@@ -81,7 +81,7 @@ class AuthProvider extends ChangeNotifier with AuthMixin{
         UserModel data = UserModel.fromJson(response.data['data']);
         log(data.profilePic);
         log("data.profilePic");
-        await setUserData(data.name, data.email,data.profilePic,data.id.toString(),data.phoneNumber,data.lastName,data.firstName).then((value) => loadUserData(),);
+        await setUserData(data.name, data.email,response.data['data']['profile_pic'],data.id.toString(),data.phoneNumber,data.lastName,data.firstName).then((value) => loadUserData(),);
         sharedPreferences.setString("userData", response.data['data'].toString());
         userNameController.clear();
         passwordController.clear();

@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:tweetai/screens/auth/password_card.dart';
 import 'package:tweetai/screens/auth/send_otp_card.dart';
@@ -33,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
         child: Scaffold(
-      backgroundColor: Color(0xffe1effe),
+      backgroundColor: const Color(0xffe1effe),
       body: Center(
         child: Form(
           key: _formKey,
@@ -46,7 +47,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                   child: Column(
                     children: [
-                      Image.asset("assets/loginLogo.png",height: 56,width: 278,),
+                      SvgPicture.asset("assets/tweet_ai.svg",height: 56,width: 278,),
                       height(height: 24),
                       Text(
                         AppStrings.loginPageText,

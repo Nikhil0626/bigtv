@@ -8,7 +8,7 @@
     <application
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
-        android:label="Chota Admin">
+        android:label="Tweet Ai">
         <activity
             android:name=".MainActivity"
             android:exported="true"

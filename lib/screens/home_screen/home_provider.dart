@@ -310,7 +310,10 @@ class HomeProvider extends ChangeNotifier {
   void pickAndUploadFile(id) async {
     await Permission.storage.request();
 
-    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['png','jpg','jpeg',], // Customize file types
+    );
     if (result != null) {
       String filePath = result.files.single.path!;
       selectedFile = File(filePath);

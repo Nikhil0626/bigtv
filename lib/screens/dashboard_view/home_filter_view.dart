@@ -17,127 +17,87 @@ class HomeFilterView extends StatelessWidget {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 25.0),
         child: Container(
-          height: MediaQuery.of(context).size.height * .55,
           decoration: BoxDecoration(
               color: AppColors.wColor,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.borderColor)),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Expanded(
-                child: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildSectionTitle("Age"),
-                        height(height: 8),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children: homeProvider.ageList.map((item) {
-                            final isSelected =
-                                homeProvider.selectAge == item.name;
-                            return ChoiceChip(
-                              showCheckmark: false,
-                              label: Text(
-                                item.name ?? "",
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.blue
-                                      : Colors.black, // Change text color
-                                ),
-                              ),
-                              selected: isSelected,
-                              onSelected: (value) {
-                                homeProvider.updateAge(item.name);
-                              },
-                              selectedColor: Colors.blue.withOpacity(0.2),
-                              // Background when selected
-                              backgroundColor: Colors.white,
-                              // Background when not selected
-                              side: BorderSide(
-                                color: isSelected ? Colors.blue : Colors.grey,
-                                // Border color change
-                                width: 1.0,
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        height(height: 16),
-                        _buildSectionTitle("Engagement Score"),
-                        height(height: 8),
-                        Wrap(
-                          spacing: 10,
-                          runSpacing: 10,
-                          children:
-                              homeProvider.engagementListForDropDown.map((item) {
-                            final isSelected =
-                                homeProvider.selectEngagement == item.name;
-                            return ChoiceChip(
-                              showCheckmark: false,
-                              label: Text(
-                                item.name ?? "",
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? Colors.blue
-                                      : Colors.black, // Change text color
-                                ),
-                              ),
-                              selected: isSelected,
-                              onSelected: (value) {
-                                homeProvider.updateEngagement(item.name);
-                              },
-                              selectedColor: Colors.blue.withOpacity(0.2),
-                              backgroundColor: Colors.white,
-                              side: BorderSide(
-                                color: isSelected ? Colors.blue : Colors.grey,
-                                width: 1.0,
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        height(height: 16),
-                        // _buildSectionTitle("AI Generator"),
-                        // height(height: 8),
-                        // Wrap(
-                        //   spacing: 10,
-                        //   runSpacing: 20,
-                        //   alignment: WrapAlignment.start,
-                        //   crossAxisAlignment: WrapCrossAlignment.start,
-                        //   children: homeProvider.gptListForDropDown.map((item) {
-                        //     final isSelected =
-                        //         homeProvider.selectGPT == item.name;
-                        //     return ChoiceChip(
-                        //       showCheckmark: false,
-                        //       label: Text(
-                        //         item.name ?? "",
-                        //         style: TextStyle(
-                        //           color: isSelected
-                        //               ? Colors.blue
-                        //               : Colors.black, // Change text color
-                        //         ),
-                        //       ),
-                        //       selected: isSelected,
-                        //       onSelected: (value) {
-                        //         homeProvider.updateGPT(item.name);
-                        //       },
-                        //
-                        //       selectedColor: Colors.blue.withOpacity(0.2),
-                        //       backgroundColor: Colors.white,
-                        //       side: BorderSide(
-                        //         color: isSelected ? Colors.blue : Colors.grey,
-                        //         // Border color change
-                        //         width: 1.0,
-                        //       ),
-                        //     );
-                        //   }).toList(),
-                        // ),
-                      ],
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionTitle("Age"),
+                    height(height: 8),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children: homeProvider.ageList.map((item) {
+                        final isSelected =
+                            homeProvider.selectAge == item.name;
+                        return ChoiceChip(
+                          showCheckmark: false,
+                          label: Text(
+                            item.name ?? "",
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Colors.blue
+                                  : Colors.black, // Change text color
+                            ),
+                          ),
+                          selected: isSelected,
+                          onSelected: (value) {
+                            homeProvider.updateAge(item.name);
+                          },
+                          selectedColor: Colors.blue.withOpacity(0.2),
+                          // Background when selected
+                          backgroundColor: Colors.white,
+                          // Background when not selected
+                          side: BorderSide(
+                            color: isSelected ? Colors.blue : Colors.grey,
+                            // Border color change
+                            width: 1.0,
+                          ),
+                        );
+                      }).toList(),
                     ),
-                  ),
+                    height(height: 16),
+                    _buildSectionTitle("Engagement Score"),
+                    height(height: 8),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      children:
+                          homeProvider.engagementListForDropDown.map((item) {
+                        final isSelected =
+                            homeProvider.selectEngagement == item.name;
+                        return ChoiceChip(
+                          showCheckmark: false,
+                          label: Text(
+                            item.name ?? "",
+                            style: TextStyle(
+                              color: isSelected
+                                  ? Colors.blue
+                                  : Colors.black, // Change text color
+                            ),
+                          ),
+                          selected: isSelected,
+                          onSelected: (value) {
+                            homeProvider.updateEngagement(item.name);
+                          },
+                          selectedColor: Colors.blue.withOpacity(0.2),
+                          backgroundColor: Colors.white,
+                          side: BorderSide(
+                            color: isSelected ? Colors.blue : Colors.grey,
+                            width: 1.0,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
                 ),
               ),
               const Divider(
