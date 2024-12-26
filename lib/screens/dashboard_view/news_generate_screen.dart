@@ -178,7 +178,7 @@ class _NewsGenerateScreenState extends State<NewsGenerateScreen> {
                                 InkWell(
                                     onTap: () {
                                       homeProvider.copyToClipboard(
-                                          homeProvider.generateByAi['title']);
+                                          homeProvider.generateByAi['text']);
                                     },
                                     child: SvgPicture.asset(
                                       "assets/copy.svg",

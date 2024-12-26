@@ -594,7 +594,7 @@ class HomeProvider extends ChangeNotifier {
 
   void copyToClipboard(String text) {
     Clipboard.setData(ClipboardData(text: text)).then((_) {
-      CustomToast.showSuccessToast(msg: 'Copied to Clipboard: $text');
+      CustomToast.showSuccessToast(msg: 'Copied to Clipboard');
     });
   }
 

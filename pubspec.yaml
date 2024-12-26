@@ -1,7 +1,7 @@
 name: tweetai
 description: "A new Flutter project."
 publish_to: 'none'
-version: 1.0.0+6
+version: 1.0.0+7
 
 environment:
   sdk: ^3.5.4
@@ -30,6 +30,7 @@ dependencies:
   http_parser: ^4.0.2
   flutter_advanced_switch: ^3.1.0
   flutter_switch: ^0.3.2
+  shimmer: ^3.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tweetai/utils/animations_views/card_swipe_indication_animation.dart';
 
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
@@ -316,11 +317,7 @@ class HomeSwipeCard extends StatefulWidget {
 // }
 
 
-class _HomeSwipeCardState extends State<HomeSwipeCard>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _animationController;
-  late Animation<double> _animation;
-  bool _isFirstSwipeHintShown = false; // Ensure animation only plays once
+class _HomeSwipeCardState extends State<HomeSwipeCard>{
 
   double offset = 0.0;
   bool isExpand = false;
@@ -329,36 +326,8 @@ class _HomeSwipeCardState extends State<HomeSwipeCard>
   void initState() {
     super.initState();
 
-    if (widget.index == 0 && !_isFirstSwipeHintShown) {
-      _animationController = AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 1000),
-      );
-
-      _animation = Tween<double>(begin: 0.0, end: -50.0).animate(
-        CurvedAnimation(
-          parent: _animationController,
-          curve: Curves.easeInOut,
-        ),
-      )..addListener(() {
-        setState(() {
-          offset = _animation.value;
-        });
-      });
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _playSwipeIndication();
-      });
-    }
   }
 
-  void _playSwipeIndication() async {
-    await _animationController.forward();
-    await _animationController.reverse();
-    setState(() {
-      _isFirstSwipeHintShown = true; // Avoid repeating animation
-    });
-  }
 
   @override
   void didUpdateWidget(HomeSwipeCard oldWidget) {
@@ -370,13 +339,7 @@ class _HomeSwipeCardState extends State<HomeSwipeCard>
     }
   }
 
-  @override
-  void dispose() {
-    if (_animationController.isAnimating || _animationController.isCompleted) {
-      _animationController.dispose();
-    }
-    super.dispose();
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -550,7 +513,7 @@ class _HomeSwipeCardState extends State<HomeSwipeCard>
                                 height(height: 4),
                                 Text(
                                   widget.item.teluguText!.toString(),
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
                                     color: AppColors.bodyTextColor,
                                   ),
@@ -609,6 +572,13 @@ class _HomeSwipeCardState extends State<HomeSwipeCard>
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                  if(widget.index == 0)
+                  const Align(
+                   alignment: Alignment.centerRight,
+                    child: CardSwipeIndicationAnimation(
+                      maxWidth: 100,
                     ),
                   ),
                 ],
