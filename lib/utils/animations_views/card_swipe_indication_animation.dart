@@ -1,7 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:tweetai/utils/app_colors.dart';
 
 class CardSwipeIndicationAnimation extends StatefulWidget {
   final double maxWidth;
@@ -14,46 +13,58 @@ class CardSwipeIndicationAnimation extends StatefulWidget {
       _CardSwipeIndicationAnimationState();
 }
 
-class _CardSwipeIndicationAnimationState extends State<CardSwipeIndicationAnimation> {
-  double _arrowPosition = 0.0;
-  late Timer _timer;
+class _CardSwipeIndicationAnimationState
+    extends State<CardSwipeIndicationAnimation> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
   @override
   void initState() {
     super.initState();
-    _startArrowAnimation();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+
+    _animation = Tween<double>(
+      begin: 0 ,
+      end: -100
+    ).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _controller.forward();
+
   }
 
   @override
   void dispose() {
-    _timer.cancel();
+    _controller.dispose();
     super.dispose();
-  }
-
-  void _startArrowAnimation() {
-    _timer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
-      setState(() {
-        _arrowPosition += 2.0; // Adjust speed
-        if (_arrowPosition > widget.maxWidth - 40) {
-          _arrowPosition = 0.0; // Reset position
-        }
-      });
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Transform.translate(
-      offset: Offset(_arrowPosition, 0),
-      child: Shimmer.fromColors(
-        baseColor: Colors.blueAccent,
-        highlightColor: Colors.lightBlueAccent,
-        child: const Icon(
-          Icons.double_arrow,
-          size: 100,
-          color: Colors.blueAccent,
-        ),
-      ),
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (BuildContext context, Widget? child) {
+        return Transform.translate(
+          offset: Offset(_animation.value, 0), // Use the animation value for horizontal movement
+          child: Shimmer.fromColors(
+            baseColor: AppColors.appButtonColor.withOpacity(.5),
+            highlightColor: Colors.lightBlueAccent.withOpacity(.5),
+            child:_animation.isCompleted?const SizedBox.shrink(): Transform.rotate(
+              angle: 3.14159, // Rotate the icon by 180 degrees
+              child: const Icon(
+                Icons.double_arrow,
+                size: 100,
+                color: Colors.blueAccent,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

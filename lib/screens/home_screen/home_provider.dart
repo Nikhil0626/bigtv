@@ -599,10 +599,10 @@ class HomeProvider extends ChangeNotifier {
   }
 
   String formatTimeDifference(String inputTime, {bool isTweets = false}) {
-    final now = DateTime.now();
+    final now = DateTime.now().add(Duration(minutes: -330));
     DateFormat inputFormat = DateFormat("MMM d, yyyy h:mm a");
     DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss');
-    DateTime date =
+    DateTime date =inputTime == null?now:
         isTweets ? inputFormat.parse(inputTime) : format.parse(inputTime);
     // final getDate = DateTime.parse(inputTime);
     final difference = now.difference(date);

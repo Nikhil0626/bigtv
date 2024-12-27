@@ -17,10 +17,10 @@ class HomeSwipeCardProvider extends ChangeNotifier {
     VoidCallback resetSwipedIndex,
   ) {
     if (offset < -40) {
-      offset = -80;
+      offset = -220;
       param1;
     } else if (offset > 40) {
-      offset = 80;
+      offset = 220;
       param1;
     } else {
       offset = 0;

@@ -70,29 +70,32 @@ class OtpCard extends StatelessWidget {
                 style: fontStyle(color: Colors.black, fontSize: 12),
               ),
               height(height: 15),
-              Pinput(
-                length: 6, // Length of the PIN
-                onCompleted: (pin) {
-                  authProvider.saveOtp(pin);
-                },
-                onChanged: (value) => print('Current Value: $value'),
-                defaultPinTheme: PinTheme(
-                  width: 50,
-                  height: 50,
-                  textStyle: fontStyle(
-                    fontSize: 14,
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w600,
+              SizedBox(
+                height: 50,
+                child: Pinput(
+                  length: 6, // Length of the PIN
+                  onCompleted: (pin) {
+                    authProvider.saveOtp(pin);
+                  },
+                  onChanged: (value) => print('Current Value: $value'),
+                  defaultPinTheme: PinTheme(
+                    width: 50,
+                    height: 50,
+                    textStyle: fontStyle(
+                      fontSize: 14,
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: Colors.blue),
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: Colors.blue),
-                  ),
-                ),
-                focusedPinTheme: PinTheme(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(30),
-                    border: Border.all(color: Colors.green),
+                  focusedPinTheme: PinTheme(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      border: Border.all(color: Colors.green),
+                    ),
                   ),
                 ),
               ),

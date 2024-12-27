@@ -242,7 +242,7 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
                               width(width: 4),
                               Text(
                                 homeProvider.formatTimeDifference(
-                                    widget.data.tweetCreatedAt.toString(),
+                                  widget.data.updatedAt??DateTime.now().toString(),
                                 ),
                                 style: fontStyle(
                                   fontSize: 10,
@@ -484,8 +484,7 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
                                       width(width: 4),
                                       Text(
                                         homeProvider.formatTimeDifference(
-                                            widget.data.tweetCreatedAt
-                                                .toString(),
+                                          widget.screenType == "schedule" ?widget.data.updatedAt??DateTime.now().toString(): widget.data.draftAt??DateTime.now().toString(),
                                            ),
                                         style: fontStyle(
                                           fontSize: 10,
@@ -512,3 +511,5 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
     });
   }
 }
+
+

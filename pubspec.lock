@@ -185,6 +185,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  flip_board:
+    dependency: "direct main"
+    description:
+      name: flip_board
+      sha256: "5b3bb7cebc7daa3b950be773a910cca40ff1516972dfb7dd4c5c5d58c94b4416"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
   flutter:
     dependency: "direct main"
     description: flutter
