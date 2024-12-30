@@ -1,4 +1,4 @@
-class DraftModel {
+class ScheduleModel {
   final int? id;
   final String? profileName;
   final String? username;
@@ -18,7 +18,7 @@ class DraftModel {
   final String? draftBy;
   final String? draftAt;
 
-  DraftModel({
+  ScheduleModel({
     this.id,
     this.profileName,
     this.username,
@@ -39,8 +39,8 @@ class DraftModel {
     this.draftAt,
   });
 
-  factory DraftModel.fromJson(Map<String, dynamic> json) {
-    return DraftModel(
+  factory ScheduleModel.fromJson(Map<String, dynamic> json) {
+    return ScheduleModel(
       id: json['id'] as int?,
       profileName: json['profile_name'] as String?,
       username: json['username'] as String?,
@@ -53,12 +53,12 @@ class DraftModel {
       userName: json['user_name'] as String?,
       imageUrl: json['image_url'] as String?,
       generatedData: json['generated_data'] as String?,
-      teluguText: json['telugu_text'] as String?,
+      teluguText: json['generated_title'] as String?,
       tweetCreatedAt: json['tweet_created_at'] != null ? DateTime.parse(json['tweet_created_at']) : null,
       generatedTitle: json['generated_title'] as String?,
       tweetUrl: json['tweet_url'] as String?,
-      draftBy: json['draft_by'] as String?,
-      draftAt: json['draft_at'] as String?,
+      draftBy: json['scheduled_by'] as String?,
+      draftAt: json['scheduled_at'] as String?,
     );
   }
 
@@ -86,3 +86,4 @@ class DraftModel {
     };
   }
 }
+

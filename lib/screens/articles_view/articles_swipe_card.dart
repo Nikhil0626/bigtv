@@ -62,10 +62,8 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
 
   @override
   Widget build(BuildContext context) {
-    print(widget.data.imageUrl.toString());
 
     final List<String> imageUrls = widget.data.imageUrl==null?"hello".split(";"):widget.data.imageUrl.split(";");
-    print(" imgsssss ${imageUrls.toString()}");
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
       return GestureDetector(
         onHorizontalDragUpdate: (details) {
@@ -229,7 +227,7 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
                               SizedBox(
                                 width: 100,
                                 child: Text(
-                                  "${widget.data.publishedBy.toString()}  ",
+                                  "${widget.data.draftBy.toString()}  ",
                                   maxLines: 1,
                                   style: fontStyle(
                                     fontSize: 12,
@@ -242,7 +240,7 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
                               width(width: 4),
                               Text(
                                 homeProvider.formatTimeDifference(
-                                  widget.data.updatedAt??DateTime.now().toString(),
+                                  widget.data.draftAt??DateTime.now().toString(),
                                 ),
                                 style: fontStyle(
                                   fontSize: 10,
@@ -367,7 +365,7 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    widget.data.generatedTitle.toString(),
+                                    widget.data.teluguText.toString(),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: fontStyle(
@@ -382,7 +380,7 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
                             ),
                             height(height: 4),
                             Text(
-                              widget.data.teluguText.toString(),
+                             widget.data.generatedData.toString(),
                               maxLines: 4,
                               style: fontStyle(
                                 fontSize: 14,
@@ -470,7 +468,7 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
                                       SizedBox(
                                         width: 80,
                                         child: Text(
-                                          " ${widget.screenType == "schedule" ? widget.data.scheduledBy.toString() : widget.data.draftBy.toString()}  ",
+                                          " ${widget.data.draftBy.toString()}  ",
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: fontStyle(
@@ -484,7 +482,7 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
                                       width(width: 4),
                                       Text(
                                         homeProvider.formatTimeDifference(
-                                          widget.screenType == "schedule" ?widget.data.updatedAt??DateTime.now().toString(): widget.data.draftAt??DateTime.now().toString(),
+                                          widget.data.draftAt??DateTime.now().toString(),isTweets: false
                                            ),
                                         style: fontStyle(
                                           fontSize: 10,

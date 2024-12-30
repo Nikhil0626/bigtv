@@ -47,7 +47,7 @@ class _UsersScreenState extends State<UsersScreen> {
               color: AppColors.appButtonColor,
               backgroundColor: Colors.white,
               onRefresh: () async {
-                settingProvider.getSettingsUser();
+                settingProvider.getSettingsUser(isCall: true);
               },
               child: homeProvider.isEngageTweetsLoading
                   ? const AppLoadingScreen()

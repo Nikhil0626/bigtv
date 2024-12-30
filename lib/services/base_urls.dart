@@ -1,9 +1,6 @@
 class BaseUrls {
  /// Dev Base Url
-  static const String baseUrl = "https://devtwitter.chotanews.com";
-
-  /// Staging Base url
-  // static const String baseUrl = "https://devtwitter.chotanews.com";
+  static const String baseUrl = "https://devtwitter.chotanews.com/api";
 
   ///  Prod Base url
   // static const String baseUrl = "https://twitter.chotanews.com";

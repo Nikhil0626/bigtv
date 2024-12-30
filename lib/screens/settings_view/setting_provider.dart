@@ -105,9 +105,11 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
   List<WordsModel> wordsList = [];
   List<ToneModel> tonesList = [];
 
-  Future getSettingsUser() async {
+  Future getSettingsUser({isCall = false}) async {
     isEngageTweetsLoading = true;
-    notifyListeners();
+    if(isCall){
+      notifyListeners();
+    }
     try {
       Response response = await AppRepo().getSettingsUser();
       log(response.data.toString());
@@ -245,7 +247,7 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
       log(response.data.toString());
       if (response.statusCode == 200) {
         addXHandleLoading = false;
-        getSettingsUser();
+        getSettingsUser(isCall: true);
         notifyListeners();
         Navigator.pop(context);
       }
@@ -273,7 +275,7 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
       Response response = await AppRepo().blockUser(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
-        getSettingsUser();
+        getSettingsUser(isCall: true);
         addXHandleLoading = false;
         notifyListeners();
         CustomToast.showSuccessToast(msg: response.data['message'])
@@ -307,7 +309,7 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
           await Provider.of<XHandleProvider>(context, listen: false)
               .getTwitterHandles();
         } else {
-          await getSettingsUser();
+          await getSettingsUser(isCall: true);
         }
         addXHandleLoading = false;
         notifyListeners();
@@ -357,7 +359,7 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
       CustomToast.showErrorToast(msg: "Something Went Wrong...");
       addUserLoading = false;
     } finally {
-      getSettingsUser();
+      getSettingsUser(isCall: true);
     }
   }
 
@@ -395,7 +397,7 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
         });
 
         addUserLoading = false;
-        await getSettingsUser();
+        await getSettingsUser(isCall: true);
         CustomToast.showSuccessToast(msg: response.data['message']).then(
           (value) {
             Navigator.pop(context, "update");

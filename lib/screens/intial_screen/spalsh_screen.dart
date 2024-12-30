@@ -48,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen> {
           response.data['data'][1]['name'] == "android_app_version") {
         String serverVersion = response.data['data'][1]['value'].toString();
 
-        if (finalVersion == serverVersion) {
+        if (finalVersion != serverVersion) {
           Future.delayed(const Duration(milliseconds: 500), () async {
             SharedPreferences sharedPreferences =
                 await SharedPreferences.getInstance();

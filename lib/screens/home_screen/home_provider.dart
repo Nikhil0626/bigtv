@@ -11,10 +11,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tweetai/screens/articles_view/models/schedule_model.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../utils/app_toasts.dart';
 import '../articles_view/models/draft_model.dart';
+import '../articles_view/models/send_model.dart';
 import '../auth/auth_repo.dart';
 import '../dashboard_view/models/engage_tweet_model.dart';
 import '../dashboard_view/models/words_model.dart';
@@ -54,9 +56,9 @@ class HomeProvider extends ChangeNotifier {
 
   List<EngageTweetModel> engageTweetsList = [];
   List<ZonesModel> zonesModelList = [];
-  List<PublishedTweetsModel> publishedTweetsList = [];
+  List<SendModel> publishedTweetsList = [];
   List<DraftModel> draftTweetsList = [];
-  List<ReadyToPublishModel> readyToPublishList = [];
+  List<ScheduleModel> readyToPublishList = [];
   List<TimePeriodModel> ageList = [];
   List<TimePeriodModel> engagementListForDropDown = [];
   List<TimePeriodModel> gptListForDropDown = [];
@@ -94,7 +96,6 @@ class HomeProvider extends ChangeNotifier {
     log(body.toString());
     try {
       Response response = await AppRepo().getEngageTweets(body);
-      log(response.data.toString());
       if (response.statusCode == 200) {
         isFilterEnable = false;
 
@@ -126,12 +127,12 @@ class HomeProvider extends ChangeNotifier {
             .toList();
         publishedTweetsList = publishedTweets
             .map(
-              (e) => PublishedTweetsModel.fromJson(e),
+              (e) => SendModel.fromJson(e),
             )
             .toList();
         readyToPublishList = readyToPublish
             .map(
-              (e) => ReadyToPublishModel.fromJson(e),
+              (e) => ScheduleModel.fromJson(e),
             )
             .toList();
         ageList = age
@@ -219,9 +220,11 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future getTweetMetric() async {
+  Future getTweetMetric({isCall = false}) async {
     isEngageTweetsLoading = true;
-    notifyListeners();
+    if(isCall) {
+      notifyListeners();
+    }
     try {
       Response response = await AppRepo().getTweetMetric();
 
@@ -364,7 +367,7 @@ class HomeProvider extends ChangeNotifier {
   Future tweetGenerateByAi(
       tweetText, tweetId, BuildContext context, String type) async {
     tweetGenerateLoading = true;
-    notifyListeners();
+    // notifyListeners();
     Map<String, dynamic> body = {
       "id": tweetId,
       "tone_id": zonesModelList.where((e)=>e.toneName.toString() == toneId.toString()).first.id ,
@@ -599,14 +602,30 @@ class HomeProvider extends ChangeNotifier {
   }
 
   String formatTimeDifference(String inputTime, {bool isTweets = false}) {
-    final now = DateTime.now().add(Duration(minutes: -330));
-    DateFormat inputFormat = DateFormat("MMM d, yyyy h:mm a");
-    DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss');
-    DateTime date =inputTime == null?now:
-        isTweets ? inputFormat.parse(inputTime) : format.parse(inputTime);
-    // final getDate = DateTime.parse(inputTime);
+    print("Input Time: $inputTime");
+
+    final now = DateTime.now().add(Duration(minutes: -330)); // Adjust time zone
+    DateFormat inputFormat = DateFormat("MMM d, yyyy h:mm a"); // Format for tweets
+    DateFormat format = DateFormat('yyyy-MM-dd HH:mm:ss'); // Generic format
+
+    // Parse the date with proper error handling
+    DateTime date;
+    try {
+      if (inputTime == null || inputTime.trim().isEmpty) {
+        date = now; // Fallback to 'now' if input is null
+      } else {
+        date = isTweets ? inputFormat.parse(inputTime) : format.parse(inputTime);
+      }
+    } catch (e) {
+      // Handle invalid date format
+      print("Error parsing date: $e");
+      date = now; // Fallback to 'now' if parsing fails
+    }
+
+    // Calculate the time difference
     final difference = now.difference(date);
 
+    // Format the difference into human-readable format
     if (difference.inSeconds < 60) {
       return '${difference.inSeconds}s ago'; // Seconds ago
     } else if (difference.inMinutes < 60) {
@@ -619,7 +638,7 @@ class HomeProvider extends ChangeNotifier {
       final weeks = (difference.inDays / 7).floor();
       return '${weeks}w ago'; // Weeks ago
     } else {
-      return DateFormat(' dd MMM yyyy').format(date); // Date format
+      return DateFormat('dd MMM yyyy').format(date); // Date format
     }
   }
 

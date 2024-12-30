@@ -1,4 +1,4 @@
-class DraftModel {
+class SendModel {
   final int? id;
   final String? profileName;
   final String? username;
@@ -18,7 +18,7 @@ class DraftModel {
   final String? draftBy;
   final String? draftAt;
 
-  DraftModel({
+  SendModel({
     this.id,
     this.profileName,
     this.username,
@@ -39,8 +39,8 @@ class DraftModel {
     this.draftAt,
   });
 
-  factory DraftModel.fromJson(Map<String, dynamic> json) {
-    return DraftModel(
+  factory SendModel.fromJson(Map<String, dynamic> json) {
+    return SendModel(
       id: json['id'] as int?,
       profileName: json['profile_name'] as String?,
       username: json['username'] as String?,
@@ -57,8 +57,8 @@ class DraftModel {
       tweetCreatedAt: json['tweet_created_at'] != null ? DateTime.parse(json['tweet_created_at']) : null,
       generatedTitle: json['generated_title'] as String?,
       tweetUrl: json['tweet_url'] as String?,
-      draftBy: json['draft_by'] as String?,
-      draftAt: json['draft_at'] as String?,
+      draftBy: json['published_by'] as String?,
+      draftAt: json['published_at'] as String?,
     );
   }
 

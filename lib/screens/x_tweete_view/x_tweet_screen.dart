@@ -44,7 +44,7 @@ class _XTweetScreenState extends State<XTweetScreen> {
         return RefreshIndicator(
           color:AppColors.appButtonColor,
           backgroundColor: Colors.white,
-          onRefresh: () => homeProvider.getTweetMetric(),
+          onRefresh: () => homeProvider.getTweetMetric(isCall: true),
 
           child: Column(
             children: [
