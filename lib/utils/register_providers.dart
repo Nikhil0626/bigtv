@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
+import 'package:tweetai/screens/x_tweete_view/x_tweets_provider.dart';
 
 import '../screens/articles_view/article_provider.dart';
 import '../screens/auth/auth_provider.dart';
@@ -20,6 +21,7 @@ class RegisterProviders {
       ChangeNotifierProvider<ArticleProvider>(create: (context) => ArticleProvider()),
       ChangeNotifierProvider<SettingProvider>(create: (context) => SettingProvider()),
       ChangeNotifierProvider<XHandleProvider>(create: (context) => XHandleProvider()),
+      ChangeNotifierProvider<XTweetsProvider>(create: (context) => XTweetsProvider()),
     ];
   }
 }

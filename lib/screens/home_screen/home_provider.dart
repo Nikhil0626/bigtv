@@ -27,7 +27,6 @@ class HomeProvider extends ChangeNotifier {
 
   TextEditingController titleController = TextEditingController();
   TextEditingController bodyController = TextEditingController();
-  TextEditingController xTweetsSearchController = TextEditingController();
   TextEditingController homeSearchController = TextEditingController();
 
   int selectedPage = 0;
@@ -64,7 +63,6 @@ class HomeProvider extends ChangeNotifier {
   List<TimePeriodModel> gptListForDropDown = [];
   List<WordsModel> wordsList = [];
 
-  List<XTwitterModel> getTweetMetricList = [];
 
   Future getEngageTweets({bool filter = false}) async {
     isEngageTweetsLoading = true;
@@ -220,38 +218,9 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future getTweetMetric({isCall = false}) async {
-    isEngageTweetsLoading = true;
-    if(isCall) {
-      notifyListeners();
-    }
-    try {
-      Response response = await AppRepo().getTweetMetric();
 
-      if (response.statusCode == 200) {
-        List data = response.data;
-        getTweetMetricList = data
-            .map(
-              (e) => XTwitterModel.fromJson(e),
-            )
-            .toList();
-
-        filteredTweetList = getTweetMetricList;
-        log("XTwitterModel---- ${getTweetMetricList.length}");
-        isEngageTweetsLoading = false;
-      }
-    } on DioException catch (e, st) {
-      log("dio error --- ${st}");
-    } catch (e, st) {
-      log("error --- ${st}");
-    } finally {
-      isEngageTweetsLoading = false;
-      notifyListeners();
-    }
-  }
 
   List<EngageTweetModel> filteredEngageList = [];
-  List<XTwitterModel> filteredTweetList = [];
 
   /// search Home Tweets
   void searchTweetHome(String value, BuildContext context) {
@@ -264,48 +233,9 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void searchTweet(String value, BuildContext context, String page) {
-    filteredTweetList = getTweetMetricList.where((user) {
-      final query = value.toLowerCase();
-      return user.userName!.toLowerCase().contains(query) ||
-          user.likeCount!.toString().toLowerCase().contains(query) ||
-          user.userId!.toString().toLowerCase().contains(query) ||
-          user.tweetId!.toString().toLowerCase().contains(query) ||
-          user.retweetCount!.toString().toLowerCase().contains(query) ||
-          user.engagementCount!.toString().toLowerCase().contains(query) ||
-          user.replyCount!.toString().toLowerCase().contains(query) ||
-          user.viewCount!.toString().toLowerCase().contains(query);
-    }).toList();
-    notifyListeners();
-  }
 
-  Future deleteXTweets(index, XTwitterModel item, context) async {
-    addXHandleLoading = true;
-    notifyListeners();
-    try {
-      getTweetMetricList.removeAt(index);
-      Map<String, dynamic> body = {
-        "ids": [item.id]
-      };
-      log(body.toString());
-      Response response = await AppRepo().deleteHandle(body);
 
-      if (response.statusCode == 200) {
-        addXHandleLoading = false;
-        notifyListeners();
-        Navigator.pop(context);
-      }
-    } on DioException catch (e, st) {
-      log(st.toString());
-      log(e.toString());
-    } catch (e, st) {
-      log(st.toString());
-      log(e.toString());
-    } finally {
-      addXHandleLoading = false;
-      notifyListeners();
-    }
-  }
+
 
   var generateByAi = {};
   File? selectedFile;
@@ -388,8 +318,8 @@ class HomeProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         log(response.data.toString());
         generateByAi = response.data;
-        titleController.text = generateByAi['title'];
-        bodyController.text = generateByAi['text'];
+        titleController.text = generateByAi['title']??"";
+        bodyController.text = generateByAi['text']??"";
         tweetGenerateLoading = false;
         notifyListeners();
       }

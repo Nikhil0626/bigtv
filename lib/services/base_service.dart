@@ -57,10 +57,10 @@ class BaseService {
       return response;
     } on DioException catch (e) {
       log('Request failed: ${e.response?.statusCode} - ${e.message}');
-      throw e;
+      throw Exception('Failed to load data: ${e.response?.statusMessage}');
     } catch (e) {
       log('Unexpected error: $e');
-      throw e;
+      throw Exception('An unexpected error occurred');
     }
   }
 }

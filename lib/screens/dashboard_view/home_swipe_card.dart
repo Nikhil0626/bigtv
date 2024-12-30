@@ -5,8 +5,8 @@ import 'package:tweetai/utils/animations_views/card_swipe_indication_animation.d
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
+import '../../utils/tweet_bottom_widget.dart';
 import '../home_screen/home_provider.dart';
-import '../x_tweete_view/x_tweet_screen.dart';
 import 'home_swipe_card_provider.dart';
 import 'models/engage_tweet_model.dart';
 
@@ -266,25 +266,25 @@ class _HomeSwipeCardState extends State<HomeSwipeCard>{
                                     MainAxisAlignment.spaceBetween,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      MiniCardsDataWidget(
+                                      TweetBottomWidget(
                                         icon: "assets/chat.svg",
                                         count: formatCount(
                                             widget.item.replyCount ?? 00),
                                       ),
-                                      MiniCardsDataWidget(
+                                      TweetBottomWidget(
                                         icon: "assets/retweet.svg",
                                         count: formatCount(
                                             widget.item.retweetCount ?? 0),
                                       ),
-                                      MiniCardsDataWidget(
+                                      TweetBottomWidget(
                                           icon: "assets/fav.svg",
                                           count: formatCount(
                                               widget.item.likeCount ?? 00)),
-                                      MiniCardsDataWidget(
+                                      TweetBottomWidget(
                                           icon: "assets/replay.svg",
                                           count: formatCount(
                                               widget.item.replyCount ?? 00)),
-                                      MiniCardsDataWidget(
+                                      TweetBottomWidget(
                                           icon: "assets/trade.svg",
                                           count: formatCount(
                                               widget.item.engagementCount ?? 00)),

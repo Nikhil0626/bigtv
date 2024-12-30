@@ -13,6 +13,7 @@ import '../settings_view/settings_screen.dart';
 import '../x_handles_view/x_handle_provider.dart';
 import '../x_handles_view/x_handles_screen.dart';
 import '../x_tweete_view/x_tweet_screen.dart';
+import '../x_tweete_view/x_tweets_provider.dart';
 import 'home_provider.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -32,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with AuthMixin{
     context.read<HomeProvider>().initialPage();
     context.read<HomeProvider>().getEngageTweets();
     context.read<XHandleProvider>().getTwitterHandles();
-    context.read<HomeProvider>().getTweetMetric();
+    context.read<XTweetsProvider>().getTweetMetric();
     context.read<SettingProvider>().getSettingsUser();
     super.initState();
   }
