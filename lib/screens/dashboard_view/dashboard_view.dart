@@ -53,7 +53,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               onRefresh: () async {
                 await context
                     .read<HomeProvider>()
-                    .getEngageTweets(filter: true);
+                    .getEngageTweets(filter: false);
               },
               child: Stack(
                 children: [

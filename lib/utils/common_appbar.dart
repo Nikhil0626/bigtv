@@ -42,6 +42,16 @@ class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   width(width: 10),
                   const Spacer(),
+                  if(screenName == "XTweet")
+                    InkWell(
+                        onTap: () {
+                          homeProvider.filterEnable(screenName: screenName);
+                        },
+                        child: SvgPicture.asset(
+                          "assets/settings.svg",
+                          width: 20,
+                          height: 20,
+                        )),
                   if (screenName == "Viral Tweets")
                     InkWell(
                         onTap: () {

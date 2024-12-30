@@ -573,10 +573,21 @@ class HomeProvider extends ChangeNotifier {
   }
 
   bool isFilterEnable = false;
+  bool isFilterEnableXTweet = false;
 
-  void filterEnable() {
-    isFilterEnable = !isFilterEnable;
-    notifyListeners();
+  void filterEnable({String screenName="Viral Tweets"}) {
+    if(screenName == "XTweet"){
+      isFilterEnable = false;
+      isFilterEnableXTweet =!isFilterEnableXTweet;
+      notifyListeners();
+
+    }else{
+      isFilterEnableXTweet = false;
+      isFilterEnable = !isFilterEnable;
+      notifyListeners();
+
+
+    }
   }
 
   void launchURL(String url) async {

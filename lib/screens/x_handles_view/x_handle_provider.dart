@@ -57,10 +57,14 @@ class XHandleProvider extends ChangeNotifier {
       log(response.data.toString());
       if (response.statusCode == 200) {
         filterTwitterHandlesList.removeAt(index);
-        addXHandleLoading = false;
         notifyListeners();
-        CustomToast.showSuccessToast(msg: response.data['message']).then((value) =>   Navigator.pop(context),);
-      
+
+        Navigator.pop(context);
+        Future.delayed(const Duration(milliseconds:500 ),(){
+          CustomToast.showSuccessToast(msg: response.data['message']);
+        });
+        addXHandleLoading = false;
+
       }
     } on DioException catch (e, st) {
       log(st.toString());
@@ -83,11 +87,13 @@ class XHandleProvider extends ChangeNotifier {
       Response response = await AppRepo().editHandle(body, id);
 
       if (response.statusCode == 200) {
+        await  getTwitterHandles();
+        Navigator.pop(context);
+        Future.delayed(const Duration(milliseconds:500 ),(){
+          CustomToast.showSuccessToast(msg: response.data['message']);
+        });
         addXHandleLoading = false;
         notifyListeners();
-
-       await getTwitterHandles().then((val) =>
-            CustomToast.showSuccessToast(msg: response.data['message']).then((value) =>   Navigator.pop(context),));
       }
     } on DioException catch (e, st) {
       log(st.toString());
@@ -114,10 +120,13 @@ class XHandleProvider extends ChangeNotifier {
       Response response = await AppRepo().addHandle(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
+        Navigator.pop(context);
+        Future.delayed(const Duration(milliseconds:500 ),(){
+          CustomToast.showSuccessToast(msg: response.data['message']);
+        });
         addXHandleLoading = false;
         notifyListeners();
-        await getTwitterHandles().then((val) =>
-            CustomToast.showSuccessToast(msg: response.data['message']).then((value) =>   Navigator.pop(context),));
+        await getTwitterHandles();
       }
     } on DioException catch (e, st) {
       log(st.toString());
@@ -143,11 +152,13 @@ class XHandleProvider extends ChangeNotifier {
       Response response = await AppRepo().blockUser(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
+        Navigator.pop(context);
+        Future.delayed(const Duration(milliseconds:500 ),(){
+          CustomToast.showSuccessToast(msg: response.data['message']);
+        });
         addXHandleLoading = false;
         notifyListeners();
-        await getTwitterHandles().then((val) {
-           Navigator.pop(context);
-            CustomToast.showSuccessToast(msg: response.data['message']);});
+        await getTwitterHandles();
       }
     } on DioException catch (e, st) {
       log(st.toString());

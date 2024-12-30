@@ -246,10 +246,14 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
       Response response = await AppRepo().deleteUser(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
+        Navigator.pop(context);
+        Future.delayed(const Duration(milliseconds:500 ),(){
+          CustomToast.showSuccessToast(msg: response.data['message']);
+        });
         addXHandleLoading = false;
         getSettingsUser(isCall: true);
         notifyListeners();
-        Navigator.pop(context);
+
       }
     } on DioException catch (e, st) {
       log(st.toString());
@@ -278,8 +282,12 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
         getSettingsUser(isCall: true);
         addXHandleLoading = false;
         notifyListeners();
-        CustomToast.showSuccessToast(msg: response.data['message'])
-            .then((e) => Navigator.pop(context));
+        Navigator.pop(context);
+        Future.delayed(const Duration(milliseconds:500 ),(){
+          CustomToast.showSuccessToast(msg: response.data['message']);
+        });
+
+
       }
     } on DioException catch (e, st) {
       log(st.toString());
@@ -314,7 +322,9 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
         addXHandleLoading = false;
         notifyListeners();
         Navigator.pop(context);
-        CustomToast.showSuccessToast(msg: response.data['message']);
+        Future.delayed(const Duration(milliseconds:500 ),(){
+          CustomToast.showSuccessToast(msg: response.data['message']);
+        });
       }
     } on DioException catch (e, st) {
       log(st.toString());
@@ -342,9 +352,10 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
       Response response = await AppRepo().addUser(body);
 
       if (response.statusCode == 200) {
-        CustomToast.showSuccessToast(msg: response.data['message']).then(
-          (value) => Navigator.pop(context),
-        );
+        Navigator.pop(context);
+        Future.delayed(const Duration(milliseconds:500 ),(){
+          CustomToast.showSuccessToast(msg: response.data['message']);
+        });
         addUserLoading = false;
         notifyListeners();
       }
@@ -398,11 +409,10 @@ class SettingProvider extends ChangeNotifier with AuthMixin {
 
         addUserLoading = false;
         await getSettingsUser(isCall: true);
-        CustomToast.showSuccessToast(msg: response.data['message']).then(
-          (value) {
-            Navigator.pop(context, "update");
-          },
-        );
+        Navigator.pop(context);
+        Future.delayed(const Duration(milliseconds:500 ),(){
+          CustomToast.showSuccessToast(msg: response.data['message']);
+        });
       }
     } on DioException catch (e, st) {
       CustomToast.showSuccessToast(msg: "Something Went Wrong...");
