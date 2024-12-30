@@ -1,6 +1,13 @@
 class BaseUrls {
- /// Base Url
-  static const String baseUrl = "https://twitter.signitivessoft.com/api";
+ /// Dev Base Url
+  static const String baseUrl = "https://devtwitter.chotanews.com";
+
+  /// Staging Base url
+  // static const String baseUrl = "https://devtwitter.chotanews.com";
+
+  ///  Prod Base url
+  // static const String baseUrl = "https://twitter.chotanews.com";
+
 
   /// Auth Apis
   static const String login = "/login";
@@ -41,5 +48,9 @@ class BaseUrls {
   ///Content Configuration Apis
   static const String getSettingsId = "/getConfigration";
   static const String updateWords = "/updateWords";
+
+  /// Get Mobile Version Details
+  static const String getMobileVersions = "/getmobileversions";
+
 
 }
