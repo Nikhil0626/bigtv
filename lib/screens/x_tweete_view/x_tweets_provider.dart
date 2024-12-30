@@ -97,6 +97,25 @@ class XTweetsProvider extends ChangeNotifier{
       notifyListeners();
     }
   }
+  List<String> selectNamesList = [];
+  void toggleSelection(String username) {
+    if (selectNamesList.contains(username)) {
+      selectNamesList.remove(username);
+    } else {
+      selectNamesList.add(username);
+    }
+    notifyListeners();
+  }
+  Future<void> filterNamesData() async {
+   filteredTweetList = getTweetMetricList ;
+   if(selectNamesList.isEmpty){
+     return;
+   }
+    filteredTweetList = filteredTweetList
+        .where((element) => selectNamesList.contains(element.userName))
+        .toList();
 
+    notifyListeners();
+  }
 
 }

@@ -171,8 +171,8 @@ class _XTweetScreenState extends State<XTweetScreen> {
                 ],
               ),
               if (context.watch<HomeProvider>().isFilterEnableXTweet)
-                Align(
-                    alignment: Alignment.topCenter, child: BottomSheetExample())
+                const Align(
+                    alignment: Alignment.topCenter, child: BottomTweetNames())
             ],
           ),
         );
