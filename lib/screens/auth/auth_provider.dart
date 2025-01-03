@@ -65,6 +65,7 @@ class AuthProvider extends ChangeNotifier with AuthMixin {
     }
   }
 
+
   Future login(BuildContext context) async {
     try {
       isLogin = true;
@@ -122,6 +123,9 @@ class AuthProvider extends ChangeNotifier with AuthMixin {
     }
   }
 
+
+
+
   Future setOtpByEmail(BuildContext context) async {
     try {
       isLogin = true;
@@ -152,6 +156,8 @@ class AuthProvider extends ChangeNotifier with AuthMixin {
   }
 
   String verifyToken = '';
+
+
 
   Future otpVerification(BuildContext context) async {
     try {
@@ -187,33 +193,46 @@ class AuthProvider extends ChangeNotifier with AuthMixin {
     }
   }
 
-  Future changePassword(BuildContext context) async {
+
+
+
+  //
+
+
+  Future<void> changePassword(BuildContext context) async {
     try {
       isLogin = true;
       notifyListeners();
+
+      // Prepare the request body with the email and new password
       Map<String, dynamic> body = {
-        "password": updatePassword.text,
         "email": otpEmail.text,
+        'token':verifyToken,
+        // Use the email entered during OTP verification
+        "password": updatePassword.text,
       };
 
-      log(body.toString());
+      log("Password change request body: $body");
+
+      // Make the API request to change the password
       Response response = await AppRepo().changePassword(body);
 
-      log(response.data.toString());
       if (response.statusCode == 200 && context.mounted) {
+        // Success: Navigate to login screen after successful password change
         changeType(LoginType.login);
         otpEmail.clear();
+        updatePassword.clear();
+        confirmPassword.clear();
+        CustomToast.showSuccessToast(msg: "Password changed successfully");
       } else {
-        CustomToast.showErrorToast(msg: response.data['message']);
+        CustomToast.showErrorToast(msg: response.data['message'] ?? "Failed to change password");
       }
 
-      print(response.data.toString());
-    } on DioException catch (e, st) {
-      log(e.response.toString());
-      CustomToast.showErrorToast(msg: e.response?.data['error'].toString());
-      log(st.toString());
-    } catch (e, st) {
-      log(st.toString());
+    } on DioException catch (e) {
+      log("Dio error: ${e.response?.toString()}");
+      CustomToast.showErrorToast(msg: e.response?.data['message'] ?? "Failed to change password");
+    } catch (e) {
+      log("Error: $e");
       CustomToast.showErrorToast(msg: "Internal Server Error");
     } finally {
       isLogin = false;
@@ -228,6 +247,10 @@ class AuthProvider extends ChangeNotifier with AuthMixin {
     enteredOTP = value.toString();
     log(enteredOTP);
   }
+
+
+
+
 
   List<String> otpValues = List.generate(6, (_) => '');
 }

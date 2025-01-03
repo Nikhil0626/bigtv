@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -23,9 +22,10 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> with AuthMixin{
+class _HomeScreenState extends State<HomeScreen> with AuthMixin {
   int? _currentIndex;
   String screenName = "Viral Tweets";
+
   @override
   void initState() {
     _currentIndex = 0;
@@ -44,8 +44,10 @@ class _HomeScreenState extends State<HomeScreen> with AuthMixin{
       canPop: false,
       child: SafeArea(
           child: Scaffold(
-            backgroundColor: Colors.white,
-              appBar: CommonAppbar(screenName: screenName,),
+              backgroundColor: Colors.white,
+              appBar: CommonAppbar(
+                screenName: screenName,
+              ),
               body: Column(
                 children: [
                   Expanded(
@@ -64,22 +66,35 @@ class _HomeScreenState extends State<HomeScreen> with AuthMixin{
                   ),
                 ],
               ),
-
-              bottomNavigationBar:BottomNavigationBar(
+              bottomNavigationBar: BottomNavigationBar(
                 backgroundColor: Colors.white,
-                currentIndex: _currentIndex??0, // Track active tab
+                currentIndex: _currentIndex ?? 0,
                 onTap: (index) {
                   setState(() {
-                    index == 0?
-                      screenName = 'Viral Tweets': index == 1?screenName = "Articles":index == 2?screenName = 'XHandles':index==3?screenName = "XTweet":screenName ="Settings";
+                    index == 0
+                        ? screenName = 'Viral Tweets'
+                        : index == 1
+                            ? screenName = "Articles"
+                            : index == 2
+                                ? screenName = 'XHandles'
+                                : index == 3
+                                    ? screenName = "XTweet"
+                                    : screenName = "Settings";
                     _currentIndex = index;
-                    context.read<HomeProvider>().pageChange(index); // Update active tab
+                    context
+                        .read<HomeProvider>()
+                        .pageChange(index); // Update active tab
                   });
                 },
-                selectedItemColor: Colors.blue, // Color for selected items
-                unselectedItemColor: Colors.black, // Color for inactive items
+                selectedItemColor: Colors.blue,
+                // Color for selected items
+                unselectedItemColor: Colors.black,
+                // Color for inactive items
                 type: BottomNavigationBarType.fixed,
-                selectedLabelStyle: fontStyle(color: Colors.blue,fontWeight: FontWeight.bold,fontSize: 14),
+                selectedLabelStyle: fontStyle(
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14),
                 iconSize: 20,
                 items: [
                   BottomNavigationBarItem(
@@ -87,7 +102,9 @@ class _HomeScreenState extends State<HomeScreen> with AuthMixin{
                       "assets/house.svg",
                       width: 20,
                       height: 20,
-                      color: _currentIndex == 0 ? Colors.blue : Colors.black, // Dynamic color
+                      color: _currentIndex == 0
+                          ? Colors.blue
+                          : Colors.black, // Dynamic color
                     ),
                     label: "Home",
                   ),
@@ -96,7 +113,9 @@ class _HomeScreenState extends State<HomeScreen> with AuthMixin{
                       "assets/article.svg",
                       width: 20,
                       height: 20,
-                      color: _currentIndex == 1 ? Colors.blue : Colors.black, // Dynamic color
+                      color: _currentIndex == 1
+                          ? Colors.blue
+                          : Colors.black, // Dynamic color
                     ),
                     label: "Articles",
                   ),
@@ -105,7 +124,9 @@ class _HomeScreenState extends State<HomeScreen> with AuthMixin{
                       "assets/x_hamdles.svg",
                       width: 20,
                       height: 20,
-                      color: _currentIndex == 2 ? Colors.blue : Colors.black, // Dynamic color
+                      color: _currentIndex == 2
+                          ? Colors.blue
+                          : Colors.black, // Dynamic color
                     ),
                     label: "XHandles",
                   ),
@@ -114,7 +135,9 @@ class _HomeScreenState extends State<HomeScreen> with AuthMixin{
                       "assets/x-logo.svg",
                       width: 20,
                       height: 20,
-                      color: _currentIndex == 3 ? Colors.blue : Colors.black, // Dynamic color
+                      color: _currentIndex == 3
+                          ? Colors.blue
+                          : Colors.black, // Dynamic color
                     ),
                     label: "XTweets",
                   ),
@@ -123,16 +146,14 @@ class _HomeScreenState extends State<HomeScreen> with AuthMixin{
                       "assets/user_settings.svg",
                       width: 20,
                       height: 20,
-                      color: _currentIndex == 4 ? Colors.blue : Colors.black, // Dynamic color
+                      color: _currentIndex == 4
+                          ? Colors.blue
+                          : Colors.black, // Dynamic color
                     ),
                     label: "Settings",
                   ),
                 ],
-              )
-
-
-
-          )),
+              ))),
     );
   }
 }

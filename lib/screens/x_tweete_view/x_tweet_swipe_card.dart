@@ -151,7 +151,6 @@ class _XTweetSwipeCardState extends State<XTweetSwipeCard> {
                                   ),
                                 ),
 
-
                               ],
                             ),
                             Padding(
@@ -163,7 +162,7 @@ class _XTweetSwipeCardState extends State<XTweetSwipeCard> {
                                   color: const Color(0xff6b7280),
                                   fontWeight: FontWeight.normal,
                                 ),
-                                maxLines: 4,
+                                maxLines: 10,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -176,14 +175,14 @@ class _XTweetSwipeCardState extends State<XTweetSwipeCard> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(top: 5.0),
                                   child: Text(
-                                    widget.item.tweetUrl.toString(),
+                                    widget.item.generatedData.toString(),
 
                                     style: fontStyle(
                                       fontSize: 14,
                                       color: AppColors.appButtonColor,
                                       fontWeight: FontWeight.w600,
                                     ),
-                                    maxLines: 1,
+                                    maxLines: 10,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),

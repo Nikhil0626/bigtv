@@ -138,6 +138,7 @@ class _UsersScreenState extends State<UsersScreen> {
                           ),
                         ),
                         width(width: 10),
+                        // widget.item.role == "super_admin" ?SizedBox.shrink():
 
                         InkWell(
                           onTap: () {
@@ -384,7 +385,10 @@ class _SwipeableTileState extends State<SwipeableTile> {
                     ),
                   ),
                 ),
-               trailing: SizedBox(
+               trailing:
+               widget.item.role == "super_admin" ?SizedBox.shrink():
+
+               SizedBox(
                  height:25,
                  width: 40,
                  child:

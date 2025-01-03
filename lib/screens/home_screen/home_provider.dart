@@ -297,7 +297,7 @@ class HomeProvider extends ChangeNotifier {
   Future tweetGenerateByAi(
       tweetText, tweetId, BuildContext context, String type) async {
     tweetGenerateLoading = true;
-    // notifyListeners();
+    notifyListeners();
     Map<String, dynamic> body = {
       "id": tweetId,
       "tone_id": zonesModelList.where((e)=>e.toneName.toString() == toneId.toString()).first.id ,
@@ -482,11 +482,11 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future tweetReGenerateByAi(id, title, name) async {
-    if (name == "title") {
-      isTitleGenLoading = true;
-    } else {
+    // if (name == "title") {
+    //   isTitleGenLoading = true;
+    // } else {
       tweetGenerateLoading = true;
-    }
+    // }
     notifyListeners();
 
     Map<String, dynamic> body = {
@@ -516,11 +516,11 @@ class HomeProvider extends ChangeNotifier {
     } catch (e, st) {
       log("error --- ${st}");
     } finally {
-      if (name == "title") {
-        isTitleGenLoading = false;
-      } else {
+      // if (name == "title") {
+      //   isTitleGenLoading = false;
+      // } else {
         tweetGenerateLoading = false;
-      }
+      // }
       notifyListeners();
     }
   }

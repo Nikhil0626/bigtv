@@ -408,7 +408,7 @@ class _SwipeableTileState extends State<SwipeableTile> {
                         ),
                       ),
                       width(width: 10),
-
+                      widget.item.status == "pending"?SizedBox.shrink():
                       Align(
                         alignment: Alignment.center,
                         child:

@@ -145,7 +145,7 @@ class _ArticlesSwipeCardState extends State<ArticlesSwipeCard> {
                     ),
                     height(height: 4),
                     Text(
-                      widget.data.teluguText.toString(),
+                      widget.data.generatedData.toString(),
                       maxLines: 4,
                       style: fontStyle(
                         fontSize: 14,

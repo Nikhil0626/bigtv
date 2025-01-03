@@ -29,7 +29,7 @@ class XTweetsProvider extends ChangeNotifier{
       if (response.statusCode == 200) {
         List data = response.data['data']['tweets'];
         List userNames = response.data['data']['tweets'];
-
+// log(response.data['data']['tweets']);
         for(var name in userNames){
           userNamesList.add(name['username']);
         }

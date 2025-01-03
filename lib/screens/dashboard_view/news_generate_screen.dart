@@ -104,9 +104,8 @@ class _NewsGenerateScreenState extends State<NewsGenerateScreen> {
                               ),
                             ),
                             height(height: 10),
-                            homeProvider.isTitleGenLoading
-                                ? const AppLoadingScreen()
-                                : AppTextFormField1(
+
+                                 AppTextFormField1(
                                     prefixIcon: Icons.account_circle_outlined,
                                     textEditingController:
                                         homeProvider.titleController,

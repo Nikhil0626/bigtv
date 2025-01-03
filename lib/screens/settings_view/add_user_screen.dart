@@ -192,6 +192,8 @@ var img;
                             return 'Please enter phone number';
                           } else if (value.length > 10) {
                             return 'phone number must be 10 digits';
+                          }else if (value.length < 10) {
+                            return 'phone number must be 10 digits';
                           }
                           return null;
                         },

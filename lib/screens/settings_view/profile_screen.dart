@@ -189,7 +189,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> with AuthMixin {
                 const Spacer(),
                 height(height: 10),
                 Text(
-                  "App Version : 1.0.0+7.2",
+                  "App Version : 1.0.0+9.0",
                   style: fontStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.normal,

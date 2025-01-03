@@ -1,9 +1,11 @@
 class BaseUrls {
+ //
  /// Dev Base Url
   static const String baseUrl = "https://devtwitter.chotanews.com/api";
 
-  ///  Prod Base url
-  // static const String baseUrl = "https://twitter.chotanews.com";
+
+  // /// Prod Base url
+  //  static const String baseUrl = "https://twitter.chotanews.com/api";
 
 
   /// Auth Apis
