@@ -1,9 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
-
-import '../screens/home_screen/home_provider.dart';
 import 'app_colors.dart';
 import 'app_fonts.dart';
 import 'app_spaces.dart';
@@ -18,8 +15,7 @@ class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-      return Container(
+    return  Container(
         color: Colors.white,
         height: preferredSize.height,
         width: MediaQuery.of(context).size.width,
@@ -45,7 +41,6 @@ class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
                   if(screenName == "XTweet")
                     InkWell(
                         onTap: () {
-                          homeProvider.filterEnable(screenName: screenName);
                         },
                         child: SvgPicture.asset(
                           "assets/settings.svg",
@@ -55,7 +50,6 @@ class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
                   if (screenName == "Viral Tweets")
                     InkWell(
                         onTap: () {
-                          homeProvider.filterEnable();
                         },
                         child: SvgPicture.asset(
                           "assets/settings.svg",
@@ -75,7 +69,7 @@ class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
           ],
         ),
       );
-    });
+
   }
 
   @override

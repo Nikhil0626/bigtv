@@ -1,7 +1,7 @@
+import 'package:chotanews/utils/register_providers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
-import 'package:tweetai/utils/register_providers.dart';
 
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
@@ -15,7 +15,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
+    return MultiBlocProvider(
       providers: RegisterProviders.providers(context),
       child: ScreenUtilInit(
         designSize: const Size(385, 890),
@@ -30,7 +30,6 @@ class MyApp extends StatelessWidget {
             ),
             scrollBehavior: MyBehavior(),
             navigatorKey: mainNavigatorKey,
-            // scaffoldMessengerKey: scaffoldKey,
             navigatorObservers: [routeObserver],
             onGenerateRoute: (RouteSettings setting) {
               return RoutesManager.generateRoute(setting);
@@ -58,6 +57,7 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
 
 
 

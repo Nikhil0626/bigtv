@@ -1,11 +1,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../screens/auth/login_screen.dart';
-import '../screens/dashboard_view/dashboard_view.dart';
-import '../screens/dashboard_view/news_generate_screen.dart';
-import '../screens/home_screen/home_screen.dart';
-import '../screens/intial_screen/spalsh_screen.dart';
+import '../screens/testing_screen/test_view.dart';
+
 
 abstract class RoutesManager {
   RoutesManager._();
@@ -18,28 +15,23 @@ abstract class RoutesManager {
   static const homeScreen = '/homeScreen';
   static const newsGenerateScreen = '/newsGenerateScreen';
 
-  static Route<dynamic> generateRoute(RouteSettings setting) {
+  static Route<dynamic>? generateRoute(RouteSettings setting) {
     switch (setting.name) {
       case splashScreen:
-        return MaterialPageRoute(builder: (context) => const SplashScreen());
-      case login:
-        return MaterialPageRoute(builder: (context) => const LoginScreen());
-      case homeScreen:
-        return MaterialPageRoute(builder: (context) => const HomeScreen());
-      case dashBoardScreen:
-        return MaterialPageRoute(builder: (context) => const DashboardScreen());
-      case newsGenerateScreen:
-        final args = setting.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(
-            builder: (context) => NewsGenerateScreen(
-                  tweetId:
-                      args?['tweetId'] ?? '', // Use a default value if null
-                  tweetText: args?['tweetText'] ?? '',
-              screenType: args?['screenType'] ?? '',
-                ));
+        return MaterialPageRoute(builder: (context) => const TestView());
+      // case newsGenerateScreen:
+      //   final args = setting.arguments as Map<String, dynamic>?;
+      //   return MaterialPageRoute(
+      //       builder: (context) => NewsGenerateScreen(
+      //             tweetId:
+      //                 args?['tweetId'] ?? '', // Use a default value if null
+      //             tweetText: args?['tweetText'] ?? '',
+      //         screenType: args?['screenType'] ?? '',
+      //           ));
 
       default:
-        return MaterialPageRoute(builder: (context) => const SplashScreen());
+        // return null;
+        return MaterialPageRoute(builder: (context) => const TestView());
     }
   }
 }
