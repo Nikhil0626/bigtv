@@ -1,6 +1,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../screens/testing_screen/test1.dart';
 import '../screens/testing_screen/test_view.dart';
 
 
@@ -18,7 +19,7 @@ abstract class RoutesManager {
   static Route<dynamic>? generateRoute(RouteSettings setting) {
     switch (setting.name) {
       case splashScreen:
-        return MaterialPageRoute(builder: (context) => const TestView());
+        return MaterialPageRoute(builder: (context) =>  NewsScreen());
       // case newsGenerateScreen:
       //   final args = setting.arguments as Map<String, dynamic>?;
       //   return MaterialPageRoute(
@@ -31,7 +32,7 @@ abstract class RoutesManager {
 
       default:
         // return null;
-        return MaterialPageRoute(builder: (context) => const TestView());
+        return MaterialPageRoute(builder: (context) =>  NewsScreen());
     }
   }
 }

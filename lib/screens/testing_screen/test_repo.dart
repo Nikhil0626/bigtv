@@ -11,21 +11,24 @@ class TestRepo extends BaseService{
   
   Future getHomePageNews() async{
     final Map<String, dynamic> queryParams = {
-      'userid': 1,
-      'postid': 0,
-      'lpostid': 0,
-      'includeHomePage': 1,
+      'userid': "1",
+      'postid': "0",
+      'lpostid': "0",
+      'includeHomePage': "1",
       'hasAds': true,
       'isByNotification': false,
       'deviceid': '993f0e149b5bed89',
-      'platform': 'android',
-      'homefeed': 1,
+      'platform': 'ios',
+      'homefeed': "1",
       'locationIds': 'undefined',
     };
     log(queryParams.toString());
     try{
-      Response response = await makeRequest(url: BaseUrls.getNews,method: RequestType.get,queryParameters: queryParams);
+      var response = await makeRequest(url: BaseUrls.getNews,method: RequestType.get,);
+
+      log("response.data.toString()");
       log(response.data.toString());
+      return response;
     }
 
   on DioException  catch(e,st){

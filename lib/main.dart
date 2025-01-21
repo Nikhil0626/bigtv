@@ -1,13 +1,54 @@
+import 'dart:developer';
+
 import 'package:chotanews/utils/register_providers.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'dart:io' show Platform;
 
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 
-void main() {
+void main() async{
   runApp(const MyApp());
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  // String? uniqueId = await DeviceIdentifier.deviceId..toString();
+  //
+  // if (Platform.isAndroid) {
+  //
+  //   final deviceInfoPlugin = DeviceInfoPlugin();
+  //   final deviceInfo = await deviceInfoPlugin.deviceInfo;
+  //   final allInfo = deviceInfo.data;
+  //
+  //
+  //   log('Running on ${allInfo}');
+  //
+  // }
+  // else if (Platform.isIOS) {
+  //   IosDeviceInfo data = await deviceInfo.iosInfo;
+  //   Map body =<String, dynamic>{
+  //     'name': data.name,
+  //     'systemName': data.systemName,
+  //     'systemVersion': data.systemVersion,
+  //     'model': data.model,
+  //     'modelName': data.modelName,
+  //     'localizedModel': data.localizedModel,
+  //     'identifierForVendor': data.identifierForVendor,
+  //     'isPhysicalDevice': data.isPhysicalDevice,
+  //     'isiOSAppOnMac': data.isiOSAppOnMac,
+  //     'utsname.sysname:': data.utsname.sysname,
+  //     'utsname.nodename:': data.utsname.nodename,
+  //     'utsname.release:': data.utsname.release,
+  //     'utsname.version:': data.utsname.version,
+  //     'utsname.machine:': data.utsname.machine,
+  //   };
+  //   print('Running on ${body}');
+  // }
+
+
+
+
 }
 
 class MyApp extends StatelessWidget {
