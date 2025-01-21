@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../screens/testing_screen/test_view.dart';
 
-
 abstract class RoutesManager {
   RoutesManager._();
 

@@ -1,3 +1,6 @@
+import 'package:chotanews/screens/language_selection_screen/language_selection_view.dart';
+import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
+import 'package:chotanews/screens/videos_main/tab_screen.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -49,6 +52,7 @@ class MyApp extends StatelessWidget {
             //     child: child!,
             //   );
             // },
+            home: TabScreen(),
             debugShowCheckedModeBanner: false,
             // initialRoute: RoutesManager.onboardingScreen,
           );

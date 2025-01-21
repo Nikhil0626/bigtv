@@ -7,6 +7,9 @@ class BaseUrls {
 
 
   static const String getNews = "/allposts";
+  static const String getAllVideos = "/menuposts";
+
+  ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
 
 
