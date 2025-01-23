@@ -153,7 +153,7 @@
 //                                 },
 //                                 errorBuilder: (context, error, stackTrace) {
 //                                   return Image.asset(
-//                                     "assets/chota.png",
+//                                     "assets/chota",
 //                                     width: double.infinity,
 //                                     height: 270,
 //                                     fit: BoxFit.cover,
@@ -365,7 +365,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
                           },
                           errorBuilder: (context, error, stackTrace) {
                             return Image.asset(
-                              "assets/chota.png",
+                              "assets/chota",
                               width: double.infinity,
                               height: 270,
                               fit: BoxFit.cover,

@@ -8,7 +8,7 @@ class AppLoadingScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Lottie.asset(
-        "assets/loading.json",height: 50,width: 50,),
+        "assets/loading",height: 50,width: 50,),
     );
   }
 }

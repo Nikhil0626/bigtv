@@ -43,7 +43,7 @@ class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
                         onTap: () {
                         },
                         child: SvgPicture.asset(
-                          "assets/settings.svg",
+                          "assets/settings",
                           width: 20,
                           height: 20,
                         )),
@@ -52,7 +52,7 @@ class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
                         onTap: () {
                         },
                         child: SvgPicture.asset(
-                          "assets/settings.svg",
+                          "assets/settings",
                           width: 20,
                           height: 20,
                         )),
