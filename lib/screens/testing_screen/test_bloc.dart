@@ -10,8 +10,8 @@ class TestBloc extends Bloc<TestEvent, TestState> {
   TestBloc() : super(InitialState()){
     on<TestEventOne>((event,emit) async{
 
-     Response res =  await TestRepo().getHomePageNews();
-      List data = res.data['posts'];
+     Response response =  await TestRepo().getHomePageNews();
+      List data = response.data['posts'];
      getAllPosts = data.map((e) => NewsPost.fromJson(e),).toList();
       emit(Success(newPosts: getAllPosts));
 
