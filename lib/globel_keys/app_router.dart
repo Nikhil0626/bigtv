@@ -1,4 +1,5 @@
 
+import 'package:chotanews/screens/testing_screen/test2.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/testing_screen/test1.dart';

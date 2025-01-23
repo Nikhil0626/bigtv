@@ -25,7 +25,6 @@ class TestRepo extends BaseService{
     log(queryParams.toString());
     try{
       var response = await makeRequest(url: BaseUrls.getNews,method: RequestType.get,);
-
       log("response.data.toString()");
       log(response.data.toString());
       return response;
