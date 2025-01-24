@@ -47,6 +47,8 @@ dependencies:
   device_info_plus: ^11.2.0
   flip_board: ^1.0.0
   appinio_swiper: ^2.1.1
+  google_sign_in: ^6.2.2
+  sign_in_with_apple: ^6.1.4
 
 dev_dependencies:
   flutter_test:
@@ -73,3 +75,5 @@ flutter:
 
   assets:
     - assets/
+    - assets/images/
+    - assets/icons/

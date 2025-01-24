@@ -1,190 +1,142 @@
-import 'dart:developer';
-
+import 'package:appinio_swiper/appinio_swiper.dart';
+import 'package:chotanews/screens/home_screen/home_bloc.dart';
+import 'package:chotanews/screens/home_screen/home_state.dart';
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../utils/app_colors.dart';
-import '../../utils/app_fonts.dart';
-import '../../utils/app_spaces.dart';
+import '../testing_screen/test_bloc.dart';
+import '../testing_screen/test_event.dart';
+import '../testing_screen/test_state.dart';
+import 'home_event.dart';
 
-class HomeScreenView extends StatelessWidget {
-  final String tweetId;
-  final String tweetTitle;
-  final String tweetBody;
-  final String tweetImage;
-  final String pageType;
+class HomeScreenView extends StatefulWidget {
+  const HomeScreenView({super.key});
 
-  const HomeScreenView(
-      {super.key,
-      required this.tweetId,
-      required this.tweetTitle,
-      required this.tweetBody,
-      required this.pageType,
-      required this.tweetImage});
+  @override
+  State<HomeScreenView> createState() => _HomeScreenViewState();
+}
+
+class _HomeScreenViewState extends State<HomeScreenView> {
+  final AppinioSwiperController controller = AppinioSwiperController();
+  int indexUP = 0;
+
+  @override
+  void initState() {
+    context.read<HomeBloc>().add(GetAllNewsFeed());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    log(tweetImage);
-
-    String img = tweetImage.split(";").first.toString();
-    log(img);
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: Stack(
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  tweetImage == "" ||
-                          tweetImage == "No image" ||
-                          tweetImage == "null"
-                      ? Container(
-                          alignment: Alignment.center,
-                          width: double.infinity,
-                          height: 270,
-                          child: Image.asset(
-                            "assets/chota.png",
-                            width: double.infinity,
-                            height: 270,
-                            fit: BoxFit.fill,
-                          ),
-                        )
-                      : Image.network(
-                          width: double.infinity,
-                          height: 270,
-                          fit: BoxFit.fill,
-                          img,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              "assets/chota.png",
-                              width: double.infinity,
-                              height: 270,
-                              fit: BoxFit.cover,
-                            );
-                          },
-                        ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 16),
-                    child: Text(
-                      tweetTitle,
-                      style: const TextStyle(
-                        color: AppColors.headerTextColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        tweetBody,
-                        style: fontStyle(
-                          color: AppColors.bodyTextColor,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  height(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {},
-                              child: Container(
-                                alignment: Alignment.center,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                    color: AppColors.wColor,
-                                    border: Border.all(
-                                        color: AppColors.appButtonColor,
-                                        width: 1),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20))),
-                                child: Text(
-                                  "Edit",
-                                  style: fontStyle(
-                                      fontSize: 14,
-                                      color: AppColors.appButtonColor,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                            ),
-                          ),
-                          width(width: 16),
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {},
-                              child: Container(
-                                height: 40,
-                                decoration: BoxDecoration(
-                                    color: AppColors.appButtonColor,
-                                    border: Border.all(
-                                        color: AppColors.appButtonColor,
-                                        width: 1),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20))),
-                                child: Center(
-                                  child: Text(
-                                    pageType == "schedule"
-                                        ? "Publish"
-                                        : "Schedule",
-                                    style: fontStyle(
-                                        fontSize: 14,
-                                        color: AppColors.wColor,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  height(height: 10),
-                ],
+      body: BlocBuilder<HomeBloc, HomeScreenState>(
+        builder: (context, state) {
+          if (state is InitialHomeScreenState) {
+            return Container(
+              color: Colors.grey,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: const Center(
+                child: CircularProgressIndicator(),
               ),
-              SizedBox(
-                height: 100,
-                width: 100,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: CircleAvatar(
-                        backgroundColor: AppColors.appButtonColor,
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 8.0),
-                          child: Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.white,
-                          ),
+            );
+          } else if (state is SuccessHomeScreenState) {
+            return AppinioSwiper(
+              invertAngleOnBottomDrag: false,
+              swipeOptions: SwipeOptions.symmetric(
+                  horizontal: false,
+                  vertical:  true),
+              controller: controller,
+              onCardPositionChanged: (SwiperPosition position) {},
+              onSwipeEnd: (
+                previousIndex,
+                targetIndex,
+                activity,
+              ) {
+                context.read<HomeBloc>().add(OnSwipeCard(
+                    previousIndex: previousIndex,
+                    targetIndex: targetIndex,
+                    activity: activity,
+                    totalPosts: state.getAllHomeScreenNews.length));
+              },
+              // onEnd:  () => context.read<HomeBloc>().add(OnSwipeEndCard( data: state.getAllHomeScreenNews.last,)),
+              allowUnSwipe: false,
+              loop: false,
+              cardCount: state.getAllHomeScreenNews.length,
+              cardBuilder: (context, index) {
+                return state.pageType == "Gallery"
+                    ? Container(
+                        height:300,
+                        width: double.infinity,
+                        color: AppColors.appButtonColor,
+                      )
+                    : Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
                         ),
-                      ),
-                    ),
-                  ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            state.getAllHomeScreenNews[index].imageUrl?.url
+                                        .toString() !=
+                                    null
+                                ? Image.network(
+                                    state.getAllHomeScreenNews[index].imageUrl!
+                                        .url
+                                        .toString(),
+                                    fit: BoxFit.cover,
+                                    width: MediaQuery.of(context).size.width,
+                                    height:
+                                        MediaQuery.of(context).size.height / 2,
+                                  )
+                                : const SizedBox.shrink(),
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    state.pageType ?? "No Title",
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  height(height: 16),
+                                  Text(
+                                    state.getAllHomeScreenNews[index].content ??
+                                        "No Description",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey[800],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+              },
+            );
+          } else {
+            return Container(
+              color: Colors.grey,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: const Center(
+                child: Text(
+                  "Something went wrong. Please try again.",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
-            ],
-          ),
-        ),
+            );
+          }
+        },
       ),
     );
   }

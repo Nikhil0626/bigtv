@@ -1,0 +1,106 @@
+import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
+import 'package:chotanews/screens/Auth_module/auth_event.dart';
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../utils/app_buttons.dart';
+import '../../utils/app_fonts.dart';
+import '../../utils/app_spaces.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: AppColors.appButtonColor,
+        centerTitle: true,
+        title: Image.asset(
+          "assets/images/brandLogoWhiteBlackBlue.png",
+          width: 200,
+        ),
+      ),
+      body:  Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          height(height: 20),
+          Container(
+              decoration:  BoxDecoration(
+                border: Border.all(color: AppColors.headerTextColor,width: 1),
+                  borderRadius: const BorderRadius.all(
+                    Radius.circular(50),
+                  ),boxShadow: [
+                BoxShadow(
+                  color: Colors.blueGrey.withOpacity(0.2),
+                  spreadRadius: 5,
+                  blurRadius: 7,
+                  offset: const Offset(-7.5, 7.5),
+                ),
+              ],
+                  color: AppColors.appButtonColor),
+              child: const CircleAvatar(backgroundImage: AssetImage("assets/images/icon.png"),radius: 50,)),
+          height(height: 20),
+           Container(
+             padding: const EdgeInsets.symmetric(horizontal: 16),
+            height: 250,
+            width: MediaQuery.of(context).size.width,
+            child: Card(
+              elevation: 10,
+
+              color: Colors.white,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 12),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 15,
+                  children: [
+
+                    Text("Login",style: fontStyle(color: AppColors.appButtonColor,fontWeight: FontWeight.bold,fontSize: 20),),
+                    const CommonButton(
+                      text: 'Login With Google',
+                      textColor: Colors.white,
+                      shape: BoxDecoration(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8),
+                          ),
+                          color: AppColors.appButtonColor),
+                    ),
+                     CommonButton(
+                      onPressed:  () => context.read<AuthBloc>().add(AppleLogin()),
+                      text: 'Login With Apple',
+                      textColor: Colors.white,
+                      shape: const BoxDecoration(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8),
+                          ),
+                          color: AppColors.appButtonColor),
+                    ),
+                    const CommonButton(
+                      text: 'Skip',
+                      textColor: Colors.white,
+                      shape: BoxDecoration(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(8),
+                          ),
+                          color: AppColors.appButtonColor),
+                    )
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
