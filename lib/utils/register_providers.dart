@@ -1,5 +1,6 @@
 
 
+import 'package:chotanews/districts_selection/district_selection_bloc.dart';
 import 'package:chotanews/screens/home_animation_widgets/home_handle_bloc.dart';
 import 'package:chotanews/screens/testing_screen/test_bloc.dart';
 import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_bloc.dart';
@@ -25,6 +26,9 @@ class RegisterProviders {
       ),
     BlocProvider<HomeBloc>(
         create: (BuildContext context) => HomeBloc(),
+      ),
+      BlocProvider<DistrictSelectionBloc>(
+        create: (BuildContext context) => DistrictSelectionBloc(),
       ),
     ];
   }

@@ -4,6 +4,8 @@ import 'package:chotanews/screens/home_screen/home_screen_view.dart';
 import 'package:chotanews/screens/testing_screen/test2.dart';
 import 'package:flutter/material.dart';
 
+import '../districts_selection/districts_selection_screen.dart';
+import '../onbording_screens/onboarding_screen.dart';
 import '../screens/testing_screen/test1.dart';
 import '../screens/testing_screen/test_view.dart';
 
@@ -11,6 +13,7 @@ abstract class RoutesManager {
   RoutesManager._();
 
   static const splashScreen = '/';
+  static const districtselectionScreen = '/districtselectionScreen';
   static const onboardingScreen = '/onboardingScreen';
   static const signUpScreen = '/signUpScreen';
   static const login = '/login';
@@ -29,6 +32,12 @@ abstract class RoutesManager {
         return MaterialPageRoute(builder: (context) => const HomeScreenView(),);
 
 
+
+        return MaterialPageRoute(builder: (context) =>  NewsScreen());
+      case onboardingScreen:
+        return MaterialPageRoute(builder: (context) => OnboardingScreen());
+      case districtselectionScreen:
+        return MaterialPageRoute(builder: (context) => DistrictsSelectionScreen()) ;
 
       // case newsGenerateScreen:
       //   final args = setting.arguments as Map<String, dynamic>?;
