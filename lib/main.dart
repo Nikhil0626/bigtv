@@ -7,8 +7,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io' show Platform;
 
+import 'districts_selection/districts_selection_screen.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
+import 'onbording_screens/onboarding_screen.dart';
 
 void main() async{
   runApp(const MyApp());
@@ -90,6 +92,7 @@ class MyApp extends StatelessWidget {
             //     child: child!,
             //   );
             // },
+            home: DistrictsSelectionScreen(),
             debugShowCheckedModeBanner: false,
             // initialRoute: RoutesManager.onboardingScreen,
           );

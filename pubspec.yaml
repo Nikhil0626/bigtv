@@ -47,6 +47,7 @@ dependencies:
   device_info_plus: ^11.2.0
   flip_board: ^1.0.0
   appinio_swiper: ^2.1.1
+  carousel_slider: ^5.0.0
 
 dev_dependencies:
   flutter_test:
