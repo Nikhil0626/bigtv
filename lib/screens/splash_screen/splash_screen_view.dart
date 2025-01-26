@@ -1,4 +1,7 @@
-import 'package:chotanews/screens/language_selection_screen/language_selection_view.dart';
+import 'dart:developer';
+
+import 'package:chotanews/globel_keys/app_router.dart';
+import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -12,12 +15,7 @@ class SplashScreenView extends StatefulWidget {
 class _SplashScreenView extends State<SplashScreenView> {
   @override
   void initState() {
-    Timer(const Duration(seconds: 3), () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const LanguageSelectionView()),
-      );
-    });
+    navigateApp();
   }
 
   @override
@@ -57,5 +55,18 @@ class _SplashScreenView extends State<SplashScreenView> {
         ),
       ),
     );
+  }
+  Future navigateApp() async {
+    String loginId = GlobalVariables().loginId ?? "";
+    log(loginId.toString());
+    if (loginId != null || loginId != "") {
+      Timer(const Duration(seconds: 3), () {
+        Navigator.pushNamed(context, RoutesManager.homeScreen);
+      });
+    } else {
+      Timer(const Duration(seconds: 3), () {
+        Navigator.pushNamed(context, RoutesManager.login);
+      });
+    }
   }
 }

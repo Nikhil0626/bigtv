@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../globel_keys/global_variables_data.dart';
 import 'district_selection_event.dart';
 import 'district_selection_model.dart';
 import 'district_selection_repo.dart';
@@ -69,8 +70,10 @@ class DistrictSelectionBloc
 
       String result = selectedDistrictList.join(', ');
       log(result);
+      String? deviceId = GlobalVariables().deviceId;
+      print("Device ID: ${deviceId}");
       var body={
-        "deviceId":"2f6a5caebb387fee",
+        "deviceId":deviceId.toString(),
         "isFollowed":"true",
         "locationId":result,
         "type":"bulk",

@@ -15,7 +15,6 @@ class DistrictSelectionRepo extends BaseService{
 
 
   Future updateDistrictsList( body) async {
-
     Response response = await makeRequest(url: BaseUrls.updateDistricts,method: RequestType.post,body: body);
     return response;
   }

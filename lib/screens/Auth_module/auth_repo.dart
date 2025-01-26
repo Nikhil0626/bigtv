@@ -10,17 +10,8 @@ class AuthRepo extends BaseService{
 
 
   Future loginWithGoogle( body) async {
-
-
-
     Response response = await makeRequest(url: BaseUrls.userInfo,method: RequestType.post,body: body);
     return response;
-  }
-
-  Future loginWithApple() async {
-    Response response = await makeRequest(url: "",method: RequestType.post);
-    return response;
-
   }
 
 }
