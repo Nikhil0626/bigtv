@@ -33,12 +33,19 @@ void fetchDeviceId() async {
   GlobalVariables().deviceId = deviceId; // Store in the global variable
   print("Device ID: ${GlobalVariables().deviceId}");
 }
+
+
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
-  runApp(const MyApp());
-  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  if (Platform.isAndroid) {
+    try {
+      await Firebase.initializeApp();
+    } catch (e) {
+      print("Firebase initialization error: $e");
+    }
+  }
   fetchDeviceId();
+  runApp(const MyApp());
   // String? uniqueId = await DeviceIdentifier.deviceId..toString();
   //
   // if (Platform.isAndroid) {
@@ -116,7 +123,7 @@ class MyApp extends StatelessWidget {
             //     child: child!,
             //   );
             // },
-            home: const LoginScreen(),
+            // home: const LoginScreen(),
             debugShowCheckedModeBanner: false,
             // initialRoute: RoutesManager.onboardingScreen,
           );

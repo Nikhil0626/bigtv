@@ -6,14 +6,12 @@ import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
 import 'package:chotanews/screens/Auth_module/auth_screen.dart';
 import 'package:chotanews/screens/home_screen/home_screen_view.dart';
-import 'package:chotanews/screens/testing_screen/test2.dart';
 import 'package:flutter/material.dart';
 
 import '../onbording_screens/onboarding_screen.dart';
 import '../screens/chota_info_screens/chota_info.dart';
 import '../screens/districts_selection/districts_selection_screen.dart';
-import '../screens/testing_screen/test1.dart';
-import '../screens/testing_screen/test_view.dart';
+import '../screens/splash_screen/splash_screen_view.dart';
 
 abstract class RoutesManager {
   RoutesManager._();
@@ -36,28 +34,28 @@ abstract class RoutesManager {
   static Route<dynamic>? generateRoute(RouteSettings setting) {
     switch (setting.name) {
       case splashScreen:
-        return MaterialPageRoute(builder: (context) =>  HomeScreenView());
+        return MaterialPageRoute(builder: (context) =>  const SplashScreenView());
       case login:
         return MaterialPageRoute(builder: (context) => const LoginScreen(),);
       case homeScreen:
         return MaterialPageRoute(builder: (context) => const HomeScreenView(),);
 
       case onboardingScreen:
-        return MaterialPageRoute(builder: (context) => OnboardingScreen());
+        return MaterialPageRoute(builder: (context) => const OnboardingScreen());
       case districtSelectionScreen:
-        return MaterialPageRoute(builder: (context) =>  DistrictsSelectionScreen()) ;
+        return MaterialPageRoute(builder: (context) =>  const DistrictsSelectionScreen()) ;
       case chotaInfo:
-        return MaterialPageRoute(builder: (context) => ChotaInfo());
+        return MaterialPageRoute(builder: (context) => const ChotaInfo());
       case aboutUs:
-        return MaterialPageRoute(builder: (context) => AboutUs());
+        return MaterialPageRoute(builder: (context) => const AboutUs());
       case contactUs:
-        return MaterialPageRoute(builder: (context) => ContactUs());
+        return MaterialPageRoute(builder: (context) => const ContactUs());
       case advertiseWithUs:
-        return MaterialPageRoute(builder: (context) => AdvertiseWithUs());
+        return MaterialPageRoute(builder: (context) => const AdvertiseWithUs());
       case termsConditions:
-        return MaterialPageRoute(builder: (context) => TermsConditions());
+        return MaterialPageRoute(builder: (context) => const TermsConditions());
       case privacyPolicy:
-        return MaterialPageRoute(builder: (context) => PrivacyPolicy());
+        return MaterialPageRoute(builder: (context) => const PrivacyPolicy());
 
 
 
@@ -73,7 +71,7 @@ abstract class RoutesManager {
 
       default:
         // return null;
-        return MaterialPageRoute(builder: (context) =>  HomeScreenView());
+        return MaterialPageRoute(builder: (context) =>  const SplashScreenView());
     }
   }
 }

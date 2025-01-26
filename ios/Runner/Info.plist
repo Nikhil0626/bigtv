@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Chotanews</string>
+	<string>ChotaNews</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>chotanews</string>
+	<string>chotaNews</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -45,5 +45,50 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<key>CFBundleURLTypes</key>
+    <array>
+      <dict>
+        <key>CFBundleTypeRole</key>
+        <string>Editor</string>
+        <key>CFBundleURLSchemes</key>
+        <array>
+          <string>com.googleusercontent.apps.YOUR_CLIENT_ID</string>
+        </array>
+      </dict>
+    </array>
+    <key>CFBundleURLTypes</key>
+    	<array>
+    		<dict>
+    			<key>CFBundleURLSchemes</key>
+    			<array>
+    				<string>myapp</string>
+    				<string>com.chotanewstelugu.app</string>
+    			</array>
+    		</dict>
+    		<dict>
+    			<key>CFBundleURLSchemes</key>
+    			<array>
+    				<string>com.googleusercontent.apps.454332164931-dtg9hd0455oo6ufjvs442siogrdso0ll</string>
+    			</array>
+    		</dict>
+    		<dict>
+    			<key>CFBundleURLSchemes</key>
+    			<array>
+    				<string>exp+chotanews</string>
+    			</array>
+    		</dict>
+    		<dict>
+    			<key>CFBundleTypeRole</key>
+    			<string>Editor</string>
+    			<key>CFBundleURLName</key>
+    			<string>Bundle Id</string>
+    			<key>CFBundleURLSchemes</key>
+    			<array>
+    				<string>com.chotanewstelugu.app</string>
+    			</array>
+    		</dict>
+    	</array>
+
 </dict>
 </plist>
