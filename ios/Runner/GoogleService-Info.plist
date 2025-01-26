@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>454332164931-dtg9hd0455oo6ufjvs442siogrdso0ll.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.454332164931-dtg9hd0455oo6ufjvs442siogrdso0ll</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>454332164931-079ac4brnaajgk71smm6ah6bhlrirbej.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyCQXibXyX4aHclDOcy3SLNj3rEh_puS85A</string>
+	<key>GCM_SENDER_ID</key>
+	<string>454332164931</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.chotanewstelugu.app</string>
+	<key>PROJECT_ID</key>
+	<string>chotanews-51054</string>
+	<key>STORAGE_BUCKET</key>
+	<string>chotanews-51054.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:454332164931:ios:be0bf1cdb8e5d191bc1df6</string>
+	<key>ADMOB_APP_ID</key>
+	<string>ca-app-pub-2405357352181832~7031527412</string>
+</dict>
+</plist>

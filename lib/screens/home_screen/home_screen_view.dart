@@ -18,16 +18,10 @@ class HomeScreenView extends StatefulWidget {
 }
 
 class _HomeScreenViewState extends State<HomeScreenView> {
-  // final AppinioSwiperController controller = AppinioSwiperController();
   final CardSwiperController controller = CardSwiperController();
-  int indexUP = 0;
-  int _selectedIndex = 0;
+  bool _areRowsVisible = true; // State to toggle visibility
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+
   @override
   void initState() {
     context.read<HomeBloc>().add(GetAllNewsFeed());
@@ -39,156 +33,227 @@ class _HomeScreenViewState extends State<HomeScreenView> {
     return Scaffold(
 
       backgroundColor: Colors.white,
-      body: BlocBuilder<HomeBloc, HomeScreenState>(
-        builder: (context, state) {
-          if (state is InitialHomeScreenState) {
-            return Container(
-              color: Colors.grey,
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
-          } else if (state is SuccessHomeScreenState) {
-            return CardSwiper(
-              controller: controller,
-              cardsCount: state.getAllHomeScreenNews.length,
-              onSwipe: (previousIndex, currentIndex, direction) {
-                context.read<HomeBloc>().add(OnSwipeCard(
-                    previousIndex: previousIndex,
-                    currentIndex: currentIndex!,
-                    direction: direction));
-                return true;
-              },
-              onUndo: _onUndo,
-              numberOfCardsDisplayed: 2,
-              maxAngle: 0,
-              threshold: 1,
-              isLoop: false,
-              allowedSwipeDirection:
-                  const AllowedSwipeDirection.symmetric(vertical: true),
-              padding: const EdgeInsets.all(0),
-              cardBuilder: (
-                context,
-                index,
-                horizontalThresholdPercentage,
-                verticalThresholdPercentage,
-              ) =>
-                  state.pageType == "Image"
-                      ? ClipRRect(
-                          child: Image.network(
-                            state.getAllHomeScreenNews[index].imageUrl.url
-                                .toString(),
-                            fit: BoxFit.fill,
-                            width: double.infinity,
-                            height: double.infinity,
-                          ),
-                        )
-                      : state.pageType == "Gallery"
-                          ? CarouselScreen(
-                              imageList:
-                                  state.getAllHomeScreenNews[index].gallery ??
-                                      [],
-                            )
-                          : Container(
-                              decoration:  BoxDecoration(
-                                color: state.pageType == "Video"?Colors.black:Colors.white,
-                              ),
-                              child: Stack(
-                                // crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    height:state.pageType == "Video"?MediaQuery.of(context).size.height/1.8: MediaQuery.of(context).size.height/1.3,
-                                    child: state.pageType == "Video"
-                                        ? NewsScreen(
-                                            url: state.getAllHomeScreenNews[index]
-                                                .videoUrl!.url
-                                                .toString(),
-                                          )
-                                        : state.getAllHomeScreenNews[index]
-                                                    .imageUrl.url
-                                                    .toString() !=
-                                                null
-                                            ? Image.network(
-                                                state.getAllHomeScreenNews[index]
-                                                    .imageUrl.url
-                                                    .toString(),
-                                                fit: BoxFit.cover,
-                                                width: MediaQuery.of(context)
-                                                    .size
-                                                    .width,
-                                                height: MediaQuery.of(context)
-                                                        .size
-                                                        .height /
-                                                    2,
-                                              )
-                                            : const SizedBox.shrink(),
+      body: Stack(
+        children: [
+          BlocConsumer<HomeBloc, HomeScreenState>(
+             listener: (context, state) {},
+            builder: (context, state) {
+            return  Container(
+              color: Colors.transparent, // Avoid null or fully transparent color
+              width: double.infinity,
+              height: double.infinity,
+              child: state is InitialHomeScreenState? Container(
+                    color: Colors.grey,
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    child: const Center(
+                      child: CircularProgressIndicator(),
+                    ),
+                  )
+                :state is SuccessHomeScreenState?
+                  CardSwiper(
+                    controller: controller,
+                    cardsCount: state.getAllHomeScreenNews.length,
+                    onSwipe: (previousIndex, currentIndex, direction) {
+                      context.read<HomeBloc>().add(OnSwipeCard(
+                          previousIndex: previousIndex,
+                          currentIndex: currentIndex!,
+                          direction: direction));
+                      return true;
+                    },
+                    onUndo: _onUndo,
+                    numberOfCardsDisplayed: 2,
+                    maxAngle: 0,
+                    threshold: 1,
+                    isLoop: false,
+                    allowedSwipeDirection:
+                        const AllowedSwipeDirection.symmetric(vertical: true),
+                    padding: const EdgeInsets.all(0),
+                    cardBuilder: (
+                      context,
+                      index,
+                      horizontalThresholdPercentage,
+                      verticalThresholdPercentage,
+                    ) =>
+                        GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onTap: () {
+                            setState(() {
+                              _areRowsVisible = !_areRowsVisible;
+                            });
+                          },
+                          child: state.pageType == "Image"
+                              ? ClipRRect(
+                                  child: Image.network(
+                                    state.getAllHomeScreenNews[index].imageUrl.url
+                                        .toString(),
+                                    fit: BoxFit.fill,
+                                    width: double.infinity,
+                                    height: double.infinity,
                                   ),
-                                  Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
-                                      height:state.pageType == "Video"? MediaQuery.of(context).size.height/2.2: MediaQuery.of(context).size.height/1.8,
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                          borderRadius: BorderRadius.only(topLeft: Radius.circular(30),topRight: Radius.circular(30))
+                                )
+                              : state.pageType == "Gallery"
+                                  ? CarouselScreen(
+                                      imageList:
+                                          state.getAllHomeScreenNews[index].gallery ??
+                                              [],
+                                    )
+                                  : Container(
+                                      decoration:  BoxDecoration(
+                                        color: state.pageType == "Video"?Colors.black:Colors.white,
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                      child: Stack(
+                                        // crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text(
-                                            state.getAllHomeScreenNews[index]
-                                                .title ?? "No Title",
-                                            style: const TextStyle(
-                                              fontSize: 24,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black,
+                                          SizedBox(
+                                            height: MediaQuery.of(context).size.height/2,
+                                            child: state.pageType == "Video"
+                                                ? NewsScreen(
+                                                    url: state.getAllHomeScreenNews[index]
+                                                        .videoUrl!.url
+                                                        .toString(),
+                                                  )
+                                                : state.getAllHomeScreenNews[index]
+                                                            .imageUrl.url
+                                                            .toString() !=
+                                                        null
+                                                    ? Image.network(
+                                                        state.getAllHomeScreenNews[index]
+                                                            .imageUrl.url
+                                                            .toString(),
+                                                        fit: BoxFit.cover,
+                                                        width: MediaQuery.of(context)
+                                                            .size
+                                                            .width,
+                                                        height: MediaQuery.of(context)
+                                                                .size
+                                                                .height /
+                                                            2,
+                                                      )
+                                                    : const SizedBox.shrink(),
+                                          ),
+                                          Align(
+                                            alignment: Alignment.bottomCenter,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                                              height:MediaQuery.of(context).size.height/2,
+                                              decoration: const BoxDecoration(
+                                                color: Colors.white,
+                                                  borderRadius: BorderRadius.only(topLeft: Radius.circular(30),topRight: Radius.circular(30))
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    state.getAllHomeScreenNews[index]
+                                                        .title ?? "No Title",
+                                                    style:  fontStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                  height(height: 10),
+                                                  Text(
+                                                    state.pageType ?? "No Title",
+                                                    style:  fontStyle(
+                                                      fontSize: 18,
+                                                      fontWeight: FontWeight.bold,
+                                                      color: Colors.black,
+                                                    ),
+                                                  ),
+                                                  height(height: 16),
+                                                  Text(
+                                                    state.getAllHomeScreenNews[index]
+                                                        .content,
+                                                    style: fontStyle(
+                                                      fontSize: 16,
+                                                      color: Colors.grey[800],
+                                                    ),
+                                                  ),
+                                                  const Spacer(),
+                                                  Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                    children: [
+                                                      BottomActions(icon: Icons.refresh, label: 'రిలోడ్',onTap: (){},), // Reload
+                                                       BottomActions(icon: Icons.thumb_up, label: 'లైక్',onTap: (){},),  // Like
+                                                       BottomActions(icon: Icons.comment, label: 'కామెంట్',onTap: (){},), // Comment
+                                                       BottomActions(icon: Icons.share, label: 'షేర్',onTap: (){},),      // Share
+                                                    ],
+                                                  ),
+                                                  height(height: 15)
+                                                ],
+                                              ),
                                             ),
                                           ),
-                                          height(height: 16),
-                                          Text(
-                                            state.getAllHomeScreenNews[index]
-                                                .content,
-                                            style: TextStyle(
-                                              fontSize: 18,
-                                              color: Colors.grey[800],
-                                            ),
-                                          ),
-                                          const Spacer(),
-                                          Row(
-                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                            children: [
-                                              BottomActions(icon: Icons.refresh, label: 'రిలోడ్',onTap: (){},), // Reload
-                                               BottomActions(icon: Icons.thumb_up, label: 'లైక్',onTap: (){},),  // Like
-                                               BottomActions(icon: Icons.comment, label: 'కామెంట్',onTap: (){},), // Comment
-                                               BottomActions(icon: Icons.share, label: 'షేర్',onTap: (){},),      // Share
-                                            ],
-                                          ),
-                                          height(height: 15)
                                         ],
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                        ),
+                  ): Container(
+                    color: Colors.grey,
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.height,
+                    child: const Center(
+                      child: Text(
+                        "Something went wrong. Please try again.",
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ),
             );
-          } else {
-            return Container(
-              color: Colors.grey,
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              child: const Center(
-                child: Text(
-                  "Something went wrong. Please try again.",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+              }
+          ),
+
+          Positioned(
+            top: 20,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 150,
+              child: AnimatedOpacity(
+                duration: const Duration(milliseconds: 500), // Animation duration
+                opacity: _areRowsVisible ? 1.0 : 0.0, // Opacity based on state
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      color: Colors.black.withOpacity(0.7),
+                      child: const Text(
+                        'Top Row Content',
+                        style: TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            );
-          }
-        },
+            ),
+          ),
+          Positioned(
+            bottom: 20,
+            left: 0,
+            right: 0,
+            child: AnimatedOpacity(
+              duration: Duration(milliseconds: 500), // Animation duration
+              opacity: _areRowsVisible ? 1.0 : 0.0, // Opacity based on state
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(10),
+                    color: Colors.black.withOpacity(0.7),
+                    child: const Text(
+                      'Bottom Row Content',
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
