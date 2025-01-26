@@ -1,6 +1,5 @@
 import 'dart:developer';
 
-import 'package:appinio_swiper/enums.dart';
 import 'package:chotanews/screens/home_screen/home_event.dart';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:chotanews/screens/home_screen/home_screen_model.dart';
@@ -20,7 +19,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       final Map<String, dynamic> queryParams = {
         'userid': "1",
         'postid': "0",
-        'lpostid': "0",
+        'lpostid': "1",
         'includeHomePage': "1",
         'hasAds': true,
         'isByNotification': false,
@@ -37,7 +36,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
               (e) => HomeScreenModel.fromJson(e),
             )
             .toList();
-        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: ""));
+        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: "",firstIndex: 1));
       } on DioException catch (e, st) {
         emit(ErrorHomeScreenState(getHomeScreenError: ""));
         log("Get News Api catch error ${st.toString()}");
@@ -58,7 +57,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
               (e) => HomeScreenModel.fromJson(e),
         )
             .toList();
-        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType));
+        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex:firstIndex ));
       } on DioException catch (e, st) {
         emit(ErrorHomeScreenState(getHomeScreenError: ""));
         log("Get News Api catch error ${st.toString()}");
@@ -71,51 +70,43 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     });
 
     on<OnSwipeCard>((event, emit) async{
-      switch (event.activity) {
-        case Swipe():
-          pageType = getAllPosts[event.targetIndex!].type.toString();
-          emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType));
+      pageType = getAllPosts[event.currentIndex].type.toString();
+      firstIndex = event.currentIndex;
 
-          if(event.targetIndex! == getAllPosts.length){
-            emit(LoadingHomeScreenState());
+      log("page index update in each swipe");
+      emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex));
 
-            final Map<String, dynamic> queryParams = {
-              'userid': "1",
-              'postid': getAllPosts.last.id.toString(),
-              'lpostid': "0",
-              'includeHomePage': "1",
-              'hasAds': true,
-              'isByNotification': false,
-              'deviceid': '993f0e149b5bed89',
-              'platform': 'ios',
-              'homefeed': "1",
-              'locationIds': 'undefined',
-            };
-            log(getAllPosts.last.id.toString());
-            log(queryParams.toString());
-            Response response = await HomeRepo().getAllNewsFeeds(queryParams);
-            List data = response.data['posts'];
-            getAllPosts = data
-                .map(
-                  (e) => HomeScreenModel.fromJson(e),
-            )
-                .toList();
-            emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType));
-          }
-          break;
-        case Unswipe():
-          log('A ${event.activity?.direction.name} swipe was undone.');
-          log('previous index: ${event.previousIndex}, target index: ${event.targetIndex}');
-          break;
-        case CancelSwipe():
-          log('A swipe was cancelled');
-          break;
-        case DrivenActivity():
-          log('Driven Activity');
-          break;
-        case null:
-          // TODO: Handle this case.
-          throw UnimplementedError();
+      if(getAllPosts.length-1==firstIndex){
+        emit(LoadingHomeScreenState());
+        log("page index update in lase ");
+
+        int last = getAllPosts.length-1;
+        final Map<String, dynamic> queryParams = {
+          'userid': "1",
+          'postid': 3523151,
+          'lpostid': "0",
+          'includeHomePage': "1",
+          'hasAds': false,
+          'isByNotification': false,
+          'deviceid': '993f0e149b5bed89',
+          'platform': 'ios',
+          'homefeed': "0",
+          'locationIds': '21,27',
+        };
+        log(getAllPosts.last.id.toString());
+
+        log(queryParams.toString());
+        Response response = await HomeRepo().getAllNewsFeeds(queryParams);
+        List data = response.data['posts'];
+        log(data.toString());
+        getAllPosts = data
+            .map(
+              (e) => HomeScreenModel.fromJson(e),
+        )
+            .toList();
+
+
+        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex));
       }
     });
 

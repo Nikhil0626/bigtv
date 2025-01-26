@@ -28,12 +28,8 @@ abstract class RoutesManager {
       case login:
         return MaterialPageRoute(builder: (context) => const LoginScreen(),);
       case homeScreen:
-
         return MaterialPageRoute(builder: (context) => const HomeScreenView(),);
 
-
-
-        return MaterialPageRoute(builder: (context) =>  NewsScreen());
       case onboardingScreen:
         return MaterialPageRoute(builder: (context) => OnboardingScreen());
       case districtselectionScreen:

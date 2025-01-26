@@ -1,15 +1,14 @@
-import 'package:appinio_swiper/appinio_swiper.dart';
+import 'package:chotanews/screens/home_screen/botton_actions.dart';
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
-import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../testing_screen/test_bloc.dart';
-import '../testing_screen/test_event.dart';
-import '../testing_screen/test_state.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import '../videos_main/video_views/video_preview.dart';
 import 'home_event.dart';
+import 'images_view.dart';
 
 class HomeScreenView extends StatefulWidget {
   const HomeScreenView({super.key});
@@ -19,9 +18,16 @@ class HomeScreenView extends StatefulWidget {
 }
 
 class _HomeScreenViewState extends State<HomeScreenView> {
-  final AppinioSwiperController controller = AppinioSwiperController();
+  // final AppinioSwiperController controller = AppinioSwiperController();
+  final CardSwiperController controller = CardSwiperController();
   int indexUP = 0;
+  int _selectedIndex = 0;
 
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
   @override
   void initState() {
     context.read<HomeBloc>().add(GetAllNewsFeed());
@@ -31,6 +37,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
       backgroundColor: Colors.white,
       body: BlocBuilder<HomeBloc, HomeScreenState>(
         builder: (context, state) {
@@ -44,84 +51,129 @@ class _HomeScreenViewState extends State<HomeScreenView> {
               ),
             );
           } else if (state is SuccessHomeScreenState) {
-            return AppinioSwiper(
-              invertAngleOnBottomDrag: false,
-              swipeOptions: SwipeOptions.symmetric(
-                  horizontal: false,
-                  vertical:  true),
+            return CardSwiper(
               controller: controller,
-              onCardPositionChanged: (SwiperPosition position) {},
-              onSwipeEnd: (
-                previousIndex,
-                targetIndex,
-                activity,
-              ) {
+              cardsCount: state.getAllHomeScreenNews.length,
+              onSwipe: (previousIndex, currentIndex, direction) {
                 context.read<HomeBloc>().add(OnSwipeCard(
                     previousIndex: previousIndex,
-                    targetIndex: targetIndex,
-                    activity: activity,
-                    totalPosts: state.getAllHomeScreenNews.length));
+                    currentIndex: currentIndex!,
+                    direction: direction));
+                return true;
               },
-              // onEnd:  () => context.read<HomeBloc>().add(OnSwipeEndCard( data: state.getAllHomeScreenNews.last,)),
-              allowUnSwipe: false,
-              loop: false,
-              cardCount: state.getAllHomeScreenNews.length,
-              cardBuilder: (context, index) {
-                return state.pageType == "Gallery"
-                    ? Container(
-                        height:300,
-                        width: double.infinity,
-                        color: AppColors.appButtonColor,
-                      )
-                    : Container(
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            state.getAllHomeScreenNews[index].imageUrl?.url
-                                        .toString() !=
-                                    null
-                                ? Image.network(
-                                    state.getAllHomeScreenNews[index].imageUrl!
-                                        .url
-                                        .toString(),
-                                    fit: BoxFit.cover,
-                                    width: MediaQuery.of(context).size.width,
-                                    height:
-                                        MediaQuery.of(context).size.height / 2,
-                                  )
-                                : const SizedBox.shrink(),
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+              onUndo: _onUndo,
+              numberOfCardsDisplayed: 2,
+              maxAngle: 0,
+              threshold: 1,
+              isLoop: false,
+              allowedSwipeDirection:
+                  const AllowedSwipeDirection.symmetric(vertical: true),
+              padding: const EdgeInsets.all(0),
+              cardBuilder: (
+                context,
+                index,
+                horizontalThresholdPercentage,
+                verticalThresholdPercentage,
+              ) =>
+                  state.pageType == "Image"
+                      ? ClipRRect(
+                          child: Image.network(
+                            state.getAllHomeScreenNews[index].imageUrl.url
+                                .toString(),
+                            fit: BoxFit.fill,
+                            width: double.infinity,
+                            height: double.infinity,
+                          ),
+                        )
+                      : state.pageType == "Gallery"
+                          ? CarouselScreen(
+                              imageList:
+                                  state.getAllHomeScreenNews[index].gallery ??
+                                      [],
+                            )
+                          : Container(
+                              decoration:  BoxDecoration(
+                                color: state.pageType == "Video"?Colors.black:Colors.white,
+                              ),
+                              child: Stack(
+                                // crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    state.pageType ?? "No Title",
-                                    style: const TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
+                                  SizedBox(
+                                    height:state.pageType == "Video"?MediaQuery.of(context).size.height/1.8: MediaQuery.of(context).size.height/1.3,
+                                    child: state.pageType == "Video"
+                                        ? NewsScreen(
+                                            url: state.getAllHomeScreenNews[index]
+                                                .videoUrl!.url
+                                                .toString(),
+                                          )
+                                        : state.getAllHomeScreenNews[index]
+                                                    .imageUrl.url
+                                                    .toString() !=
+                                                null
+                                            ? Image.network(
+                                                state.getAllHomeScreenNews[index]
+                                                    .imageUrl.url
+                                                    .toString(),
+                                                fit: BoxFit.cover,
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height /
+                                                    2,
+                                              )
+                                            : const SizedBox.shrink(),
                                   ),
-                                  height(height: 16),
-                                  Text(
-                                    state.getAllHomeScreenNews[index].content ??
-                                        "No Description",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.grey[800],
+                                  Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                                      height:state.pageType == "Video"? MediaQuery.of(context).size.height/2.2: MediaQuery.of(context).size.height/1.8,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                          borderRadius: BorderRadius.only(topLeft: Radius.circular(30),topRight: Radius.circular(30))
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            state.getAllHomeScreenNews[index]
+                                                .title ?? "No Title",
+                                            style: const TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          height(height: 16),
+                                          Text(
+                                            state.getAllHomeScreenNews[index]
+                                                .content,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.grey[800],
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                            children: [
+                                              BottomActions(icon: Icons.refresh, label: 'రిలోడ్',onTap: (){},), // Reload
+                                               BottomActions(icon: Icons.thumb_up, label: 'లైక్',onTap: (){},),  // Like
+                                               BottomActions(icon: Icons.comment, label: 'కామెంట్',onTap: (){},), // Comment
+                                               BottomActions(icon: Icons.share, label: 'షేర్',onTap: (){},),      // Share
+                                            ],
+                                          ),
+                                          height(height: 15)
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
                             ),
-                          ],
-                        ),
-                      );
-              },
             );
           } else {
             return Container(
@@ -140,4 +192,18 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       ),
     );
   }
+
+  bool _onUndo(
+    int? previousIndex,
+    int currentIndex,
+    CardSwiperDirection direction,
+  ) {
+    debugPrint(
+      'The card $currentIndex was undod from the ${direction.name}',
+    );
+    return true;
+  }
 }
+
+
+

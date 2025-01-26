@@ -1,20 +1,43 @@
-import 'dart:developer';
 
+import 'package:chotanews/screens/Auth_module/auth_screen.dart';
+import 'package:chotanews/screens/testing_screen/test3.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io' show Platform;
 
-import 'districts_selection/districts_selection_screen.dart';
 import 'globel_keys/app_router.dart';
+import 'globel_keys/global_variables_data.dart';
 import 'globel_keys/globel_keys.dart';
-import 'onbording_screens/onboarding_screen.dart';
 
+
+Future<String?> getUniqueDeviceId() async {
+  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
+  if (Platform.isAndroid) {
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    return androidInfo.id; // Returns a unique ID for Android devices
+  } else if (Platform.isIOS) {
+    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+    return iosInfo.identifierForVendor; // Returns a unique ID for iOS devices
+  } else {
+    return null; // Handle other platforms or return a default value
+  }
+}
+void fetchDeviceId() async {
+  String? deviceId = await getUniqueDeviceId();
+  GlobalVariables().deviceId = deviceId; // Store in the global variable
+  print("Device ID: ${GlobalVariables().deviceId}");
+}
 void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const MyApp());
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  fetchDeviceId();
   // String? uniqueId = await DeviceIdentifier.deviceId..toString();
   //
   // if (Platform.isAndroid) {
@@ -92,7 +115,7 @@ class MyApp extends StatelessWidget {
             //     child: child!,
             //   );
             // },
-            home: DistrictsSelectionScreen(),
+            home: const LoginScreen(),
             debugShowCheckedModeBanner: false,
             // initialRoute: RoutesManager.onboardingScreen,
           );

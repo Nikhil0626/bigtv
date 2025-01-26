@@ -6,10 +6,14 @@ abstract class HomeScreenState{}
 
 class InitialHomeScreenState extends HomeScreenState{}
 class LoadingHomeScreenState extends HomeScreenState{}
+
+
+
 class SuccessHomeScreenState extends HomeScreenState{
   List<HomeScreenModel> getAllHomeScreenNews = [];
   final String pageType;
-  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType});
+  final int firstIndex;
+  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex});
 
 }
 class ErrorHomeScreenState extends HomeScreenState{

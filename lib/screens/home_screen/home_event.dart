@@ -1,4 +1,4 @@
-import 'package:appinio_swiper/enums.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 abstract class HomeScreenEvent {}
 
@@ -7,16 +7,14 @@ class GetAllNewsFeed extends HomeScreenEvent {}
 class GetFollowingNewsFeed extends HomeScreenEvent {}
 
 class OnSwipeCard extends HomeScreenEvent {
-  int? previousIndex;
-  int? targetIndex;
-  SwiperActivity? activity;
-  int? totalPosts;
+ final int previousIndex;
+  final  int currentIndex;
+  CardSwiperDirection direction;
 
   OnSwipeCard(
       {required this.previousIndex,
-      required this.targetIndex,
-      required this.activity,
-      required this.totalPosts});
+      required this.currentIndex,
+      required this.direction});
 }
 
 class OnSwipeEndCard extends HomeScreenEvent {
