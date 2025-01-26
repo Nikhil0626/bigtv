@@ -1,191 +1,209 @@
-import 'dart:developer';
-
+import 'package:chotanews/screens/home_screen/botton_actions.dart';
+import 'package:chotanews/screens/home_screen/home_bloc.dart';
+import 'package:chotanews/screens/home_screen/home_state.dart';
+import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import '../videos_main/video_views/video_preview.dart';
+import 'home_event.dart';
+import 'images_view.dart';
 
-import '../../utils/app_colors.dart';
-import '../../utils/app_fonts.dart';
-import '../../utils/app_spaces.dart';
+class HomeScreenView extends StatefulWidget {
+  const HomeScreenView({super.key});
 
-class HomeScreenView extends StatelessWidget {
-  final String tweetId;
-  final String tweetTitle;
-  final String tweetBody;
-  final String tweetImage;
-  final String pageType;
+  @override
+  State<HomeScreenView> createState() => _HomeScreenViewState();
+}
 
-  const HomeScreenView(
-      {super.key,
-      required this.tweetId,
-      required this.tweetTitle,
-      required this.tweetBody,
-      required this.pageType,
-      required this.tweetImage});
+class _HomeScreenViewState extends State<HomeScreenView> {
+  // final AppinioSwiperController controller = AppinioSwiperController();
+  final CardSwiperController controller = CardSwiperController();
+  int indexUP = 0;
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+  @override
+  void initState() {
+    context.read<HomeBloc>().add(GetAllNewsFeed());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    log(tweetImage);
-
-    String img = tweetImage.split(";").first.toString();
-    log(img);
     return Scaffold(
+
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: Stack(
-            children: [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  tweetImage == "" ||
-                          tweetImage == "No image" ||
-                          tweetImage == "null"
-                      ? Container(
-                          alignment: Alignment.center,
-                          width: double.infinity,
-                          height: 270,
-                          child: Image.asset(
-                            "assets/chota.png",
-                            width: double.infinity,
-                            height: 270,
+      body: BlocBuilder<HomeBloc, HomeScreenState>(
+        builder: (context, state) {
+          if (state is InitialHomeScreenState) {
+            return Container(
+              color: Colors.grey,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          } else if (state is SuccessHomeScreenState) {
+            return CardSwiper(
+              controller: controller,
+              cardsCount: state.getAllHomeScreenNews.length,
+              onSwipe: (previousIndex, currentIndex, direction) {
+                context.read<HomeBloc>().add(OnSwipeCard(
+                    previousIndex: previousIndex,
+                    currentIndex: currentIndex!,
+                    direction: direction));
+                return true;
+              },
+              onUndo: _onUndo,
+              numberOfCardsDisplayed: 2,
+              maxAngle: 0,
+              threshold: 1,
+              isLoop: false,
+              allowedSwipeDirection:
+                  const AllowedSwipeDirection.symmetric(vertical: true),
+              padding: const EdgeInsets.all(0),
+              cardBuilder: (
+                context,
+                index,
+                horizontalThresholdPercentage,
+                verticalThresholdPercentage,
+              ) =>
+                  state.pageType == "Image"
+                      ? ClipRRect(
+                          child: Image.network(
+                            state.getAllHomeScreenNews[index].imageUrl.url
+                                .toString(),
                             fit: BoxFit.fill,
+                            width: double.infinity,
+                            height: double.infinity,
                           ),
                         )
-                      : Image.network(
-                          width: double.infinity,
-                          height: 270,
-                          fit: BoxFit.fill,
-                          img,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Image.asset(
-                              "assets/chota.png",
-                              width: double.infinity,
-                              height: 270,
-                              fit: BoxFit.cover,
-                            );
-                          },
-                        ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0, vertical: 16),
-                    child: Text(
-                      tweetTitle,
-                      style: const TextStyle(
-                        color: AppColors.headerTextColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: Text(
-                        tweetBody,
-                        style: fontStyle(
-                          color: AppColors.bodyTextColor,
-                          fontWeight: FontWeight.normal,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ),
-                  height(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Center(
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {},
-                              child: Container(
-                                alignment: Alignment.center,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                    color: AppColors.wColor,
-                                    border: Border.all(
-                                        color: AppColors.appButtonColor,
-                                        width: 1),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20))),
-                                child: Text(
-                                  "Edit",
-                                  style: fontStyle(
-                                      fontSize: 14,
-                                      color: AppColors.appButtonColor,
-                                      fontWeight: FontWeight.bold),
-                                ),
+                      : state.pageType == "Gallery"
+                          ? CarouselScreen(
+                              imageList:
+                                  state.getAllHomeScreenNews[index].gallery ??
+                                      [],
+                            )
+                          : Container(
+                              decoration:  BoxDecoration(
+                                color: state.pageType == "Video"?Colors.black:Colors.white,
                               ),
-                            ),
-                          ),
-                          width(width: 16),
-                          Expanded(
-                            child: InkWell(
-                              onTap: () {},
-                              child: Container(
-                                height: 40,
-                                decoration: BoxDecoration(
-                                    color: AppColors.appButtonColor,
-                                    border: Border.all(
-                                        color: AppColors.appButtonColor,
-                                        width: 1),
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(20))),
-                                child: Center(
-                                  child: Text(
-                                    pageType == "schedule"
-                                        ? "Publish"
-                                        : "Schedule",
-                                    style: fontStyle(
-                                        fontSize: 14,
-                                        color: AppColors.wColor,
-                                        fontWeight: FontWeight.bold),
+                              child: Stack(
+                                // crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SizedBox(
+                                    height:state.pageType == "Video"?MediaQuery.of(context).size.height/1.8: MediaQuery.of(context).size.height/1.3,
+                                    child: state.pageType == "Video"
+                                        ? NewsScreen(
+                                            url: state.getAllHomeScreenNews[index]
+                                                .videoUrl!.url
+                                                .toString(),
+                                          )
+                                        : state.getAllHomeScreenNews[index]
+                                                    .imageUrl.url
+                                                    .toString() !=
+                                                null
+                                            ? Image.network(
+                                                state.getAllHomeScreenNews[index]
+                                                    .imageUrl.url
+                                                    .toString(),
+                                                fit: BoxFit.cover,
+                                                width: MediaQuery.of(context)
+                                                    .size
+                                                    .width,
+                                                height: MediaQuery.of(context)
+                                                        .size
+                                                        .height /
+                                                    2,
+                                              )
+                                            : const SizedBox.shrink(),
                                   ),
-                                ),
+                                  Align(
+                                    alignment: Alignment.bottomCenter,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                                      height:state.pageType == "Video"? MediaQuery.of(context).size.height/2.2: MediaQuery.of(context).size.height/1.8,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                          borderRadius: BorderRadius.only(topLeft: Radius.circular(30),topRight: Radius.circular(30))
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            state.getAllHomeScreenNews[index]
+                                                .title ?? "No Title",
+                                            style: const TextStyle(
+                                              fontSize: 24,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
+                                          ),
+                                          height(height: 16),
+                                          Text(
+                                            state.getAllHomeScreenNews[index]
+                                                .content,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              color: Colors.grey[800],
+                                            ),
+                                          ),
+                                          const Spacer(),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                            children: [
+                                              BottomActions(icon: Icons.refresh, label: 'రిలోడ్',onTap: (){},), // Reload
+                                               BottomActions(icon: Icons.thumb_up, label: 'లైక్',onTap: (){},),  // Like
+                                               BottomActions(icon: Icons.comment, label: 'కామెంట్',onTap: (){},), // Comment
+                                               BottomActions(icon: Icons.share, label: 'షేర్',onTap: (){},),      // Share
+                                            ],
+                                          ),
+                                          height(height: 15)
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  height(height: 10),
-                ],
-              ),
-              SizedBox(
-                height: 100,
-                width: 100,
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    child: Align(
-                      alignment: Alignment.topLeft,
-                      child: CircleAvatar(
-                        backgroundColor: AppColors.appButtonColor,
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 8.0),
-                          child: Icon(
-                            Icons.arrow_back_ios,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
+            );
+          } else {
+            return Container(
+              color: Colors.grey,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: const Center(
+                child: Text(
+                  "Something went wrong. Please try again.",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
-            ],
-          ),
-        ),
+            );
+          }
+        },
       ),
     );
   }
+
+  bool _onUndo(
+    int? previousIndex,
+    int currentIndex,
+    CardSwiperDirection direction,
+  ) {
+    debugPrint(
+      'The card $currentIndex was undod from the ${direction.name}',
+    );
+    return true;
+  }
 }
+
+
+

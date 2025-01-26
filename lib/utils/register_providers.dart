@@ -7,6 +7,9 @@ import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../screens/Auth_module/auth_bloc.dart';
+import '../screens/home_screen/home_bloc.dart';
+
 class RegisterProviders {
   static providers(BuildContext context) {
     return [
@@ -17,6 +20,12 @@ class RegisterProviders {
       ),
     BlocProvider<VideosBloc>(
         create: (BuildContext context) => VideosBloc(),
+      ),
+    BlocProvider<AuthBloc>(
+        create: (BuildContext context) => AuthBloc(),
+      ),
+    BlocProvider<HomeBloc>(
+        create: (BuildContext context) => HomeBloc(),
       ),
       BlocProvider<DistrictSelectionBloc>(
         create: (BuildContext context) => DistrictSelectionBloc(),

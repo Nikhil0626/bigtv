@@ -47,7 +47,13 @@ dependencies:
   device_info_plus: ^11.2.0
   flip_board: ^1.0.0
   appinio_swiper: ^2.1.1
+  google_sign_in: ^6.2.2
+  sign_in_with_apple: ^6.1.4
   carousel_slider: ^5.0.0
+  introduction_screen: ^3.1.14
+  flutter_card_swiper: ^7.0.2
+  firebase_auth: ^5.4.1
+  firebase_core: ^3.10.1
 
 dev_dependencies:
   flutter_test:
@@ -74,3 +80,5 @@ flutter:
 
   assets:
     - assets/
+    - assets/images/
+    - assets/icons/

@@ -214,7 +214,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                       child: Container(
                         height: 40,
                         width: MediaQuery.of(context).size.width,
-                        decoration: ,
+                        // decoration: ,
                       ),
                     )
                   ],
