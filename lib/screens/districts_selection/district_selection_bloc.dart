@@ -1,17 +1,17 @@
 import 'dart:developer';
 
-import 'package:chotanews/districts_selection/district_selection_event.dart';
-import 'package:chotanews/districts_selection/district_selection_repo.dart';
-import 'package:chotanews/districts_selection/district_selection_state.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'district_selection_event.dart';
 import 'district_selection_model.dart';
+import 'district_selection_repo.dart';
+import 'district_selection_state.dart';
 
 class DistrictSelectionBloc
     extends Bloc<DistrictSelectionEvent, DistrictSelectionState> {
   DistrictSelectionBloc() : super(InitialDistrictsState()) {
-    List<DistrictModel> getAllDistrictsModelList = [];
+    List<DistrictModel> districtList = [];
     List<DistrictModel> filterDistrictsList = [];
     List<int> selectedDistrictList = [];
 
@@ -22,14 +22,14 @@ class DistrictSelectionBloc
         selectedDistrictList.remove(event.selectedDistrict);
 
         emit(SuccessDistrictsState(
-            districtList: getAllDistrictsModelList,
+            districtList: districtList,
             selectedDistrictList: selectedDistrictList, filterDistrictsList: filterDistrictsList));
       } else {
         log("add ${event.selectedDistrict.toString()}");
 
         selectedDistrictList.add(event.selectedDistrict);
         emit(SuccessDistrictsState(
-            districtList: getAllDistrictsModelList,
+            districtList: districtList,
             selectedDistrictList: selectedDistrictList, filterDistrictsList: filterDistrictsList));
       }
     });
@@ -40,14 +40,15 @@ class DistrictSelectionBloc
         Response response = await DistrictSelectionRepo().getAllDistricts();
         log(response.data.toString());
         List getData = response.data;
-        getAllDistrictsModelList = getData
+
+        districtList = getData
             .map(
               (e) => DistrictModel.fromJson(e),
             )
             .toList();
-        filterDistrictsList =getAllDistrictsModelList;
+        filterDistrictsList =districtList;
         emit(SuccessDistrictsState(
-            districtList: getAllDistrictsModelList, selectedDistrictList: [], filterDistrictsList: filterDistrictsList));
+            districtList: districtList, selectedDistrictList: [], filterDistrictsList: filterDistrictsList));
       } catch (e, st) {
         emit(ErrorDistrictsState(message: 'No Districts Available'));
       }
@@ -55,11 +56,31 @@ class DistrictSelectionBloc
 
     on<SearchDistricts>((event, emit) async {
       log(event.searchName);
-      filterDistrictsList = getAllDistrictsModelList.where((user) {
+      filterDistrictsList = districtList.where((user) {
         final query = event.searchName.toLowerCase();
         return user.value.toLowerCase().contains(query);
       }).toList();
       emit(SuccessDistrictsState(
-          districtList: getAllDistrictsModelList, selectedDistrictList: selectedDistrictList, filterDistrictsList: filterDistrictsList));});
+          districtList: districtList, selectedDistrictList: selectedDistrictList, filterDistrictsList: filterDistrictsList));});
+
+
+    on<SubmitDistricts>((event, emit) async {
+      emit(SubmitLoadingState());
+
+      String result = selectedDistrictList.join(', ');
+      log(result);
+      var body={
+        "deviceId":"2f6a5caebb387fee",
+        "isFollowed":"true",
+        "locationId":result,
+        "type":"bulk",
+      };
+      try {
+        Response response = await DistrictSelectionRepo().updateDistrictsList(body);
+        log(response.data.toString());
+        emit(SubmitSuccessState());
+      } catch (e, st) {
+      }
+    });
   }
 }

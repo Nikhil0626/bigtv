@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
+import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'dart:io' show Platform;
 
-import 'districts_selection/districts_selection_screen.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 import 'onbording_screens/onboarding_screen.dart';
@@ -92,7 +93,7 @@ class MyApp extends StatelessWidget {
             //     child: child!,
             //   );
             // },
-            home: DistrictsSelectionScreen(),
+            home: ChotaInfo(),
             debugShowCheckedModeBanner: false,
             // initialRoute: RoutesManager.onboardingScreen,
           );
