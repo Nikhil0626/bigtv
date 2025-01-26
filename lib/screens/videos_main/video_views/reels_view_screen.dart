@@ -1,10 +1,12 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 
 import '../videos_model/videos_model.dart';
 
 class ReelsViewScreen extends StatefulWidget {
-  final GetAllVideosModel getReelDetails;
+  final String getReelDetails;
 
   const ReelsViewScreen({super.key, required this.getReelDetails});
 
@@ -18,9 +20,10 @@ class _ReelsViewScreenState extends State<ReelsViewScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.getReelDetails.videoUrl?.url != null) {
+    if (widget.getReelDetails != null) {
+      log(widget.getReelDetails);
       _controller = VideoPlayerController.network(
-          widget.getReelDetails.videoUrl!.url.toString())
+          widget.getReelDetails.toString())
         ..initialize().then((_) {
           setState(() {});
         })
@@ -139,16 +142,16 @@ class _ReelsViewScreenState extends State<ReelsViewScreen> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Text(
-              widget.getReelDetails.title ?? "No Title",
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.all(10.0),
+          //   child: Text(
+          //     widget.getReelDetails.title ?? "No Title",
+          //     style: const TextStyle(
+          //       fontSize: 15,
+          //       fontWeight: FontWeight.w500,
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );

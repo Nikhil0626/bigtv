@@ -4,6 +4,8 @@ import 'package:chotanews/screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
 import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
+import 'package:chotanews/screens/Auth_module/auth_screen.dart';
+import 'package:chotanews/screens/home_screen/home_screen_view.dart';
 import 'package:chotanews/screens/testing_screen/test2.dart';
 import 'package:flutter/material.dart';
 
@@ -34,7 +36,12 @@ abstract class RoutesManager {
   static Route<dynamic>? generateRoute(RouteSettings setting) {
     switch (setting.name) {
       case splashScreen:
-        return MaterialPageRoute(builder: (context) =>  NewsScreen());
+        return MaterialPageRoute(builder: (context) =>  HomeScreenView());
+      case login:
+        return MaterialPageRoute(builder: (context) => const LoginScreen(),);
+      case homeScreen:
+        return MaterialPageRoute(builder: (context) => const HomeScreenView(),);
+
       case onboardingScreen:
         return MaterialPageRoute(builder: (context) => OnboardingScreen());
       case districtSelectionScreen:
@@ -66,7 +73,7 @@ abstract class RoutesManager {
 
       default:
         // return null;
-        return MaterialPageRoute(builder: (context) =>  NewsScreen());
+        return MaterialPageRoute(builder: (context) =>  HomeScreenView());
     }
   }
 }

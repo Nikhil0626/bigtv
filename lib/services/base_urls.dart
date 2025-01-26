@@ -12,6 +12,7 @@ static const String getAllDistricts = "/user/1/locations";
 static const String updateDistricts ="/upsert/location";
 
   static const String getAllVideos = "/menuposts";
+  static const String userInfo = "/userinfo";
 
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 

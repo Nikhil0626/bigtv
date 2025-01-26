@@ -6,12 +6,17 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class NewsScreen extends StatefulWidget {
+class NewsScreen1 extends StatefulWidget {
+  final String url;
+  const NewsScreen1({super.key,required this.url });
+
+
+
   @override
-  _NewsScreenState createState() => _NewsScreenState();
+  _NewsScreen1State createState() => _NewsScreen1State();
 }
 
-class _NewsScreenState extends State<NewsScreen> {
+class _NewsScreen1State extends State<NewsScreen1> {
   final AppinioSwiperController controller = AppinioSwiperController();
   int indexUP = 0;
 

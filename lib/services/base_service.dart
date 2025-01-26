@@ -92,7 +92,6 @@ class BaseService {
       },
       onResponse: (Response response, ResponseInterceptorHandler handler) {
         log('Response[${response.statusCode}] => PATH: ${response.requestOptions.uri}');
-        log('Data: ${response.data}');
         return handler.next(response); // Continue with the response
       },
       onError: (DioException e, ErrorInterceptorHandler handler) {

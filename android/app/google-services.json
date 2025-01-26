@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "454332164931",
+    "project_id": "chotanews-51054",
+    "storage_bucket": "chotanews-51054.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:454332164931:android:43f1fc969146995cbc1df6",
+        "android_client_info": {
+          "package_name": "com.chotanews"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "454332164931-le4gsvsqsovkm70ubs4d4ri05jeumoug.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chotanews",
+            "certificate_hash": "942c3c7c8dd0371a49dc1eecc913f345598ad5a4"
+          }
+        },
+        {
+          "client_id": "454332164931-pm48aqslqh8jj66ju9i03ve039os7kor.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.chotanews",
+            "certificate_hash": "1c2c411b526ef02d690579d87108d0319aef3a2b"
+          }
+        },
+        {
+          "client_id": "454332164931-24846e365crrabqopi1gfjqs0218lnnc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBwmg1tgwkFb79KOTU8QQSgNpbKM7NrqI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "454332164931-24846e365crrabqopi1gfjqs0218lnnc.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "454332164931-dtg9hd0455oo6ufjvs442siogrdso0ll.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.chotanewstelugu.app",
+                "app_store_id": "1631068092"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
