@@ -34,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
       body:  BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if(state is SuccessScreen){
-            Navigator.pushNamed(context, RoutesManager.districtselectionScreen);
+            Navigator.pushNamed(context, RoutesManager.districtSelectionScreen);
           }
         },
         builder: (context,state) {

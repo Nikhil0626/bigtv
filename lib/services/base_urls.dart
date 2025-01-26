@@ -9,6 +9,8 @@ class BaseUrls {
   static const String getNews = "/allposts";
 static const String getAllDistricts = "/user/1/locations";
 
+static const String updateDistricts ="/upsert/location";
+
   static const String getAllVideos = "/menuposts";
   static const String userInfo = "/userinfo";
 
