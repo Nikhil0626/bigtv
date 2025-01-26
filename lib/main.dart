@@ -2,7 +2,6 @@
 import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
 import 'package:chotanews/screens/Auth_module/auth_screen.dart';
-import 'package:chotanews/screens/testing_screen/test3.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -117,7 +116,6 @@ class MyApp extends StatelessWidget {
             //     child: child!,
             //   );
             // },
-            home: ChotaInfo(),
             home: const LoginScreen(),
             debugShowCheckedModeBanner: false,
             // initialRoute: RoutesManager.onboardingScreen,
