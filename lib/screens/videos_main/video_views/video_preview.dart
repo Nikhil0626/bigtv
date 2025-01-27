@@ -86,25 +86,26 @@
 
 
 
+import 'package:chotanews/screens/videos_main/videos_model/videos_model.dart';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
-class NewsScreen extends StatefulWidget {
+class VideoPreview extends StatefulWidget {
   final String url;
-  const NewsScreen({super.key,required this.url });
+  const VideoPreview({super.key,required this.url,  });
   @override
-  _NewsScreenState createState() => _NewsScreenState();
+  _VideoPreview createState() => _VideoPreview();
 }
 
-class _NewsScreenState extends State<NewsScreen> {
+class _VideoPreview extends State<VideoPreview> {
   late YoutubePlayerController controller;
 
   @override
   void initState() {
     super.initState();
     controller = YoutubePlayerController(
-      initialVideoId: widget.url, // Replace with your YouTube video ID
+      initialVideoId: widget.url,
       flags: YoutubePlayerFlags(
         autoPlay: false,
         mute: false,

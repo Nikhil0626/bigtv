@@ -54,12 +54,12 @@ class _VideosScreenState extends State<VideosScreen> {
                         child: InkWell(
                           onTap: () {
                             if (state.getAllVideoList[index].type.toString() == "Video") {
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //     builder: (context) => VideoPreview(videoPreviewData: state.getAllVideoList[index]),
-                              //   ),
-                              // );
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => VideoPreview(url: state.getAllVideoList[index].videoUrl.toString(), ),
+                                ),
+                              );
                             } else {
                               Navigator.push(
                                 context,
