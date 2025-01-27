@@ -27,8 +27,8 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         'includeHomePage': "1",
         // 'hasAds': true,
         // 'isByNotification': false,
-        'deviceid': "04424124087b259e",
-        'platform': "android",
+        'deviceid': deviceId,
+        'platform': platForm,
         // 'homefeed': "1",
         'locationIds': '64',
         // "debugMode": true
@@ -85,18 +85,19 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         emit(LoadingHomeScreenState());
         log("page index update in lase ");
         int last = getAllPosts.length-1;
+        String? lastPostId = getAllPosts[last].id.toString()??"";
         String  deviceId =  GlobalVariables().deviceId??"";
         String  platForm =  GlobalVariables().platForm??"";
         final Map<String, dynamic> queryParams = {
           'userid': "1",
-          'postid': last,
+          'postid': lastPostId,
           'lpostid': "0",
           'includeHomePage': "1",
-          'hasAds': false,
-          'isByNotification': false,
+          // 'hasAds': false,
+          // 'isByNotification': false,
           'deviceid': deviceId,
           'platform': platForm,
-          'homefeed': "1",
+          // 'homefeed': "1",
           'locationIds': '64',
         };
         log(getAllPosts.last.id.toString());

@@ -13,6 +13,7 @@ class FirstCardHomeFeeds extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return     Container(
+      padding: const EdgeInsets.all(4),
       color: Colors.white,
       height: MediaQuery.of(context).size.height,
       width: MediaQuery.of(context).size.width,
@@ -20,16 +21,19 @@ class FirstCardHomeFeeds extends StatelessWidget {
           children: [
             Expanded(
               flex: 2,
-                child: NewsCard(imageUrl:getHomeList![0].imageUrl!.url, title: getHomeList![0].title,)),
+                child: NewsCard(imageUrl:getHomeList![0].imageUrl!.url, title: getHomeList![0].title,isMainCard:true)),
+            const Divider(height: 4,color: Colors.white,),
             Expanded(
              flex: 1,
               child: Row(
                 children: [
-                  Expanded(child: NewsCard(imageUrl:getHomeList![1].imageUrl!.url, title: getHomeList![1].title,)),
-                  Expanded(child: NewsCard(imageUrl:getHomeList![2].imageUrl!.url, title: getHomeList![2].title,))
+                  Expanded(child: NewsCard(imageUrl:getHomeList![1].imageUrl!.url, title: getHomeList![1].title,isMainCard:false)),
+                  Container(color: Colors.white,width: 4,),
+                  Expanded(child: NewsCard(imageUrl:getHomeList![2].imageUrl!.url, title: getHomeList![2].title,isMainCard:false))
                 ],
               ),
-            )
+            ),
+            const Divider(height:4,color: Colors.white,),
           ],
         ),
     );
@@ -39,8 +43,9 @@ class FirstCardHomeFeeds extends StatelessWidget {
 class NewsCard extends StatelessWidget {
   final String imageUrl;
   final String title;
+  final bool isMainCard;
 
-  NewsCard({required this.imageUrl, required this.title});
+  NewsCard({required this.imageUrl, required this.title, required this.isMainCard});
 
   @override
   Widget build(BuildContext context) {
@@ -51,14 +56,9 @@ class NewsCard extends StatelessWidget {
             imageUrl: imageUrl,
             imageBuilder: (context, imageProvider) =>
                 Container(
-                  height: 30,
+                  height: MediaQuery.of(context).size.height,
                   width: MediaQuery.of(context).size.width,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                        width: 1,
-                        color: Colors.black),
-                    borderRadius: const BorderRadius.all(
-                        Radius.circular(15)),
                     image: DecorationImage(
                       image: imageProvider,
                       fit: BoxFit.cover,
@@ -66,8 +66,8 @@ class NewsCard extends StatelessWidget {
                   ),
                 ),
             errorWidget: (context, url, error) => Container(
-              height: 30,
-              width: 30,
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
               decoration: BoxDecoration(
                   borderRadius: const BorderRadius.all(
                       Radius.circular(32)),
@@ -87,18 +87,28 @@ class NewsCard extends StatelessWidget {
         ),
 
         Positioned(
-          bottom: 20,
+          bottom: 8,
           left: 0,
           right: 0,
-          child: Text(
-            title,
-            style:  fontStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.black
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: Container(
+              decoration:  BoxDecoration(
+                  color: Colors.white.withOpacity(.5),
+
+                  borderRadius: const BorderRadius.all(Radius.circular(8))),
+              padding: const EdgeInsets.symmetric(horizontal:14.0,vertical: 8),
+              child: Text(
+                title,
+                style:  fontStyle(
+                  fontSize: isMainCard?20:14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ),
 
