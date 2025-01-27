@@ -1,9 +1,12 @@
+import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:chotanews/screens/videos_main/video_views/devotional_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/gallery_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/myagazines_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/podcost_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/videos_view_screen.dart';
 import 'package:flutter/material.dart';
+
+import '../../globel_keys/app_router.dart';
 
 class TabScreen extends StatefulWidget {
   const TabScreen({super.key});
@@ -23,6 +26,7 @@ class _TabScreen extends State<TabScreen> with SingleTickerProviderStateMixin {
       setState(() {});
     });
   }
+
   @override
   void dispose() {
     tabController.dispose();
@@ -41,8 +45,8 @@ class _TabScreen extends State<TabScreen> with SingleTickerProviderStateMixin {
               "Chota",
               style: TextStyle(
                 color: Colors.black,
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
+                fontSize: 25,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(width: 8),
@@ -53,24 +57,34 @@ class _TabScreen extends State<TabScreen> with SingleTickerProviderStateMixin {
                 "News",
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
             ),
             const Spacer(),
-            const Icon(
-              Icons.circle_notifications_rounded,
-              color: Colors.grey,
-            ),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          TabBar(
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.settings,
+              size: 25,
+              color: Colors.grey,
+            ),
+            onPressed: () {
+              Navigator.pushNamed(context, RoutesManager.chotaInfo);
+
+            },
+          ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(50),
+          child: TabBar(
             controller: tabController,
+            isScrollable: true,
             indicatorColor: Colors.lightBlue,
+            labelColor: Colors.lightBlue,
             labelStyle: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w500,
@@ -80,26 +94,22 @@ class _TabScreen extends State<TabScreen> with SingleTickerProviderStateMixin {
               fontWeight: FontWeight.w500,
             ),
             tabs: const [
-              Tab(text: "Videos"),
-              Tab(text: "Gallery"),
-              Tab(
-                text: "Podcost",
-              ),
-              Tab(
-                text: "Myagazines",
-              ),
-              Tab(
-                text: "Devotional",
-              ),
+              Tab(text: "వీడియోలు"),
+              Tab(text: "గ్యాలరీ"),
+              Tab(text: "పాడ్‌కాస్ట్"),
+              Tab(text: "మ్యాగజైన్లు"),
+              Tab(text: "భక్తి"),
             ],
           ),
+        ),
+      ),
+      body: Column(
+        children: [
           Expanded(
             child: TabBarView(
               controller: tabController,
-              physics: const NeverScrollableScrollPhysics(),
               children: const [
                 VideosScreen(),
-                // ReelsScreen(),
                 GalleryScreen(),
                 PodcostScreen(),
                 MyagazinesScreen(),

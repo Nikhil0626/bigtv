@@ -120,7 +120,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                                                       2,
                                                   child: state.pageType ==
                                                           "Video"
-                                                      ? NewsScreen(
+                                                      ? VideoPreview(
                                                           url: state
                                                               .getAllHomeScreenNews[
                                                                   index]
