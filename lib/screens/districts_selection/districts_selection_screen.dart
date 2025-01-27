@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../../utils/app_colors.dart';
+import '../chota_info_screens/chota_info.dart';
 import 'district_selection_bloc.dart';
 import 'district_selection_event.dart';
 import 'district_selection_state.dart';
@@ -220,7 +221,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                 height: 40,
                                 width: MediaQuery.of(context).size.width,
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 12.0, horizontal: 20.0),
+                                    vertical: 10.0, horizontal: 20.0),
                                 decoration: BoxDecoration(
                                   color: Colors.lightBlue,
                                   borderRadius: BorderRadius.circular(8),
@@ -263,7 +264,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
               },
               listener: (context, state) {
                 if (state is SubmitSuccessState) {
-                  Navigator.pushNamed(context, RoutesManager.homeScreen);
+                  Navigator.pushNamed(context, RoutesManager.chotaInfo);
                 }
               },
             )
