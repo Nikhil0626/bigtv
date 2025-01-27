@@ -9,4 +9,5 @@ class GlobalVariables {
 
   String? deviceId;
   String? loginId;
+  String? platForm;
 }

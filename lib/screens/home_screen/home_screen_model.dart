@@ -37,7 +37,7 @@ class HomeScreenModel {
   final String? reportedBy;
   final int postOrder;
   final bool isStickyPost;
-  final String? homepage;
+  final List<Article>? homepage;
   final String? downloadUrl;
   final String? choices;
   final String? adPosition;
@@ -137,7 +137,10 @@ class HomeScreenModel {
       reportedBy: json['reportedBy'],
       postOrder: json['postOrder'] ?? 0,
       isStickyPost: json['isStickyPost'] ?? false,
-      homepage: json['homepage'],
+      homepage:json['homepage'] != null
+          ? (json['homepage'] as List)
+          .map((item) => Article.fromJson(item)).toList()
+          : null,
       downloadUrl: json['downloadUrl'],
       choices: json['choices'],
       adPosition: json['adPosition'],
@@ -145,6 +148,69 @@ class HomeScreenModel {
       linkURLIos: json['linkURLIos'] ?? '',
     );
   }
+}
+
+class Article {
+  final int id;
+  final String author;
+  final String title;
+  final String content;
+  final String type;
+  final List<String> links;
+  final String? reportedBy;
+  final List<String>? gallery;
+  final ImageUrl? imageUrl;
+  final String? videoUrl;
+  final int totalComments;
+  final int totalShares;
+  final DateTime created;
+  final int totalLikes;
+  final int totalViews;
+  final String? linkURLAndroid;
+  final String? linkURLIos;
+
+  Article({
+    required this.id,
+    required this.author,
+    required this.title,
+    required this.content,
+    required this.type,
+    required this.links,
+    this.reportedBy,
+    this.gallery,
+    required this.imageUrl,
+    this.videoUrl,
+    required this.totalComments,
+    required this.totalShares,
+    required this.created,
+    required this.totalLikes,
+    required this.totalViews,
+    this.linkURLAndroid,
+    this.linkURLIos,
+  });
+
+  factory Article.fromJson(Map<String, dynamic> json) {
+    return Article(
+      id: json['id'],
+      author: json['author'],
+      title: json['title'],
+      content: json['content'],
+      type: json['type'],
+      links: List<String>.from(json['links']),
+      reportedBy: json['reportedBy'],
+      gallery: json['gallery'] != null ? List<String>.from(json['gallery']) : null,
+      imageUrl: json['imageUrl'] != null ? ImageUrl.fromJson(json['imageUrl']) : null,
+      videoUrl: json['videoUrl'],
+      totalComments: json['totalComments'],
+      totalShares: json['totalShares'],
+      created: DateTime.parse(json['created']),
+      totalLikes: json['totalLikes'],
+      totalViews: json['totalViews'],
+      linkURLAndroid: json['linkURLAndroid'],
+      linkURLIos: json['linkURLIos'],
+    );
+  }
+
 }
 
 class GalleryImage {

@@ -131,6 +131,8 @@ class BaseService {
         case RequestType.get:
           final uri = Uri.parse(dio.options.baseUrl + url)
               .replace(queryParameters: queryParameters);
+          log("urlllllllllllll$queryParameters");
+          log("urlllllllllllll $uri");
           response = await dio.getUri(uri, cancelToken: token);
           break;
         case RequestType.put:
@@ -156,8 +158,9 @@ class BaseService {
     } on DioException catch (e) {
       log('Request failed: ${e.response?.statusCode} - ${e.message}');
       throw Exception('Failed to load data: ${e.response?.statusMessage}');
-    } catch (e) {
+    } catch (e,st) {
       log('Unexpected error: $e');
+      log('Unexpected error: $st');
       throw Exception('An unexpected error occurred');
     }
   }
