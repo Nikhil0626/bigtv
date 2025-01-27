@@ -1,3 +1,4 @@
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 
@@ -6,17 +7,27 @@ class BottomNavigationItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 70,
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.symmetric(horizontal: 18,),
-      child: const Row(
-        children: [
-          RowItem(text: "Home", icon: Icons.home),
-          RowItem(text: "Location", icon: Icons.location_on_sharp),
-          RowItem(text: "Menu", icon: Icons.menu),
-        ],
-      ),
+    return Column(
+      children: [
+        const Divider(
+          color: AppColors.borderColor,
+        ),
+        Container(
+          color: Colors.white,
+          height: 50,
+          width: MediaQuery.of(context).size.width,
+          padding: EdgeInsets.symmetric(horizontal: 18,),
+          child: const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              RowItem(text: "Home", icon: Icons.home),
+              RowItem(text: "Location", icon: Icons.location_on_sharp),
+              RowItem(text: "Menu", icon: Icons.menu),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

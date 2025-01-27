@@ -47,7 +47,7 @@ abstract class RoutesManager {
       case chotaInfo:
         return MaterialPageRoute(builder: (context) => const ChotaInfo());
       case aboutUs:
-        return MaterialPageRoute(builder: (context) => const AboutUs());
+        return MaterialPageRoute(builder: (context) =>  AboutUs());
       case contactUs:
         return MaterialPageRoute(builder: (context) => const ContactUs());
       case advertiseWithUs:
