@@ -3,8 +3,12 @@ import 'package:chotanews/screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
 import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
+import 'package:chotanews/screens/home_screen/home_screen_view.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
+
+import '../../globel_keys/app_router.dart';
+import '../videos_main/tab_screen.dart';
 
 class ChotaInfo extends StatelessWidget {
   const ChotaInfo({super.key});
@@ -26,21 +30,30 @@ class HomePage extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
+          leading: InkWell(
+            onTap: () {
+              // Navigator.pushNamed(context, RoutesManager.homeScreen);
+              // print("fgcfcvcv");
+            },
+            child:  Icon(Icons.arrow_back, color: Colors.white),
+          ),
           backgroundColor: Colors.lightBlue,
           centerTitle: true,
           title: Text(
             "Chota News Info",
             style: fontStyle(
-                fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
+              fontSize: 20,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
           ),
         ),
         body: ListView(
           children: [
             const SizedBox(height: 70),
+            // About Us Card
             Card(
-              margin: const EdgeInsets.symmetric(
-                horizontal: 10,
-              ),
+              margin: const EdgeInsets.symmetric(horizontal: 20),
               child: ListTile(
                 leading: const Card(
                   color: Colors.purple,
@@ -60,46 +73,52 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AboutUs()),
+                    MaterialPageRoute(builder: (context) =>  AboutUs()),
                   );
                 },
               ),
             ),
             const SizedBox(height: 20),
+            // Contact Us Card
             Card(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 20),
               child: ListTile(
                 leading: const Card(
-                    color: Colors.blue,
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Icon(Icons.phone_outlined, color: Colors.white),
-                    )),
-                title: const Text('Contact Us',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  color: Colors.blue,
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(Icons.phone_outlined, color: Colors.white),
+                  ),
+                ),
+                title: const Text(
+                  'Contact Us',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
                 trailing: const Icon(Icons.arrow_forward_ios, size: 20),
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ContactUs()),
+                    MaterialPageRoute(builder: (context) => const ContactUs()),
                   );
                 },
               ),
             ),
             const SizedBox(height: 20),
+            // Advertise With Us Card
             Card(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 20),
               child: ListTile(
                 leading: const Card(
-                    color: Colors.orange,
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Icon(Icons.tv_outlined, color: Colors.white),
-                    )),
-                title: const Text('Advertise With Us',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  color: Colors.orange,
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(Icons.tv_outlined, color: Colors.white),
+                  ),
+                ),
+                title: const Text(
+                  'Advertise With Us',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
                 trailing: const Icon(
                   Icons.arrow_forward_ios,
                   size: 20,
@@ -107,24 +126,28 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AdvertiseWithUs()),
+                    MaterialPageRoute(
+                        builder: (context) => const AdvertiseWithUs()),
                   );
                 },
               ),
             ),
             const SizedBox(height: 20),
+            // Terms & Conditions Card
             Card(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 20),
               child: ListTile(
                 leading: const Card(
-                    color: Colors.deepOrangeAccent,
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Icon(Icons.article_outlined, color: Colors.white),
-                    )),
-                title: const Text('Terms & Conditions',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  color: Colors.deepOrangeAccent,
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(Icons.article_outlined, color: Colors.white),
+                  ),
+                ),
+                title: const Text(
+                  'Terms & Conditions',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
                 trailing: const Icon(
                   Icons.arrow_forward_ios,
                   size: 20,
@@ -132,27 +155,31 @@ class HomePage extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => TermsConditions()),
+                    MaterialPageRoute(
+                        builder: (context) => const TermsConditions()),
                   );
                 },
               ),
             ),
             const SizedBox(height: 20),
+            // Privacy Policy Card
             Card(
-              margin: const EdgeInsets.symmetric(horizontal: 10),
+              margin: const EdgeInsets.symmetric(horizontal: 20),
               child: ListTile(
                 leading: const Card(
-                    color: Colors.lightGreen,
-                    child: Padding(
-                      padding: EdgeInsets.all(8.0),
-                      child: Icon(
-                        Icons.lock_clock_outlined,
-                        color: Colors.white,
-                      ),
-                    )),
-                title: const Text('Privacy Policy',
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                  color: Colors.lightGreen,
+                  child: Padding(
+                    padding: EdgeInsets.all(8.0),
+                    child: Icon(
+                      Icons.lock_clock_outlined,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                title: const Text(
+                  'Privacy Policy',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                ),
                 trailing: const Icon(
                   Icons.arrow_forward_ios,
                   size: 20,

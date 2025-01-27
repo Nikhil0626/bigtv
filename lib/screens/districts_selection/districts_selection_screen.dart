@@ -1,4 +1,5 @@
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../globel_keys/app_router.dart';
 import '../../utils/app_colors.dart';
 import '../chota_info_screens/chota_info.dart';
+import '../home_screen/home_screen_view.dart';
 import 'district_selection_bloc.dart';
 import 'district_selection_event.dart';
 import 'district_selection_state.dart';
@@ -130,143 +132,145 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                 ),
               ),
             ),
-            BlocConsumer<DistrictSelectionBloc, DistrictSelectionState>(
-              builder: (context, state) {
-                if (state is LoadingDistrictsState ||
-                    state is SubmitLoadingState) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (state is SuccessDistrictsState) {
-                  return Expanded(
-                    child: Stack(
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(
-                              bottom: 55,
-                            ),
-                            child: ListView.builder(
-                              itemCount: state.filterDistrictsList.length,
-                              itemBuilder: (context, index) {
-                                final district =
-                                    state.filterDistrictsList[index];
+            Expanded(
+              child: BlocConsumer<DistrictSelectionBloc, DistrictSelectionState>(
+                builder: (context, state) {
+                  if (state is LoadingDistrictsState ||
+                      state is SubmitLoadingState) {
+                    return const Center(child: AppLoadingScreen());
+                  } else if (state is SuccessDistrictsState) {
+                    return Expanded(
+                      child: Stack(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 55,
+                              ),
+                              child: ListView.builder(
+                                itemCount: state.filterDistrictsList.length,
+                                itemBuilder: (context, index) {
+                                  final district =
+                                      state.filterDistrictsList[index];
 
-                                final isSelected = state.selectedDistrictList
-                                    .contains(district.id);
+                                  final isSelected = state.selectedDistrictList
+                                      .contains(district.id);
 
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8.0, horizontal: 20.0),
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      context.read<DistrictSelectionBloc>().add(
-                                            SelectedDistrictsUpdate(
-                                                selectedDistrict: district.id),
-                                          );
-                                    },
-                                    child: Container(
-                                      width: MediaQuery.of(context).size.width,
-                                      height: 40,
-                                      decoration: BoxDecoration(
-                                        color: Colors.white,
-                                        border: Border.all(
-                                          color: isSelected
-                                              ? AppColors.appButtonColor
-                                              : AppColors.borderColor,
-                                          width: 1,
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 8.0, horizontal: 20.0),
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        context.read<DistrictSelectionBloc>().add(
+                                              SelectedDistrictsUpdate(
+                                                  selectedDistrict: district.id),
+                                            );
+                                      },
+                                      child: Container(
+                                        width: MediaQuery.of(context).size.width,
+                                        height: 40,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          border: Border.all(
+                                            color: isSelected
+                                                ? AppColors.appButtonColor
+                                                : AppColors.borderColor,
+                                            width: 1,
+                                          ),
+                                          borderRadius: BorderRadius.circular(8),
                                         ),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 16.0),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text(
-                                              district.name,
-                                              style: const TextStyle(
-                                                fontSize: 18,
-                                                fontWeight: FontWeight.w400,
-                                                color: Colors.black,
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16.0),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                district.name,
+                                                style: const TextStyle(
+                                                  fontSize: 18,
+                                                  fontWeight: FontWeight.w400,
+                                                  color: Colors.black,
+                                                ),
                                               ),
-                                            ),
-                                            Icon(
-                                              isSelected
-                                                  ? Icons.check_circle
-                                                  : Icons.check_circle_outline,
-                                              color: Colors.lightBlue,
-                                            ),
-                                          ],
+                                              Icon(
+                                                isSelected
+                                                    ? Icons.check_circle
+                                                    : Icons.check_circle_outline,
+                                                color: Colors.lightBlue,
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(15.0),
-                          child: Align(
-                            alignment: Alignment.bottomCenter,
-                            child: InkWell(
-                              onTap: () {
-                                context
-                                    .read<DistrictSelectionBloc>()
-                                    .add(SubmitDistricts());
-                              },
-                              child: Container(
-                                height: 40,
-                                width: MediaQuery.of(context).size.width,
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 10.0, horizontal: 20.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.lightBlue,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text(
-                                  'Done',
-                                  style: TextStyle(
-                                    color: Colors.white, // White text
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
+                                  );
+                                },
                               ),
                             ),
                           ),
-                        )
-                      ],
-                    ),
-                  );
-                } else if (state is ErrorDistrictsState) {
-                  return const Center(
-                    child: Text(
-                      "Please try again later.",
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  );
-                } else {
-                  return const Center(
-                    child: Text(
-                      "No data available",
-                      style: TextStyle(
-                        color: Colors.lightBlue,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w400,
+                          Padding(
+                            padding: const EdgeInsets.all(15.0),
+                            child: Align(
+                              alignment: Alignment.bottomCenter,
+                              child: InkWell(
+                                onTap: () {
+                                  context
+                                      .read<DistrictSelectionBloc>()
+                                      .add(SubmitDistricts());
+                                },
+                                child: Container(
+                                  height: 40,
+                                  width: MediaQuery.of(context).size.width,
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 10.0, horizontal: 20.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.lightBlue,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    'Done',
+                                    style: TextStyle(
+                                      color: Colors.white, // White text
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
                       ),
-                    ),
-                  );
-                }
-              },
-              listener: (context, state) {
-                if (state is SubmitSuccessState) {
-                  Navigator.pushNamed(context, RoutesManager.chotaInfo);
-                }
-              },
+                    );
+                  } else if (state is ErrorDistrictsState) {
+                    return const Center(
+                      child: Text(
+                        "Please try again later.",
+                        style: TextStyle(color: Colors.red),
+                      ),
+                    );
+                  } else {
+                    return const Center(
+                      child: Text(
+                        "No data available",
+                        style: TextStyle(
+                          color: Colors.lightBlue,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    );
+                  }
+                },
+                listener: (context, state) {
+                  if (state is SubmitSuccessState) {
+                    Navigator.pushNamed(context, RoutesManager.homeScreen);
+                  }
+                },
+              ),
             )
           ],
         ),

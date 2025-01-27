@@ -2,6 +2,9 @@ import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/districts_selection/districts_selection_screen.dart';
+import '../screens/videos_main/tab_screen.dart';
+
 class BottomNavigationItems extends StatelessWidget {
   const BottomNavigationItems({super.key});
 
@@ -16,14 +19,37 @@ class BottomNavigationItems extends StatelessWidget {
           color: Colors.white,
           height: 50,
           width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.symmetric(horizontal: 18,),
-          child: const Row(
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              RowItem(text: "Home", icon: Icons.home),
-              RowItem(text: "Location", icon: Icons.location_on_sharp),
-              RowItem(text: "Menu", icon: Icons.menu),
+              RowItem(
+                text: "Home",
+                icon: Icons.home,
+                onTap: () {
+                },
+              ),
+              RowItem(
+                text: "Location",
+                icon: Icons.location_on_sharp,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DistrictsSelectionScreen()),
+                  );
+                },
+              ),
+              RowItem(
+                text: "Menu",
+                icon: Icons.menu,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const TabScreen()),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -33,18 +59,31 @@ class BottomNavigationItems extends StatelessWidget {
 }
 
 class RowItem extends StatelessWidget {
-  final  icon;
+  final IconData icon;
   final String text;
-  const RowItem({super.key,required this.text,required this.icon});
+  final VoidCallback onTap;
 
+  const RowItem({
+    super.key,
+    required this.text,
+    required this.icon,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Icon(icon,size: 24),
-        Text(text,style: fontStyle(),)
-      ],
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Icon(icon, size: 24),
+          Text(
+            text,
+            style: fontStyle(),
+          ),
+        ],
+      ),
     );
   }
 }
+
