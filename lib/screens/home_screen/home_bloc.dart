@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:chotanews/screens/home_screen/home_event.dart';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:chotanews/screens/home_screen/home_screen_model.dart';
@@ -12,21 +13,25 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     List<HomeScreenModel> getAllPosts = [];
     int firstIndex = 0;
      String pageType = "";
-    int lastIndex = 0;
 
     on<GetAllNewsFeed>((event, emit) async {
       emit(LoadingHomeScreenState());
+
+    String  deviceId =  GlobalVariables().deviceId??"";
+    String  platForm =  GlobalVariables().platForm??"";
+
       final Map<String, dynamic> queryParams = {
         'userid': "1",
         'postid': "0",
-        'lpostid': "1",
+        'lpostid': "0",
         'includeHomePage': "1",
-        'hasAds': true,
-        'isByNotification': false,
-        'deviceid': '993f0e149b5bed89',
-        'platform': 'ios',
-        'homefeed': "1",
-        'locationIds': 'undefined',
+        // 'hasAds': true,
+        // 'isByNotification': false,
+        'deviceid': deviceId,
+        'platform': platForm,
+        // 'homefeed': "1",
+        'locationIds': '64',
+        // "debugMode": true
       };
       try {
         Response response = await HomeRepo().getAllNewsFeeds(queryParams);
@@ -73,25 +78,27 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       pageType = getAllPosts[event.currentIndex].type.toString();
       firstIndex = event.currentIndex;
 
-      log("page index update in each swipe");
+      log("page index update in each swipe${getAllPosts[firstIndex].id}");
       emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex));
 
       if(getAllPosts.length-1==firstIndex){
         emit(LoadingHomeScreenState());
         log("page index update in lase ");
-
         int last = getAllPosts.length-1;
+        String? lastPostId = getAllPosts[last].id.toString()??"";
+        String  deviceId =  GlobalVariables().deviceId??"";
+        String  platForm =  GlobalVariables().platForm??"";
         final Map<String, dynamic> queryParams = {
           'userid': "1",
-          'postid': 3523151,
+          'postid': lastPostId,
           'lpostid': "0",
           'includeHomePage': "1",
-          'hasAds': false,
-          'isByNotification': false,
-          'deviceid': '993f0e149b5bed89',
-          'platform': 'ios',
-          'homefeed': "0",
-          'locationIds': '21,27',
+          // 'hasAds': false,
+          // 'isByNotification': false,
+          'deviceid': deviceId,
+          'platform': platForm,
+          // 'homefeed': "1",
+          'locationIds': '64',
         };
         log(getAllPosts.last.id.toString());
 

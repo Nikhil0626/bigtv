@@ -8,7 +8,7 @@ class HomeRepo extends BaseService{
   Future getAllNewsFeeds(queryParams) async{
 
 
-    Response response = await makeRequest(url: BaseUrls.getNews,method: RequestType.get);
+    Response response = await makeRequest(url: BaseUrls.getNews,method: RequestType.get,queryParameters: queryParams);
     return response;
   }
 }

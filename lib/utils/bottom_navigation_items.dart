@@ -1,5 +1,6 @@
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 
 import '../screens/districts_selection/districts_selection_screen.dart';
@@ -10,17 +11,17 @@ class BottomNavigationItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const Divider(
-          color: AppColors.borderColor,
-        ),
-        Container(
-          color: Colors.white,
-          height: 50,
-          width: MediaQuery.of(context).size.width,
-          padding: const EdgeInsets.symmetric(horizontal: 18),
-          child: Row(
+    return Container(
+      color: Colors.white,
+      height: 70,
+      width: MediaQuery.of(context).size.width,
+      child: Column(
+        children: [
+          const Divider(
+            color: AppColors.borderColor,
+          ),
+          height(height: 4),
+          Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
@@ -52,8 +53,8 @@ class BottomNavigationItems extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -79,7 +80,7 @@ class RowItem extends StatelessWidget {
           Icon(icon, size: 24),
           Text(
             text,
-            style: fontStyle(),
+            style: fontStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 14),
           ),
         ],
       ),

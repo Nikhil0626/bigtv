@@ -1,4 +1,6 @@
 
+import 'dart:developer';
+
 import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
 import 'package:chotanews/screens/Auth_module/auth_screen.dart';
@@ -20,9 +22,13 @@ Future<String?> getUniqueDeviceId() async {
 
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    GlobalVariables().platForm = androidInfo.brand;
+    log(androidInfo.toString());
     return androidInfo.id; // Returns a unique ID for Android devices
   } else if (Platform.isIOS) {
     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+    GlobalVariables().platForm = iosInfo.systemName;
+    log(iosInfo.systemName);
     return iosInfo.identifierForVendor; // Returns a unique ID for iOS devices
   } else {
     return null; // Handle other platforms or return a default value
