@@ -104,9 +104,10 @@ class MyApp extends StatelessWidget {
         builder: (_, child) {
           return MaterialApp(
             theme: ThemeData(
-              colorScheme:
-              ColorScheme.fromSeed(seedColor: Colors.orange.shade300),
-              useMaterial3: true,
+              // colorScheme:
+              // ColorScheme.fromSeed(seedColor: Colors.lightBlue.shade300),
+              // useMaterial3: true,
+
             ),
             scrollBehavior: MyBehavior(),
             navigatorKey: mainNavigatorKey,

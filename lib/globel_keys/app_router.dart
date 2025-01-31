@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import '../onbording_screens/onboarding_screen.dart';
 import '../screens/chota_info_screens/chota_info.dart';
 import '../screens/districts_selection/districts_selection_screen.dart';
+import '../screens/home_screen/home_top_tabs.dart';
+import '../screens/profile_screen/profile_screen.dart';
 import '../screens/splash_screen/splash_screen_view.dart';
 
 abstract class RoutesManager {
@@ -30,6 +32,7 @@ abstract class RoutesManager {
   static const advertiseWithUs = '/advertiseWithUs';
   static const termsConditions = '/termsConditions';
   static const privacyPolicy = '/privacyPolicy';
+  static const profileScreen = '/profileScreen';
 
   static Route<dynamic>? generateRoute(RouteSettings setting) {
     switch (setting.name) {
@@ -38,7 +41,7 @@ abstract class RoutesManager {
       case login:
         return MaterialPageRoute(builder: (context) => const LoginScreen(),);
       case homeScreen:
-        return MaterialPageRoute(builder: (context) => const HomeScreenView(),);
+        return MaterialPageRoute(builder: (context) => const HomeTopTabs(),);
 
       case onboardingScreen:
         return MaterialPageRoute(builder: (context) => const OnboardingScreen());
@@ -56,6 +59,8 @@ abstract class RoutesManager {
         return MaterialPageRoute(builder: (context) => const TermsConditions());
       case privacyPolicy:
         return MaterialPageRoute(builder: (context) => const PrivacyPolicy());
+      case profileScreen:
+        return MaterialPageRoute(builder: (context) =>  ProfileScreen());
 
 
 

@@ -13,7 +13,8 @@ class SuccessHomeScreenState extends HomeScreenState{
   List<HomeScreenModel> getAllHomeScreenNews = [];
   final String pageType;
   final int firstIndex;
-  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex});
+  bool isChange;
+  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex,required this.isChange});
 
 }
 class ErrorHomeScreenState extends HomeScreenState{
@@ -27,4 +28,8 @@ class ErrorHomeScreenState extends HomeScreenState{
  class OnSwipeForwardHomeState extends HomeScreenState{
 
 
+ }
+ class MenuChangeState extends HomeScreenState{
+   bool isChange;
+   MenuChangeState({required this.isChange});
  }

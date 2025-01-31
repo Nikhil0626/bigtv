@@ -12,7 +12,12 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
   HomeBloc() : super(InitialHomeScreenState()) {
     List<HomeScreenModel> getAllPosts = [];
     int firstIndex = 0;
+    bool isMenuChange = false;
      String pageType = "";
+     on<MenuChange>((event, emit) async {
+       isMenuChange=!isMenuChange;
+       emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: "",firstIndex: firstIndex,isChange: isMenuChange));
+     });
 
     on<GetAllNewsFeed>((event, emit) async {
       emit(LoadingHomeScreenState());
@@ -41,7 +46,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
               (e) => HomeScreenModel.fromJson(e),
             )
             .toList();
-        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: "",firstIndex: 1));
+        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: "",firstIndex: 1,isChange: isMenuChange));
       } on DioException catch (e, st) {
         emit(ErrorHomeScreenState(getHomeScreenError: ""));
         log("Get News Api catch error ${st.toString()}");
@@ -62,7 +67,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
               (e) => HomeScreenModel.fromJson(e),
         )
             .toList();
-        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex:firstIndex ));
+        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex:firstIndex,isChange: isMenuChange ));
       } on DioException catch (e, st) {
         emit(ErrorHomeScreenState(getHomeScreenError: ""));
         log("Get News Api catch error ${st.toString()}");
@@ -79,7 +84,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       firstIndex = event.currentIndex;
 
       log("page index update in each swipe${getAllPosts[firstIndex].id}");
-      emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex));
+      emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex,isChange: isMenuChange));
 
       if(getAllPosts.length-1==firstIndex){
         emit(LoadingHomeScreenState());
@@ -113,7 +118,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
             .toList();
 
 
-        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex));
+        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex,isChange: isMenuChange));
       }
     });
 

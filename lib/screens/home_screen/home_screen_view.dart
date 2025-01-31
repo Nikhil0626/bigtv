@@ -8,6 +8,7 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/bottom_navigation_items.dart';
 import '../videos_main/video_views/video_preview.dart';
@@ -24,7 +25,6 @@ class HomeScreenView extends StatefulWidget {
 
 class _HomeScreenViewState extends State<HomeScreenView> {
   final CardSwiperController controller = CardSwiperController();
-  bool _areRowsVisible = false; // State to toggle visibility
 
   @override
   void initState() {
@@ -45,7 +45,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                   return Container(
                     color: Colors.transparent,
                     // Avoid null or fully transparent color
-                    width: double.infinity,
+                    width: MediaQuery.of(context).size.width,
                     height: double.infinity,
                     child: state is LoadingHomeScreenState
                         ? Container(
@@ -83,264 +83,278 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                                   horizontalThresholdPercentage,
                                   verticalThresholdPercentage,
                                 ) {
-                                  return GestureDetector(
-                                    behavior: HitTestBehavior.translucent,
-                                    onTap: () {
-                                      setState(() {
-                                        _areRowsVisible = !_areRowsVisible;
-                                      });
-                                    },
-                                    child: state.pageType == "Image"
-                                        ? CachedNetworkImage(
-                                      imageUrl: state.getAllHomeScreenNews[index].imageUrl.url??"",
-                                      imageBuilder: (context, imageProvider) =>
-                                          Container(
-                                            height: MediaQuery.of(context).size.height,
-                                            width: MediaQuery.of(context).size.width,
+                                  return state.pageType == "Image"
+                                      ? CachedNetworkImage(
+                                          imageUrl: state
+                                                  .getAllHomeScreenNews[index]
+                                                  .imageUrl
+                                                  .url ??
+                                              "",
+                                          imageBuilder:
+                                              (context, imageProvider) =>
+                                                  Container(
+                                            height: MediaQuery.of(context)
+                                                .size
+                                                .height,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
                                             decoration: BoxDecoration(
                                               image: DecorationImage(
                                                 image: imageProvider,
-                                                fit: BoxFit.cover,
+                                                fit: BoxFit.fill,
                                               ),
                                             ),
                                           ),
-                                      errorWidget: (context, url, error) => Container(
-                                        height: MediaQuery.of(context).size.height,
-                                        width: MediaQuery.of(context).size.width,
-                                        decoration: BoxDecoration(
-                                            borderRadius: const BorderRadius.all(
-                                                Radius.circular(32)),
-                                            border: Border.all(
-                                                width: 1,
-                                                color:  Colors.black)),
-                                        child: Center(
-                                          child: Text(
-                                            "H",
-                                            style: fontStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.w500),
+                                          errorWidget:
+                                              (context, url, error) =>
+                                                  Container(
+                                            height: MediaQuery.of(context)
+                                                .size
+                                                .height,
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    const BorderRadius.all(
+                                                        Radius.circular(32)),
+                                                border: Border.all(
+                                                    width: 1,
+                                                    color: Colors.black)),
+                                            child: Center(
+                                              child: Text(
+                                                "H",
+                                                style: fontStyle(
+                                                    fontSize: 10,
+                                                    fontWeight:
+                                                        FontWeight.w500),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                    )
-                                        : state.pageType == "Gallery"
-                                            ? CarouselScreen(
-                                                imageList: state
-                                                        .getAllHomeScreenNews[
-                                                            index]
-                                                        .gallery ??
-                                                    [],
-                                              )
-                                            : state.getAllHomeScreenNews[index]
-                                                            .title ==
-                                                        "Home" ||
-                                                    state
-                                                            .getAllHomeScreenNews[
-                                                                index]
-                                                            .homepage !=
-                                                        null
-                                                ? FirstCardHomeFeeds(
-                                                    getHomeList: state
-                                                        .getAllHomeScreenNews[
-                                                            index]
-                                                        .homepage,
-                                                  )
-                                                : Container(
-                                                    decoration: BoxDecoration(
-                                                      color: state.pageType ==
-                                                              "Video"
-                                                          ? Colors.black
-                                                          : Colors.white,
-                                                    ),
-                                                    child: Stack(
-                                                      children: [
-                                                        SizedBox(
-                                                          height: MediaQuery.of(
-                                                                      context)
-                                                                  .size
-                                                                  .height /
-                                                              2,
-                                                          child: state.pageType ==
-                                                                  "Video"
-                                                              ? VideoPreview(
-                                                                  url: state
-                                                                      .getAllHomeScreenNews[
-                                                                          index]
-                                                                      .videoUrl!
-                                                                      .url
-                                                                      .toString(),
-                                                                )
-                                                              : state
-                                                                          .getAllHomeScreenNews[
-                                                                              index]
-                                                                          .imageUrl
-                                                                          .url
-                                                                          .toString() !=
-                                                                      null
-                                                                  ? CachedNetworkImage(
-                                                            imageUrl: state.getAllHomeScreenNews[index].imageUrl.url??"",
-                                                            imageBuilder: (context, imageProvider) =>
-                                                                Container(
-                                                                  height: MediaQuery.of(context).size.height,
-                                                                  width: MediaQuery.of(context).size.width,
-                                                                  decoration: BoxDecoration(
-                                                                    image: DecorationImage(
-                                                                      image: imageProvider,
-                                                                      fit: BoxFit.cover,
-                                                                    ),
+                                        )
+                                      : state.pageType == "Gallery"
+                                          ? CarouselScreen(
+                                              imageList: state
+                                                      .getAllHomeScreenNews[
+                                                          index]
+                                                      .gallery ??
+                                                  [],
+                                            )
+                                          : state.getAllHomeScreenNews[index]
+                                                          .title ==
+                                                      "Home" ||
+                                                  state
+                                                          .getAllHomeScreenNews[
+                                                              index]
+                                                          .homepage !=
+                                                      null
+                                              ? FirstCardHomeFeeds(
+                                                  getHomeList: state
+                                                      .getAllHomeScreenNews[
+                                                          index]
+                                                      .homepage,
+                                                )
+                                              : Container(
+                                                  decoration: const BoxDecoration(
+                                                    color:  Colors.white,
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Expanded(
+                                                        child: GestureDetector(
+                                                          behavior: HitTestBehavior.translucent,
+                                                          onTap: () {
+                                                            context
+                                                                .read<HomeBloc>()
+                                                                .add(MenuChange());
+                                                          },
+                                                          child: Column(
+                                                            children: [
+                                                              SizedBox(
+                                                                height: MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .height /
+                                                                    2.5,
+                                                                child: state.pageType ==
+                                                                        "Video"
+                                                                    ? VideoPreview(
+                                                                        url: state
+                                                                            .getAllHomeScreenNews[
+                                                                                index]
+                                                                            .videoUrl!
+                                                                            .url
+                                                                            .toString(),
+                                                                      )
+                                                                    : state
+                                                                                .getAllHomeScreenNews[
+                                                                                    index]
+                                                                                .imageUrl
+                                                                                .url
+                                                                                .toString() !=
+                                                                            null
+                                                                        ? CachedNetworkImage(
+                                                                            imageUrl: state
+                                                                                    .getAllHomeScreenNews[index]
+                                                                                    .imageUrl
+                                                                                    .url ??
+                                                                                "",
+                                                                            imageBuilder:
+                                                                                (context, imageProvider) =>
+                                                                                    Container(
+                                                                              height: MediaQuery.of(context)
+                                                                                  .size
+                                                                                  .height,
+                                                                              width: MediaQuery.of(context)
+                                                                                  .size
+                                                                                  .width,
+                                                                              decoration:
+                                                                                  BoxDecoration(
+                                                                                image:
+                                                                                    DecorationImage(
+                                                                                  image:
+                                                                                      imageProvider,
+                                                                                  fit:
+                                                                                      BoxFit.cover,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                            errorWidget: (context,
+                                                                                    url,
+                                                                                    error) =>
+                                                                                Container(
+                                                                              height: MediaQuery.of(context)
+                                                                                  .size
+                                                                                  .height,
+                                                                              width: MediaQuery.of(context)
+                                                                                  .size
+                                                                                  .width,
+                                                                              decoration: BoxDecoration(
+                                                                                  borderRadius:
+                                                                                      const BorderRadius.all(Radius.circular(32)),
+                                                                                  border: Border.all(width: 1, color: Colors.black)),
+                                                                              child:
+                                                                                  Center(
+                                                                                child:
+                                                                                    Text(
+                                                                                  "H",
+                                                                                  style:
+                                                                                      fontStyle(fontSize: 10, fontWeight: FontWeight.w500),
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          )
+                                                                        : const SizedBox
+                                                                            .shrink(),
+                                                              ),
+                                                              Expanded(
+                                                                child: Padding(
+                                                                  padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                                                                  child: Column(
+                                                                    crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                    children: [
+                                                                      Text(
+                                                                        state.getAllHomeScreenNews[index]
+                                                                                .title ??
+                                                                            "No Title",
+                                                                        style:
+                                                                            fontStyle(
+                                                                          fontSize:
+                                                                              18,
+                                                                          fontWeight:
+                                                                              FontWeight
+                                                                                  .bold,
+                                                                          color: Colors
+                                                                              .black,
+                                                                        ),
+                                                                      ),
+                                                                      height(
+                                                                          height: 8),
+                                                                      Expanded(
+                                                                        child: Text(
+                                                                          state
+                                                                              .getAllHomeScreenNews[
+                                                                                  index]
+                                                                              .content,
+                                                                          style:
+                                                                              fontStyle(
+                                                                            fontSize:
+                                                                                16,
+                                                                            color: Colors
+                                                                                    .grey[
+                                                                                800],
+                                                                          ),
+                                                                        ),
+                                                                      ),
+
+                                                                    ],
                                                                   ),
-                                                                ),
-                                                            errorWidget: (context, url, error) => Container(
-                                                              height: MediaQuery.of(context).size.height,
-                                                              width: MediaQuery.of(context).size.width,
-                                                              decoration: BoxDecoration(
-                                                                  borderRadius: const BorderRadius.all(
-                                                                      Radius.circular(32)),
-                                                                  border: Border.all(
-                                                                      width: 1,
-                                                                      color:  Colors.black)),
-                                                              child: Center(
-                                                                child: Text(
-                                                                  "H",
-                                                                  style: fontStyle(
-                                                                      fontSize: 10,
-                                                                      fontWeight: FontWeight.w500),
                                                                 ),
                                                               ),
-                                                            ),
-                                                          )
-                                                                  : const SizedBox
-                                                                      .shrink(),
-                                                        ),
-                                                        Align(
-                                                          alignment: Alignment
-                                                              .bottomCenter,
-                                                          child: Container(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .symmetric(
-                                                                    horizontal:
-                                                                        16,
-                                                                    vertical:
-                                                                        8),
-                                                            height: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .height /
-                                                                2,
-                                                            decoration:
-                                                                const BoxDecoration(
-                                                              color:
-                                                                  Colors.white,
-                                                            ),
-                                                            child: Column(
-                                                              crossAxisAlignment:
-                                                                  CrossAxisAlignment
-                                                                      .start,
-                                                              children: [
-                                                                Text(
-                                                                  state.getAllHomeScreenNews[index]
-                                                                          .title ??
-                                                                      "No Title",
-                                                                  style:
-                                                                      fontStyle(
-                                                                    fontSize:
-                                                                        18,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                                height(
-                                                                    height: 10),
-                                                                Text(
-                                                                  state.pageType ??
-                                                                      "No Title",
-                                                                  style:
-                                                                      fontStyle(
-                                                                    fontSize:
-                                                                        18,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .bold,
-                                                                    color: Colors
-                                                                        .black,
-                                                                  ),
-                                                                ),
-                                                                height(
-                                                                    height: 16),
-                                                                Text(
-                                                                  state
-                                                                      .getAllHomeScreenNews[
-                                                                          index]
-                                                                      .content,
-                                                                  style:
-                                                                      fontStyle(
-                                                                    fontSize:
-                                                                        16,
-                                                                    color: Colors
-                                                                            .grey[
-                                                                        800],
-                                                                  ),
-                                                                ),
-                                                                const Spacer(),
-                                                                const Divider(
-                                                                  color: AppColors
-                                                                      .borderColor,
-                                                                ),
-                                                                height(
-                                                                    height: 4),
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .spaceAround,
-                                                                  children: [
-                                                                    BottomActions(
-                                                                      icon: Icons
-                                                                          .refresh,
-                                                                      label:
-                                                                          'రిలోడ్',
-                                                                      onTap:
-                                                                          () {},
-                                                                    ), // Reload
-                                                                    BottomActions(
-                                                                      icon: Icons
-                                                                          .thumb_up,
-                                                                      label:
-                                                                          'లైక్',
-                                                                      onTap:
-                                                                          () {},
-                                                                    ), // Like
-                                                                    BottomActions(
-                                                                      icon: Icons
-                                                                          .comment,
-                                                                      label:
-                                                                          'కామెంట్',
-                                                                      onTap:
-                                                                          () {},
-                                                                    ), // Comment
-                                                                    BottomActions(
-                                                                      icon: Icons
-                                                                          .share,
-                                                                      label:
-                                                                          'షేర్',
-                                                                      onTap:
-                                                                          () {},
-                                                                    ), // Share
-                                                                  ],
-                                                                ),
-                                                                height(
-                                                                    height: 10)
-                                                              ],
-                                                            ),
+                                                            ],
                                                           ),
                                                         ),
-                                                      ],
-                                                    ),
+                                                      ),
+                                                      const Divider(
+                                                        color: AppColors
+                                                            .borderColor,
+                                                      ),
+                                                      SizedBox(
+                                                        height: 45,
+                                                        child: Row(
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceAround,
+                                                          children: [
+                                                            BottomActions(
+                                                              icon: Icons
+                                                                  .refresh,
+                                                              label:
+                                                              'రిలోడ్',
+                                                              onTap:
+                                                                  () {},
+                                                            ),
+                                                            // Reload
+                                                            BottomActions(
+                                                              icon: Icons
+                                                                  .thumb_up,
+                                                              label:
+                                                              'లైక్',
+                                                              onTap:
+                                                                  () {},
+                                                            ),
+                                                            // Like
+                                                            BottomActions(
+                                                              icon: Icons
+                                                                  .comment,
+                                                              label:
+                                                              'కామెంట్',
+                                                              onTap:
+                                                                  () {
+
+                                                                  },
+                                                            ),
+                                                            // Comment
+                                                            BottomActions(
+                                                              icon: Icons
+                                                                  .share,
+                                                              label:
+                                                              'షేర్',
+                                                              onTap:
+                                                                  () {
+
+                                                              },
+                                                            ),
+                                                            // Share
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
-                                  );
+                                                );
                                 })
                             : Container(
                                 color: Colors.grey,
@@ -356,51 +370,6 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                               ),
                   );
                 }),
-            Positioned(
-              top: 1,
-              left: 0,
-              right: 0,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 500),
-                opacity: _areRowsVisible ? 1.0 : 0.0,
-                child: Container(
-                  decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(8),bottomRight: Radius.circular(8))),
-                  height: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        child:  Text(
-                          'వార్తలు',
-                          style: fontStyle(color: Colors.black,fontSize: 16,fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(10),
-                        child:  Text(
-                          'జిల్లాలు',
-                          style: fontStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 1,
-              left: 0,
-              right: 0,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 500), // Animation duration
-                opacity: _areRowsVisible ? 1.0 : 0.0,
-                child: const BottomNavigationItems(),
-                // Opacity based on state
-              ),
-            ),
           ],
         ),
       ),

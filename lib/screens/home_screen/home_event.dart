@@ -19,5 +19,9 @@ class OnSwipeCard extends HomeScreenEvent {
 
 class OnSwipeEndCard extends HomeScreenEvent {
   var data;
+
   OnSwipeEndCard({required this.data});
+}
+
+class MenuChange extends HomeScreenEvent{
 }

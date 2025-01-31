@@ -61,7 +61,7 @@ class NewsCard extends StatelessWidget {
                   decoration: BoxDecoration(
                     image: DecorationImage(
                       image: imageProvider,
-                      fit: BoxFit.cover,
+                      fit: BoxFit.fill,
                     ),
                   ),
                 ),

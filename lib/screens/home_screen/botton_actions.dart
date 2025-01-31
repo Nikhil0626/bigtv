@@ -13,11 +13,11 @@ class BottomActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Icon(icon, size: 24, color: Colors.grey),
-        height(height: 4),
+        Icon(icon, size: 20, color: Colors.grey),
+        height(height: 2),
         Text(
           label,
           style: fontStyle(fontSize: 14, color: Colors.grey),
