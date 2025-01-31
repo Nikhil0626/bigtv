@@ -23,8 +23,8 @@ class FirstCardHomeFeeds extends StatelessWidget {
               flex: 2,
                 child: NewsCard(imageUrl:getHomeList![0].imageUrl!.url, title: getHomeList![0].title,isMainCard:true)),
             const Divider(height: 4,color: Colors.white,),
-            Expanded(
-             flex: 1,
+            SizedBox(
+            height: MediaQuery.of(context).size.height*.3,
               child: Row(
                 children: [
                   Expanded(child: NewsCard(imageUrl:getHomeList![1].imageUrl!.url, title: getHomeList![1].title,isMainCard:false)),
@@ -51,36 +51,34 @@ class NewsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Expanded(
-          child: CachedNetworkImage(
-            imageUrl: imageUrl,
-            imageBuilder: (context, imageProvider) =>
-                Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: imageProvider,
-                      fit: BoxFit.cover,
-                    ),
+        CachedNetworkImage(
+          imageUrl: imageUrl,
+          imageBuilder: (context, imageProvider) =>
+              Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: imageProvider,
+                    fit: BoxFit.cover,
                   ),
                 ),
-            errorWidget: (context, url, error) => Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.all(
-                      Radius.circular(32)),
-                  border: Border.all(
-                      width: 1,
-                      color:  Colors.black)),
-              child: Center(
-                child: Text(
-                  "H",
-                  style: fontStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w500),
-                ),
+              ),
+          errorWidget: (context, url, error) => Container(
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+                borderRadius: const BorderRadius.all(
+                    Radius.circular(32)),
+                border: Border.all(
+                    width: 1,
+                    color:  Colors.black)),
+            child: Center(
+              child: Text(
+                "H",
+                style: fontStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w500),
               ),
             ),
           ),

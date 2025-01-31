@@ -39,7 +39,7 @@ dependencies:
   another_flushbar: ^1.12.30
   flutter_svg: ^2.0.16
   flutter_screenutil: ^5.9.3
-  flutter_bloc: ^8.1.6
+  flutter_bloc: ^9.0.0
   dio: ^5.7.0
   intl: ^0.19.0
   video_player: ^2.9.2
@@ -52,11 +52,13 @@ dependencies:
   carousel_slider: ^5.0.0
   introduction_screen: ^3.1.14
   flutter_card_swiper: ^7.0.2
-  firebase_auth: any
+  firebase_auth: ^5.4.1
   firebase_core: ^3.10.1
   shared_preferences: ^2.4.0
   url_launcher: ^6.3.1
   cached_network_image: ^3.4.1
+  webengage_flutter: ^1.6.0
+  firebase_messaging: ^15.2.1
 
 dev_dependencies:
   flutter_test:

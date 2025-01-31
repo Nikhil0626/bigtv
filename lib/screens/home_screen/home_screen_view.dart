@@ -69,7 +69,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                                   return true;
                                 },
                                 onUndo: _onUndo,
-                                numberOfCardsDisplayed: 2,
+                                // numberOfCardsDisplayed: 2,
                                 maxAngle: 0,
                                 threshold: 1,
                                 isLoop: false,
@@ -133,7 +133,9 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                                               )
                                             : state.getAllHomeScreenNews[index]
                                                             .title ==
-                                                        "Home" ||
+                                                        "Home" ||state.getAllHomeScreenNews[index]
+                                                            .title ==
+                                                        "content" ||
                                                     state
                                                             .getAllHomeScreenNews[
                                                                 index]

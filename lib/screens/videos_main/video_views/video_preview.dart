@@ -87,13 +87,15 @@
 
 
 import 'package:chotanews/screens/videos_main/videos_model/videos_model.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
 class VideoPreview extends StatefulWidget {
   final String url;
-  const VideoPreview({super.key,required this.url,  });
+  bool isVideoScreen;
+   VideoPreview({super.key,required this.url,  this.isVideoScreen = false, });
   @override
   _VideoPreview createState() => _VideoPreview();
 }
@@ -121,11 +123,30 @@ class _VideoPreview extends State<VideoPreview> {
 
   @override
   Widget build(BuildContext context) {
-    return YoutubePlayer(
+    if (widget.isVideoScreen) {
+      return SafeArea(
+          child: Scaffold(
+            appBar: AppBar(centerTitle: true,title: Text("Video Player",style: fontStyle(fontSize: 18,fontWeight: FontWeight.w700),),),
+            backgroundColor: Colors.white,
+            body: Stack(
+              children: [
+              YoutubePlayer(
+              controller: controller,
+              showVideoProgressIndicator: true,
+              progressIndicatorColor: Colors.red,
+            ),
+
+              ],
+            ),
+          ),
+        );
+    } else {
+      return YoutubePlayer(
       controller: controller,
       showVideoProgressIndicator: true,
       progressIndicatorColor: Colors.red,
     );
+    }
   }
 }
 
