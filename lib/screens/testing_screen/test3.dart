@@ -448,7 +448,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
   final _streamController = StreamController.broadcast();
   int _currentIndex = 0;
   AxisDirection _flipDirection = AxisDirection.down;
-  bool _isFlipping = false; // Flag to track if a flip is in progress
+  bool _isFlipping = false;
+  double _dragStartY = 0;
+  double _dragProgress = 0.0;
 
   @override
   void initState() {
@@ -461,38 +463,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
   void dispose() {
     _streamController.close();
     super.dispose();
-  }
-
-  void _nextPage() async {
-    if (_currentIndex < 15 - 1 && !_isFlipping) {
-      setState(() {
-        _isFlipping = true; // Lock flipping
-        _currentIndex++;
-        _flipDirection = AxisDirection.down; // Flip downward
-        _streamController.add(_currentIndex);
-      });
-      await Future.delayed(
-          const Duration(seconds: 1)); // Shortened delay
-      setState(() {
-        _isFlipping = false; // Unlock flipping
-      });
-    }
-  }
-
-  void _previousPage() async {
-    if (_currentIndex > 0 && !_isFlipping) {
-      setState(() {
-        _isFlipping = true; // Lock flipping
-        _currentIndex--;
-        _flipDirection = AxisDirection.up; // Flip upward
-        _streamController.add(_currentIndex);
-      });
-      await Future.delayed(
-          const Duration(seconds: 1)); // Shortened delay
-      setState(() {
-        _isFlipping = false; // Unlock flipping
-      });
-    }
   }
 
   @override
@@ -511,76 +481,98 @@ class _PreviewScreenState extends State<PreviewScreen> {
               ),
             );
           } else if (state is Success) {
-            return ListView.builder(
-              itemCount: state.newPosts.length,
-              itemBuilder: (context, index) {
-                final post = state.newPosts[index];
-                return GestureDetector(
-                  onVerticalDragUpdate: (details) {
-                    if (!_isFlipping) {
-                      if (details.primaryDelta! < 0) {
-                        _previousPage(); // Swiping up
-                      } else if (details.primaryDelta! > 0) {
-                        _nextPage(); // Swiping down
-                      }
-                    }
-                  },
-                  onVerticalDragEnd: (details) {
-                    if (!_isFlipping) {
-                      if (details.velocity.pixelsPerSecond.dy > 0) {
-                        _nextPage();
-                      } else if (details.velocity.pixelsPerSecond.dy < 0) {
-                        _previousPage();
-                      }
-                    }
-                  },
-                  child: SizedBox(
+            return GestureDetector(
+
+              onVerticalDragStart: (details) {
+                _dragStartY = details.globalPosition.dy;
+              },
+              onVerticalDragUpdate: (details) {
+                final screenHeight = MediaQuery.of(context).size.height;
+                final dragDistance = details.globalPosition.dy - _dragStartY;
+                _dragProgress = dragDistance / screenHeight;
+
+                if (_dragProgress.abs() > 0.5 && !_isFlipping) {
+                  if (_dragProgress > 0) {
+                    _nextPage(state.newPosts.length);  // Swiping down
+                  } else {
+                    _previousPage();  // Swiping up
+                  }
+                }
+              },
+              // onVerticalDragUpdate: (details) {
+              //   if (!_isFlipping) {
+              //     if (details.primaryDelta! < 0) {
+              //       _nextPage(state.newPosts.length);
+              //     } else if (details.primaryDelta! > 0) {
+              //       _previousPage();
+              //     }
+              //   }
+              // },
+              // onVerticalDragEnd: (details) {
+              //   if (!_isFlipping) {
+              //     if (details.velocity.pixelsPerSecond.dy > 0) {
+              //       _nextPage(state.newPosts.length);
+              //     } else if (details.velocity.pixelsPerSecond.dy < 0) {
+              //       _previousPage();
+              //     }
+              //   }
+              // },
+              child: FlipWidget(
+                initialValue: _currentIndex,
+                flipType: FlipType.middleFlip,
+                itemStream: _streamController.stream,
+                flipDuration: Duration(seconds: 1),
+                itemBuilder: (_, index) {
+                  final post = state.newPosts[index];
+                  return Container(
+                    color: Colors.white,
                     height: MediaQuery.of(context).size.height,
                     width: MediaQuery.of(context).size.width,
-                    child: FlipWidget(
-                      initialValue: _currentIndex,
-                      flipType: FlipType.middleFlip,
-                      itemStream: _streamController.stream,
-                      flipDuration: Duration(seconds: 2),
-                      itemBuilder: (_, index) {
-                        return SizedBox(
-                          height: MediaQuery.of(context).size.height,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height/2,
                           width: MediaQuery.of(context).size.width,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Image.network(
-                                post.imageUrl?.url ?? "",
+                          child: Image.network(
+                            post.imageUrl?.url ?? "",
+                            width: double.infinity,
+                            height: 350,
+                            fit: BoxFit.fill,
+                            loadingBuilder: (context, child, loadingProgress) {
+                              if (loadingProgress == null) return child;
+                              return Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded /
+                                      (loadingProgress.expectedTotalBytes ?? 1)
+                                      : null,
+                                ),
+                              );
+                            },
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.asset(
+                                "assets/chota",
                                 width: double.infinity,
-                                height: 350,
-                                fit: BoxFit.fill,
-                                loadingBuilder:
-                                    (context, child, loadingProgress) {
-                                  if (loadingProgress == null) return child;
-                                  return Center(
-                                    child: CircularProgressIndicator(
-                                      value: loadingProgress.expectedTotalBytes !=
-                                          null
-                                          ? loadingProgress
-                                          .cumulativeBytesLoaded /
-                                          (loadingProgress
-                                              .expectedTotalBytes ??
-                                              1)
-                                          : null,
-                                    ),
-                                  );
-                                },
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Image.asset(
-                                    "assets/chota",
-                                    width: double.infinity,
-                                    height: 270,
-                                    fit: BoxFit.cover,
-                                  );
-                                },
-                              ),
-                              addPadding(
-                                child: Text(
+                                height: 270,
+                                fit: BoxFit.cover,
+                              );
+                            },
+                          ),
+                        ),
+
+                        Expanded(
+                          child: Column(
+                            children: [
+                             Text(
+                                  post.content ?? "",
+                                  style: fontStyle(
+                                    color: AppColors.bodyTextColor,
+                                    fontWeight: FontWeight.normal,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                               Text(
                                   post.title ?? "",
                                   style: const TextStyle(
                                     color: AppColors.headerTextColor,
@@ -588,32 +580,18 @@ class _PreviewScreenState extends State<PreviewScreen> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                              ),
-                              Expanded(
-                                child: addPadding(
-                                  child: Text(
-                                    post.content ?? "",
-                                    style: fontStyle(
-                                      color: AppColors.bodyTextColor,
-                                      fontWeight: FontWeight.normal,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              height(height: 8),
                             ],
                           ),
-                        );
-                      },
-                      flipDirection: _flipDirection, // Dynamic flip direction
+                        ),
+                        height(height: 8),
+                      ],
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+                flipDirection: _flipDirection,
+              ),
             );
           } else {
-            // Error or other unexpected state
             return Container(
               color: Colors.grey,
               width: MediaQuery.of(context).size.width,
@@ -630,6 +608,37 @@ class _PreviewScreenState extends State<PreviewScreen> {
       ),
     );
   }
+
+  void _nextPage(int listLength) async {
+    if (_currentIndex < listLength - 1 && !_isFlipping) {
+      setState(() {
+        _isFlipping = true;
+        _currentIndex++;
+        _flipDirection = AxisDirection.up;
+        _streamController.add(_currentIndex);
+      });
+      await Future.delayed(const Duration(milliseconds: 2000));
+      setState(() {
+        _isFlipping = false;
+      });
+    }
+  }
+
+  void _previousPage() async {
+    if (_currentIndex > 0 && !_isFlipping) {
+      setState(() {
+        _isFlipping = true;
+        _currentIndex--;
+        _flipDirection = AxisDirection.down;
+        _streamController.add(_currentIndex);
+      });
+      await Future.delayed(const Duration(milliseconds: 2000));
+      setState(() {
+        _isFlipping = false;
+      });
+    }
+  }
+
 
   // Utility method for padding
   Widget addPadding({required Widget child}) {

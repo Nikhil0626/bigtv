@@ -1,15 +1,16 @@
 
 import 'dart:developer';
 
-import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
-import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
-import 'package:chotanews/screens/Auth_module/auth_screen.dart';
+import 'package:chotanews/screens/home_screen/flip_wat2news.dart';
+import 'package:chotanews/screens/testing_screen/test3.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 import 'dart:io' show Platform;
 
 import 'globel_keys/app_router.dart';
@@ -34,23 +35,54 @@ Future<String?> getUniqueDeviceId() async {
     return null; // Handle other platforms or return a default value
   }
 }
+
+
 void fetchDeviceId() async {
   String? deviceId = await getUniqueDeviceId();
   GlobalVariables().deviceId = deviceId; // Store in the global variable
   print("Device ID: ${GlobalVariables().deviceId}");
 }
 
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  WebEngagePlugin.onPushMessageReceive(message.data);
+}
 
-void main() async{
+
+Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isAndroid) {
-    try {
-      await Firebase.initializeApp();
-    } catch (e) {
-      print("Firebase initialization error: $e");
-    }
-  }
+   await Firebase.initializeApp();
+
+  // if (Platform.isAndroid) {
+  //   try {
+  //   } catch (e) {
+  //     print("Firebase initialization error: $e");
+  //   }
+  // }
   fetchDeviceId();
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+  print('APNs Token: $apnsToken');
+
+
+
+  var token = await FirebaseMessaging.instance.getToken();
+  if (token != null) {
+    log("gksgojgoigspoas ${token}");
+    WebEngagePlugin.setPushToken(token);
+
+
+  }
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    WebEngagePlugin.onPushMessageReceive(message.data);
+  });
   runApp(const MyApp());
   // String? uniqueId = await DeviceIdentifier.deviceId..toString();
   //
@@ -97,43 +129,36 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: RegisterProviders.providers(context),
-      child: ScreenUtilInit(
-        designSize: const Size(385, 890),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (_, child) {
-          return MaterialApp(
-            theme: ThemeData(
-              colorScheme:
-              ColorScheme.fromSeed(seedColor: Colors.orange.shade300),
-              useMaterial3: true,
-            ),
-            scrollBehavior: MyBehavior(),
-            navigatorKey: mainNavigatorKey,
-            navigatorObservers: [routeObserver],
-            onGenerateRoute: (RouteSettings setting) {
-              return RoutesManager.generateRoute(setting);
-            },
-            builder: (
-                BuildContext context,
-                Widget? child,
-                ) {
-              ScreenUtil.init(context, designSize: const Size(385, 890));
-              return child!;
-            },
-            // builder: (BuildContext context, Widget? child) {
-            //   ScreenUtil.init(context, designSize: const Size(385, 890));
-            //   return MediaQuery(
-            //     data: MediaQuery.of(context)
-            //         .copyWith(textScaler: const TextScaler.linear(1)),
-            //     child: child!,
-            //   );
-            // },
-            // home: const LoginScreen(),
-            debugShowCheckedModeBanner: false,
-            // initialRoute: RoutesManager.onboardingScreen,
-          );
+      child: MaterialApp(
+        theme: ThemeData(
+          colorScheme:
+          ColorScheme.fromSeed(seedColor: Colors.orange.shade300),
+          useMaterial3: true,
+        ),
+        scrollBehavior: MyBehavior(),
+        navigatorKey: mainNavigatorKey,
+        navigatorObservers: [routeObserver],
+        onGenerateRoute: (RouteSettings setting) {
+          return RoutesManager.generateRoute(setting);
         },
+        builder: (
+            BuildContext context,
+            Widget? child,
+            ) {
+          ScreenUtil.init(context, designSize: const Size(385, 890));
+          return child!;
+        },
+        // builder: (BuildContext context, Widget? child) {
+        //   ScreenUtil.init(context, designSize: const Size(385, 890));
+        //   return MediaQuery(
+        //     data: MediaQuery.of(context)
+        //         .copyWith(textScaler: const TextScaler.linear(1)),
+        //     child: child!,
+        //   );
+        // },
+        home:  MyHomePage1(title: "ljnclkadsfc",),
+        debugShowCheckedModeBanner: false,
+        // initialRoute: RoutesManager.onboardingScreen,
       ),
     );
   }

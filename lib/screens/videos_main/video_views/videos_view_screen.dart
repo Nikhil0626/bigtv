@@ -57,7 +57,7 @@ class _VideosScreenState extends State<VideosScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => VideoPreview(url: state.getAllVideoList[index].videoUrl.toString(), ),
+                                  builder: (context) => VideoPreview(url: state.getAllVideoList[index].videoUrl!.url.toString(),isVideoScreen: true,),
                                 ),
                               );
                             } else {

@@ -160,7 +160,7 @@ class Article {
   final String? reportedBy;
   final List<String>? gallery;
   final ImageUrl? imageUrl;
-  final String? videoUrl;
+  final dynamic videoUrl;
   final int totalComments;
   final int totalShares;
   final DateTime created;
@@ -200,7 +200,7 @@ class Article {
       reportedBy: json['reportedBy'],
       gallery: json['gallery'] != null ? List<String>.from(json['gallery']) : null,
       imageUrl: json['imageUrl'] != null ? ImageUrl.fromJson(json['imageUrl']) : null,
-      videoUrl: json['videoUrl'],
+      videoUrl: json['videoUrl']??null,
       totalComments: json['totalComments'],
       totalShares: json['totalShares'],
       created: DateTime.parse(json['created']),
