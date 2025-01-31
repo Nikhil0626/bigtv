@@ -69,7 +69,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                                   return true;
                                 },
                                 onUndo: _onUndo,
-                                numberOfCardsDisplayed: 2,
+                                // numberOfCardsDisplayed: 2,
                                 maxAngle: 0,
                                 threshold: 1,
                                 isLoop: false,
@@ -106,191 +106,187 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                                               ),
                                             ),
                                           ),
-                                          errorWidget:
-                                              (context, url, error) =>
-                                                  Container(
-                                            height: MediaQuery.of(context)
-                                                .size
-                                                .height,
-                                            width: MediaQuery.of(context)
-                                                .size
-                                                .width,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    const BorderRadius.all(
-                                                        Radius.circular(32)),
-                                                border: Border.all(
-                                                    width: 1,
-                                                    color: Colors.black)),
-                                            child: Center(
-                                              child: Text(
-                                                "H",
-                                                style: fontStyle(
-                                                    fontSize: 10,
-                                                    fontWeight:
-                                                        FontWeight.w500),
-                                              ),
-                                            ),
+                                      errorWidget: (context, url, error) => Container(
+                                        height: MediaQuery.of(context).size.height,
+                                        width: MediaQuery.of(context).size.width,
+                                        decoration: BoxDecoration(
+                                            borderRadius: const BorderRadius.all(
+                                                Radius.circular(32)),
+                                            border: Border.all(
+                                                width: 1,
+                                                color:  Colors.black)),
+                                        child: Center(
+                                          child: Text(
+                                            "H",
+                                            style: fontStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w500),
                                           ),
-                                        )
-                                      : state.pageType == "Gallery"
-                                          ? CarouselScreen(
-                                              imageList: state
-                                                      .getAllHomeScreenNews[
-                                                          index]
-                                                      .gallery ??
-                                                  [],
-                                            )
-                                          : state.getAllHomeScreenNews[index]
-                                                          .title ==
-                                                      "Home" ||
-                                                  state
-                                                          .getAllHomeScreenNews[
-                                                              index]
-                                                          .homepage !=
-                                                      null
-                                              ? FirstCardHomeFeeds(
-                                                  getHomeList: state
-                                                      .getAllHomeScreenNews[
-                                                          index]
-                                                      .homepage,
-                                                )
-                                              : Container(
-                                                  decoration: const BoxDecoration(
-                                                    color:  Colors.white,
-                                                  ),
-                                                  child: Column(
-                                                    children: [
-                                                      Expanded(
-                                                        child: GestureDetector(
-                                                          behavior: HitTestBehavior.translucent,
-                                                          onTap: () {
-                                                            context
-                                                                .read<HomeBloc>()
-                                                                .add(MenuChange());
-                                                          },
-                                                          child: Column(
-                                                            children: [
-                                                              SizedBox(
-                                                                height: MediaQuery.of(
-                                                                            context)
-                                                                        .size
-                                                                        .height /
-                                                                    2.5,
-                                                                child: state.pageType ==
-                                                                        "Video"
-                                                                    ? VideoPreview(
-                                                                        url: state
-                                                                            .getAllHomeScreenNews[
-                                                                                index]
-                                                                            .videoUrl!
-                                                                            .url
-                                                                            .toString(),
-                                                                      )
-                                                                    : state
-                                                                                .getAllHomeScreenNews[
-                                                                                    index]
-                                                                                .imageUrl
-                                                                                .url
-                                                                                .toString() !=
-                                                                            null
-                                                                        ? CachedNetworkImage(
-                                                                            imageUrl: state
-                                                                                    .getAllHomeScreenNews[index]
-                                                                                    .imageUrl
-                                                                                    .url ??
-                                                                                "",
-                                                                            imageBuilder:
-                                                                                (context, imageProvider) =>
-                                                                                    Container(
-                                                                              height: MediaQuery.of(context)
-                                                                                  .size
-                                                                                  .height,
-                                                                              width: MediaQuery.of(context)
-                                                                                  .size
-                                                                                  .width,
-                                                                              decoration:
-                                                                                  BoxDecoration(
-                                                                                image:
-                                                                                    DecorationImage(
-                                                                                  image:
-                                                                                      imageProvider,
-                                                                                  fit:
-                                                                                      BoxFit.cover,
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                            errorWidget: (context,
-                                                                                    url,
-                                                                                    error) =>
-                                                                                Container(
-                                                                              height: MediaQuery.of(context)
-                                                                                  .size
-                                                                                  .height,
-                                                                              width: MediaQuery.of(context)
-                                                                                  .size
-                                                                                  .width,
-                                                                              decoration: BoxDecoration(
-                                                                                  borderRadius:
-                                                                                      const BorderRadius.all(Radius.circular(32)),
-                                                                                  border: Border.all(width: 1, color: Colors.black)),
-                                                                              child:
-                                                                                  Center(
-                                                                                child:
-                                                                                    Text(
-                                                                                  "H",
-                                                                                  style:
-                                                                                      fontStyle(fontSize: 10, fontWeight: FontWeight.w500),
-                                                                                ),
-                                                                              ),
-                                                                            ),
-                                                                          )
-                                                                        : const SizedBox
-                                                                            .shrink(),
+                                        ),
+                                      ),
+                                    )
+                                        : state.pageType == "Gallery"
+                                            ? CarouselScreen(
+                                                imageList: state
+                                                        .getAllHomeScreenNews[
+                                                            index]
+                                                        .gallery ??
+                                                    [],
+                                              )
+                                            : state.getAllHomeScreenNews[index]
+                                                            .title ==
+                                                        "Home" ||state.getAllHomeScreenNews[index]
+                                                            .title ==
+                                                        "content" ||
+                                                    state
+                                                            .getAllHomeScreenNews[
+                                                                index]
+                                                            .homepage !=
+                                                        null
+                                                ? FirstCardHomeFeeds(
+                                                    getHomeList: state
+                                                        .getAllHomeScreenNews[
+                                                            index]
+                                                        .homepage,
+                                                  )
+                                                : Container(
+                                                    decoration: BoxDecoration(
+                                                      color: state.pageType ==
+                                                              "Video"
+                                                          ? Colors.black
+                                                          : Colors.white,
+                                                    ),
+                                                    child: Stack(
+                                                      children: [
+                                                        SizedBox(
+                                                          height: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .height /
+                                                              2,
+                                                          child: state.pageType ==
+                                                                  "Video"
+                                                              ? VideoPreview(
+                                                                  url: state
+                                                                      .getAllHomeScreenNews[
+                                                                          index]
+                                                                      .videoUrl!
+                                                                      .url
+                                                                      .toString(),
+                                                                )
+                                                              : state
+                                                                          .getAllHomeScreenNews[
+                                                                              index]
+                                                                          .imageUrl
+                                                                          .url
+                                                                          .toString() !=
+                                                                      null
+                                                                  ? CachedNetworkImage(
+                                                            imageUrl: state.getAllHomeScreenNews[index].imageUrl.url??"",
+                                                            imageBuilder: (context, imageProvider) =>
+                                                                Container(
+                                                                  height: MediaQuery.of(context).size.height,
+                                                                  width: MediaQuery.of(context).size.width,
+                                                                  decoration: BoxDecoration(
+                                                                    image: DecorationImage(
+                                                                      image: imageProvider,
+                                                                      fit: BoxFit.cover,
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                            errorWidget: (context, url, error) => Container(
+                                                              height: MediaQuery.of(context).size.height,
+                                                              width: MediaQuery.of(context).size.width,
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius: const BorderRadius.all(
+                                                                      Radius.circular(32)),
+                                                                  border: Border.all(
+                                                                      width: 1,
+                                                                      color:  Colors.black)),
+                                                              child: Center(
+                                                                child: Text(
+                                                                  "H",
+                                                                  style: fontStyle(
+                                                                      fontSize: 10,
+                                                                      fontWeight: FontWeight.w500),
+                                                                ),
                                                               ),
-                                                              Expanded(
-                                                                child: Padding(
-                                                                  padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
-                                                                  child: Column(
-                                                                    crossAxisAlignment:
-                                                                        CrossAxisAlignment
-                                                                            .start,
-                                                                    children: [
-                                                                      Text(
-                                                                        state.getAllHomeScreenNews[index]
-                                                                                .title ??
-                                                                            "No Title",
-                                                                        style:
-                                                                            fontStyle(
-                                                                          fontSize:
-                                                                              18,
-                                                                          fontWeight:
-                                                                              FontWeight
-                                                                                  .bold,
-                                                                          color: Colors
-                                                                              .black,
-                                                                        ),
-                                                                      ),
-                                                                      height(
-                                                                          height: 8),
-                                                                      Expanded(
-                                                                        child: Text(
-                                                                          state
-                                                                              .getAllHomeScreenNews[
-                                                                                  index]
-                                                                              .content,
-                                                                          style:
-                                                                              fontStyle(
-                                                                            fontSize:
-                                                                                16,
-                                                                            color: Colors
-                                                                                    .grey[
-                                                                                800],
-                                                                          ),
-                                                                        ),
-                                                                      ),
-
-                                                                    ],
+                                                            ),
+                                                          )
+                                                                  : const SizedBox
+                                                                      .shrink(),
+                                                        ),
+                                                        Align(
+                                                          alignment: Alignment
+                                                              .bottomCenter,
+                                                          child: Container(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .symmetric(
+                                                                    horizontal:
+                                                                        16,
+                                                                    vertical:
+                                                                        8),
+                                                            height: MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height /
+                                                                2,
+                                                            decoration:
+                                                                const BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                            child: Column(
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .start,
+                                                              children: [
+                                                                Text(
+                                                                  state.getAllHomeScreenNews[index]
+                                                                          .title ??
+                                                                      "No Title",
+                                                                  style:
+                                                                      fontStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color: Colors
+                                                                        .black,
+                                                                  ),
+                                                                ),
+                                                                height(
+                                                                    height: 10),
+                                                                Text(
+                                                                  state.pageType ??
+                                                                      "No Title",
+                                                                  style:
+                                                                      fontStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color: Colors
+                                                                        .black,
+                                                                  ),
+                                                                ),
+                                                                height(
+                                                                    height: 16),
+                                                                Text(
+                                                                  state
+                                                                      .getAllHomeScreenNews[
+                                                                          index]
+                                                                      .content,
+                                                                  style:
+                                                                      fontStyle(
+                                                                    fontSize:
+                                                                        16,
+                                                                    color: Colors
+                                                                            .grey[
+                                                                        800],
                                                                   ),
                                                                 ),
                                                               ),

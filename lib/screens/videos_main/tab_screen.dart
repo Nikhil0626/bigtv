@@ -4,7 +4,10 @@ import 'package:chotanews/screens/videos_main/video_views/gallery_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/myagazines_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/podcost_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/videos_view_screen.dart';
+import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../globel_keys/app_router.dart';
 
@@ -39,68 +42,59 @@ class _TabScreen extends State<TabScreen> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 1,
-        title: Row(
-          children: [
-            const Text(
-              "Chota",
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 25,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              color: Colors.lightBlue,
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-              child: const Text(
-                "News",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 25,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const Spacer(),
-          ],
+        centerTitle: true,
+        leading: InkWell(
+          onTap: (){
+
+          },
+          child: const Icon(Icons.arrow_back_ios,size: 24,),
+        ),
+        title:  const Text(
+          "Menu Screen",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 25,
+            fontWeight: FontWeight.w700,
+          ),
         ),
         actions: [
           IconButton(
             icon: const Icon(
               Icons.settings,
               size: 25,
-              color: Colors.grey,
+              color: Colors.black,
             ),
             onPressed: () {
-              Navigator.pushNamed(context, RoutesManager.chotaInfo);
+              final GoogleSignIn _googleSignIn = GoogleSignIn();
+              _googleSignIn.disconnect();
+              Navigator.pushNamed(context, RoutesManager.login);
 
             },
           ),
+          width(width: 10)
         ],
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(50),
-          child: TabBar(
-            controller: tabController,
-            isScrollable: true,
-            indicatorColor: Colors.lightBlue,
-            labelColor: Colors.lightBlue,
-            labelStyle: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-            unselectedLabelStyle: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w500,
-            ),
-            tabs: const [
-              Tab(text: "వీడియోలు"),
-              Tab(text: "గ్యాలరీ"),
-              Tab(text: "పాడ్‌కాస్ట్"),
-              Tab(text: "మ్యాగజైన్లు"),
-              Tab(text: "భక్తి"),
-            ],
+        bottom: TabBar(
+          controller: tabController,
+          isScrollable: true,
+          tabAlignment: TabAlignment.center,
+          indicatorColor: Colors.lightBlue,
+          labelColor: Colors.lightBlue,
+
+          labelStyle:  fontStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w500,
           ),
+          unselectedLabelStyle:  fontStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+          tabs: const [
+            Tab(text: "వీడియోలు"),
+            Tab(text: "గ్యాలరీ"),
+            Tab(text: "పాడ్‌కాస్ట్"),
+            Tab(text: "మ్యాగజైన్లు"),
+            Tab(text: "భక్తి"),
+          ],
         ),
       ),
       body: Column(
