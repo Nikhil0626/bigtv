@@ -13,7 +13,7 @@ class BottomNavigationItems extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      height: 70,
+      height: 75,
       width: MediaQuery.of(context).size.width,
       child: Column(
         children: [
@@ -47,12 +47,13 @@ class BottomNavigationItems extends StatelessWidget {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const TabScreen()),
+                    MaterialPageRoute(builder: (context) => const TabScreen ()),
                   );
                 },
               ),
             ],
           ),
+          height(height: 6),
         ],
       ),
     );
@@ -80,7 +81,7 @@ class RowItem extends StatelessWidget {
           Icon(icon, size: 24),
           Text(
             text,
-            style: fontStyle(color: Colors.black,fontWeight: FontWeight.bold,fontSize: 14),
+            style: fontStyle(color: Colors.black,fontWeight: FontWeight.normal,fontSize: 14),
           ),
         ],
       ),

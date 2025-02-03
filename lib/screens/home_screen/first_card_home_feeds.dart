@@ -51,34 +51,36 @@ class NewsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        CachedNetworkImage(
-          imageUrl: imageUrl,
-          imageBuilder: (context, imageProvider) =>
-              Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: imageProvider,
-                    fit: BoxFit.cover,
+        Expanded(
+          child: CachedNetworkImage(
+            imageUrl: imageUrl,
+            imageBuilder: (context, imageProvider) =>
+                Container(
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: imageProvider,
+                      fit: BoxFit.fill,
+                    ),
                   ),
                 ),
-              ),
-          errorWidget: (context, url, error) => Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(
-                    Radius.circular(32)),
-                border: Border.all(
-                    width: 1,
-                    color:  Colors.black)),
-            child: Center(
-              child: Text(
-                "H",
-                style: fontStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500),
+            errorWidget: (context, url, error) => Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                  borderRadius: const BorderRadius.all(
+                      Radius.circular(32)),
+                  border: Border.all(
+                      width: 1,
+                      color:  Colors.black)),
+              child: Center(
+                child: Text(
+                  "H",
+                  style: fontStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w500),
+                ),
               ),
             ),
           ),
