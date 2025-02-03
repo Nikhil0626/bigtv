@@ -26,7 +26,7 @@ class WelcomeScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Container(
+              child: SizedBox(
                 height: 40,
                 width: 276,
                 child: RichText(
@@ -37,7 +37,7 @@ class WelcomeScreen extends StatelessWidget {
                         color: Colors.black),
                     children: [
                       const TextSpan(text: "Chota"),
-                      const WidgetSpan(child: SizedBox(width: 4)),
+                      // const WidgetSpan(child: SizedBox(width: 4)),
                       WidgetSpan(
                         child: Container(
                           decoration: const BoxDecoration(

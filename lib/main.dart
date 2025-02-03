@@ -1,8 +1,5 @@
-
 import 'dart:developer';
 
-import 'package:chotanews/screens/home_screen/flip_wat2news.dart';
-import 'package:chotanews/screens/testing_screen/test3.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -52,7 +49,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
-   await Firebase.initializeApp();
+  await Firebase.initializeApp();
 
   // if (Platform.isAndroid) {
   //   try {

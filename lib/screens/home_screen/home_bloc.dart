@@ -6,7 +6,9 @@ import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:chotanews/screens/home_screen/home_screen_model.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:share_plus/share_plus.dart';
 
 class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
   HomeBloc() : super(InitialHomeScreenState()) {
@@ -80,8 +82,8 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     });
 
     on<OnSwipeCard>((event, emit) async{
-      pageType = getAllPosts[event.currentIndex].type.toString();
-      firstIndex = event.currentIndex;
+      pageType = getAllPosts[event.index].type.toString();
+      firstIndex = event.index;
 
       log("page index update in each swipe${getAllPosts[firstIndex].id}");
       emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex,isChange: isMenuChange));
@@ -124,6 +126,52 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
 
     on<OnSwipeEndCard>((event, emit) {
       log(event.data.toString());
+    });
+
+
+    on<SendNewsToSocialMedia>((event, emit) async{
+
+      final DynamicLinkParameters parameters = DynamicLinkParameters(
+        uriPrefix: 'https://chotanews.page.link/store',
+        link: Uri.parse('https://chotanews.page.link/store'),
+        androidParameters: const AndroidParameters(
+          packageName: 'com.chotanews',
+          minimumVersion: 1,
+        ),
+        iosParameters: const IOSParameters(
+          bundleId: 'com.chotanewstelugu.app',
+          minimumVersion: '1.0',
+        ),
+      );
+
+      final ShortDynamicLink shortLink = await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+      final Uri dynamicUrl = shortLink.shortUrl;
+      print(dynamicUrl.toString());
+
+      // final DynamicLinkParameters parameters = DynamicLinkParameters(
+      //   uriPrefix: 'https://chotanews.page.link', // Use your dynamic link domain
+      //   link: Uri.parse('https://chotanews.page.link/store'), // Your custom link
+      //   androidParameters: const AndroidParameters(
+      //     packageName: 'com.chotanews', // Replace with your actual Android package name
+      //     minimumVersion: 1,
+      //   ),
+      //   iosParameters: const IOSParameters(
+      //     bundleId: 'com.chotanewstelugu.app', // Replace with your actual iOS bundle ID
+      //     minimumVersion: '1.0.0',
+      //   ),
+      // );
+
+
+      try {
+        var dynamicUrl = await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+        print('Short Dynamic Link: $dynamicUrl');
+        Share.share('$dynamicUrl');
+
+      } catch (e,st) {
+        print('Error generating dynamic link: $st');
+        print('Error generating dynamic link: $e');
+      }
+
     });
   }
 }

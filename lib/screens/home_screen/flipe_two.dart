@@ -714,10 +714,10 @@ class _MyHomePage1State extends State<MyHomePage1> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                BottomActions(icon: Icons.refresh, label: 'Refresh', onTap: () {}),
-                BottomActions(icon: Icons.thumb_up, label: 'Like', onTap: () {}),
-                BottomActions(icon: Icons.comment, label: 'Comment', onTap: () {}),
-                BottomActions(icon: Icons.share, label: 'Share', onTap: () {}),
+                // BottomActions(icon: Icons.refresh, label: 'Refresh', onTap: () {}),
+                // BottomActions(icon: Icons.thumb_up, label: 'Like', onTap: () {}),
+                // BottomActions(icon: Icons.comment, label: 'Comment', onTap: () {}),
+                // BottomActions(icon: Icons.share, label: 'Share', onTap: () {}),
               ],
             ),
           ],

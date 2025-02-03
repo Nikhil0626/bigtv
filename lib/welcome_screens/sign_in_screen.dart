@@ -119,7 +119,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.grey[300],
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.only(topLeft: Radius.circular(4),bottomLeft: Radius.circular(4)),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 14),
                         child: const Text(
@@ -141,7 +141,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           controller: _mobileController,
                           keyboardType: TextInputType.phone,
                           decoration: const InputDecoration(
-                            hintText: "7396335862",
+                            hintText: "Enter Mobile",
                             border: InputBorder.none,
                             contentPadding: EdgeInsets.symmetric(horizontal: 10),
                           ),

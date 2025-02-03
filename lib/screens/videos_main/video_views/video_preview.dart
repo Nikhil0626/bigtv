@@ -108,7 +108,7 @@ class _VideoPreview extends State<VideoPreview> {
     super.initState();
     controller = YoutubePlayerController(
       initialVideoId: widget.url,
-      flags: YoutubePlayerFlags(
+      flags: const YoutubePlayerFlags(
         autoPlay: false,
         mute: false,
       ),
@@ -128,15 +128,12 @@ class _VideoPreview extends State<VideoPreview> {
           child: Scaffold(
             appBar: AppBar(centerTitle: true,title: Text("Video Player",style: fontStyle(fontSize: 18,fontWeight: FontWeight.w700),),),
             backgroundColor: Colors.white,
-            body: Stack(
-              children: [
-              YoutubePlayer(
+            body: Center(
+              child: YoutubePlayer(
               controller: controller,
               showVideoProgressIndicator: true,
               progressIndicatorColor: Colors.red,
-            ),
-
-              ],
+                          ),
             ),
           ),
         );
