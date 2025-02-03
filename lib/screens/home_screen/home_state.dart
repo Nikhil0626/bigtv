@@ -13,7 +13,10 @@ class SuccessHomeScreenState extends HomeScreenState{
   List<HomeScreenModel> getAllHomeScreenNews = [];
   final String pageType;
   final int firstIndex;
-  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex});
+  final bool isLike;
+  final bool isShare;
+
+  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex , this.isLike = false, this.isShare=false});
 
 }
 class ErrorHomeScreenState extends HomeScreenState{

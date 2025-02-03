@@ -59,6 +59,11 @@ dependencies:
   cached_network_image: ^3.4.1
   webengage_flutter: ^1.6.0
   firebase_messaging: ^15.2.1
+  share_plus: ^10.1.4
+  firebase_dynamic_links: ^6.1.1
+  app_links: ^6.3.3
+#  kochava_tracker: ^2.6.0
+#  kochava_measurement_apple_tracking: ^3.2.0
 
 dev_dependencies:
   flutter_test:

@@ -89,6 +89,14 @@
     			</array>
     		</dict>
     	</array>
+    	<key>WEGLicenseCode</key>
+        <string>in~~1341061ba</string>
+        <key>UIBackgroundModes</key>
+        <array>
+          <string>fetch</string>
+          <string>remote-notification</string>
+        </array>
+
 
 </dict>
 </plist>

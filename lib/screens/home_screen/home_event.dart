@@ -7,17 +7,20 @@ class GetAllNewsFeed extends HomeScreenEvent {}
 class GetFollowingNewsFeed extends HomeScreenEvent {}
 
 class OnSwipeCard extends HomeScreenEvent {
- final int previousIndex;
-  final  int currentIndex;
-  CardSwiperDirection direction;
+ final int index;
 
   OnSwipeCard(
-      {required this.previousIndex,
-      required this.currentIndex,
-      required this.direction});
+      {required this.index});
 }
 
 class OnSwipeEndCard extends HomeScreenEvent {
   var data;
   OnSwipeEndCard({required this.data});
+}
+
+
+class SendNewsToSocialMedia extends HomeScreenEvent{
+  String id;
+
+  SendNewsToSocialMedia({required this.id});
 }

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "Chotanews",
+      "package_name": "com.chotanews",
+      "sha256_cert_fingerprints": [
+        "86:f4:b6:a2:e0:b5:01:6d:12:36:24:38:09:a6:58:a0:be:ac:43:13:4c:70:7c:5e:65:1e:09:d5:3d:63:3e:2a"
+      ]
+    }
+  }
+]

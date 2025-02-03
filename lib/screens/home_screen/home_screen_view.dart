@@ -63,9 +63,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                                 onSwipe:
                                     (previousIndex, currentIndex, direction) {
                                   context.read<HomeBloc>().add(OnSwipeCard(
-                                      previousIndex: previousIndex,
-                                      currentIndex: currentIndex!,
-                                      direction: direction));
+                                      index: 0));
                                   return true;
                                 },
                                 onUndo: _onUndo,
@@ -300,32 +298,28 @@ class _HomeScreenViewState extends State<HomeScreenView> {
                                                                           .spaceAround,
                                                                   children: [
                                                                     BottomActions(
-                                                                      icon: Icons
-                                                                          .refresh,
+                                                                      icon: "assets/like.json",
                                                                       label:
                                                                           'రిలోడ్',
                                                                       onTap:
                                                                           () {},
                                                                     ), // Reload
                                                                     BottomActions(
-                                                                      icon: Icons
-                                                                          .thumb_up,
+                                                                      icon: "assets/like.json",
                                                                       label:
                                                                           'లైక్',
                                                                       onTap:
                                                                           () {},
                                                                     ), // Like
                                                                     BottomActions(
-                                                                      icon: Icons
-                                                                          .comment,
+                                                                      icon: "assets/like.json",
                                                                       label:
                                                                           'కామెంట్',
                                                                       onTap:
                                                                           () {},
                                                                     ), // Comment
                                                                     BottomActions(
-                                                                      icon: Icons
-                                                                          .share,
+                                                                      icon: "assets/like.json",
                                                                       label:
                                                                           'షేర్',
                                                                       onTap:

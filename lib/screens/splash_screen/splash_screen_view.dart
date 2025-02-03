@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -15,7 +16,28 @@ class SplashScreenView extends StatefulWidget {
 class _SplashScreenView extends State<SplashScreenView> {
   @override
   void initState() {
+    initDynamicLinks();
     navigateApp();
+  }
+
+
+  Future<void> initDynamicLinks() async {
+    final PendingDynamicLinkData? initialLink =
+    await FirebaseDynamicLinks.instance.getInitialLink();
+    if (initialLink?.link != null) {
+      handleDeepLink(initialLink!.link);
+    }
+
+    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
+      handleDeepLink(dynamicLinkData.link);
+    }).onError((error) {
+      print("Dynamic Link Error: $error");
+    });
+  }
+
+  void handleDeepLink(Uri deepLink) {
+    print("Opened with deep link: ${deepLink.toString()}");
+    // Navigate based on the deep link path
   }
 
   @override
