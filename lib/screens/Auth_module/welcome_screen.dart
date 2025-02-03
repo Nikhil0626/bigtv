@@ -1,6 +1,6 @@
-import 'package:chotanews/welcome_screens/sign_in_screen.dart';
+import 'package:chotanews/screens/Auth_module/sign_in_screen.dart';
 import 'package:flutter/material.dart';
-import '../screens/Auth_module/auth_screen.dart';
+import 'package:flutter_svg/svg.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -22,48 +22,14 @@ class WelcomeScreen extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 100),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: SizedBox(
-                height: 40,
-                width: 276,
-                child: RichText(
-                  text: TextSpan(
-                    style: const TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                    children: [
-                      const TextSpan(text: "Chota"),
-                      // const WidgetSpan(child: SizedBox(width: 4)),
-                      WidgetSpan(
-                        child: Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.lightBlue,
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(20),
-                              bottomLeft: Radius.circular(20),
-                            ),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                          ),
-                          child: const Text(
-                            "News",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 30,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+                  child: SvgPicture.asset(
+          'assets/svg/Chota_news_logo.svg',
+                    height: 40,
+                    width: 276,
+        ),
+
             ),
             const SizedBox(height: 50),
             const Text(

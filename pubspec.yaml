@@ -38,7 +38,7 @@ dependencies:
   share_plus: ^10.1.4
   lottie: ^3.2.0
   another_flushbar: ^1.12.30
-  flutter_svg: ^2.0.16
+  flutter_svg: ^2.0.17
   flutter_screenutil: ^5.9.3
   flutter_bloc: ^9.0.0
   dio: ^5.7.0
@@ -93,3 +93,4 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/settings_icons/
+    - assets/svg/

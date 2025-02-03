@@ -5,17 +5,17 @@ import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
 import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
 import 'package:chotanews/screens/Auth_module/auth_screen.dart';
-import 'package:chotanews/welcome_screens/enter_otp_screen.dart';
-import 'package:chotanews/welcome_screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../onbording_screens/onboarding_screen.dart';
+import '../screens/Auth_module/enter_otp_screen.dart';
+import '../screens/Auth_module/sign_in_screen.dart';
+import '../screens/Auth_module/welcome_screen.dart';
 import '../screens/chota_info_screens/chota_info.dart';
 import '../screens/districts_selection/districts_selection_screen.dart';
 import '../screens/home_screen/home_top_tabs.dart';
 import '../screens/profile_screen/profile_screen.dart';
 import '../screens/splash_screen/splash_screen_view.dart';
-import '../welcome_screens/welcome_screen.dart';
 
 abstract class RoutesManager {
   RoutesManager._();

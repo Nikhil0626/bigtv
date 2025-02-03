@@ -10,3 +10,11 @@ class ErrorScreen extends AuthState{
   String message = "";
   ErrorScreen({ required this.message});
 }
+
+class MobileNumberValid extends AuthState {}
+
+class MobileNumberInvalid extends AuthState {
+  final String errorMessage;
+
+  MobileNumberInvalid(this.errorMessage);
+}
