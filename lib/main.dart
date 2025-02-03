@@ -156,7 +156,7 @@ class MyApp extends StatelessWidget {
         //     child: child!,
         //   );
         // },
-        home:  MyHomePage1(title: "ljnclkadsfc",),
+        // home:  MyHomePage1(title: "ljnclkadsfc",),
         debugShowCheckedModeBanner: false,
         // initialRoute: RoutesManager.onboardingScreen,
       ),

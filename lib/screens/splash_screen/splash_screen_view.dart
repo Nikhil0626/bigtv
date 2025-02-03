@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:lottie/lottie.dart';
 
+import '../../welcome_screens/welcome_screen.dart';
+
 class SplashScreenView extends StatefulWidget {
   const SplashScreenView({super.key});
 
@@ -89,7 +91,12 @@ class _SplashScreenView extends State<SplashScreenView> {
       });
     } else {
       Timer(const Duration(seconds: 7), () {
-        Navigator.pushNamed(context, RoutesManager.login);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WelcomeScreen(), // Replace `NewScreen` with the screen you want to navigate to
+          ),
+        );
       });
     }
   }

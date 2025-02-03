@@ -1,4 +1,6 @@
+import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
+import 'package:chotanews/screens/home_screen/flip_wat2news.dart';
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/screens/home_screen/home_screen_view.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
@@ -57,8 +59,8 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                   TabBarView(
                     controller: _tabController,
                     physics: const NeverScrollableScrollPhysics(), // Disable horizontal scroll
-                    children: const [
-                      HomeScreenView(),
+                    children:  [
+                      MyHomePage1(title: ""),
                       DistrictsSelectionScreen(),
                     ],
                   ),
