@@ -13,5 +13,8 @@ class AuthRepo extends BaseService{
     Response response = await makeRequest(url: BaseUrls.userInfo,method: RequestType.post,body: body);
     return response;
   }
+  Future sendOtp() async {
+    // Response response = await makeRequest(url: )
+  }
 
 }

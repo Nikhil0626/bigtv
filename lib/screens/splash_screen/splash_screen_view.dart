@@ -1,10 +1,13 @@
 import 'dart:developer';
-
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+
+import 'package:lottie/lottie.dart';
+
+import '../../welcome_screens/welcome_screen.dart';
 
 class SplashScreenView extends StatefulWidget {
   const SplashScreenView({super.key});
@@ -17,6 +20,7 @@ class _SplashScreenView extends State<SplashScreenView> {
   @override
   void initState() {
     initDynamicLinks();
+    super.initState();
     navigateApp();
   }
 
@@ -42,54 +46,30 @@ class _SplashScreenView extends State<SplashScreenView> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  child: Text(
-                    "Chota",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    "News",
-                    style: TextStyle(
-                      color: Colors.white,
-                      backgroundColor: Colors.lightBlue,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Image.asset(
+        "assets/splash1.gif",
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
       ),
     );
   }
   Future navigateApp() async {
     String loginId = GlobalVariables().loginId ?? "";
     log(loginId.toString());
-    if (loginId != null || loginId != "") {
-      Timer(const Duration(seconds: 3), () {
+    if (loginId.isNotEmpty) {
+      Timer(const Duration(seconds: 7), () {
         Navigator.pushNamed(context, RoutesManager.homeScreen);
       });
     } else {
-      Timer(const Duration(seconds: 3), () {
-        Navigator.pushNamed(context, RoutesManager.login);
+      Timer(const Duration(seconds: 7), () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => WelcomeScreen(), // Replace `NewScreen` with the screen you want to navigate to
+          ),
+        );
       });
     }
   }

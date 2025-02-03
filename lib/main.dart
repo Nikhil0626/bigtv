@@ -77,18 +77,10 @@ Future<void> main() async{
 
 
 
-  // var token = await FirebaseMessaging.instance.getToken();
-  // if (token != null) {
-  //   log("gksgojgoigspoas ${token}");
-  //  WebEngagePlugin.setPushToken(token);
-  //   WebEngagePlugin.userLogin('user123');
-  //
-  // }
-  // FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  // FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-  //   WebEngagePlugin.onPushMessageReceive(message.data);
-  //   log("gksgojgoigspoas ${message.data}");
-  // });
+  var token = await FirebaseMessaging.instance.getToken();
+  if (token != null) {
+    log("gksgojgoigspoas ${token}");
+    WebEngagePlugin.setPushToken(token);
 
 
 
@@ -165,6 +157,7 @@ class MyApp extends StatelessWidget {
         //     child: child!,
         //   );
         // },
+        // home:  MyHomePage1(title: "ljnclkadsfc",),
         // home:  MyHomePage1(title: "",),
         debugShowCheckedModeBanner: false,
         // initialRoute: RoutesManager.onboardingScreen,

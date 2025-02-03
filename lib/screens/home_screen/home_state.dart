@@ -17,6 +17,8 @@ class SuccessHomeScreenState extends HomeScreenState{
   final bool isShare;
 
   SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex , this.isLike = false, this.isShare=false});
+  bool isChange;
+  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex,required this.isChange});
 
 }
 class ErrorHomeScreenState extends HomeScreenState{
@@ -30,4 +32,8 @@ class ErrorHomeScreenState extends HomeScreenState{
  class OnSwipeForwardHomeState extends HomeScreenState{
 
 
+ }
+ class MenuChangeState extends HomeScreenState{
+   bool isChange;
+   MenuChangeState({required this.isChange});
  }

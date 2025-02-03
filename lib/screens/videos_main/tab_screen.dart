@@ -67,7 +67,7 @@ class _TabScreen extends State<TabScreen> with SingleTickerProviderStateMixin {
             onPressed: () {
               final GoogleSignIn _googleSignIn = GoogleSignIn();
               _googleSignIn.disconnect();
-              Navigator.pushNamed(context, RoutesManager.login);
+              // Navigator.pushNamed(context, RoutesManager.login);
 
             },
           ),

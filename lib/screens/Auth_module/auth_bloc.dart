@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:chotanews/screens/Auth_module/auth_event.dart';
 import 'package:chotanews/screens/Auth_module/auth_repo.dart';
 import 'package:chotanews/screens/Auth_module/auth_state.dart';
+import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_state.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -109,6 +110,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SkipLogin>((event, emit) async {
       log("Login Skip ");
       emit(SuccessScreen(message: "Skip"));
+    });
+
+    on<SendOtp>((event, emit) async {
+     emit(LoadingScreen());
+     try{
+
+     }catch(e,st) {
+
+     }
     });
   }
 }
