@@ -1,13 +1,11 @@
-import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
-import 'package:chotanews/screens/home_screen/flip_wat2news.dart';
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
-import 'package:chotanews/screens/home_screen/home_screen_view.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../utils/bottom_navigation_items.dart';
+import 'flip_way2news.dart';
 
 class HomeTopTabs extends StatefulWidget {
   const HomeTopTabs({super.key});
@@ -60,7 +58,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                     controller: _tabController,
                     physics: const NeverScrollableScrollPhysics(), // Disable horizontal scroll
                     children:  [
-                      MyHomePage1(title: ""),
+                      MyHomePage1(),
                       DistrictsSelectionScreen(),
                     ],
                   ),

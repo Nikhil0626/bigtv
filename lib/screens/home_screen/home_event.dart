@@ -24,3 +24,7 @@ class SendNewsToSocialMedia extends HomeScreenEvent{
 
   SendNewsToSocialMedia({required this.id});
 }
+
+class MenuChange extends HomeScreenEvent{
+
+}

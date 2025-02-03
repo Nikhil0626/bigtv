@@ -1,8 +1,5 @@
-
 import 'dart:developer';
 
-import 'package:app_links/app_links.dart';
-import 'package:chotanews/screens/home_screen/flip_way2news.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -52,12 +49,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
-   await Firebase.initializeApp();
-  final appLinks = AppLinks();
-
-  appLinks.uriLinkStream.listen((uri) {
-    log("app loimnks  --------- $uri");
-  });
+  await Firebase.initializeApp();
 
   // if (Platform.isAndroid) {
   //   try {
@@ -83,7 +75,11 @@ Future<void> main() async{
     WebEngagePlugin.setPushToken(token);
 
 
-
+  }
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    WebEngagePlugin.onPushMessageReceive(message.data);
+  });
   runApp(const MyApp());
   // String? uniqueId = await DeviceIdentifier.deviceId..toString();
   //
@@ -158,7 +154,6 @@ class MyApp extends StatelessWidget {
         //   );
         // },
         // home:  MyHomePage1(title: "ljnclkadsfc",),
-        // home:  MyHomePage1(title: "",),
         debugShowCheckedModeBanner: false,
         // initialRoute: RoutesManager.onboardingScreen,
       ),

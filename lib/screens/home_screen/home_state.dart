@@ -15,10 +15,9 @@ class SuccessHomeScreenState extends HomeScreenState{
   final int firstIndex;
   final bool isLike;
   final bool isShare;
-
-  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex , this.isLike = false, this.isShare=false});
   bool isChange;
-  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex,required this.isChange});
+
+  SuccessHomeScreenState({required this.getAllHomeScreenNews, required this.pageType,required this.firstIndex , this.isLike = false, this.isShare=false,required this.isChange});
 
 }
 class ErrorHomeScreenState extends HomeScreenState{

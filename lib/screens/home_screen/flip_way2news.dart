@@ -23,9 +23,8 @@ typedef IndexedItemBuilder<T> = Widget Function(
     BuildContext context, int index);
 
 class MyHomePage1 extends StatefulWidget {
-  final String title;
 
- const MyHomePage1({super.key, required this.title});
+ const MyHomePage1({super.key});
 
   @override
   State<MyHomePage1> createState() => _MyHomePage1State();

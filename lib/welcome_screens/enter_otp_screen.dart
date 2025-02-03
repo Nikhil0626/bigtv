@@ -2,7 +2,8 @@ import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/welcome_screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 
-import '../screens/home_screen/flip_wat2news.dart';
+import '../screens/home_screen/flip_way2news.dart';
+
 
 class EnterOtpScreen extends StatefulWidget {
   const EnterOtpScreen({super.key});
@@ -260,7 +261,7 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                       if (_validateOtp()) {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => MyHomePage1(title: '',)),
+                          MaterialPageRoute(builder: (context) => const MyHomePage1()),
                         );
                       }
                     });

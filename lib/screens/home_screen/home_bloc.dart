@@ -134,11 +134,11 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       final DynamicLinkParameters parameters = DynamicLinkParameters(
         uriPrefix: 'https://chotanews.page.link/store',
         link: Uri.parse('https://chotanews.page.link/store'),
-        androidParameters: AndroidParameters(
+        androidParameters: const AndroidParameters(
           packageName: 'com.chotanews',
           minimumVersion: 1,
         ),
-        iosParameters: IOSParameters(
+        iosParameters: const IOSParameters(
           bundleId: 'com.chotanewstelugu.app',
           minimumVersion: '1.0',
         ),
