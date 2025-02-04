@@ -18,7 +18,8 @@ import 'auth_event.dart';
 
 class OtpScreen extends StatefulWidget {
   final String mobileNumber;
-  const OtpScreen({super.key,required this.mobileNumber});
+  final String otp;
+  const OtpScreen({super.key,required this.mobileNumber,required this.otp,});
 
   @override
   _OtpScreenState createState() => _OtpScreenState();
@@ -104,6 +105,10 @@ class _OtpScreenState extends State<OtpScreen> {
                   width: 166,
                 ),
                  height(height: 30),
+                 Text(
+                  "OTP: ${widget.otp}",
+                  style: fontStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),height(height: 30),
                  Text(
                   "Sign In",
                   style: fontStyle(fontSize: 24, fontWeight: FontWeight.bold),

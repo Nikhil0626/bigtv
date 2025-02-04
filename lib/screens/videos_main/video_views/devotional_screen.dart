@@ -138,7 +138,5 @@ class _DevotionalScreenState extends State<DevotionalScreen> {
       ),
       ),
     );
-
-
   }
 }

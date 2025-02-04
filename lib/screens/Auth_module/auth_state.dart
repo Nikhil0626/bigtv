@@ -4,7 +4,8 @@ class InitialScreen extends AuthState{}
 class LoadingScreen extends AuthState{}
 class SuccessScreen extends AuthState{
   String message = "";
-  SuccessScreen({ required this.message});
+  String otp ;
+  SuccessScreen({ required this.message, this.otp="",});
 }
 class ErrorScreen extends AuthState{
   String message = "";
