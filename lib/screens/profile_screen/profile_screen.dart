@@ -1,18 +1,7 @@
 import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(ProfileApp());
-}
 
-class ProfileApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: ProfileScreen(),
-    );
-  }
-}
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -32,7 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, size: 20),
           onPressed: () {
-            Navigator.pop(context, const ChotaInfo());
+            Navigator.pop(context, );
           },
         ),
         title: const Text('Profile'),

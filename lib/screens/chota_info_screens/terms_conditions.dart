@@ -19,7 +19,7 @@ class _TermsConditionsState extends State<TermsConditions> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context, const ChotaInfo());
+            Navigator.pop(context,);
           },
         ),
         title: Text("Terms and Conditions", style: fontStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),

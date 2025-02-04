@@ -25,7 +25,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
         backgroundColor: Colors.blue,
         leading: InkWell(
           onTap: () {
-            Navigator.pop(context, ChotaInfo);
+            Navigator.pop(context, );
           },
           child: const Icon(
             Icons.arrow_back_ios,

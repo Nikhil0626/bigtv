@@ -4,9 +4,9 @@ import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
 import 'package:chotanews/screens/Auth_module/auth_event.dart';
 import 'package:chotanews/screens/Auth_module/auth_state.dart';
+import 'package:chotanews/screens/Auth_module/sign_in_screen.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
-import 'package:chotanews/welcome_screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

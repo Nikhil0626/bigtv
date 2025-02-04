@@ -11,28 +11,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../globel_keys/app_router.dart';
+import '../new_refer_earn_screen/new_refer_earn_screen.dart';
 import '../videos_main/tab_screen.dart';
 
-class ChotaInfo extends StatelessWidget {
-  const ChotaInfo({super.key});
+
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomePage(),
-    );
-  }
+  _SettingsScreenState createState() => _SettingsScreenState();
 }
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
+class _SettingsScreenState extends State<SettingsScreen> {
   bool isDarkTheme = false;
 
   void _toggleTheme() {
@@ -45,6 +35,9 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        appBar: AppBar(
+
+        ),
         backgroundColor: isDarkTheme ? Colors.black : Colors.white,
         body: ListView(
           children: [
@@ -71,46 +64,46 @@ class _HomePageState extends State<HomePage> {
                 ],
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 20),
 
             // Profile Card
-            Card(
-              color: isDarkTheme ? Colors.grey[800] : Colors.white,
-              margin: const EdgeInsets.symmetric(horizontal: 20),
-              shadowColor: Colors.black12,
-              elevation: 2,
-              child: ListTile(
-                leading: Card(
-                  color: AppColors.appButtonColor,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: SvgPicture.asset(
-                      'assets/settings_icons/profile_icon.svg',
-                      height: 30,
-                      width: 30,
-                    ),
-                  ),
-                ),
-                title: Text(
-                  'Profile',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: isDarkTheme ? Colors.white : Colors.black,
-                  ),
-                ),
-                trailing: const Icon(
-                  Icons.arrow_forward_ios,
-                  size: 20,
-                ),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfileScreen()),
-                  );
-                },
-              ),
-            ),
+            // Card(
+            //   color: isDarkTheme ? Colors.grey[800] : Colors.white,
+            //   margin: const EdgeInsets.symmetric(horizontal: 20),
+            //   shadowColor: Colors.black12,
+            //   elevation: 2,
+            //   child: ListTile(
+            //     leading: Card(
+            //       color: AppColors.appButtonColor,
+            //       child: Padding(
+            //         padding: const EdgeInsets.all(8.0),
+            //         child: SvgPicture.asset(
+            //           'assets/settings_icons/profile_icon.svg',
+            //           height: 30,
+            //           width: 30,
+            //         ),
+            //       ),
+            //     ),
+            //     title: Text(
+            //       'Profile',
+            //       style: TextStyle(
+            //         fontSize: 16,
+            //         fontWeight: FontWeight.w500,
+            //         color: isDarkTheme ? Colors.white : Colors.black,
+            //       ),
+            //     ),
+            //     trailing: const Icon(
+            //       Icons.arrow_forward_ios,
+            //       size: 20,
+            //     ),
+            //     onTap: () {
+            //       Navigator.push(
+            //         context,
+            //         MaterialPageRoute(builder: (context) => ProfileScreen()),
+            //       );
+            //     },
+            //   ),
+            // ),
 
             // Refer&Earn Card
              const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
@@ -146,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AboutUs()),
+                    MaterialPageRoute(builder: (context) => NewReferEarnScreen()),
                   );
                 },
               ),
@@ -393,23 +386,23 @@ class _HomePageState extends State<HomePage> {
             const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
           ],
         ),
-        bottomNavigationBar: BottomNavigationBar(
-
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'Home',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.location_on),
-              label: 'Locations',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.menu),
-              label: 'Menu',
-            ),
-          ],
-        ),
+        // bottomNavigationBar: BottomNavigationBar(
+        //
+        //   items: const [
+        //     BottomNavigationBarItem(
+        //       icon: Icon(Icons.home),
+        //       label: 'Home',
+        //     ),
+        //     BottomNavigationBarItem(
+        //       icon: Icon(Icons.location_on),
+        //       label: 'Locations',
+        //     ),
+        //     BottomNavigationBarItem(
+        //       icon: Icon(Icons.menu),
+        //       label: 'Menu',
+        //     ),
+        //   ],
+        // ),
       ),
     );
   }
