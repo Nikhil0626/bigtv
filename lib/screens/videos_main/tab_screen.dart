@@ -130,10 +130,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../utils/app_colors.dart';
-import '../profile_screen/profile_screen.dart';
+
 
 class GetAllMenuItemScreen extends StatefulWidget {
-  const GetAllMenuItemScreen({super.key});
+
+  const GetAllMenuItemScreen({super.key,});
 
   @override
   State<GetAllMenuItemScreen> createState() => _GetAllMenuItemScreenState();
@@ -177,7 +178,6 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
           child: const Icon(
             color: Colors.white,
             Icons.arrow_back_ios,
-
             size: 18,
           ),
         ),
@@ -222,7 +222,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
                           } else if (state.getAllMenuList[index].value ==
                               "devotional") {
                             Navigator.pushNamed(
-                                context, RoutesManager.districtSelectionScreen,arguments: { "postId": state.getAllMenuList[index].id.toString(),});
+                                context, RoutesManager.devotionalScreen,arguments: { "postId": state.getAllMenuList[index].id.toString(),});
                           } else if (state.getAllMenuList[index].value ==
                               "podcast") {
                             Navigator.pushNamed(

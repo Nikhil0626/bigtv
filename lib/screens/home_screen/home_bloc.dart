@@ -11,6 +11,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/app_router.dart';
 
@@ -19,29 +20,33 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     List<HomeScreenModel> getAllPosts = [];
     int firstIndex = 0;
     bool isMenuChange = false;
-     String pageType = "";
-     on<MenuChange>((event, emit) async {
-       isMenuChange=!isMenuChange;
-       emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: "",firstIndex: firstIndex,isChange: isMenuChange));
-     });
+    String pageType = "";
+    on<MenuChange>((event, emit) async {
+      isMenuChange = !isMenuChange;
+      emit(SuccessHomeScreenState(
+          getAllHomeScreenNews: getAllPosts,
+          pageType: "",
+          firstIndex: firstIndex,
+          isChange: isMenuChange));
+    });
 
     on<GetAllNewsFeed>((event, emit) async {
       emit(LoadingHomeScreenState());
 
-    String  deviceId =  GlobalVariables().deviceId??"";
-    String  platForm =  GlobalVariables().platForm??"";
+      String deviceId = GlobalVariables().deviceId ?? "";
+      String platForm = GlobalVariables().platForm ?? "";
 
       final Map<String, dynamic> queryParams = {
         'userid': "1",
         'postid': "0",
         'lpostid': "0",
-        'includeHomePage': "1",
+        'includeHomePage': "0",
         // 'hasAds': true,
         // 'isByNotification': false,
         'deviceid': deviceId,
         'platform': platForm,
-        // 'homefeed': "1",
-        'locationIds': '64',
+        'homefeed': "1",
+        // 'locationIds': '64',
         // "debugMode": true
       };
       try {
@@ -52,7 +57,11 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
               (e) => HomeScreenModel.fromJson(e),
             )
             .toList();
-        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: "",firstIndex: 1,isChange: isMenuChange));
+        emit(SuccessHomeScreenState(
+            getAllHomeScreenNews: getAllPosts,
+            pageType: "",
+            firstIndex: 1,
+            isChange: isMenuChange));
       } on DioException catch (e, st) {
         emit(ErrorHomeScreenState(getHomeScreenError: ""));
         log("Get News Api catch error ${st.toString()}");
@@ -64,16 +73,69 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       }
     });
 
-    on<GetFollowingNewsFeed>((event,emit)async{
+    on<GetAllDistrictFeed>((event, emit) async {
+      emit(LoadingHomeScreenState());
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      String locationId = sharedPreferences.getString(
+            "locationId",
+          ) ??
+          "";
+      log(locationId);
+      String deviceId = GlobalVariables().deviceId ?? "";
+      String platForm = GlobalVariables().platForm ?? "";
+
+      final Map<String, dynamic> queryParams = {
+        'userid': "1",
+        'postid': "0",
+        'lpostid': "0",
+        'includeHomePage': "0",
+        // 'hasAds': true,
+        // 'isByNotification': false,
+        'deviceid': deviceId,
+        'platform': platForm,
+        'homefeed': "0",
+        'locationIds': locationId,
+        // "debugMode": true
+      };
+      try {
+        Response response = await HomeRepo().getAllNewsFeeds(queryParams);
+        List data = response.data['posts'];
+        getAllPosts = data
+            .map(
+              (e) => HomeScreenModel.fromJson(e),
+            )
+            .toList();
+        emit(SuccessHomeScreenState(
+            getAllHomeScreenNews: getAllPosts,
+            pageType: "",
+            firstIndex: 1,
+            isChange: isMenuChange));
+      } on DioException catch (e, st) {
+        emit(ErrorHomeScreenState(getHomeScreenError: ""));
+        log("Get News Api catch error ${st.toString()}");
+        log("Get News Api  catch ${st.toString()}");
+      } catch (e, st) {
+        emit(ErrorHomeScreenState(getHomeScreenError: ""));
+        log("Get News Api catch error ${st.toString()}");
+        log("Get News Api catch ${st.toString()}");
+      }
+    });
+
+    on<GetFollowingNewsFeed>((event, emit) async {
       try {
         Response response = await HomeRepo().getAllNewsFeeds({});
         List data = response.data['posts'];
         getAllPosts = data
             .map(
               (e) => HomeScreenModel.fromJson(e),
-        )
+            )
             .toList();
-        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex:firstIndex,isChange: isMenuChange ));
+        emit(SuccessHomeScreenState(
+            getAllHomeScreenNews: getAllPosts,
+            pageType: pageType,
+            firstIndex: firstIndex,
+            isChange: isMenuChange));
       } on DioException catch (e, st) {
         emit(ErrorHomeScreenState(getHomeScreenError: ""));
         log("Get News Api catch error ${st.toString()}");
@@ -85,20 +147,24 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       }
     });
 
-    on<OnSwipeCard>((event, emit) async{
+    on<OnSwipeCard>((event, emit) async {
       pageType = getAllPosts[event.index].type.toString();
       firstIndex = event.index;
 
       log("page index update in each swipe${getAllPosts[firstIndex].id}");
-      emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex,isChange: isMenuChange));
+      emit(SuccessHomeScreenState(
+          getAllHomeScreenNews: getAllPosts,
+          pageType: pageType,
+          firstIndex: firstIndex,
+          isChange: isMenuChange));
 
-      if(getAllPosts.length-1==firstIndex){
+      if (getAllPosts.length - 1 == firstIndex) {
         emit(LoadingHomeScreenState());
         log("page index update in lase ");
-        int last = getAllPosts.length-1;
-        String? lastPostId = getAllPosts[last].id.toString()??"";
-        String  deviceId =  GlobalVariables().deviceId??"";
-        String  platForm =  GlobalVariables().platForm??"";
+        int last = getAllPosts.length - 1;
+        String? lastPostId = getAllPosts[last].id.toString() ?? "";
+        String deviceId = GlobalVariables().deviceId ?? "";
+        String platForm = GlobalVariables().platForm ?? "";
         final Map<String, dynamic> queryParams = {
           'userid': "1",
           'postid': lastPostId,
@@ -120,11 +186,14 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         getAllPosts = data
             .map(
               (e) => HomeScreenModel.fromJson(e),
-        )
+            )
             .toList();
 
-
-        emit(SuccessHomeScreenState(getAllHomeScreenNews: getAllPosts,pageType: pageType,firstIndex: firstIndex,isChange: isMenuChange));
+        emit(SuccessHomeScreenState(
+            getAllHomeScreenNews: getAllPosts,
+            pageType: pageType,
+            firstIndex: firstIndex,
+            isChange: isMenuChange));
       }
     });
 
@@ -132,9 +201,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       log(event.data.toString());
     });
 
-
-    on<SendNewsToSocialMedia>((event, emit) async{
-
+    on<SendNewsToSocialMedia>((event, emit) async {
       final DynamicLinkParameters parameters = DynamicLinkParameters(
         uriPrefix: 'https://chotanews.page.link/store',
         link: Uri.parse('https://chotanews.page.link/store'),
@@ -148,7 +215,8 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         ),
       );
 
-      final ShortDynamicLink shortLink = await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+      final ShortDynamicLink shortLink =
+          await FirebaseDynamicLinks.instance.buildShortLink(parameters);
       final Uri dynamicUrl = shortLink.shortUrl;
       print(dynamicUrl.toString());
 
@@ -165,34 +233,34 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       //   ),
       // );
 
-
       try {
-        var dynamicUrl = await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+        var dynamicUrl =
+            await FirebaseDynamicLinks.instance.buildShortLink(parameters);
         print('Short Dynamic Link: $dynamicUrl');
         Share.share('$dynamicUrl');
-
-      } catch (e,st) {
+      } catch (e, st) {
         print('Error generating dynamic link: $st');
         print('Error generating dynamic link: $e');
       }
-
     });
 
-
-    on<MenuItemClickEvent>((event,emit)async{
-      if(event.currentMenuItem == "హోమ్"){
+    on<MenuItemClickEvent>((event, emit) async {
+      if (event.currentMenuItem == "హోమ్") {
         Navigator.pushNamed(event.context, RoutesManager.homeScreen);
-      }else if(event.currentMenuItem == "లొకేషన్స్"){
-        Navigator.pushNamed(event.context, RoutesManager.districtSelectionScreen);
-      }else{
+      } else if (event.currentMenuItem == "లొకేషన్స్") {
+        Navigator.pushNamed(
+            event.context, RoutesManager.districtSelectionScreen,
+            arguments: {
+              "className": "Home",
+            });
+      } else {
         Navigator.push(
           event.context,
-         MaterialPageRoute(builder: (context) => const GetAllMenuItemScreen(),),
+          MaterialPageRoute(
+            builder: (context) => const GetAllMenuItemScreen(),
+          ),
         );
       }
-
     });
-
-
   }
 }

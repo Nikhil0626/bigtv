@@ -1,19 +1,22 @@
+
+import 'package:chotanews/screens/home_screen/home_top_tabs.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../../utils/app_colors.dart';
-import '../chota_info_screens/chota_info.dart';
-import '../home_screen/home_screen_view.dart';
+import '../videos_main/tab_screen.dart';
 import 'district_selection_bloc.dart';
 import 'district_selection_event.dart';
 import 'district_selection_state.dart';
 
 class DistrictsSelectionScreen extends StatefulWidget {
-  const DistrictsSelectionScreen({super.key});
+  final String className;
+  const DistrictsSelectionScreen({super.key,required this.className});
 
   @override
   State<DistrictsSelectionScreen> createState() =>
@@ -33,6 +36,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -46,15 +50,31 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                     color: Colors.blueGrey,
                     borderRadius: BorderRadius.circular(8)),
                 padding: const EdgeInsets.all(16.0),
-                child: const Text(
-                  "మీ జిల్లాను ఎంచుకోండి, మీ ఊర్లో తాజా ఈవెంట్లు తెలుసుకోండి!",
-                  maxLines: 2,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                  textAlign: TextAlign.center,
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Icon(
+                        color: Colors.white,
+                        Icons.arrow_back_ios,
+                        size: 18,
+                      ),
+                    ),
+                    const Expanded(
+                      child: Text(
+                        "మీ జిల్లాను ఎంచుకోండి, మీ ఊర్లో తాజా ఈవెంట్లు తెలుసుకోండి!",
+                        maxLines: 2,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -135,115 +155,117 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
             Expanded(
               child: BlocConsumer<DistrictSelectionBloc, DistrictSelectionState>(
                 builder: (context, state) {
+
                   if (state is LoadingDistrictsState ||
                       state is SubmitLoadingState) {
                     return const Center(child: AppLoadingScreen());
                   } else if (state is SuccessDistrictsState) {
-                    return Expanded(
-                      child: Stack(
-                        children: [
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: 55,
-                              ),
-                              child: ListView.builder(
-                                itemCount: state.filterDistrictsList.length,
-                                itemBuilder: (context, index) {
-                                  final district =
-                                      state.filterDistrictsList[index];
 
-                                  final isSelected = state.selectedDistrictList
-                                      .contains(district.id);
+                    return Stack(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            bottom: 55,
+                          ),
+                          child: ListView.builder(
+                            itemCount: state.filterDistrictsList.length,
+                            itemBuilder: (context, index) {
+                              final district =
+                                  state.filterDistrictsList[index];
 
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 8.0, horizontal: 20.0),
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        context.read<DistrictSelectionBloc>().add(
-                                              SelectedDistrictsUpdate(
-                                                  selectedDistrict: district.id),
-                                            );
-                                      },
-                                      child: Container(
-                                        width: MediaQuery.of(context).size.width,
-                                        height: 40,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          border: Border.all(
-                                            color: isSelected
-                                                ? AppColors.appButtonColor
-                                                : AppColors.borderColor,
-                                            width: 1,
+                              final isSelected = state.selectedDistrictList.contains(district.id.toString());
+
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 8.0, horizontal: 20.0),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    context.read<DistrictSelectionBloc>().add(
+                                          SelectedDistrictsUpdate(
+                                              selectedDistrict: district.id.toString()),
+                                        );
+                                  },
+                                  child: Container(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? AppColors.appButtonColor
+                                            : AppColors.borderColor,
+                                        width: 1,
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 16.0),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            district.name,
+                                            style: const TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w400,
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 16.0),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceBetween,
-                                            children: [
-                                              Text(
-                                                district.name,
-                                                style: const TextStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                              Icon(
-                                                isSelected
-                                                    ? Icons.check_circle
-                                                    : Icons.check_circle_outline,
-                                                color: Colors.lightBlue,
-                                              ),
-                                            ],
+                                          Icon(
+                                            isSelected
+                                                ? Icons.check_circle
+                                                : Icons.check_circle_outline,
+                                            color: Colors.lightBlue,
                                           ),
-                                        ),
+                                        ],
                                       ),
                                     ),
-                                  );
-                                },
-                              ),
-                            ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                          Padding(
-                            padding: const EdgeInsets.all(15.0),
-                            child: Align(
-                              alignment: Alignment.bottomCenter,
-                              child: InkWell(
-                                onTap: () {
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(15.0),
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: InkWell(
+                              onTap: () {
+                                if(state.selectedDistrictList.isEmpty){
+                                  CustomToast.showInfoToast(msg: "Select at list two district");
+                                }else{
                                   context
                                       .read<DistrictSelectionBloc>()
-                                      .add(SubmitDistricts());
-                                },
-                                child: Container(
-                                  height: 40,
-                                  width: MediaQuery.of(context).size.width,
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 10.0, horizontal: 20.0),
-                                  decoration: BoxDecoration(
-                                    color: Colors.lightBlue,
-                                    borderRadius: BorderRadius.circular(8),
+                                      .add(SubmitDistricts(className: widget.className));
+                                }
+
+                              },
+                              child: Container(
+                                height: 40,
+                                width: MediaQuery.of(context).size.width,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 10.0, horizontal: 20.0),
+                                decoration: BoxDecoration(
+                                  color:state.selectedDistrictList.isEmpty?Colors.grey: Colors.lightBlue,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Text(
+                                  'Done',
+                                  style: TextStyle(
+                                    color: Colors.white, // White text
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  child: const Text(
-                                    'Done',
-                                    style: TextStyle(
-                                      color: Colors.white, // White text
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
                               ),
                             ),
-                          )
-                        ],
-                      ),
+                          ),
+                        )
+                      ],
                     );
                   } else if (state is ErrorDistrictsState) {
                     return const Center(
@@ -267,7 +289,11 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                 },
                 listener: (context, state) {
                   if (state is SubmitSuccessState) {
-                    Navigator.pushNamed(context, RoutesManager.homeScreen);
+                    if(state.className=="Home"){
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeTopTabs(tab: "1",),));
+                    }else{
+                      Navigator.pushNamed(context, RoutesManager.homeScreen);
+                    }
                   }
                 },
               ),
@@ -277,4 +303,5 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
       ),
     );
   }
+
 }

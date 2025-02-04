@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import 'district_selection_event.dart';
@@ -14,7 +15,7 @@ class DistrictSelectionBloc
   DistrictSelectionBloc() : super(InitialDistrictsState()) {
     List<DistrictModel> districtList = [];
     List<DistrictModel> filterDistrictsList = [];
-    List<int> selectedDistrictList = [];
+    List<String> selectedDistrictList = [];
 
     on<SelectedDistrictsUpdate>((event, emit) async {
       if (selectedDistrictList.contains(event.selectedDistrict)) {
@@ -24,20 +25,29 @@ class DistrictSelectionBloc
 
         emit(SuccessDistrictsState(
             districtList: districtList,
-            selectedDistrictList: selectedDistrictList, filterDistrictsList: filterDistrictsList));
+            selectedDistrictList: selectedDistrictList,
+            filterDistrictsList: filterDistrictsList));
       } else {
         log("add ${event.selectedDistrict.toString()}");
 
-        selectedDistrictList.add(event.selectedDistrict);
+        selectedDistrictList.add(event.selectedDistrict.toString());
         emit(SuccessDistrictsState(
             districtList: districtList,
-            selectedDistrictList: selectedDistrictList, filterDistrictsList: filterDistrictsList));
+            selectedDistrictList: selectedDistrictList,
+            filterDistrictsList: filterDistrictsList));
       }
     });
 
     on<GetAllDistricts>((event, emit) async {
       emit(LoadingDistrictsState());
       try {
+        print("selectedDistrictList.toString()");
+        SharedPreferences sharedPreferences =
+            await SharedPreferences.getInstance();
+        String result = sharedPreferences.getString("locationId") ?? "";
+        print("selectedDistrictList.toString()   $result");
+        selectedDistrictList = result.split(',');
+        print(selectedDistrictList.toString());
         Response response = await DistrictSelectionRepo().getAllDistricts();
         log(response.data.toString());
         List getData = response.data;
@@ -47,9 +57,11 @@ class DistrictSelectionBloc
               (e) => DistrictModel.fromJson(e),
             )
             .toList();
-        filterDistrictsList =districtList;
+        filterDistrictsList = districtList;
         emit(SuccessDistrictsState(
-            districtList: districtList, selectedDistrictList: [], filterDistrictsList: filterDistrictsList));
+            districtList: districtList,
+            selectedDistrictList: selectedDistrictList,
+            filterDistrictsList: filterDistrictsList));
       } catch (e, st) {
         emit(ErrorDistrictsState(message: 'No Districts Available'));
       }
@@ -62,28 +74,36 @@ class DistrictSelectionBloc
         return user.value.toLowerCase().contains(query);
       }).toList();
       emit(SuccessDistrictsState(
-          districtList: districtList, selectedDistrictList: selectedDistrictList, filterDistrictsList: filterDistrictsList));});
-
+          districtList: districtList,
+          selectedDistrictList: selectedDistrictList,
+          filterDistrictsList: filterDistrictsList));
+    });
 
     on<SubmitDistricts>((event, emit) async {
       emit(SubmitLoadingState());
-
-      String result = selectedDistrictList.join(', ');
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      sharedPreferences.remove(
+        "locationId",
+      );
+      String result = selectedDistrictList.toSet().join(',');
+      sharedPreferences.setString("locationId", result);
       log(result);
       String? deviceId = GlobalVariables().deviceId;
       print("Device ID: ${deviceId}");
-      var body={
-        "deviceId":deviceId.toString(),
-        "isFollowed":"true",
-        "locationId":result,
-        "type":"bulk",
+      var body = {
+        "deviceId": deviceId.toString(),
+        "isFollowed": "true",
+        "locationId": result,
+        "type": "bulk",
       };
       try {
-        Response response = await DistrictSelectionRepo().updateDistrictsList(body);
+        Response response =
+            await DistrictSelectionRepo().updateDistrictsList(body);
         log(response.data.toString());
-        emit(SubmitSuccessState());
-      } catch (e, st) {
-      }
+        selectedDistrictList = [];
+        emit(SubmitSuccessState(className:event.className));
+      } catch (e, st) {}
     });
   }
 }

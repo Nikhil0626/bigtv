@@ -259,10 +259,10 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
                     setState(() {
                       _isOtpSubmitted = true;
                       if (_validateOtp()) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MyHomePage1()),
-                        );
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(builder: (context) =>  MyHomePage1()),
+                        // );
                       }
                     });
                   },

@@ -95,9 +95,9 @@ class CarouselScreen extends StatelessWidget {
       body: Stack(
         children: [
           PageView.builder(
-            itemCount: imageList?.length,
+            itemCount: imageList.length,
             itemBuilder: (context, index) {
-              return _buildImageCard(imageList![index]);
+              return _buildImageCard(imageList[index]);
             },
           ),
 
