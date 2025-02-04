@@ -31,3 +31,10 @@ class UserDetailsSave extends AuthEvent {
     required this.email,
   });
 }
+
+
+class MobileNumberChanged extends AuthEvent {
+  final String mobileNumber;
+
+  MobileNumberChanged(this.mobileNumber);
+}

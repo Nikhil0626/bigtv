@@ -26,7 +26,7 @@ class _ContactUsState extends State<ContactUs> {
         backgroundColor: Colors.blue,
         leading: InkWell(
           onTap: () {
-            Navigator.pop(context, ChotaInfo);
+            Navigator.pop(context, );
           },
           child: const Icon(
             Icons.arrow_back_ios,

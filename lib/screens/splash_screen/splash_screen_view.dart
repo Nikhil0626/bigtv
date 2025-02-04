@@ -8,7 +8,7 @@ import 'dart:async';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../welcome_screens/welcome_screen.dart';
+import '../Auth_module/welcome_screen.dart';
 
 class SplashScreenView extends StatefulWidget {
   const SplashScreenView({super.key});

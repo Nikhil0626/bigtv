@@ -1,6 +1,11 @@
+import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
+import 'package:chotanews/screens/Auth_module/welcome_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:chotanews/welcome_screens/enter_otp_screen.dart';
-import 'package:chotanews/welcome_screens/welcome_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_svg/svg.dart';
+
+import 'auth_event.dart';
+import 'enter_otp_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -53,38 +58,10 @@ class _SignInScreenState extends State<SignInScreen> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                RichText(
-                  textAlign: TextAlign.center,
-                  text: TextSpan(
-                    style: const TextStyle(
-                        fontSize: 27,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                    children: [
-                      const TextSpan(text: "Chota"),
-                      const WidgetSpan(child: SizedBox(width: 4)),
-                      WidgetSpan(
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6),
-                          decoration: const BoxDecoration(
-                            color: Colors.lightBlue,
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(15),
-                              bottomLeft: Radius.circular(15),
-                            ),
-                          ),
-                          child: const Text(
-                            "News",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                 SvgPicture.asset(
+                   'assets/svg/Chota_news_logo.svg',
+                   height: 24,
+                   width: 166,
                 ),
                 const SizedBox(height: 45),
 
@@ -147,21 +124,22 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
 
                           validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              setState(() {
-                                _mobileNumberError = "Please enter your mobile number";
-                              });
-                              return '';
-                            } else if (value.length != 10) {
-                              setState(() {
-                                _mobileNumberError = "Please enter a valid 10-digit mobile number";
-                              });
-                              return '';
-                            }
-                            setState(() {
-                              _mobileNumberError = null;
-                            });
-                            return null;
+                            // if (value == null || value.isEmpty) {
+                            //   setState(() {
+                            //     _mobileNumberError = "Please enter your mobile number";
+                            //   });
+                            //   return '';
+                            // } else if (value.length != 10) {
+                            //   setState(() {
+                            //     _mobileNumberError = "Please enter a valid 10-digit mobile number";
+                            //   });
+                            //   return '';
+                            // }
+                            // setState(() {
+                            //   _mobileNumberError = null;
+                            // });
+                            // return null;
+                            context.watch<AuthBloc>().add(MobileNumberChanged(value!));
                           },
                         ),
                       ),
