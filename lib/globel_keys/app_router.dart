@@ -5,6 +5,13 @@ import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
 import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
 import 'package:chotanews/screens/Auth_module/auth_screen.dart';
+import 'package:chotanews/screens/videos_main/video_views/devotional_screen.dart';
+import 'package:chotanews/screens/videos_main/video_views/gallery_screen.dart';
+import 'package:chotanews/screens/videos_main/video_views/myagazines_screen.dart';
+import 'package:chotanews/screens/videos_main/video_views/podcost_screen.dart';
+import 'package:chotanews/screens/videos_main/video_views/videos_view_screen.dart';
+import 'package:chotanews/welcome_screens/enter_otp_screen.dart';
+import 'package:chotanews/welcome_screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 
 import '../onbording_screens/onboarding_screen.dart';
@@ -16,6 +23,8 @@ import '../screens/districts_selection/districts_selection_screen.dart';
 import '../screens/home_screen/home_top_tabs.dart';
 import '../screens/profile_screen/profile_screen.dart';
 import '../screens/splash_screen/splash_screen_view.dart';
+import '../screens/videos_main/tab_screen.dart';
+import '../welcome_screens/welcome_screen.dart';
 
 abstract class RoutesManager {
   RoutesManager._();
@@ -38,6 +47,12 @@ abstract class RoutesManager {
   static const welcomeScreen = '/welcomeScreen';
   static const signInScreen = '/signInScreen';
   static const enterOtpScreen = '/enterOtpScreen';
+  static const videoScreen = '/videoScreen';
+  static const galleryScreen = '/galleryScreen';
+  static const magazineScreen = '/magazineScreen';
+  static const devotionalScreen = '/devotionalScreen';
+  static const podcastScreen = '/podcastScreen';
+  static const getAllMenuItemScreen = '/getAllMenuItemScreen';
 
   static Route<dynamic>? generateRoute(RouteSettings setting) {
     switch (setting.name) {
@@ -71,7 +86,29 @@ abstract class RoutesManager {
       case signInScreen:
         return MaterialPageRoute(builder: (context) => const SignInScreen());
       case enterOtpScreen:
-        return MaterialPageRoute(builder: (context) =>  EnterOtpScreen());
+        return MaterialPageRoute(builder: (context) =>  const EnterOtpScreen());
+        case getAllMenuItemScreen:
+        return MaterialPageRoute(builder: (context) =>  const GetAllMenuItemScreen());
+        case videoScreen:
+          final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (context) =>   VideosScreen(postId:
+        args?['postId'] ?? '',));
+        case galleryScreen:
+          final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (context) =>   GalleryScreen(postId:
+                    args?['postId'] ?? '',));
+        case magazineScreen:
+          final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (context) =>   MyagazinesScreen(postId:
+        args?['postId'] ?? '',));
+        case devotionalScreen:
+          final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (context) =>   DevotionalScreen(postId:
+        args?['postId'] ?? '',));
+        case podcastScreen:
+          final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (context) =>   PodcostScreen(postId:
+        args?['postId'] ?? '',));
 
 
 

@@ -1,16 +1,20 @@
 import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_bloc.dart';
 import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_state.dart';
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../globel_keys/app_router.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
 import '../vodeo_bloc/videos_event.dart';
 
 class GalleryScreen extends StatefulWidget {
-  const GalleryScreen({super.key});
+  final String postId;
+  const GalleryScreen({super.key, required this.postId});
 
   @override
   State<GalleryScreen> createState() => _GalleryScreenState();
@@ -19,13 +23,24 @@ class GalleryScreen extends StatefulWidget {
 class _GalleryScreenState extends State<GalleryScreen> {
   @override
   void initState() {
-    context.read<VideosBloc>().add(GetAllVideos(type: "2"));
+    context.read<VideosBloc>().add(GetAllVideos(type: widget.postId));
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(leading: InkWell(
+        onTap: () {
+          Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+        },
+        child: const Icon(
+          color: Colors.white,
+          Icons.arrow_back_ios,
+          size: 18,
+        ),
+      ),backgroundColor: AppColors.appButtonColor,title: Text("Gallery View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
       body: BlocBuilder<VideosBloc, VideosState>(
         builder: (context, state) {
           if (state is LoadingState) {

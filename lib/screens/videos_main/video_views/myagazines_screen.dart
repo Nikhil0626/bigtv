@@ -3,6 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../globel_keys/app_router.dart';
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_fonts.dart';
 import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
 import '../../../utils/app_strings.dart';
@@ -12,7 +15,8 @@ import '../vodeo_bloc/videos_event.dart';
 import '../vodeo_bloc/videos_state.dart';
 
 class MyagazinesScreen extends StatefulWidget {
-  const MyagazinesScreen({super.key});
+  final String postId;
+  const MyagazinesScreen({super.key, required this.postId});
 
   @override
   State<MyagazinesScreen> createState() => _MyagazinesScreen();
@@ -21,13 +25,25 @@ class MyagazinesScreen extends StatefulWidget {
 class _MyagazinesScreen extends State<MyagazinesScreen> {
   @override
   void initState() {
-    context.read<VideosBloc>().add(GetAllVideos(type: "5"));
+    context.read<VideosBloc>().add(GetAllVideos(type: widget.postId));
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(leading: InkWell(
+        onTap: () {
+          Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+        },
+        child: const Icon(
+          color: Colors.white,
+          Icons.arrow_back_ios,
+          size: 18,
+        ),
+      ),backgroundColor: AppColors.appButtonColor,title: Text("Magazine View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
+
       body: BlocBuilder<VideosBloc, VideosState>(
         builder: (context, state) {
           if (state is LoadingState) {
