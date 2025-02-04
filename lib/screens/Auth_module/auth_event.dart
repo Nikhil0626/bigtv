@@ -14,8 +14,9 @@ class SendOtp extends AuthEvent {
 
 class VerificationOtp extends AuthEvent {
   final String Otp;
+  final String mobileNumber;
 
-  VerificationOtp({required this.Otp});
+  VerificationOtp({required this.Otp,required this.mobileNumber});
 }
 
 

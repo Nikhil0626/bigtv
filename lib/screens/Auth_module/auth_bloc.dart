@@ -4,6 +4,7 @@ import 'package:chotanews/screens/Auth_module/auth_event.dart';
 import 'package:chotanews/screens/Auth_module/auth_repo.dart';
 import 'package:chotanews/screens/Auth_module/auth_state.dart';
 import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_state.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,6 +19,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc() : super(InitialScreen()) {
     // Firebase.initializeApp();
     // final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    String otp = "";
     final GoogleSignIn _googleSignIn = GoogleSignIn();
     on<GoogleLogin>((event, emit) async {
       emit(LoadingScreen());
@@ -130,9 +133,52 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         Response response = await AuthRepo().sendOtp(body);
         if(response.statusCode ==200){
           log(response.data.toString());
+          CustomToast.showSuccessToast(msg: response.data['message']);
+          otp =  response.data['Otp'].toString();
+          log(otp);
+          emit(SuccessScreen(message: response.data['success'].toString()));
         }
 
       } catch (e, st) {
+        CustomToast.showSuccessToast(msg: "Otp Not Send Try Again");
+        log("error  $e");
+        log("error  $st");
+      }
+    });
+
+
+    on<VerificationOtp>((event, emit) async {
+      emit(LoadingScreen());
+      try {
+        String? deviceId = GlobalVariables().deviceId;
+        Map<String, dynamic> body = {
+          "mobile_number": event.mobileNumber.toString(),
+          "otp":event.Otp,
+          "authType": "Apple",
+          "deviceId": deviceId,
+          "email": "", // Use stored email if null
+          "familyName": "",
+          "givenName": "",
+          "id": "",
+          "name": "hello",
+          "photo": ""
+        };
+        log(body.toString());
+        Response response = await AuthRepo().validateOtp(body);
+        if(response.statusCode == 200){
+          log(response.data.toString());
+          CustomToast.showSuccessToast(msg: response.data['message']);
+          otp = "";
+          GlobalVariables().userId = response.data['data']['id'].toString();
+          SharedPreferences preferences = await SharedPreferences.getInstance();
+
+          preferences.setString(
+              "loginId", response.data['data']['id'].toString());
+          emit(SuccessScreen(message: "OTP Verify"));
+        }
+
+      } catch (e, st) {
+        CustomToast.showSuccessToast(msg: "Otp Not Send Try Again");
         log("error  $e");
         log("error  $st");
       }

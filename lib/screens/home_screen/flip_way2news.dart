@@ -10,6 +10,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
+import '../../utils/date_format.dart';
 import '../../utils/image_view_popup.dart';
 import '../videos_main/video_views/video_preview.dart';
 import 'botton_actions.dart';
@@ -223,7 +224,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
                               fontStyle(fontSize: 16, color: Colors.grey[800])),
                     ),
                     height(height: 4),
-                    Text(item.created ?? "No Title",
+                    Text(formatTimeDifference( item.created),
                         style:
                         fontStyle(fontSize: 14, fontWeight: FontWeight.normal)),
                     const Divider(color: AppColors.borderColor),

@@ -29,6 +29,7 @@ class SendNewsToSocialMedia extends HomeScreenEvent{
 class MenuChange extends HomeScreenEvent{}
 
 
+
 class MenuItemClickEvent extends HomeScreenEvent{
   final String currentMenuItem;
   final BuildContext context;
