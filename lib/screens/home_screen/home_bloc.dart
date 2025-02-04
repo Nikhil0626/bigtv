@@ -10,7 +10,6 @@ import 'package:dio/dio.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -21,7 +20,11 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     List<HomeScreenModel> getAllPosts = [];
     int firstIndex = 0;
     bool isMenuChange = false;
+
     String pageType = "";
+
+
+
     on<MenuChange>((event, emit) async {
       isMenuChange = !isMenuChange;
       emit(SuccessHomeScreenState(
@@ -264,6 +267,57 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       }
     });
 
+    on<CommentByPost>((event, emit) async {
+      emit(LoadingHomeScreenState());
 
+      final Map<String, dynamic> body = {};
+      try {
+        Response response = await HomeRepo().addCommentByPost(body);
+        List data = response.data['posts'];
+        getAllPosts = data
+            .map(
+              (e) => HomeScreenModel.fromJson(e),
+            )
+            .toList();
+        emit(SuccessHomeScreenState(
+            getAllHomeScreenNews: getAllPosts,
+            pageType: "",
+            firstIndex: 1,
+            isChange: isMenuChange));
+      } on DioException catch (e, st) {
+        log("Get News Api catch error ${st.toString()}");
+        log("Get News Api  catch ${st.toString()}");
+      } catch (e, st) {
+        log("Get News Api catch error ${st.toString()}");
+        log("Get News Api catch ${st.toString()}");
+      }
+    });
+    on<LikeByPost>((event, emit) async {
+      emit(LoadingHomeScreenState());
+      String deviceId = GlobalVariables().deviceId ?? "";
+      String userId = GlobalVariables().userId ?? "";
+      final Map<String, dynamic> body = {
+        "CategoryId": "",
+        "CreatedAt": DateTime.now().toString(),
+        "DeviceId": deviceId,
+        "IsLiked": event.isLike,
+        "PostId": event.postId,
+        "UserId": userId.toString()
+      };
+      try {
+        Response response = await HomeRepo().likeByPost(body);
+        if(response.statusCode==200){
+          emit(IsLike(isLike: true));
+        }
+      } on DioException catch (e, st) {
+        log("Get News Api catch error ${st.toString()}");
+        log("Get News Api  catch ${st.toString()}");
+      } catch (e, st) {
+        log("Get News Api catch error ${st.toString()}");
+        log("Get News Api catch ${st.toString()}");
+      }
+    });
   }
+
+
 }

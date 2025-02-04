@@ -21,23 +21,26 @@ class BottomActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SvgPicture.asset(icon,
-              height: 20,
-              width: 20,
-              color: Colors.grey[600]
-          ),
-          height(height: 4),
-          Text(
-            label,
-            style: fontStyle(fontSize: 14,
+      child: SizedBox(
+        height: 50,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SvgPicture.asset(icon,
+                height: 20,
+                width: 20,
                 color: Colors.grey[600]
             ),
-          ),
-        ],
+            height(height: 4),
+            Text(
+              label,
+              style: fontStyle(fontSize: 14,
+                  color: Colors.grey[600]
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

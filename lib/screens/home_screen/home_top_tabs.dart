@@ -11,7 +11,7 @@ import 'flip_way2news.dart';
 
 class HomeTopTabs extends StatefulWidget {
   final String tab;
-  const HomeTopTabs({super.key, this.tab ="1"});
+  const HomeTopTabs({super.key, this.tab ="0"});
 
   @override
   State<HomeTopTabs> createState() => _HomeTopTabsState();
@@ -65,6 +65,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
 
                     ],
                   ),
+                  if(isChange)
                   Positioned(
                     left: 0,
                     right: 0,
@@ -88,7 +89,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                       ),
                     ),
                   ),
-
+                  if(isChange)
                   Positioned(
                     bottom: 1,
                     left: 0,

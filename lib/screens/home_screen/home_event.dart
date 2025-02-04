@@ -35,3 +35,15 @@ class MenuItemClickEvent extends HomeScreenEvent{
   final BuildContext context;
   MenuItemClickEvent({required this.currentMenuItem,required this.context});
 }
+
+class CommentByPost extends HomeScreenEvent {
+  final String postData;
+  final String postId;
+  CommentByPost({required this.postData,required this.postId,});
+}
+
+class LikeByPost extends HomeScreenEvent {
+  final bool isLike;
+  final String postId;
+  LikeByPost({required this.isLike,required this.postId,});
+}
