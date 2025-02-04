@@ -136,7 +136,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           CustomToast.showSuccessToast(msg: response.data['message']);
           otp =  response.data['Otp'].toString();
           log(otp);
-          emit(SuccessScreen(message: response.data['success'].toString()));
+          emit(SuccessScreen(message: response.data['success'].toString(),otp: otp));
         }
 
       } catch (e, st) {

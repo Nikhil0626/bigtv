@@ -1,9 +1,7 @@
 import 'dart:developer';
-
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
 import 'package:chotanews/screens/Auth_module/auth_state.dart';
-import 'package:chotanews/screens/Auth_module/welcome_screen.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -12,7 +10,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'auth_event.dart';
-import 'enter_otp_screen.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -44,7 +41,8 @@ class _SignInScreenState extends State<SignInScreen> {
             if (state.message == "true") {
               Navigator.pushNamed(context, RoutesManager.enterOtpScreen,
                   arguments: {
-                    "mobileNumber": _mobileController.text.toString()
+                    "mobileNumber": _mobileController.text.toString(),
+                    "otp": state.otp
                   });
             }
           }
@@ -75,14 +73,14 @@ class _SignInScreenState extends State<SignInScreen> {
                                 ),
                               ),
                               height(height: 30),
-                               Text(
+                              Text(
                                 "Sign In",
                                 textAlign: TextAlign.center,
                                 style: fontStyle(
                                     fontSize: 24, fontWeight: FontWeight.w600),
                               ),
-                             height(height: 8),
-                               Text(
+                              height(height: 8),
+                              Text(
                                 "Start using with your mobile number",
                                 textAlign: TextAlign.center,
                                 style: fontStyle(
@@ -90,13 +88,13 @@ class _SignInScreenState extends State<SignInScreen> {
                                     color: Colors.black54,
                                     fontWeight: FontWeight.normal),
                               ),
-                             height(height: 30),
-                               Text(
+                              height(height: 30),
+                              Text(
                                 "Mobile Number*",
                                 style: fontStyle(
                                     fontSize: 16, fontWeight: FontWeight.w700),
                               ),
-                             height(height: 16),
+                              height(height: 16),
                               Container(
                                 height: 50,
                                 decoration: BoxDecoration(
@@ -114,7 +112,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 15, vertical: 14),
-                                      child:  Text(
+                                      child: Text(
                                         "+91",
                                         style: fontStyle(
                                             fontSize: 16,
@@ -218,6 +216,21 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                               ),
+                              height(height: 20),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(context,
+                                        RoutesManager.districtSelectionScreen);
+                                  },
+                                  child: const Center(
+                                    child: Text(
+                                      "Skip and login as guest",
+                                      style: TextStyle(
+                                          color: Colors.lightBlue,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  )),
                             ],
                           ),
                         ),

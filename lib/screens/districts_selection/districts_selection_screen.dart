@@ -30,7 +30,6 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
     context.read<DistrictSelectionBloc>().add(GetAllDistricts());
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

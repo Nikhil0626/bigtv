@@ -14,6 +14,7 @@ import '../vodeo_bloc/videos_event.dart';
 
 class GalleryScreen extends StatefulWidget {
   final String postId;
+
   const GalleryScreen({super.key, required this.postId});
 
   @override
@@ -31,16 +32,24 @@ class _GalleryScreenState extends State<GalleryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(leading: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
-        },
-        child: const Icon(
-          color: Colors.white,
-          Icons.arrow_back_ios,
-          size: 18,
+      appBar: AppBar(
+        leading: InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+          },
+          child: const Icon(
+            color: Colors.white,
+            Icons.arrow_back_ios,
+            size: 18,
+          ),
         ),
-      ),backgroundColor: AppColors.appButtonColor,title: Text("Gallery View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
+        backgroundColor: AppColors.appButtonColor,
+        title: Text(
+          "Gallery View",
+          style: fontStyle(
+              fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+        ),
+      ),
       body: BlocBuilder<VideosBloc, VideosState>(
         builder: (context, state) {
           if (state is LoadingState) {
@@ -50,7 +59,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
               itemCount: state.getAllVideoList.length,
               itemBuilder: (context, index) {
                 return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,7 +74,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                           fit: BoxFit.fill,
                         ),
                       ),
-                    width(width: 15),
+                      width(width: 15),
                       Expanded(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
