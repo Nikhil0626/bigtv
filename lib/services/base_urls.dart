@@ -17,8 +17,14 @@ static const String updateDistricts ="/upsert/location";
   static const String appMenu = "/app/menu";
 
 
+  ///Add Comment
+  static const String addComment = "/addcomment";
+
   ///getUserDetail
   static const String userInfo = "/userinfo";
+
+  ///like post
+  static const String likePost = "/post/likes";
 
   ///Auth Apis
   static const String sendOtp = "/generateOtp";

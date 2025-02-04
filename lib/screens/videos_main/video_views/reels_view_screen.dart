@@ -82,9 +82,10 @@ class _ReelsViewScreenState extends State<ReelsViewScreen> {
           _controller.value.isInitialized
               ? AspectRatio(
             aspectRatio: _controller.value.aspectRatio,
-            child: VideoPlayer(_controller),
+            child: VideoPlayer(_controller,),
           )
               : const Center(child: CircularProgressIndicator()),
+          if(!isPlaying)
           Positioned.fill(
             child: Center(
               child: InkWell(
@@ -99,26 +100,38 @@ class _ReelsViewScreenState extends State<ReelsViewScreen> {
               ),
             ),
           ),
-          const Positioned(
+           Positioned(
             bottom: 20,
             right: 20,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Icon(Icons.favorite_border, color: Colors.white, size: 35),
-                SizedBox(height: 5),
-                Text('2000', style: TextStyle(color: Colors.white, fontSize: 12)),
-                SizedBox(height: 30),
-                Icon(Icons.comment, color: Colors.white, size: 35),
-                SizedBox(height: 5),
-                Text('4500', style: TextStyle(color: Colors.white, fontSize: 12)),
-                SizedBox(height: 30),
-                Icon(Icons.send_rounded, color: Colors.white, size: 35),
-                SizedBox(height: 5),
-                Text('8900', style: TextStyle(color: Colors.white, fontSize: 12)),
-                SizedBox(height: 30),
-                Icon(Icons.more_horiz_outlined, color: Colors.white, size: 35),
-                SizedBox(height: 5),
+                if(isPlaying)
+                  InkWell(
+                    onTap: togglePlayPause,
+                    child: Icon(
+                      isPlaying
+                          ? Icons.pause_circle_filled
+                          : Icons.play_circle_filled,
+                      size: 40,
+                      color: Colors.lightBlue.shade50,
+                    ),
+                  ),
+                const SizedBox(height: 20),
+                const Icon(Icons.favorite_border, color: Colors.white, size: 35),
+                const SizedBox(height: 5),
+                const Text('2000', style: TextStyle(color: Colors.white, fontSize: 12)),
+                const SizedBox(height: 30),
+                const Icon(Icons.comment, color: Colors.white, size: 35),
+                const SizedBox(height: 5),
+                const Text('4500', style: TextStyle(color: Colors.white, fontSize: 12)),
+                const SizedBox(height: 30),
+                const Icon(Icons.send_rounded, color: Colors.white, size: 35),
+                const SizedBox(height: 5),
+                const Text('8900', style: TextStyle(color: Colors.white, fontSize: 12)),
+                const SizedBox(height: 30),
+                const Icon(Icons.more_horiz_outlined, color: Colors.white, size: 35),
+                const SizedBox(height: 5),
               ],
             ),
           ),

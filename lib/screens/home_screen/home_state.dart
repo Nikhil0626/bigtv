@@ -28,10 +28,13 @@ class ErrorHomeScreenState extends HomeScreenState{
 
 
 ///Card Swipe End
- class OnSwipeForwardHomeState extends HomeScreenState{
-
-
+ class OnSwipeForwardHomeState extends HomeScreenState{}
+ class IsLike extends HomeScreenState{
+  final bool isLike;
+  IsLike({required this.isLike});
  }
+
+
  class MenuChangeState extends HomeScreenState{
    bool isChange;
    MenuChangeState({required this.isChange});

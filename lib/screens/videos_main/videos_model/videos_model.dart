@@ -1,3 +1,5 @@
+import '../../home_screen/home_screen_model.dart';
+
 class GetAllVideosModel {
   int? id;
   String? author;
@@ -19,7 +21,7 @@ class GetAllVideosModel {
   bool? isBigStandardFullVideo;
   bool? isReporter;
   bool? isHomePage;
-  List<String>? gallery;
+  final List<GalleryImage>? gallery;
   MediaUrl? imageUrl;
   MediaUrl? videoUrl;
   String? vdoUrl;
@@ -111,7 +113,11 @@ class GetAllVideosModel {
       isBigStandardFullVideo: json['isBigStandardFullVideo'] as bool?,
       isReporter: json['isReporter'] as bool?,
       isHomePage: json['isHomePage'] as bool?,
-      gallery: (json['gallery'] as List<dynamic>?)?.cast<String>(),
+      gallery: json['gallery'] != null
+          ? (json['gallery'] as List)
+          .map((item) => GalleryImage.fromJson(item))
+          .toList()
+          : null,
       imageUrl: json['imageUrl'] != null ? MediaUrl.fromJson(json['imageUrl']) : null,
       videoUrl: json['videoUrl'] != null ? MediaUrl.fromJson(json['videoUrl']) : null,
       vdoUrl: json['vdoUrl'] as String?,

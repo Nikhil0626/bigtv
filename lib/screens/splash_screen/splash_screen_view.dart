@@ -62,7 +62,7 @@ class _SplashScreenView extends State<SplashScreenView> {
     log(loginId.toString());
     if (loginId !=null || loginId.isNotEmpty) {
       Timer(const Duration(seconds: 2), () {
-        Navigator.pushNamed(context, RoutesManager.signInScreen);
+        Navigator.pushNamed(context, RoutesManager.homeScreen);
       });
     } else {
       Timer(const Duration(seconds: 2), () {

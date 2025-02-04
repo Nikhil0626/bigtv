@@ -1,3 +1,6 @@
+
+import 'package:carousel_slider/carousel_options.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_bloc.dart';
 import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_state.dart';
 import 'package:chotanews/utils/app_colors.dart';
@@ -6,10 +9,15 @@ import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+// import 'package:carousel_slider/carousel_slider.dart';
+import 'package:carousel_slider/carousel_controller.dart';
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
 
 import '../../../globel_keys/app_router.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
+import '../../home_screen/home_screen_model.dart';
 import '../vodeo_bloc/videos_event.dart';
 
 class GalleryScreen extends StatefulWidget {
@@ -29,87 +37,168 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(leading: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
-        },
-        child: const Icon(
-          color: Colors.white,
-          Icons.arrow_back_ios,
-          size: 18,
+    return WillPopScope(
+      onWillPop: ()async{
+        Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(leading: InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+          },
+          child: const Icon(
+            color: Colors.white,
+            Icons.arrow_back_ios,
+            size: 18,
+          ),
+        ),backgroundColor: AppColors.appButtonColor,title: Text("Gallery View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
+        body: BlocBuilder<VideosBloc, VideosState>(
+          builder: (context, state) {
+            if (state is LoadingState) {
+              return const AppLoadingScreen();
+            } else if (state is VideoSuccessState) {
+              return ListView.separated(
+                itemCount: state.getAllVideoList.length,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: (){
+                      print("sbcksjnkhncknsd");
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => FullPageCarousel(imageUrls: state.getAllVideoList[index].gallery?? []),));
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 10),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: const BorderRadius.all(Radius.circular(4)),
+                            child: Image.network(
+                              state.getAllVideoList[index].imageUrl!.url.toString(),
+                              height: 120,
+                              width: 80,
+                              fit: BoxFit.fill,
+                            ),
+                          ),
+                        width(width: 15),
+                          Expanded(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  state.getAllVideoList[index].title.toString(),
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                height(height: 10),
+                                Text(
+                                  dateFormat(
+                                    state.getAllVideoList[index].created.toString(),
+                                  ),
+                                  style: const TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                separatorBuilder: (context, index) {
+                  return const Divider(
+                    color: Colors.grey,
+                    thickness: 1.0,
+                    height: 5.0,
+                  );
+                },
+              );
+            }
+            return const Center(child: Text(AppStrings.appNotWorking));
+          },
         ),
-      ),backgroundColor: AppColors.appButtonColor,title: Text("Gallery View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
-      body: BlocBuilder<VideosBloc, VideosState>(
-        builder: (context, state) {
-          if (state is LoadingState) {
-            return AppLoadingScreen();
-          } else if (state is VideoSuccessState) {
-            return ListView.separated(
-              itemCount: state.getAllVideoList.length,
-              itemBuilder: (context, index) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(4)),
-                        child: Image.network(
-                          state.getAllVideoList[index].imageUrl!.url.toString(),
-                          height: 120,
-                          width: 80,
-                          fit: BoxFit.fill,
-                        ),
-                      ),
-                    width(width: 15),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              state.getAllVideoList[index].title.toString(),
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            height(height: 10),
-                            Text(
-                              dateFormat(
-                                state.getAllVideoList[index].created.toString(),
-                              ),
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              separatorBuilder: (context, index) {
-                return const Divider(
-                  color: Colors.grey,
-                  thickness: 1.0,
-                  height: 5.0,
-                );
-              },
-            );
-          }
-          return Container(
-            child: const Center(child: Text(AppStrings.appNotWorking)),
-          );
-        },
       ),
     );
   }
 }
+
+
+class FullPageCarousel extends StatefulWidget {
+  final List<GalleryImage> imageUrls;
+
+  const FullPageCarousel({super.key, required this.imageUrls});
+
+  @override
+  _FullPageCarouselState createState() => _FullPageCarouselState();
+}
+
+class _FullPageCarouselState extends State<FullPageCarousel> {
+  int _currentIndex = 0;
+  final CarouselSliderController _controller = CarouselSliderController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          CarouselSlider(
+            // carouselController: _controller, // Using the correct controller
+            options: CarouselOptions(
+              height: double.infinity,
+              viewportFraction: 1.0,
+              enableInfiniteScroll: true,
+              autoPlay: true,
+              autoPlayInterval: Duration(seconds: 3),
+              onPageChanged: (index, reason) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+            ),
+            items: widget.imageUrls.map((image) {
+              return Container(
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(image.url),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+
+          // Smooth Page Indicator
+          Positioned(
+            bottom: 20,
+            child: AnimatedSmoothIndicator(
+              activeIndex: _currentIndex,
+              count: widget.imageUrls.length,
+              effect: ExpandingDotsEffect(
+                dotHeight: 8,
+                dotWidth: 8,
+                activeDotColor: Colors.white,
+                dotColor: Colors.grey.shade400,
+              ),
+              onDotClicked: (index) {
+                _controller.jumpToPage(index); // Corrected method
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+

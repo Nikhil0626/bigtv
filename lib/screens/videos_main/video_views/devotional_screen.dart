@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/globel_keys/app_router.dart';
+import 'package:chotanews/screens/videos_main/video_views/reels_view_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,96 +31,112 @@ class _DevotionalScreenState extends State<DevotionalScreen> {
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(leading: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
-        },
-        child: const Icon(
-          color: Colors.white,
-          Icons.arrow_back_ios,
-          size: 18,
-        ),
-      ),backgroundColor: AppColors.appButtonColor,title: Text("Devotional View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
+    return WillPopScope(
+      onWillPop: ()async{
+        Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(leading: InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+          },
+          child: const Icon(
+            color: Colors.white,
+            Icons.arrow_back_ios,
+            size: 18,
+          ),
+        ),backgroundColor: AppColors.appButtonColor,title: Text("Devotional View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
 
-      body: BlocBuilder<VideosBloc, VideosState>(
-    builder: (context, state) {
-      if (state is LoadingState) {
-        return AppLoadingScreen();
-      } else if (state is VideoSuccessState) {
-        return ListView.separated(
-          itemCount: state.getAllVideoList.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 120,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      image: DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          state.getAllVideoList[index].imageUrl!.url!.isNotEmpty
-                              ?  state.getAllVideoList[index].imageUrl!.url.toString()
-                              : "https://example.com/default_image.png",
+        body: BlocBuilder<VideosBloc, VideosState>(
+      builder: (context, state) {
+        if (state is LoadingState) {
+          return AppLoadingScreen();
+        } else if (state is VideoSuccessState) {
+          return ListView.separated(
+            itemCount: state.getAllVideoList.length,
+            itemBuilder: (context, index) {
+              return InkWell(
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ReelsViewScreen(getReelDetails: state.getAllVideoList[index].videoUrl!.url.toString()),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 120,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          image: DecorationImage(
+                            image: CachedNetworkImageProvider(
+                              state.getAllVideoList[index].imageUrl!.url!.isNotEmpty
+                                  ?  state.getAllVideoList[index].imageUrl!.url.toString()
+                                  : "https://example.com/default_image.png",
+                            ),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        fit: BoxFit.cover,
                       ),
-                    ),
-                  ),
 
-                  width(width: 15),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          state.getAllVideoList[index].title.toString(),
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      width(width: 15),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              state.getAllVideoList[index].title.toString(),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            height(height: 10),
+                            Text(
+                              dateFormat(
+                                state.getAllVideoList[index].created.toString(),
+                              ),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
-                        height(height: 10),
-                        Text(
-                          dateFormat(
-                            state.getAllVideoList[index].created.toString(),
-                          ),
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-          separatorBuilder: (context, index) {
-            return const Divider(
-              color: Colors.grey,
-              thickness: 1.0,
-              height: 5.0,
-            );
-          },
+                ),
+              );
+            },
+            separatorBuilder: (context, index) {
+              return const Divider(
+                color: Colors.grey,
+                thickness: 1.0,
+                height: 5.0,
+              );
+            },
+          );
+        }
+        return Container(
+          child: const Center(child: Text(AppStrings.appNotWorking)),
         );
-      }
-      return Container(
-        child: const Center(child: Text(AppStrings.appNotWorking)),
-      );
-    },
-    ),
+      },
+      ),
+      ),
     );
 
 

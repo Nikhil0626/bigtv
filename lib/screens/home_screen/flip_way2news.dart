@@ -10,14 +10,15 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
+import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
 import '../../utils/image_view_popup.dart';
+import '../videos_main/video_views/gallery_screen.dart';
 import '../videos_main/video_views/video_preview.dart';
 import 'botton_actions.dart';
 import 'home_bloc.dart';
 import 'home_event.dart';
 import 'home_state.dart';
-import 'images_view.dart';
 
 enum FlipDirection { up, down }
 
@@ -70,15 +71,12 @@ class _MyHomePage1State extends State<MyHomePage1> {
           if (state is LoadingHomeScreenState) {
             return const Center(child: AppLoadingScreen());
           } else if (state is SuccessHomeScreenState) {
-            return Expanded(
-              child: FlipPanel.builder(
-                itemBuilder: (context, index) => _buildContent(context, state, index),
-                itemsCount: state.getAllHomeScreenNews.length,
-              ),
+            return FlipPanel.builder(
+              itemBuilder: (context, index) => _buildContent(context, state, index),
+              itemsCount: state.getAllHomeScreenNews.length,
             );
           } else {
-            return const Center(
-                child: Text("Something went wrong. Please try again."));
+            return const Center(child: AppLoadingScreen());
           }
         },
       ),
@@ -86,7 +84,8 @@ class _MyHomePage1State extends State<MyHomePage1> {
   }
 
   Widget _buildContent(
-      BuildContext context, SuccessHomeScreenState state, int index) {
+      BuildContext context, SuccessHomeScreenState state, int index)
+  {
     var item = state.getAllHomeScreenNews[index];
     log("post typeee -------  ${state.pageType}");
     if (state.pageType == "Image") {
@@ -102,7 +101,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
           color: Colors.white,
           height: MediaQuery.of(context).size.height-35,
           width: MediaQuery.of(context).size.width,
-          child: CarouselScreen(imageList: item.gallery ?? []));
+          child: FullPageCarousel(imageUrls: item.gallery ?? []));
     }
 
     // else if (item.homepage != null) {
@@ -131,7 +130,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
               child: Stack(
                 children: [
                   SizedBox(
-                      height: MediaQuery.of(context).size.height / 2.3,
+                      height: MediaQuery.of(context).size.height / 2.1,
                       child: state.pageType == "Video"
                           ? VideoPreview(url: item.videoUrl?.url ?? "")
                           : CachedNetworkImage(
@@ -239,18 +238,23 @@ class _MyHomePage1State extends State<MyHomePage1> {
                               context.read<HomeBloc>().add(GetAllNewsFeed());
                             }),
                         BottomActions(
-                            icon: "assets/svg/like.svg",
+                            icon:isLike?"assets/svg/reload.svg":"assets/svg/like.svg",
                             label: 'లైక్',
                             onTap: () {
                               log("Like",);
-                              context.read<HomeBloc>().add(GetAllNewsFeed());
+                              isLike = !isLike;
+                              setState(() {
+
+                              });
+                              // context.read<HomeBloc>().add(LikeByPost(isLike: true, postId: item.id.toString()));
                             }),
                         BottomActions(
                             icon: "assets/svg/comment.svg",
                             label: 'కామెంట్',
                             onTap: () {
                               log("Comment");
-                              context.read<HomeBloc>().add(GetAllNewsFeed());
+                              showComments(context,item.id.toString());
+                              // context.read<HomeBloc>().add(GetAllNewsFeed());
                             }),
                         BottomActions(
                             icon: "assets/svg/share.svg",
@@ -271,6 +275,8 @@ class _MyHomePage1State extends State<MyHomePage1> {
       ),
     );
   }
+
+  bool isLike = false;
 
 }
 
