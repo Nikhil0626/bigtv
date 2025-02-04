@@ -9,7 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../../utils/app_colors.dart';
-import '../videos_main/tab_screen.dart';
 import 'district_selection_bloc.dart';
 import 'district_selection_event.dart';
 import 'district_selection_state.dart';

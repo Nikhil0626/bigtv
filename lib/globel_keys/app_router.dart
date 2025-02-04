@@ -72,8 +72,7 @@ abstract class RoutesManager {
         return MaterialPageRoute(builder: (context) =>   DistrictsSelectionScreen(className:
         args?['className'] ?? '',)) ;
       case chotaInfo:
-        return MaterialPageRoute(builder: (context) => const ChotaInfo());
-        return MaterialPageRoute(builder: (context) =>  const DistrictsSelectionScreen()) ;
+        return MaterialPageRoute(builder: (context) => const SettingsScreen());
       case settingsScreen:
         return MaterialPageRoute(builder: (context) => const SettingsScreen());
       case aboutUs:

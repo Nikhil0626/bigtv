@@ -9,11 +9,11 @@ import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../new_refer_earn_screen/new_refer_earn_screen.dart';
 import '../videos_main/tab_screen.dart';
-
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -36,7 +36,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
-
+          title: Text(
+            "Settings",
+            style: fontStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
         ),
         backgroundColor: isDarkTheme ? Colors.black : Colors.white,
         body: ListView(
@@ -51,15 +57,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                  ),
-                  const Expanded(
-                    child: Text(
-                      "Settings",
-                      style: TextStyle(
-                        fontSize: 19,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
                   ),
                 ],
               ),
@@ -106,7 +103,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             // ),
 
             // Refer&Earn Card
-             const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
             Card(
               color: isDarkTheme ? Colors.grey[800] : Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -139,14 +138,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => NewReferEarnScreen()),
+                    MaterialPageRoute(
+                        builder: (context) => NewReferEarnScreen()),
                   );
                 },
               ),
             ),
 
             // Share app Card
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
             Card(
               color: isDarkTheme ? Colors.grey[800] : Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -186,7 +188,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             // Contact Us Card
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
             Card(
               color: isDarkTheme ? Colors.grey[800] : Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -198,7 +202,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SvgPicture.asset(
-                      'assets/settings_icons/contactus_icon.svg',  // Add the correct asset path
+                      'assets/settings_icons/contactus_icon.svg',
+                      // Add the correct asset path
                       height: 30,
                       width: 30,
                     ),
@@ -226,7 +231,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             // Advertise with Us Card
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
             Card(
               color: isDarkTheme ? Colors.grey[800] : Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -238,7 +245,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SvgPicture.asset(
-                      'assets/settings_icons/advertise_icon.svg',  // Add the correct asset path
+                      'assets/settings_icons/advertise_icon.svg',
+                      // Add the correct asset path
                       height: 30,
                       width: 30,
                     ),
@@ -266,7 +274,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             // Terms and Conditions Card
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
             Card(
               color: isDarkTheme ? Colors.grey[800] : Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -278,7 +288,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SvgPicture.asset(
-                      'assets/settings_icons/terms_conditions_icon.svg',  // Add the correct asset path
+                      'assets/settings_icons/terms_conditions_icon.svg',
+                      // Add the correct asset path
                       height: 30,
                       width: 30,
                     ),
@@ -306,7 +317,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             // Privacy Policy Card
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
             Card(
               color: isDarkTheme ? Colors.grey[800] : Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -318,7 +331,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SvgPicture.asset(
-                      'assets/settings_icons/privacy_policy.svg',  // Add the correct asset path
+                      'assets/settings_icons/privacy_policy.svg',
+                      // Add the correct asset path
                       height: 30,
                       width: 30,
                     ),
@@ -346,7 +360,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
 
             // Logout Card
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
             Card(
               color: isDarkTheme ? Colors.grey[800] : Colors.white,
               margin: const EdgeInsets.symmetric(horizontal: 20),
@@ -358,7 +374,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: SvgPicture.asset(
-                      'assets/settings_icons/logout_icon.svg',  // Add the correct asset path
+                      'assets/settings_icons/logout_icon.svg',
+                      // Add the correct asset path
                       height: 30,
                       width: 30,
                     ),
@@ -376,14 +393,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Icons.arrow_forward_ios,
                   size: 20,
                 ),
-                onTap: () {
-                  // Add your logout logic here
-
+                onTap: () async {
+                  SharedPreferences sp = await SharedPreferences.getInstance();
+                  sp.clear();
+                  Navigator.pushNamed(context, RoutesManager.signInScreen);
                 },
               ),
             ),
 
-            const Padding(padding: EdgeInsets.symmetric(horizontal: 16,vertical: 8),),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            ),
           ],
         ),
         // bottomNavigationBar: BottomNavigationBar(
