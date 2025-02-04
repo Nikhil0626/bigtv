@@ -11,11 +11,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../utils/app_colors.dart';
+
 import '../chota_info_screens/chota_info.dart';
 import '../profile_screen/profile_screen.dart';
 
 class GetAllMenuItemScreen extends StatefulWidget {
-  const GetAllMenuItemScreen({super.key});
+
+  const GetAllMenuItemScreen({super.key,});
 
   @override
   State<GetAllMenuItemScreen> createState() => _GetAllMenuItemScreenState();
@@ -30,13 +32,12 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
 
   @override
   void didChangeDependencies() {
-    log("iscallingggggggggg");
+   log("iscallingggggggggg");
     super.didChangeDependencies();
   }
-
-  @override
+@override
   void didUpdateWidget(covariant GetAllMenuItemScreen oldWidget) {
-    log("ksaiu;fofoihsv;ufiae;ufiowefivhsh");
+  log("ksaiu;fofoihsv;ufiae;ufiowefivhsh");
     super.didUpdateWidget(oldWidget);
   }
 
@@ -79,9 +80,10 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
         ],
       ),
       body: BlocBuilder<VideosBloc, VideosState>(builder: (context, state) {
+
         if (state is LoadingState) {
-          return const Center(child: AppLoadingScreen());
-        } else if (state is MenuItemState) {
+          return const Center(child: AppLoadingScreen(),);
+        }else if (state is MenuItemState) {
           if (state.getAllMenuList.isEmpty) {
             return const Center(child: Text('No menu items available.'));
           }
@@ -99,44 +101,29 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
                       );
                     },
                     itemCount: state.getAllMenuList.length,
+                    // Ensure proper item count
                     itemBuilder: (context, index) {
                       return InkWell(
                         onTap: () {
                           if (state.getAllMenuList[index].value == "gallery") {
                             Navigator.pushNamed(
-                                context, RoutesManager.galleryScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
-                          } else if (state.getAllMenuList[index].value == "bytes") {
+                                context, RoutesManager.galleryScreen,arguments: { "postId": state.getAllMenuList[index].id.toString(),});
+                          } else if (state.getAllMenuList[index].value ==
+                              "bytes") {
                             Navigator.pushNamed(
-                                context, RoutesManager.videoScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
-                          } else if (state.getAllMenuList[index].value == "magazine") {
+                                context, RoutesManager.videoScreen,arguments: { "postId": state.getAllMenuList[index].id.toString(),});
+                          } else if (state.getAllMenuList[index].value ==
+                              "magazine") {
                             Navigator.pushNamed(
-                                context, RoutesManager.magazineScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
-                          } else if (state.getAllMenuList[index].value == "devotional") {
+                                context, RoutesManager.magazineScreen,arguments: { "postId": state.getAllMenuList[index].id.toString(),});
+                          } else if (state.getAllMenuList[index].value ==
+                              "devotional") {
                             Navigator.pushNamed(
-                                context, RoutesManager.districtSelectionScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
-                          } else if (state.getAllMenuList[index].value == "podcast") {
+                                context, RoutesManager.devotionalScreen,arguments: { "postId": state.getAllMenuList[index].id.toString(),});
+                          } else if (state.getAllMenuList[index].value ==
+                              "podcast") {
                             Navigator.pushNamed(
-                                context, RoutesManager.podcastScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
+                                context, RoutesManager.podcastScreen,arguments: { "postId": state.getAllMenuList[index].id.toString(),});
                           }
                         },
                         child: ListTile(
@@ -156,7 +143,9 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                            ),
+                            )
+
+
                           ),
                           title: Text(
                             state.getAllMenuList[index].name,
@@ -170,6 +159,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
                             Icons.arrow_forward_ios,
                             size: 20,
                           ),
+
                         ),
                       );
                     },

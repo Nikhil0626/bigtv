@@ -4,6 +4,7 @@ import 'package:chotanews/screens/Auth_module/auth_event.dart';
 import 'package:chotanews/screens/Auth_module/auth_repo.dart';
 import 'package:chotanews/screens/Auth_module/auth_state.dart';
 import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_state.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -16,8 +17,10 @@ import '../../globel_keys/global_variables_data.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc() : super(InitialScreen()) {
-     // Firebase.initializeApp();
+    // Firebase.initializeApp();
     // final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    String otp = "";
     final GoogleSignIn _googleSignIn = GoogleSignIn();
     on<GoogleLogin>((event, emit) async {
       emit(LoadingScreen());
@@ -28,9 +31,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         Map<String, dynamic> body = {
           "authType": "Google",
-          "deviceId":deviceId,
+          "deviceId": deviceId,
           "email": googleUser!.email.toString(),
-          "familyName":googleUser.displayName.toString().split(" ").first,
+          "familyName": googleUser.displayName.toString().split(" ").first,
           "givenName": googleUser.displayName.toString().split(" ")[1],
           "id": googleUser.id.toString(),
           "name": googleUser.displayName.toString(),
@@ -39,15 +42,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         log(body.toString());
         Response response = await AuthRepo().loginWithGoogle(body);
-        if(response.statusCode == 200){
+        if (response.statusCode == 200) {
           String? loginId = googleUser.id.toString();
           GlobalVariables().loginId = loginId;
           SharedPreferences preferences = await SharedPreferences.getInstance();
 
-          preferences.setString("loginId",  googleUser.id.toString());
+          preferences.setString("loginId", googleUser.id.toString());
           emit(SuccessScreen(message: ""));
         }
-
       } on DioException catch (e, st) {
         emit(ErrorScreen(message: ""));
         log("Google Login dio catch error ${e.toString()}");
@@ -86,15 +88,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         log(body.toString());
         Response response = await AuthRepo().loginWithGoogle(body);
-        if(response.statusCode == 200){
-          String? loginId =  credential.userIdentifier.toString();
+        if (response.statusCode == 200) {
+          String? loginId = credential.userIdentifier.toString();
           GlobalVariables().loginId = loginId;
           SharedPreferences preferences = await SharedPreferences.getInstance();
 
-          preferences.setString("loginId",  credential.userIdentifier.toString());
+          preferences.setString(
+              "loginId", credential.userIdentifier.toString());
           emit(SuccessScreen(message: ""));
         }
-
       } on DioException catch (e, st) {
         emit(ErrorScreen(message: ""));
 
@@ -108,7 +110,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<SkipLogin>((event, emit) async {
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
 
       sharedPreferences.setString("loginId", "Skip");
       log("Login Skip ");
@@ -119,11 +122,66 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<SendOtp>((event, emit) async {
-     emit(LoadingScreen());
-     try{
-     }catch(e,st) {
+      emit(LoadingScreen());
+      try {
+        String? deviceId = GlobalVariables().deviceId;
+        Map<String, dynamic> body = {
+          "mobile_number": event.phoneNumber.toString(),
+          "device_id": deviceId.toString(),
+        };
+        log(body.toString());
+        Response response = await AuthRepo().sendOtp(body);
+        if(response.statusCode ==200){
+          log(response.data.toString());
+          CustomToast.showSuccessToast(msg: response.data['message']);
+          otp =  response.data['Otp'].toString();
+          log(otp);
+          emit(SuccessScreen(message: response.data['success'].toString()));
+        }
 
-     }
+      } catch (e, st) {
+        CustomToast.showSuccessToast(msg: "Otp Not Send Try Again");
+        log("error  $e");
+        log("error  $st");
+      }
+    });
+
+
+    on<VerificationOtp>((event, emit) async {
+      emit(LoadingScreen());
+      try {
+        String? deviceId = GlobalVariables().deviceId;
+        Map<String, dynamic> body = {
+          "mobile_number": event.mobileNumber.toString(),
+          "otp":event.Otp,
+          "authType": "Apple",
+          "deviceId": deviceId,
+          "email": "", // Use stored email if null
+          "familyName": "",
+          "givenName": "",
+          "id": "",
+          "name": "hello",
+          "photo": ""
+        };
+        log(body.toString());
+        Response response = await AuthRepo().validateOtp(body);
+        if(response.statusCode == 200){
+          log(response.data.toString());
+          CustomToast.showSuccessToast(msg: response.data['message']);
+          otp = "";
+          GlobalVariables().userId = response.data['data']['id'].toString();
+          SharedPreferences preferences = await SharedPreferences.getInstance();
+
+          preferences.setString(
+              "loginId", response.data['data']['id'].toString());
+          emit(SuccessScreen(message: "OTP Verify"));
+        }
+
+      } catch (e, st) {
+        CustomToast.showSuccessToast(msg: "Otp Not Send Try Again");
+        log("error  $e");
+        log("error  $st");
+      }
     });
 
 
@@ -139,6 +197,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
   }
 }
+
 
 
 ///Device ID: UP1A.231005.007

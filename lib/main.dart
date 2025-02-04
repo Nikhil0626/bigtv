@@ -50,13 +50,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
-  // if (Platform.isAndroid) {
-  //   try {
-  //   } catch (e) {
-  //     print("Firebase initialization error: $e");
-  //   }
-  // }
   fetchDeviceId();
   await FirebaseMessaging.instance.requestPermission(
     alert: true,
@@ -64,15 +57,17 @@ Future<void> main() async{
     sound: true,
   );
 
-  String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-  print('APNs Token: $apnsToken');
+  // String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+  // log('APNs Token: $apnsToken');
 
 
 
   var token = await FirebaseMessaging.instance.getToken();
   if (token != null) {
-    log("gksgojgoigspoas ${token}");
+    log("FCM token $token");
     WebEngagePlugin.setPushToken(token);
+    WebEngagePlugin.userLogin('3254');
+
 
 
   }

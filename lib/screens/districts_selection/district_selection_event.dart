@@ -4,7 +4,7 @@ class  GetAllDistricts extends DistrictSelectionEvent{}
 
 
 class SelectedDistrictsUpdate extends DistrictSelectionEvent{
- final int selectedDistrict;
+ final String selectedDistrict;
  SelectedDistrictsUpdate ({required this.selectedDistrict});
 }
 
@@ -16,5 +16,6 @@ SearchDistricts({required this.searchName});
 
 
 class SubmitDistricts extends DistrictSelectionEvent{
-
+ final String className ;
+ SubmitDistricts({required this.className});
 }

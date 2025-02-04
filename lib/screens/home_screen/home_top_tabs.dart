@@ -1,4 +1,5 @@
-import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
+import 'dart:developer';
+
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -9,7 +10,8 @@ import '../../utils/bottom_navigation_items.dart';
 import 'flip_way2news.dart';
 
 class HomeTopTabs extends StatefulWidget {
-  const HomeTopTabs({super.key});
+  final String tab;
+  const HomeTopTabs({super.key, this.tab ="1"});
 
   @override
   State<HomeTopTabs> createState() => _HomeTopTabsState();
@@ -22,7 +24,8 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    log(widget.tab);
+    _tabController = TabController(length: 2, vsync: this,initialIndex: int.parse(widget.tab.toString()));
   }
 
   @override
@@ -57,8 +60,9 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                     controller: _tabController,
                     physics: const NeverScrollableScrollPhysics(), // Disable horizontal scroll
                     children:  const [
-                      MyHomePage1(),
-                      DistrictsSelectionScreen(),
+                      MyHomePage1(tabName: "Home",),
+                      MyHomePage1(tabName: "",),
+
                     ],
                   ),
                   Positioned(
