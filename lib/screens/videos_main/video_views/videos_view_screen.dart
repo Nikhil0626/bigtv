@@ -5,13 +5,17 @@ import 'package:chotanews/utils/date_conversion.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../globel_keys/app_router.dart';
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_fonts.dart';
 import '../../../utils/app_loading_screen.dart';
 import '../vodeo_bloc/videos_bloc.dart';
 import '../vodeo_bloc/videos_event.dart';
 import '../vodeo_bloc/videos_state.dart';
 
 class VideosScreen extends StatefulWidget {
-  const VideosScreen({super.key});
+  final String postId;
+  const VideosScreen({super.key, required this.postId});
 
   @override
   State<VideosScreen> createState() => _VideosScreenState();
@@ -26,7 +30,20 @@ class _VideosScreenState extends State<VideosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: BlocBuilder<VideosBloc, VideosState>(builder: (context, state) {
+    return Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(leading: InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+          },
+          child: const Icon(
+            color: Colors.white,
+            Icons.arrow_back_ios,
+            size: 18,
+          ),
+        ),backgroundColor: AppColors.appButtonColor,title: Text("Video Screen",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
+
+        body: BlocBuilder<VideosBloc, VideosState>(builder: (context, state) {
       if (state is LoadingState) {
         return const AppLoadingScreen();
       } else if (state is VideoSuccessState) {

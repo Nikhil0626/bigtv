@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 abstract class HomeScreenEvent {}
@@ -25,6 +26,11 @@ class SendNewsToSocialMedia extends HomeScreenEvent{
   SendNewsToSocialMedia({required this.id});
 }
 
-class MenuChange extends HomeScreenEvent{
+class MenuChange extends HomeScreenEvent{}
 
+
+class MenuItemClickEvent extends HomeScreenEvent{
+  final String currentMenuItem;
+  final BuildContext context;
+  MenuItemClickEvent({required this.currentMenuItem,required this.context});
 }

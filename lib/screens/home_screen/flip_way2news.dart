@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
@@ -63,13 +64,11 @@ class _MyHomePage1State extends State<MyHomePage1> {
           if (state is LoadingHomeScreenState) {
             return const Center(child: AppLoadingScreen());
           } else if (state is SuccessHomeScreenState) {
-            return FlipPanel.builder(
-              itemBuilder: (context, index) => Container(
-                  height: MediaQuery.of(context).size.height,
-                  width: MediaQuery.of(context).size.width,
-                  color: Colors.white,
-                  child: _buildContent(context, state, index)),
-              itemsCount: state.getAllHomeScreenNews.length,
+            return Expanded(
+              child: FlipPanel.builder(
+                itemBuilder: (context, index) => _buildContent(context, state, index),
+                itemsCount: state.getAllHomeScreenNews.length,
+              ),
             );
           } else {
             return const Center(
@@ -101,101 +100,156 @@ class _MyHomePage1State extends State<MyHomePage1> {
   }
 
   Widget _buildTextContent(BuildContext context, var item, SuccessHomeScreenState state) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Stack(
+    return Container(
+      color: Colors.white,
+      height: MediaQuery.of(context).size.height-35,
+      width: MediaQuery.of(context).size.width,
+      child: InkWell(
+        onTap: (){
+          context.read<HomeBloc>().add(MenuChange());
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-                height: MediaQuery.of(context).size.height / 2.2,
-                child:state.pageType == "Video"?
-                VideoPreview(url: item.videoUrl?.url ?? ""): CachedNetworkImage(
-                  imageUrl: item.imageUrl.url ?? "",
-                  imageBuilder: (context, imageProvider) => Container(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: imageProvider,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                  errorWidget: (context, url, error) => Container(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: const BoxDecoration(
-                      borderRadius: BorderRadius.all(Radius.circular(32)),
-                    ),
-                    child: const Icon(
-                      Icons.account_box,
-                      size: 200,
-                    ),
-                  ),
-                )),
-            Positioned(bottom:1,child: Container(
-              margin: const EdgeInsets.all(8),
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              height: 30,
-                width: 100,
-                decoration: BoxDecoration(color: AppColors.appButtonColor.withOpacity(.4),borderRadius: const BorderRadius.only(topRight: Radius.circular(10),bottomLeft: Radius.circular(10))),
-                child: Image.asset("assets/images/brandlogo.png"))),
-             Positioned(bottom:10,right: 10,child: InkWell(
-                onTap: (){
-                  if(state.pageType== "Video"){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => VideoPreview(url: item.videoUrl?.url ,isVideoScreen: true,),));
-                  }else{
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ImageViewPopup(imageUrl:  item.imageUrl.url,),));
-
-                  }
-                },
-                child: const Center(child: Icon(Icons.zoom_out_map_sharp,color: AppColors.appButtonColor,size: 24,)))),
-          ],
-        ),
-        Expanded(
-            child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(item.title ?? "No Title",
-                  style: fontStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              Expanded(
-                child: Text(item.content,
-                    style: fontStyle(fontSize: 16, color: Colors.grey[800])),
-              ),
-              const Divider(color: AppColors.borderColor),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+            Expanded(
+              flex: 4,
+              child: Stack(
                 children: [
-                  BottomActions(
-                      icon: "assets/loading.json", label: 'Refresh', onTap: () {
-                        log("Refresh");
-                        context.read<HomeBloc>().add(GetAllNewsFeed());
-                  }),
-                  BottomActions(
-                      icon: "assets/like.json", label: 'Like', onTap: () {
-                    log("Like");
-                    context.read<HomeBloc>().add(GetAllNewsFeed());
-                  }),
-                  BottomActions(
-                      icon: "assets/like.json", label: 'Comment', onTap: () {
-                    log("Comment");
-                    context.read<HomeBloc>().add(GetAllNewsFeed());
-                  }),
-                  BottomActions(
-                      icon: "assets/like.json", label: 'Share', onTap: () {
-                    log("Comment");
-                   context.read<HomeBloc>().add(SendNewsToSocialMedia(id: item.linkURLAndroid));
-                  }),
+                  SizedBox(
+                      height: MediaQuery.of(context).size.height / 2.3,
+                      child: state.pageType == "Video"
+                          ? VideoPreview(url: item.videoUrl?.url ?? "")
+                          : CachedNetworkImage(
+                              imageUrl: item.imageUrl.url ?? "",
+                              imageBuilder: (context, imageProvider) => Container(
+                                height: MediaQuery.of(context).size.height,
+                                width: MediaQuery.of(context).size.width,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: imageProvider,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                height: MediaQuery.of(context).size.height,
+                                width: MediaQuery.of(context).size.width,
+                                decoration: const BoxDecoration(
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(32)),
+                                ),
+                                child: const Icon(
+                                  Icons.account_box,
+                                  size: 200,
+                                ),
+                              ),
+                            )),
+                  Positioned(
+                      bottom: 1,
+                      child: Container(
+                          margin: const EdgeInsets.all(8),
+                          padding: const EdgeInsets.symmetric(horizontal: 8),
+                          height: 30,
+                          width: 100,
+                          decoration: BoxDecoration(
+                              color: AppColors.appButtonColor.withOpacity(.4),
+                              borderRadius: const BorderRadius.only(
+                                  topRight: Radius.circular(10),
+                                  bottomLeft: Radius.circular(10))),
+                          child: Image.asset("assets/images/brandlogo.png"))),
+                  Positioned(
+                      bottom: 10,
+                      right: 10,
+                      child: InkWell(
+                          onTap: () {
+                            if (state.pageType == "Video") {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => VideoPreview(
+                                      url: item.videoUrl?.url,
+                                      isVideoScreen: true,
+                                    ),
+                                  ));
+                            } else {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ImageViewPopup(
+                                      imageUrl: item.imageUrl.url,
+                                    ),
+                                  ));
+                            }
+                          },
+                          child: const Center(
+                              child: Icon(
+                            Icons.zoom_out_map_sharp,
+                            color: AppColors.appButtonColor,
+                            size: 24,
+                          )))),
                 ],
               ),
-            ],
-          ),
-        ))
-      ],
+            ),
+            Expanded(
+              flex: 6,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Text(item.title ?? "No Title",
+                        style:
+                            fontStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    height(height: 10),
+                    Expanded(
+                      child: Text(item.content,
+                          style:
+                              fontStyle(fontSize: 16, color: Colors.grey[800])),
+                    ),
+                    const Divider(color: AppColors.borderColor),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        BottomActions(
+                            icon: "assets/loading.json",
+                            label: 'Refresh',
+                            onTap: () {
+                              log("Refresh");
+                              context.read<HomeBloc>().add(GetAllNewsFeed());
+                            }),
+                        BottomActions(
+                            icon: "assets/like.json",
+                            label: 'Like',
+                            onTap: () {
+                              log("Like");
+                              context.read<HomeBloc>().add(GetAllNewsFeed());
+                            }),
+                        BottomActions(
+                            icon: "assets/like.json",
+                            label: 'Comment',
+                            onTap: () {
+                              log("Comment");
+                              context.read<HomeBloc>().add(GetAllNewsFeed());
+                            }),
+                        BottomActions(
+                            icon: "assets/like.json",
+                            label: 'Share',
+                            onTap: () {
+                              log("Comment");
+                              context.read<HomeBloc>().add(
+                                  SendNewsToSocialMedia(id: item.linkURLAndroid));
+                            }),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
     );
   }
 

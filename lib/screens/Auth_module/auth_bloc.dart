@@ -41,7 +41,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         Response response = await AuthRepo().loginWithGoogle(body);
         if(response.statusCode == 200){
           String? loginId = googleUser.id.toString();
-          GlobalVariables().loginId = deviceId;
+          GlobalVariables().loginId = loginId;
           SharedPreferences preferences = await SharedPreferences.getInstance();
 
           preferences.setString("loginId",  googleUser.id.toString());
@@ -88,7 +88,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         Response response = await AuthRepo().loginWithGoogle(body);
         if(response.statusCode == 200){
           String? loginId =  credential.userIdentifier.toString();
-          GlobalVariables().loginId = deviceId;
+          GlobalVariables().loginId = loginId;
           SharedPreferences preferences = await SharedPreferences.getInstance();
 
           preferences.setString("loginId",  credential.userIdentifier.toString());
@@ -108,14 +108,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     });
 
     on<SkipLogin>((event, emit) async {
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+      sharedPreferences.setString("loginId", "Skip");
       log("Login Skip ");
+      GlobalVariables().loginId = "Skip";
+      log("Login Skip ${GlobalVariables().loginId}");
+
       emit(SuccessScreen(message: "Skip"));
     });
 
     on<SendOtp>((event, emit) async {
      emit(LoadingScreen());
      try{
-
      }catch(e,st) {
 
      }

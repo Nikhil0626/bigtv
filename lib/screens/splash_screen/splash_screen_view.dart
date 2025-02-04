@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../welcome_screens/welcome_screen.dart';
 
@@ -56,18 +57,19 @@ class _SplashScreenView extends State<SplashScreenView> {
     );
   }
   Future navigateApp() async {
-    String loginId = GlobalVariables().loginId ?? "";
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String loginId = sharedPreferences.getString("loginId")??"";
     log(loginId.toString());
-    if (loginId.isNotEmpty) {
-      Timer(const Duration(seconds: 7), () {
+    if (loginId !=null || loginId.isNotEmpty) {
+      Timer(const Duration(seconds: 2), () {
         Navigator.pushNamed(context, RoutesManager.homeScreen);
       });
     } else {
-      Timer(const Duration(seconds: 7), () {
+      Timer(const Duration(seconds: 2), () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => WelcomeScreen(), // Replace `NewScreen` with the screen you want to navigate to
+            builder: (context) => const WelcomeScreen(), // Replace `NewScreen` with the screen you want to navigate to
           ),
         );
       });

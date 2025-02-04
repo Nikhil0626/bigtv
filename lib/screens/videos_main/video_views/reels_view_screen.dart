@@ -1,7 +1,13 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:video_player/video_player.dart';
+
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_fonts.dart';
+import '../vodeo_bloc/videos_bloc.dart';
+import '../vodeo_bloc/videos_event.dart';
 
 class ReelsViewScreen extends StatefulWidget {
   final String getReelDetails;
@@ -57,6 +63,19 @@ class _ReelsViewScreenState extends State<ReelsViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(leading: InkWell(
+        onTap: () {
+
+          Navigator.pop(context);
+        },
+        child: const Icon(
+          color: Colors.white,
+          Icons.arrow_back_ios,
+          size: 18,
+        ),
+      ),backgroundColor: AppColors.appButtonColor,title: Text("Reels View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
+
       body: Stack(
         fit: StackFit.expand,
         children: [

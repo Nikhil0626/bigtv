@@ -36,3 +36,8 @@ class ErrorHomeScreenState extends HomeScreenState{
    bool isChange;
    MenuChangeState({required this.isChange});
  }
+
+ class CurrentMenuItemState extends HomeScreenState{
+   final String currentMenuItem;
+   CurrentMenuItemState({required this.currentMenuItem});
+ }
