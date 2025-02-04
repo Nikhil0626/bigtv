@@ -137,8 +137,22 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         log("error  $st");
       }
     });
+
+
+    on<MobileNumberChanged>((event, emit) async {
+      if (event.mobileNumber.isEmpty) {
+        emit(MobileNumberInvalid("Please enter your mobile number"));
+      } else if (event.mobileNumber.length != 10) {
+        emit(MobileNumberInvalid("Please enter a valid 10-digit mobile number"));
+      } else {
+        emit(MobileNumberValid());
+      }
+    });
+
   }
 }
+
+
 
 ///Device ID: UP1A.231005.007
 ///

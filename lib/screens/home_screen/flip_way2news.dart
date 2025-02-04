@@ -231,29 +231,29 @@ class _MyHomePage1State extends State<MyHomePage1> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         BottomActions(
-                            icon: "assets/loading.json",
-                            label: 'Refresh',
+                            icon: "assets/svg/reload.svg",
+                            label: 'రిలోడ్ ',
                             onTap: () {
                               log("Refresh");
                               context.read<HomeBloc>().add(GetAllNewsFeed());
                             }),
                         BottomActions(
-                            icon: "assets/like.json",
-                            label: 'Like',
+                            icon: "assets/svg/like.svg",
+                            label: 'లైక్',
                             onTap: () {
-                              log("Like");
+                              log("Like",);
                               context.read<HomeBloc>().add(GetAllNewsFeed());
                             }),
                         BottomActions(
-                            icon: "assets/like.json",
-                            label: 'Comment',
+                            icon: "assets/svg/comment.svg",
+                            label: 'కామెంట్',
                             onTap: () {
                               log("Comment");
                               context.read<HomeBloc>().add(GetAllNewsFeed());
                             }),
                         BottomActions(
-                            icon: "assets/like.json",
-                            label: 'Share',
+                            icon: "assets/svg/share.svg",
+                            label: ' షేర్',
                             onTap: () {
                               log("Comment");
                               context.read<HomeBloc>().add(

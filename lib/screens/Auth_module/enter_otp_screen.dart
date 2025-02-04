@@ -1,9 +1,9 @@
+import 'package:chotanews/screens/Auth_module/sign_in_screen.dart';
 import 'package:chotanews/utils/app_colors.dart';
-import 'package:chotanews/welcome_screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 
-import '../screens/home_screen/flip_way2news.dart';
-
+import '../home_screen/flip_way2news.dart';
 
 class EnterOtpScreen extends StatefulWidget {
   const EnterOtpScreen({super.key});
@@ -25,10 +25,9 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
   @override
   void initState() {
     super.initState();
-    _isResendEnabled = false; // Initially, the resend option is disabled.
+    _isResendEnabled = false;
   }
 
-  // Function to start OTP resend timer
   void _startTimer() {
     if (_isOtpEntered) {
       Future.delayed(const Duration(seconds: 1), () {
@@ -63,12 +62,10 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
     return _otpControllers.every((controller) => controller.text.isNotEmpty);
   }
 
-  // Referral code validation logic
   bool _validateReferralCode() {
     return _referralController.text == 'XBYAAASN';
   }
 
-  // Focus next OTP box when user enters a digit
   void _onOtpChanged(String value, int index) {
     if (value.isNotEmpty && index < 3) {
       FocusScope.of(context).requestFocus(_otpFocusNodes[index + 1]); // Move focus to the next box
@@ -105,40 +102,11 @@ class _EnterOtpScreenState extends State<EnterOtpScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              RichText(
-                text: TextSpan(
-                  children: [
-                    const TextSpan(
-                      text: "Chota",
-                      style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black),
-                    ),
-                    const WidgetSpan(child: SizedBox(width: 3)),
-                    WidgetSpan(
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        decoration: const BoxDecoration(
-                          color: Colors.lightBlue,
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(15),
-                            bottomLeft: Radius.circular(15),
-                          ),
-                        ),
-                        child: const Text(
-                          "News",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+               SvgPicture.asset(
+                 'assets/svg/Chota_news_logo.svg',
+                 height:24 ,
+                 width: 166,
+               ),
               const SizedBox(height: 25),
               const Text(
                 'Sign In',
