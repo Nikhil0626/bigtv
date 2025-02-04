@@ -93,8 +93,10 @@ abstract class RoutesManager {
         return MaterialPageRoute(builder: (context) => const SignInScreen());
       case enterOtpScreen:
         final args = setting.arguments as Map<String, dynamic>?;
-        return MaterialPageRoute(builder: (context) =>   OtpScreen(mobileNumber:
-        args?['mobileNumber'] ?? '',));
+        return MaterialPageRoute(builder: (context) =>   OtpScreen(
+          mobileNumber: args?['mobileNumber'] ?? '',
+          otp: args?['otp'] ?? '',
+        ));
         case getAllMenuItemScreen:
         return MaterialPageRoute(builder: (context) =>  const GetAllMenuItemScreen());
         case videoScreen:

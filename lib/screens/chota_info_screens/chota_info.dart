@@ -36,6 +36,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        backgroundColor: Colors.white.withOpacity(.9),
         appBar: AppBar(
           backgroundColor: AppColors.appButtonColor,
           leading: IconButton(
@@ -61,7 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
                   margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
                   shadowColor: Colors.black12,
-                  elevation: 2,
+                  elevation: 5,
                   child: ListTile(
                     leading: Padding(
                       padding: const EdgeInsets.only(left: 0),  // Adjusted left padding for leading icon
@@ -106,7 +107,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
                   margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
                   shadowColor: Colors.black12,
-                  elevation: 2,
+                  elevation: 5,
                   child: ListTile(
                     leading: Padding(
                       padding: const EdgeInsets.only(left: 0),
@@ -148,7 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
                   margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
                   shadowColor: Colors.black12,
-                  elevation: 2,
+                  elevation: 5,
                   child: ListTile(
                     leading: Padding(
                       padding: const EdgeInsets.only(left: 0),
@@ -193,7 +194,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
                   margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
                   shadowColor: Colors.black12,
-                  elevation: 2,
+                  elevation: 5,
                   child: ListTile(
                     leading: Padding(
                       padding: const EdgeInsets.only(left: 0),
@@ -238,7 +239,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
                   margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
                   shadowColor: Colors.black12,
-                  elevation: 2,
+                  elevation: 5,
                   child: ListTile(
                     leading: Padding(
                       padding: const EdgeInsets.only(left: 0),
@@ -283,7 +284,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
                   margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
                   shadowColor: Colors.black12,
-                  elevation: 2,
+                  elevation: 5,
                   child: ListTile(
                     leading: Padding(
                       padding: const EdgeInsets.only(left: 0),
@@ -328,7 +329,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
                   margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
                   shadowColor: Colors.black12,
-                  elevation: 2,
+                  elevation: 5,
                   child: ListTile(
                     leading: Padding(
                       padding: const EdgeInsets.only(left: 0),
