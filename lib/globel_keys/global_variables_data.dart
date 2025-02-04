@@ -8,6 +8,7 @@ class GlobalVariables {
   GlobalVariables._internal();
 
   String? deviceId;
+  String? userId;
   String? loginId;
   String? platForm;
 }

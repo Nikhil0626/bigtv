@@ -9,7 +9,7 @@ class LoadingDistrictsState extends DistrictSelectionState {}
 class SuccessDistrictsState extends DistrictSelectionState {
   final List<DistrictModel> districtList;
   final List<DistrictModel> filterDistrictsList;
-  final List<int> selectedDistrictList;
+  final List<String> selectedDistrictList;
   SuccessDistrictsState({required this.districtList,required this.filterDistrictsList,required this.selectedDistrictList});
 }
 class ErrorDistrictsState extends DistrictSelectionState {
@@ -23,7 +23,10 @@ class ErrorDistrictsState extends DistrictSelectionState {
 
 
 class SubmitLoadingState extends DistrictSelectionState{}
-class SubmitSuccessState extends DistrictSelectionState{}
+class SubmitSuccessState extends DistrictSelectionState{
+ final String className;
+ SubmitSuccessState({required this.className});
+}
 class SubmitErrorState extends DistrictSelectionState{}
 
 

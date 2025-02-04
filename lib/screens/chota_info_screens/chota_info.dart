@@ -9,10 +9,12 @@ import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../new_refer_earn_screen/new_refer_earn_screen.dart';
 import '../videos_main/tab_screen.dart';
+
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -354,8 +356,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Icons.arrow_forward_ios,
                       size: 20,
                     ),
-                    onTap: () {
-                      // Add your logout logic here
+                    onTap: () async {
+                      SharedPreferences sp = await SharedPreferences.getInstance();
+                      sp.clear();
+                      Navigator.pushNamed(context, RoutesManager.signInScreen);
                     },
                   ),
                 ),

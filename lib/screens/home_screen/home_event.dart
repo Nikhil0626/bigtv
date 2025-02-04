@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 abstract class HomeScreenEvent {}
 
 class GetAllNewsFeed extends HomeScreenEvent {}
+class GetAllDistrictFeed extends HomeScreenEvent {}
 
 class GetFollowingNewsFeed extends HomeScreenEvent {}
 
@@ -27,6 +27,7 @@ class SendNewsToSocialMedia extends HomeScreenEvent{
 }
 
 class MenuChange extends HomeScreenEvent{}
+
 
 
 class MenuItemClickEvent extends HomeScreenEvent{

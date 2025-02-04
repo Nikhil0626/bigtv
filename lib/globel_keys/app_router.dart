@@ -68,7 +68,11 @@ abstract class RoutesManager {
       case onboardingScreen:
         return MaterialPageRoute(builder: (context) => const OnboardingScreen());
       case districtSelectionScreen:
-        return MaterialPageRoute(builder: (context) =>  const DistrictsSelectionScreen()) ;
+        final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (context) =>   DistrictsSelectionScreen(className:
+        args?['className'] ?? '',)) ;
+      case chotaInfo:
+        return MaterialPageRoute(builder: (context) => const SettingsScreen());
       case settingsScreen:
         return MaterialPageRoute(builder: (context) => const SettingsScreen());
       case aboutUs:
@@ -88,7 +92,9 @@ abstract class RoutesManager {
       case signInScreen:
         return MaterialPageRoute(builder: (context) => const SignInScreen());
       case enterOtpScreen:
-        return MaterialPageRoute(builder: (context) =>  const EnterOtpScreen());
+        final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (context) =>   OtpScreen(mobileNumber:
+        args?['mobileNumber'] ?? '',));
         case getAllMenuItemScreen:
         return MaterialPageRoute(builder: (context) =>  const GetAllMenuItemScreen());
         case videoScreen:

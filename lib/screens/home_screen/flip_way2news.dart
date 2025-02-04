@@ -10,6 +10,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
+import '../../utils/date_format.dart';
 import '../../utils/image_view_popup.dart';
 import '../videos_main/video_views/video_preview.dart';
 import 'botton_actions.dart';
@@ -24,8 +25,8 @@ typedef IndexedItemBuilder<T> = Widget Function(
     BuildContext context, int index);
 
 class MyHomePage1 extends StatefulWidget {
-
- const MyHomePage1({super.key});
+final String tabName;
+ const MyHomePage1({super.key,required this.tabName});
 
   @override
   State<MyHomePage1> createState() => _MyHomePage1State();
@@ -35,7 +36,12 @@ class _MyHomePage1State extends State<MyHomePage1> {
   @override
   void initState() {
     initDynamicLinks();
-    context.read<HomeBloc>().add(GetAllNewsFeed());
+    if(widget.tabName=="Home"){
+      context.read<HomeBloc>().add(GetAllNewsFeed());
+    }else{
+      context.read<HomeBloc>().add(GetAllDistrictFeed());
+
+    }
     super.initState();
   }
   Future<void> initDynamicLinks() async {
@@ -84,10 +90,19 @@ class _MyHomePage1State extends State<MyHomePage1> {
     var item = state.getAllHomeScreenNews[index];
     log("post typeee -------  ${state.pageType}");
     if (state.pageType == "Image") {
-      return CachedNetworkImage(
-          imageUrl: item.imageUrl.url ?? "", fit: BoxFit.cover);
+      return Container(
+        color: Colors.white,
+        height: MediaQuery.of(context).size.height-35,
+        width: MediaQuery.of(context).size.width,
+        child: CachedNetworkImage(
+            imageUrl: item.imageUrl.url ?? "", fit: BoxFit.cover),
+      );
     } else if (state.pageType == "Gallery") {
-      return CarouselScreen(imageList: item.gallery ?? []);
+      return Container(
+          color: Colors.white,
+          height: MediaQuery.of(context).size.height-35,
+          width: MediaQuery.of(context).size.width,
+          child: CarouselScreen(imageList: item.gallery ?? []));
     }
 
     // else if (item.homepage != null) {
@@ -208,6 +223,10 @@ class _MyHomePage1State extends State<MyHomePage1> {
                           style:
                               fontStyle(fontSize: 16, color: Colors.grey[800])),
                     ),
+                    height(height: 4),
+                    Text(formatTimeDifference( item.created),
+                        style:
+                        fontStyle(fontSize: 14, fontWeight: FontWeight.normal)),
                     const Divider(color: AppColors.borderColor),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
