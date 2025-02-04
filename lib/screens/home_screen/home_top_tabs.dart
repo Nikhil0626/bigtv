@@ -1,6 +1,7 @@
 import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -30,9 +31,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
     super.dispose();
   }
 
-  // Method to handle back button press and stop the back navigation
   Future<bool> _onWillPop() async {
-    // Returning false prevents the system back button from doing anything
     return false;
   }
 
@@ -57,7 +56,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                   TabBarView(
                     controller: _tabController,
                     physics: const NeverScrollableScrollPhysics(), // Disable horizontal scroll
-                    children:  [
+                    children:  const [
                       MyHomePage1(),
                       DistrictsSelectionScreen(),
                     ],
@@ -73,9 +72,10 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                         child: TabBar(
                           controller: _tabController,
                           isScrollable: false, // Disable scrolling of the TabBar
-                          labelColor: Colors.black,
                           unselectedLabelColor: Colors.black,
                           indicatorColor: Colors.blue,
+                          unselectedLabelStyle: fontStyle(color: Colors.black,fontSize: 14,fontWeight: FontWeight.normal),
+                          labelStyle: fontStyle(color: Colors.blue,fontSize: 16,fontWeight: FontWeight.bold),
                           tabs: const [
                             Tab(text: 'వార్తలు'),
                             Tab(text: 'జిల్లాలు'),
@@ -84,6 +84,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                       ),
                     ),
                   ),
+
                   Positioned(
                     bottom: 1,
                     left: 0,

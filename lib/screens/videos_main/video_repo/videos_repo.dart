@@ -11,4 +11,10 @@ class VideosRepo extends BaseService {
         queryParameters: queryParameters);
     return response;
   }
+  Future getAllMenuItem() async {
+    Response response = await makeRequest(
+        url: BaseUrls.appMenu,
+        method: RequestType.get,);
+    return response;
+  }
 }

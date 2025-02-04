@@ -5,10 +5,14 @@ import 'package:chotanews/screens/home_screen/home_event.dart';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:chotanews/screens/home_screen/home_screen_model.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
+import 'package:chotanews/screens/videos_main/tab_screen.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
+
+import '../../globel_keys/app_router.dart';
 
 class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
   HomeBloc() : super(InitialHomeScreenState()) {
@@ -173,5 +177,22 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       }
 
     });
+
+
+    on<MenuItemClickEvent>((event,emit)async{
+      if(event.currentMenuItem == "హోమ్"){
+        Navigator.pushNamed(event.context, RoutesManager.homeScreen);
+      }else if(event.currentMenuItem == "లొకేషన్స్"){
+        Navigator.pushNamed(event.context, RoutesManager.districtSelectionScreen);
+      }else{
+        Navigator.push(
+          event.context,
+         MaterialPageRoute(builder: (context) => const GetAllMenuItemScreen(),),
+        );
+      }
+
+    });
+
+
   }
 }
