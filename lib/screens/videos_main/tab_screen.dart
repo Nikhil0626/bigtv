@@ -78,116 +78,119 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
           ),
         ],
       ),
-      body: BlocBuilder<VideosBloc, VideosState>(builder: (context, state) {
-        if (state is LoadingState) {
-          return const Center(child: AppLoadingScreen());
-        } else if (state is MenuItemState) {
-          if (state.getAllMenuList.isEmpty) {
-            return const Center(child: Text('No menu items available.'));
-          }
+      body: Padding(
+        padding: const EdgeInsets.all(15.0),
+        child: BlocBuilder<VideosBloc, VideosState>(builder: (context, state) {
+          if (state is LoadingState) {
+            return const Center(child: AppLoadingScreen());
+          } else if (state is MenuItemState) {
+            if (state.getAllMenuList.isEmpty) {
+              return const Center(child: Text('No menu items available.'));
+            }
 
-          return SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView.separated(
-                    separatorBuilder: (context, index) {
-                      return const Divider(
-                        color: AppColors.borderColor,
-                      );
-                    },
-                    itemCount: state.getAllMenuList.length,
-                    itemBuilder: (context, index) {
-                      return InkWell(
-                        onTap: () {
-                          if (state.getAllMenuList[index].value == "gallery") {
-                            Navigator.pushNamed(
-                                context, RoutesManager.galleryScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
-                          } else if (state.getAllMenuList[index].value == "bytes") {
-                            Navigator.pushNamed(
-                                context, RoutesManager.videoScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
-                          } else if (state.getAllMenuList[index].value == "magazine") {
-                            Navigator.pushNamed(
-                                context, RoutesManager.magazineScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
-                          } else if (state.getAllMenuList[index].value == "devotional") {
-                            Navigator.pushNamed(
-                                context, RoutesManager.districtSelectionScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
-                          } else if (state.getAllMenuList[index].value == "podcast") {
-                            Navigator.pushNamed(
-                                context, RoutesManager.podcastScreen,
-                                arguments: {
-                                  "postId":
-                                  state.getAllMenuList[index].id.toString(),
-                                });
-                          }
-                        },
-                        child: ListTile(
-                          leading: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(8),
-                                image: DecorationImage(
-                                  image: CachedNetworkImageProvider(
-                                    state.getAllMenuList[index].imageUrl.isNotEmpty
-                                        ? state.getAllMenuList[index].imageUrl
-                                        : "https://example.com/default_image.png",
+            return SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              child: Column(
+                children: [
+                  Expanded(
+                    child: ListView.separated(
+                      separatorBuilder: (context, index) {
+                        return const Divider(
+                          color: AppColors.borderColor,
+                        );
+                      },
+                      itemCount: state.getAllMenuList.length,
+                      itemBuilder: (context, index) {
+                        return InkWell(
+                          onTap: () {
+                            if (state.getAllMenuList[index].value == "gallery") {
+                              Navigator.pushNamed(
+                                  context, RoutesManager.galleryScreen,
+                                  arguments: {
+                                    "postId":
+                                    state.getAllMenuList[index].id.toString(),
+                                  });
+                            } else if (state.getAllMenuList[index].value == "bytes") {
+                              Navigator.pushNamed(
+                                  context, RoutesManager.videoScreen,
+                                  arguments: {
+                                    "postId":
+                                    state.getAllMenuList[index].id.toString(),
+                                  });
+                            } else if (state.getAllMenuList[index].value == "magazine") {
+                              Navigator.pushNamed(
+                                  context, RoutesManager.magazineScreen,
+                                  arguments: {
+                                    "postId":
+                                    state.getAllMenuList[index].id.toString(),
+                                  });
+                            } else if (state.getAllMenuList[index].value == "devotional") {
+                              Navigator.pushNamed(
+                                  context, RoutesManager.districtSelectionScreen,
+                                  arguments: {
+                                    "postId":
+                                    state.getAllMenuList[index].id.toString(),
+                                  });
+                            } else if (state.getAllMenuList[index].value == "podcast") {
+                              Navigator.pushNamed(
+                                  context, RoutesManager.podcastScreen,
+                                  arguments: {
+                                    "postId":
+                                    state.getAllMenuList[index].id.toString(),
+                                  });
+                            }
+                          },
+                          child: ListTile(
+                            leading: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Container(
+                                height: 40,
+                                width: 40,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: DecorationImage(
+                                    image: CachedNetworkImageProvider(
+                                      state.getAllMenuList[index].imageUrl.isNotEmpty
+                                          ? state.getAllMenuList[index].imageUrl
+                                          : "https://example.com/default_image.png",
+                                    ),
+                                    fit: BoxFit.cover,
                                   ),
-                                  fit: BoxFit.cover,
                                 ),
                               ),
                             ),
-                          ),
-                          title: Text(
-                            state.getAllMenuList[index].name,
-                            style: fontStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
+                            title: Text(
+                              state.getAllMenuList[index].name,
+                              style: fontStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.black,
+                              ),
+                            ),
+                            trailing: const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 20,
                             ),
                           ),
-                          trailing: const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 20,
-                          ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-                const Divider(
-                  color: AppColors.borderColor,
-                ),
-              ],
-            ),
-          );
-        } else {
-          return SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-          );
-        }
-      }),
+                  const Divider(
+                    color: AppColors.borderColor,
+                  ),
+                ],
+              ),
+            );
+          } else {
+            return SizedBox(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+            );
+          }
+        }),
+      ),
     );
   }
 }

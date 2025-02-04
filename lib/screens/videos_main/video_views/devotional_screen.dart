@@ -15,6 +15,7 @@ import '../vodeo_bloc/videos_state.dart';
 
 class DevotionalScreen extends StatefulWidget {
   final String postId;
+
   const DevotionalScreen({super.key, required this.postId});
 
   @override
@@ -28,100 +29,107 @@ class _DevotionalScreenState extends State<DevotionalScreen> {
 
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(leading: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
-        },
-        child: const Icon(
-          color: Colors.white,
-          Icons.arrow_back_ios,
-          size: 18,
+      appBar: AppBar(
+        leading: InkWell(
+          onTap: () {
+            Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+          },
+          child: const Icon(
+            color: Colors.white,
+            Icons.arrow_back_ios,
+            size: 18,
+          ),
         ),
-      ),backgroundColor: AppColors.appButtonColor,title: Text("Devotional View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
-
+        backgroundColor: AppColors.appButtonColor,
+        title: Text(
+          "Devotional View",
+          style: fontStyle(
+              fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+        ),
+      ),
       body: BlocBuilder<VideosBloc, VideosState>(
-    builder: (context, state) {
-      if (state is LoadingState) {
-        return AppLoadingScreen();
-      } else if (state is VideoSuccessState) {
-        return ListView.separated(
-          itemCount: state.getAllVideoList.length,
-          itemBuilder: (context, index) {
-            return Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 120,
-                    width: 80,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8),
-                      image: DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          state.getAllVideoList[index].imageUrl!.url!.isNotEmpty
-                              ?  state.getAllVideoList[index].imageUrl!.url.toString()
-                              : "https://example.com/default_image.png",
+        builder: (context, state) {
+          if (state is LoadingState) {
+            return AppLoadingScreen();
+          } else if (state is VideoSuccessState) {
+            return ListView.separated(
+              itemCount: state.getAllVideoList.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        height: 120,
+                        width: 80,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          image: DecorationImage(
+                            image: CachedNetworkImageProvider(
+                              state.getAllVideoList[index].imageUrl!.url!
+                                      .isNotEmpty
+                                  ? state.getAllVideoList[index].imageUrl!.url
+                                      .toString()
+                                  : "https://example.com/default_image.png",
+                            ),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        fit: BoxFit.cover,
                       ),
-                    ),
-                  ),
-
-                  width(width: 15),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          state.getAllVideoList[index].title.toString(),
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      width(width: 15),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              state.getAllVideoList[index].title.toString(),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            height(height: 10),
+                            Text(
+                              dateFormat(
+                                state.getAllVideoList[index].created.toString(),
+                              ),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
                         ),
-                        height(height: 10),
-                        Text(
-                          dateFormat(
-                            state.getAllVideoList[index].created.toString(),
-                          ),
-                          style: const TextStyle(
-                            color: Colors.black,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w400,
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
+              separatorBuilder: (context, index) {
+                return const Divider(
+                  color: Colors.grey,
+                  thickness: 1.0,
+                  height: 5.0,
+                );
+              },
             );
-          },
-          separatorBuilder: (context, index) {
-            return const Divider(
-              color: Colors.grey,
-              thickness: 1.0,
-              height: 5.0,
-            );
-          },
-        );
-      }
-      return Container(
-        child: const Center(child: Text(AppStrings.appNotWorking)),
-      );
-    },
-    ),
+          }
+          return Container(
+            child: const Center(child: Text(AppStrings.appNotWorking)),
+          );
+        },
+      ),
     );
-
-
   }
 }

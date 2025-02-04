@@ -39,9 +39,9 @@ class _VideosScreenState extends State<VideosScreen> {
           child: const Icon(
             color: Colors.white,
             Icons.arrow_back_ios,
-            size: 18,
+            size: 20,
           ),
-        ),backgroundColor: AppColors.appButtonColor,title: Text("Video Screen",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
+        ),backgroundColor: AppColors.appButtonColor,title: Text("Video Screen",style: fontStyle(fontSize: 18,fontWeight: FontWeight.w600,color: Colors.white),),),
 
         body: BlocBuilder<VideosBloc, VideosState>(builder: (context, state) {
       if (state is LoadingState) {

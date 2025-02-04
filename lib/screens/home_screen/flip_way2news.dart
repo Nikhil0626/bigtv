@@ -237,7 +237,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
                             icon: "assets/svg/share.svg",
                             label: ' షేర్',
                             onTap: () {
-                              log("Comment");
+                              log("Share");
                               context.read<HomeBloc>().add(
                                   SendNewsToSocialMedia(id: item.linkURLAndroid));
                             }),
