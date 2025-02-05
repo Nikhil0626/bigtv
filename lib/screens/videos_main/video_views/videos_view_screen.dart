@@ -29,6 +29,7 @@ class _VideosScreenState extends State<VideosScreen> {
     context.read<VideosBloc>().add(GetAllVideos(type: "2"));
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,61 +52,60 @@ class _VideosScreenState extends State<VideosScreen> {
                 fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
           ),
         ),
-        body: BlocBuilder<VideosBloc, VideosState>(
-            builder: (context, state) {
+        body: BlocBuilder<VideosBloc, VideosState>(builder: (context, state) {
           if (state is LoadingState) {
             return const AppLoadingScreen();
           } else if (state is VideoSuccessState) {
             return ListView.separated(
               separatorBuilder: (context, index) {
-                return Divider(color: AppColors.borderColor,);
+                return const Divider(
+                  color: AppColors.borderColor,
+                );
               },
               itemCount: state.getAllVideoList.length,
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: () {
-                                    if (state.getAllVideoList[index].type
-                                            .toString() ==
-                                        "Video") {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => VideoPreview(
-                                            url: state.getAllVideoList[index]
-                                                .videoUrl!.url
-                                                .toString(),
-                                            isVideoScreen: true,
-                                          ),
-                                        ),
-                                      );
-                                    } else {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => ReelsViewScreen(
-                                              getReelDetails: state
-                                                  .getAllVideoList[index]
-                                                  .videoUrl!
-                                                  .url
-                                                  .toString()),
-                                        ),
-                                      );
-                                    }
-                                  },
+                    if (state.getAllVideoList[index].type.toString() ==
+                        "Video") {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => VideoPreview(
+                            url: state.getAllVideoList[index].videoUrl!.url
+                                .toString(),
+                            isVideoScreen: true,
+                          ),
+                        ),
+                      );
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReelsViewScreen(
+                              getReelDetails: state
+                                  .getAllVideoList[index].videoUrl!.url
+                                  .toString()),
+                        ),
+                      );
+                    }
+                  },
                   child: Padding(
-                    padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         ClipRRect(
-                          borderRadius: const BorderRadius.all(Radius.circular(4)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(4)),
                           child: Image.network(
-                            state.getAllVideoList[index].imageUrl!.url.toString(),
-                            height: 120,
+                            state.getAllVideoList[index].imageUrl!.url
+                                .toString(),
+                            height: 110,
                             width: 80,
-                            fit: BoxFit.fill,
+                            fit: BoxFit.cover,
                           ),
                         ),
                         width(width: 15),
@@ -125,7 +125,8 @@ class _VideosScreenState extends State<VideosScreen> {
                               height(height: 10),
                               Text(
                                 dateFormat(
-                                  state.getAllVideoList[index].created.toString(),
+                                  state.getAllVideoList[index].created
+                                      .toString(),
                                 ),
                                 style: const TextStyle(
                                   color: Colors.black,

@@ -4,6 +4,9 @@ import 'package:chotanews/screens/home_animation_widgets/home_handle_state.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../utils/app_fonts.dart';
+import '../../utils/app_spaces.dart';
+
 class CollapseWidgetScreen extends StatefulWidget {
   final Widget homeView;
   const CollapseWidgetScreen({super.key,required this.homeView});
@@ -41,11 +44,11 @@ class _CollapseWidgetScreenState extends State<CollapseWidgetScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding:  EdgeInsets.all(10),
                           color: Colors.black.withOpacity(0.7),
-                          child: const Text(
+                          child:  Text(
                             'Top Row Content',
-                            style: TextStyle(color: Colors.white, fontSize: 16),
+                            style: fontStyle(color: Colors.white, fontSize: 16),
                           ),
                         ),
                       ],
@@ -57,7 +60,7 @@ class _CollapseWidgetScreenState extends State<CollapseWidgetScreen> {
                   child: AnimatedOpacity(
                     duration: const Duration(milliseconds: 500), // Animation duration
                     opacity: state.isActive ? 1.0 : 0.0, // Opacity based on state
-                    child: const SizedBox(
+                    child:  SizedBox(
                       height: 70,
                       child: Column(
                         children: [
@@ -68,60 +71,60 @@ class _CollapseWidgetScreenState extends State<CollapseWidgetScreen> {
                               Expanded(
                                 child: Column(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.home,
                                       color: Colors.black,
                                     ),
-                                    SizedBox(height: 4),
+                                    height(height: 4),
                                     Text(
                                       'Home',
-                                      style: TextStyle(color: Colors.black, fontSize: 12),
+                                      style: fontStyle(color: Colors.black, fontSize: 12),
                                     ),
                                   ],
                                 ),
                               ),
                               Expanded(
-
                                 child: Column(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.video_call,
                                       color: Colors.black,
                                     ),
-                                    SizedBox(height: 4),
+                                    height(height: 4),
                                     Text(
                                       'Videos',
-                                      style: TextStyle(color: Colors.black, fontSize: 12),
+                                      style: fontStyle(color: Colors.black, fontSize: 12),
                                     ),
                                   ],
                                 ),
                               ),
-                              Expanded(
+                               Expanded(
                                 child: Column(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.add_card,
                                       color: Colors.black,
                                     ),
-                                    SizedBox(height: 4),
-                                    Text(
+                                    height(height: 4),
+
+                                     Text(
                                       'Bytes',
-                                      style: TextStyle(color: Colors.black, fontSize: 12),
+                                      style: fontStyle(color: Colors.black, fontSize: 12),
                                     ),
                                   ],
                                 ),
                               ),
-                              Expanded(
+                               Expanded(
                                 child: Column(
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.account_circle,
                                       color: Colors.black,
                                     ),
-                                    SizedBox(height: 4),
+                                    height(height: 4),
                                     Text(
                                       'Profile',
-                                      style: TextStyle(color: Colors.black, fontSize: 12),
+                                      style: fontStyle(color: Colors.black, fontSize: 12),
                                     ),
                                   ],
                                 ),

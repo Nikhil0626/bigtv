@@ -127,7 +127,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
                                   });
                             } else if (state.getAllMenuList[index].value == "devotional") {
                               Navigator.pushNamed(
-                                  context, RoutesManager.districtSelectionScreen,
+                                  context, RoutesManager.devotionalScreen,
                                   arguments: {
                                     "postId":
                                     state.getAllMenuList[index].id.toString(),

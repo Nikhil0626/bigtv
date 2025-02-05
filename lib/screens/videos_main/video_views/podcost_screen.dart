@@ -15,7 +15,9 @@ import '../vodeo_bloc/videos_state.dart';
 
 class PodcostScreen extends StatefulWidget {
   final String postId;
+
   const PodcostScreen({super.key, required this.postId});
+
   @override
   State<PodcostScreen> createState() => _PodcostScreenState();
 }
@@ -24,30 +26,37 @@ class _PodcostScreenState extends State<PodcostScreen> {
   @override
   void initState() {
     print(widget.postId);
-    context.read<VideosBloc>().add(GetAllVideos(type:widget.postId));
+    context.read<VideosBloc>().add(GetAllVideos(type: widget.postId));
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
         return false;
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(leading: InkWell(
-          onTap: () {
-            Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
-          },
-          child: const Icon(
-            color: Colors.white,
-            Icons.arrow_back_ios,
-            size: 18,
+        appBar: AppBar(
+          leading: InkWell(
+            onTap: () {
+              Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+            },
+            child: const Icon(
+              color: Colors.white,
+              Icons.arrow_back_ios,
+              size: 18,
+            ),
           ),
-        ),backgroundColor: AppColors.appButtonColor,title: Text("Podcast View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
-
+          backgroundColor: AppColors.appButtonColor,
+          title: Text(
+            "Podcast View",
+            style: fontStyle(
+                fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+          ),
+        ),
         body: BlocBuilder<VideosBloc, VideosState>(
           builder: (context, state) {
             if (state is LoadingState) {
@@ -57,28 +66,33 @@ class _PodcostScreenState extends State<PodcostScreen> {
                 itemCount: state.getAllVideoList.length,
                 itemBuilder: (context, index) {
                   return InkWell(
-                    onTap: (){
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => ReelsViewScreen(getReelDetails: state.getAllVideoList[index].videoUrl!.url.toString()),
+                          builder: (context) => ReelsViewScreen(
+                              getReelDetails: state
+                                  .getAllVideoList[index].videoUrl!.url
+                                  .toString()),
                         ),
                       );
                     },
                     child: Padding(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ClipRRect(
-                            borderRadius: const BorderRadius.all(Radius.circular(4)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(4)),
                             child: Image.network(
-                              state.getAllVideoList[index].imageUrl!.url.toString(),
-                              height: 120,
+                              state.getAllVideoList[index].imageUrl!.url
+                                  .toString(),
+                              height: 110,
                               width: 80,
-                              fit: BoxFit.fill,
+                              fit: BoxFit.cover,
                             ),
                           ),
                           width(width: 15),
@@ -89,7 +103,7 @@ class _PodcostScreenState extends State<PodcostScreen> {
                               children: [
                                 Text(
                                   state.getAllVideoList[index].title.toString(),
-                                  style: const TextStyle(
+                                  style: fontStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
@@ -98,9 +112,10 @@ class _PodcostScreenState extends State<PodcostScreen> {
                                 height(height: 10),
                                 Text(
                                   dateFormat(
-                                    state.getAllVideoList[index].created.toString(),
+                                    state.getAllVideoList[index].created
+                                        .toString(),
                                   ),
-                                  style: const TextStyle(
+                                  style: fontStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,

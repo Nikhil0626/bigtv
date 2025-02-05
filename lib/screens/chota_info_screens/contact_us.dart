@@ -44,7 +44,7 @@ class _ContactUsState extends State<ContactUs> {
               Center(
                 child: Column(
                   children: <Widget>[
-                    SizedBox(height: 10),
+                    height(height: 10),
                     Text(
                       "Chota News",
                       style: fontStyle(

@@ -1,6 +1,9 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/app_fonts.dart';
+import '../utils/app_spaces.dart';
+
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -12,26 +15,26 @@ class _OnboardingScreen extends State<OnboardingScreen> {
   int _currentIndex = 0;
 
   final List<Widget> _slides = [
-    const Column(
+     Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(
+        const Icon(
           Icons.location_on,
           size: 190,
           color: Colors.red,
         ),
-        SizedBox(height: 90),
+        height(height: 90),
         Text(
           "మీ జిల్లా వార్తలు",
-          style: TextStyle(
+          style: fontStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: 10),
-        Padding(
+        height(height: 10),
+        const Padding(
           padding: EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
             "మీరిక్కడున్నా మీ జిల్లాలను సెట్ చేసుకోవాలి. మీ ఊరి సంగతులు మీతోనే.",
@@ -64,18 +67,18 @@ class _OnboardingScreen extends State<OnboardingScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 90),
-        const Text(
+        height(height: 90),
+         Text(
           "బ్రేకింగ్ న్యూస్",
-          style: TextStyle(
+          style: fontStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 10),
-        const Padding(
+        height(height: 10),
+         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
             "రాజకీయాలు సినిమా గాడ్జెట్లు, ఉద్యోగ నోటిఫికేషన్లు... అన్నీ ఒకే చోట వార్తలలో.",
@@ -145,7 +148,7 @@ class _OnboardingScreen extends State<OnboardingScreen> {
                     );
                   }),
                 ),
-                const SizedBox(height: 20),
+               height(height: 20),
                 ElevatedButton(
                   onPressed: () {
                     if (_currentIndex < _slides.length - 1) {
@@ -166,7 +169,7 @@ class _OnboardingScreen extends State<OnboardingScreen> {
                   ),
                   child: Text(
                     _currentIndex == _slides.length - 1 ? "Finish" : "Next",
-                    style: const TextStyle(fontSize: 18, color: Colors.white),
+                    style: fontStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
               ],

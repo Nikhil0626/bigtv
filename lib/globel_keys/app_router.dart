@@ -85,8 +85,8 @@ abstract class RoutesManager {
         return MaterialPageRoute(builder: (context) => const TermsConditions());
       case privacyPolicy:
         return MaterialPageRoute(builder: (context) => const PrivacyPolicy());
-      case profileScreen:
-        return MaterialPageRoute(builder: (context) =>  ProfileScreen());
+      // case profileScreen:
+      //   return MaterialPageRoute(builder: (context) =>  ProfileScreen());
       case welcomeScreen:
         return MaterialPageRoute(builder: (context) => const WelcomeScreen());
       case signInScreen:

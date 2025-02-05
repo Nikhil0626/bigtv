@@ -1,4 +1,3 @@
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +16,7 @@ import 'gallery_screen.dart';
 
 class MyagazinesScreen extends StatefulWidget {
   final String postId;
+
   const MyagazinesScreen({super.key, required this.postId});
 
   @override
@@ -34,23 +34,30 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: ()async{
+      onWillPop: () async {
         Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
         return false;
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        appBar: AppBar(leading: InkWell(
-          onTap: () {
-            Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
-          },
-          child: const Icon(
-            color: Colors.white,
-            Icons.arrow_back_ios,
-            size: 18,
+        appBar: AppBar(
+          leading: InkWell(
+            onTap: () {
+              Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+            },
+            child: const Icon(
+              color: Colors.white,
+              Icons.arrow_back_ios,
+              size: 18,
+            ),
           ),
-        ),backgroundColor: AppColors.appButtonColor,title: Text("Magazine View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
-
+          backgroundColor: AppColors.appButtonColor,
+          title: Text(
+            "Magazine View",
+            style: fontStyle(
+                fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+          ),
+        ),
         body: BlocBuilder<VideosBloc, VideosState>(
           builder: (context, state) {
             if (state is LoadingState) {
@@ -60,23 +67,31 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
                 itemCount: state.getAllVideoList.length,
                 itemBuilder: (context, index) {
                   return InkWell(
-                    onTap: (){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => FullPageCarousel(imageUrls: state.getAllVideoList[index].gallery?? []),));
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FullPageCarousel(
+                                imageUrls:
+                                    state.getAllVideoList[index].gallery ?? []),
+                          ));
                     },
                     child: Padding(
-                      padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ClipRRect(
-                            borderRadius: const BorderRadius.all(Radius.circular(4)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(4)),
                             child: Image.network(
-                              state.getAllVideoList[index].imageUrl!.url.toString(),
-                              height: 120,
+                              state.getAllVideoList[index].imageUrl!.url
+                                  .toString(),
+                              height: 110,
                               width: 80,
-                              fit: BoxFit.fill,
+                              fit: BoxFit.cover,
                             ),
                           ),
                           width(width: 15),
@@ -87,7 +102,7 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
                               children: [
                                 Text(
                                   state.getAllVideoList[index].title.toString(),
-                                  style: const TextStyle(
+                                  style: fontStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
@@ -96,9 +111,10 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
                                 height(height: 10),
                                 Text(
                                   dateFormat(
-                                    state.getAllVideoList[index].created.toString(),
+                                    state.getAllVideoList[index].created
+                                        .toString(),
                                   ),
-                                  style: const TextStyle(
+                                  style: fontStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,
