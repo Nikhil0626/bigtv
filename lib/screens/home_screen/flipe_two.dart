@@ -711,7 +711,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
                   style: fontStyle(fontSize: 16, color: Colors.grey[800])),
             ),
             const Divider(color: AppColors.borderColor),
-            Row(
+            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 // BottomActions(icon: Icons.refresh, label: 'Refresh', onTap: () {}),

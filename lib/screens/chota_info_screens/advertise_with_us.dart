@@ -35,7 +35,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding:  EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +43,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
               Center(
                 child: Column(
                   children: <Widget>[
-                    SizedBox(height: 10),
+                    height(height: 10),
                     Text(
                       "Chota News",
                       style: fontStyle(
@@ -62,20 +62,20 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                   ],
                 ),
               ),
-              SizedBox(height: 16),
+              height(height: 16),
 
               Text(
                 "Chota News is a first of its kind unique mobile media company in the country. We produce & distribute “Made for Mobile Content” to Indian local language audience. Like TV media & Print media, we are building a technology-based mobile media company with short news and other rich content in local languages.",
                 style: fontStyle(fontSize: 16),
                 textAlign: TextAlign.justify,
               ),
-              SizedBox(height: 16),
+              height(height: 16),
 
               Text(
                 "Get In Touch",
                 style: fontStyle(fontWeight: FontWeight.w800, fontSize: 18),
               ),
-              SizedBox(height: 10),
+              height(height: 10),
 
               // Support/Feedback Text
               Text(
@@ -86,7 +86,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                 "info@chotanews.com",
                 style: fontStyle(color: Colors.lightBlue),
               ),
-              SizedBox(height: 20),
+              height(height: 20),
 
               // Address Section
               Text(
@@ -96,14 +96,14 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 10),
+              height(height: 10),
 
               // Address Details
               Text(
                 "Pravasa Media LLP\nDwaraka Trident, 4th Floor\nKavuri Hills, JubileeHills, Hyderabad,\nTelangana 500033",
                 style: fontStyle(fontSize: 16),
               ),
-              SizedBox(height: 10),
+              height(height: 10),
 
               // Phone Number
               Text(

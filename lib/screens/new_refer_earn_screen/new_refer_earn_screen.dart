@@ -1,5 +1,8 @@
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
+
+import '../../utils/app_fonts.dart';
 
 class NewReferEarnScreen extends StatefulWidget {
   const NewReferEarnScreen({super.key});
@@ -19,9 +22,9 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title:  Text(
           "Refer & Earn",
-          style: TextStyle(
+          style: fontStyle(
             color: Colors.black,
             fontSize: 16,
             fontWeight: FontWeight.w500,
@@ -33,11 +36,11 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Align(
+             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Referral Code",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                style: fontStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
             ),
             const SizedBox(height: 10),
@@ -58,21 +61,21 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
                       width: 120,
                       fit: BoxFit.cover,
                     ),
-                    const SizedBox(height: 10),
+                    height(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text(
+                         Text(
                           "XBYAHSN",
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                          style: fontStyle(fontSize: 14, fontWeight: FontWeight.w500),
                         ),
-                        const SizedBox(width: 8),
+                        width(width: 8),
                         Container(
                           width: 1,
                           height: 18,
                           color: Colors.black,
                         ),
-                        const SizedBox(width: 8),
+                        width(width: 8),
                         const Icon(Icons.share, color: Colors.black),
                       ],
                     ),
@@ -80,15 +83,15 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
                 ),
               ),
             ),
-            const SizedBox(height: 20),
-            const Align(
+            height(height: 20),
+             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Refer Friends and win an iphone",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                style: fontStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
             ),
-            const SizedBox(height: 15),
+            height(height: 15),
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.asset(
@@ -98,15 +101,15 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
                 fit: BoxFit.cover,
               ),
             ),
-            const SizedBox(height: 15),
-            const Align(
+            height(height: 15),
+             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Invite 5 friends for a chance to win an iphone!",
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                style: fontStyle(fontSize: 12, fontWeight: FontWeight.w500),
               ),
             ),
-            const SizedBox(height: 15),
+           height(height: 15),
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.asset(

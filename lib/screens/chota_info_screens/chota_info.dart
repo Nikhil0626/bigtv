@@ -45,9 +45,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
             },
             icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 24),
           ),
-          title: const Text(
+          title:  Text(
             "Settings",
-            style: TextStyle(
+            style: fontStyle(
                 color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
           ),
         ),
@@ -80,7 +80,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     title: Text(
                       'Refer&Earn',
-                      style: TextStyle(
+                      style: fontStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: isDarkTheme ? Colors.white : Colors.black,
@@ -125,7 +125,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     title: Text(
                       'Share app',
-                      style: TextStyle(
+                      style: fontStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: isDarkTheme ? Colors.white : Colors.black,
@@ -167,7 +167,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     title: Text(
                       'Contact Us',
-                      style: TextStyle(
+                      style: fontStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: isDarkTheme ? Colors.white : Colors.black,
@@ -212,7 +212,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     title: Text(
                       'Advertise with Us',
-                      style: TextStyle(
+                      style: fontStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: isDarkTheme ? Colors.white : Colors.black,
@@ -257,7 +257,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     title: Text(
                       'Terms and Conditions',
-                      style: TextStyle(
+                      style: fontStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: isDarkTheme ? Colors.white : Colors.black,
@@ -302,7 +302,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     title: Text(
                       'Privacy Policy',
-                      style: TextStyle(
+                      style: fontStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: isDarkTheme ? Colors.white : Colors.black,
@@ -347,7 +347,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     ),
                     title: Text(
                       'Logout',
-                      style: TextStyle(
+                      style: fontStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                         color: isDarkTheme ? Colors.white : Colors.black,

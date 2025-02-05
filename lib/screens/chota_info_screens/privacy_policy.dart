@@ -22,9 +22,9 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
           },
         ),
         centerTitle: true,
-        title: const Text(
+        title:  Text(
           "Privacy Policy",
-          style: TextStyle(
+          style: fontStyle(
               color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.lightBlue,
@@ -35,7 +35,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 16),
+              height(height: 16),
 
               // Section 1: Introduction
               sectionTitle("Introduction"),
@@ -102,7 +102,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                 "We value your trust and are committed to addressing your inquiries promptly and transparently.",
               ),
 
-              const SizedBox(height: 8),
+             height(height: 8),
               Text(
                 "Contact Details",
                 style: fontStyle(
@@ -110,7 +110,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 3),
+             height(height: 3),
 
               ContactDetailTile(
                 title: "For support/feedback queries",
@@ -125,7 +125,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                 email: "grievance@chotanews.com",
               ),
 
-              const SizedBox(height: 20),
+             height(height: 20),
               Text(
                 "Address",
                 style: fontStyle(
@@ -133,7 +133,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(height: 10),
+              height(height: 10),
 
               // Address details
               Text(
@@ -149,10 +149,10 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
 
   Widget sectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
+      padding:  EdgeInsets.only(top: 16.0),
       child: Text(
         title,
-        style: const TextStyle(
+        style: fontStyle(
           fontSize: 18,
           fontWeight: FontWeight.bold,
           color: Colors.black,
@@ -163,7 +163,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
 
   Widget sectionContent(String content) {
     return Padding(
-      padding: const EdgeInsets.only(top: 8.0),
+      padding:  EdgeInsets.only(top: 8.0),
       child: Text(
         content,
         style: const TextStyle(

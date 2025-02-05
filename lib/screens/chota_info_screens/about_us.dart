@@ -36,7 +36,7 @@ class AboutUs extends StatelessWidget {
               Center(
                 child: Column(
                   children: [
-                    SizedBox(height: 10),
+                    height(height: 10),
                     Text(
                       "Chota News",
                       style: fontStyle(

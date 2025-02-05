@@ -172,7 +172,7 @@ class _OtpScreenState extends State<OtpScreen> {
                       onTap: canResend ? resendOtp : null,
                       child:  Text(
                         "Resend OTP",
-                        style: TextStyle(color:  canResend ?Colors.blue:Colors.grey, fontWeight: FontWeight.bold),
+                        style: fontStyle(color:  canResend ?Colors.blue:Colors.grey, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
