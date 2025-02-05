@@ -15,7 +15,7 @@ String formatTimeDifference(String inputTime, ) {
       date = now; // Fallback to 'now' if input is empty
     } else {
       date =  format.parse(inputTime);
-      date = date.toLocal(); // Convert to local time
+      date = date; // Convert to local time
       print("Parsed Date: $date");
     }
   } catch (e) {

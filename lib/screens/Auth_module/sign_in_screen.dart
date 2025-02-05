@@ -54,6 +54,187 @@ class _SignInScreenState extends State<SignInScreen> {
                   ? const Center(
                       child: AppLoadingScreen(),
                     )
+                  : state is InitialScreen?
+              Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20.0, vertical: 50),
+                      child: Center(
+                        child: Form(
+                          key: _formKey,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              height(height: 100),
+                              SvgPicture.asset(
+                                'assets/svg/Chota_news_logo.svg',
+                                height: 24,
+                                width: 166,
+                              ),
+                              height(height: 30),
+                              Text(
+                                "Sign In",
+                                textAlign: TextAlign.center,
+                                style: fontStyle(
+                                    fontSize: 24, fontWeight: FontWeight.w600),
+                              ),
+                              height(height: 8),
+                              Text(
+                                "Start using with your mobile number",
+                                textAlign: TextAlign.center,
+                                style: fontStyle(
+                                    fontSize: 16,
+                                    color: Colors.black54,
+                                    fontWeight: FontWeight.normal),
+                              ),
+                              height(height: 30),
+                              Text(
+                                "Mobile Number*",
+                                style: fontStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w700),
+                              ),
+                              height(height: 16),
+                              Container(
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[300],
+                                        borderRadius: const BorderRadius.only(
+                                            topLeft: Radius.circular(4),
+                                            bottomLeft: Radius.circular(4)),
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 15, vertical: 14),
+                                      child: Text(
+                                        "+91",
+                                        style: fontStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black87),
+                                      ),
+                                    ),
+                                    Container(
+                                      width: 1,
+                                      height: 50,
+                                      color: Colors.grey,
+                                    ),
+                                    Expanded(
+                                      child: TextFormField(
+                                        controller: _mobileController,
+                                        keyboardType: TextInputType.phone,
+                                        maxLength: 10,
+                                        decoration: const InputDecoration(
+                                          counterText: "",
+                                          hintText: "Enter Mobile",
+                                          border: InputBorder.none,
+                                          contentPadding: EdgeInsets.symmetric(
+                                              horizontal: 10),
+                                        ),
+                                        onChanged: (value) {
+                                          if (value.length > 9) {
+                                            _mobileNumberError = null;
+                                          }
+                                          setState(() {});
+                                        },
+                                        validator: (value) {
+                                          if (value == null || value.isEmpty) {
+                                            setState(() {
+                                              _mobileNumberError =
+                                                  "Please enter your mobile number";
+                                            });
+                                            return "";
+                                          } else if (value.length != 10) {
+                                            setState(() {
+                                              _mobileNumberError =
+                                                  "Please enter a valid 10-digit mobile number";
+                                            });
+                                            return "";
+                                          }
+                                          setState(() {
+                                            _mobileNumberError = null;
+                                          });
+                                          return null;
+                                          // context.watch<AuthBloc>().add(MobileNumberChanged(value!));
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              if (_mobileNumberError != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 8.0, left: 10.0),
+                                  child: Text(
+                                    _mobileNumberError!,
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              height(height: 20),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    if (_mobileController.text.length < 9) {
+                                    } else {
+                                      if (_formKey.currentState!.validate()) {
+                                        log("phone number   ${_mobileController.text.toString()}");
+                                        context.read<AuthBloc>().add(SendOtp(
+                                            phoneNumber: _mobileController.text
+                                                .toString()));
+                                      }
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        _mobileController.text.length > 9
+                                            ? Colors.lightBlue
+                                            : Colors.grey,
+                                    padding: const EdgeInsets.symmetric(
+                                        vertical: 14),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    "Send OTP",
+                                    style: fontStyle(
+                                        fontSize: 16,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ),
+                              ),
+                              height(height: 20),
+                              TextButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(context,
+                                        RoutesManager.districtSelectionScreen);
+                                  },
+                                  child: const Center(
+                                    child: Text(
+                                      "Skip and login as guest",
+                                      style: TextStyle(
+                                          color: Colors.lightBlue,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  )),
+                            ],
+                          ),
+                        ),
+                      ),
+                    )
                   : Padding(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 20.0, vertical: 50),
@@ -65,12 +246,10 @@ class _SignInScreenState extends State<SignInScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               height(height: 100),
-                              Center(
-                                child: SvgPicture.asset(
-                                  'assets/svg/Chota_news_logo.svg',
-                                  height: 24,
-                                  width: 166,
-                                ),
+                              SvgPicture.asset(
+                                'assets/svg/Chota_news_logo.svg',
+                                height: 24,
+                                width: 166,
                               ),
                               height(height: 30),
                               Text(

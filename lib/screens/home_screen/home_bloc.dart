@@ -44,15 +44,16 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         'userid': "1",
         'postid': "0",
         'lpostid': "0",
-        'includeHomePage': "0",
-        // 'hasAds': true,
-        // 'isByNotification': false,
+        'includeHomePage': "1",
+        'isByNotification': "false",
         'deviceid': deviceId,
         'platform': platForm,
         'homefeed': "1",
-        // 'locationIds': '64',
+        // 'hasAds': true,
+        // 'locationIds': '21,22,43,44,55,64',
         // "debugMode": true
       };
+      log(queryParams.toString());
       try {
         Response response = await HomeRepo().getAllNewsFeeds(queryParams);
         List data = response.data['posts'];
@@ -71,7 +72,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         log("Get News Api catch error ${st.toString()}");
         log("Get News Api  catch ${st.toString()}");
       } catch (e, st) {
-        emit(ErrorHomeScreenState(getHomeScreenError: ""));
+        emit(ErrorHomeScreenState(getHomeScreenError: "No News Feeds Available"));
         log("Get News Api catch error ${st.toString()}");
         log("Get News Api catch ${st.toString()}");
       }

@@ -58,7 +58,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                 children: [
                   TabBarView(
                     controller: _tabController,
-                    physics: const NeverScrollableScrollPhysics(), // Disable horizontal scroll
+                    // physics: const NeverScrollableScrollPhysics(), // Disable horizontal scroll
                     children:  const [
                       MyHomePage1(tabName: "Home",),
                       MyHomePage1(tabName: "",),

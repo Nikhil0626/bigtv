@@ -1,12 +1,17 @@
 import 'dart:developer';
 
+import 'package:chotanews/screens/Auth_module/auth_repo.dart';
+import 'package:chotanews/screens/Auth_module/auth_screen.dart';
+import 'package:chotanews/screens/testing_screen/test4.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'dart:io' show Platform;
 
@@ -15,18 +20,32 @@ import 'globel_keys/global_variables_data.dart';
 import 'globel_keys/globel_keys.dart';
 
 
-Future<String?> getUniqueDeviceId() async {
+Future<String?> getUniqueDeviceId(String token) async {
   final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     GlobalVariables().platForm = androidInfo.brand;
     log(androidInfo.toString());
-    return androidInfo.id; // Returns a unique ID for Android devices
+
+    // AuthRepo().addDeviceDetails({
+    //   "deviceId": androidInfo.id,
+    //   "deviceType": "1",
+    //   "fcmKey": token,
+    //   "brand": androidInfo.brand
+    // });
+    return androidInfo.id;
   } else if (Platform.isIOS) {
     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
     GlobalVariables().platForm = iosInfo.systemName;
-    log(iosInfo.systemName);
+    log(iosInfo.toString());
+
+    // AuthRepo().addDeviceDetails({
+    //   "deviceId": iosInfo.identifierForVendor,
+    //   "deviceType": "1",
+    //   "fcmKey": token,
+    //   "brand": iosInfo.systemName
+    // });
     return iosInfo.identifierForVendor; // Returns a unique ID for iOS devices
   } else {
     return null; // Handle other platforms or return a default value
@@ -34,15 +53,16 @@ Future<String?> getUniqueDeviceId() async {
 }
 
 
-void fetchDeviceId() async {
-  String? deviceId = await getUniqueDeviceId();
-  GlobalVariables().deviceId = deviceId; // Store in the global variable
+void fetchDeviceId(String token) async {
+  String? deviceId = await getUniqueDeviceId(token);
+  GlobalVariables().deviceId = deviceId;
+
   print("Device ID: ${GlobalVariables().deviceId}");
+
 }
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
   WebEngagePlugin.onPushMessageReceive(message.data);
 }
 
@@ -50,68 +70,30 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  fetchDeviceId();
+
   await FirebaseMessaging.instance.requestPermission(
     alert: true,
     badge: true,
     sound: true,
   );
-
-  // String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-  // log('APNs Token: $apnsToken');
-
-
-
+  if(Platform.isIOS){
+    String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+    log('APNs Token: $apnsToken');
+    fetchDeviceId("");
+  }
+if(Platform.isAndroid){
   var token = await FirebaseMessaging.instance.getToken();
   if (token != null) {
-    log("FCM token $token");
+    fetchDeviceId(token);
     WebEngagePlugin.setPushToken(token);
-    WebEngagePlugin.userLogin('3254');
-
-
-
+    WebEngagePlugin.userLogin('63855');
   }
+}
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     WebEngagePlugin.onPushMessageReceive(message.data);
   });
   runApp(const MyApp());
-  // String? uniqueId = await DeviceIdentifier.deviceId..toString();
-  //
-  // if (Platform.isAndroid) {
-  //
-  //   final deviceInfoPlugin = DeviceInfoPlugin();
-  //   final deviceInfo = await deviceInfoPlugin.deviceInfo;
-  //   final allInfo = deviceInfo.data;
-  //
-  //
-  //   log('Running on ${allInfo}');
-  //
-  // }
-  // else if (Platform.isIOS) {
-  //   IosDeviceInfo data = await deviceInfo.iosInfo;
-  //   Map body =<String, dynamic>{
-  //     'name': data.name,
-  //     'systemName': data.systemName,
-  //     'systemVersion': data.systemVersion,
-  //     'model': data.model,
-  //     'modelName': data.modelName,
-  //     'localizedModel': data.localizedModel,
-  //     'identifierForVendor': data.identifierForVendor,
-  //     'isPhysicalDevice': data.isPhysicalDevice,
-  //     'isiOSAppOnMac': data.isiOSAppOnMac,
-  //     'utsname.sysname:': data.utsname.sysname,
-  //     'utsname.nodename:': data.utsname.nodename,
-  //     'utsname.release:': data.utsname.release,
-  //     'utsname.version:': data.utsname.version,
-  //     'utsname.machine:': data.utsname.machine,
-  //   };
-  //   print('Running on ${body}');
-  // }
-
-
-
-
 }
 
 class MyApp extends StatelessWidget {
@@ -148,7 +130,7 @@ class MyApp extends StatelessWidget {
         //     child: child!,
         //   );
         // },
-        // home:  MyHomePage1(title: "ljnclkadsfc",),
+        // home:  LoginScreen(),
         debugShowCheckedModeBanner: false,
         // initialRoute: RoutesManager.onboardingScreen,
       ),

@@ -140,7 +140,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
 
       } catch (e, st) {
-        CustomToast.showSuccessToast(msg: "Otp Not Send Try Again");
+        CustomToast.showErrorToast(msg: "Otp Not Send Try Again");
+emit(InitialScreen());
         log("error  $e");
         log("error  $st");
       }
@@ -178,7 +179,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         }
 
       } catch (e, st) {
-        CustomToast.showSuccessToast(msg: "Otp Not Send Try Again");
+        CustomToast.showErrorToast(msg: "Otp Not Verify");
+        emit(InitialScreen());
         log("error  $e");
         log("error  $st");
       }

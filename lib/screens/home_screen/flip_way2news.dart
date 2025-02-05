@@ -1,12 +1,15 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import '../../globel_keys/global_variables_data.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
@@ -26,8 +29,9 @@ typedef IndexedItemBuilder<T> = Widget Function(
     BuildContext context, int index);
 
 class MyHomePage1 extends StatefulWidget {
-final String tabName;
- const MyHomePage1({super.key,required this.tabName});
+  final String tabName;
+
+  const MyHomePage1({super.key, required this.tabName});
 
   @override
   State<MyHomePage1> createState() => _MyHomePage1State();
@@ -37,17 +41,17 @@ class _MyHomePage1State extends State<MyHomePage1> {
   @override
   void initState() {
     initDynamicLinks();
-    if(widget.tabName=="Home"){
+    if (widget.tabName == "Home") {
       context.read<HomeBloc>().add(GetAllNewsFeed());
-    }else{
+    } else {
       context.read<HomeBloc>().add(GetAllDistrictFeed());
-
     }
     super.initState();
   }
+
   Future<void> initDynamicLinks() async {
     final PendingDynamicLinkData? initialLink =
-    await FirebaseDynamicLinks.instance.getInitialLink();
+        await FirebaseDynamicLinks.instance.getInitialLink();
     if (initialLink?.link != null) {
       handleDeepLink(initialLink!.link);
     }
@@ -62,67 +66,83 @@ class _MyHomePage1State extends State<MyHomePage1> {
   void handleDeepLink(Uri deepLink) {
     print("Opened with deep link: ${deepLink.toString()}");
   }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocConsumer<HomeBloc, HomeScreenState>(
-        listener: (context, state) {},
-        builder: (context, state) {
-          if (state is LoadingHomeScreenState) {
-            return const Center(child: AppLoadingScreen());
-          } else if (state is SuccessHomeScreenState) {
-            return FlipPanel.builder(
-              itemBuilder: (context, index) => _buildContent(context, state, index),
-              itemsCount: state.getAllHomeScreenNews.length,
-            );
-          } else {
-            return const Center(child: AppLoadingScreen());
-          }
-        },
-      ),
+    return BlocBuilder<HomeBloc, HomeScreenState>(
+      builder: (context, state) {
+        if (state is LoadingHomeScreenState) {
+          return const Center(child: AppLoadingScreen());
+        } else if (state is SuccessHomeScreenState) {
+          return FlipPanel.builder(
+            itemBuilder: (context, index) {
+              var item = state.getAllHomeScreenNews[index];
+              return Container(
+                color: Colors.white,
+                width: 1.sw,  // Full screen width
+                height: 1.sh-(GlobalVariables().platForm=="iOS"?100:32),
+                child: state.pageType == "Image"
+                    ? CachedNetworkImage(
+                        imageUrl: item.imageUrl.url ?? "",)
+                    : state.pageType == "Gallery"
+                        ? FullPageCarousel(imageUrls: item.gallery ?? [])
+                        : _buildTextContent(context, item, state),
+              );
+            },
+
+            // => _buildContent(context, state, index),
+            itemsCount: state.getAllHomeScreenNews.length,
+          );
+        } else if(state is ErrorHomeScreenState){
+          return  Center(child: AppNoData(data: state.getHomeScreenError,));
+        }else {
+          return const Center(child: AppNoData());
+        }
+      },
     );
   }
 
-  Widget _buildContent(
-      BuildContext context, SuccessHomeScreenState state, int index)
-  {
-    var item = state.getAllHomeScreenNews[index];
-    log("post typeee -------  ${state.pageType}");
-    if (state.pageType == "Image") {
-      return Container(
+  // Widget _buildContent(
+  //     BuildContext context, SuccessHomeScreenState state, int index)
+  // {
+  //   var item = state.getAllHomeScreenNews[index];
+  //   log("post typeee -------  ${state.pageType}");
+  //   if (state.pageType == "Image") {
+  //     return Container(
+  //       color: Colors.white,
+  //       height: MediaQuery.of(context).size.height-35,
+  //       width: MediaQuery.of(context).size.width,
+  //       child: ,
+  //     );
+  //   } else if (state.pageType == "Gallery") {
+  //     return Container(
+  //         color: Colors.white,
+  //         height: MediaQuery.of(context).size.height-35,
+  //         width: MediaQuery.of(context).size.width,
+  //         child: );
+  //   }
+  //
+  //   // else if (item.homepage != null) {
+  //   //   return FirstCardHomeFeeds(getHomeList: item.homepage);
+  //   // }
+  //   else{
+  //     return _buildTextContent(context, item,state);
+  //   }
+  //
+  // }
+
+  Widget _buildTextContent(
+      BuildContext context, var item, SuccessHomeScreenState state) {
+    return InkWell(
+      onTap: () {
+        context.read<HomeBloc>().add(MenuChange());
+      },
+      child: Container(
         color: Colors.white,
-        height: MediaQuery.of(context).size.height-35,
+        height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        child: CachedNetworkImage(
-            imageUrl: item.imageUrl.url ?? "", fit: BoxFit.cover),
-      );
-    } else if (state.pageType == "Gallery") {
-      return Container(
-          color: Colors.white,
-          height: MediaQuery.of(context).size.height-35,
-          width: MediaQuery.of(context).size.width,
-          child: FullPageCarousel(imageUrls: item.gallery ?? []));
-    }
-
-    // else if (item.homepage != null) {
-    //   return FirstCardHomeFeeds(getHomeList: item.homepage);
-    // }
-    else{
-      return _buildTextContent(context, item,state);
-    }
-
-  }
-
-  Widget _buildTextContent(BuildContext context, var item, SuccessHomeScreenState state) {
-    return Container(
-      color: Colors.white,
-      height: MediaQuery.of(context).size.height-35,
-      width: MediaQuery.of(context).size.width,
-      child: InkWell(
-        onTap: (){
-          context.read<HomeBloc>().add(MenuChange());
-        },
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
@@ -130,12 +150,12 @@ class _MyHomePage1State extends State<MyHomePage1> {
               child: Stack(
                 children: [
                   SizedBox(
-                      height: MediaQuery.of(context).size.height / 2.1,
                       child: state.pageType == "Video"
                           ? VideoPreview(url: item.videoUrl?.url ?? "")
                           : CachedNetworkImage(
                               imageUrl: item.imageUrl.url ?? "",
-                              imageBuilder: (context, imageProvider) => Container(
+                              imageBuilder: (context, imageProvider) =>
+                                  Container(
                                 height: MediaQuery.of(context).size.height,
                                 width: MediaQuery.of(context).size.width,
                                 decoration: BoxDecoration(
@@ -214,57 +234,63 @@ class _MyHomePage1State extends State<MyHomePage1> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(item.title ?? "No Title",
-                        style:
-                            fontStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        style: fontStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold)),
                     height(height: 10),
                     Expanded(
                       child: Text(item.content,
                           style:
-                              fontStyle(fontSize: 16, color: Colors.grey[800])),
+                              fontStyle(fontSize: 14, color: Colors.grey[800])),
                     ),
                     height(height: 4),
-                    Text(formatTimeDifference( item.created),
-                        style:
-                        fontStyle(fontSize: 14, fontWeight: FontWeight.normal)),
+                    Text("Posted ${formatTimeDifference(item.created)}",
+                        style: fontStyle(
+                            fontSize: 14, fontWeight: FontWeight.normal)),
                     const Divider(color: AppColors.borderColor),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        BottomActions(
-                            icon: "assets/svg/reload.svg",
-                            label: 'రిలోడ్ ',
-                            onTap: () {
-                              log("Refresh");
-                              context.read<HomeBloc>().add(GetAllNewsFeed());
-                            }),
-                        BottomActions(
-                            icon:isLike?"assets/svg/reload.svg":"assets/svg/like.svg",
-                            label: 'లైక్',
-                            onTap: () {
-                              log("Like",);
-                              isLike = !isLike;
-                              setState(() {
-
-                              });
-                              // context.read<HomeBloc>().add(LikeByPost(isLike: true, postId: item.id.toString()));
-                            }),
-                        BottomActions(
-                            icon: "assets/svg/comment.svg",
-                            label: 'కామెంట్',
-                            onTap: () {
-                              log("Comment");
-                              showComments(context,item.id.toString());
-                              // context.read<HomeBloc>().add(GetAllNewsFeed());
-                            }),
-                        BottomActions(
-                            icon: "assets/svg/share.svg",
-                            label: ' షేర్',
-                            onTap: () {
-                              log("Share");
-                              context.read<HomeBloc>().add(
-                                  SendNewsToSocialMedia(id: item.linkURLAndroid));
-                            }),
-                      ],
+                    SizedBox(
+                      height: 50,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          BottomActions(
+                              icon: "assets/svg/reload.svg",
+                              label: 'రిలోడ్ ',
+                              onTap: () {
+                                log("Refresh");
+                                context.read<HomeBloc>().add(GetAllNewsFeed());
+                              }),
+                          BottomActions(
+                              icon: isLike
+                                  ? "assets/svg/reload.svg"
+                                  : "assets/svg/like.svg",
+                              label: 'లైక్',
+                              onTap: () {
+                                log(
+                                  "Like",
+                                );
+                                isLike = !isLike;
+                                setState(() {});
+                                // context.read<HomeBloc>().add(LikeByPost(isLike: true, postId: item.id.toString()));
+                              }),
+                          BottomActions(
+                              icon: "assets/svg/comment.svg",
+                              label: 'కామెంట్',
+                              onTap: () {
+                                log("Comment");
+                                showComments(context, item.id.toString());
+                                // context.read<HomeBloc>().add(GetAllNewsFeed());
+                              }),
+                          BottomActions(
+                              icon: "assets/svg/share.svg",
+                              label: ' షేర్',
+                              onTap: () {
+                                log("Share");
+                                context.read<HomeBloc>().add(
+                                    SendNewsToSocialMedia(
+                                        id: item.linkURLAndroid));
+                              }),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -277,7 +303,6 @@ class _MyHomePage1State extends State<MyHomePage1> {
   }
 
   bool isLike = false;
-
 }
 
 class FlipPanel<T> extends StatefulWidget {
@@ -328,7 +353,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
       ..addStatusListener((status) {
         if (status == AnimationStatus.completed) {
           _isReversePhase = true;
-          _controller!.reverse();
+          _controller!.forward();
           _refreshDataForCurrentIndex();
         }
         if (status == AnimationStatus.dismissed) {
@@ -553,44 +578,56 @@ class _FlipPanelState<T> extends State<FlipPanel>
       );
 
   Widget _buildPanel() {
+    print("sbcfkjsknsncklclsdn ${GlobalVariables().platForm}");
     if (direction == FlipDirection.up) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _TopBuildUpperFlipPanel(),
-          _TopBuildLowerFlipPanel(),
-        ],
+      return Container(
+        color: Colors.white,
+        width: MediaQuery.of(context).size.width,  // Full screen width
+        height:MediaQuery.of(context).size.height-(GlobalVariables().platForm=="iOS"?100:40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _TopBuildUpperFlipPanel(),
+            _TopBuildLowerFlipPanel(),
+          ],
+        ),
       );
     } else {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _BottomBuildUpperFlipPanel(),
-          _BottombuildLowerFlipPanel(),
-        ],
+      return Container(
+        color: Colors.white,
+        width: MediaQuery.of(context).size.width,  // Full screen width
+        height:MediaQuery.of(context).size.height,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _BottomBuildUpperFlipPanel(),
+            _BottombuildLowerFlipPanel(),
+          ],
+        ),
       );
     }
   }
 }
 
 class VideoScreenView extends StatelessWidget {
-final  String url;
-  const VideoScreenView({super.key,required this.url});
+  final String url;
+
+  const VideoScreenView({super.key, required this.url});
 
   @override
   Widget build(BuildContext context) {
-    YoutubePlayerController  controller = YoutubePlayerController(
+    YoutubePlayerController controller = YoutubePlayerController(
       initialVideoId: url,
       flags: const YoutubePlayerFlags(
         autoPlay: true,
         mute: false,
       ),
     );
-    return  YoutubePlayer(
+    return YoutubePlayer(
       controller: controller,
       showVideoProgressIndicator: true,
       progressIndicatorColor: Colors.red,
