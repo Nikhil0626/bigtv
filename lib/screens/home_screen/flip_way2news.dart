@@ -533,7 +533,6 @@ class _FlipPanelState<T> extends State<FlipPanel>
           ),
         ],
       );
-
   Widget _BottombuildLowerFlipPanel() => Stack(
         children: [
           Transform(

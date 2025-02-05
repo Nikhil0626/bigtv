@@ -52,7 +52,9 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                   children: [
                     InkWell(
                       onTap: () {
+
                         Navigator.pop(context);
+
                       },
                       child: const Icon(
                         color: Colors.white,
@@ -60,11 +62,11 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                         size: 18,
                       ),
                     ),
-                    const Expanded(
+                     Expanded(
                       child: Text(
-                        "మీ జిల్లాను ఎంచుకోండి, మీ ఊర్లో తాజా ఈవెంట్లు తెలుసుకోండి!",
+                        "మీ ప్రాంతాన్ని ఎంచుకోండి, ప్రతిరోజు మీ ఊరిలో ఏమి జరుగుతుందో తెలుసుకోండి.",
                         maxLines: 2,
-                        style: TextStyle(
+                        style: fontStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -205,7 +207,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                         children: [
                                           Text(
                                             district.name,
-                                            style: const TextStyle(
+                                            style: fontStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.w400,
                                               color: Colors.black,
@@ -250,9 +252,9 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                   color:state.selectedDistrictList.isEmpty?Colors.grey: Colors.lightBlue,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Text(
+                                child:  Text(
                                   'Done',
-                                  style: TextStyle(
+                                  style: fontStyle(
                                     color: Colors.white, // White text
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -266,17 +268,17 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                       ],
                     );
                   } else if (state is ErrorDistrictsState) {
-                    return const Center(
+                    return  Center(
                       child: Text(
                         "Please try again later.",
-                        style: TextStyle(color: Colors.red),
+                        style: fontStyle(color: Colors.red),
                       ),
                     );
                   } else {
-                    return const Center(
+                    return  Center(
                       child: Text(
                         "No data available",
-                        style: TextStyle(
+                        style: fontStyle(
                           color: Colors.lightBlue,
                           fontSize: 20,
                           fontWeight: FontWeight.w400,

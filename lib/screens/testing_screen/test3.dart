@@ -574,7 +574,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
                                 ),
                                Text(
                                   post.title ?? "",
-                                  style: const TextStyle(
+                                  style: fontStyle(
                                     color: AppColors.headerTextColor,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
@@ -596,10 +596,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
               color: Colors.grey,
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              child: const Center(
+              child:  Center(
                 child: Text(
                   "Something went wrong. Please try again.",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  style:fontStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             );

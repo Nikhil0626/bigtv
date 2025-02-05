@@ -2,6 +2,8 @@ import 'package:appinio_swiper/appinio_swiper.dart';
 import 'package:chotanews/screens/testing_screen/test_bloc.dart';
 import 'package:chotanews/screens/testing_screen/test_event.dart';
 import 'package:chotanews/screens/testing_screen/test_state.dart';
+import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -69,7 +71,7 @@ class _NewsScreen1State extends State<NewsScreen1> {
                       child: Center(
                         child: Text(
                           state.newPosts[index].title ?? 'No Title',
-                          style: const TextStyle(
+                          style: fontStyle(
                               fontSize: 24, fontWeight: FontWeight.bold),
                         ),
                       ),
@@ -99,17 +101,17 @@ class _NewsScreen1State extends State<NewsScreen1> {
                               children: [
                                 Text(
                                   state.newPosts[index].title ?? "No Title",
-                                  style: const TextStyle(
+                                  style: fontStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.black,
                                   ),
                                 ),
-                                SizedBox(height: 16),
+                                height(height: 16),
                                 Text(
                                   state.newPosts[index].content ??
                                       "No Description",
-                                  style: TextStyle(
+                                  style: fontStyle(
                                     fontSize: 16,
                                     color: Colors.grey[800],
                                   ),
@@ -129,10 +131,10 @@ class _NewsScreen1State extends State<NewsScreen1> {
               color: Colors.grey,
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              child: const Center(
+              child:  Center(
                 child: Text(
                   "Something went wrong. Please try again.",
-                  style: TextStyle(color: Colors.white, fontSize: 16),
+                  style: fontStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             );
@@ -226,16 +228,16 @@ class AnimatedNewsPage extends StatelessWidget {
                       children: [
                         Text(
                           title,
-                          style: const TextStyle(
+                          style:fontStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
                         ),
-                        SizedBox(height: 16),
+                        height(height: 16),
                         Text(
                           description,
-                          style: TextStyle(
+                          style: fontStyle(
                             fontSize: 16,
                             color: Colors.grey[800],
                           ),
