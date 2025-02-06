@@ -84,8 +84,6 @@
 //   }
 // }
 
-
-
 import 'package:chotanews/screens/videos_main/videos_model/videos_model.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
@@ -93,11 +91,16 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../utils/app_colors.dart';
 
-
 class VideoPreview extends StatefulWidget {
   final String url;
   bool isVideoScreen;
-   VideoPreview({super.key,required this.url,  this.isVideoScreen = false, });
+
+  VideoPreview({
+    super.key,
+    required this.url,
+    this.isVideoScreen = false,
+  });
+
   @override
   _VideoPreview createState() => _VideoPreview();
 }
@@ -127,9 +130,10 @@ class _VideoPreview extends State<VideoPreview> {
   Widget build(BuildContext context) {
     if (widget.isVideoScreen) {
       return SafeArea(
-          child: Scaffold(
-            backgroundColor: Colors.white,
-            appBar: AppBar(leading: InkWell(
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            leading: InkWell(
               onTap: () {
                 Navigator.pop(context);
               },
@@ -138,23 +142,31 @@ class _VideoPreview extends State<VideoPreview> {
                 Icons.arrow_back_ios,
                 size: 18,
               ),
-            ),backgroundColor: AppColors.appButtonColor,title: Text("Video View",style: fontStyle(fontSize: 16,fontWeight: FontWeight.w600,color: Colors.white),),),
-            body: Center(
-              child: YoutubePlayer(
+            ),
+            backgroundColor: AppColors.appButtonColor,
+            title: Text(
+              "Video View",
+              style: fontStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white),
+            ),
+          ),
+          body: Center(
+            child: YoutubePlayer(
               controller: controller,
               showVideoProgressIndicator: true,
               progressIndicatorColor: Colors.red,
-                          ),
             ),
           ),
-        );
+        ),
+      );
     } else {
       return YoutubePlayer(
-      controller: controller,
-      showVideoProgressIndicator: true,
-      progressIndicatorColor: Colors.red,
-    );
+        controller: controller,
+        showVideoProgressIndicator: true,
+        progressIndicatorColor: Colors.red,
+      );
     }
   }
 }
-

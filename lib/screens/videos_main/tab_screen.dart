@@ -46,23 +46,29 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: AppColors.appButtonColor,
-        title: Text(
-          "మెను",
-          style: fontStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: Colors.white,
-          ),
-        ),
-        leading: InkWell(
-          onTap: () {
-            Navigator.pushNamed(context, RoutesManager.homeScreen);
-          },
-          child: const Icon(
-            color: Colors.white,
-            Icons.arrow_back_ios,
-            size: 18,
-          ),
+        leading: const SizedBox(),
+        title: Row(
+          children: [
+            InkWell(
+              onTap: () {
+                Navigator.pushNamed(context, RoutesManager.homeScreen);
+              },
+              child: const Icon(
+                Icons.arrow_back_ios,
+                size: 18,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "మెను",
+              style: fontStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                color: Colors.white,
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -74,7 +80,6 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
             onPressed: () {
               Navigator.pushNamed(context, RoutesManager.settingsScreen);
             },
-
           ),
         ],
       ),

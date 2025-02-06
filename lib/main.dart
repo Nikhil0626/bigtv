@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -75,6 +76,7 @@ Future<void> main() async{
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     WebEngagePlugin.onPushMessageReceive(message.data);
   });
+
   runApp(const MyApp());
   // String? uniqueId = await DeviceIdentifier.deviceId..toString();
   //
@@ -122,9 +124,9 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: RegisterProviders.providers(context),
       child: MaterialApp(
-        theme: ThemeData(
-          colorScheme:
-          ColorScheme.fromSeed(seedColor: Colors.orange.shade300),
+        theme:ThemeData(
+          primaryColor: Colors.lightBlue,
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange.shade300),
           useMaterial3: true,
         ),
         scrollBehavior: MyBehavior(),
@@ -148,8 +150,10 @@ class MyApp extends StatelessWidget {
         //     child: child!,
         //   );
         // },
-        // home:  MyHomePage1(title: "ljnclkadsfc",),
+
+        home:  DistrictsSelectionScreen(className: "hgh"),
         debugShowCheckedModeBanner: false,
+        // debugShowMaterialGrid: true,
         // initialRoute: RoutesManager.onboardingScreen,
       ),
     );
