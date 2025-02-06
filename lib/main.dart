@@ -1,17 +1,16 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/Auth_module/auth_repo.dart';
-import 'package:chotanews/screens/Auth_module/auth_screen.dart';
-import 'package:chotanews/screens/testing_screen/test4.dart';
+import 'package:chotanews/screens/flip_page/articals_bloc.dart';
+import 'package:chotanews/screens/flip_page/article_bloc_provider.dart';
+import 'package:chotanews/screens/home_screen/home_repo.dart';
+import 'package:chotanews/screens/home_screen/home_screen_view.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'dart:io' show Platform;
 
@@ -67,6 +66,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 
+
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -86,13 +86,17 @@ if(Platform.isAndroid){
   if (token != null) {
     fetchDeviceId(token);
     WebEngagePlugin.setPushToken(token);
-    WebEngagePlugin.userLogin('63855');
+    WebEngagePlugin.userLogin('63860');
+    WebEngagePlugin.trackScreen('Home Page');
+    WebEngagePlugin.trackScreen('Product Page', {'Product Id': 'UHUH799'});
   }
 }
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     WebEngagePlugin.onPushMessageReceive(message.data);
   });
+  // WENotificationInbox().init();
+
   runApp(const MyApp());
 }
 
@@ -101,38 +105,45 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: RegisterProviders.providers(context),
-      child: MaterialApp(
-        theme: ThemeData(
-          colorScheme:
-          ColorScheme.fromSeed(seedColor: Colors.orange.shade300),
-          useMaterial3: true,
+    HomeRepo api = HomeRepo();
+    ArticleBloc bloc = ArticleBloc(api: api);
+
+    bloc.getArticles();
+    return ArticleBlocProvider(
+      bloc: bloc,
+      child: MultiBlocProvider(
+        providers: RegisterProviders.providers(context),
+        child: MaterialApp(
+          theme: ThemeData(
+            colorScheme:
+            ColorScheme.fromSeed(seedColor: Colors.orange.shade300),
+            useMaterial3: true,
+          ),
+          scrollBehavior: MyBehavior(),
+          navigatorKey: mainNavigatorKey,
+          navigatorObservers: [routeObserver],
+          onGenerateRoute: (RouteSettings setting) {
+            return RoutesManager.generateRoute(setting);
+          },
+          builder: (
+              BuildContext context,
+              Widget? child,
+              ) {
+            // ScreenUtil.init(context, designSize: const Size(385, 890));
+            return child!;
+          },
+          // builder: (BuildContext context, Widget? child) {
+          //   ScreenUtil.init(context, designSize: const Size(385, 890));
+          //   return MediaQuery(
+          //     data: MediaQuery.of(context)
+          //         .copyWith(textScaler: const TextScaler.linear(1)),
+          //     child: child!,
+          //   );
+          // },
+          // home:  HomePage(),
+          debugShowCheckedModeBanner: false,
+          // initialRoute: RoutesManager.onboardingScreen,
         ),
-        scrollBehavior: MyBehavior(),
-        navigatorKey: mainNavigatorKey,
-        navigatorObservers: [routeObserver],
-        onGenerateRoute: (RouteSettings setting) {
-          return RoutesManager.generateRoute(setting);
-        },
-        builder: (
-            BuildContext context,
-            Widget? child,
-            ) {
-          ScreenUtil.init(context, designSize: const Size(385, 890));
-          return child!;
-        },
-        // builder: (BuildContext context, Widget? child) {
-        //   ScreenUtil.init(context, designSize: const Size(385, 890));
-        //   return MediaQuery(
-        //     data: MediaQuery.of(context)
-        //         .copyWith(textScaler: const TextScaler.linear(1)),
-        //     child: child!,
-        //   );
-        // },
-        // home:  LoginScreen(),
-        debugShowCheckedModeBanner: false,
-        // initialRoute: RoutesManager.onboardingScreen,
       ),
     );
   }

@@ -19,6 +19,7 @@ import '../../utils/image_view_popup.dart';
 import '../videos_main/video_views/gallery_screen.dart';
 import '../videos_main/video_views/video_preview.dart';
 import 'botton_actions.dart';
+import 'first_card_home_feeds.dart';
 import 'home_bloc.dart';
 import 'home_event.dart';
 import 'home_state.dart';
@@ -59,12 +60,11 @@ class _MyHomePage1State extends State<MyHomePage1> {
     FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
       handleDeepLink(dynamicLinkData.link);
     }).onError((error) {
-      print("Dynamic Link Error: $error");
+
     });
   }
 
   void handleDeepLink(Uri deepLink) {
-    print("Opened with deep link: ${deepLink.toString()}");
   }
 
   @override
@@ -75,6 +75,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
           return const Center(child: AppLoadingScreen());
         } else if (state is SuccessHomeScreenState) {
           return FlipPanel.builder(
+
             itemBuilder: (context, index) {
               var item = state.getAllHomeScreenNews[index];
               return Container(
@@ -86,7 +87,8 @@ class _MyHomePage1State extends State<MyHomePage1> {
                         imageUrl: item.imageUrl.url ?? "",)
                     : state.pageType == "Gallery"
                         ? FullPageCarousel(imageUrls: item.gallery ?? [])
-                        : _buildTextContent(context, item, state),
+                        :item.homepage != null
+                    ? FirstCardHomeFeeds(getHomeList: item.homepage): _buildTextContent(context, item, state,index),
               );
             },
 
@@ -102,37 +104,8 @@ class _MyHomePage1State extends State<MyHomePage1> {
     );
   }
 
-  // Widget _buildContent(
-  //     BuildContext context, SuccessHomeScreenState state, int index)
-  // {
-  //   var item = state.getAllHomeScreenNews[index];
-  //   log("post typeee -------  ${state.pageType}");
-  //   if (state.pageType == "Image") {
-  //     return Container(
-  //       color: Colors.white,
-  //       height: MediaQuery.of(context).size.height-35,
-  //       width: MediaQuery.of(context).size.width,
-  //       child: ,
-  //     );
-  //   } else if (state.pageType == "Gallery") {
-  //     return Container(
-  //         color: Colors.white,
-  //         height: MediaQuery.of(context).size.height-35,
-  //         width: MediaQuery.of(context).size.width,
-  //         child: );
-  //   }
-  //
-  //   // else if (item.homepage != null) {
-  //   //   return FirstCardHomeFeeds(getHomeList: item.homepage);
-  //   // }
-  //   else{
-  //     return _buildTextContent(context, item,state);
-  //   }
-  //
-  // }
-
   Widget _buildTextContent(
-      BuildContext context, var item, SuccessHomeScreenState state) {
+      BuildContext context, var item, SuccessHomeScreenState state, int index) {
     return InkWell(
       onTap: () {
         context.read<HomeBloc>().add(MenuChange());
@@ -146,12 +119,14 @@ class _MyHomePage1State extends State<MyHomePage1> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: 4,
+              flex: 5,
               child: Stack(
                 children: [
                   SizedBox(
                       child: state.pageType == "Video"
-                          ? VideoPreview(url: item.videoUrl?.url ?? "")
+                          ? Container(
+                          color: Colors.black,
+                          child: Center(child: VideoPreview(url: item.videoUrl?.url ?? "")))
                           : CachedNetworkImage(
                               imageUrl: item.imageUrl.url ?? "",
                               imageBuilder: (context, imageProvider) =>
@@ -190,7 +165,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
                               borderRadius: const BorderRadius.only(
                                   topRight: Radius.circular(10),
                                   bottomLeft: Radius.circular(10))),
-                          child: Image.asset("assets/images/brandlogo.png"))),
+                          child: Image.asset("assets/images/brandlogo.png",))),
                   Positioned(
                       bottom: 10,
                       right: 10,
@@ -235,17 +210,14 @@ class _MyHomePage1State extends State<MyHomePage1> {
                   children: [
                     Text(item.title ?? "No Title",
                         style: fontStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold)),
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     height(height: 10),
                     Expanded(
-                      child: Text(item.content,
+                      child: Text("${item.content}\n\nPosted ${formatTimeDifference(item.created)}($index)",
                           style:
-                              fontStyle(fontSize: 14, color: Colors.grey[800])),
+                              fontStyle(fontSize: 16, color: Colors.grey[800])),
                     ),
                     height(height: 4),
-                    Text("Posted ${formatTimeDifference(item.created)}",
-                        style: fontStyle(
-                            fontSize: 14, fontWeight: FontWeight.normal)),
                     const Divider(color: AppColors.borderColor),
                     SizedBox(
                       height: 50,
@@ -333,7 +305,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   FlipDirection direction = FlipDirection.down;
   AnimationController? _controller;
   Animation? _animation;
-  int? _currentIndex;
+  int _currentIndex = 0;
   bool? _isReversePhase;
   final _perspective = 0.00003;
   final _zeroAngle = 0.0001;
@@ -345,21 +317,20 @@ class _FlipPanelState<T> extends State<FlipPanel>
   @override
   void initState() {
     super.initState();
-    _currentIndex = 0;
     _isReversePhase = true;
-
     _controller = AnimationController(
-        duration: const Duration(milliseconds: 200), vsync: this)
+        duration: const Duration(milliseconds: 1000), vsync: this)
       ..addStatusListener((status) {
+        log(status.index.toString());
         if (status == AnimationStatus.completed) {
           _isReversePhase = true;
-          _controller!.forward();
+          _controller!.reverse();
           _refreshDataForCurrentIndex();
         }
         if (status == AnimationStatus.dismissed) {
           setState(() {
             // Update the index when the flip animation is complete
-            _currentIndex = _currentIndex!;
+            _currentIndex = _currentIndex;
             _refreshDataForCurrentIndex(); // Ensure data refresh
           });
         }
@@ -381,19 +352,19 @@ class _FlipPanelState<T> extends State<FlipPanel>
   void _refreshDataForCurrentIndex() {
     setState(() {
       /// Ensure that the current index stays within valid bounds
-      if (_currentIndex! < 0) {
+      if (_currentIndex < 0) {
         _currentIndex = 0; // Prevent negative index
-      } else if (_currentIndex! >= widget.itemsCount!) {
+      } else if (_currentIndex >= widget.itemsCount!) {
         _currentIndex = widget.itemsCount! - 1; // Prevent index out of range
       }
 
       /// Safely set the widget for the current index
-      _child1 = widget.indexedItemBuilder!(context, _currentIndex!);
+      _child1 = widget.indexedItemBuilder!(context, _currentIndex);
       _upperChild1 = _makeUpperClip(_child1!);
       _lowerChild1 = _makeLowerClip(_child1!);
 
       /// Safely set the widget for the next index (for _child2)
-      int nextIndex = _currentIndex! - 1;
+      int nextIndex = _currentIndex - 1;
       if (nextIndex < widget.itemsCount!) {
         _child2 = widget.indexedItemBuilder!(context, nextIndex);
         _upperChild2 = _makeUpperClip(_child2!);
@@ -405,11 +376,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
   }
 
   void _flipBackward() {
-    if (_currentIndex! > 0) {
+    if (_currentIndex > 0) {
       setState(() {
         _isReversePhase = false;
         direction = FlipDirection.down;
-        _currentIndex = (_currentIndex! - 1).clamp(0, widget.itemsCount! - 1);
+        _currentIndex = (_currentIndex - 1).clamp(0, widget.itemsCount! - 1);
       });
 
       _controller!.forward().then((_) {
@@ -419,19 +390,17 @@ class _FlipPanelState<T> extends State<FlipPanel>
       });
     }
   }
-
   void _flipForward() {
     setState(() {
       _isReversePhase = false;
       direction = FlipDirection.up;
-      _currentIndex = (_currentIndex! + 1).clamp(0, widget.itemsCount! + 1);
-    });
+      _currentIndex = (_currentIndex + 1).clamp(0, widget.itemsCount! + 1);
 
     _controller!.forward().then((_) {
-      setState(() {
         _refreshDataForCurrentIndex(); // Refresh data on forward flip
-      });
     });
+    });
+
   }
 
   @override
@@ -441,7 +410,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
     return GestureDetector(
       onVerticalDragUpdate: (details) {
         if (!_controller!.isAnimating && !_isSwiping) {
-          context.read<HomeBloc>().add(OnSwipeCard(index: _currentIndex!));
+          context.read<HomeBloc>().add(OnSwipeCard(index: _currentIndex));
           _isSwiping = true;
           if (details.primaryDelta! > 0) {
             _flipBackward();
@@ -458,6 +427,9 @@ class _FlipPanelState<T> extends State<FlipPanel>
         // Reset the swipe tracking if the drag is canceled
         _isSwiping = false;
       },
+      onHorizontalDragStart: (val){
+        _isSwiping = false;
+      },
       child: AnimatedBuilder(
         animation: _controller!,
         builder: (context, child) {
@@ -468,22 +440,40 @@ class _FlipPanelState<T> extends State<FlipPanel>
   }
 
   void _buildChildWidgetsIfNeed(BuildContext context) {
+
     if (_child1 == null) {
-      _child1 = widget.indexedItemBuilder!(context, (_currentIndex! + 1));
+      _child1 = widget.indexedItemBuilder!(context, _currentIndex);
       _upperChild1 = _makeUpperClip(_child1!);
       _lowerChild1 = _makeLowerClip(_child1!);
     }
 
-    if (_child2 == null) {
-      _child2 = widget.indexedItemBuilder!(context, (_currentIndex! + 1));
+    if (_child2 == null ) {
+      _child2 = widget.indexedItemBuilder!(context,_currentIndex==0?_currentIndex : _currentIndex + 1);
       _upperChild2 = _makeUpperClip(_child2!);
       _lowerChild2 = _makeLowerClip(_child2!);
     }
 
-    _child1 = widget.indexedItemBuilder!(context, _currentIndex!);
-    _upperChild1 = _makeUpperClip(_child1!);
-    _lowerChild1 = _makeLowerClip(_child1!);
+
   }
+
+
+  // void _buildChildWidgetsIfNeed(BuildContext context) {
+  //   if (_child1 == null) {
+  //     _child1 = widget.indexedItemBuilder!(context, (_currentIndex! + 1));
+  //     _upperChild1 = _makeUpperClip(_child1!);
+  //     _lowerChild1 = _makeLowerClip(_child1!);
+  //   }
+  //
+  //   if (_child2 == null) {
+  //     _child2 = widget.indexedItemBuilder!(context, (_currentIndex! + 1));
+  //     _upperChild2 = _makeUpperClip(_child2!);
+  //     _lowerChild2 = _makeLowerClip(_child2!);
+  //   }
+  //
+  //   _child1 = widget.indexedItemBuilder!(context, _currentIndex!);
+  //   _upperChild1 = _makeUpperClip(_child1!);
+  //   _lowerChild1 = _makeLowerClip(_child1!);
+  // }
 
   Widget _makeUpperClip(Widget widget) {
     return ClipRect(
@@ -577,7 +567,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
       );
 
   Widget _buildPanel() {
-    print("sbcfkjsknsncklclsdn ${GlobalVariables().platForm}");
+
     if (direction == FlipDirection.up) {
       return Container(
         color: Colors.white,

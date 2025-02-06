@@ -44,11 +44,11 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         'userid': "1",
         'postid': "0",
         'lpostid': "0",
-        'includeHomePage': "1",
+        'includeHomePage': "0",
         'isByNotification': "false",
         'deviceid': deviceId,
         'platform': platForm,
-        'homefeed': "1",
+        'homefeed': "0",
         // 'hasAds': true,
         // 'locationIds': '21,22,43,44,55,64',
         // "debugMode": true
