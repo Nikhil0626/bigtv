@@ -1,3 +1,5 @@
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -50,24 +52,34 @@ class ImageViewPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: AppColors.appButtonColor,
         leading: InkWell(
           onTap: () => Navigator.pop(context),
           child: const Icon(
             Icons.arrow_back_ios,
+            color: Colors.white,
             size: 24,
           ),
         ),
-        title: const Text("Image View"),
+        title:  Text("Image View",style: fontStyle(fontWeight: FontWeight.w600,fontSize: 18,color: Colors.white),),
       ),
-      body: Container(
-        width: MediaQuery.of(context).size.width, // Adjust the width as needed
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          borderRadius: const BorderRadius.all(Radius.circular(4)),
-          image: DecorationImage(
-            image: NetworkImage(imageUrl),
-            fit: BoxFit.fill, // Ensures the image covers the entire area
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width, // Adjust the width as needed
+            height: MediaQuery.of(context).size.height/1.5,
+
+            decoration: BoxDecoration(
+              borderRadius: const BorderRadius.all(Radius.circular(4)),
+              color: Colors.white,
+              image: DecorationImage(
+                image: NetworkImage(imageUrl),
+                // fit: BoxFit.fill, // Ensures the image covers the entire area
+              ),
+            ),
           ),
         ),
       ),

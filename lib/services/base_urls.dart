@@ -3,8 +3,8 @@ import 'dart:core';
 class BaseUrls {
 
  /// Dev Base Url
- //  static const String baseUrl = "https://chotanews-fdcscrezbfd4befm.z01.azurefd.net/api";
-  static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
+   static const String baseUrl = "https://chotanews-fdcscrezbfd4befm.z01.azurefd.net/api";
+  // static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
   static const String baseUrlAws = "https://devchota.signitivessoft.com/api";
 
 
@@ -22,6 +22,7 @@ static const String updateDistricts ="/upsert/location";
 
   ///getUserDetail
   static const String userInfo = "/userinfo";
+  static const String addDevice = "/adddevice";
 
   ///like post
   static const String likePost = "/post/likes";

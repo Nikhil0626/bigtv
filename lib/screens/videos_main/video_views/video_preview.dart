@@ -1,90 +1,3 @@
-// import 'package:flutter/material.dart';
-// import 'package:video_player/video_player.dart';
-//
-// import '../videos_model/videos_model.dart';
-//
-// class VideoPreview extends StatefulWidget {
-//   final GetAllVideosModel videoPreviewData;
-//
-//   const VideoPreview({super.key, required this.videoPreviewData});
-//
-//   @override
-//   _VideoPreview createState() => _VideoPreview();
-// }
-// class _VideoPreview extends State<VideoPreview> {
-//   late VideoPlayerController _controller;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     print(widget.videoPreviewData.videoUrl?.url.toString());
-//     _controller = VideoPlayerController.networkUrl(
-//         Uri.parse(widget.videoPreviewData.videoUrl!.url.toString()))
-//       ..initialize().then((_) {
-//         setState(() {});
-//       })
-//       ..addListener(() {
-//         if (_controller.value.position == _controller.value.duration) {
-//           setState(() {});
-//         }
-//       });
-//   }
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Column(
-//         children: [
-//           Expanded(
-//
-//             child: Stack(
-//               fit: StackFit.expand,
-//               children: [
-//                 _controller.value.isInitialized
-//                     ? AspectRatio(
-//                         aspectRatio: _controller.value.aspectRatio,
-//                         child: VideoPlayer(_controller),
-//                       )
-//                     : Container(),
-//                 Positioned.fill(
-//                   child: Center(
-//                     child: InkWell(
-//                       onTap: () {
-//                         if (_controller.value.isPlaying) {
-//                           _controller.pause();
-//                         } else {
-//                           if (_controller.value.position ==
-//                               _controller.value.duration) {
-//                             _controller.seekTo(Duration.zero);
-//                             _controller.play();
-//                           } else {
-//                             _controller.play();
-//                           }
-//                         }
-//                         setState(() {});
-//                       },
-//                       child: Icon(
-//                         _controller.value.isPlaying ||
-//                                 _controller.value.position ==
-//                                     _controller.value.duration
-//                             ? Icons.pause_circle_filled
-//                             : Icons.play_circle_filled,
-//                         size: 70,
-//                         color: Colors.lightBlue.shade50,
-//                       ),
-//                     ),
-//                   ),
-//                 ),
-//               ],
-//             ),
-//           ),
-//         ],
-//       ),
-//
-//     );
-//   }
-// }
-
-import 'package:chotanews/screens/videos_main/videos_model/videos_model.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -93,13 +6,9 @@ import '../../../utils/app_colors.dart';
 
 class VideoPreview extends StatefulWidget {
   final String url;
-  bool isVideoScreen;
+  final bool isVideoScreen;
 
-  VideoPreview({
-    super.key,
-    required this.url,
-    this.isVideoScreen = false,
-  });
+  VideoPreview({super.key, required this.url, this.isVideoScreen = false});
 
   @override
   _VideoPreview createState() => _VideoPreview();
@@ -107,6 +16,7 @@ class VideoPreview extends StatefulWidget {
 
 class _VideoPreview extends State<VideoPreview> {
   late YoutubePlayerController controller;
+  bool isPlaying = false; // Track whether video has started playing
 
   @override
   void initState() {
@@ -115,7 +25,8 @@ class _VideoPreview extends State<VideoPreview> {
       initialVideoId: widget.url,
       flags: const YoutubePlayerFlags(
         autoPlay: false,
-        mute: false,
+        mute: true,
+        hideControls: true, // This hides fullscreen button
       ),
     );
   }
@@ -128,45 +39,63 @@ class _VideoPreview extends State<VideoPreview> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isVideoScreen) {
-      return SafeArea(
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            leading: InkWell(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: const Icon(
-                color: Colors.white,
-                Icons.arrow_back_ios,
-                size: 18,
-              ),
-            ),
-            backgroundColor: AppColors.appButtonColor,
-            title: Text(
-              "Video View",
-              style: fontStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white),
+    return widget.isVideoScreen
+        ? SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          leading: InkWell(
+            onTap: () {
+              Navigator.pop(context);
+            },
+            child: const Icon(
+              color: Colors.white,
+              Icons.arrow_back_ios,
+              size: 18,
             ),
           ),
-          body: Center(
-            child: YoutubePlayer(
-              controller: controller,
-              showVideoProgressIndicator: true,
-              progressIndicatorColor: Colors.red,
-            ),
+          backgroundColor: AppColors.appButtonColor,
+          title: Text(
+            "Video View",
+            style: fontStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.white),
           ),
         ),
-      );
-    } else {
-      return YoutubePlayer(
-        controller: controller,
-        showVideoProgressIndicator: true,
-        progressIndicatorColor: Colors.red,
-      );
-    }
+        body: Center(child: _buildVideoPlayer()),
+      ),
+    )
+        : _buildVideoPlayer();
+  }
+
+  Widget _buildVideoPlayer() {
+    return isPlaying
+        ? YoutubePlayer(
+
+      controller: controller,
+      showVideoProgressIndicator: true,
+      progressIndicatorColor: Colors.red,
+
+    )
+        : Stack(
+      alignment: Alignment.center,
+      children: [
+        Image.network(
+          "https://img.youtube.com/vi/${widget.url}/hqdefault.jpg",
+          fit: BoxFit.cover,
+          width: double.infinity,
+          height: double.infinity,
+        ),
+        IconButton(
+          icon: Icon(Icons.play_circle_filled, size: 70, color: Colors.blue),
+          onPressed: () {
+            setState(() {
+              isPlaying = true;
+            });
+          },
+        ),
+      ],
+    );
   }
 }

@@ -6,7 +6,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../utils/bottom_navigation_items.dart';
+import '../flip_page/articals_bloc.dart';
+import '../flip_page/article_bloc_provider.dart';
 import 'flip_way2news.dart';
+import 'home_repo.dart';
+import 'home_screen_view.dart';
 
 class HomeTopTabs extends StatefulWidget {
   final String tab;
@@ -43,33 +47,41 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _onWillPop,
-      child: SafeArea(
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          body: BlocConsumer<HomeBloc, HomeScreenState>(
-            listener: (context, state) {
-              if (state is SuccessHomeScreenState) {
-                if (isChange != state.isChange) {
-                  setState(() {
-                    isChange = state.isChange;
-                  });
+    HomeRepo api = HomeRepo();
+    ArticleBloc bloc = ArticleBloc(api: api);
+
+    bloc.getArticles();
+    return ArticleBlocProvider(
+      bloc: bloc,
+      child: WillPopScope(
+        onWillPop: _onWillPop,
+        child: SafeArea(
+          child: Scaffold(
+            backgroundColor: Colors.white,
+            body: BlocConsumer<HomeBloc, HomeScreenState>(
+              listener: (context, state) {
+                if (state is SuccessHomeScreenState) {
+                  if (isChange != state.isChange) {
+                    setState(() {
+                      isChange = state.isChange;
+                    });
+                  }
                 }
-              }
-            },
-            builder: (context, state) {
-              return Stack(
-                children: [
-                  TabBarView(
-                    controller: _tabController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: const [
-                      MyHomePage1(tabName: "Home"),
-                      MyHomePage1(tabName: ""),
-                    ],
-                  ),
-                  if (isChange)
+              },
+              builder: (context, state) {
+                return Stack(
+                  children: [
+                    TabBarView(
+                      controller: _tabController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: const [
+                        // MyHomePage1(tabName: "Home"),
+                        // MyHomePage1(tabName: ""),
+                        HomePage(),
+                        HomePage(),
+                      ],
+                    ),
+                    if(isChange)
                     Positioned(
                       left: 0,
                       right: 0,
@@ -80,19 +92,11 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                           color: Colors.white,
                           child: TabBar(
                             controller: _tabController,
-                            isScrollable: false,
+                            isScrollable: false, // Disable scrolling of the TabBar
                             unselectedLabelColor: Colors.black,
                             indicatorColor: Colors.blue,
-                            unselectedLabelStyle: fontStyle(
-                              color: Colors.black,
-                              fontSize: 14,
-                              fontWeight: FontWeight.normal,
-                            ),
-                            labelStyle: fontStyle(
-                              color: Colors.blue,
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            unselectedLabelStyle: fontStyle(color: Colors.black,fontSize: 14,fontWeight: FontWeight.normal),
+                            labelStyle: fontStyle(color: Colors.blue,fontSize: 16,fontWeight: FontWeight.bold),
                             tabs: const [
                               Tab(text: 'వార్తలు'),
                               Tab(text: 'జిల్లాలు'),
@@ -101,7 +105,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                         ),
                       ),
                     ),
-                  if (isChange)
+                    if(isChange)
                     Positioned(
                       bottom: 1,
                       left: 0,
@@ -112,9 +116,10 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                         child: const BottomNavigationItems(),
                       ),
                     ),
-                ],
-              );
-            },
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),

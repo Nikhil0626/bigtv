@@ -9,12 +9,14 @@ import '../../utils/app_spaces.dart';
 class BottomActions extends StatelessWidget {
   final String icon;
   final String label;
+  final bool isLike;
   final onTap;
 
   const BottomActions(
       {super.key,
       required this.icon,
       required this.label,
+       this.isLike=false,
       required this.onTap});
 
   @override
@@ -27,6 +29,14 @@ class BottomActions extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            if(label == "లైక్")
+              SvgPicture.asset(icon,
+                  height: 20,
+                  width: 20,
+                  color: isLike ?Colors.green:Colors.grey[600]
+              ),
+
+            if(label != "లైక్")
             SvgPicture.asset(icon,
                 height: 20,
                 width: 20,

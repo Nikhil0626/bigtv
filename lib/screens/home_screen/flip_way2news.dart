@@ -1,12 +1,15 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import '../../globel_keys/global_variables_data.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
@@ -16,6 +19,7 @@ import '../../utils/image_view_popup.dart';
 import '../videos_main/video_views/gallery_screen.dart';
 import '../videos_main/video_views/video_preview.dart';
 import 'botton_actions.dart';
+import 'first_card_home_feeds.dart';
 import 'home_bloc.dart';
 import 'home_event.dart';
 import 'home_state.dart';
@@ -26,8 +30,9 @@ typedef IndexedItemBuilder<T> = Widget Function(
     BuildContext context, int index);
 
 class MyHomePage1 extends StatefulWidget {
-final String tabName;
- const MyHomePage1({super.key,required this.tabName});
+  final String tabName;
+
+  const MyHomePage1({super.key, required this.tabName});
 
   @override
   State<MyHomePage1> createState() => _MyHomePage1State();
@@ -37,17 +42,17 @@ class _MyHomePage1State extends State<MyHomePage1> {
   @override
   void initState() {
     initDynamicLinks();
-    if(widget.tabName=="Home"){
+    if (widget.tabName == "Home") {
       context.read<HomeBloc>().add(GetAllNewsFeed());
-    }else{
+    } else {
       context.read<HomeBloc>().add(GetAllDistrictFeed());
-
     }
     super.initState();
   }
+
   Future<void> initDynamicLinks() async {
     final PendingDynamicLinkData? initialLink =
-    await FirebaseDynamicLinks.instance.getInitialLink();
+        await FirebaseDynamicLinks.instance.getInitialLink();
     if (initialLink?.link != null) {
       handleDeepLink(initialLink!.link);
     }
@@ -55,87 +60,77 @@ class _MyHomePage1State extends State<MyHomePage1> {
     FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
       handleDeepLink(dynamicLinkData.link);
     }).onError((error) {
-      print("Dynamic Link Error: $error");
+
     });
   }
 
   void handleDeepLink(Uri deepLink) {
-    print("Opened with deep link: ${deepLink.toString()}");
   }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocConsumer<HomeBloc, HomeScreenState>(
-        listener: (context, state) {},
-        builder: (context, state) {
-          if (state is LoadingHomeScreenState) {
-            return const Center(child: AppLoadingScreen());
-          } else if (state is SuccessHomeScreenState) {
-            return FlipPanel.builder(
-              itemBuilder: (context, index) => _buildContent(context, state, index),
-              itemsCount: state.getAllHomeScreenNews.length,
-            );
-          } else {
-            return const Center(child: AppLoadingScreen());
-          }
-        },
-      ),
+    return BlocBuilder<HomeBloc, HomeScreenState>(
+      builder: (context, state) {
+        if (state is LoadingHomeScreenState) {
+          return const Center(child: AppLoadingScreen());
+        } else if (state is SuccessHomeScreenState) {
+          return FlipPanel.builder(
+
+            itemBuilder: (context, index) {
+              var item = state.getAllHomeScreenNews[index];
+              return Container(
+                color: Colors.white,
+                width: 1.sw,  // Full screen width
+                height: 1.sh-(GlobalVariables().platForm=="iOS"?100:32),
+                child: state.pageType == "Image"
+                    ? CachedNetworkImage(
+                        imageUrl: item.imageUrl.url ?? "",)
+                    : state.pageType == "Gallery"
+                        ? FullPageCarousel(imageUrls: item.gallery ?? [])
+                        :item.homepage != null
+                    ? FirstCardHomeFeeds(getHomeList: item.homepage): _buildTextContent(context, item, state,index),
+              );
+            },
+
+            // => _buildContent(context, state, index),
+            itemsCount: state.getAllHomeScreenNews.length,
+          );
+        } else if(state is ErrorHomeScreenState){
+          return  Center(child: AppNoData(data: state.getHomeScreenError,));
+        }else {
+          return const Center(child: AppNoData());
+        }
+      },
     );
   }
 
-  Widget _buildContent(
-      BuildContext context, SuccessHomeScreenState state, int index)
-  {
-    var item = state.getAllHomeScreenNews[index];
-    log("post typeee -------  ${state.pageType}");
-    if (state.pageType == "Image") {
-      return Container(
+  Widget _buildTextContent(
+      BuildContext context, var item, SuccessHomeScreenState state, int index) {
+    return InkWell(
+      onTap: () {
+        context.read<HomeBloc>().add(MenuChange());
+      },
+      child: Container(
         color: Colors.white,
-        height: MediaQuery.of(context).size.height-35,
+        height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-        child: CachedNetworkImage(
-            imageUrl: item.imageUrl.url ?? "", fit: BoxFit.cover),
-      );
-    } else if (state.pageType == "Gallery") {
-      return Container(
-          color: Colors.white,
-          height: MediaQuery.of(context).size.height-35,
-          width: MediaQuery.of(context).size.width,
-          child: FullPageCarousel(imageUrls: item.gallery ?? []));
-    }
-
-    // else if (item.homepage != null) {
-    //   return FirstCardHomeFeeds(getHomeList: item.homepage);
-    // }
-    else{
-      return _buildTextContent(context, item,state);
-    }
-
-  }
-
-  Widget _buildTextContent(BuildContext context, var item, SuccessHomeScreenState state) {
-    return Container(
-      color: Colors.white,
-      height: MediaQuery.of(context).size.height-35,
-      width: MediaQuery.of(context).size.width,
-      child: InkWell(
-        onTap: (){
-          context.read<HomeBloc>().add(MenuChange());
-        },
         child: Column(
+          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              flex: 4,
+              flex: 5,
               child: Stack(
                 children: [
                   SizedBox(
-                      height: MediaQuery.of(context).size.height / 2.1,
                       child: state.pageType == "Video"
-                          ? VideoPreview(url: item.videoUrl?.url ?? "")
+                          ? Container(
+                          color: Colors.black,
+                          child: Center(child: VideoPreview(url: item.videoUrl?.url ?? "")))
                           : CachedNetworkImage(
                               imageUrl: item.imageUrl.url ?? "",
-                              imageBuilder: (context, imageProvider) => Container(
+                              imageBuilder: (context, imageProvider) =>
+                                  Container(
                                 height: MediaQuery.of(context).size.height,
                                 width: MediaQuery.of(context).size.width,
                                 decoration: BoxDecoration(
@@ -170,7 +165,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
                               borderRadius: const BorderRadius.only(
                                   topRight: Radius.circular(10),
                                   bottomLeft: Radius.circular(10))),
-                          child: Image.asset("assets/images/brandlogo.png"))),
+                          child: Image.asset("assets/images/brandlogo.png",))),
                   Positioned(
                       bottom: 10,
                       right: 10,
@@ -214,57 +209,60 @@ class _MyHomePage1State extends State<MyHomePage1> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Text(item.title ?? "No Title",
-                        style:
-                            fontStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                        style: fontStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                     height(height: 10),
                     Expanded(
-                      child: Text(item.content,
+                      child: Text("${item.content}\n\nPosted ${formatTimeDifference(item.created)}($index)",
                           style:
                               fontStyle(fontSize: 16, color: Colors.grey[800])),
                     ),
                     height(height: 4),
-                    Text(formatTimeDifference( item.created),
-                        style:
-                        fontStyle(fontSize: 14, fontWeight: FontWeight.normal)),
                     const Divider(color: AppColors.borderColor),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        BottomActions(
-                            icon: "assets/svg/reload.svg",
-                            label: 'రిలోడ్ ',
-                            onTap: () {
-                              log("Refresh");
-                              context.read<HomeBloc>().add(GetAllNewsFeed());
-                            }),
-                        BottomActions(
-                            icon:isLike?"assets/svg/reload.svg":"assets/svg/like.svg",
-                            label: 'లైక్',
-                            onTap: () {
-                              log("Like",);
-                              isLike = !isLike;
-                              setState(() {
-
-                              });
-                              // context.read<HomeBloc>().add(LikeByPost(isLike: true, postId: item.id.toString()));
-                            }),
-                        BottomActions(
-                            icon: "assets/svg/comment.svg",
-                            label: 'కామెంట్',
-                            onTap: () {
-                              log("Comment");
-                              showComments(context,item.id.toString());
-                              // context.read<HomeBloc>().add(GetAllNewsFeed());
-                            }),
-                        BottomActions(
-                            icon: "assets/svg/share.svg",
-                            label: ' షేర్',
-                            onTap: () {
-                              log("Share");
-                              context.read<HomeBloc>().add(
-                                  SendNewsToSocialMedia(id: item.linkURLAndroid));
-                            }),
-                      ],
+                    SizedBox(
+                      height: 50,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          BottomActions(
+                              icon: "assets/svg/reload.svg",
+                              label: 'రిలోడ్ ',
+                              onTap: () {
+                                log("Refresh");
+                                context.read<HomeBloc>().add(GetAllNewsFeed());
+                              }),
+                          BottomActions(
+                              icon: isLike
+                                  ? "assets/svg/reload.svg"
+                                  : "assets/svg/like.svg",
+                              label: 'లైక్',
+                              onTap: () {
+                                log(
+                                  "Like",
+                                );
+                                isLike = !isLike;
+                                setState(() {});
+                                // context.read<HomeBloc>().add(LikeByPost(isLike: true, postId: item.id.toString()));
+                              }),
+                          BottomActions(
+                              icon: "assets/svg/comment.svg",
+                              label: 'కామెంట్',
+                              onTap: () {
+                                log("Comment");
+                                showComments(context, item.id.toString());
+                                // context.read<HomeBloc>().add(GetAllNewsFeed());
+                              }),
+                          BottomActions(
+                              icon: "assets/svg/share.svg",
+                              label: ' షేర్',
+                              onTap: () {
+                                log("Share");
+                                context.read<HomeBloc>().add(
+                                    SendNewsToSocialMedia(
+                                        id: item.linkURLAndroid));
+                              }),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -277,7 +275,6 @@ class _MyHomePage1State extends State<MyHomePage1> {
   }
 
   bool isLike = false;
-
 }
 
 class FlipPanel<T> extends StatefulWidget {
@@ -308,7 +305,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   FlipDirection direction = FlipDirection.down;
   AnimationController? _controller;
   Animation? _animation;
-  int? _currentIndex;
+  int _currentIndex = 0;
   bool? _isReversePhase;
   final _perspective = 0.00003;
   final _zeroAngle = 0.0001;
@@ -320,12 +317,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
   @override
   void initState() {
     super.initState();
-    _currentIndex = 0;
     _isReversePhase = true;
-
     _controller = AnimationController(
-        duration: const Duration(milliseconds: 200), vsync: this)
+        duration: const Duration(milliseconds: 1000), vsync: this)
       ..addStatusListener((status) {
+        log(status.index.toString());
         if (status == AnimationStatus.completed) {
           _isReversePhase = true;
           _controller!.reverse();
@@ -334,7 +330,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
         if (status == AnimationStatus.dismissed) {
           setState(() {
             // Update the index when the flip animation is complete
-            _currentIndex = _currentIndex!;
+            _currentIndex = _currentIndex;
             _refreshDataForCurrentIndex(); // Ensure data refresh
           });
         }
@@ -356,19 +352,19 @@ class _FlipPanelState<T> extends State<FlipPanel>
   void _refreshDataForCurrentIndex() {
     setState(() {
       /// Ensure that the current index stays within valid bounds
-      if (_currentIndex! < 0) {
+      if (_currentIndex < 0) {
         _currentIndex = 0; // Prevent negative index
-      } else if (_currentIndex! >= widget.itemsCount!) {
+      } else if (_currentIndex >= widget.itemsCount!) {
         _currentIndex = widget.itemsCount! - 1; // Prevent index out of range
       }
 
       /// Safely set the widget for the current index
-      _child1 = widget.indexedItemBuilder!(context, _currentIndex!);
+      _child1 = widget.indexedItemBuilder!(context, _currentIndex);
       _upperChild1 = _makeUpperClip(_child1!);
       _lowerChild1 = _makeLowerClip(_child1!);
 
       /// Safely set the widget for the next index (for _child2)
-      int nextIndex = _currentIndex! - 1;
+      int nextIndex = _currentIndex - 1;
       if (nextIndex < widget.itemsCount!) {
         _child2 = widget.indexedItemBuilder!(context, nextIndex);
         _upperChild2 = _makeUpperClip(_child2!);
@@ -380,11 +376,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
   }
 
   void _flipBackward() {
-    if (_currentIndex! > 0) {
+    if (_currentIndex > 0) {
       setState(() {
         _isReversePhase = false;
         direction = FlipDirection.down;
-        _currentIndex = (_currentIndex! - 1).clamp(0, widget.itemsCount! - 1);
+        _currentIndex = (_currentIndex - 1).clamp(0, widget.itemsCount! - 1);
       });
 
       _controller!.forward().then((_) {
@@ -394,19 +390,17 @@ class _FlipPanelState<T> extends State<FlipPanel>
       });
     }
   }
-
   void _flipForward() {
     setState(() {
       _isReversePhase = false;
       direction = FlipDirection.up;
-      _currentIndex = (_currentIndex! + 1).clamp(0, widget.itemsCount! + 1);
-    });
+      _currentIndex = (_currentIndex + 1).clamp(0, widget.itemsCount! + 1);
 
     _controller!.forward().then((_) {
-      setState(() {
         _refreshDataForCurrentIndex(); // Refresh data on forward flip
-      });
     });
+    });
+
   }
 
   @override
@@ -416,7 +410,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
     return GestureDetector(
       onVerticalDragUpdate: (details) {
         if (!_controller!.isAnimating && !_isSwiping) {
-          context.read<HomeBloc>().add(OnSwipeCard(index: _currentIndex!));
+          context.read<HomeBloc>().add(OnSwipeCard(index: _currentIndex));
           _isSwiping = true;
           if (details.primaryDelta! > 0) {
             _flipBackward();
@@ -433,6 +427,9 @@ class _FlipPanelState<T> extends State<FlipPanel>
         // Reset the swipe tracking if the drag is canceled
         _isSwiping = false;
       },
+      onHorizontalDragStart: (val){
+        _isSwiping = false;
+      },
       child: AnimatedBuilder(
         animation: _controller!,
         builder: (context, child) {
@@ -443,22 +440,40 @@ class _FlipPanelState<T> extends State<FlipPanel>
   }
 
   void _buildChildWidgetsIfNeed(BuildContext context) {
+
     if (_child1 == null) {
-      _child1 = widget.indexedItemBuilder!(context, (_currentIndex! + 1));
+      _child1 = widget.indexedItemBuilder!(context, _currentIndex);
       _upperChild1 = _makeUpperClip(_child1!);
       _lowerChild1 = _makeLowerClip(_child1!);
     }
 
-    if (_child2 == null) {
-      _child2 = widget.indexedItemBuilder!(context, (_currentIndex! + 1));
+    if (_child2 == null ) {
+      _child2 = widget.indexedItemBuilder!(context,_currentIndex==0?_currentIndex : _currentIndex + 1);
       _upperChild2 = _makeUpperClip(_child2!);
       _lowerChild2 = _makeLowerClip(_child2!);
     }
 
-    _child1 = widget.indexedItemBuilder!(context, _currentIndex!);
-    _upperChild1 = _makeUpperClip(_child1!);
-    _lowerChild1 = _makeLowerClip(_child1!);
+
   }
+
+
+  // void _buildChildWidgetsIfNeed(BuildContext context) {
+  //   if (_child1 == null) {
+  //     _child1 = widget.indexedItemBuilder!(context, (_currentIndex! + 1));
+  //     _upperChild1 = _makeUpperClip(_child1!);
+  //     _lowerChild1 = _makeLowerClip(_child1!);
+  //   }
+  //
+  //   if (_child2 == null) {
+  //     _child2 = widget.indexedItemBuilder!(context, (_currentIndex! + 1));
+  //     _upperChild2 = _makeUpperClip(_child2!);
+  //     _lowerChild2 = _makeLowerClip(_child2!);
+  //   }
+  //
+  //   _child1 = widget.indexedItemBuilder!(context, _currentIndex!);
+  //   _upperChild1 = _makeUpperClip(_child1!);
+  //   _lowerChild1 = _makeLowerClip(_child1!);
+  // }
 
   Widget _makeUpperClip(Widget widget) {
     return ClipRect(
@@ -552,44 +567,56 @@ class _FlipPanelState<T> extends State<FlipPanel>
       );
 
   Widget _buildPanel() {
+
     if (direction == FlipDirection.up) {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _TopBuildUpperFlipPanel(),
-          _TopBuildLowerFlipPanel(),
-        ],
+      return Container(
+        color: Colors.white,
+        width: MediaQuery.of(context).size.width,  // Full screen width
+        height:MediaQuery.of(context).size.height-(GlobalVariables().platForm=="iOS"?100:40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _TopBuildUpperFlipPanel(),
+            _TopBuildLowerFlipPanel(),
+          ],
+        ),
       );
     } else {
-      return Column(
-        mainAxisSize: MainAxisSize.min,
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          _BottomBuildUpperFlipPanel(),
-          _BottombuildLowerFlipPanel(),
-        ],
+      return Container(
+        color: Colors.white,
+        width: MediaQuery.of(context).size.width,  // Full screen width
+        height:MediaQuery.of(context).size.height,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            _BottomBuildUpperFlipPanel(),
+            _BottombuildLowerFlipPanel(),
+          ],
+        ),
       );
     }
   }
 }
 
 class VideoScreenView extends StatelessWidget {
-final  String url;
-  const VideoScreenView({super.key,required this.url});
+  final String url;
+
+  const VideoScreenView({super.key, required this.url});
 
   @override
   Widget build(BuildContext context) {
-    YoutubePlayerController  controller = YoutubePlayerController(
+    YoutubePlayerController controller = YoutubePlayerController(
       initialVideoId: url,
       flags: const YoutubePlayerFlags(
         autoPlay: true,
         mute: false,
       ),
     );
-    return  YoutubePlayer(
+    return YoutubePlayer(
       controller: controller,
       showVideoProgressIndicator: true,
       progressIndicatorColor: Colors.red,

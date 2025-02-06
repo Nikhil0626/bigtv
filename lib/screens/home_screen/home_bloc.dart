@@ -22,6 +22,9 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     bool isMenuChange = false;
 
     String pageType = "";
+
+
+
     on<MenuChange>((event, emit) async {
       isMenuChange = !isMenuChange;
       emit(SuccessHomeScreenState(
@@ -42,14 +45,15 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         'postid': "0",
         'lpostid': "0",
         'includeHomePage': "0",
-        // 'hasAds': true,
-        // 'isByNotification': false,
+        'isByNotification': "false",
         'deviceid': deviceId,
         'platform': platForm,
-        'homefeed': "1",
-        'locationIds': '64',
+        'homefeed': "0",
+        // 'hasAds': true,
+        // 'locationIds': '21,22,43,44,55,64',
         // "debugMode": true
       };
+      log(queryParams.toString());
       try {
         Response response = await HomeRepo().getAllNewsFeeds(queryParams);
         List data = response.data['posts'];
@@ -68,7 +72,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         log("Get News Api catch error ${st.toString()}");
         log("Get News Api  catch ${st.toString()}");
       } catch (e, st) {
-        emit(ErrorHomeScreenState(getHomeScreenError: ""));
+        emit(ErrorHomeScreenState(getHomeScreenError: "No News Feeds Available"));
         log("Get News Api catch error ${st.toString()}");
         log("Get News Api catch ${st.toString()}");
       }
@@ -147,6 +151,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         log("Get News Api catch ${st.toString()}");
       }
     });
+
     on<OnSwipeCard>((event, emit) async {
       pageType = getAllPosts[event.index].type.toString();
       firstIndex = event.index;
@@ -188,6 +193,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
               (e) => HomeScreenModel.fromJson(e),
             )
             .toList();
+
         emit(SuccessHomeScreenState(
             getAllHomeScreenNews: getAllPosts,
             pageType: pageType,
@@ -242,6 +248,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         print('Error generating dynamic link: $e');
       }
     });
+
     on<MenuItemClickEvent>((event, emit) async {
       if (event.currentMenuItem == "హోమ్") {
         Navigator.pushNamed(event.context, RoutesManager.homeScreen);
