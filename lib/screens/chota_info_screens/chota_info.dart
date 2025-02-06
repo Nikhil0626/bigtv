@@ -365,6 +365,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
+              const Spacer(),
+              Container(
+                padding: const EdgeInsets.only(bottom: 20),
+                  alignment: Alignment.center,
+                  width: MediaQuery.of(context).size.width,
+                  child: Text("App Version: 1.0.0+2",style: fontStyle(fontSize: 14,),))
             ],
           ),
         ),

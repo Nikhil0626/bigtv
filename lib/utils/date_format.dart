@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 String formatTimeDifference(String inputTime, ) {
   print("Input Time: $inputTime");
 
-  final now = DateTime.now(); // Get current local time
+  final now = DateTime.now().add(Duration(hours: -5, minutes: -30)); // Get current local time
 
   // Define date formats
   DateFormat inputFormat = DateFormat("MMM d, yyyy h:mm a"); // Format for tweets
@@ -15,7 +15,7 @@ String formatTimeDifference(String inputTime, ) {
       date = now; // Fallback to 'now' if input is empty
     } else {
       date =  format.parse(inputTime);
-      date = date.toLocal(); // Convert to local time
+      date = date; // Convert to local time
       print("Parsed Date: $date");
     }
   } catch (e) {
