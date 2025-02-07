@@ -52,7 +52,7 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
               strokeWidth: 1,
               dashPattern: [10, 6],
               child: Container(
-                width: 200,
+                width: 211,
                 child: Column(
                   children: [
                     Image.asset(
@@ -95,30 +95,13 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.asset(
-                'assets/images/Iphone.png',
-                height: 180,
-                width: double.infinity,
+                'assets/images/iphone_gift.png',
+                height: 335,
+                width: 335,
                 fit: BoxFit.cover,
               ),
             ),
-            height(height: 15),
-             Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "Invite 5 friends for a chance to win an iphone!",
-                style: fontStyle(fontSize: 12, fontWeight: FontWeight.w500),
-              ),
-            ),
-           height(height: 15),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                'assets/images/last_image.png',
-                height: 250,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
-            ),
+
           ],
         ),
       ),

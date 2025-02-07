@@ -685,7 +685,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
     } else if (state.pageType == "Gallery") {
       return CarouselScreen(imageList: item.gallery ?? []);
     } else if (state.pageType == "Video") {
-      return VideoPreview(url: item.videoUrl?.url ?? "");
+      return VideoPreview(url: item.videoUrl?.url ?? "", );
     } else if (item.homepage != null) {
       return FirstCardHomeFeeds(getHomeList: item.homepage);
     }
