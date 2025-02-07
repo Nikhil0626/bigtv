@@ -1,7 +1,9 @@
 import 'dart:developer';
+import 'package:chotanews/screens/Auth_module/auth_screen.dart';
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,17 +24,20 @@ class HomeTopTabs extends StatefulWidget {
 
 class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  bool isChange = false;
+  bool isChange = true;
 
   @override
   void initState() {
     super.initState();
     log(widget.tab);
+    initDynamicLinks();
+    // initUniLinks();
     _tabController = TabController(
       length: 2,
       vsync: this,
-      initialIndex: int.tryParse(widget.tab) ?? 0,
+      initialIndex: int.parse(widget.tab) ?? 0,
     );
+
   }
 
   @override
@@ -45,12 +50,75 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
     return false;
   }
 
+  void initDynamicLinks() async {
+    FirebaseDynamicLinks.instance.onLink.listen((PendingDynamicLinkData? data) {
+      log("Dynamic Links  ${data?.link}");
+      final Uri? deepLink = data?.link;
+      if (deepLink != null) {
+        handleDeepLink(deepLink);
+      }
+    }).onError((error) {
+      print('Dynamic Link Failed: $error');
+    });
+
+    final PendingDynamicLinkData? initialLink =
+    await FirebaseDynamicLinks.instance.getInitialLink();
+
+    if (initialLink?.link != null) {
+      handleDeepLink(initialLink!.link!);
+    }
+  }
+
+  // Handling Deep Links from Custom URL Schemes
+  // void initUniLinks() async {
+  //   try {
+  //     final Uri? initialUri = await getInitialUri();
+  //     if (initialUri != null) {
+  //       handleDeepLink(initialUri);
+  //     }
+  //   } catch (e) {
+  //     print('UniLinks Error: $e');
+  //   }
+  //
+  //   linkStream.listen((String? link) {
+  //     if (link != null) {
+  //       handleDeepLink(Uri.parse(link));
+  //     }
+  //   }, onError: (err) {
+  //     print('UniLinks Stream Error: $err');
+  //   });
+  // }
+
+  // Function to handle deep links
+  void handleDeepLink(Uri deepLink) {
+    String url = "https://chotanews.com/store?postId=3604374";
+    Uri uri = Uri.parse(url);
+
+    String? postId = uri.queryParameters["postId"];
+
+    print(postId);
+    print('Deep Link: $deepLink');
+
+    if (postId != null) {
+      String productId = deepLink.pathSegments.last;
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     HomeRepo api = HomeRepo();
     ArticleBloc bloc = ArticleBloc(api: api);
 
-    bloc.getArticles();
+    if(widget.tab =="1"){
+      bloc.getArticles(isTab: true);
+    }else{
+      bloc.getArticles();
+
+    }
     return ArticleBlocProvider(
       bloc: bloc,
       child: WillPopScope(
@@ -91,6 +159,13 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                         child: Material(
                           color: Colors.white,
                           child: TabBar(
+                            onTap: (val){
+                              if(val == 0) {
+                                bloc.getArticles();
+                              }else{
+                                bloc.getArticles(isTab: true);
+                              }
+                            },
                             controller: _tabController,
                             isScrollable: false, // Disable scrolling of the TabBar
                             unselectedLabelColor: Colors.black,
@@ -98,7 +173,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                             unselectedLabelStyle: fontStyle(color: Colors.black,fontSize: 14,fontWeight: FontWeight.normal),
                             labelStyle: fontStyle(color: Colors.blue,fontSize: 16,fontWeight: FontWeight.bold),
                             tabs: const [
-                              Tab(text: 'వార్తలు'),
+                              Tab(text: 'న్యూస్'),
                               Tab(text: 'జిల్లాలు'),
                             ],
                           ),

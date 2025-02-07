@@ -20,7 +20,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
     List<HomeScreenModel> getAllPosts = [];
     int firstIndex = 0;
     bool isMenuChange = false;
-
+    bool isChange = true;
     String pageType = "";
 
 
@@ -208,45 +208,36 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
 
     on<SendNewsToSocialMedia>((event, emit) async {
       final DynamicLinkParameters parameters = DynamicLinkParameters(
-        uriPrefix: 'https://chotanews.page.link/store',
-        link: Uri.parse('https://chotanews.page.link/store'),
+        uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
+        link: Uri.parse('https://chotanews.com/store?postId=${event.id}'), // Ensure this is a valid URL
         androidParameters: const AndroidParameters(
-          packageName: 'com.chotanews',
-          minimumVersion: 1,
+          packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
         ),
         iosParameters: const IOSParameters(
-          bundleId: 'com.chotanewstelugu.app',
-          minimumVersion: '1.0',
+          bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
+          appStoreId: '1631068092',
         ),
       );
 
-      final ShortDynamicLink shortLink =
-          await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-      final Uri dynamicUrl = shortLink.shortUrl;
-      print(dynamicUrl.toString());
-
-      // final DynamicLinkParameters parameters = DynamicLinkParameters(
-      //   uriPrefix: 'https://chotanews.page.link', // Use your dynamic link domain
-      //   link: Uri.parse('https://chotanews.page.link/store'), // Your custom link
-      //   androidParameters: const AndroidParameters(
-      //     packageName: 'com.chotanews', // Replace with your actual Android package name
-      //     minimumVersion: 1,
-      //   ),
-      //   iosParameters: const IOSParameters(
-      //     bundleId: 'com.chotanewstelugu.app', // Replace with your actual iOS bundle ID
-      //     minimumVersion: '1.0.0',
-      //   ),
-      // );
-
       try {
-        var dynamicUrl =
-            await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-        print('Short Dynamic Link: $dynamicUrl');
-        Share.share('$dynamicUrl');
-      } catch (e, st) {
-        print('Error generating dynamic link: $st');
-        print('Error generating dynamic link: $e');
+        final ShortDynamicLink shortLink =
+        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+        print("Short Link Created: ${shortLink.shortUrl}");
+        Share.share('${shortLink.shortUrl}');
+      } catch (e) {
+        print("Error creating dynamic link: $e");
       }
+
+
+      // try {
+      //   var dynamicUrl =
+      //       await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+      //   print('Short Dynamic Link: $dynamicUrl');
+      //   Share.share('$dynamicUrl');
+      // } catch (e, st) {
+      //   print('Error generating dynamic link: $st');
+      //   print('Error generating dynamic link: $e');
+      // }
     });
 
     on<MenuItemClickEvent>((event, emit) async {

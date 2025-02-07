@@ -14,11 +14,11 @@ import '../home_screen/home_screen_model.dart';
 class ArticleBloc {
   static const String _kSourcesKey = "sources_key";
 
+  bool isChange = true;
 
   static const int _pageSize = 10;
   int _nextPage = 1;
 
-  // Assume there is at least one article in the server
   int _totalItemsForRequestedSources = 1;
 
   late SharedPreferences prefs;
@@ -42,14 +42,15 @@ class ArticleBloc {
   }
   List<HomeScreenModel>? articlesData;
 
-  Future<void> getArticles({bool refresh = false,int index= 0}) async {
+  Future<void> getArticles({bool refresh = false,int index= 0,bool isTab = false}) async {
 
-    log("siva");
+
     if (activeSources == null) {
       await init();
     }
 
-    if(index != 0){
+    if(index != 0 && isTab==false){
+      log("Home index");
       int last = index - 1;
       String? lastPostId = articlesData![last].id.toString() ?? "";
       String deviceId = GlobalVariables().deviceId ?? "";
@@ -71,16 +72,78 @@ class ArticleBloc {
       List<HomeScreenModel> articles = jsonList.map((item) => HomeScreenModel.fromJson(item)).toList();
       _totalItemsForRequestedSources = articles.length;
     }
-    if (refresh) {
-      log("siva1");
-      // Send a null list prior to the real list to allow the flip panel to reset
-      // and show the refresh indicator
+   else if(index == 0 && isTab==true){
+      log("iaTab");
+      SharedPreferences sharedPreferences =
+      await SharedPreferences.getInstance();
+      String locationId = sharedPreferences.getString(
+        "locationId",
+      ) ??
+          "";
+      log(locationId);
+      String deviceId = GlobalVariables().deviceId ?? "";
+      String platForm = GlobalVariables().platForm ?? "";
+      final Map<String, dynamic> queryParams = {
+        'userid': "1",
+        'postid': "0",
+        'lpostid': "0",
+        // 'includeHomePage': "1",
+        'homefeed': "1",
+        'deviceid': deviceId,
+        'platform': platForm,
+        'locationIds':locationId,
+      };
+      articlesController.add(null);
+      articlesData = [];
+      log(queryParams.toString());
+      Response response = await HomeRepo().getAllNewsFeeds(queryParams);
+      print(response.toString());
+      List jsonList = response.data['posts'];
+      articlesData = jsonList.map((item) => HomeScreenModel.fromJson(item)).toList();
+      articlesController.add(articlesData!);
+      _totalItemsForRequestedSources = articlesData!.length;
+    }
+   else if(index != 0 && isTab==true){
+      log("State index");
+      int last = index - 1;
+      String? lastPostId = articlesData![last].id.toString() ?? "";
+      SharedPreferences sharedPreferences =
+      await SharedPreferences.getInstance();
+      String locationId = sharedPreferences.getString(
+        "locationId",
+      ) ??
+          "";
+      log(locationId);
+      String deviceId = GlobalVariables().deviceId ?? "";
+      String platForm = GlobalVariables().platForm ?? "";
+      final Map<String, dynamic> queryParams = {
+        'userid': "1",
+        'postid': lastPostId,
+        'lpostid': "0",
+        // 'includeHomePage': "1",
+        'homefeed': "1",
+        'deviceid': deviceId,
+        'platform': platForm,
+        'locationIds':locationId,
+      };
+      articlesController.add(null);
+      articlesData = [];
+      log(queryParams.toString());
+      Response response = await HomeRepo().getAllNewsFeeds(queryParams);
+      print(response.toString());
+      List jsonList = response.data['posts'];
+      articlesData = jsonList.map((item) => HomeScreenModel.fromJson(item)).toList();
+      articlesController.add(articlesData!);
+      _totalItemsForRequestedSources = articlesData!.length;
+    }
+    else if (refresh) {
+      log("refresh");
       articlesController.add(null);
       articlesData = await _getArticles();
       articlesController.add(articlesData!);
       _nextPage = 2;
     } else {
-      log("siva2");
+      log("elseeeeee");
       if (_totalItemsForRequestedSources > (_nextPage - 1) * _pageSize) {
         articlesData = await _getArticles(page: _nextPage);
         if (articles != null) {
@@ -93,25 +156,25 @@ class ArticleBloc {
     }
   }
 
-  Future<void> getSources() async {
-    String deviceId = GlobalVariables().deviceId ?? "";
-    String platForm = GlobalVariables().platForm ?? "";
-
-    final Map<String, dynamic> queryParams = {
-      'userid': "1",
-      'postid': "0",
-      'lpostid': "0",
-      'includeHomePage': "0",
-      'isByNotification': "false",
-      'deviceid': deviceId,
-      'platform': platForm,
-      'homefeed': "0",
-      // 'hasAds': true,
-      // 'locationIds': '21,22,43,44,55,64',
-      // "debugMode": true
-    };
-    _sourcesController.add(await HomeRepo().getAllNewsFeeds(queryParams));
-  }
+  // Future<void> getSources() async {
+  //   String deviceId = GlobalVariables().deviceId ?? "";
+  //   String platForm = GlobalVariables().platForm ?? "";
+  //
+  //   final Map<String, dynamic> queryParams = {
+  //     'userid': "1",
+  //     'postid': "0",
+  //     'lpostid': "0",
+  //     'includeHomePage': "0",
+  //     'isByNotification': "false",
+  //     'deviceid': deviceId,
+  //     'platform': platForm,
+  //     'homefeed': "0",
+  //     // 'hasAds': true,
+  //     // 'locationIds': '21,22,43,44,55,64',
+  //     // "debugMode": true
+  //   };
+  //   _sourcesController.add(await HomeRepo().getAllNewsFeeds(queryParams));
+  // }
 
   // Outputs
   Stream<List<HomeScreenModel>?> get articles => articlesController.stream;

@@ -3,14 +3,13 @@ import 'dart:developer';
 import 'package:chotanews/screens/flip_page/articals_bloc.dart';
 import 'package:chotanews/screens/flip_page/article_bloc_provider.dart';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
-import 'package:chotanews/screens/home_screen/home_screen_view.dart';
+import 'package:chotanews/screens/testing_screen/test4.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'dart:io' show Platform;
 
@@ -70,7 +69,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
+  WebEngagePlugin _webEngagePlugin = new WebEngagePlugin();
   await FirebaseMessaging.instance.requestPermission(
     alert: true,
     badge: true,
@@ -82,13 +81,40 @@ Future<void> main() async{
     fetchDeviceId("");
   }
 if(Platform.isAndroid){
+  // await WebEngagePlugin.userLogout();
   var token = await FirebaseMessaging.instance.getToken();
   if (token != null) {
+
     fetchDeviceId(token);
-    WebEngagePlugin.setPushToken(token);
-    WebEngagePlugin.userLogin('63860');
-    WebEngagePlugin.trackScreen('Home Page');
-    WebEngagePlugin.trackScreen('Product Page', {'Product Id': 'UHUH799'});
+    _webEngagePlugin = new WebEngagePlugin();
+    _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
+
+     WebEngagePlugin.setPushToken(token);
+    // await WebEngagePlugin.userLogin('63860');
+    // await WebEngagePlugin.setUserEmail('jogisivakumar.eee@gmail.com');
+    // await WebEngagePlugin.trackScreen('Home_Page');
+    // WebEngagePlugin.setUserOptIn('in_app', true);
+    // WebEngagePlugin.setUserOptIn('sms', true);
+    // WebEngagePlugin.setUserOptIn('push', true);
+    // WebEngagePlugin.setUserOptIn('email', true);
+    // WebEngagePlugin.setUserOptIn('whatsapp', true);
+    // WebEngagePlugin.setUserOptIn('viber', true);
+    // await WebEngagePlugin.trackScreen('Product Page', {'Product Id': 'UHUH799'});
+
+    // WebEngagePlugin.trackEvent('opened_app', {
+    //   'platform': "android"
+    // });
+    // WebEngagePlugin.trackEvent("hello_siva_test",{
+    //   "userName":"Siva",
+    //   "mobileNumber":"9951755530",
+    //
+    // });
+    //
+    // WebEngagePlugin.trackEvent("Email Address",{
+    //   "userName":"siva143145@gmail.com",
+    //   "mobileNumber":"9951755530",
+    //
+    // });
   }
 }
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -99,7 +125,11 @@ if(Platform.isAndroid){
 
   runApp(const MyApp());
 }
-
+void _onTokenInvalidated(Map<String, dynamic>? message) {
+  print("tokenInvalidated callback received $message");
+  // Reset with new Security Token in the callback
+  WebEngagePlugin.setSecureToken("siva kumar", message.toString());
+}
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -116,7 +146,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           theme: ThemeData(
             colorScheme:
-            ColorScheme.fromSeed(seedColor: Colors.orange.shade300),
+            ColorScheme.fromSeed(seedColor: Colors.blue),
             useMaterial3: true,
           ),
           scrollBehavior: MyBehavior(),
@@ -140,7 +170,7 @@ class MyApp extends StatelessWidget {
           //     child: child!,
           //   );
           // },
-          // home:  HomePage(),
+          // home: WebDash(),
           debugShowCheckedModeBanner: false,
           // initialRoute: RoutesManager.onboardingScreen,
         ),

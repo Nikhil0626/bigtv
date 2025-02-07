@@ -52,7 +52,7 @@ class ImageViewPopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: AppColors.appButtonColor,
         leading: InkWell(
@@ -60,25 +60,22 @@ class ImageViewPopup extends StatelessWidget {
           child: const Icon(
             Icons.arrow_back_ios,
             color: Colors.white,
-            size: 24,
+            size: 20,
           ),
         ),
         title:  Text("Image View",style: fontStyle(fontWeight: FontWeight.w600,fontSize: 18,color: Colors.white),),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width, // Adjust the width as needed
-            height: MediaQuery.of(context).size.height/1.5,
+      body: Center(
+        child: Container(
+          width: MediaQuery.of(context).size.width, // Adjust the width as needed
+          height: MediaQuery.of(context).size.height/1.5,
 
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(4)),
-              color: Colors.white,
-              image: DecorationImage(
-                image: NetworkImage(imageUrl),
-                // fit: BoxFit.fill, // Ensures the image covers the entire area
-              ),
+          decoration: BoxDecoration(
+            borderRadius: const BorderRadius.all(Radius.circular(4)),
+            color: Colors.black,
+            image: DecorationImage(
+              image: NetworkImage(imageUrl),
+              // fit: BoxFit.fill, // Ensures the image covers the entire area
             ),
           ),
         ),
