@@ -12,6 +12,13 @@ class SendOtp extends AuthEvent {
   SendOtp({required this.phoneNumber});
 }
 
+class SendReferralCode extends AuthEvent{
+  final String referralCodeNumber;
+  final String mobileNumber;
+  SendReferralCode({required this.referralCodeNumber,required this.mobileNumber});
+}
+
+
 class VerificationOtp extends AuthEvent {
   final String Otp;
   final String mobileNumber;

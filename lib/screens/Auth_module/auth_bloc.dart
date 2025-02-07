@@ -146,6 +146,35 @@ emit(InitialScreen());
         log("error  $st");
       }
     });
+    on<SendReferralCode>((event, emit) async {
+      emit(LoadingScreen());
+      try {
+
+        SharedPreferences preferences = await SharedPreferences.getInstance();
+
+      String? loginId =  preferences.getString("loginId",);
+        String? deviceId = GlobalVariables().deviceId;
+        Map<String, dynamic> body = {
+          "code":event.referralCodeNumber,
+          "mobile_number":event.mobileNumber,
+          "child_id":loginId!
+        };
+        log(body.toString());
+        Response response = await AuthRepo().sendCode(body);
+        if(response.statusCode ==200){
+          log(response.data.toString());
+          CustomToast.showSuccessToast(msg: response.data['message']);
+
+          emit(SuccessScreen(message: response.data['success'].toString(),otp: otp));
+        }
+
+      } catch (e, st) {
+        CustomToast.showErrorToast(msg: "Referral code not matched");
+emit(InitialScreen());
+        log("error  $e");
+        log("error  $st");
+      }
+    });
 
 
     on<VerificationOtp>((event, emit) async {

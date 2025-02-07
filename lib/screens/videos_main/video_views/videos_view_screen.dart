@@ -29,7 +29,6 @@ class _VideosScreenState extends State<VideosScreen> {
     context.read<VideosBloc>().add(GetAllVideos(type: "2"));
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,7 +66,7 @@ class _VideosScreenState extends State<VideosScreen> {
                 return InkWell(
                   onTap: () {
                     if (state.getAllVideoList[index].type.toString() ==
-                        "Video") {
+                        "Video"&&state.getAllVideoList[index].type.toString() =="") {
                       Navigator.push(
                         context,
                         MaterialPageRoute(

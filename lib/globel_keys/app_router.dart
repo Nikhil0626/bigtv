@@ -1,4 +1,5 @@
 
+import 'package:chotanews/referral_code_screen/referral_code.dart';
 import 'package:chotanews/screens/chota_info_screens/about_us.dart';
 import 'package:chotanews/screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
@@ -53,6 +54,7 @@ abstract class RoutesManager {
   static const getAllMenuItemScreen = '/getAllMenuItemScreen';
   static const settingsScreen = '/settingsScreen';
   static const newReferEarnScreen = '/newReferEarnScreen';
+  static const referralCode = '/referralCode';
 
   static Route<dynamic>? generateRoute(RouteSettings setting) {
     switch (setting.name) {
@@ -89,7 +91,11 @@ abstract class RoutesManager {
       //   return MaterialPageRoute(builder: (context) =>  ProfileScreen());
       case welcomeScreen:
         return MaterialPageRoute(builder: (context) => const WelcomeScreen());
+      case referralCode:
+        final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (context) => ReferralCode(mobileNumber:args?['mobileNumber'] ?? '',));
       case signInScreen:
+
         return MaterialPageRoute(builder: (context) => const SignInScreen());
       case enterOtpScreen:
         final args = setting.arguments as Map<String, dynamic>?;

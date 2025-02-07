@@ -52,20 +52,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         body: Padding(
-          padding: const EdgeInsets.all(4.0),  // Reduced padding for the body
+          padding: const EdgeInsets.all(4.0),
           child: ListView(
             children: [
-              // Refer&Earn Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6), // Further reduced horizontal padding
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
                 child: Card(
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
                   shadowColor: Colors.black12,
                   elevation: 5,
                   child: ListTile(
                     leading: Padding(
-                      padding: const EdgeInsets.only(left: 0),  // Adjusted left padding for leading icon
+                      padding: const EdgeInsets.only(left: 0),
                       child: Card(
                         color: AppColors.appButtonColor,
                         child: Padding(
@@ -100,12 +99,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
 
-              // Share app Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),  // Further reduced horizontal padding
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
                 child: Card(
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
                   shadowColor: Colors.black12,
                   elevation: 5,
                   child: ListTile(
@@ -136,18 +134,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       size: 20,
                     ),
                     onTap: () {
-                      // Add share app logic here
                     },
                   ),
                 ),
               ),
 
-              // Contact Us Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),  // Further reduced horizontal padding
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
                 child: Card(
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
                   shadowColor: Colors.black12,
                   elevation: 5,
                   child: ListTile(
@@ -187,12 +183,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
 
-              // Advertise with Us Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),  // Further reduced horizontal padding
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
                 child: Card(
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
                   shadowColor: Colors.black12,
                   elevation: 5,
                   child: ListTile(
@@ -234,10 +229,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Terms and Conditions Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),  // Further reduced horizontal padding
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
                 child: Card(
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
+                  margin: const EdgeInsets.symmetric(horizontal: 8),
                   shadowColor: Colors.black12,
                   elevation: 5,
                   child: ListTile(
@@ -277,9 +272,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
 
-              // Privacy Policy Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),  // Further reduced horizontal padding
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
                 child: Card(
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
                   margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
@@ -324,7 +318,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
               // Logout Card
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),  // Further reduced horizontal padding
+                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
                 child: Card(
                   color: isDarkTheme ? Colors.grey[800] : Colors.white,
                   margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
@@ -365,8 +359,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 ),
               ),
-              const Spacer(),
+              // const Spacer(),
               Container(
+                height: 40,
                 padding: const EdgeInsets.only(bottom: 20),
                   alignment: Alignment.center,
                   width: MediaQuery.of(context).size.width,
