@@ -8,9 +8,13 @@
 
 import 'dart:async';
 
+import 'package:chotanews/screens/home_screen/home_top_tabs.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math' as math;
 
+import '../home_screen/home_bloc.dart';
+import '../home_screen/home_event.dart';
 import 'artical_page.dart';
 import 'article_bloc_provider.dart';
 
@@ -326,11 +330,17 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   void _handleDragEnd(DragEndDetails details) {
     _dragging = false;
-
     if (ArticleBlocProvider.of(context).articlesData!.length - 1 ==
         _currentIndex) {
-      ArticleBlocProvider.of(context).getArticles(index: _currentIndex + 1);
+      ArticleBlocProvider.of(context)
+          .getArticles(index: _currentIndex + 1, isTab: true);
     }
+
+    if (_currentIndex == 1) {
+      print("sbfsuifdsgfjsofgsijodgfs");
+      context.read<HomeBloc>().add(MenuChange());
+    }
+
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {
         _showNoMoreItemsMessage();

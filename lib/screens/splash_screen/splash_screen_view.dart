@@ -61,11 +61,11 @@ class _SplashScreenView extends State<SplashScreenView> {
     String loginId = sharedPreferences.getString("loginId")??"";
     log(loginId.toString());
     if (loginId != null || loginId.isNotEmpty) {
-      Timer(const Duration(seconds: 2), () {
+      Timer(const Duration(seconds: 8), () {
         Navigator.pushNamed(context, RoutesManager.homeScreen);
       });
     } else {
-      Timer(const Duration(seconds: 2), () {
+      Timer(const Duration(seconds: 8), () {
         Navigator.push(
           context,
           MaterialPageRoute(

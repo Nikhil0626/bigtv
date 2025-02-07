@@ -28,15 +28,15 @@ String formatTimeDifference(String inputTime, ) {
 
   // Formatting the difference
   if (difference.inSeconds < 60) {
-    return '${difference.inSeconds}s ago';
+    return '${difference.inSeconds} seconds ago';
   } else if (difference.inMinutes < 60) {
-    return '${difference.inMinutes}m ago';
+    return difference.inMinutes==1?'${difference.inMinutes} minute ago':'${difference.inMinutes} minutes ago';
   } else if (difference.inHours < 24) {
-    return '${difference.inHours}h ago';
+    return difference.inHours==1?'${difference.inHours} hour ago':'${difference.inHours} hours ago';
   } else if (difference.inDays < 7) {
-    return '${difference.inDays}d ago';
+    return difference.inDays==1?'${difference.inDays} days ago':'${difference.inDays} days ago';
   } else if (difference.inDays < 30) {
-    return '${(difference.inDays / 7).floor()}w ago';
+    return '${(difference.inDays / 7).floor()} week ago';
   } else {
     return DateFormat('dd MMM yyyy').format(date); // Display full date
   }

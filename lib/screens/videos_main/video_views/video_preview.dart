@@ -26,7 +26,7 @@ class _VideoPreview extends State<VideoPreview> {
       flags: const YoutubePlayerFlags(
         autoPlay: false,
         mute: true,
-        hideControls: true, // This hides fullscreen button
+        hideControls: false, // This hides fullscreen button
       ),
     );
   }

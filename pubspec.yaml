@@ -71,6 +71,8 @@ dependencies:
   rxdart: ^0.28.0
   google_fonts: ^6.2.1
   provider: ^6.1.2
+  webview_flutter: ^4.10.0
+  flutter_linkify: ^6.0.0
 
 #  kochava_tracker: ^2.6.0
 #  kochava_measurement_apple_tracking: ^3.2.0
