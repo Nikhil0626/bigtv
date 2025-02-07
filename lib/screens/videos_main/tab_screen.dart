@@ -46,14 +46,6 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: AppColors.appButtonColor,
-        title: Text(
-          "మెను",
-          style: fontStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 16,
-            color: Colors.white,
-          ),
-        ),
         leading: InkWell(
           onTap: () {
             Navigator.pushNamed(context, RoutesManager.homeScreen);
@@ -63,6 +55,11 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
             Icons.arrow_back_ios,
             size: 18,
           ),
+        ),
+        title: Text(
+          "మెను",
+          style: fontStyle(
+              fontSize: 18, fontWeight: FontWeight.w600, color: Colors.white),
         ),
         actions: [
           IconButton(
@@ -74,10 +71,10 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
             onPressed: () {
               Navigator.pushNamed(context, RoutesManager.settingsScreen);
             },
-
           ),
         ],
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(15.0),
         child: BlocBuilder<VideosBloc, VideosState>(builder: (context, state) {
@@ -96,13 +93,17 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
                   Expanded(
                     child: ListView.separated(
                       separatorBuilder: (context, index) {
-                        return const Divider(
+                        if (state.getAllMenuList[index].value == "gallery"||state.getAllMenuList[index].value == "magazine") {
+                          return const Divider(
                           color: AppColors.borderColor,
                         );
+                        } else
+                          return SizedBox.shrink();
                       },
                       itemCount: state.getAllMenuList.length,
                       itemBuilder: (context, index) {
-                        return InkWell(
+                        if (state.getAllMenuList[index].value == "gallery"||state.getAllMenuList[index].value == "magazine") {
+                          return  InkWell(
                           onTap: () {
                             if (state.getAllMenuList[index].value == "gallery") {
                               Navigator.pushNamed(
@@ -174,12 +175,13 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
                             ),
                           ),
                         );
+                        } else {
+                          return  const SizedBox.shrink();
+                        }
                       },
                     ),
                   ),
-                  const Divider(
-                    color: AppColors.borderColor,
-                  ),
+
                 ],
               ),
             );

@@ -73,7 +73,7 @@ class _DevotionalScreenState extends State<DevotionalScreen> {
                           builder: (context) => ReelsViewScreen(
                               getReelDetails: state
                                   .getAllVideoList[index].videoUrl!.url
-                                  .toString()),
+                                  .toString(), videoType: '',),
                         ),
                       );
                     },

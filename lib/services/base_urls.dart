@@ -29,6 +29,7 @@ static const String updateDistricts ="/upsert/location";
 
   ///Auth Apis
   static const String sendOtp = "/generateOtp";
+  static const String sendCode= "/validateReferalCode";
   static const String validateOtp = "/validateOtp";
 
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2

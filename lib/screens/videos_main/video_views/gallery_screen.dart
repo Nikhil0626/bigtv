@@ -18,6 +18,7 @@ import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
 import '../../home_screen/home_screen_model.dart';
 import '../vodeo_bloc/videos_event.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class GalleryScreen extends StatefulWidget {
   final String postId;
@@ -34,7 +35,6 @@ class _GalleryScreenState extends State<GalleryScreen> {
     context.read<VideosBloc>().add(GetAllVideos(type: widget.postId));
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -72,31 +72,35 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
-                      print("sbcksjnkhncknsd");
                       Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FullPageCarousel(
-                                imageUrls:
-                                    state.getAllVideoList[index].gallery ?? []),
-                          ));
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => FullPageCarousel(
+                            imageUrls: state.getAllVideoList[index].gallery ?? [],
+                            className: "Gallery View",
+                          ),
+                        ),
+                      );
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ClipRRect(
-                            borderRadius:
-                                const BorderRadius.all(Radius.circular(4)),
-                            child: Image.network(
-                              state.getAllVideoList[index].imageUrl!.url
-                                  .toString(),
+                            borderRadius: const BorderRadius.all(Radius.circular(4)),
+                            child: CachedNetworkImage(
+                              imageUrl: state.getAllVideoList[index].imageUrl!.url.toString(),
                               height: 110,
                               width: 80,
                               fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                height: 110,
+                                width: 80,
+                                color: Colors.grey[300], // Placeholder color
+                              ),
+                              errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
                           ),
                           width(width: 15),
@@ -107,7 +111,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                               children: [
                                 Text(
                                   state.getAllVideoList[index].title.toString(),
-                                  style:  fontStyle(
+                                  style: fontStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
@@ -116,10 +120,9 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                 height(height: 10),
                                 Text(
                                   dateFormat(
-                                    state.getAllVideoList[index].created
-                                        .toString(),
+                                    state.getAllVideoList[index].created.toString(),
                                   ),
-                                  style:  fontStyle(
+                                  style: fontStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,
@@ -150,10 +153,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 }
 
+
 class FullPageCarousel extends StatefulWidget {
   final List<GalleryImage> imageUrls;
-
-  const FullPageCarousel({super.key, required this.imageUrls});
+  final String className;
+  const FullPageCarousel({super.key, required this.imageUrls,this.className=""});
 
   @override
   _FullPageCarouselState createState() => _FullPageCarouselState();
@@ -161,11 +165,30 @@ class FullPageCarousel extends StatefulWidget {
 
 class _FullPageCarouselState extends State<FullPageCarousel> {
   int _currentIndex = 0;
+
   final CarouselSliderController _controller = CarouselSliderController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: widget.className== ""? null:AppBar(
+        leading: InkWell(
+          onTap: () {
+            Navigator.pop(context, RoutesManager.getAllMenuItemScreen);
+          },
+          child: const Icon(
+            color: Colors.white,
+            Icons.arrow_back_ios,
+            size: 18,
+          ),
+        ),
+        backgroundColor: AppColors.appButtonColor,
+        title: Text(
+          widget.className,
+          style: fontStyle(
+              fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+        ),
+      ),
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [

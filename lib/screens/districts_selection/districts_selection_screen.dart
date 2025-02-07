@@ -1,4 +1,3 @@
-
 import 'package:chotanews/screens/home_screen/home_top_tabs.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
@@ -15,7 +14,8 @@ import 'district_selection_state.dart';
 
 class DistrictsSelectionScreen extends StatefulWidget {
   final String className;
-  const DistrictsSelectionScreen({super.key,required this.className});
+
+  const DistrictsSelectionScreen({super.key, required this.className});
 
   @override
   State<DistrictsSelectionScreen> createState() =>
@@ -30,13 +30,13 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
     context.read<DistrictSelectionBloc>().add(GetAllDistricts());
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-
-      body: SafeArea(
-        child: Column(
+    return SafeArea(
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        body: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -47,14 +47,12 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                 decoration: BoxDecoration(
                     color: Colors.blueGrey,
                     borderRadius: BorderRadius.circular(8)),
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(14.0),
                 child: Row(
                   children: [
                     InkWell(
                       onTap: () {
-
                         Navigator.pop(context);
-
                       },
                       child: const Icon(
                         color: Colors.white,
@@ -62,10 +60,10 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                         size: 18,
                       ),
                     ),
-                     Expanded(
+                    Expanded(
                       child: Text(
-                        "మీ ప్రాంతాన్ని ఎంచుకోండి, ప్రతిరోజు మీ ఊరిలో ఏమి జరుగుతుందో తెలుసుకోండి.",
-                        maxLines: 2,
+                        "మీ ప్రాంతాన్ని ఎంచుకోండి, ప్రతిరోజు మీ ఊరిలో ఏం జరుగుతుందో తెలుసుకోండి.",
+                        maxLines: 3,
                         style: fontStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
@@ -153,14 +151,13 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
               ),
             ),
             Expanded(
-              child: BlocConsumer<DistrictSelectionBloc, DistrictSelectionState>(
+              child:
+                  BlocConsumer<DistrictSelectionBloc, DistrictSelectionState>(
                 builder: (context, state) {
-
                   if (state is LoadingDistrictsState ||
                       state is SubmitLoadingState) {
                     return const Center(child: AppLoadingScreen());
                   } else if (state is SuccessDistrictsState) {
-
                     return Stack(
                       children: [
                         Padding(
@@ -170,10 +167,10 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                           child: ListView.builder(
                             itemCount: state.filterDistrictsList.length,
                             itemBuilder: (context, index) {
-                              final district =
-                                  state.filterDistrictsList[index];
+                              final district = state.filterDistrictsList[index];
 
-                              final isSelected = state.selectedDistrictList.contains(district.id.toString());
+                              final isSelected = state.selectedDistrictList
+                                  .contains(district.id.toString());
 
                               return Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -182,22 +179,23 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                   onTap: () {
                                     context.read<DistrictSelectionBloc>().add(
                                           SelectedDistrictsUpdate(
-                                              selectedDistrict: district.id.toString()),
+                                              selectedDistrict:
+                                                  district.id.toString()),
                                         );
                                   },
                                   child: Container(
                                     width: MediaQuery.of(context).size.width,
                                     height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      border: Border.all(
-                                        color: isSelected
-                                            ? AppColors.appButtonColor
-                                            : AppColors.borderColor,
-                                        width: 1,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
+                                    decoration: const BoxDecoration(
+                                        // color: Colors.white,
+                                        // border: Border.all(
+                                        //   color: isSelected
+                                        //       ? AppColors.appButtonColor
+                                        //       : AppColors.borderColor,
+                                        //   width: 1,
+                                        // ),
+                                        // borderRadius: BorderRadius.circular(8),
+                                        ),
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 16.0),
@@ -218,6 +216,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                                 ? Icons.check_circle
                                                 : Icons.check_circle_outline,
                                             color: Colors.lightBlue,
+                                            size: 22,
                                           ),
                                         ],
                                       ),
@@ -234,14 +233,14 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                             alignment: Alignment.bottomCenter,
                             child: InkWell(
                               onTap: () {
-                                if(state.selectedDistrictList.isEmpty){
-                                  CustomToast.showInfoToast(msg: "Select at list two district");
-                                }else{
-                                  context
-                                      .read<DistrictSelectionBloc>()
-                                      .add(SubmitDistricts(className: widget.className));
+                                if (state.selectedDistrictList.isEmpty) {
+                                  CustomToast.showInfoToast(
+                                      msg: "Select at list two district");
+                                } else {
+                                  context.read<DistrictSelectionBloc>().add(
+                                      SubmitDistricts(
+                                          className: widget.className));
                                 }
-
                               },
                               child: Container(
                                 height: 40,
@@ -249,10 +248,12 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 10.0, horizontal: 20.0),
                                 decoration: BoxDecoration(
-                                  color:state.selectedDistrictList.isEmpty?Colors.grey: Colors.lightBlue,
+                                  color: state.selectedDistrictList.isEmpty
+                                      ? Colors.grey
+                                      : Colors.lightBlue,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child:  Text(
+                                child: Text(
                                   'Done',
                                   style: fontStyle(
                                     color: Colors.white, // White text
@@ -268,14 +269,14 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                       ],
                     );
                   } else if (state is ErrorDistrictsState) {
-                    return  Center(
+                    return Center(
                       child: Text(
                         "Please try again later.",
                         style: fontStyle(color: Colors.red),
                       ),
                     );
                   } else {
-                    return  Center(
+                    return Center(
                       child: Text(
                         "No data available",
                         style: fontStyle(
@@ -289,9 +290,15 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                 },
                 listener: (context, state) {
                   if (state is SubmitSuccessState) {
-                    if(state.className=="Home"){
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeTopTabs(tab: "1",),));
-                    }else{
+                    if (state.className == "Home") {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomeTopTabs(
+                              tab: "1",
+                            ),
+                          ));
+                    } else {
                       Navigator.pushNamed(context, RoutesManager.homeScreen);
                     }
                   }
@@ -303,5 +310,4 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
       ),
     );
   }
-
 }
