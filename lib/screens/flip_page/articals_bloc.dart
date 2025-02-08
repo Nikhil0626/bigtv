@@ -139,9 +139,10 @@ class ArticleBloc {
     else if (refresh) {
       log("refresh");
       articlesController.add(null);
+      // articlesData=[];
       articlesData = await _getArticles();
       articlesController.add(articlesData!);
-      _nextPage = 2;
+
     } else {
       log("elseeeeee");
       if (_totalItemsForRequestedSources > (_nextPage - 1) * _pageSize) {
