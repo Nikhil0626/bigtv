@@ -68,7 +68,7 @@ class _SplashScreenView extends State<SplashScreenView> {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Image.asset(
-        "assets/splash1.gif",
+        "assets/svg/splash_video.gif",
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
       ),
@@ -83,15 +83,15 @@ class _SplashScreenView extends State<SplashScreenView> {
     String loginId = sharedPreferences.getString("loginId")??"";
     log(loginId.toString());
     if (loginId != null || loginId.isNotEmpty) {
-      Timer(const Duration(seconds: 1), () {
+      Timer(const Duration(seconds: 5), () {
         Navigator.pushNamed(context, RoutesManager.homeScreen);
       });
     } else {
-      Timer(const Duration(seconds: 1), () {
+      Timer(const Duration(seconds: 5), () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const WelcomeScreen(), // Replace `NewScreen` with the screen you want to navigate to
+            builder: (context) => const WelcomeScreen(),
           ),
         );
       });

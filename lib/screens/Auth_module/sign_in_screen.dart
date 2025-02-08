@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../utils/app_colors.dart';
 import 'auth_event.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -71,9 +72,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                 height: 24,
                                 width: 166,
                               ),
-                              height(height: 30),
+                              height(height: 44),
                               Text(
-                                "Sign In",
+                                "Sign in",
                                 textAlign: TextAlign.center,
                                 style: fontStyle(
                                     fontSize: 24, fontWeight: FontWeight.w600),
@@ -87,13 +88,13 @@ class _SignInScreenState extends State<SignInScreen> {
                                     color: Colors.black54,
                                     fontWeight: FontWeight.normal),
                               ),
-                              height(height: 30),
+                              height(height: 35),
                               Text(
-                                "Mobile Number*",
+                                "Mobile Number *",
                                 style: fontStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w700),
+                                    fontSize: 14, fontWeight: FontWeight.w600),
                               ),
-                              height(height: 16),
+                              height(height: 10),
                               Container(
                                 height: 50,
                                 decoration: BoxDecoration(
@@ -106,8 +107,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                       decoration: BoxDecoration(
                                         color: Colors.grey[300],
                                         borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(4),
-                                            bottomLeft: Radius.circular(4)),
+                                            topLeft: Radius.circular(8),
+                                            bottomLeft: Radius.circular(8)),
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 15, vertical: 14),
@@ -180,7 +181,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     ),
                                   ),
                                 ),
-                              height(height: 20),
+                              height(height: 40),
                               SizedBox(
                                 width: MediaQuery.of(context).size.width,
                                 child: ElevatedButton(
@@ -215,7 +216,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                               ),
-                              height(height: 20),
+                              height(height: 22),
                               TextButton(
                                   onPressed: () {
                                     Navigator.pushNamed(context,
@@ -361,40 +362,40 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                               height(height: 20),
-                              SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    if (_mobileController.text.length < 9) {
-                                    } else {
-                                      if (_formKey.currentState!.validate()) {
-                                        log("phone number   ${_mobileController.text.toString()}");
-                                        context.read<AuthBloc>().add(SendOtp(
-                                            phoneNumber: _mobileController.text
-                                                .toString()));
-                                      }
+
+                              InkWell(
+                                onTap: (){
+                                  if (_mobileController.text.length < 9) {
+                                  } else {
+                                    if (_formKey.currentState!.validate()) {
+                                      log("phone number   ${_mobileController.text.toString()}");
+                                      context.read<AuthBloc>().add(SendOtp(
+                                          phoneNumber: _mobileController.text
+                                              .toString()));
                                     }
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        _mobileController.text.length > 9
-                                            ? Colors.lightBlue
-                                            : Colors.grey,
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 14),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                  ),
+                                  }
+                                },
+
+                                child: Container(
+                                  height: 42,
+                                  decoration: BoxDecoration(
+                                      color: _mobileController.text.length < 3
+                                          ? Colors.grey
+                                          : AppColors.appButtonColor,
+                                      borderRadius:
+                                      BorderRadius.all(Radius.circular(8))),
+                                  width: double.infinity,
+                                  alignment: Alignment.center,
                                   child: Text(
                                     "Send OTP",
                                     style: fontStyle(
-                                        fontSize: 16,
+                                        fontSize: 18,
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600),
                                   ),
                                 ),
                               ),
+
                               height(height: 20),
                               TextButton(
                                   onPressed: () {
