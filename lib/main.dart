@@ -4,6 +4,7 @@ import 'package:chotanews/screens/flip_page/articals_bloc.dart';
 import 'package:chotanews/screens/flip_page/article_bloc_provider.dart';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:chotanews/screens/testing_screen/test4.dart';
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -146,7 +147,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           theme: ThemeData(
             colorScheme:
-            ColorScheme.fromSeed(seedColor: Colors.blue),
+            ColorScheme.fromSeed(seedColor: AppColors.appButtonColor),
             useMaterial3: true,
           ),
           scrollBehavior: MyBehavior(),

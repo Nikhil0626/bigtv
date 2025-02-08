@@ -186,7 +186,7 @@ emit(InitialScreen());
           "otp":event.Otp,
           "authType": "Apple",
           "deviceId": deviceId,
-          "email": "", // Use stored email if null
+          "email": "",
           "familyName": "",
           "givenName": "",
           "id": "",
@@ -204,6 +204,8 @@ emit(InitialScreen());
 
           preferences.setString(
               "loginId", response.data['data']['id'].toString());
+          preferences.setString(
+              "referralCode", response.data['code'].toString());
           emit(SuccessScreen(message: "OTP Verify"));
         }
 

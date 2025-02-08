@@ -10,7 +10,7 @@ TextStyle fontStyle(
   return
     GoogleFonts.notoSansTelugu(
       textStyle: TextStyle(
-        fontSize: fontSize,
+        fontSize: fontSize ,
         fontWeight: fontWeight,
         color: color,)
     );

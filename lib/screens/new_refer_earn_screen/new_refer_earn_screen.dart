@@ -1,6 +1,7 @@
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
+import 'package:flutter_svg/svg.dart';
 
 import '../../utils/app_fonts.dart';
 
@@ -17,18 +18,35 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title:  Text(
-          "Refer & Earn",
-          style: fontStyle(
-            color: Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+        titleSpacing: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 1),
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios_rounded,
+              color: Colors.black,
+              size: 20,
+            ),
           ),
+        ),
+        title: Row(
+          children: [
+            SizedBox(width: 10),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                "Refer & Earn",
+                style: fontStyle(
+                  color: Colors.black,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
@@ -56,7 +74,7 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
                 child: Column(
                   children: [
                     Image.asset(
-                      'assets/images/QRcode.png',
+                      'assets/images/QR.png',
                       height: 120,
                       width: 120,
                       fit: BoxFit.cover,
@@ -94,11 +112,10 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
             height(height: 15),
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                'assets/images/iphone_gift.png',
+              child:  Image.asset(
+                "assets/svg/apple_banner.gif",
                 height: 335,
                 width: 335,
-                fit: BoxFit.cover,
               ),
             ),
 
