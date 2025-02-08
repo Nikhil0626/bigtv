@@ -7,6 +7,7 @@ import 'package:chotanews/screens/home_screen/home_screen_view.dart';
 import 'package:chotanews/screens/profile_screen/profile_screen.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -34,340 +35,354 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.white.withOpacity(.9),
-        appBar: AppBar(
-          backgroundColor: AppColors.appButtonColor,
-          leading: IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 24),
-          ),
-          title:  Text(
-            "Settings",
-            style: fontStyle(
-                color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
-          ),
+    return Scaffold(
+      backgroundColor: Colors.white.withOpacity(.9),
+      appBar: AppBar(
+        backgroundColor: AppColors.appButtonColor,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 24),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: ListView(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                child: Card(
-                  color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  shadowColor: Colors.black12,
-                  elevation: 5,
-                  child: ListTile(
-                    leading: Padding(
-                      padding: const EdgeInsets.only(left: 0),
-                      child: Card(
-                        color: AppColors.appButtonColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            'assets/settings_icons/refer_earn.svg',
-                            height: 30,
-                            width: 30,
-                          ),
+        title:  Text(
+          "Settings",
+          style: fontStyle(
+              color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700),
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          spacing:16 ,
+          children: [
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NewReferEarnScreen()),
+                );
+              },
+              child: Card(
+                color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                shadowColor: Colors.black12,
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/settings_icons/refer_earn.svg',
+                        height: 40,
+                        width: 40,
+                      ),
+                      width(width: 16),
+                      Text(
+                        'Refer&Earn',
+                        style: fontStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkTheme ? Colors.white : Colors.black,
                         ),
                       ),
-                    ),
-                    title: Text(
-                      'Refer&Earn',
-                      style: fontStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: isDarkTheme ? Colors.white : Colors.black,
+                      Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
                       ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 20,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const NewReferEarnScreen()),
-                      );
-                    },
-                  ),
-                ),
-              ),
+                    ],
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                child: Card(
-                  color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  shadowColor: Colors.black12,
-                  elevation: 5,
-                  child: ListTile(
-                    leading: Padding(
-                      padding: const EdgeInsets.only(left: 0),
-                      child: Card(
-                        color: AppColors.appButtonColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            'assets/settings_icons/shareapp_icon.svg',
-                            height: 30,
-                            width: 30,
-                          ),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      'Share app',
-                      style: fontStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: isDarkTheme ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 20,
-                    ),
-                    onTap: () {
-                    },
-                  ),
-                ),
-              ),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                child: Card(
-                  color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  shadowColor: Colors.black12,
-                  elevation: 5,
-                  child: ListTile(
-                    leading: Padding(
-                      padding: const EdgeInsets.only(left: 0),
-                      child: Card(
-                        color: AppColors.appButtonColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            'assets/settings_icons/contactus_icon.svg',
-                            height: 30,
-                            width: 30,
-                          ),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      'Contact Us',
-                      style: fontStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: isDarkTheme ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 20,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const ContactUs()),
-                      );
-                    },
-                  ),
-                ),
-              ),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                child: Card(
-                  color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  shadowColor: Colors.black12,
-                  elevation: 5,
-                  child: ListTile(
-                    leading: Padding(
-                      padding: const EdgeInsets.only(left: 0),
-                      child: Card(
-                        color: AppColors.appButtonColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            'assets/settings_icons/advertise_icon.svg',
-                            height: 30,
-                            width: 30,
-                          ),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      'Advertise with Us',
-                      style: fontStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: isDarkTheme ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 20,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const AdvertiseWithUs()),
-                      );
-                    },
-                  ),
-                ),
-              ),
 
-              // Terms and Conditions Card
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                child: Card(
-                  color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  shadowColor: Colors.black12,
-                  elevation: 5,
-                  child: ListTile(
-                    leading: Padding(
-                      padding: const EdgeInsets.only(left: 0),
-                      child: Card(
-                        color: AppColors.appButtonColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            'assets/settings_icons/terms_conditions_icon.svg',
-                            height: 30,
-                            width: 30,
-                          ),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      'Terms and Conditions',
-                      style: fontStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: isDarkTheme ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 20,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const TermsConditions()),
-                      );
-                    },
                   ),
                 ),
               ),
+            ),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const NewReferEarnScreen()),
+                );
+              },
+              child: Card(
+                color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                shadowColor: Colors.black12,
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/settings_icons/shareapp_icon.svg',
+                        height: 40,
+                        width: 40,
+                      ),
+                      width(width: 16),
+                      Text(
+                        'Share app',
+                        style: fontStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkTheme ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
+                      ),
+                    ],
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                child: Card(
-                  color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
-                  shadowColor: Colors.black12,
-                  elevation: 5,
-                  child: ListTile(
-                    leading: Padding(
-                      padding: const EdgeInsets.only(left: 0),
-                      child: Card(
-                        color: AppColors.appButtonColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            'assets/settings_icons/privacy_policy.svg',
-                            height: 30,
-                            width: 30,
-                          ),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      'Privacy Policy',
-                      style: fontStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: isDarkTheme ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 20,
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const PrivacyPolicy()),
-                      );
-                    },
-                  ),
-                ),
-              ),
 
-              // Logout Card
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 6),
-                child: Card(
-                  color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                  margin: const EdgeInsets.symmetric(horizontal: 8), // Reduced margin
-                  shadowColor: Colors.black12,
-                  elevation: 5,
-                  child: ListTile(
-                    leading: Padding(
-                      padding: const EdgeInsets.only(left: 0),
-                      child: Card(
-                        color: AppColors.appButtonColor,
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            'assets/settings_icons/logout_icon.svg',
-                            height: 30,
-                            width: 30,
-                          ),
-                        ),
-                      ),
-                    ),
-                    title: Text(
-                      'Logout',
-                      style: fontStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: isDarkTheme ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    trailing: const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 20,
-                    ),
-                    onTap: () async {
-                      SharedPreferences sp = await SharedPreferences.getInstance();
-                      sp.clear();
-                      Navigator.pushNamed(context, RoutesManager.signInScreen);
-                    },
+
+
                   ),
                 ),
               ),
-              // const Spacer(),
-              Container(
-                height: 40,
-                padding: const EdgeInsets.only(bottom: 20),
-                  alignment: Alignment.center,
-                  width: MediaQuery.of(context).size.width,
-                  child: Text("App Version: 1.0.0+2",style: fontStyle(fontSize: 14,),))
-            ],
-          ),
+            ),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ContactUs()),
+                );
+              },
+              child: Card(
+                color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                shadowColor: Colors.black12,
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/settings_icons/contactus_icon.svg',
+                        height: 40,
+                        width: 40,
+                      ),
+                      width(width: 16),
+                      Text(
+                        'Contact Us',
+                        style: fontStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkTheme ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
+                      ),
+                    ],
+
+
+
+
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const AdvertiseWithUs()),
+                );
+              },
+              child: Card(
+                color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                shadowColor: Colors.black12,
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/settings_icons/advertise_icon.svg',
+                        height: 40,
+                        width: 40,
+                      ),
+                      width(width: 16),
+                      Text(
+                        'Advertise with Us',
+                        style: fontStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkTheme ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
+                      ),
+                    ],
+
+
+
+
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const TermsConditions()),
+                );
+              },
+              child: Card(
+                color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                shadowColor: Colors.black12,
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/settings_icons/terms_conditions_icon.svg',
+                        height: 40,
+                        width: 40,
+                      ),
+                      width(width: 16),
+                      Text(
+                        'Terms and Conditions',
+                        style: fontStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkTheme ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
+                      ),
+                    ],
+
+
+
+
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PrivacyPolicy()),
+                );
+              },
+              child: Card(
+                color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                shadowColor: Colors.black12,
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/settings_icons/privacy_policy.svg',
+                        height: 40,
+                        width: 40,
+                      ),
+                      width(width: 16),
+                      Text(
+                        'Privacy Policy',
+                        style: fontStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkTheme ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
+                      ),
+                    ],
+
+
+
+
+                  ),
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () async {
+                SharedPreferences sp = await SharedPreferences.getInstance();
+                sp.clear();
+                Navigator.pushNamed(context, RoutesManager.signInScreen);
+              },
+              child: Card(
+                color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                shadowColor: Colors.black12,
+                elevation: 5,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/settings_icons/logout_icon.svg',
+                        height: 40,
+                        width: 40,
+                      ),
+                      width(width: 16),
+                      Text(
+                        'Logout',
+                        style: fontStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: isDarkTheme ? Colors.white : Colors.black,
+                        ),
+                      ),
+                      Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
+                      ),
+                    ],
+
+
+
+
+                  ),
+                ),
+              ),
+            ),
+
+
+
+
+
+            // const Spacer(),
+            Container(
+              height: 40,
+              padding: const EdgeInsets.only(bottom: 20),
+                alignment: Alignment.center,
+                width: MediaQuery.of(context).size.width,
+                child: Text("App Version: 1.0.0+2",style: fontStyle(fontSize: 14,),))
+          ],
         ),
       ),
     );

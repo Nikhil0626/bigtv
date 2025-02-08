@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:chotanews/screens/Auth_module/auth_screen.dart';
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
@@ -123,10 +124,10 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
       bloc: bloc,
       child: WillPopScope(
         onWillPop: _onWillPop,
-        child: SafeArea(
-          child: Scaffold(
-            backgroundColor: Colors.white,
-            body: BlocConsumer<HomeBloc, HomeScreenState>(
+        child: Scaffold(
+          backgroundColor: AppColors.appButtonColor,
+          body: SafeArea(
+            child:  BlocConsumer<HomeBloc, HomeScreenState>(
               listener: (context, state) {
                 if (state is SuccessHomeScreenState) {
                   if (isChange != state.isChange) {
@@ -150,47 +151,47 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                       ],
                     ),
                     if(isChange)
-                    Positioned(
-                      left: 0,
-                      right: 0,
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 500),
-                        opacity: isChange ? 1.0 : 0.0,
-                        child: Material(
-                          color: Colors.white,
-                          child: TabBar(
-                            onTap: (val){
-                              if(val == 0) {
-                                bloc.getArticles();
-                              }else{
-                                bloc.getArticles(isTab: true);
-                              }
-                            },
-                            controller: _tabController,
-                            isScrollable: false, // Disable scrolling of the TabBar
-                            unselectedLabelColor: Colors.black,
-                            indicatorColor: Colors.blue,
-                            unselectedLabelStyle: fontStyle(color: Colors.black,fontSize: 14,fontWeight: FontWeight.normal),
-                            labelStyle: fontStyle(color: Colors.blue,fontSize: 16,fontWeight: FontWeight.bold),
-                            tabs: const [
-                              Tab(text: 'న్యూస్'),
-                              Tab(text: 'జిల్లాలు'),
-                            ],
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 500),
+                          opacity: isChange ? 1.0 : 0.0,
+                          child: Material(
+                            color: Colors.white,
+                            child: TabBar(
+                              onTap: (val){
+                                if(val == 0) {
+                                  bloc.getArticles();
+                                }else{
+                                  bloc.getArticles(isTab: true);
+                                }
+                              },
+                              controller: _tabController,
+                              isScrollable: false, // Disable scrolling of the TabBar
+                              unselectedLabelColor: Colors.black,
+                              indicatorColor: Colors.blue,
+                              unselectedLabelStyle: fontStyle(color: Colors.black,fontSize: 14,fontWeight: FontWeight.bold),
+                              labelStyle: fontStyle(color: Colors.blue,fontSize: 16,fontWeight: FontWeight.bold),
+                              tabs: const [
+                                Tab(text: 'న్యూస్'),
+                                Tab(text: 'జిల్లాలు'),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
                     if(isChange)
-                    Positioned(
-                      bottom: 1,
-                      left: 0,
-                      right: 0,
-                      child: AnimatedOpacity(
-                        duration: const Duration(milliseconds: 500),
-                        opacity: isChange ? 1.0 : 0.0,
-                        child: const BottomNavigationItems(),
+                      Positioned(
+                        bottom: 1,
+                        left: 0,
+                        right: 0,
+                        child: AnimatedOpacity(
+                          duration: const Duration(milliseconds: 500),
+                          opacity: isChange ? 1.0 : 0.0,
+                          child: const BottomNavigationItems(),
+                        ),
                       ),
-                    ),
                   ],
                 );
               },
