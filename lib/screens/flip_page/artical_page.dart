@@ -104,22 +104,18 @@ class ArticlePageState extends State<ArticlePage> {
         },
         child: Scaffold(
             body: InkWell(
-              onTap: () {
-        context.read<HomeBloc>().add(MenuChange());
-        },
-              child:
-
-
-            widget.article.type == "Image"
-                ? CachedNetworkImage(
-                    imageUrl: widget.article.imageUrl.url ?? "",
-                  )
-                : widget.article.type == "Gallery"
-                    ? FullPageCarousel(imageUrls: widget.article.gallery ?? [])
-                    : widget.article.homepage != null
-                        ? FirstCardHomeFeeds(
-                            getHomeList: widget.article.homepage)
-                        : Container(
+          onTap: () {
+            context.read<HomeBloc>().add(MenuChange());
+          },
+          child: widget.article.type == "Image"
+              ? CachedNetworkImage(
+                  imageUrl: widget.article.imageUrl.url ?? "",
+                )
+              : widget.article.type == "Gallery"
+                  ? FullPageCarousel(imageUrls: widget.article.gallery ?? [])
+                  : widget.article.homepage != null
+                      ? FirstCardHomeFeeds(getHomeList: widget.article.homepage)
+                      : Container(
                           color: Colors.white,
                           height: MediaQuery.of(context).size.height,
                           width: MediaQuery.of(context).size.width,
@@ -128,7 +124,10 @@ class ArticlePageState extends State<ArticlePage> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                flex: widget.article.subType=="BigBlackStandard"?9:5,
+                                flex:
+                                    widget.article.subType == "BigBlackStandard"
+                                        ? 9
+                                        : 5,
                                 child: Stack(
                                   children: [
                                     SizedBox(
@@ -137,15 +136,13 @@ class ArticlePageState extends State<ArticlePage> {
                                               color: Colors.black,
                                               child: Center(
                                                   child: VideoPreview(
-                                                      url: widget
-                                                              .article
-                                                              .videoUrl
-                                                              ?.url ??
+                                                      url: widget.article
+                                                              .videoUrl?.url ??
                                                           "")))
                                           : Image.network(
                                               widget.article.imageUrl.url,
-                                              key: ValueKey(widget
-                                                  .article.imageUrl.url),
+                                              key: ValueKey(
+                                                  widget.article.imageUrl.url),
                                               fit: BoxFit.cover,
                                               width: double.infinity,
                                               height: double.infinity,
@@ -181,21 +178,17 @@ class ArticlePageState extends State<ArticlePage> {
                                         bottom: -12,
                                         child: Container(
                                             margin: const EdgeInsets.all(8),
-                                            padding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 8),
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 8),
                                             height: 30,
                                             width: 100,
                                             decoration: const BoxDecoration(
                                                 color: Colors.white,
-                                                borderRadius:
-                                                    BorderRadius.all(
-                                                        Radius.circular(
-                                                                10),
-                                                    )),
+                                                borderRadius: BorderRadius.all(
+                                                  Radius.circular(10),
+                                                )),
                                             child: Image.asset(
                                               "assets/images/brandlogo.png",
-
                                             ))),
                                     // Positioned(
                                     //     bottom: 10,
@@ -244,44 +237,51 @@ class ArticlePageState extends State<ArticlePage> {
                                   child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
-                                      Text(
-                                          widget.article.title ??
-                                              "No Title",
+                                      Text(widget.article.title ?? "No Title",
                                           style: fontStyle(
                                               fontSize: 18,
                                               fontWeight: FontWeight.w600)),
                                       height(height: 10),
-
                                       Expanded(
-                                        child: RichText(
-                                          text:  TextSpan(
-                                            text: '${widget.article.content} ', // Normal text
-                                            style: TextStyle(fontSize: 16, color: AppColors.bodyTextColor,fontWeight: FontWeight.normal,),
-                                            children: <TextSpan>[
-                                              TextSpan(
-                                                text: '\n\nPosted ${formatTimeDifference(widget.article.created)}  ', // Bold text
-                                                style: fontStyle(fontWeight: FontWeight.normal,fontSize: 12,color: AppColors.bodyTextColor),
-                                              ),
-
-                                              TextSpan(
-                                                text: "${widget.article.type}  ${widget.article.subType}", // Bold text
-                                                style: fontStyle(fontWeight: FontWeight.normal,fontSize: 12),
-                                              ),
-
-                                            ],
+                                          child: RichText(
+                                        text: TextSpan(
+                                          text: '${widget.article.content} ',
+                                          // Normal text
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: AppColors.bodyTextColor,
+                                            fontWeight: FontWeight.normal,
                                           ),
-                                        )
+                                          children: <TextSpan>[
+                                            TextSpan(
+                                              text:
+                                                  '\n\nPosted ${formatTimeDifference(widget.article.created)}  ',
+                                              // Bold text
+                                              style: fontStyle(
+                                                  fontWeight: FontWeight.normal,
+                                                  fontSize: 12,
+                                                  color:
+                                                      AppColors.bodyTextColor),
+                                            ),
+                                            TextSpan(
+                                              text:
+                                                  "${widget.article.type}  ${widget.article.subType}", // Bold text
+                                              style: fontStyle(
+                                                  fontWeight: FontWeight.normal,
+                                                  fontSize: 12),
+                                            ),
+                                          ],
+                                        ),
+                                      )
 
-
-                                        // Text(
-                                        //     "${widget.article.content}\n\nPosted ${formatTimeDifference(widget.article.created)}",
-                                        //     style: fontStyle(
-                                        //         fontSize: 16,
-                                        //         color: Colors.grey[800])),
-                                      ),
+                                          // Text(
+                                          //     "${widget.article.content}\n\nPosted ${formatTimeDifference(widget.article.created)}",
+                                          //     style: fontStyle(
+                                          //         fontSize: 16,
+                                          //         color: Colors.grey[800])),
+                                          ),
                                       height(height: 4),
                                       const Divider(
                                           color: AppColors.borderColor),
@@ -292,8 +292,7 @@ class ArticlePageState extends State<ArticlePage> {
                                               MainAxisAlignment.spaceAround,
                                           children: [
                                             BottomActions(
-                                                icon:
-                                                    "assets/svg/reload.svg",
+                                                icon: "assets/svg/reload.svg",
                                                 label: 'రిలోడ్ ',
                                                 onTap: () {
                                                   log("Refresh");
@@ -315,8 +314,7 @@ class ArticlePageState extends State<ArticlePage> {
                                                   });
                                                 }),
                                             BottomActions(
-                                                icon:
-                                                    "assets/svg/comment.svg",
+                                                icon: "assets/svg/comment.svg",
                                                 label: 'కామెంట్',
                                                 onTap: () {
                                                   log("Comment");
@@ -327,15 +325,14 @@ class ArticlePageState extends State<ArticlePage> {
                                                   // context.read<HomeBloc>().add(GetAllNewsFeed());
                                                 }),
                                             BottomActions(
-                                                icon:
-                                                    "assets/svg/share.svg",
+                                                icon: "assets/svg/share.svg",
                                                 label: ' షేర్',
                                                 onTap: () {
                                                   log("Share");
                                                   context.read<HomeBloc>().add(
                                                       SendNewsToSocialMedia(
-                                                          id: widget.article
-                                                              .id.toString()));
+                                                          id: widget.article.id
+                                                              .toString()));
                                                 }),
                                           ],
                                         ),
@@ -346,17 +343,17 @@ class ArticlePageState extends State<ArticlePage> {
                               )
                             ],
                           ),
-            ),
-                        )),
+                        ),
+        )),
       ),
     );
   }
 
   bool isLike = false;
 
-
   List<TextSpan> _parseText(BuildContext context, String text) {
-    RegExp linkRegExp = RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
+    RegExp linkRegExp =
+        RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
     List<TextSpan> spans = [];
 
     text.splitMapJoin(
@@ -368,7 +365,9 @@ class ArticlePageState extends State<ArticlePage> {
         }
         spans.add(TextSpan(
           text: match.group(0),
-          style: fontStyle(color: Colors.blue, ),
+          style: fontStyle(
+            color: Colors.blue,
+          ),
           recognizer: TapGestureRecognizer()
             ..onTap = () {
 // String url = widget.article.url ?? '';
@@ -390,5 +389,3 @@ class ArticlePageState extends State<ArticlePage> {
     return spans;
   }
 }
-
-

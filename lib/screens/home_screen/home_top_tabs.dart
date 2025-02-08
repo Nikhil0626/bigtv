@@ -32,8 +32,6 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
   void initState() {
     super.initState();
     log(widget.tab);
-    initDynamicLinks();
-    // initUniLinks();
     _tabController = TabController(
       length: 2,
       vsync: this,
@@ -52,63 +50,8 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
     return false;
   }
 
-  void initDynamicLinks() async {
-    FirebaseDynamicLinks.instance.onLink.listen((PendingDynamicLinkData? data) {
-      log("Dynamic Links  ${data?.link}");
-      final Uri? deepLink = data?.link;
-      if (deepLink != null) {
-        handleDeepLink(deepLink);
-      }
-    }).onError((error) {
-      print('Dynamic Link Failed: $error');
-    });
 
-    final PendingDynamicLinkData? initialLink =
-    await FirebaseDynamicLinks.instance.getInitialLink();
 
-    if (initialLink?.link != null) {
-      handleDeepLink(initialLink!.link!);
-    }
-  }
-
-  // Handling Deep Links from Custom URL Schemes
-  // void initUniLinks() async {
-  //   try {
-  //     final Uri? initialUri = await getInitialUri();
-  //     if (initialUri != null) {
-  //       handleDeepLink(initialUri);
-  //     }
-  //   } catch (e) {
-  //     print('UniLinks Error: $e');
-  //   }
-  //
-  //   linkStream.listen((String? link) {
-  //     if (link != null) {
-  //       handleDeepLink(Uri.parse(link));
-  //     }
-  //   }, onError: (err) {
-  //     print('UniLinks Stream Error: $err');
-  //   });
-  // }
-
-  // Function to handle deep links
-  void handleDeepLink(Uri deepLink) {
-    String url = "https://chotanews.com/store?postId=3604374";
-    Uri uri = Uri.parse(url);
-
-    String? postId = uri.queryParameters["postId"];
-
-    print(postId);
-    print('Deep Link: $deepLink');
-
-    if (postId != null) {
-      String productId = deepLink.pathSegments.last;
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {

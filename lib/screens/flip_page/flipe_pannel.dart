@@ -9,6 +9,7 @@
 import 'dart:async';
 
 import 'package:chotanews/screens/home_screen/home_top_tabs.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math' as math;
@@ -43,7 +44,7 @@ class FlipPanel<T> extends StatefulWidget {
     required this.itemStream,
     required this.getItemsCallback,
     required this.height,
-    this.duration = const Duration(milliseconds: 300),
+    this.duration = const Duration(milliseconds: 100),
   }) : super(key: key);
 
   @override
@@ -91,7 +92,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   // The flip distance is the distance from the drag start point to the center
   // of the flip panel, with a minimum distance of a quarter of the panel
   // height
-  double _flipExtent = 200.0;
+  double _flipExtent = 100.0;
 
   LastFlip _lastFlip = LastFlip.none;
 
@@ -149,9 +150,6 @@ class _FlipPanelState<T> extends State<FlipPanel>
         Tween(begin: _zeroAngle, end: math.pi / 2).animate(_controller);
 
     _subscription = widget.itemStream.distinct().listen((items) {
-      // A null items list is sent to indicate that a refresh
-      // request has been sent to the server. It will be used to show a refresh
-      // indicator
       if (items == null || items.isEmpty) {
         widgets = null;
         _availableItems = 0;
@@ -193,9 +191,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   @override
   Widget build(BuildContext context) {
-    // We only build new widgets when not waiting for refresh.
-    // If we are waiting for refresh we don't invalidate the present widgets
-    // until new ones are received
+
     if (!_waitingForRefresh) {
       if (widgets == null || _availableItems == 0) {
         return Container(
@@ -203,7 +199,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
           height: _height,
           width: MediaQuery.of(context).size.width,
           child: const Center(
-            child: CircularProgressIndicator(),
+            child: AppLoadingScreen(),
           ),
         );
       }
@@ -287,12 +283,12 @@ class _FlipPanelState<T> extends State<FlipPanel>
     _direction = FlipDirection.none;
     _dragExtent = _controller.value * _dragExtent.sign;
 
-    double _halfFlipPanel = context.size!.height / 2;
+    double _halfFlipPanel = context.size!.height / 3;
     RenderBox referenceBox = context.findRenderObject() as RenderBox;
     Offset localPosition = referenceBox.globalToLocal(details.globalPosition);
     _flipExtent = (localPosition.dy - _halfFlipPanel)
         .abs()
-        .clamp(_halfFlipPanel / 2, double.infinity);
+        .clamp(_halfFlipPanel / 3, double.infinity);
     if (_controller.isAnimating) {
       _controller.stop();
     }

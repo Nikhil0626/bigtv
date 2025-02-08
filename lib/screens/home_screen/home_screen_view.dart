@@ -14,9 +14,9 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Calculate height of the page before applying the SafeArea since it removes
     // the padding from the MediaQuery and can not calculate it inside the page.
-    double height = MediaQuery.of(context).size.height -
+    double height = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
-        MediaQuery.of(context).padding.bottom-(Platform.isIOS?100:34);
+        MediaQuery.of(context).padding.bottom)-(Platform.isIOS?100:36);
 
     return SafeArea(
 

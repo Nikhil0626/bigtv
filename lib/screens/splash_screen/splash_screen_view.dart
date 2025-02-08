@@ -23,7 +23,6 @@ class _SplashScreenView extends State<SplashScreenView> {
   void initState() {
     initDynamicLinks();
     super.initState();
-    navigateApp();
   }
 
 
@@ -84,11 +83,11 @@ class _SplashScreenView extends State<SplashScreenView> {
     String loginId = sharedPreferences.getString("loginId")??"";
     log(loginId.toString());
     if (loginId != null || loginId.isNotEmpty) {
-      Timer(const Duration(seconds: 8), () {
+      Timer(const Duration(seconds: 1), () {
         Navigator.pushNamed(context, RoutesManager.homeScreen);
       });
     } else {
-      Timer(const Duration(seconds: 8), () {
+      Timer(const Duration(seconds: 1), () {
         Navigator.push(
           context,
           MaterialPageRoute(
