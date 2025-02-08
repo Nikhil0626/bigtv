@@ -98,7 +98,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                               placeholder: (context, url) => Container(
                                 height: 110,
                                 width: 80,
-                                color: Colors.grey[300], // Placeholder color
+                                color: Colors.grey[300],
                               ),
                               errorWidget: (context, url, error) => const Icon(Icons.error),
                             ),
