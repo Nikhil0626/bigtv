@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
 import 'package:chotanews/screens/Auth_module/auth_state.dart';
+import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../referral_code_screen/referral_code.dart';
 import 'auth_event.dart';
@@ -45,7 +47,7 @@ class _OtpScreenState extends State<OtpScreen> {
     startCountdown();
   }
 
-  void verifyOtp() {
+  Future verifyOtp() async{
 
     if (enteredOtp.length == 4) {
       context.read<AuthBloc>().add(
@@ -107,12 +109,20 @@ class _OtpScreenState extends State<OtpScreen> {
       // ),
       body: Padding(
         padding: const EdgeInsets.only(top: 32),
-        child: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
+        child: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) async{
+          SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+          String code = await sharedPreferences.getString("sharedReferralCode")??"";
           if (state is SuccessScreen) {
-            if (state.message == "OTP Verify") {
-              Navigator.pushNamed(context, RoutesManager.referralCode,arguments: {
-        "mobileNumber":widget.mobileNumber
-              });
+
+            if (state.message == "OTP Verify"  ) {
+              if( code != ""){
+                context.read<AuthBloc>().add(SendReferralCode(referralCodeNumber: code, mobileNumber: widget.mobileNumber));
+              }else{
+                Navigator.pushNamed(context, RoutesManager.referralCode,arguments: {
+                  "mobileNumber":widget.mobileNumber
+                });
+              }
+
             }
           }
         }, builder: (context, state) {

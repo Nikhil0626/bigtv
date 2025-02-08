@@ -28,8 +28,9 @@ class _SplashScreenView extends State<SplashScreenView> {
 
   void initDynamicLinks() async {
     FirebaseDynamicLinks.instance.onLink.listen((PendingDynamicLinkData? data) {
-      log("Dynamic Links  ${data?.link}");
       final Uri? deepLink = data?.link;
+      log("Dynamic Links  ${data?.link}");
+
       if (deepLink != null) {
         handleDeepLink(deepLink);
       }
@@ -37,31 +38,48 @@ class _SplashScreenView extends State<SplashScreenView> {
       print('Dynamic Link Failed: $error');
     });
 
-    final PendingDynamicLinkData? initialLink =
-    await FirebaseDynamicLinks.instance.getInitialLink();
-
-    if (initialLink?.link != null) {
-      handleDeepLink(initialLink!.link);
-    }
+    // final PendingDynamicLinkData? initialLink =
+    // await FirebaseDynamicLinks.instance.getInitialLink();
+    //
+    // if (initialLink?.link != null) {
+    //   handleDeepLink(initialLink!.link);
+    // }else{
+    //   navigateApp();
+    // }
   }
 
-  void handleDeepLink(Uri deepLink) {
+  Future handleDeepLink(Uri deepLink) async {
     Uri uri = Uri.parse(deepLink.toString());
+    bool isValid = uri.queryParameters.containsKey("postId");
 
-    String? postId = uri.queryParameters["postId"];
+    String? postId = isValid ? uri.queryParameters["postId"] : "";
+    String? referralCode = !isValid ? uri.queryParameters["referralCode"] : "";
 
-    print(postId);
-    print('Deep Link: $deepLink');
+    log("post iddddddddd $postId");
+    log("post iddddddddd $referralCode");
 
-    if (postId != null) {
+    if (postId != null && postId != "") {
+      log("post iddddddddd $postId");
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => IndividualPost(postId: postId,)),
+        MaterialPageRoute(builder: (context) => IndividualPost(postId: postId)),
       );
-    }else{
+    } else if (referralCode != null && referralCode != "") {
+      log("code iddddddddd $referralCode");
+      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      sharedPreferences.setString("sharedReferralCode", referralCode);
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const WelcomeScreen(),
+        ),
+      );
+    } else {
+      log("normalllllll $referralCode");
       navigateApp();
     }
   }
+
 
   @override
   Widget build(BuildContext context) {

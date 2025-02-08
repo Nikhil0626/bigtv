@@ -8,8 +8,10 @@ import 'package:chotanews/screens/profile_screen/profile_screen.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/app_router.dart';
@@ -127,12 +129,29 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 )),
             InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const NewReferEarnScreen()),
+                onTap: () async{
+                  SharedPreferences sp = await SharedPreferences.getInstance();
+                  String? getCode= sp.getString("referralCode");
+                  final DynamicLinkParameters parameters = DynamicLinkParameters(
+                    uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
+                    link: Uri.parse('https://chotanews.com/store?referralCode=$getCode'), // Ensure this is a valid URL
+                    androidParameters: const AndroidParameters(
+                      packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
+                    ),
+                    iosParameters: const IOSParameters(
+                      bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
+                      appStoreId: '1631068092',
+                    ),
                   );
+
+                  try {
+                    final ShortDynamicLink shortLink =
+                        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+                    print("Short Link Created: ${shortLink.shortUrl}");
+                    Share.share('${shortLink.shortUrl}');
+                  } catch (e) {
+                    print("Error creating dynamic link: $e");
+                  }
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -159,7 +178,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           height: 40,
                           width: 40,
                         ),
-                        SizedBox(width: 16),
+                        width(width: 16),
                         Text(
                           'Share app',
                           style: fontStyle(
@@ -383,6 +402,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             InkWell(
                 onTap: () async {
                   SharedPreferences sp = await SharedPreferences.getInstance();
+                  sp.remove("loginId");
                   sp.clear();
                   Navigator.pushNamed(context, RoutesManager.signInScreen);
                 },
