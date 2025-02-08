@@ -259,11 +259,11 @@ class ArticlePageState extends State<ArticlePage> {
                                         child: RichText(
                                           text:  TextSpan(
                                             text: '${widget.article.content} ', // Normal text
-                                            style: fontStyle(fontSize: 16, color: Colors.black,fontWeight: FontWeight.normal),
+                                            style: TextStyle(fontSize: 16, color: AppColors.bodyTextColor,fontWeight: FontWeight.normal,),
                                             children: <TextSpan>[
                                               TextSpan(
                                                 text: '\n\nPosted ${formatTimeDifference(widget.article.created)}  ', // Bold text
-                                                style: fontStyle(fontWeight: FontWeight.normal,fontSize: 12),
+                                                style: fontStyle(fontWeight: FontWeight.normal,fontSize: 12,color: AppColors.bodyTextColor),
                                               ),
 
                                               TextSpan(
