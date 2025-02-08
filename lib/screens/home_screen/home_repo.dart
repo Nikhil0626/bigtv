@@ -7,14 +7,18 @@ class HomeRepo extends BaseService{
 
   Future getAllNewsFeeds(queryParams) async{
     Response response = await makeRequest(url: BaseUrls.getNews,method: RequestType.get,queryParameters: queryParams);
-
-
     return response;
   }
 
 
   Future addCommentByPost(queryParams) async{
     Response response = await makeRequest(url: BaseUrls.addComment,method: RequestType.get,queryParameters: queryParams);
+    return response;
+  }
+
+
+  Future getSinglePost(queryParams) async{
+    Response response = await makeRequest(url: "${BaseUrls.getPostById}/$queryParams",method: RequestType.get);
     return response;
   }
 

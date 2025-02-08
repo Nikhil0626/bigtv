@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:chotanews/screens/Auth_module/auth_screen.dart';
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/screens/home_screen/home_state.dart';
+import 'package:chotanews/screens/individual_post_view/individual_post.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';

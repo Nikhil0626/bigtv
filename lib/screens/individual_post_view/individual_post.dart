@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/screens/home_screen/home_screen_model.dart';
+import 'package:chotanews/screens/individual_post_view/individual_post_event.dart';
+import 'package:chotanews/screens/individual_post_view/individual_post_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,11 +25,12 @@ import '../home_screen/home_event.dart';
 import '../home_screen/home_state.dart';
 import '../videos_main/video_views/gallery_screen.dart';
 import '../videos_main/video_views/video_preview.dart';
+import 'individual_post_bloc.dart';
 
 class IndividualPost extends StatefulWidget {
-  final HomeScreenModel item;
+  final String postId;
 
-  const IndividualPost({super.key,required this.item});
+  const IndividualPost({super.key,required this.postId});
 
   @override
   State<IndividualPost> createState() => _IndividualPostState();
@@ -35,14 +38,21 @@ class IndividualPost extends StatefulWidget {
 
 class _IndividualPostState extends State<IndividualPost> {
   @override
+  void initState() {
+    context.read<IndividualPostBloc>().add(GetSinglePost(postId: widget.postId));
+    super.initState();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
 
-      body: BlocBuilder<HomeBloc, HomeScreenState>(
+      body: BlocBuilder<IndividualPostBloc, IndividualPostState>(
         builder: (context, state) {
-          if (state is LoadingHomeScreenState) {
+          if (state is LoadingPostState) {
             return const Center(child: AppLoadingScreen());
-          } else if (state is SuccessHomeScreenState) {
+          } else if (state is SuccessPostState) {
             return Container(
               color: Colors.white,
               height: MediaQuery.of(context).size.height,
@@ -56,12 +66,12 @@ class _IndividualPostState extends State<IndividualPost> {
                     child: Stack(
                       children: [
                         SizedBox(
-                            child: state.pageType == "Video"
+                            child: state.getPost.type == "Video"
                                 ? Container(
                                 color: Colors.black,
-                                child: Center(child: VideoPreview(url:  "")))
+                                child: Center(child: VideoPreview(url:  state.getPost.videoUrl!.url.toString())))
                                 : CachedNetworkImage(
-                              imageUrl:"",
+                              imageUrl:state.getPost.imageUrl.url ,
                               imageBuilder: (context, imageProvider) =>
                                   Container(
                                     height: MediaQuery.of(context).size.height,
@@ -104,7 +114,7 @@ class _IndividualPostState extends State<IndividualPost> {
                             right: 10,
                             child: InkWell(
                                 onTap: () {
-                                  if (state.pageType == "Video") {
+                                  if (state.getPost.type.toString() == "Video") {
                                     Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -141,14 +151,36 @@ class _IndividualPostState extends State<IndividualPost> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Text( "No Title",
+                          Text( state.getPost.title.toString(),
                               style: fontStyle(
                                   fontSize: 18, fontWeight: FontWeight.bold)),
                           height(height: 10),
                           Expanded(
-                            child: Text("Posted ()",
-                                style:
-                                fontStyle(fontSize: 16, color: Colors.grey[800])),
+                              child: RichText(
+                                text:  TextSpan(
+                                  text: '${state.getPost.content} ', // Normal text
+                                  style: TextStyle(fontSize: 16, color: AppColors.bodyTextColor,fontWeight: FontWeight.normal,),
+                                  children: <TextSpan>[
+                                    TextSpan(
+                                      text: '\n\nPosted ${formatTimeDifference(state.getPost.created)}  ', // Bold text
+                                      style: fontStyle(fontWeight: FontWeight.normal,fontSize: 12,color: AppColors.bodyTextColor),
+                                    ),
+
+                                    TextSpan(
+                                      text: "${state.getPost.type}  ${state.getPost.subType}", // Bold text
+                                      style: fontStyle(fontWeight: FontWeight.normal,fontSize: 12),
+                                    ),
+
+                                  ],
+                                ),
+                              )
+
+
+                            // Text(
+                            //     "${widget.article.content}\n\nPosted ${formatTimeDifference(widget.article.created)}",
+                            //     style: fontStyle(
+                            //         fontSize: 16,
+                            //         color: Colors.grey[800])),
                           ),
                           height(height: 4),
                           const Divider(color: AppColors.borderColor),
@@ -202,8 +234,8 @@ class _IndividualPostState extends State<IndividualPost> {
                 ],
               ),
             );
-          } else if (state is ErrorHomeScreenState) {
-            return Center(child: AppNoData(data: state.getHomeScreenError,));
+          } else if (state is ErrorPostState) {
+            return Center(child: AppNoData(data: state.error??""));
           } else {
             return const Center(child: AppNoData());
           }

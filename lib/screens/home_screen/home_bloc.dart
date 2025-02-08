@@ -284,6 +284,8 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
         log("Get News Api catch ${st.toString()}");
       }
     });
+
+
     on<LikeByPost>((event, emit) async {
       emit(LoadingHomeScreenState());
       String deviceId = GlobalVariables().deviceId ?? "";

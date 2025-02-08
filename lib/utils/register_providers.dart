@@ -10,6 +10,7 @@ import '../screens/districts_selection/district_selection_bloc.dart';
 
 import '../screens/Auth_module/auth_bloc.dart';
 import '../screens/home_screen/home_bloc.dart';
+import '../screens/individual_post_view/individual_post_bloc.dart';
 
 class RegisterProviders {
   static providers(BuildContext context) {
@@ -30,6 +31,8 @@ class RegisterProviders {
       ),
       BlocProvider<DistrictSelectionBloc>(
         create: (BuildContext context) => DistrictSelectionBloc(),
+      ),BlocProvider<IndividualPostBloc>(
+        create: (BuildContext context) => IndividualPostBloc(),
       ),
     ];
   }

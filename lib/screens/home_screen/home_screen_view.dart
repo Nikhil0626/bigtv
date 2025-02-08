@@ -1,4 +1,6 @@
 
+import 'dart:io';
+
 import 'package:chotanews/screens/flip_page/flipe_pannel.dart';
 import 'package:flutter/material.dart';
 import '../flip_page/artical_page.dart';
@@ -14,7 +16,7 @@ class HomePage extends StatelessWidget {
     // the padding from the MediaQuery and can not calculate it inside the page.
     double height = MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
-        MediaQuery.of(context).padding.bottom-32;
+        MediaQuery.of(context).padding.bottom-(Platform.isIOS?100:34);
 
     return SafeArea(
 

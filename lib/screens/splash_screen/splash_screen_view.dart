@@ -9,6 +9,7 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Auth_module/welcome_screen.dart';
+import '../individual_post_view/individual_post.dart';
 
 class SplashScreenView extends StatefulWidget {
   const SplashScreenView({super.key});
@@ -26,23 +27,41 @@ class _SplashScreenView extends State<SplashScreenView> {
   }
 
 
-  Future<void> initDynamicLinks() async {
+  void initDynamicLinks() async {
+    FirebaseDynamicLinks.instance.onLink.listen((PendingDynamicLinkData? data) {
+      log("Dynamic Links  ${data?.link}");
+      final Uri? deepLink = data?.link;
+      if (deepLink != null) {
+        handleDeepLink(deepLink);
+      }
+    }).onError((error) {
+      print('Dynamic Link Failed: $error');
+    });
+
     final PendingDynamicLinkData? initialLink =
     await FirebaseDynamicLinks.instance.getInitialLink();
+
     if (initialLink?.link != null) {
       handleDeepLink(initialLink!.link);
     }
-
-    FirebaseDynamicLinks.instance.onLink.listen((dynamicLinkData) {
-      handleDeepLink(dynamicLinkData.link);
-    }).onError((error) {
-      print("Dynamic Link Error: $error");
-    });
   }
 
   void handleDeepLink(Uri deepLink) {
-    print("Opened with deep link: ${deepLink.toString()}");
-    // Navigate based on the deep link path
+    Uri uri = Uri.parse(deepLink.toString());
+
+    String? postId = uri.queryParameters["postId"];
+
+    print(postId);
+    print('Deep Link: $deepLink');
+
+    if (postId != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => IndividualPost(postId: postId,)),
+      );
+    }else{
+      navigateApp();
+    }
   }
 
   @override
@@ -56,6 +75,10 @@ class _SplashScreenView extends State<SplashScreenView> {
       ),
     );
   }
+
+
+
+
   Future navigateApp() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String loginId = sharedPreferences.getString("loginId")??"";
