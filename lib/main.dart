@@ -2,8 +2,10 @@ import 'dart:developer';
 
 import 'package:chotanews/screens/flip_page/articals_bloc.dart';
 import 'package:chotanews/screens/flip_page/article_bloc_provider.dart';
+import 'package:chotanews/screens/flip_page/test_one.dart';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:chotanews/screens/testing_screen/test4.dart';
+import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -24,7 +26,6 @@ Future<String?> getUniqueDeviceId(String token) async {
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     GlobalVariables().platForm = androidInfo.brand;
-    log(androidInfo.toString());
 
     // AuthRepo().addDeviceDetails({
     //   "deviceId": androidInfo.id,
@@ -36,7 +37,6 @@ Future<String?> getUniqueDeviceId(String token) async {
   } else if (Platform.isIOS) {
     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
     GlobalVariables().platForm = iosInfo.systemName;
-    log(iosInfo.toString());
 
     // AuthRepo().addDeviceDetails({
     //   "deviceId": iosInfo.identifierForVendor,
@@ -130,8 +130,20 @@ void _onTokenInvalidated(Map<String, dynamic>? message) {
   // Reset with new Security Token in the callback
   WebEngagePlugin.setSecureToken("siva kumar", message.toString());
 }
-class MyApp extends StatelessWidget {
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+ @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +176,7 @@ class MyApp extends StatelessWidget {
         //     child: child!,
         //   );
         // },
-        // home: WebDash(),
+        // home: CustomShakingStepper(),
         debugShowCheckedModeBanner: false,
         // initialRoute: RoutesManager.onboardingScreen,
       ),

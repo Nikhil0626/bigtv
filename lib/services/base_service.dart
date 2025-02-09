@@ -85,9 +85,7 @@ class BaseService {
   void _initializeInterceptors() {
     dio.interceptors.add(InterceptorsWrapper(
       onRequest: (RequestOptions options, RequestInterceptorHandler handler) {
-        log('Request[${options.method}] => PATH: ${options.uri}');
-        log('Headers: ${options.headers}');
-        log('Body: ${options.data}');
+
         return handler.next(options); // Continue with the request
       },
       onResponse: (Response response, ResponseInterceptorHandler handler) {
@@ -131,8 +129,6 @@ class BaseService {
         case RequestType.get:
           final uri = Uri.parse(dio.options.baseUrl + url)
               .replace(queryParameters: queryParameters);
-          log("urlllllllllllll$queryParameters");
-          log("urlllllllllllll $uri");
           response = await dio.getUri(uri, cancelToken: token);
           break;
         case RequestType.put:

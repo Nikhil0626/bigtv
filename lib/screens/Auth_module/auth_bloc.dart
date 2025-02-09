@@ -8,11 +8,13 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../../globel_keys/app_router.dart';
 import '../../globel_keys/global_variables_data.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -165,7 +167,7 @@ emit(InitialScreen());
           log(response.data.toString());
           CustomToast.showSuccessToast(msg: response.data['message']);
 
-          emit(SuccessScreen(message: response.data['success'].toString(),otp: otp));
+          Navigator.pushNamed(event.context, RoutesManager.districtSelectionScreen,);
         }
 
       } catch (e, st) {
@@ -206,7 +208,28 @@ emit(InitialScreen());
               "loginId", response.data['data']['id'].toString());
           preferences.setString(
               "referralCode", response.data['code'].toString());
-          emit(SuccessScreen(message: "OTP Verify"));
+
+          String code =  preferences.getString("sharedReferralCode")??"";
+if(code != ""&& code.isNotEmpty){
+  String? loginId =  preferences.getString("loginId",);
+  String? deviceId = GlobalVariables().deviceId;
+  Map<String, dynamic> body = {
+    "code":code,
+    "mobile_number":event.mobileNumber,
+    "child_id":loginId!
+  };
+  log(body.toString());
+  Response response = await AuthRepo().sendCode(body);
+  if(response.statusCode ==200){
+    log(response.data.toString());
+    CustomToast.showSuccessToast(msg: response.data['message']);
+
+    Navigator.pushNamed(event.context, RoutesManager.districtSelectionScreen,);
+  }
+}else{
+  emit(SuccessScreen(message: "OTP Verify"));
+
+}
         }
 
       } catch (e, st) {

@@ -78,12 +78,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
           spacing: 16,
           children: [
             InkWell(
-                onTap: () {
+                onTap: () async{SharedPreferences sp = await SharedPreferences.getInstance();
+                String? getCode= sp.getString("referralCode");
+                final DynamicLinkParameters parameters = DynamicLinkParameters(
+                  uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
+                  link: Uri.parse('https://chotanews.com/store?referralCode=$getCode'), // Ensure this is a valid URL
+                  androidParameters: const AndroidParameters(
+                    packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
+                  ),
+                  iosParameters: const IOSParameters(
+                    bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
+                    appStoreId: '1631068092',
+                  ),
+                );
+
+                try {
+                  final ShortDynamicLink shortLink =
+                      await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+                  print("Short Link Created: ${shortLink.shortUrl}");
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => const NewReferEarnScreen()),
+                        builder: (context) =>  NewReferEarnScreen(shortLink:shortLink.shortUrl.toString(),getCode:getCode.toString())),
                   );
+                } catch (e) {
+                  print("Error creating dynamic link: $e");
+                }
+
+
                 },
                 child: Container(
                   decoration: BoxDecoration(

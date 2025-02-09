@@ -8,8 +8,8 @@ import 'dart:async';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../services/dynamic_link_service.dart';
 import '../Auth_module/welcome_screen.dart';
-import '../individual_post_view/individual_post.dart';
 
 class SplashScreenView extends StatefulWidget {
   const SplashScreenView({super.key});
@@ -21,64 +21,10 @@ class SplashScreenView extends StatefulWidget {
 class _SplashScreenView extends State<SplashScreenView> {
   @override
   void initState() {
-    initDynamicLinks();
     super.initState();
+    navigateApp();
   }
 
-
-  void initDynamicLinks() async {
-    FirebaseDynamicLinks.instance.onLink.listen((PendingDynamicLinkData? data) {
-      final Uri? deepLink = data?.link;
-      log("Dynamic Links  ${data?.link}");
-
-      if (deepLink != null) {
-        handleDeepLink(deepLink);
-      }
-    }).onError((error) {
-      print('Dynamic Link Failed: $error');
-    });
-
-    // final PendingDynamicLinkData? initialLink =
-    // await FirebaseDynamicLinks.instance.getInitialLink();
-    //
-    // if (initialLink?.link != null) {
-    //   handleDeepLink(initialLink!.link);
-    // }else{
-    //   navigateApp();
-    // }
-  }
-
-  Future handleDeepLink(Uri deepLink) async {
-    Uri uri = Uri.parse(deepLink.toString());
-    bool isValid = uri.queryParameters.containsKey("postId");
-
-    String? postId = isValid ? uri.queryParameters["postId"] : "";
-    String? referralCode = !isValid ? uri.queryParameters["referralCode"] : "";
-
-    log("post iddddddddd $postId");
-    log("post iddddddddd $referralCode");
-
-    if (postId != null && postId != "") {
-      log("post iddddddddd $postId");
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => IndividualPost(postId: postId)),
-      );
-    } else if (referralCode != null && referralCode != "") {
-      log("code iddddddddd $referralCode");
-      SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-      sharedPreferences.setString("sharedReferralCode", referralCode);
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const WelcomeScreen(),
-        ),
-      );
-    } else {
-      log("normalllllll $referralCode");
-      navigateApp();
-    }
-  }
 
 
   @override
@@ -92,26 +38,17 @@ class _SplashScreenView extends State<SplashScreenView> {
       ),
     );
   }
-
-
-
-
   Future navigateApp() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String loginId = sharedPreferences.getString("loginId")??"";
     log(loginId.toString());
-    if (loginId != null || loginId.isNotEmpty) {
+    if ( loginId.isNotEmpty) {
       Timer(const Duration(seconds: 5), () {
         Navigator.pushNamed(context, RoutesManager.homeScreen);
       });
     } else {
       Timer(const Duration(seconds: 5), () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const WelcomeScreen(),
-          ),
-        );
+        DynamicLinkService.handleDynamicLinks(context);
       });
     }
   }

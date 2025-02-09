@@ -144,7 +144,7 @@ class _ReferralCodeState extends State<ReferralCode> {
                               log("phone number   ${referralCode.text.toString()}");
                               context.read<AuthBloc>().add(SendReferralCode(
                                   referralCodeNumber: referralCode.text
-                                      .toString(), mobileNumber: widget.mobileNumber));
+                                      .toString(), mobileNumber: widget.mobileNumber,context: context));
                             }
                           }
                         },

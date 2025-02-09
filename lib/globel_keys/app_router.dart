@@ -64,8 +64,8 @@ abstract class RoutesManager {
       //   return MaterialPageRoute(builder: (context) => const LoginScreen(),);
       case homeScreen:
         return MaterialPageRoute(builder: (context) => const HomeTopTabs(),);
-      case newReferEarnScreen:
-        return MaterialPageRoute(builder: (context) =>  const NewReferEarnScreen());
+      // case newReferEarnScreen:
+      //   return MaterialPageRoute(builder: (context) =>  const NewReferEarnScreen());
 
       case onboardingScreen:
         return MaterialPageRoute(builder: (context) => const OnboardingScreen());

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
@@ -51,7 +52,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
     if (enteredOtp.length == 4) {
       context.read<AuthBloc>().add(
-          VerificationOtp(Otp: enteredOtp, mobileNumber: widget.mobileNumber));
+          VerificationOtp(Otp: enteredOtp, mobileNumber: widget.mobileNumber,context: context));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid OTP!')),
@@ -113,17 +114,21 @@ class _OtpScreenState extends State<OtpScreen> {
           SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
           String code = await sharedPreferences.getString("sharedReferralCode")??"";
           if (state is SuccessScreen) {
-
-            if (state.message == "OTP Verify"  ) {
-              if( code != ""){
-                context.read<AuthBloc>().add(SendReferralCode(referralCodeNumber: code, mobileNumber: widget.mobileNumber));
-              }else{
+// print("skbfjksfhksdhfkshjfskfhskjfkfhksdfdf");
+//             if (state.message == "OTP Verify"  ) {
+//               print("sjfhksehfksfshlkfhseflwfjil");
+//               log("code     $code"   );
+//               log(code);
+//               if( code != ""){
+//                 context.read<AuthBloc>().add(SendReferralCode(referralCodeNumber: code, mobileNumber: widget.mobileNumber, context:context));
+//               }else{
+//                 print("skbfjksfhksdhfkshjfskfhskjfkfhksdfdf1");
                 Navigator.pushNamed(context, RoutesManager.referralCode,arguments: {
                   "mobileNumber":widget.mobileNumber
                 });
-              }
+              // }
 
-            }
+
           }
         }, builder: (context, state) {
           return state is LoadingScreen
