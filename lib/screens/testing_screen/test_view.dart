@@ -366,7 +366,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
 //                         addPadding(
 //                           child: Text(
 //                             post.title ?? "",
-//                             style: const TextStyle(
+//                             style: const fontStyle(
 //                               color: AppColors.headerTextColor,
 //                               fontSize: 16,
 //                               fontWeight: FontWeight.bold,
@@ -402,7 +402,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
 //               child: const Center(
 //                 child: Text(
 //                   "Something went wrong. Please try again.",
-//                   style: TextStyle(color: Colors.white, fontSize: 16),
+//                   style: fontStyle(color: Colors.white, fontSize: 16),
 //                 ),
 //               ),
 //             );

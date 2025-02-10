@@ -10,11 +10,12 @@ import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../globel_keys/app_router.dart';
 import '../screens/Auth_module/auth_bloc.dart';
+import '../screens/videos_main/video_bloc/videos_state.dart';
 
 class ReferralCode extends StatefulWidget {
   final String mobileNumber;
 
-  const ReferralCode({super.key, required  this.mobileNumber});
+  const ReferralCode({super.key, required this.mobileNumber});
 
   @override
   State<ReferralCode> createState() => _ReferralCodeState();
@@ -22,27 +23,30 @@ class ReferralCode extends StatefulWidget {
 
 class _ReferralCodeState extends State<ReferralCode> {
   TextEditingController referralCode = TextEditingController();
-
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
   String? _mobileNumberError;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: BlocConsumer<AuthBloc,AuthState>(
+        child: BlocConsumer<AuthBloc, AuthState>(
           listener: (context, state) {
-            if (state is SuccessScreen) {
-              if (state.message == "true") {
-                Navigator.pushNamed(context, RoutesManager.districtSelectionScreen,);
-              }
+            if (state is SuccessScreen && state.message == "true") {
+              Navigator.pushNamed(context, RoutesManager.districtSelectionScreen);
             }
           },
-          builder: (context,state) {
+          builder: (context, state) {
+            if (state is LoadingState) {
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+
             return Form(
-             key: _formKey,
+              key: _formKey,
               child: Center(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -57,9 +61,10 @@ class _ReferralCodeState extends State<ReferralCode> {
                     Text(
                       "Sign in",
                       style: fontStyle(
-                          fontSize: 24,
-                          color: Colors.black,
-                          fontWeight: FontWeight.w600),
+                        fontSize: 24,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                     height(height: 7),
                     Text(
@@ -85,13 +90,12 @@ class _ReferralCodeState extends State<ReferralCode> {
                         maxLength: 8,
                         decoration: const InputDecoration(
                           counterText: "",
-                          hintText: "Enter ReferralCode",
+                          hintText: "Enter Referral Code",
                           border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 10),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
                         ),
                         onChanged: (value) {
-                          if (value.length > 7) {
+                          if (value.length == 8) {
                             _mobileNumberError = null;
                           }
                           setState(() {});
@@ -99,14 +103,12 @@ class _ReferralCodeState extends State<ReferralCode> {
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             setState(() {
-                              _mobileNumberError =
-                              "Please enter your Referral Code";
+                              _mobileNumberError = "Please enter your Referral Code";
                             });
                             return "";
                           } else if (value.length != 8) {
                             setState(() {
-                              _mobileNumberError =
-                              "Please enter a valid 8-digits Referral Code";
+                              _mobileNumberError = "Please enter a valid 8-digit Referral Code";
                             });
                             return "";
                           }
@@ -114,42 +116,39 @@ class _ReferralCodeState extends State<ReferralCode> {
                             _mobileNumberError = null;
                           });
                           return null;
-                          // context.watch<AuthBloc>().add(MobileNumberChanged(value!));
                         },
                       ),
                     ),
                     if (_mobileNumberError != null)
                       Padding(
-                        padding: const EdgeInsets.only(
-                            top: 8.0, left: 10.0),
+                        padding: const EdgeInsets.only(top: 8.0, left: 10.0),
                         child: Text(
                           _mobileNumberError!,
-                          style: const TextStyle(
+                          style: fontStyle(
                             color: Colors.red,
                             fontSize: 12,
                             fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
-
-
                     height(height: 40),
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
-                        onPressed: () {
-                          if (referralCode.text.length < 7) {
-                          } else {
-                            if (_formKey.currentState!.validate()) {
-                              log("phone number   ${referralCode.text.toString()}");
-                              context.read<AuthBloc>().add(SendReferralCode(
-                                  referralCodeNumber: referralCode.text
-                                      .toString(), mobileNumber: widget.mobileNumber,context: context));
-                            }
+                        onPressed: referralCode.text.length == 8
+                            ? () {
+                          if (_formKey.currentState!.validate()) {
+                            log("Referral Code: \${referralCode.text}");
+                            context.read<AuthBloc>().add(SendReferralCode(
+                              referralCodeNumber: referralCode.text,
+                              mobileNumber: widget.mobileNumber,
+                              context: context,
+                            ));
                           }
-                        },
+                        }
+                            : null,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: referralCode.text.length > 7
+                          backgroundColor: referralCode.text.length == 8
                               ? Colors.lightBlue
                               : Colors.grey,
                           padding: const EdgeInsets.symmetric(vertical: 12),
@@ -160,16 +159,17 @@ class _ReferralCodeState extends State<ReferralCode> {
                         child: Text(
                           "Submit",
                           style: fontStyle(
-                              fontSize: 16,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w500),
+                            fontSize: 16,
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
                     height(height: 16),
                     Center(
                       child: TextButton(
-                        onPressed: ()async {
+                        onPressed: () async {
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           sp.remove("sharedReferralCode");
                           if (!context.mounted) return;
@@ -178,9 +178,10 @@ class _ReferralCodeState extends State<ReferralCode> {
                         child: Text(
                           "Skip",
                           style: fontStyle(
-                              fontSize: 16,
-                              color: Colors.blue,
-                              fontWeight: FontWeight.w500),
+                            fontSize: 16,
+                            color: Colors.blue,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
@@ -188,7 +189,7 @@ class _ReferralCodeState extends State<ReferralCode> {
                 ),
               ),
             );
-          }
+          },
         ),
       ),
     );

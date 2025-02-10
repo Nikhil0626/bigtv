@@ -59,7 +59,7 @@ class CommentSection extends StatelessWidget {
           Expanded(
             child: ListView(
               shrinkWrap: true,
-              children: const [
+              children:  [
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12.0),
                   child: Row(
@@ -72,11 +72,11 @@ class CommentSection extends StatelessWidget {
                           children: [
                             Text(
                               'Vivek Varma',
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: fontStyle(fontWeight: FontWeight.bold),
                             ),
                             Text(
                               'Hee',
-                              style: TextStyle(color: Colors.black87),
+                              style: fontStyle(color: Colors.black87),
                             ),
                           ],
                         ),

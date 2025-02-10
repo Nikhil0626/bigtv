@@ -21,11 +21,11 @@
 //                 "",
 //             image: _buildFullscreenImage(image.url),
 //             decoration: const PageDecoration(
-//               titleTextStyle: TextStyle(
+//               titlefontStyle: fontStyle(
 //                 fontSize: 24.0,
 //                 fontWeight: FontWeight.bold,
 //               ),
-//               bodyTextStyle: TextStyle(fontSize: 16.0),
+//               bodyfontStyle: fontStyle(fontSize: 16.0),
 //               contentMargin: EdgeInsets.symmetric(horizontal: 16),
 //               fullScreen: true,
 //               bodyFlex: 2,
@@ -39,9 +39,9 @@
 //         showBackButton: false,
 //         showDoneButton: false,
 //         showNextButton: false,
-//         skip: const Text('Skip', style: TextStyle(fontWeight: FontWeight.w600)),
+//         skip: const Text('Skip', style: fontStyle(fontWeight: FontWeight.w600)),
 //         next: const Icon(Icons.arrow_forward),
-//         done: const Text('Done', style: TextStyle(fontWeight: FontWeight.w600)),
+//         done: const Text('Done', style: fontStyle(fontWeight: FontWeight.w600)),
 //
 //         dotsDecorator: const DotsDecorator(
 //           size: Size(10.0, 10.0),

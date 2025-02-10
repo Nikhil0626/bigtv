@@ -10,9 +10,9 @@ import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
-import '../vodeo_bloc/videos_bloc.dart';
-import '../vodeo_bloc/videos_event.dart';
-import '../vodeo_bloc/videos_state.dart';
+import '../video_bloc/videos_bloc.dart';
+import '../video_bloc/videos_event.dart';
+import '../video_bloc/videos_state.dart';
 
 class DevotionalScreen extends StatefulWidget {
   final String postId;
@@ -111,7 +111,7 @@ class _DevotionalScreenState extends State<DevotionalScreen> {
                               children: [
                                 Text(
                                   state.getAllVideoList[index].title.toString(),
-                                  style: const TextStyle(
+                                  style:  fontStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w600,
@@ -123,7 +123,7 @@ class _DevotionalScreenState extends State<DevotionalScreen> {
                                     state.getAllVideoList[index].created
                                         .toString(),
                                   ),
-                                  style: const TextStyle(
+                                  style:  fontStyle(
                                     color: Colors.black,
                                     fontSize: 15,
                                     fontWeight: FontWeight.w400,

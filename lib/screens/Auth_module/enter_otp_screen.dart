@@ -48,11 +48,12 @@ class _OtpScreenState extends State<OtpScreen> {
     startCountdown();
   }
 
-  Future verifyOtp() async{
-
+  Future verifyOtp() async {
     if (enteredOtp.length == 4) {
-      context.read<AuthBloc>().add(
-          VerificationOtp(Otp: enteredOtp, mobileNumber: widget.mobileNumber,context: context));
+      context.read<AuthBloc>().add(VerificationOtp(
+          Otp: enteredOtp,
+          mobileNumber: widget.mobileNumber,
+          context: context));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid OTP!')),
@@ -74,7 +75,7 @@ class _OtpScreenState extends State<OtpScreen> {
       } else {
         _timer.cancel();
         setState(() {
-          canResend = true; // Enable "Resend OTP" button
+          canResend = true;
         });
       }
     });
@@ -110,11 +111,14 @@ class _OtpScreenState extends State<OtpScreen> {
       // ),
       body: Padding(
         padding: const EdgeInsets.only(top: 32),
-        child: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) async{
-          SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-          String code = await sharedPreferences.getString("sharedReferralCode")??"";
+        child:
+            BlocConsumer<AuthBloc, AuthState>(listener: (context, state) async {
+          SharedPreferences sharedPreferences =
+              await SharedPreferences.getInstance();
+          String code =
+              await sharedPreferences.getString("sharedReferralCode") ?? "";
           if (state is SuccessScreen) {
-// print("skbfjksfhksdhfkshjfskfhskjfkfhksdfdf");
+//       print("skbfjksfhksdhfkshjfskfhskjfkfhksdfdf");
 //             if (state.message == "OTP Verify"  ) {
 //               print("sjfhksehfksfshlkfhseflwfjil");
 //               log("code     $code"   );
@@ -123,18 +127,15 @@ class _OtpScreenState extends State<OtpScreen> {
 //                 context.read<AuthBloc>().add(SendReferralCode(referralCodeNumber: code, mobileNumber: widget.mobileNumber, context:context));
 //               }else{
 //                 print("skbfjksfhksdhfkshjfskfhskjfkfhksdfdf1");
-                Navigator.pushNamed(context, RoutesManager.referralCode,arguments: {
-                  "mobileNumber":widget.mobileNumber
-                });
-              // }
-
-
+            Navigator.pushNamed(context, RoutesManager.referralCode,
+                arguments: {"mobileNumber": widget.mobileNumber});
+            // }
           }
         }, builder: (context, state) {
           return SingleChildScrollView(
             child: SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
               child: state is LoadingScreen
                   ? const Center(
                       child: AppLoadingScreen(),
@@ -167,7 +168,8 @@ class _OtpScreenState extends State<OtpScreen> {
                               height(height: 10),
                               Text(
                                 "Please enter the OTP sent to",
-                                style: fontStyle(fontSize: 14, color: Colors.grey),
+                                style:
+                                    fontStyle(fontSize: 14, color: Colors.grey),
                               ),
                               height(height: 10),
                               Row(
@@ -175,7 +177,8 @@ class _OtpScreenState extends State<OtpScreen> {
                                   Text(
                                     "+91 ${widget.mobileNumber}",
                                     style: fontStyle(
-                                        fontSize: 14, fontWeight: FontWeight.bold),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   const Spacer(),
                                   InkWell(
@@ -201,8 +204,9 @@ class _OtpScreenState extends State<OtpScreen> {
                                 length: 4,
                                 width: MediaQuery.of(context).size.width,
                                 fieldWidth: 70,
-                                style: const TextStyle(fontSize: 18),
-                                textFieldAlignment: MainAxisAlignment.spaceEvenly,
+                                style: fontStyle(fontSize: 18),
+                                textFieldAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 fieldStyle: FieldStyle.box,
                                 controller: otpController,
                                 onChanged: (otp) {
@@ -218,7 +222,8 @@ class _OtpScreenState extends State<OtpScreen> {
                               ),
                               height(height: 10),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "OTP is valid for ${_remainingTime ~/ 60}:${(_remainingTime % 60).toString().padLeft(2, '0')}",
@@ -229,8 +234,9 @@ class _OtpScreenState extends State<OtpScreen> {
                                     child: Text(
                                       "Resend OTP",
                                       style: fontStyle(
-                                          color:
-                                              canResend ? Colors.blue : Colors.grey,
+                                          color: canResend
+                                              ? Colors.blue
+                                              : Colors.grey,
                                           fontWeight: FontWeight.bold),
                                     ),
                                   ),
@@ -286,7 +292,8 @@ class _OtpScreenState extends State<OtpScreen> {
                               height(height: 10),
                               Text(
                                 "Please enter the OTP sent to",
-                                style: fontStyle(fontSize: 16, color: Colors.grey),
+                                style:
+                                    fontStyle(fontSize: 16, color: Colors.grey),
                               ),
                               height(height: 10),
                               Row(
@@ -294,7 +301,8 @@ class _OtpScreenState extends State<OtpScreen> {
                                   Text(
                                     "+91 ${widget.mobileNumber}",
                                     style: fontStyle(
-                                        fontSize: 14, fontWeight: FontWeight.bold),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                   const Spacer(),
                                   InkWell(
@@ -321,7 +329,13 @@ class _OtpScreenState extends State<OtpScreen> {
                               height(height: 24),
                               Padding(
                                 padding: const EdgeInsets.only(left: 8),
-                                child: Text("Enter OTP",style: fontStyle(fontSize: 14,color: Colors.black,fontWeight: FontWeight.w600),),
+                                child: Text(
+                                  "Enter OTP",
+                                  style: fontStyle(
+                                      fontSize: 14,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600),
+                                ),
                               ),
                               height(height: 5),
                               OTPTextField(
@@ -329,8 +343,9 @@ class _OtpScreenState extends State<OtpScreen> {
                                 length: 4,
                                 width: MediaQuery.of(context).size.width,
                                 fieldWidth: 70,
-                                style: const TextStyle(fontSize: 18),
-                                textFieldAlignment: MainAxisAlignment.spaceEvenly,
+                                style: fontStyle(fontSize: 18),
+                                textFieldAlignment:
+                                    MainAxisAlignment.spaceEvenly,
                                 fieldStyle: FieldStyle.box,
 
                                 controller: otpController,
@@ -347,7 +362,8 @@ class _OtpScreenState extends State<OtpScreen> {
                               ),
                               height(height: 16),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Padding(
                                     padding: const EdgeInsets.only(left: 10),
@@ -362,9 +378,10 @@ class _OtpScreenState extends State<OtpScreen> {
                                       padding: const EdgeInsets.only(right: 9),
                                       child: Text(
                                         "Resend OTP",
-                                        style: TextStyle(
-                                            color:
-                                                canResend ? Colors.blue : Colors.grey,
+                                        style: fontStyle(
+                                            color: canResend
+                                                ? Colors.blue
+                                                : Colors.grey,
                                             fontWeight: FontWeight.bold),
                                       ),
                                     ),
@@ -374,7 +391,6 @@ class _OtpScreenState extends State<OtpScreen> {
                               height(height: 32),
                               InkWell(
                                 onTap: verifyOtp,
-
                                 child: Container(
                                   height: 43,
                                   decoration: BoxDecoration(

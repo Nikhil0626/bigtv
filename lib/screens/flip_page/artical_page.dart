@@ -305,7 +305,7 @@ class ArticlePageState extends State<ArticlePage> {
                                           //   text: TextSpan(
                                           //     text: '${widget.article.content} ',
                                           //     // Normal text
-                                          //     style: const TextStyle(
+                                          //     style: const fontStyle(
                                           //       fontSize: 16,
                                           //       color: AppColors.bodyTextColor,
                                           //       fontWeight: FontWeight.normal,
@@ -335,24 +335,25 @@ class ArticlePageState extends State<ArticlePage> {
                                         text: TextSpan(
                                           text: '',
                                           // Normal text
-                                          style: const TextStyle(
+                                          style:  fontStyle(
                                             fontSize: 16,
                                             color: Colors.black,
                                             fontWeight: FontWeight.normal,
                                           ),
                                           children: _parseText(
                                               context,
-                                              '${widget.article.content} \n\nPosted ${formatTimeDifference(widget.article.created)}',
+                                              '${widget.article.content}',
                                               widget.article.links),
                                         ),
                                       )
 
-                                          // Text(
-                                          //     "${widget.article.content}\n\nPosted ${formatTimeDifference(widget.article.created)}",
-                                          //     style: fontStyle(
-                                          //         fontSize: 16,
-                                          //         color: Colors.grey[800])),
+
                                           ),
+                                      Text(
+                                          "\nPosted ${formatTimeDifference(widget.article.created)}",
+                                          style: fontStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[800])),
                                       height(height: 4),
                                       const Divider(
                                           color: AppColors.borderColor),
@@ -442,6 +443,7 @@ class ArticlePageState extends State<ArticlePage> {
           text: match.group(0),
           style: fontStyle(
             color: Colors.blue,
+
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () async{
@@ -466,7 +468,7 @@ class ArticlePageState extends State<ArticlePage> {
         return "";
       },
       onNonMatch: (nonMatch) {
-        spans.add(TextSpan(text: nonMatch));
+        spans.add(TextSpan(text: nonMatch,style: fontStyle(fontSize: 16,)));
         return "";
       },
     );

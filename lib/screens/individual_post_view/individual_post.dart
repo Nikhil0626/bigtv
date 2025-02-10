@@ -159,7 +159,7 @@ class _IndividualPostState extends State<IndividualPost> {
                               child: RichText(
                                 text:  TextSpan(
                                   text: '${state.getPost.content} ', // Normal text
-                                  style: TextStyle(fontSize: 16, color: AppColors.bodyTextColor,fontWeight: FontWeight.normal,),
+                                  style: fontStyle(fontSize: 16, color: AppColors.bodyTextColor,fontWeight: FontWeight.normal,),
                                   children: <TextSpan>[
                                     TextSpan(
                                       text: '\n\nPosted ${formatTimeDifference(state.getPost.created)}  ', // Bold text
