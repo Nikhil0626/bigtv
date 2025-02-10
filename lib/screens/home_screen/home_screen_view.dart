@@ -14,23 +14,20 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Calculate height of the page before applying the SafeArea since it removes
     // the padding from the MediaQuery and can not calculate it inside the page.
-    double height = MediaQuery.of(context).size.height -
+    double height = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
-        MediaQuery.of(context).padding.bottom-(Platform.isIOS?100:34);
+        MediaQuery.of(context).padding.bottom)-(Platform.isIOS?100:36);
 
-    return SafeArea(
-
-      child: Scaffold(
-        body:  FlipPanel<HomeScreenModel>(
-          itemStream: ArticleBlocProvider.of(context).articles,
-          itemBuilder: <HomeScreenModel>(context, article, flipBack, height) => ArticlePage(article: article, flipBack: flipBack, height: height),
-          getItemsCallback: ArticleBlocProvider.of(context).getArticles,
-          height: height,
-        ),
-
-
-
+    return Scaffold(
+      body:  FlipPanel<HomeScreenModel>(
+        itemStream: ArticleBlocProvider.of(context).articles,
+        itemBuilder: <HomeScreenModel>(context, article, flipBack, height) => ArticlePage(article: article, flipBack: flipBack, height: height),
+        getItemsCallback: ArticleBlocProvider.of(context).getArticles,
+        height: height,
       ),
+
+
+
     );
   }
 }
