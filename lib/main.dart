@@ -59,10 +59,7 @@ void fetchDeviceId(String token) async {
 
 }
 
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  WebEngagePlugin.onPushMessageReceive(message.data);
-}
+
 
 
 
@@ -117,14 +114,20 @@ if(Platform.isAndroid){
     // });
   }
 }
+
+  // WENotificationInbox().init();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     WebEngagePlugin.onPushMessageReceive(message.data);
   });
-  // WENotificationInbox().init();
-
   runApp(const MyApp());
 }
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  WebEngagePlugin.onPushMessageReceive(message.data);
+}
+
 void _onTokenInvalidated(Map<String, dynamic>? message) {
   print("tokenInvalidated callback received $message");
   // Reset with new Security Token in the callback
@@ -176,7 +179,7 @@ class _MyAppState extends State<MyApp> {
         //     child: child!,
         //   );
         // },
-        // home: CustomShakingStepper(),
+        // home: DownloadApp(),
         debugShowCheckedModeBanner: false,
         // initialRoute: RoutesManager.onboardingScreen,
       ),

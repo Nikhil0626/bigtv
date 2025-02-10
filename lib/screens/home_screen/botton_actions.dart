@@ -29,6 +29,7 @@ class BottomActions extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            height(height: 5),
             if(label == "లైక్")
               SvgPicture.asset(icon,
                   height: 20,

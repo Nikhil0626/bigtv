@@ -283,12 +283,12 @@ class _FlipPanelState<T> extends State<FlipPanel>
     _direction = FlipDirection.none;
     _dragExtent = _controller.value * _dragExtent.sign;
 
-    double _halfFlipPanel = context.size!.height / 3;
+    double halfFlipPanel = context.size!.height / 3;
     RenderBox referenceBox = context.findRenderObject() as RenderBox;
     Offset localPosition = referenceBox.globalToLocal(details.globalPosition);
-    _flipExtent = (localPosition.dy - _halfFlipPanel)
+    _flipExtent = (localPosition.dy - halfFlipPanel)
         .abs()
-        .clamp(_halfFlipPanel / 3, double.infinity);
+        .clamp(halfFlipPanel / 3, double.infinity);
     if (_controller.isAnimating) {
       _controller.stop();
     }
@@ -326,11 +326,12 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   void _handleDragEnd(DragEndDetails details) {
     _dragging = false;
-    if (ArticleBlocProvider.of(context).articlesData!.length - 1 ==
-        _currentIndex) {
-      ArticleBlocProvider.of(context)
-          .getArticles(index: _currentIndex + 1, isTab: true);
-    }
+    // print("kkkkk ${ArticleBlocProvider.of(context).articlesData?.length}");
+    // if (ArticleBlocProvider.of(context).articlesData!.length - 2 ==
+    //     _currentIndex) {
+    //   ArticleBlocProvider.of(context)
+    //       .getArticles(index: _currentIndex + 2, isTab: true);
+    // }
 
     if (_currentIndex == 1) {
       print("sbfsuifdsgfjsofgsijodgfs");

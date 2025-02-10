@@ -108,8 +108,64 @@ class ArticlePageState extends State<ArticlePage> {
             context.read<HomeBloc>().add(MenuChange());
           },
           child: widget.article.type == "Image"
-              ? CachedNetworkImage(
-                  imageUrl: widget.article.imageUrl.url ?? "",
+              ? Stack(
+                  children: [
+                    Expanded(
+                      child: Image.network(
+                        fit: BoxFit.cover,
+                        widget.article.imageUrl.url ?? "",
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        color: Colors.white,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            BottomActions(
+                                icon: "assets/svg/reload.svg",
+                                label: 'రిలోడ్ ',
+                                onTap: () {
+                                  log("Refresh");
+                                  ArticleBlocProvider.of(context)
+                                      .getArticles(refresh: true);
+                                }),
+                            BottomActions(
+                                icon: "assets/svg/like.svg",
+                                label: 'లైక్',
+                                isLike: isLike,
+                                onTap: () {
+                                  log(
+                                    "Like",
+                                  );
+                                  setState(() {
+                                    isLike = !isLike;
+                                  });
+                                }),
+                            BottomActions(
+                                icon: "assets/svg/comment.svg",
+                                label: 'కామెంట్',
+                                onTap: () {
+                                  log("Comment");
+                                  showComments(
+                                      context, widget.article.id.toString());
+                                  // context.read<HomeBloc>().add(GetAllNewsFeed());
+                                }),
+                            BottomActions(
+                                icon: "assets/svg/share.svg",
+                                label: ' షేర్',
+                                onTap: () {
+                                  log("Share");
+                                  context.read<HomeBloc>().add(
+                                      SendNewsToSocialMedia(
+                                          id: widget.article.id.toString()));
+                                }),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 )
               : widget.article.type == "Gallery"
                   ? FullPageCarousel(imageUrls: widget.article.gallery ?? [])
@@ -245,34 +301,49 @@ class ArticlePageState extends State<ArticlePage> {
                                               fontWeight: FontWeight.w600)),
                                       height(height: 10),
                                       Expanded(
+                                          //     child: RichText(
+                                          //   text: TextSpan(
+                                          //     text: '${widget.article.content} ',
+                                          //     // Normal text
+                                          //     style: const TextStyle(
+                                          //       fontSize: 16,
+                                          //       color: AppColors.bodyTextColor,
+                                          //       fontWeight: FontWeight.normal,
+                                          //     ),
+                                          //     children: <TextSpan>[
+                                          //       TextSpan(
+                                          //         text:
+                                          //             '\n\nPosted ${formatTimeDifference(widget.article.created)}  ',
+                                          //         // Bold text
+                                          //         style: fontStyle(
+                                          //             fontWeight: FontWeight.normal,
+                                          //             fontSize: 12,
+                                          //             color:
+                                          //                 AppColors.bodyTextColor),
+                                          //       ),
+                                          //       TextSpan(
+                                          //         text:
+                                          //             "${widget.article.type}  ${widget.article.subType}", // Bold text
+                                          //         style: fontStyle(
+                                          //             fontWeight: FontWeight.normal,
+                                          //             fontSize: 12),
+                                          //       ),
+                                          //     ],
+                                          //   ),
+                                          // )
                                           child: RichText(
                                         text: TextSpan(
-                                          text: '${widget.article.content} ',
+                                          text: '',
                                           // Normal text
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 16,
-                                            color: AppColors.bodyTextColor,
+                                            color: Colors.black,
                                             fontWeight: FontWeight.normal,
                                           ),
-                                          children: <TextSpan>[
-                                            TextSpan(
-                                              text:
-                                                  '\n\nPosted ${formatTimeDifference(widget.article.created)}  ',
-                                              // Bold text
-                                              style: fontStyle(
-                                                  fontWeight: FontWeight.normal,
-                                                  fontSize: 12,
-                                                  color:
-                                                      AppColors.bodyTextColor),
-                                            ),
-                                            TextSpan(
-                                              text:
-                                                  "${widget.article.type}  ${widget.article.subType}", // Bold text
-                                              style: fontStyle(
-                                                  fontWeight: FontWeight.normal,
-                                                  fontSize: 12),
-                                            ),
-                                          ],
+                                          children: _parseText(
+                                              context,
+                                              '${widget.article.content} \n\nPosted ${formatTimeDifference(widget.article.created)}',
+                                              widget.article.links),
                                         ),
                                       )
 
@@ -351,7 +422,8 @@ class ArticlePageState extends State<ArticlePage> {
 
   bool isLike = false;
 
-  List<TextSpan> _parseText(BuildContext context, String text) {
+  List<TextSpan> _parseText(
+      BuildContext context, String text, List<LinkModel>? links) {
     RegExp linkRegExp =
         RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
     List<TextSpan> spans = [];
@@ -360,8 +432,11 @@ class ArticlePageState extends State<ArticlePage> {
       linkRegExp,
       onMatch: (match) {
         String link = match.group(0)!;
-        if (link.contains('<link')) {
-          link = "https://example.com"; // Replace with actual link extraction
+
+        if (link.contains('<link1>')) {
+          log("click linkss    ${links!.first.value.toString()}");
+          link = links!.first.value
+              .toString(); // Replace with actual link extraction
         }
         spans.add(TextSpan(
           text: match.group(0),
@@ -369,13 +444,23 @@ class ArticlePageState extends State<ArticlePage> {
             color: Colors.blue,
           ),
           recognizer: TapGestureRecognizer()
-            ..onTap = () {
-// String url = widget.article.url ?? '';
-              // if (await canLaunch(url)) {
-              //   await launch(url);
-              // } else {
-              //   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Could not launch $url")));
+            ..onTap = () async{
+              print("ghhgjjkjjhg $link");
+              // if(link.contains('<link1>'){
+              //
+              // }else if(link.contains('<link2>'){
+              //
+              // }else if(link.contains('<link3>'){
+              //
+              // }else{
+              //
               // }
+              if (await canLaunch(link)) {
+                await launch(link);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Could not launch $link")));
+              }
             },
         ));
         return "";

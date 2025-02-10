@@ -79,3 +79,83 @@
 //     }
 //   }
 // }
+
+
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
+
+import '../../services/file_download_services.dart';
+import '../../services/permission_handler_services.dart';
+
+class DownloadApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: DownloadScreen(),
+    );
+  }
+}
+
+class DownloadScreen extends StatefulWidget {
+  @override
+  _DownloadScreenState createState() => _DownloadScreenState();
+}
+
+class _DownloadScreenState extends State<DownloadScreen> {
+  String _status = "Click below to download";
+
+  void _downloadFile(String url, String fileName, String fileType) async {
+    await requestManageStoragePermission();
+   await requestStoragePermission();
+    setState(() {
+      _status = "Downloading...";
+    });
+
+     downloadFile('https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', 'sample.pdf');
+
+    // setState(() {
+    //   _status = filePath != null ? "Downloaded to: $filePath" : "Download Failed!";
+    // });
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+
+    return Scaffold(
+      appBar: AppBar(title: Text("Download PDF & Image")),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_status, textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => _downloadFile(
+                    "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+                    "sample_pdf",
+                    "pdf"
+                ),
+                child: Text("Download PDF"),
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => _downloadFile(
+                    "https://unsplash.com/photos/young-asian-travel-woman-is-enjoying-with-beautiful-place-in-bangkok-thailand-_Fqoswmdmoo",
+                    "sample_image",
+                    "jpg"
+                ),
+                child: Text("Download Image"),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
