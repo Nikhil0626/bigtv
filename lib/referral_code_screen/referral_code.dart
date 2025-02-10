@@ -53,7 +53,7 @@ class _ReferralCodeState extends State<ReferralCode> {
                       height: 24,
                       width: 166,
                     ),
-                    height(height: 30),
+                    height(height: 34),
                     Text(
                       "Sign in",
                       style: fontStyle(
@@ -74,7 +74,7 @@ class _ReferralCodeState extends State<ReferralCode> {
                     ),
                     height(height: 5),
                     Container(
-                      height: 43,
+                      height: 45,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.grey),
                         borderRadius: BorderRadius.circular(8),
@@ -166,7 +166,7 @@ class _ReferralCodeState extends State<ReferralCode> {
                         ),
                       ),
                     ),
-                    height(height: 10),
+                    height(height: 16),
                     Center(
                       child: TextButton(
                         onPressed: ()async {

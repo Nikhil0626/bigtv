@@ -41,21 +41,36 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          leading: InkWell(
-            onTap: () {
-              Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
-            },
-            child: const Icon(
-              color: Colors.white,
-              Icons.arrow_back_ios,
-              size: 18,
+          backgroundColor: AppColors.appButtonColor,
+          titleSpacing: 0,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 14),
+            child: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.arrow_back_ios_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
-          backgroundColor: AppColors.appButtonColor,
-          title: Text(
-            "Magazine View",
-            style: fontStyle(
-                fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+          title: Row(
+            children: [
+              SizedBox(width: 16),
+              Padding(
+                padding: const EdgeInsets.only(top: 7),
+                child: Text(
+                  "Magazine View",
+                  style: fontStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         body: BlocBuilder<VideosBloc, VideosState>(
