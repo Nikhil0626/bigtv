@@ -1,7 +1,6 @@
 import 'package:intl/intl.dart';
 
 String formatTimeDifference(String inputTime, ) {
-  print("Input Time: $inputTime");
 
   final now = DateTime.now().add(Duration(hours: -5, minutes: -30)); // Get current local time
 
@@ -16,17 +15,13 @@ String formatTimeDifference(String inputTime, ) {
     } else {
       date =  format.parse(inputTime);
       date = date; // Convert to local time
-      print("Parsed Date: $date");
     }
   } catch (e) {
-    print("Error parsing date: $e");
     return "Invalid date"; // Return an error string
   }
 
   final difference = now.difference(date);
-  print("Time Difference: $difference");
 
-  // Formatting the difference
   if (difference.inSeconds < 60) {
     return '${difference.inSeconds} seconds ago';
   } else if (difference.inMinutes < 60) {
