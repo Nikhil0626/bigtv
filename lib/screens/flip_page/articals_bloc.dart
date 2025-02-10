@@ -51,7 +51,7 @@ class ArticleBloc {
 
     if(index != 0 && isTab==false){
       log("Home index");
-      int last = index - 1;
+      int last = index ;
       String? lastPostId = articlesData![last].id.toString() ?? "";
       String deviceId = GlobalVariables().deviceId ?? "";
       String platForm = GlobalVariables().platForm ?? "";

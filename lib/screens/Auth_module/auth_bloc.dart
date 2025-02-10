@@ -8,11 +8,13 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import '../../globel_keys/app_router.dart';
 import '../../globel_keys/global_variables_data.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
@@ -131,17 +133,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         };
         log(body.toString());
         Response response = await AuthRepo().sendOtp(body);
-        if(response.statusCode ==200){
+        if (response.statusCode == 200) {
           log(response.data.toString());
           CustomToast.showSuccessToast(msg: response.data['message']);
-          otp =  response.data['Otp'].toString();
+          otp = response.data['Otp'].toString();
           log(otp);
-          emit(SuccessScreen(message: response.data['success'].toString(),otp: otp));
+          emit(SuccessScreen(
+              message: response.data['success'].toString(), otp: otp));
         }
-
       } catch (e, st) {
         CustomToast.showErrorToast(msg: "Otp Not Send Try Again");
-emit(InitialScreen());
+        emit(InitialScreen());
         log("error  $e");
         log("error  $st");
       }
@@ -149,33 +151,35 @@ emit(InitialScreen());
     on<SendReferralCode>((event, emit) async {
       emit(LoadingScreen());
       try {
-
         SharedPreferences preferences = await SharedPreferences.getInstance();
 
-      String? loginId =  preferences.getString("loginId",);
-        String? deviceId = GlobalVariables().deviceId;
+        String? loginId = preferences.getString(
+          "loginId",
+        );
         Map<String, dynamic> body = {
-          "code":event.referralCodeNumber,
-          "mobile_number":event.mobileNumber,
-          "child_id":loginId!
+          "code": event.referralCodeNumber,
+          "mobile_number": event.mobileNumber,
+          "child_id": loginId!
         };
         log(body.toString());
         Response response = await AuthRepo().sendCode(body);
-        if(response.statusCode ==200){
+        if (response.statusCode == 200) {
+          preferences.remove("sharedReferralCode");
           log(response.data.toString());
           CustomToast.showSuccessToast(msg: response.data['message']);
 
-          emit(SuccessScreen(message: response.data['success'].toString(),otp: otp));
+          Navigator.pushNamed(
+            event.context,
+            RoutesManager.districtSelectionScreen,
+          );
         }
-
       } catch (e, st) {
         CustomToast.showErrorToast(msg: "Referral code not matched");
-emit(InitialScreen());
+        emit(InitialScreen());
         log("error  $e");
         log("error  $st");
       }
     });
-
 
     on<VerificationOtp>((event, emit) async {
       emit(LoadingScreen());
@@ -183,7 +187,7 @@ emit(InitialScreen());
         String? deviceId = GlobalVariables().deviceId;
         Map<String, dynamic> body = {
           "mobile_number": event.mobileNumber.toString(),
-          "otp":event.Otp,
+          "otp": event.Otp,
           "authType": "Apple",
           "deviceId": deviceId,
           "email": "",
@@ -195,7 +199,7 @@ emit(InitialScreen());
         };
         log(body.toString());
         Response response = await AuthRepo().validateOtp(body);
-        if(response.statusCode == 200){
+        if (response.statusCode == 200) {
           log(response.data.toString());
           CustomToast.showSuccessToast(msg: response.data['message']);
           otp = "";
@@ -206,9 +210,33 @@ emit(InitialScreen());
               "loginId", response.data['data']['id'].toString());
           preferences.setString(
               "referralCode", response.data['code'].toString());
-          emit(SuccessScreen(message: "OTP Verify"));
-        }
 
+          String code = preferences.getString("sharedReferralCode") ?? "";
+          if (code != "" && code.isNotEmpty) {
+            String? loginId = preferences.getString(
+              "loginId",
+            );
+            Map<String, dynamic> body = {
+              "code": code,
+              "mobile_number": event.mobileNumber,
+              "child_id": loginId!
+            };
+            log(body.toString());
+            Response response = await AuthRepo().sendCode(body);
+            if (response.statusCode == 200) {
+              preferences.remove("sharedReferralCode");
+              log(response.data.toString());
+              CustomToast.showSuccessToast(msg: response.data['message']);
+
+              Navigator.pushNamed(
+                event.context,
+                RoutesManager.districtSelectionScreen,
+              );
+            }
+          } else {
+            emit(SuccessScreen(message: "OTP Verify"));
+          }
+        }
       } catch (e, st) {
         CustomToast.showErrorToast(msg: "Otp Not Verify");
         emit(InitialScreen());
@@ -217,21 +245,18 @@ emit(InitialScreen());
       }
     });
 
-
     on<MobileNumberChanged>((event, emit) async {
       if (event.mobileNumber.isEmpty) {
         emit(MobileNumberInvalid("Please enter your mobile number"));
       } else if (event.mobileNumber.length != 10) {
-        emit(MobileNumberInvalid("Please enter a valid 10-digit mobile number"));
+        emit(
+            MobileNumberInvalid("Please enter a valid 10-digit mobile number"));
       } else {
         emit(MobileNumberValid());
       }
     });
-
   }
 }
-
-
 
 ///Device ID: UP1A.231005.007
 ///

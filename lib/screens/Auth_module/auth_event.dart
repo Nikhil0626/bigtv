@@ -1,3 +1,5 @@
+import 'package:flutter/src/widgets/framework.dart';
+
 abstract class AuthEvent {}
 
 class GoogleLogin extends AuthEvent {}
@@ -15,15 +17,16 @@ class SendOtp extends AuthEvent {
 class SendReferralCode extends AuthEvent{
   final String referralCodeNumber;
   final String mobileNumber;
-  SendReferralCode({required this.referralCodeNumber,required this.mobileNumber});
+  final BuildContext context;
+  SendReferralCode({required this.referralCodeNumber,required this.mobileNumber, required this.context});
 }
 
 
 class VerificationOtp extends AuthEvent {
   final String Otp;
   final String mobileNumber;
-
-  VerificationOtp({required this.Otp,required this.mobileNumber});
+  final BuildContext context;
+  VerificationOtp({required this.Otp,required this.mobileNumber, required this.context});
 }
 
 

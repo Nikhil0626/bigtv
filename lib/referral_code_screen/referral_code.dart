@@ -7,6 +7,7 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../globel_keys/app_router.dart';
 import '../screens/Auth_module/auth_bloc.dart';
 
@@ -130,8 +131,7 @@ class _ReferralCodeState extends State<ReferralCode> {
                           ),
                         ),
                       ),
-                    if (_mobileNumberError != null)
-                    height(height: 20),
+
 
                     height(height: 40),
                     SizedBox(
@@ -144,7 +144,7 @@ class _ReferralCodeState extends State<ReferralCode> {
                               log("phone number   ${referralCode.text.toString()}");
                               context.read<AuthBloc>().add(SendReferralCode(
                                   referralCodeNumber: referralCode.text
-                                      .toString(), mobileNumber: widget.mobileNumber));
+                                      .toString(), mobileNumber: widget.mobileNumber,context: context));
                             }
                           }
                         },
@@ -169,8 +169,11 @@ class _ReferralCodeState extends State<ReferralCode> {
                     height(height: 16),
                     Center(
                       child: TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, RoutesManager.homeScreen);
+                        onPressed: ()async {
+                          SharedPreferences sp = await SharedPreferences.getInstance();
+                          sp.remove("sharedReferralCode");
+                          if (!context.mounted) return;
+                          Navigator.pushNamed(context, RoutesManager.districtSelectionScreen);
                         },
                         child: Text(
                           "Skip",

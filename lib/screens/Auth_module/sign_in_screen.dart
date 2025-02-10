@@ -5,10 +5,16 @@ import 'package:chotanews/screens/Auth_module/auth_state.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-
+import 'package:flutter/services.dart';
+import 'package:mobile_number/mobile_number.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
+import 'dart:async';
 import '../../utils/app_colors.dart';
 import 'auth_event.dart';
 
@@ -25,6 +31,61 @@ class _SignInScreenState extends State<SignInScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   String? _mobileNumberError;
+
+  String mobileNumber = "Fetching...";
+  List simCards = [];
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    getPhoneNumber();
+
+  }
+
+  Future<void> getPhoneNumber() async {
+    try {
+      // Request Permission
+      if (await Permission.location.request().isGranted) {
+        
+      }else{
+        Permission.location;
+        Permission.locationAlways;
+      }
+      if (await Permission.phone.request().isGranted) {
+        bool hasPermission = await MobileNumber.hasPhonePermission ?? false;
+        if (!hasPermission) {
+          await MobileNumber.requestPhonePermission;
+        }
+
+        // Fetch SIM details
+        mobileNumber = await MobileNumber.mobileNumber??"";
+        // if (cards!.isNotEmpty) {
+        //   setState(() {
+        //     // simCards = cards.toString();
+        //     mobileNumber =  "No Number Found";
+        //   });
+        // } else {
+        //   setState(() {
+        //     mobileNumber = "No SIM Card Detected";
+        //   });
+        // }
+      } else {
+        setState(() {
+          mobileNumber = "Permission Denied";
+        });
+      }
+    } catch (e) {
+      print(e.toString());
+      setState(() {
+        mobileNumber = "Error: ${e.toString()}";
+      });
+    }
+  }
+
+  String? phoneNumber;
+
 
   @override
   void dispose() {
@@ -90,7 +151,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                               height(height: 35),
                               Text(
-                                "Mobile Number *",
+                                "Mobile Number",
                                 style: fontStyle(
                                     fontSize: 14, fontWeight: FontWeight.w600),
                               ),
@@ -270,7 +331,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                               height(height: 30),
                               Text(
-                                "Mobile Number*",
+                                "${mobileNumber}",
                                 style: fontStyle(
                                     fontSize: 16, fontWeight: FontWeight.w700),
                               ),
@@ -395,6 +456,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                               ),
+
+                              height(height: 20),
+                              ...simCards.map((sim) => Text("SIM: ${sim.carrierName}, ${sim.number ?? 'Unknown'}")).toList(),
 
                               height(height: 20),
                               TextButton(

@@ -33,7 +33,7 @@ class HomeScreenModel {
   final int categoryId;
   final String categoryName;
   final List<String>? bulletPoints;
-  // final dynamic links;
+  final List<LinkModel>? links;
   final String? reportedBy;
   final int postOrder;
   final bool isStickyPost;
@@ -79,7 +79,7 @@ class HomeScreenModel {
     required this.categoryId,
     required this.categoryName,
     this.bulletPoints,
-    // this.links,
+      this.links,
     this.reportedBy,
     required this.postOrder,
     required this.isStickyPost,
@@ -133,7 +133,11 @@ class HomeScreenModel {
       bulletPoints: json['bulletPoints'] != null
           ? List<String>.from(json['bulletPoints'])
           : null,
-      // links: json['links'] != null || json['links'] != []? List<String>.from(json['links']) : null,
+      links: json['links'] != null
+          ? (json['links'] as List)
+          .map((item) => LinkModel.fromJson(item))
+          .toList()
+          : null,
       reportedBy: json['reportedBy'],
       postOrder: json['postOrder'] ?? 0,
       isStickyPost: json['isStickyPost'] ?? false,
@@ -281,6 +285,30 @@ class MediaUrl {
       'link': link,
       'otherUrl': otherUrl,
       'buttonText': buttonText,
+    };
+  }
+}
+
+
+class LinkModel {
+  final String id;
+  final String value;
+
+  LinkModel({required this.id, required this.value});
+
+  // Convert JSON to LinkModel
+  factory LinkModel.fromJson(Map<String, dynamic> json) {
+    return LinkModel(
+      id: json['id'],
+      value: json['value'],
+    );
+  }
+
+  // Convert LinkModel to JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'value': value,
     };
   }
 }

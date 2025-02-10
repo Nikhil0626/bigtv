@@ -2,9 +2,10 @@ import 'dart:developer';
 
 import 'package:chotanews/screens/flip_page/articals_bloc.dart';
 import 'package:chotanews/screens/flip_page/article_bloc_provider.dart';
+import 'package:chotanews/screens/flip_page/test_one.dart';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:chotanews/screens/testing_screen/test4.dart';
-import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -25,7 +26,6 @@ Future<String?> getUniqueDeviceId(String token) async {
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     GlobalVariables().platForm = androidInfo.brand;
-    log(androidInfo.toString());
 
     // AuthRepo().addDeviceDetails({
     //   "deviceId": androidInfo.id,
@@ -37,7 +37,6 @@ Future<String?> getUniqueDeviceId(String token) async {
   } else if (Platform.isIOS) {
     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
     GlobalVariables().platForm = iosInfo.systemName;
-    log(iosInfo.toString());
 
     // AuthRepo().addDeviceDetails({
     //   "deviceId": iosInfo.identifierForVendor,
@@ -60,10 +59,7 @@ void fetchDeviceId(String token) async {
 
 }
 
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  WebEngagePlugin.onPushMessageReceive(message.data);
-}
+
 
 
 
@@ -118,63 +114,74 @@ if(Platform.isAndroid){
     // });
   }
 }
+
+  // WENotificationInbox().init();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     WebEngagePlugin.onPushMessageReceive(message.data);
   });
-  // WENotificationInbox().init();
-
   runApp(const MyApp());
 }
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  WebEngagePlugin.onPushMessageReceive(message.data);
+}
+
 void _onTokenInvalidated(Map<String, dynamic>? message) {
   print("tokenInvalidated callback received $message");
   // Reset with new Security Token in the callback
   WebEngagePlugin.setSecureToken("siva kumar", message.toString());
 }
-class MyApp extends StatelessWidget {
+
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    HomeRepo api = HomeRepo();
-    ArticleBloc bloc = ArticleBloc(api: api);
+  State<MyApp> createState() => _MyAppState();
+}
 
-    bloc.getArticles();
-    return ArticleBlocProvider(
-      bloc: bloc,
-      child: MultiBlocProvider(
-        providers: RegisterProviders.providers(context),
-        child: MaterialApp(
-          theme: ThemeData(
-            colorScheme:
-            ColorScheme.fromSeed(seedColor: AppColors.appButtonColor),
-            useMaterial3: true,
-          ),
-          scrollBehavior: MyBehavior(),
-          navigatorKey: mainNavigatorKey,
-          navigatorObservers: [routeObserver],
-          onGenerateRoute: (RouteSettings setting) {
-            return RoutesManager.generateRoute(setting);
-          },
-          builder: (
-              BuildContext context,
-              Widget? child,
-              ) {
-            // ScreenUtil.init(context, designSize: const Size(385, 890));
-            return child!;
-          },
-          // builder: (BuildContext context, Widget? child) {
-          //   ScreenUtil.init(context, designSize: const Size(385, 890));
-          //   return MediaQuery(
-          //     data: MediaQuery.of(context)
-          //         .copyWith(textScaler: const TextScaler.linear(1)),
-          //     child: child!,
-          //   );
-          // },
-          // home: WebDash(),
-          debugShowCheckedModeBanner: false,
-          // initialRoute: RoutesManager.onboardingScreen,
+class _MyAppState extends State<MyApp> {
+ @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: RegisterProviders.providers(context),
+      child: MaterialApp(
+        theme: ThemeData(
+          colorScheme:
+          ColorScheme.fromSeed(seedColor: Colors.blue),
+          useMaterial3: true,
         ),
+        scrollBehavior: MyBehavior(),
+        navigatorKey: mainNavigatorKey,
+        navigatorObservers: [routeObserver],
+        onGenerateRoute: (RouteSettings setting) {
+          return RoutesManager.generateRoute(setting);
+        },
+        builder: (
+            BuildContext context,
+            Widget? child,
+            ) {
+          // ScreenUtil.init(context, designSize: const Size(385, 890));
+          return child!;
+        },
+        // builder: (BuildContext context, Widget? child) {
+        //   ScreenUtil.init(context, designSize: const Size(385, 890));
+        //   return MediaQuery(
+        //     data: MediaQuery.of(context)
+        //         .copyWith(textScaler: const TextScaler.linear(1)),
+        //     child: child!,
+        //   );
+        // },
+        // home: DownloadApp(),
+        debugShowCheckedModeBanner: false,
+        // initialRoute: RoutesManager.onboardingScreen,
       ),
     );
   }

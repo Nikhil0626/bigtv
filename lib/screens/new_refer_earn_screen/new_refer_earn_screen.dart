@@ -1,23 +1,29 @@
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:dotted_border/dotted_border.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../utils/app_fonts.dart';
+import 'package:fl_qr_generation/src/fl_qr_generation.dart';
 
 class NewReferEarnScreen extends StatefulWidget {
-  const NewReferEarnScreen({super.key});
+  final String shortLink;
+  final String getCode;
+  const NewReferEarnScreen({super.key, required this.shortLink, required this.getCode});
 
   @override
   State<NewReferEarnScreen> createState() => _NewReferEarnScreenState();
 }
 
 class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
+  // SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  // String code = await sharedPreferences.getString("sharedReferralCode")??"";
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.blue,
         titleSpacing: 0,
         leading: Padding(
           padding: const EdgeInsets.only(left: 1),
@@ -27,20 +33,20 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
             },
             icon: const Icon(
               Icons.arrow_back_ios_rounded,
-              color: Colors.black,
+              color: Colors.white,
               size: 20,
             ),
           ),
         ),
         title: Row(
           children: [
-            SizedBox(width: 10),
+            width(width: 10),
             Padding(
               padding: const EdgeInsets.only(top: 6),
               child: Text(
                 "Refer & Earn",
                 style: fontStyle(
-                  color: Colors.black,
+                  color: Colors.white,
                   fontSize: 18,
                   fontWeight: FontWeight.w600,
                 ),
@@ -69,22 +75,22 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
               color: Colors.lightBlue,
               strokeWidth: 1,
               dashPattern: [10, 6],
-              child: Container(
-                width: 211,
+              child: SizedBox(
+                width: 200,
                 child: Column(
                   children: [
-                    Image.asset(
-                      'assets/images/QR.png',
-                      height: 120,
-                      width: 120,
-                      fit: BoxFit.cover,
-                    ),
+                QRGenerator.generate(
+                link:widget.shortLink,
+                  foregroundColor: Colors.black,
+
+                  backgroundColor: Colors.white,
+                ),
                     height(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                          Text(
-                          "XBYAHSN",
+                           widget.getCode,
                           style: fontStyle(fontSize: 14, fontWeight: FontWeight.w500),
                         ),
                         width(width: 8),
@@ -94,7 +100,11 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
                           color: Colors.black,
                         ),
                         width(width: 8),
-                        const Icon(Icons.share, color: Colors.black),
+                        InkWell(
+                            onTap: (){
+                              Share.share('${widget.shortLink}');
+                            },
+                            child: const Icon(Icons.share, color: Colors.black)),
                       ],
                     ),
                   ],
