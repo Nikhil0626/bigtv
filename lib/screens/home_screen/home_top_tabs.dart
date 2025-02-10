@@ -9,6 +9,7 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../services/permission_handler_services.dart';
 import '../../utils/bottom_navigation_items.dart';
 import '../flip_page/articals_bloc.dart';
 import '../flip_page/article_bloc_provider.dart';
@@ -31,6 +32,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
+    requestNotificationPermission();
     log(widget.tab);
     _tabController = TabController(
       length: 2,
@@ -62,7 +64,6 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
       bloc.getArticles(isTab: true);
     }else{
       bloc.getArticles();
-
     }
     return ArticleBlocProvider(
       bloc: bloc,

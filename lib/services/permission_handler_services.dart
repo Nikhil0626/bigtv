@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 
@@ -28,8 +29,6 @@ Future<void> requestManageStoragePermission() async {
 
 Future<void> requestStoragePermission() async {
 
-
-
   if (Platform.isAndroid) {
     var status = await Permission.storage.status;
 
@@ -47,5 +46,13 @@ Future<void> requestStoragePermission() async {
       await openAppSettings();
     }
   }
+
+}
+Future<void> requestNotificationPermission() async {
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
 
 }

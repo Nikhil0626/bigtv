@@ -446,15 +446,6 @@ class ArticlePageState extends State<ArticlePage> {
           recognizer: TapGestureRecognizer()
             ..onTap = () async{
               print("ghhgjjkjjhg $link");
-              // if(link.contains('<link1>'){
-              //
-              // }else if(link.contains('<link2>'){
-              //
-              // }else if(link.contains('<link3>'){
-              //
-              // }else{
-              //
-              // }
               if (await canLaunch(link)) {
                 await launch(link);
               } else {

@@ -67,11 +67,7 @@ Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   WebEngagePlugin _webEngagePlugin = new WebEngagePlugin();
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
+
   if(Platform.isIOS){
     String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
     log('APNs Token: $apnsToken');
