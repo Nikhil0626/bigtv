@@ -39,27 +39,42 @@ class _GalleryScreenState extends State<GalleryScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+        Navigator.pop(context, RoutesManager.getAllMenuItemScreen);
         return false;
       },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          leading: InkWell(
-            onTap: () {
-              Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
-            },
-            child: const Icon(
-              color: Colors.white,
-              Icons.arrow_back_ios,
-              size: 18,
+          backgroundColor: AppColors.appButtonColor,
+          titleSpacing: 0,
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 1),
+            child: IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(
+                Icons.arrow_back_ios_rounded,
+                color: Colors.white,
+                size: 20,
+              ),
             ),
           ),
-          backgroundColor: AppColors.appButtonColor,
-          title: Text(
-            "Gallery View",
-            style: fontStyle(
-                fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+          title: Row(
+            children: [
+              SizedBox(width: 16),
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  "Gallery View",
+                  style: fontStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         body: BlocBuilder<VideosBloc, VideosState>(
@@ -172,21 +187,27 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: widget.className== ""? null:AppBar(
-        leading: InkWell(
-          onTap: () {
-            Navigator.pop(context, RoutesManager.getAllMenuItemScreen);
-          },
-          child: const Icon(
-            color: Colors.white,
-            Icons.arrow_back_ios,
-            size: 18,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 14),
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context,RoutesManager.getAllMenuItemScreen);
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios_rounded,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
         ),
         backgroundColor: AppColors.appButtonColor,
-        title: Text(
-          widget.className,
-          style: fontStyle(
-              fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+        title: Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(
+            widget.className,
+            style: fontStyle(
+                fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+          ),
         ),
       ),
       body: Stack(

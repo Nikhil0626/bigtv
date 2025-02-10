@@ -68,8 +68,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ],
         ),
-      )
-      ,
+      ),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(

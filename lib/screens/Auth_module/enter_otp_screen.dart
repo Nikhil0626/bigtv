@@ -106,7 +106,7 @@ class _OtpScreenState extends State<OtpScreen> {
       //   ),
       // ),
       body: Padding(
-        padding: const EdgeInsets.only(top: 32),
+        padding: const EdgeInsets.only(top: 30),
         child: BlocConsumer<AuthBloc, AuthState>(listener: (context, state) {
           if (state is SuccessScreen) {
             if (state.message == "OTP Verify") {
@@ -352,7 +352,7 @@ class _OtpScreenState extends State<OtpScreen> {
                               ),
                             ],
                           ),
-                          height(height: 32),
+                          height(height: 30),
                           InkWell(
                             onTap: verifyOtp,
 
