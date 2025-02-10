@@ -8,7 +8,6 @@
 
 import 'dart:async';
 
-import 'package:chotanews/screens/home_screen/home_top_tabs.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -35,6 +34,7 @@ class FlipPanel<T> extends StatefulWidget {
   final ItemBuilder<T> itemBuilder;
   final Duration duration;
   final double height;
+  final bool waitingForRefresh;
   final Stream<List<T>?> itemStream;
   final GetItems getItemsCallback;
 
@@ -42,6 +42,7 @@ class FlipPanel<T> extends StatefulWidget {
     Key? key,
     required this.itemBuilder,
     required this.itemStream,
+    required this.waitingForRefresh,
     required this.getItemsCallback,
     required this.height,
     this.duration = const Duration(milliseconds: 100),
@@ -56,6 +57,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   late AnimationController _controller;
   late Animation _animation;
   int _currentIndex = 0;
+  bool waitingForRefresh = false;
   bool _isReversePhase = false;
   bool _running = false;
   final _perspective = 0.00003;
@@ -79,7 +81,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   // we launch a request to server for more items (next page).
   final _updateThreshold = 5;
 
-  bool _waitingForRefresh = false;
+  // bool _waitingForRefresh = false;
 
   Widget? _prevChild, _currentChild, _nextChild;
   Widget? _upperChild1, _upperChild2;
@@ -154,11 +156,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
         widgets = null;
         _availableItems = 0;
         _currentIndex = 0;
-        _waitingForRefresh = true;
+        waitingForRefresh = true;
         setState(() {});
         return;
       }
-      _waitingForRefresh = false;
+      waitingForRefresh = false;
       if (_availableItems == 0) {
         widgets = [];
         widgets!.add(_buildFirstWidget(items[0]));
@@ -192,7 +194,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   @override
   Widget build(BuildContext context) {
 
-    if (!_waitingForRefresh) {
+    if (!waitingForRefresh) {
       if (widgets == null || _availableItems == 0) {
         return Container(
           color: Colors.white,
@@ -311,8 +313,8 @@ class _FlipPanelState<T> extends State<FlipPanel>
       }
       if (_direction == FlipDirection.up &&
           _currentIndex == widgets!.length - 1) {
-        _dragExtent = 0.0;
-        _shouldShowNoMoreItemsMessage = true;
+        // _dragExtent = 0.0;
+        _shouldShowNoMoreItemsMessage = false;
       }
       if (_dragExtent.abs() < _flipExtent) {
         _controller.value = (_dragExtent / _flipExtent).abs();
@@ -326,12 +328,12 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   void _handleDragEnd(DragEndDetails details) {
     _dragging = false;
-    // print("kkkkk ${ArticleBlocProvider.of(context).articlesData?.length}");
-    // if (ArticleBlocProvider.of(context).articlesData!.length - 2 ==
-    //     _currentIndex) {
-    //   ArticleBlocProvider.of(context)
-    //       .getArticles(index: _currentIndex + 2, isTab: true);
-    // }
+    print("kkkkk ${ArticleBlocProvider.of(context).articlesData.length-1}   tttttt $_currentIndex");
+    if (ArticleBlocProvider.of(context).articlesData.length -2==
+        _currentIndex) {
+      ArticleBlocProvider.of(context)
+          .getArticles(index: _currentIndex , isTab: false);
+    }
 
     if (_currentIndex == 1) {
       print("sbfsuifdsgfjsofgsijodgfs");
@@ -499,7 +501,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
               Stack(
                 children: <Widget>[
                   _upperChild1!,
-                  _waitingForRefresh
+                  waitingForRefresh
                       ? const Padding(
                           padding: EdgeInsets.only(top: 100.0),
                           child: SizedBox(
