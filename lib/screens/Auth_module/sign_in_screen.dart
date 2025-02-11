@@ -440,7 +440,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 child: Container(
                                   height: 42,
                                   decoration: BoxDecoration(
-                                      color: _mobileController.text.length < 3
+                                      color: _mobileController.text.length < 9
                                           ? Colors.grey
                                           : AppColors.appButtonColor,
                                       borderRadius:

@@ -24,12 +24,12 @@ class BottomActions extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        height: 50,
+        height: 52,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            height(height: 5),
+            height(height: 3),
             if(label == "లైక్")
               SvgPicture.asset(icon,
                   height: 20,

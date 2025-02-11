@@ -45,6 +45,7 @@ class _OtpScreenState extends State<OtpScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    enteredOtp = "";
     startCountdown();
   }
 
@@ -127,7 +128,7 @@ class _OtpScreenState extends State<OtpScreen> {
 //                 context.read<AuthBloc>().add(SendReferralCode(referralCodeNumber: code, mobileNumber: widget.mobileNumber, context:context));
 //               }else{
 //                 print("skbfjksfhksdhfkshjfskfhskjfkfhksdfdf1");
-            Navigator.pushNamed(context, RoutesManager.referralCode,
+            Navigator.pushNamed(context, RoutesManager.districtSelectionScreen,
                 arguments: {"mobileNumber": widget.mobileNumber});
             // }
           }

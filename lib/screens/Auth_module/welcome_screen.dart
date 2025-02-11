@@ -27,7 +27,12 @@ class WelcomeScreen extends StatelessWidget {
         child: BlocConsumer<AuthBloc,AuthState>(
           listener: (context, state) {
             if(state is SuccessScreen){
-              Navigator.pushNamedAndRemoveUntil(context, RoutesManager.homeScreen, (route) => false,);
+              if(state.message == "Skip"){
+                Navigator.pushNamedAndRemoveUntil(context, RoutesManager.districtSelectionScreen,arguments: {"className":""},(route) => false,);
+              }else{
+                Navigator.pushNamedAndRemoveUntil(context, RoutesManager.homeScreen, (route) => false,);
+              }
+
             }
           },
           builder: (context,state) {
@@ -48,7 +53,7 @@ class WelcomeScreen extends StatelessWidget {
                   height(height:60),
                    Text(
                     "Welcome",
-                    style: fontStyle(fontSize: 24, fontWeight: FontWeight.w700),
+                    style: fontStyle(fontSize: 24, fontWeight: FontWeight.w600),
                   ),
                    height(height: 8),
                    Text(
@@ -87,11 +92,8 @@ class WelcomeScreen extends StatelessWidget {
                   InkWell(
                     onTap: (){
                       log("Goto Home Screen");
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const DistrictsSelectionScreen(className: "")),
-                      );
+                      context.read<AuthBloc>().add(SkipLogin());
+
                       
                     },
                     child: Center(

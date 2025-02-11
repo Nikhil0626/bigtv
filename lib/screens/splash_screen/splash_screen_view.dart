@@ -44,7 +44,7 @@ class _SplashScreenView extends State<SplashScreenView> {
     log(loginId.toString());
     if ( loginId.isNotEmpty) {
       Timer(const Duration(seconds: 5), () {
-        Navigator.pushNamed(context, RoutesManager.homeScreen);
+        Navigator.pushNamedAndRemoveUntil(context, RoutesManager.homeScreen,(route) => false,);
       });
     } else {
       Timer(const Duration(seconds: 5), () {

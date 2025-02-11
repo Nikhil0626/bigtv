@@ -8,6 +8,7 @@ import 'package:chotanews/screens/profile_screen/profile_screen.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -33,7 +34,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
       isDarkTheme = !isDarkTheme;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,147 +77,155 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           spacing: 16,
           children: [
-            InkWell(
-                onTap: () async{SharedPreferences sp = await SharedPreferences.getInstance();
-                String? getCode= sp.getString("referralCode");
-                final DynamicLinkParameters parameters = DynamicLinkParameters(
-                  uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
-                  link: Uri.parse('https://chotanews.com/store?referralCode=$getCode'), // Ensure this is a valid URL
-                  androidParameters: const AndroidParameters(
-                    packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
-                  ),
-                  iosParameters: const IOSParameters(
-                    bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
-                    appStoreId: '1631068092',
-                  ),
-                );
-
-                try {
-                  final ShortDynamicLink shortLink =
-                      await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-                  print("Short Link Created: ${shortLink.shortUrl}");
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>  NewReferEarnScreen(shortLink:shortLink.shortUrl.toString(),getCode:getCode.toString())),
-                  );
-                } catch (e) {
-                  print("Error creating dynamic link: $e");
-                }
-
-
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 20,
-                        spreadRadius: 1,
-                        offset: Offset(0, 4), // Adjust shadow position
-                      ),
-                    ],
-                  ),
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/settings_icons/refer_earn.svg',
-                          height: 40,
-                          width: 40,
-                        ),
-                        SizedBox(width: 16),
-                        Text(
-                          'Refer&Earn',
-                          style: fontStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkTheme ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        Spacer(),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                )),
-            InkWell(
-                onTap: () async{
-                  SharedPreferences sp = await SharedPreferences.getInstance();
-                  String? getCode= sp.getString("referralCode");
-                  final DynamicLinkParameters parameters = DynamicLinkParameters(
-                    uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
-                    link: Uri.parse('https://chotanews.com/store?referralCode=$getCode'), // Ensure this is a valid URL
-                    androidParameters: const AndroidParameters(
-                      packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
-                    ),
-                    iosParameters: const IOSParameters(
-                      bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
-                      appStoreId: '1631068092',
-                    ),
-                  );
-
-                  try {
-                    final ShortDynamicLink shortLink =
-                        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-                    print("Short Link Created: ${shortLink.shortUrl}");
-                    Share.share('${shortLink.shortUrl}');
-                  } catch (e) {
-                    print("Error creating dynamic link: $e");
-                  }
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 20,
-                        spreadRadius: 1,
-                        offset: Offset(0, 4), // Adjust shadow position
-                      ),
-                    ],
-                  ),
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/settings_icons/shareapp_icon.svg',
-                          height: 40,
-                          width: 40,
-                        ),
-                        width(width: 16),
-                        Text(
-                          'Share app',
-                          style: fontStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkTheme ? Colors.white : Colors.black,
-                          ),
-                        ),
-                        Spacer(),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                )),
+            // InkWell(
+            //
+            //     onTap: () async{
+            //       SharedPreferences sp = await SharedPreferences.getInstance();
+            //       String? getCode= sp.getString("referralCode");
+            //       String loginId = sp.getString("loginId")??"";
+            //       if ( loginId.isEmpty) {
+            //         CustomToast.showErrorToast(msg: "Without login we can't referral");
+            //       } else {
+            //
+            //      final DynamicLinkParameters parameters = DynamicLinkParameters(
+            //        uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
+            //        link: Uri.parse('https://chotanews.com/store?referralCode=$getCode'), // Ensure this is a valid URL
+            //        androidParameters: const AndroidParameters(
+            //          packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
+            //        ),
+            //        iosParameters: const IOSParameters(
+            //          bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
+            //          appStoreId: '1631068092',
+            //        ),
+            //      );
+            //
+            //      try {
+            //        final ShortDynamicLink shortLink =
+            //        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+            //        print("Short Link Created: ${shortLink.shortUrl}");
+            //        Navigator.push(
+            //          context,
+            //          MaterialPageRoute(
+            //              builder: (context) =>  NewReferEarnScreen(shortLink:shortLink.shortUrl.toString(),getCode:getCode.toString())),
+            //        );
+            //      } catch (e) {
+            //        print("Error creating dynamic link: $e");
+            //      }
+            //    }
+            //
+            //
+            //     },
+            //     child: Container(
+            //       decoration: BoxDecoration(
+            //         color: isDarkTheme ? Colors.grey[800] : Colors.white,
+            //         borderRadius: BorderRadius.circular(8),
+            //         boxShadow: const [
+            //           BoxShadow(
+            //             color: Colors.black12,
+            //             blurRadius: 20,
+            //             spreadRadius: 1,
+            //             offset: Offset(0, 4), // Adjust shadow position
+            //           ),
+            //         ],
+            //       ),
+            //       margin: const EdgeInsets.symmetric(horizontal: 8),
+            //       child: Padding(
+            //         padding:
+            //             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            //         child: Row(
+            //           crossAxisAlignment: CrossAxisAlignment.center,
+            //           children: [
+            //             SvgPicture.asset(
+            //               'assets/settings_icons/refer_earn.svg',
+            //               height: 40,
+            //               width: 40,
+            //             ),
+            //             SizedBox(width: 16),
+            //             Text(
+            //               'Refer&Earn',
+            //               style: fontStyle(
+            //                 fontSize: 16,
+            //                 fontWeight: FontWeight.w500,
+            //                 color: isDarkTheme ? Colors.white : Colors.black,
+            //               ),
+            //             ),
+            //             Spacer(),
+            //             const Icon(
+            //               Icons.arrow_forward_ios,
+            //               size: 20,
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //     )),
+            // InkWell(
+            //     onTap: () async{
+            //       SharedPreferences sp = await SharedPreferences.getInstance();
+            //       String? getCode= sp.getString("referralCode");
+            //       final DynamicLinkParameters parameters = DynamicLinkParameters(
+            //         uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
+            //         link: Uri.parse('https://chotanews.com/store?referralCode=$getCode'), // Ensure this is a valid URL
+            //         androidParameters: const AndroidParameters(
+            //           packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
+            //         ),
+            //         iosParameters: const IOSParameters(
+            //           bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
+            //           appStoreId: '1631068092',
+            //         ),
+            //       );
+            //
+            //       try {
+            //         final ShortDynamicLink shortLink =
+            //             await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+            //         print("Short Link Created: ${shortLink.shortUrl}");
+            //         Share.share('${shortLink.shortUrl}');
+            //       } catch (e) {
+            //         print("Error creating dynamic link: $e");
+            //       }
+            //     },
+            //     child: Container(
+            //       decoration: BoxDecoration(
+            //         color: isDarkTheme ? Colors.grey[800] : Colors.white,
+            //         borderRadius: BorderRadius.circular(8),
+            //         boxShadow: const [
+            //           BoxShadow(
+            //             color: Colors.black12,
+            //             blurRadius: 20,
+            //             spreadRadius: 1,
+            //             offset: Offset(0, 4), // Adjust shadow position
+            //           ),
+            //         ],
+            //       ),
+            //       margin: const EdgeInsets.symmetric(horizontal: 8),
+            //       child: Padding(
+            //         padding:
+            //             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            //         child: Row(
+            //           crossAxisAlignment: CrossAxisAlignment.center,
+            //           children: [
+            //             SvgPicture.asset(
+            //               'assets/settings_icons/shareapp_icon.svg',
+            //               height: 40,
+            //               width: 40,
+            //             ),
+            //             width(width: 16),
+            //             Text(
+            //               'Share app',
+            //               style: fontStyle(
+            //                 fontSize: 16,
+            //                 fontWeight: FontWeight.w500,
+            //                 color: isDarkTheme ? Colors.white : Colors.black,
+            //               ),
+            //             ),
+            //             Spacer(),
+            //             const Icon(
+            //               Icons.arrow_forward_ios,
+            //               size: 20,
+            //             ),
+            //           ],
+            //         ),
+            //       ),
+            //     )),
             InkWell(
                 onTap: () {
                   Navigator.push(
@@ -422,55 +430,76 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 )),
             InkWell(
-                onTap: () async {
-                  SharedPreferences sp = await SharedPreferences.getInstance();
-                  sp.remove("loginId");
-                  sp.clear();
-                  Navigator.pushNamed(context, RoutesManager.signInScreen);
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDarkTheme ? Colors.grey[800] : Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        blurRadius: 20,
-                        spreadRadius: 1,
-                        offset: Offset(0, 4), // Adjust shadow position
-                      ),
-                    ],
-                  ),
-                  margin: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/settings_icons/logout_icon.svg',
-                          height: 40,
-                          width: 40,
-                        ),
-                        const SizedBox(width: 16),
-                        Text(
-                          'Logout',
-                          style: fontStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
-                            color: isDarkTheme ? Colors.white : Colors.black,
+              onTap: () async {
+                SharedPreferences sp = await SharedPreferences.getInstance();
+                await sp.remove("loginId"); // Remove only loginId
+                setState(() {}); // Force UI update after logout
+                Navigator.pushNamed(context, RoutesManager.signInScreen);
+              },
+              child: FutureBuilder<SharedPreferences>(
+                future: SharedPreferences.getInstance(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.done) {
+                    SharedPreferences? prefs = snapshot.data;
+                    String? loginId = prefs?.getString("loginId");
+
+                    // Ensure loginId is null or empty to hide logout button
+                    if (loginId == null || loginId.isEmpty) {
+                      return SizedBox.shrink(); // Hide logout button
+                    }
+
+                    return Container(
+                      decoration: BoxDecoration(
+                        color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 20,
+                            spreadRadius: 1,
+                            offset: Offset(0, 4),
                           ),
+                        ],
+                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 8),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SvgPicture.asset(
+                              'assets/settings_icons/logout_icon.svg',
+                              height: 40,
+                              width: 40,
+                            ),
+                            const SizedBox(width: 16),
+                            Text(
+                              'Logout',
+                              style: fontStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: isDarkTheme ? Colors.white : Colors.black,
+                              ),
+                            ),
+                            const Spacer(),
+                            const Icon(
+                              Icons.arrow_forward_ios,
+                              size: 20,
+                            ),
+                          ],
                         ),
-                        const Spacer(),
-                        const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 20,
-                        ),
-                      ],
-                    ),
-                  ),
-                )),
+                      ),
+                    );
+                  } else {
+                    return SizedBox.shrink(); // Hide if SharedPreferences is still loading
+                  }
+                },
+              ),
+            ),
+
+
+
+
             const Spacer(),
             Container(
                 height: 40,
@@ -478,7 +507,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 child: Text(
-                  "App Version: 1.0.0+2",
+                  "App Version: 1.0.0+6",
                   style: fontStyle(
                     fontSize: 14,
                   ),

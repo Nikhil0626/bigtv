@@ -100,7 +100,7 @@ class CustomToast {
       message: msg,
       messageColor: Colors.white,
       backgroundColor: Colors.green,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 4),
       margin: const EdgeInsets.all(15),
       borderRadius: const BorderRadius.all(Radius.circular(15)),
       mainButton: TextButton(

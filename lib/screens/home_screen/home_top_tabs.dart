@@ -69,11 +69,12 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
       bloc: bloc,
       child: WillPopScope(
         onWillPop: _onWillPop,
-        child: SafeArea(
-          child: Scaffold(
-            backgroundColor: AppColors.appButtonColor,
+        child: Scaffold(
+          backgroundColor: AppColors.appButtonColor,
 
-            body: BlocConsumer<HomeBloc, HomeScreenState>(
+          body: SafeArea(
+
+            child: BlocConsumer<HomeBloc, HomeScreenState>(
               listener: (context, state) {
                 if (state is SuccessHomeScreenState) {
                   if (isChange != state.isChange) {
