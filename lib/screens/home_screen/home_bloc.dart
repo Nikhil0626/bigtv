@@ -26,7 +26,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
 
 
     on<MenuChange>((event, emit) async {
-      isMenuChange = !isMenuChange;
+      isMenuChange =event.isFirst=="close"?false:event.isFirst=="active"?true: !isMenuChange;
       emit(SuccessHomeScreenState(
           getAllHomeScreenNews: getAllPosts,
           pageType: "",

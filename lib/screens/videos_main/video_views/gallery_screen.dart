@@ -1,7 +1,5 @@
 import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_bloc.dart';
-import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_state.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
@@ -17,8 +15,11 @@ import '../../../globel_keys/app_router.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
 import '../../home_screen/home_screen_model.dart';
-import '../vodeo_bloc/videos_event.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+
+import '../video_bloc/videos_bloc.dart';
+import '../video_bloc/videos_event.dart';
+import '../video_bloc/videos_state.dart';
 
 class GalleryScreen extends StatefulWidget {
   final String postId;
@@ -64,7 +65,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
             children: [
               SizedBox(width: 16),
               Padding(
-                padding: const EdgeInsets.only(top: 6),
+                padding: const EdgeInsets.only(top:6 ),
                 child: Text(
                   "Gallery View",
                   style: fontStyle(
@@ -167,12 +168,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 }
-
-
 class FullPageCarousel extends StatefulWidget {
   final List<GalleryImage> imageUrls;
   final String className;
-  const FullPageCarousel({super.key, required this.imageUrls,this.className=""});
+  const FullPageCarousel({super.key, required this.imageUrls, this.className = ""});
 
   @override
   _FullPageCarouselState createState() => _FullPageCarouselState();
@@ -186,12 +185,12 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.className== ""? null:AppBar(
+      appBar: widget.className == "" ? null : AppBar(
         leading: Padding(
           padding: const EdgeInsets.only(left: 14),
           child: IconButton(
             onPressed: () {
-              Navigator.pop(context,RoutesManager.getAllMenuItemScreen);
+              Navigator.pop(context, RoutesManager.getAllMenuItemScreen);
             },
             icon: const Icon(
               Icons.arrow_back_ios_rounded,
@@ -214,7 +213,6 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
         alignment: Alignment.bottomCenter,
         children: [
           CarouselSlider(
-            // carouselController: _controller, // Using the correct controller
             options: CarouselOptions(
               height: double.infinity,
               viewportFraction: 1.0,
@@ -226,6 +224,8 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                   _currentIndex = index;
                 });
               },
+              scrollPhysics: BouncingScrollPhysics(), // Smooth scrolling to reduce shake
+              enlargeCenterPage: true, // Helps maintain focus and reduce blur
             ),
             items: widget.imageUrls.map((image) {
               return Container(
@@ -234,6 +234,8 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                   image: DecorationImage(
                     image: NetworkImage(image.url),
                     fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high, // Improves image quality
+                    isAntiAlias: true, // Reduces shaking and improves clarity
                   ),
                 ),
               );
@@ -253,7 +255,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                 dotColor: Colors.grey.shade400,
               ),
               onDotClicked: (index) {
-                _controller.jumpToPage(index); // Corrected method
+                _controller.jumpToPage(index);
               },
             ),
           ),

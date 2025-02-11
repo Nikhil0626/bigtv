@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:chotanews/screens/Auth_module/auth_event.dart';
 import 'package:chotanews/screens/Auth_module/auth_repo.dart';
 import 'package:chotanews/screens/Auth_module/auth_state.dart';
-import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_state.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -211,31 +210,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           preferences.setString(
               "referralCode", response.data['code'].toString());
 
-          String code = preferences.getString("sharedReferralCode") ?? "";
-          if (code != "" && code.isNotEmpty) {
-            String? loginId = preferences.getString(
-              "loginId",
-            );
-            Map<String, dynamic> body = {
-              "code": code,
-              "mobile_number": event.mobileNumber,
-              "child_id": loginId!
-            };
-            log(body.toString());
-            Response response = await AuthRepo().sendCode(body);
-            if (response.statusCode == 200) {
-              preferences.remove("sharedReferralCode");
-              log(response.data.toString());
-              CustomToast.showSuccessToast(msg: response.data['message']);
-
-              Navigator.pushNamed(
-                event.context,
-                RoutesManager.districtSelectionScreen,
-              );
-            }
-          } else {
+          // String code = preferences.getString("sharedReferralCode") ?? "";
+          // if (code != "" && code.isNotEmpty) {
+          //   String? loginId = preferences.getString(
+          //     "loginId",
+          //   );
+          //   Map<String, dynamic> body = {
+          //     "code": code,
+          //     "mobile_number": event.mobileNumber,
+          //     "child_id": loginId!
+          //   };
+          //   log(body.toString());
+          //   Response response = await AuthRepo().sendCode(body);
+          //   if (response.statusCode == 200) {
+          //     preferences.remove("sharedReferralCode");
+          //     log(response.data.toString());
+          //     CustomToast.showSuccessToast(msg: response.data['message']);
+          //
+          //     Navigator.pushNamed(
+          //       event.context,
+          //       RoutesManager.districtSelectionScreen,
+          //     );
+          //   }
+          // } else {
             emit(SuccessScreen(message: "OTP Verify"));
-          }
+          // }
         }
       } catch (e, st) {
         CustomToast.showErrorToast(msg: "Otp Not Verify");

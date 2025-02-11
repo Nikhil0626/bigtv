@@ -235,7 +235,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                       top: 8.0, left: 10.0),
                                   child: Text(
                                     _mobileNumberError!,
-                                    style: const TextStyle(
+                                    style:  fontStyle(
                                       color: Colors.red,
                                       fontSize: 12,
                                       fontWeight: FontWeight.normal,
@@ -283,10 +283,10 @@ class _SignInScreenState extends State<SignInScreen> {
                                     Navigator.pushNamed(context,
                                         RoutesManager.districtSelectionScreen);
                                   },
-                                  child: const Center(
+                                  child:  Center(
                                     child: Text(
                                       "Skip and login as guest",
-                                      style: TextStyle(
+                                      style: fontStyle(
                                           color: Colors.lightBlue,
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500),
@@ -331,7 +331,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                               height(height: 30),
                               Text(
-                                "${mobileNumber}",
+                                "Mobile Number",
                                 style: fontStyle(
                                     fontSize: 16, fontWeight: FontWeight.w700),
                               ),
@@ -348,8 +348,8 @@ class _SignInScreenState extends State<SignInScreen> {
                                       decoration: BoxDecoration(
                                         color: Colors.grey[300],
                                         borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(4),
-                                            bottomLeft: Radius.circular(4)),
+                                            topLeft: Radius.circular(8),
+                                            bottomLeft: Radius.circular(8)),
                                       ),
                                       padding: const EdgeInsets.symmetric(
                                           horizontal: 15, vertical: 14),
@@ -415,7 +415,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                       top: 8.0, left: 10.0),
                                   child: Text(
                                     _mobileNumberError!,
-                                    style: const TextStyle(
+                                    style:  fontStyle(
                                       color: Colors.red,
                                       fontSize: 12,
                                       fontWeight: FontWeight.normal,
@@ -440,7 +440,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 child: Container(
                                   height: 42,
                                   decoration: BoxDecoration(
-                                      color: _mobileController.text.length < 3
+                                      color: _mobileController.text.length < 9
                                           ? Colors.grey
                                           : AppColors.appButtonColor,
                                       borderRadius:
@@ -466,10 +466,10 @@ class _SignInScreenState extends State<SignInScreen> {
                                     Navigator.pushNamed(context,
                                         RoutesManager.districtSelectionScreen);
                                   },
-                                  child: const Center(
+                                  child:  Center(
                                     child: Text(
                                       "Skip and login as guest",
-                                      style: TextStyle(
+                                      style: fontStyle(
                                           color: Colors.lightBlue,
                                           fontSize: 16,
                                           fontWeight: FontWeight.w500),

@@ -10,9 +10,9 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
-import '../vodeo_bloc/videos_bloc.dart';
-import '../vodeo_bloc/videos_event.dart';
-import '../vodeo_bloc/videos_state.dart';
+import '../video_bloc/videos_bloc.dart';
+import '../video_bloc/videos_event.dart';
+import '../video_bloc/videos_state.dart';
 
 class VideosScreen extends StatefulWidget {
   final String postId;
@@ -116,7 +116,7 @@ class _VideosScreenState extends State<VideosScreen> {
                             children: [
                               Text(
                                 state.getAllVideoList[index].title.toString(),
-                                style: const TextStyle(
+                                style:  fontStyle(
                                   color: Colors.black,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
@@ -128,7 +128,7 @@ class _VideosScreenState extends State<VideosScreen> {
                                   state.getAllVideoList[index].created
                                       .toString(),
                                 ),
-                                style: const TextStyle(
+                                style:  fontStyle(
                                   color: Colors.black,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w400,
@@ -136,7 +136,7 @@ class _VideosScreenState extends State<VideosScreen> {
                               ),Text(
                                   state.getAllVideoList[index].subType
                                       .toString(),
-                                style: const TextStyle(
+                                style:  fontStyle(
                                   color: Colors.black,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w400,
@@ -230,7 +230,7 @@ class _VideosScreenState extends State<VideosScreen> {
                 //                     horizontal: 16, vertical: 10),
                 //                 child: Text(
                 //                   state.getAllVideoList[index].type.toString(),
-                //                   style: const TextStyle(
+                //                   style: const fontStyle(
                 //                     color: Colors.black,
                 //                     fontSize: 12,
                 //                     fontWeight: FontWeight.bold,
@@ -241,7 +241,7 @@ class _VideosScreenState extends State<VideosScreen> {
                 //             const SizedBox(height: 7),
                 //             Text(
                 //               state.getAllVideoList[index].title.toString(),
-                //               style: const TextStyle(
+                //               style: const fontStyle(
                 //                 fontSize: 16,
                 //                 fontWeight: FontWeight.bold,
                 //               ),
@@ -251,7 +251,7 @@ class _VideosScreenState extends State<VideosScreen> {
                 //               dateConversion(
                 //                 state.getAllVideoList[index].created.toString(),
                 //               ),
-                //               style: const TextStyle(
+                //               style: const fontStyle(
                 //                 fontSize: 12,
                 //                 color: Colors.grey,
                 //               ),

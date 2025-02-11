@@ -1,10 +1,9 @@
 
-import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 
 class CommonButton extends StatelessWidget {
   final String text;
-  final TextStyle? textStyle;
+  final FontStyle? fontStyle;
   final VoidCallback? onPressed;
   final Color? backgroundColor;
   final Color? disabledColor;
@@ -18,7 +17,7 @@ class CommonButton extends StatelessWidget {
   const CommonButton({
     Key? key,
     required this.text,
-    this.textStyle,
+    this.fontStyle,
     this.onPressed,
     this.backgroundColor,
     this.disabledColor,
@@ -41,7 +40,7 @@ class CommonButton extends StatelessWidget {
         decoration: shape,
 
         child: Center(
-          child: Text(text,style: fontStyle(color: textColor,fontSize: 16,fontWeight: FontWeight.bold),),
+          child: Text(text,),
         ),
       ),
     );

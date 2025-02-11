@@ -1,13 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/screens/home_screen/home_screen_model.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../utils/app_colors.dart';
@@ -15,7 +12,6 @@ import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
-import '../../utils/image_view_popup.dart';
 import '../home_screen/botton_actions.dart';
 import '../home_screen/first_card_home_feeds.dart';
 import '../home_screen/home_bloc.dart';
@@ -305,7 +301,7 @@ class ArticlePageState extends State<ArticlePage> {
                                           //   text: TextSpan(
                                           //     text: '${widget.article.content} ',
                                           //     // Normal text
-                                          //     style: const TextStyle(
+                                          //     style: const fontStyle(
                                           //       fontSize: 16,
                                           //       color: AppColors.bodyTextColor,
                                           //       fontWeight: FontWeight.normal,
@@ -335,24 +331,25 @@ class ArticlePageState extends State<ArticlePage> {
                                         text: TextSpan(
                                           text: '',
                                           // Normal text
-                                          style: const TextStyle(
+                                          style:  fontStyle(
                                             fontSize: 16,
                                             color: Colors.black,
                                             fontWeight: FontWeight.normal,
                                           ),
                                           children: _parseText(
                                               context,
-                                              '${widget.article.content} \n\nPosted ${formatTimeDifference(widget.article.created)}',
+                                              '${widget.article.content}',
                                               widget.article.links),
                                         ),
                                       )
 
-                                          // Text(
-                                          //     "${widget.article.content}\n\nPosted ${formatTimeDifference(widget.article.created)}",
-                                          //     style: fontStyle(
-                                          //         fontSize: 16,
-                                          //         color: Colors.grey[800])),
+
                                           ),
+                                      Text(
+                                          "\nPosted ${formatTimeDifference(widget.article.created)}",
+                                          style: fontStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey[800])),
                                       height(height: 4),
                                       const Divider(
                                           color: AppColors.borderColor),
@@ -436,12 +433,13 @@ class ArticlePageState extends State<ArticlePage> {
         if (link.contains('<link1>')) {
           log("click linkss    ${links!.first.value.toString()}");
           link = links!.first.value
-              .toString(); // Replace with actual link extraction
+              .toString();
         }
         spans.add(TextSpan(
-          text: match.group(0),
+          text: match.group(0).toString().replaceFirst('<link1>', '').replaceFirst('</link1>', ''),
           style: fontStyle(
             color: Colors.blue,
+
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () async{
@@ -457,7 +455,7 @@ class ArticlePageState extends State<ArticlePage> {
         return "";
       },
       onNonMatch: (nonMatch) {
-        spans.add(TextSpan(text: nonMatch));
+        spans.add(TextSpan(text: nonMatch,style: fontStyle(fontSize: 16,)));
         return "";
       },
     );

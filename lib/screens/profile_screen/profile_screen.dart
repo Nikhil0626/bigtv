@@ -45,7 +45,7 @@
 //                       controller: _fullNameController,
 //                       decoration: const InputDecoration(
 //                         labelText: 'Full Name',
-//                         labelStyle: TextStyle(color: Colors.black54),
+//                         labelStyle: fontStyle(color: Colors.black54),
 //                         suffixIcon: Icon(Icons.edit),
 //                         border: InputBorder.none,
 //                         contentPadding:
@@ -71,7 +71,7 @@
 //                       controller: _emailController,
 //                       decoration: const InputDecoration(
 //                         labelText: 'Email Address',
-//                         labelStyle: TextStyle(color: Colors.black54),
+//                         labelStyle: fontStyle(color: Colors.black54),
 //                         suffixIcon: Icon(Icons.edit),
 //                         border: InputBorder.none,
 //                         contentPadding:
@@ -98,7 +98,7 @@
 //                       controller: _mobileController,
 //                       decoration: const InputDecoration(
 //                         labelText: 'Mobile Number',
-//                         labelStyle: TextStyle(color: Colors.black54),
+//                         labelStyle: fontStyle(color: Colors.black54),
 //                         suffixIcon: Icon(Icons.edit),
 //                         border: InputBorder.none,
 //                         contentPadding:
@@ -152,7 +152,7 @@
 //                 child: InputDecorator(
 //                   decoration: const InputDecoration(
 //                     labelText: 'Gender',
-//                     labelStyle: TextStyle(color: Colors.black54),
+//                     labelStyle: fontStyle(color: Colors.black54),
 //                     suffixIcon: Icon(Icons.edit),
 //                     border: InputBorder.none,
 //                     contentPadding:

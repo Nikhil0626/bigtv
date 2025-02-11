@@ -1,8 +1,8 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_event.dart';
+import 'package:chotanews/screens/videos_main/video_bloc/videos_event.dart';
+import 'package:chotanews/screens/videos_main/video_bloc/videos_state.dart';
 import 'package:chotanews/screens/videos_main/video_repo/videos_repo.dart';
-import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_state.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

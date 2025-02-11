@@ -88,6 +88,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../services/file_download_services.dart';
 import '../../services/permission_handler_services.dart';
+import '../../utils/app_fonts.dart';
 
 class DownloadApp extends StatelessWidget {
   @override
@@ -129,11 +130,11 @@ class _DownloadScreenState extends State<DownloadScreen> {
       appBar: AppBar(title: Text("Download PDF & Image")),
       body: Center(
         child: Padding(
-          padding: const EdgeInsets.all(20.0),
+          padding:  EdgeInsets.all(20.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(_status, textAlign: TextAlign.center, style: TextStyle(fontSize: 16)),
+              Text(_status, textAlign: TextAlign.center, style: fontStyle(fontSize: 16)),
               SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () => _downloadFile(

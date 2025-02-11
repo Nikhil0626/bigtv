@@ -26,7 +26,10 @@ class SendNewsToSocialMedia extends HomeScreenEvent{
   SendNewsToSocialMedia({required this.id});
 }
 
-class MenuChange extends HomeScreenEvent{}
+class MenuChange extends HomeScreenEvent{
+ final  String isFirst;
+ MenuChange({ this.isFirst = ""});
+}
 
 
 

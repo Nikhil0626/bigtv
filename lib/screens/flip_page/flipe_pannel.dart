@@ -34,7 +34,6 @@ class FlipPanel<T> extends StatefulWidget {
   final ItemBuilder<T> itemBuilder;
   final Duration duration;
   final double height;
-  final bool waitingForRefresh;
   final Stream<List<T>?> itemStream;
   final GetItems getItemsCallback;
 
@@ -42,7 +41,6 @@ class FlipPanel<T> extends StatefulWidget {
     Key? key,
     required this.itemBuilder,
     required this.itemStream,
-    required this.waitingForRefresh,
     required this.getItemsCallback,
     required this.height,
     this.duration = const Duration(milliseconds: 100),
@@ -57,9 +55,9 @@ class _FlipPanelState<T> extends State<FlipPanel>
   late AnimationController _controller;
   late Animation _animation;
   int _currentIndex = 0;
-  bool waitingForRefresh = false;
   bool _isReversePhase = false;
   bool _running = false;
+  bool isFirstPost = false;
   final _perspective = 0.00003;
   final _zeroAngle =
       0.00001; // There's something wrong in the perspective transform, I use a very small value instead of zero to temporarily get it around.
@@ -81,7 +79,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   // we launch a request to server for more items (next page).
   final _updateThreshold = 5;
 
-  // bool _waitingForRefresh = false;
+  bool _waitingForRefresh = false;
 
   Widget? _prevChild, _currentChild, _nextChild;
   Widget? _upperChild1, _upperChild2;
@@ -156,11 +154,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
         widgets = null;
         _availableItems = 0;
         _currentIndex = 0;
-        waitingForRefresh = true;
+        _waitingForRefresh = true;
         setState(() {});
         return;
       }
-      waitingForRefresh = false;
+      _waitingForRefresh = false;
       if (_availableItems == 0) {
         widgets = [];
         widgets!.add(_buildFirstWidget(items[0]));
@@ -194,7 +192,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   @override
   Widget build(BuildContext context) {
 
-    if (!waitingForRefresh) {
+    if (!_waitingForRefresh) {
       if (widgets == null || _availableItems == 0) {
         return Container(
           color: Colors.white,
@@ -328,16 +326,22 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   void _handleDragEnd(DragEndDetails details) {
     _dragging = false;
-    print("kkkkk ${ArticleBlocProvider.of(context).articlesData.length-1}   tttttt $_currentIndex");
+    // print("kkkkk ${ArticleBlocProvider.of(context).articlesData[_currentIndex+1].title}   tttttt $_currentIndex");
+
     if (ArticleBlocProvider.of(context).articlesData.length -2==
         _currentIndex) {
       ArticleBlocProvider.of(context)
           .getArticles(index: _currentIndex , isTab: false);
     }
 
-    if (_currentIndex == 1) {
-      print("sbfsuifdsgfjsofgsijodgfs");
-      context.read<HomeBloc>().add(MenuChange());
+    if ( _currentIndex == 1&& _currentIndex<2) {
+      print("active  ${_currentIndex} ");
+        context.read<HomeBloc>().add(MenuChange(isFirst:"active" ));
+    }
+
+    if(_waitingForRefresh == false && _currentIndex == 0 ){
+      print("close  $_currentIndex ");
+      context.read<HomeBloc>().add(MenuChange(isFirst: "close"));
     }
 
     if (_dragExtent == 0.0) {
@@ -501,7 +505,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
               Stack(
                 children: <Widget>[
                   _upperChild1!,
-                  waitingForRefresh
+                  _waitingForRefresh
                       ? const Padding(
                           padding: EdgeInsets.only(top: 100.0),
                           child: SizedBox(

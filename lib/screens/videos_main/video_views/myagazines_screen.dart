@@ -9,9 +9,9 @@ import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
-import '../vodeo_bloc/videos_bloc.dart';
-import '../vodeo_bloc/videos_event.dart';
-import '../vodeo_bloc/videos_state.dart';
+import '../video_bloc/videos_bloc.dart';
+import '../video_bloc/videos_event.dart';
+import '../video_bloc/videos_state.dart';
 import 'gallery_screen.dart';
 
 class MyagazinesScreen extends StatefulWidget {
@@ -60,7 +60,7 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
             children: [
               SizedBox(width: 16),
               Padding(
-                padding: const EdgeInsets.only(top: 7),
+                padding: const EdgeInsets.only(top: 4),
                 child: Text(
                   "Magazine View",
                   style: fontStyle(

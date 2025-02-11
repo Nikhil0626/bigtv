@@ -2,9 +2,9 @@ import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/globel_keys/app_router.dart';
-import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_bloc.dart';
-import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_event.dart';
-import 'package:chotanews/screens/videos_main/vodeo_bloc/videos_state.dart';
+import 'package:chotanews/screens/videos_main/video_bloc/videos_bloc.dart';
+import 'package:chotanews/screens/videos_main/video_bloc/videos_event.dart';
+import 'package:chotanews/screens/videos_main/video_bloc/videos_state.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
