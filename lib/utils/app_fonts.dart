@@ -8,11 +8,9 @@ TextStyle fontStyle(
     double? fontSize = 14,
     FontWeight? fontWeight = FontWeight.normal}) {
   return
-    GoogleFonts.notoSansTelugu(
-      textStyle: TextStyle(
-        fontSize: fontSize ,
-        fontWeight: fontWeight,
-        color: color,)
-    );
+    TextStyle(
+      fontSize: fontSize ,
+      fontWeight: fontWeight,
+      color: color,);
 
 }

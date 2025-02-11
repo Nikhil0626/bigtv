@@ -206,6 +206,11 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       log(event.data.toString());
     });
 
+    on<OnTabClick>((event, emit) {
+      log("Tab Change");
+     emit(OnTabClickState(isOnTab: event.isClick));
+    });
+
     on<SendNewsToSocialMedia>((event, emit) async {
       final DynamicLinkParameters parameters = DynamicLinkParameters(
         uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console

@@ -27,6 +27,11 @@ class SendNewsToSocialMedia extends HomeScreenEvent{
 }
 
 class MenuChange extends HomeScreenEvent{}
+class OnTabClick extends HomeScreenEvent{
+  String isClick;
+
+  OnTabClick({required this.isClick});
+}
 
 
 

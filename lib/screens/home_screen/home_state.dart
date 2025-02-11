@@ -6,6 +6,12 @@ abstract class HomeScreenState{}
 
 class InitialHomeScreenState extends HomeScreenState{}
 class LoadingHomeScreenState extends HomeScreenState{}
+class OnTabClickState extends HomeScreenState{
+  String isOnTab;
+
+  OnTabClickState({required this.isOnTab});
+
+}
 
 
 

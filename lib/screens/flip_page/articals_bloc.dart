@@ -33,7 +33,8 @@ class ArticleBloc extends  ChangeNotifier {
   bool isRefresh = false;
 
   Future<void> getArticles(
-      {bool refresh = false, int index = 0, bool isTab = false}) async {
+      {bool refresh = false, int index = 0, bool isTab = false}) async
+  {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String locationId = sp.getString("locationId") ?? "";
     String deviceId = GlobalVariables().deviceId ?? "";
