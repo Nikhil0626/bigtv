@@ -34,16 +34,16 @@ class _OnboardingScreen extends State<OnboardingScreen> {
           textAlign: TextAlign.center,
         ),
         height(height: 10),
-        const Padding(
+         Padding(
           padding: EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
             "మీరిక్కడున్నా మీ జిల్లాలను సెట్ చేసుకోవాలి. మీ ఊరి సంగతులు మీతోనే.",
             maxLines: 3,
-            style: TextStyle(
+            style: fontStyle(
               fontSize: 22,
               color: Colors.black,
               fontWeight: FontWeight.w400,
-              height: 1.5,
+
             ),
             textAlign: TextAlign.center,
           ),
@@ -78,16 +78,16 @@ class _OnboardingScreen extends State<OnboardingScreen> {
           textAlign: TextAlign.center,
         ),
         height(height: 10),
-         const Padding(
+          Padding(
           padding: EdgeInsets.symmetric(horizontal: 40.0),
           child: Text(
             "రాజకీయాలు సినిమా గాడ్జెట్లు, ఉద్యోగ నోటిఫికేషన్లు... అన్నీ ఒకే చోట వార్తలలో.",
             maxLines: 3,
-            style: TextStyle(
+            style: fontStyle(
               fontSize: 22,
               color: Colors.black,
               fontWeight: FontWeight.w400,
-              height: 1.5,
+
             ),
             textAlign: TextAlign.center,
           ),

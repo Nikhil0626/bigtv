@@ -323,7 +323,7 @@
 //                       child: const Center(
 //                         child: Text(
 //                           "Something went wrong. Please try again.",
-//                           style: TextStyle(
+//                           style: fontStyle(
 //                               color: Colors.white, fontSize: 16),
 //                         ),
 //                       ),

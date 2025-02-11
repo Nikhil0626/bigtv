@@ -317,6 +317,12 @@ class ArticlePageState extends State<ArticlePage> {
                                                 //         fontSize: 16,
                                                 //         color: Colors.grey[800])),
                                                 ),
+                                            Text(
+                                                "\nPosted ${formatTimeDifference(widget.article.created)}",
+                                                style: fontStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey[800])),
+                                            height(height: 4),
                                             height(height: 4),
                                             const Divider(
                                                 color: AppColors.borderColor),
@@ -400,12 +406,13 @@ class ArticlePageState extends State<ArticlePage> {
         if (link.contains('<link1>')) {
           log("click linkss    ${links!.first.value.toString()}");
           link = links!.first.value
-              .toString(); // Replace with actual link extraction
+              .toString();
         }
         spans.add(TextSpan(
-          text: match.group(0),
+          text: match.group(0).toString().replaceFirst('<link1>', '').replaceFirst('</link1>', ''),
           style: fontStyle(
             color: Colors.blue,
+
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () async{
@@ -421,7 +428,7 @@ class ArticlePageState extends State<ArticlePage> {
         return "";
       },
       onNonMatch: (nonMatch) {
-        spans.add(TextSpan(text: nonMatch));
+        spans.add(TextSpan(text: nonMatch,style: fontStyle(fontSize: 16,)));
         return "";
       },
     );

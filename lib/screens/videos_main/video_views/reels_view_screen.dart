@@ -7,8 +7,6 @@ import 'package:video_player/video_player.dart';
 
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
-import '../vodeo_bloc/videos_bloc.dart';
-import '../vodeo_bloc/videos_event.dart';
 
 class ReelsViewScreen extends StatefulWidget {
   final String getReelDetails;
@@ -137,18 +135,18 @@ class _ReelsViewScreenState extends State<ReelsViewScreen> {
                 const Icon(Icons.favorite_border,
                     color: Colors.white, size: 20),
                 height(height: 5),
-                const Text('2000',
-                    style: TextStyle(color: Colors.white, fontSize: 12)),
+                 Text('2000',
+                    style: fontStyle(color: Colors.white, fontSize: 12)),
                 height(height: 30),
                 const Icon(Icons.comment, color: Colors.white, size: 35),
                 height(height: 5),
-                const Text('4500',
-                    style: TextStyle(color: Colors.white, fontSize: 12)),
+                 Text('4500',
+                    style: fontStyle(color: Colors.white, fontSize: 12)),
                 height(height: 30),
                 const Icon(Icons.send_rounded, color: Colors.white, size: 35),
                 height(height: 5),
-                const Text('8900',
-                    style: TextStyle(color: Colors.white, fontSize: 12)),
+                 Text('8900',
+                    style: fontStyle(color: Colors.white, fontSize: 12)),
                 height(height: 30),
                 const Icon(Icons.more_horiz_outlined,
                     color: Colors.white, size: 35),
@@ -175,7 +173,7 @@ class _ReelsViewScreenState extends State<ReelsViewScreen> {
                       // Current position text
                       Text(
                         _formatDuration(_controller.value.position),
-                        style: const TextStyle(
+                        style:  fontStyle(
                             color: Colors.white, fontSize: 12),
                       ),
                       Expanded(
@@ -203,7 +201,7 @@ class _ReelsViewScreenState extends State<ReelsViewScreen> {
                       // Duration text
                       Text(
                         _formatDuration(_controller.value.duration),
-                        style: const TextStyle(
+                        style:  fontStyle(
                             color: Colors.white, fontSize: 12),
                       ),
                     ],

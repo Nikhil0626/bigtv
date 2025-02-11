@@ -119,17 +119,56 @@ class _NewReferEarnScreenState extends State<NewReferEarnScreen> {
                 style: fontStyle(fontSize: 14, fontWeight: FontWeight.w500),
               ),
             ),
-            height(height: 15),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child:  Image.asset(
-                "assets/svg/apple_banner.gif",
-                height: 335,
-                width: 335,
-              ),
-            ),
+            height(height: 10),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    "assets/svg/splash_banner.gif",
+                    height: 335,
+                    width: 335,
+                  ),
+                ),
+                Positioned(
+                  bottom: 50,
+                  child: Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: const Text(
+                      "01/05",
+                      style: TextStyle(
+                        color: Colors.lightBlue,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  bottom: 30,
+                  child: SizedBox(
+                    width: 190,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: const LinearProgressIndicator(
+                        value: 0.2,
+                        backgroundColor: Colors.white,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.lightBlue),
+                        minHeight: 11,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            )
 
-          ],
+
+        ],
         ),
       ),
     );

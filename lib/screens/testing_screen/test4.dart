@@ -9,6 +9,8 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:intl/intl.dart';
 
+import '../../utils/app_fonts.dart';
+
 class _WebDashState extends State<WebDash> {
   late WebEngagePlugin _webEngagePlugin;
   late String os;
@@ -458,10 +460,10 @@ class _WebDashState extends State<WebDash> {
                 ),
                 child: new Text(
                   msg,
-                  style: TextStyle(
+                  style: fontStyle(
                     color: Colors.black,
                     fontSize: 18.0,
-                    fontFamily: 'helvetica_neue_light',
+                    // fontFamily: 'helvetica_neue_light',
                   ),
                   textAlign: TextAlign.center,
                 ),

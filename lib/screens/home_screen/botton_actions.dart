@@ -24,7 +24,7 @@ class BottomActions extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: SizedBox(
-        height: 50,
+        height: 52,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,

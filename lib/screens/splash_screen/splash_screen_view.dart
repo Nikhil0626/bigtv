@@ -43,11 +43,11 @@ class _SplashScreenView extends State<SplashScreenView> {
     String loginId = sharedPreferences.getString("loginId")??"";
     log(loginId.toString());
     if ( loginId.isNotEmpty) {
-      Timer(const Duration(seconds: 1), () {
-        Navigator.pushNamed(context, RoutesManager.homeScreen);
+      Timer(const Duration(seconds: 5), () {
+        Navigator.pushNamedAndRemoveUntil(context, RoutesManager.homeScreen,(route) => false,);
       });
     } else {
-      Timer(const Duration(seconds: 1), () {
+      Timer(const Duration(seconds: 5), () {
         DynamicLinkService.handleDynamicLinks(context);
       });
     }

@@ -98,7 +98,7 @@
 //       child: const Center(
 //         child: Text(
 //           "Something went wrong. Please try again.",
-//           style: TextStyle(color: Colors.white, fontSize: 16),
+//           style: fontStyle(color: Colors.white, fontSize: 16),
 //         ),
 //       ),
 //     );
@@ -133,7 +133,7 @@
 //               children: [
 //                 Text(
 //                   state.pageType ?? "No Title",
-//                   style: const TextStyle(
+//                   style: const fontStyle(
 //                     fontSize: 24,
 //                     fontWeight: FontWeight.bold,
 //                     color: Colors.black,
@@ -142,7 +142,7 @@
 //                 const SizedBox(height: 16),
 //                 Text(
 //                   newsItem.content,
-//                   style: TextStyle(
+//                   style: fontStyle(
 //                     fontSize: 16,
 //                     color: Colors.grey[800],
 //                   ),
@@ -272,7 +272,7 @@ class _FlipWidgetState extends State<FlipWidgetsPage> {
           color: colors.secondary,
           child: Text(
             title,
-            style: TextStyle(
+            style: fontStyle(
               fontSize: 20.0,
               fontWeight: FontWeight.bold,
               color: colors.onSecondary,
@@ -375,7 +375,7 @@ class _FlipWidgetState extends State<FlipWidgetsPage> {
                       ),
                     Text(
                           post.title ?? "",
-                          style: const TextStyle(
+                          style: const fontStyle(
                             color: AppColors.headerTextColor,
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -408,7 +408,7 @@ class _FlipWidgetState extends State<FlipWidgetsPage> {
             child: const Center(
               child: Text(
                 "Something went wrong. Please try again.",
-                style: TextStyle(color: Colors.white, fontSize: 16),
+                style: fontStyle(color: Colors.white, fontSize: 16),
               ),
             ),
           );

@@ -41,7 +41,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Container(
                 margin: const EdgeInsets.only(top: 16),
                 decoration: BoxDecoration(

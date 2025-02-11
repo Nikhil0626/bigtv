@@ -2,6 +2,7 @@ import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 
 import '../main.dart';
+import 'app_fonts.dart';
 
 class CustomToast {
   static Widget crossIcon = const Icon(Icons.close);
@@ -99,14 +100,14 @@ class CustomToast {
       message: msg,
       messageColor: Colors.white,
       backgroundColor: Colors.green,
-      duration: const Duration(seconds: 2),
+      duration: const Duration(seconds: 4),
       margin: const EdgeInsets.all(15),
       borderRadius: const BorderRadius.all(Radius.circular(15)),
       mainButton: TextButton(
         onPressed: onTap,
-        child: const Text(
+        child:  Text(
           "Open",
-          style: TextStyle(color: Colors.white),
+          style: fontStyle(color: Colors.white),
         ),
       ),
       padding: const EdgeInsets.all(15),
