@@ -29,6 +29,10 @@
         android:label="chotanews"
 
         android:requestLegacyExternalStorage="true">
+        <meta-data
+            android:name="com.webengage.sdk.android.environment"
+            android:value="in" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -42,23 +46,18 @@
             android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:windowSoftInputMode="adjustResize">
-            <!-- Specifies an Android theme to apply to this Activity as soon as
-                       the Android process has started. This theme is visible to the user
-                       while the Flutter UI initializes. After that, this theme continues
-                       to determine the Window background behind the Flutter UI. -->
+
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
 
-            <meta-data
-                android:name="com.webengage.sdk.android.debug"
-                android:value="true" />
-            <meta-data
-                android:name="com.webengage.sdk.android.environment"
-                android:value="in" />
-            <meta-data
-                android:name="com.webengage.sdk.android.key"
-                android:value="in~~1341061ba" />
+<!--            <meta-data-->
+<!--                android:name="com.webengage.sdk.android.debug"-->
+<!--                android:value="true" />-->
+
+<!--            <meta-data-->
+<!--                android:name="com.webengage.sdk.android.key"-->
+<!--                android:value="in~~1341061ba" />-->
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
