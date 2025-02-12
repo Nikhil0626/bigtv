@@ -159,12 +159,6 @@ class FlipProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  bool isIconcolor = false;
-
-  updateColor() {
-    isIconcolor = !isIconcolor;
-    notifyListeners();
-  }
 
   final StreamController<List<HomeScreenModel>> districtArticlesController =
       StreamController<List<HomeScreenModel>>.broadcast();
@@ -177,21 +171,6 @@ class FlipProvider extends ChangeNotifier {
   Stream<List<HomeScreenModel>> get districtArticles =>
       districtArticlesController.stream;
 
-  // void loadArticles() {
-  //   print("loadArticles");
-  //   // List<HomeScreenModel> articles = data1.map((e) => Article.fromJson(e)).toList();
-  //   // _articlesController.add(articles);
-  //   print("_articlesController");
-  //   print(_articlesController);
-  //
-  //   notifyListeners();
-  // }
-  // void addMorerAticles() {
-  //   print("Adding more articles from data2");
-  //   // List<HomeScreenModel> articles = data2.map((e) => Article.fromJson(e)).toList();
-  //   // _articlesController.add(articles);
-  //   notifyListeners();
-  // }
 
   @override
   void dispose() {
@@ -264,9 +243,9 @@ class FlipProvider extends ChangeNotifier {
 
   Future addCommentPostById(postData,comment)async{
     Map<String, dynamic> body = {
-      "UserId": "1",
+      "UserId": "User${GlobalVariables().userId}",
       "PostId": postData.toString(),
-      "CommentText": comment
+      "Content": comment
     };
     log(body.toString());
     try {
