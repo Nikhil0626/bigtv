@@ -27,7 +27,12 @@ class PostBottomActions extends StatelessWidget {
         MainAxisAlignment.spaceAround,
         children: [
           flipProvider.isRefresh
-              ? AppLoadingScreen()
+              ? const Center(
+            child: SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator()),
+          )
               : BottomActions(
               icon:
               "assets/svg/reload.svg",

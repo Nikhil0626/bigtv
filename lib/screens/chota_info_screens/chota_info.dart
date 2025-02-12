@@ -438,64 +438,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {}); // Force UI update after logout
                 Navigator.pushNamed(context, RoutesManager.signInScreen);
               },
-              child: FutureBuilder<SharedPreferences>(
-                future: SharedPreferences.getInstance(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    SharedPreferences? prefs = snapshot.data;
-                    String? loginId = prefs?.getString("loginId");
-
-                    // Ensure loginId is null or empty to hide logout button
-                    if (loginId == null || loginId.isEmpty) {
-                      return SizedBox.shrink(); // Hide logout button
-                    }
-
-                    return Container(
-                      decoration: BoxDecoration(
-                        color:  Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        boxShadow: const [
-                          BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 20,
-                            spreadRadius: 1,
-                            offset: Offset(0, 4),
-                          ),
-                        ],
+              child:  Container(
+                decoration: BoxDecoration(
+                  color:  Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 20,
+                      spreadRadius: 1,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
+                ),
+                margin: const EdgeInsets.symmetric(horizontal: 8),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SvgPicture.asset(
+                        'assets/settings_icons/logout_icon.svg',
+                        height: 40,
+                        width: 40,
                       ),
-                      margin: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            SvgPicture.asset(
-                              'assets/settings_icons/logout_icon.svg',
-                              height: 40,
-                              width: 40,
-                            ),
-                            const SizedBox(width: 16),
-                            Text(
-                              isLogin? 'Logout':'Login',
-                              style: fontStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.black,
-                              ),
-                            ),
-                            const Spacer(),
-                            const Icon(
-                              Icons.arrow_forward_ios,
-                              size: 20,
-                            ),
-                          ],
+                      const SizedBox(width: 16),
+                      Text(
+                        isLogin? 'Logout':'Login',
+                        style: fontStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black,
                         ),
                       ),
-                    );
-                  } else {
-                    return SizedBox.shrink(); // Hide if SharedPreferences is still loading
-                  }
-                },
+                      const Spacer(),
+                      const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ),
 
@@ -524,7 +507,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String loginId = sharedPreferences.getString("loginId")??"";
     log(loginId.toString());
-    if ( loginId.isNotEmpty) {
+    if ( loginId.isNotEmpty && loginId != "Skip") {
       isLogin=true;
     } else {
       isLogin=false;
