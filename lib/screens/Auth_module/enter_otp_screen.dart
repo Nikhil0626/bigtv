@@ -15,6 +15,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../referral_code_screen/referral_code.dart';
 import 'auth_event.dart';
@@ -46,6 +47,8 @@ class _OtpScreenState extends State<OtpScreen> {
     // TODO: implement initState
     super.initState();
     enteredOtp = "";
+    WebEngagePlugin.userLogin(widget.mobileNumber.toString());
+    WebEngagePlugin.trackEvent('enterOtpScreen', {'mobileNumber': widget.mobileNumber.toString()});
     startCountdown();
   }
 

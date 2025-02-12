@@ -11,12 +11,14 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    WebEngagePlugin.trackEvent('welcomeScreen', {'user': "unknown"});
     return Scaffold(
       backgroundColor: Colors.white,
 

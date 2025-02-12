@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 60;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -17,6 +17,8 @@
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		CBE32001282200B13E8FC558 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 69B0E887F1F1F4963B05571B /* Pods_RunnerTests.framework */; };
 		DD5111062D4FB979000A5861 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DD5111052D4FB979000A5861 /* GoogleService-Info.plist */; };
+		DD9364362D5C8DBE00EFEC5C /* WebEngage.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = DD9364292D5C8CB600EFEC5C /* WebEngage.xcframework */; };
+		DD9364372D5C8DBE00EFEC5C /* WebEngage.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DD9364292D5C8CB600EFEC5C /* WebEngage.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +38,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				DD9364372D5C8DBE00EFEC5C /* WebEngage.xcframework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -64,6 +67,18 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B0408DA68CB6A568937A0C3D /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		DD5111052D4FB979000A5861 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		DD9364272D5C8CB600EFEC5C /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		DD9364282D5C8CB600EFEC5C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		DD9364292D5C8CB600EFEC5C /* WebEngage.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WebEngage.xcframework; sourceTree = "<group>"; };
+		DD93642A2D5C8CB600EFEC5C /* WELocation.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WELocation.xcframework; sourceTree = "<group>"; };
+		DD93642C2D5C8CF100EFEC5C /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		DD93642D2D5C8CF100EFEC5C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		DD93642E2D5C8CF100EFEC5C /* WebEngage.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WebEngage.xcframework; sourceTree = "<group>"; };
+		DD93642F2D5C8CF100EFEC5C /* WELocation.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WELocation.xcframework; sourceTree = "<group>"; };
+		DD9364312D5C8D9900EFEC5C /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		DD9364322D5C8D9900EFEC5C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		DD9364332D5C8D9900EFEC5C /* WebEngage.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WebEngage.xcframework; sourceTree = "<group>"; };
+		DD9364342D5C8D9900EFEC5C /* WELocation.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WELocation.xcframework; sourceTree = "<group>"; };
 		DDAB80C22D461EC4008D0B68 /* RunnerDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerDebug.entitlements; sourceTree = "<group>"; };
 		DDAB80C32D461F8F008D0B68 /* RunnerRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerRelease.entitlements; sourceTree = "<group>"; };
 		E0DF7B1739783E7AAA13BE37 /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
@@ -85,6 +100,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3FEF9674B4A242CF22F4B6E6 /* Pods_Runner.framework in Frameworks */,
+				DD9364362D5C8DBE00EFEC5C /* WebEngage.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -165,10 +181,49 @@
 		C526F4B19814563B09D39692 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				DD93642B2D5C8CB600EFEC5C /* WebEngageFramework */,
+				DD9364302D5C8CF100EFEC5C /* WebEngageFramework */,
+				DD9364352D5C8D9900EFEC5C /* WebEngageFramework */,
 				EF6E003C516A0AF3F57C97AE /* Pods_Runner.framework */,
 				69B0E887F1F1F4963B05571B /* Pods_RunnerTests.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		DD93642B2D5C8CB600EFEC5C /* WebEngageFramework */ = {
+			isa = PBXGroup;
+			children = (
+				DD9364272D5C8CB600EFEC5C /* LICENSE */,
+				DD9364282D5C8CB600EFEC5C /* README.md */,
+				DD9364292D5C8CB600EFEC5C /* WebEngage.xcframework */,
+				DD93642A2D5C8CB600EFEC5C /* WELocation.xcframework */,
+			);
+			name = WebEngageFramework;
+			path = ../../../../Downloads/WebEngageFramework;
+			sourceTree = "<group>";
+		};
+		DD9364302D5C8CF100EFEC5C /* WebEngageFramework */ = {
+			isa = PBXGroup;
+			children = (
+				DD93642C2D5C8CF100EFEC5C /* LICENSE */,
+				DD93642D2D5C8CF100EFEC5C /* README.md */,
+				DD93642E2D5C8CF100EFEC5C /* WebEngage.xcframework */,
+				DD93642F2D5C8CF100EFEC5C /* WELocation.xcframework */,
+			);
+			name = WebEngageFramework;
+			path = ../../../../Downloads/WebEngageFramework;
+			sourceTree = "<group>";
+		};
+		DD9364352D5C8D9900EFEC5C /* WebEngageFramework */ = {
+			isa = PBXGroup;
+			children = (
+				DD9364312D5C8D9900EFEC5C /* LICENSE */,
+				DD9364322D5C8D9900EFEC5C /* README.md */,
+				DD9364332D5C8D9900EFEC5C /* WebEngage.xcframework */,
+				DD9364342D5C8D9900EFEC5C /* WELocation.xcframework */,
+			);
+			name = WebEngageFramework;
+			path = ../../../../Downloads/WebEngageFramework;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -708,7 +763,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/RunnerRelease.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = 55NJ7F83F2;
+				DEVELOPMENT_TEAM = 74NBJBC965;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Chotanews;

@@ -27,7 +27,6 @@
         android:name=".MainApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="chotanews"
-
         android:requestLegacyExternalStorage="true">
         <meta-data
             android:name="com.webengage.sdk.android.environment"
