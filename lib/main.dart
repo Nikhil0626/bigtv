@@ -4,20 +4,24 @@ import 'package:chotanews/screens/flip_page/articals_bloc.dart';
 import 'package:chotanews/screens/flip_page/article_bloc_provider.dart';
 import 'package:chotanews/screens/flip_page/test_one.dart';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
+import 'package:chotanews/screens/testing_screen/provider.dart';
 import 'package:chotanews/screens/testing_screen/test4.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
+import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'dart:io' show Platform;
 
 import 'globel_keys/app_router.dart';
 import 'globel_keys/global_variables_data.dart';
 import 'globel_keys/globel_keys.dart';
+import 'screens/testing_screen/test2.dart';
 
 
 Future<String?> getUniqueDeviceId(String token) async {
@@ -67,7 +71,6 @@ Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   WebEngagePlugin _webEngagePlugin = new WebEngagePlugin();
-
   if(Platform.isIOS){
     String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
     log('APNs Token: $apnsToken');
@@ -83,35 +86,12 @@ if(Platform.isAndroid){
     _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
 
      WebEngagePlugin.setPushToken(token);
-    // await WebEngagePlugin.userLogin('63860');
-    // await WebEngagePlugin.setUserEmail('jogisivakumar.eee@gmail.com');
-    // await WebEngagePlugin.trackScreen('Home_Page');
-    // WebEngagePlugin.setUserOptIn('in_app', true);
-    // WebEngagePlugin.setUserOptIn('sms', true);
-    // WebEngagePlugin.setUserOptIn('push', true);
-    // WebEngagePlugin.setUserOptIn('email', true);
-    // WebEngagePlugin.setUserOptIn('whatsapp', true);
-    // WebEngagePlugin.setUserOptIn('viber', true);
-    // await WebEngagePlugin.trackScreen('Product Page', {'Product Id': 'UHUH799'});
+     WebEngagePlugin.userLogin('63861');
+     WebEngagePlugin.setUserEmail('siva.j2092@gmail.com');
 
-    // WebEngagePlugin.trackEvent('opened_app', {
-    //   'platform': "android"
-    // });
-    // WebEngagePlugin.trackEvent("hello_siva_test",{
-    //   "userName":"Siva",
-    //   "mobileNumber":"9951755530",
-    //
-    // });
-    //
-    // WebEngagePlugin.trackEvent("Email Address",{
-    //   "userName":"siva143145@gmail.com",
-    //   "mobileNumber":"9951755530",
-    //
-    // });
+
   }
 }
-
-  // WENotificationInbox().init();
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     WebEngagePlugin.onPushMessageReceive(message.data);
@@ -146,38 +126,44 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: RegisterProviders.providers(context),
-      child: MaterialApp(
-        theme: ThemeData(
-          colorScheme:
-          ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<FlipProvider>(create: (context) => FlipProvider()),
+
+      ],
+      child: MultiBlocProvider(
+        providers: RegisterProviders.providers(context),
+        child: MaterialApp(
+          theme: ThemeData(
+            colorScheme:
+            ColorScheme.fromSeed(seedColor: Colors.blue),
+            useMaterial3: true,
+          ),
+          scrollBehavior: MyBehavior(),
+          navigatorKey: mainNavigatorKey,
+          navigatorObservers: [routeObserver],
+          onGenerateRoute: (RouteSettings setting) {
+            return RoutesManager.generateRoute(setting);
+          },
+          builder: (
+              BuildContext context,
+              Widget? child,
+              ) {
+            // ScreenUtil.init(context, designSize: const Size(385, 890));
+            return child!;
+          },
+          // builder: (BuildContext context, Widget? child) {
+          //   ScreenUtil.init(context, designSize: const Size(385, 890));
+          //   return MediaQuery(
+          //     data: MediaQuery.of(context)
+          //         .copyWith(textScaler: const TextScaler.linear(1)),
+          //     child: child!,
+          //   );
+          // },
+          // home: WebDash(),
+          debugShowCheckedModeBanner: false,
+          // initialRoute: RoutesManager.onboardingScreen,
         ),
-        scrollBehavior: MyBehavior(),
-        navigatorKey: mainNavigatorKey,
-        navigatorObservers: [routeObserver],
-        onGenerateRoute: (RouteSettings setting) {
-          return RoutesManager.generateRoute(setting);
-        },
-        builder: (
-            BuildContext context,
-            Widget? child,
-            ) {
-          // ScreenUtil.init(context, designSize: const Size(385, 890));
-          return child!;
-        },
-        // builder: (BuildContext context, Widget? child) {
-        //   ScreenUtil.init(context, designSize: const Size(385, 890));
-        //   return MediaQuery(
-        //     data: MediaQuery.of(context)
-        //         .copyWith(textScaler: const TextScaler.linear(1)),
-        //     child: child!,
-        //   );
-        // },
-        // home: DownloadApp(),
-        debugShowCheckedModeBanner: false,
-        // initialRoute: RoutesManager.onboardingScreen,
       ),
     );
   }

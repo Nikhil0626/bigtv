@@ -26,7 +26,6 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
 
 
     on<MenuChange>((event, emit) async {
-      isMenuChange =event.isFirst=="close"?false:event.isFirst=="active"?true: !isMenuChange;
       emit(SuccessHomeScreenState(
           getAllHomeScreenNews: getAllPosts,
           pageType: "",
@@ -206,27 +205,13 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       log(event.data.toString());
     });
 
-    on<SendNewsToSocialMedia>((event, emit) async {
-      final DynamicLinkParameters parameters = DynamicLinkParameters(
-        uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
-        link: Uri.parse('https://chotanews.com/store?postId=${event.id}'), // Ensure this is a valid URL
-        androidParameters: const AndroidParameters(
-          packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
-        ),
-        iosParameters: const IOSParameters(
-          bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
-          appStoreId: '1631068092',
-        ),
-      );
+    on<OnTabClick>((event, emit) {
+      log("Tab Change");
+     emit(OnTabClickState(isOnTab: event.isClick));
+    });
 
-      try {
-        final ShortDynamicLink shortLink =
-        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-        print("Short Link Created: ${shortLink.shortUrl}");
-        Share.share('${shortLink.shortUrl}');
-      } catch (e) {
-        print("Error creating dynamic link: $e");
-      }
+    on<SendNewsToSocialMedia>((event, emit) async {
+
 
 
       // try {
@@ -312,6 +297,7 @@ class HomeBloc extends Bloc<HomeScreenEvent, HomeScreenState> {
       }
     });
   }
+
 
 
 }

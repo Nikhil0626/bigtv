@@ -77,6 +77,8 @@ dependencies:
   mobile_number: ^3.0.0
   http: ^1.3.0
   flutter_launcher_icons: ^0.14.3
+  screenshot: ^3.0.0
+  path_provider: ^2.1.5
 
 #  kochava_tracker: ^2.6.0
 #  kochava_measurement_apple_tracking: ^3.2.0
