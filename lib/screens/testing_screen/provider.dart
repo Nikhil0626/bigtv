@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -16,7 +17,6 @@ import '../home_screen/home_screen_model.dart';
 class FlipProvider extends ChangeNotifier {
   List<HomeScreenModel> mainArticlesData = [];
   List<HomeScreenModel> districtArticlesData = [];
-  final ScreenshotController screenshotController = ScreenshotController();
   int isTab = 0;
   bool isShowTopBottomView = true;
 
@@ -202,8 +202,25 @@ class FlipProvider extends ChangeNotifier {
   }
 
 
-  Future<void> takeScreenshotAndShare( article) async {
+  Future<void> takeScreenshotAndShare( article,screenshotController) async {
+    final DynamicLinkParameters parameters = DynamicLinkParameters(
+      uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
+      link: Uri.parse('https://chotanews.com/store?postId=${article.id}'), // Ensure this is a valid URL
+      androidParameters: const AndroidParameters(
+        packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
+      ),
+      iosParameters: const IOSParameters(
+        bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
+        appStoreId: '1631068092',
+      ),
+    );
     try {
+
+
+        final ShortDynamicLink shortLink =
+        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+        print("Short Link Created: ${shortLink.shortUrl}");
+        // Share.share('${shortLink.shortUrl}');
 
 
       final image = await screenshotController.capture(
@@ -211,7 +228,7 @@ class FlipProvider extends ChangeNotifier {
       );
       if (image != null) {
         final directory = await getTemporaryDirectory();
-        final imagePath = '${directory.path}/siva.png';
+        final imagePath = '${directory.path}/${article.id}.png';
         final imageFile = File(imagePath);
         await imageFile.writeAsBytes(image);
 
@@ -223,7 +240,7 @@ class FlipProvider extends ChangeNotifier {
         //     },
         //     child: Text("www.google.com"));
 
-        Share.shareXFiles([XFile(imageFile.path)], text: 'https:/kdsbfjksdfkjhbsdjfds');
+        Share.shareXFiles([XFile(imageFile.path)], text: '${shortLink.shortUrl}');
 
       } else {
         CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
@@ -232,4 +249,60 @@ class FlipProvider extends ChangeNotifier {
       CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
     }
   }
+
+
+  Future getAllPostById(postId)async{
+    try{
+      Response response = await HomeRepo().getAllCommentByPost(postId);
+      log(response.data.toString());
+    }on DioException catch(e,st){
+
+    }catch(e,st){
+
+    }
+  }
+
+  Future addCommentPostById(postData,comment)async{
+    Map<String, dynamic> body = {
+      "UserId": "1",
+      "PostId": postData.toString(),
+      "CommentText": comment
+    };
+    log(body.toString());
+    try {
+      Response response = await HomeRepo().addCommentByPost(body);
+      log(response.data.toString());
+
+     if(response.statusCode==200){
+       getAllPostById(postData.toString());
+     }
+
+    } on DioException catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api  catch ${st.toString()}");
+    } catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api catch ${st.toString()}");
+    }
+  }
+
+
+  List<String> isLikeList = [];
+
+  void isLikePost(val) async{
+    log(val.toString());
+    if (!isLikeList.contains(val)) {
+      isLikeList.add(val);
+      log(isLikeList.toString());
+    }else{
+      isLikeList.remove(val);
+      log(isLikeList.toString());
+    }
+    notifyListeners(); // Notify listeners if using ChangeNotifier
+
+  }
 }
+
+
+
+

@@ -12,7 +12,12 @@ class HomeRepo extends BaseService{
 
 
   Future addCommentByPost(queryParams) async{
-    Response response = await makeRequest(url: BaseUrls.addComment,method: RequestType.get,queryParameters: queryParams);
+    Response response = await makeRequest(url: BaseUrls.addComment,method: RequestType.post,body: queryParams);
+    return response;
+  }
+
+  Future getAllCommentByPost(postId) async{
+    Response response = await makeRequest(url: "${BaseUrls.commentGet}$postId/comments",method: RequestType.get);
     return response;
   }
 
@@ -22,11 +27,6 @@ class HomeRepo extends BaseService{
     return response;
   }
 
-
-  Future getAllComments(queryParams) async{
-    Response response = await makeRequest(url: BaseUrls.addComment,method: RequestType.get,queryParameters: queryParams);
-    return response;
-  }
 
   Future likeByPost(queryParams) async{
     Response response = await makeRequest(url: BaseUrls.likePost,method: RequestType.post,body: queryParams);

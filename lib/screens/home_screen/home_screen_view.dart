@@ -18,16 +18,19 @@ class HomePage extends StatelessWidget {
     double height = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         MediaQuery.of(context).padding.bottom)-(Platform.isIOS?100:32);
-    return Consumer<FlipProvider>(
-      builder: (_,flipProvider,__) {
-        return FlipPanel<HomeScreenModel>(
-          itemStream: flipProvider.mainArticles,
-          waitingForRefresh: flipProvider.isRefresh?true:false,
-          itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
-              ArticlePage(article: article, flipBack: flipBack, height: height,),
-          height: height,
-        );
-      }
+    return Scaffold(
+
+      body: Consumer<FlipProvider>(
+        builder: (_,flipProvider,__) {
+          return FlipPanel<HomeScreenModel>(
+            itemStream: flipProvider.mainArticles,
+            waitingForRefresh: flipProvider.isRefresh?true:false,
+            itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
+                ArticlePage(article: article, flipBack: flipBack, height: height,),
+            height: height,
+          );
+        }
+      ),
     );
   }
 }

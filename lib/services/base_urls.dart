@@ -20,6 +20,8 @@ static const String updateDistricts ="/upsert/location";
 
   ///Add Comment
   static const String addComment = "/addcomment";
+  static const String commentGet ="/post/";
+
 
   ///getUserDetail
   static const String userInfo = "/userinfo";
@@ -32,6 +34,8 @@ static const String updateDistricts ="/upsert/location";
   static const String sendOtp = "/generateOtp";
   static const String sendCode= "/validateReferalCode";
   static const String validateOtp = "/validateOtp";
+
+
 
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
