@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chotanews/screens/chota_info_screens/about_us.dart';
 import 'package:chotanews/screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
@@ -27,13 +29,13 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  bool isDarkTheme = false;
-
-  void _toggleTheme() {
-    setState(() {
-      isDarkTheme = !isDarkTheme;
-    });
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getLogin();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -235,7 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
                       BoxShadow(
@@ -264,7 +266,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: isDarkTheme ? Colors.white : Colors.black,
+                            color:  Colors.black,
                           ),
                         ),
                         Spacer(),
@@ -286,7 +288,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                    color:  Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
                       BoxShadow(
@@ -315,7 +317,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: isDarkTheme ? Colors.white : Colors.black,
+                            color: Colors.black,
                           ),
                         ),
                         Spacer(),
@@ -337,7 +339,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                    color:Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
                       BoxShadow(
@@ -366,7 +368,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: isDarkTheme ? Colors.white : Colors.black,
+                            color:Colors.black,
                           ),
                         ),
                         Spacer(),
@@ -388,7 +390,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                    color:  Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
                       BoxShadow(
@@ -417,7 +419,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color: isDarkTheme ? Colors.white : Colors.black,
+                            color:  Colors.black,
                           ),
                         ),
                         Spacer(),
@@ -450,7 +452,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     return Container(
                       decoration: BoxDecoration(
-                        color: isDarkTheme ? Colors.grey[800] : Colors.white,
+                        color:  Colors.white,
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: const [
                           BoxShadow(
@@ -474,11 +476,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             const SizedBox(width: 16),
                             Text(
-                              'Logout',
+                              isLogin? 'Logout':'Login',
                               style: fontStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
-                                color: isDarkTheme ? Colors.white : Colors.black,
+                                color: Colors.black,
                               ),
                             ),
                             const Spacer(),
@@ -516,5 +518,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
       ),
     );
+  }
+ bool isLogin=false;
+  Future  getLogin()  async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+    String loginId = sharedPreferences.getString("loginId")??"";
+    log(loginId.toString());
+    if ( loginId.isNotEmpty) {
+      isLogin=true;
+    } else {
+      isLogin=false;
+    }
+    setState(() {
+
+    });
   }
 }
