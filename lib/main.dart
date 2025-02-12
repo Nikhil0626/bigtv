@@ -64,8 +64,9 @@ void fetchDeviceId(String token) async {
 }
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  WebEngagePlugin _webEngagePlugin =  WebEngagePlugin();
   await Firebase.initializeApp();
-  WebEngagePlugin _webEngagePlugin = new WebEngagePlugin();
+
   if(Platform.isIOS){
     String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
     log('APNs Token: $apnsToken');
@@ -77,12 +78,10 @@ if(Platform.isAndroid){
   if (token != null) {
 
     fetchDeviceId(token);
-    _webEngagePlugin = new WebEngagePlugin();
+    // _webEngagePlugin = new WebEngagePlugin();
     _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
 
      WebEngagePlugin.setPushToken(token);
-     WebEngagePlugin.userLogin('63861');
-     WebEngagePlugin.setUserEmail('siva.j2092@gmail.com');
 
 
   }
