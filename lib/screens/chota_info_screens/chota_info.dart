@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../new_refer_earn_screen/new_refer_earn_screen.dart';
@@ -433,6 +434,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 )),
             InkWell(
               onTap: () async {
+                WebEngagePlugin.userLogout();
                 SharedPreferences sp = await SharedPreferences.getInstance();
                 await sp.remove("loginId"); // Remove only loginId
                 setState(() {}); // Force UI update after logout
