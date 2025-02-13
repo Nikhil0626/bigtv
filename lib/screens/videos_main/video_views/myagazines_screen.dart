@@ -35,7 +35,11 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushNamed(context, RoutesManager.getAllMenuItemScreen);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RoutesManager.getAllMenuItemScreen,
+          (route) => false,
+        );
         return false;
       },
       child: Scaffold(
@@ -47,7 +51,11 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
             padding: const EdgeInsets.only(left: 14),
             child: IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  RoutesManager.getAllMenuItemScreen,
+                  (route) => false,
+                );
               },
               icon: const Icon(
                 Icons.arrow_back_ios_rounded,
@@ -87,8 +95,10 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => FullPageCarousel(
-                                imageUrls:
-                                    state.getAllVideoList[index].gallery ?? [],className: "Magazine View",),
+                              imageUrls:
+                                  state.getAllVideoList[index].gallery ?? [],
+                              className: "Magazine View",
+                            ),
                           ));
                     },
                     child: Padding(

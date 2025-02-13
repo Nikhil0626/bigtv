@@ -110,6 +110,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
 
+
     on<SkipLogin>((event, emit) async {
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
@@ -121,6 +122,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
       emit(SuccessScreen(message: "Skip"));
     });
+
 
     on<SendOtp>((event, emit) async {
       emit(LoadingScreen());
@@ -147,6 +149,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         log("error  $st");
       }
     });
+
     on<SendReferralCode>((event, emit) async {
       emit(LoadingScreen());
       try {
@@ -244,6 +247,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
     });
 
+
     on<MobileNumberChanged>((event, emit) async {
       if (event.mobileNumber.isEmpty) {
         emit(MobileNumberInvalid("Please enter your mobile number"));
@@ -254,6 +258,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(MobileNumberValid());
       }
     });
+
   }
 }
 

@@ -64,7 +64,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
           children: [
             const SizedBox(width: 16),
             Padding(
-              padding: const EdgeInsets.only(top: 5),
+              padding: const EdgeInsets.only(top: 1),
               child: Text(
                 "మెను",
                 style: fontStyle(
