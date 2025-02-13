@@ -17,6 +17,7 @@ import '../../../utils/date_conversion.dart';
 import '../../home_screen/home_screen_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../tab_screen.dart';
 import '../video_bloc/videos_bloc.dart';
 import '../video_bloc/videos_event.dart';
 import '../video_bloc/videos_state.dart';
@@ -40,7 +41,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context, RoutesManager.getAllMenuItemScreen);
+        Navigator.pushNamedAndRemoveUntil(context, RoutesManager.getAllMenuItemScreen,(route) => false,);
         return false;
       },
       child: Scaffold(
@@ -52,7 +53,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
             padding: const EdgeInsets.only(left: 1),
             child: IconButton(
               onPressed: () {
-                Navigator.pop(context);
+                Navigator.pushNamedAndRemoveUntil(context, RoutesManager.getAllMenuItemScreen,(route) => false,
+                );
               },
               icon: const Icon(
                 Icons.arrow_back_ios_rounded,

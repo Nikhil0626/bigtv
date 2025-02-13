@@ -7,9 +7,11 @@ TextStyle fontStyle(
       double? fontSize = 14,
       FontWeight? fontWeight = FontWeight.normal}) {
   return
-    GoogleFonts.poppins(
+    GoogleFonts.mandali(
   textStyle: TextStyle(
   fontSize: fontSize ,
+  height: 1.5,
+  wordSpacing: 2,
   fontWeight: fontWeight,
   color: color,)
   );

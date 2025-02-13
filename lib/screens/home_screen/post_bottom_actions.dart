@@ -11,96 +11,71 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import 'botton_actions.dart';
 
-class PostBottomActions extends StatelessWidget {
+class PostBottomActions extends StatefulWidget {
   final FlipProvider flipProvider;
   final HomeScreenModel article;
   final ScreenshotController screenshotController;
-  const PostBottomActions({super.key,required this.flipProvider,required this.article,required this.screenshotController});
+  const PostBottomActions({super.key, required this.flipProvider, required this.article, required this.screenshotController});
+
+  @override
+  _PostBottomActionsState createState() => _PostBottomActionsState();
+}
+
+class _PostBottomActionsState extends State<PostBottomActions> {
+  bool _isVisible = true;
 
   @override
   Widget build(BuildContext context) {
-    return   Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      height: _isVisible ? 50 : 0,
       color: Colors.white,
-      height: 50,
-      child: Row(
-        mainAxisAlignment:
-        MainAxisAlignment.spaceAround,
+      child: _isVisible
+          ? Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          flipProvider.isRefresh
+          widget.flipProvider.isRefresh
               ? const Center(
-            child: SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator()),
+            child: SizedBox(height: 24, width: 24, child: CircularProgressIndicator()),
           )
               : BottomActions(
-              icon:
-              "assets/svg/reload.svg",
+              icon: "assets/svg/reload.svg",
               label: 'రిలోడ్ ',
               onTap: () {
                 log("Refresh");
-                flipProvider.getArticles(
-                    refresh:
-                    true);
+                widget.flipProvider.getArticles(refresh: true);
               }),
           BottomActions(
               icon: "assets/svg/like.svg",
               label: 'లైక్',
-              isLike: flipProvider.isLikeList.contains(article.id.toString())?true:false,
+              isLike: widget.flipProvider.isLikeList.contains(widget.article.id.toString()),
               onTap: () {
-                log(
-                  "Like",
-                );
-                flipProvider.isLikePost(article.id.toString());
-                // setState(() {
-                //   isLike = !isLike;
-                // });
+                log("Like");
+                widget.flipProvider.isLikePost(widget.article.id.toString());
               }),
           BottomActions(
-              icon:
-              "assets/svg/comment.svg",
+              icon: "assets/svg/comment.svg",
               label: 'కామెంట్',
               onTap: () async {
                 log("Comment");
-                SharedPreferences
-                sharedPreferences =
-                await SharedPreferences
-                    .getInstance();
-                String loginId =
-                    sharedPreferences
-                        .getString(
-                        "loginId") ??
-                        "";
+                SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+                String loginId = sharedPreferences.getString("loginId") ?? "";
                 log(loginId.toString());
                 if (loginId.isNotEmpty) {
-                  flipProvider
-                      .getAllPostById(
-                      article.id)
-                      .then((value) =>
-                      showComments(
-                          context,
-                          article
-                              .id
-                              .toString()));
+                  widget.flipProvider.getAllPostById(widget.article.id).then((value) => showComments(context, widget.article.id.toString()));
                 } else {
-                  CustomToast.showInfoToast(
-                      msg:
-                      "Please Login And Continue");
+                  CustomToast.showInfoToast(msg: "Please Login And Continue");
                 }
               }),
           BottomActions(
-              icon:
-              "assets/svg/share.svg",
+              icon: "assets/svg/share.svg",
               label: ' షేర్',
               onTap: () async {
-                flipProvider
-                    .takeScreenshotAndShare(
-                    article,
-                    screenshotController);
-
+                widget.flipProvider.takeScreenshotAndShare(widget.article, widget.screenshotController);
               }),
         ],
-      ),
+      )
+          : null,
     );
   }
 }
