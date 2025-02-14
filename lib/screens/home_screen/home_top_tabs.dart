@@ -82,8 +82,8 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                             isScrollable: false, // Disable scrolling of the TabBar
                             unselectedLabelColor: Colors.black,
                             indicatorColor: Colors.blue,
-                            unselectedLabelStyle: fontStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w700),
-                            labelStyle: fontStyle(color: Colors.blue,fontSize: 20 ,fontWeight: FontWeight.bold),
+                            unselectedLabelStyle: fontStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w700),
+                            labelStyle: fontStyle(color: Colors.blue,fontSize: 18 ,fontWeight: FontWeight.bold),
                             tabs: const [
                               Tab(text: 'న్యూస్'),
                               Tab(text: 'జిల్లాలు'),

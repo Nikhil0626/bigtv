@@ -222,9 +222,9 @@ class _OtpScreenState extends State<OtpScreen> {
                           height(height: 20),
                           InkWell(
                             onTap: () {
-                              if (enteredOtp.length == 4) {
+                              if (otpController.text.length == 4) {
                                 context.read<AuthProvider>().verifyOtp(
-                                    context, widget.mobileNumber, enteredOtp);
+                                    context, widget.mobileNumber, otpController.text);
                               } else {
                                 CustomToast.showErrorToast(msg: "Invalid OTP");
                               }

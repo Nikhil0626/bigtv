@@ -56,19 +56,19 @@ class DynamicLinkService {
     if (postId != null && postId.isNotEmpty) {
       log("Navigating to Post ID: $postId");
       if (!context.mounted) return;
-      Navigator.push(
+      Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => IndividualPost(postId: postId)),
+        MaterialPageRoute(builder: (context) => IndividualPost(postId: postId)),(route) => false,
       );
     } else if (referralCode != null && referralCode.isNotEmpty) {
       log("Applying Referral Code: $referralCode");
       sharedPreferences.setString("sharedReferralCode", referralCode);
       if (!context.mounted) return;
-      Navigator.pushNamed(context, RoutesManager.welcomeScreen);
+      Navigator.pushNamedAndRemoveUntil(context, RoutesManager.welcomeScreen,(route) => false,);
     } else {
       log("No deep link parameters found, navigating normally.");
       if (!context.mounted) return;
-        Navigator.pushNamed(context, RoutesManager.welcomeScreen);
+        Navigator.pushNamedAndRemoveUntil(context, RoutesManager.welcomeScreen,(route) => false,);
     }
   }
 }

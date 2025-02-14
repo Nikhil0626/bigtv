@@ -55,7 +55,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             icon: const Icon(
               Icons.arrow_back_ios_rounded,
               color: Colors.white,
-              size: 20,
+              size: 22,
             ),
           ),
         ),
@@ -68,7 +68,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 "సెట్టింగ్స్",
                 style: fontStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -271,7 +271,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Text(
                           'కాంటాక్ట్ అస్',
                           style: fontStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color:  Colors.black,
                           ),
@@ -326,7 +326,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Text(
                           'ఆడ్వర్టైజ్ విత్ అస్',
                           style: fontStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color: Colors.black,
                           ),
@@ -382,7 +382,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Text(
                           'టర్మ్స్ అండ్ కండీషన్స్',
                           style: fontStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color:Colors.black,
                           ),
@@ -437,7 +437,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         Text(
                           'ప్రైవసీ పాలసీ',
                           style: fontStyle(
-                            fontSize: 16,
+                            fontSize: 18,
                             fontWeight: FontWeight.w500,
                             color:  Colors.black,
                           ),
@@ -487,7 +487,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       Text(
                         isLogin? 'లాగౌట్':'లాగిన్',
                         style: fontStyle(
-                          fontSize: 16,
+                          fontSize: 18,
                           fontWeight: FontWeight.w500,
                           color: Colors.black,
                         ),
@@ -515,7 +515,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 child: Text(
                   "App Version: 1.0.0+6",
                   style: fontStyle(
-                    fontSize: 14,
+                    fontSize: 16,
                   ),
                 ))
           ],
