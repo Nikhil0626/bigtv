@@ -15,15 +15,16 @@ import '../../utils/commant_screen.dart';
 import 'botton_actions.dart';
 
 class PostBottomActions extends StatelessWidget {
+  final String postType;
   final FlipProvider flipProvider;
   final HomeScreenModel article;
   final ScreenshotController screenshotController;
-  const PostBottomActions({super.key,required this.flipProvider,required this.article,required this.screenshotController});
+  const PostBottomActions({super.key,required this.flipProvider,required this.article,required this.screenshotController,this.postType =""});
 
   @override
   Widget build(BuildContext context) {
     return   Container(
-      color: Colors.white,
+      color:postType == "BigBlackStandard" ?Colors.black:Colors.white,
       height: 50,
       child: Row(
         mainAxisAlignment:
@@ -32,6 +33,7 @@ class PostBottomActions extends StatelessWidget {
           flipProvider.isRefresh
               ? const AppLoadingScreen()
               : BottomActions(
+            postType: postType,
               icon:
               "assets/svg/reload.svg",
               label: 'రిలోడ్ ',
@@ -42,6 +44,7 @@ class PostBottomActions extends StatelessWidget {
                     true);
               }),
           BottomActions(
+              postType: postType,
               icon: "assets/svg/like.svg",
               label: 'లైక్',
               isLike: flipProvider.isLikeList.contains(article.id.toString())?true:false,
@@ -55,6 +58,7 @@ class PostBottomActions extends StatelessWidget {
                 // });
               }),
           BottomActions(
+              postType: postType,
               icon:
               "assets/svg/comment.svg",
               label: 'కామెంట్',
@@ -84,7 +88,9 @@ class PostBottomActions extends StatelessWidget {
                       "Please Login And Continue");
                 }
               }),
+
           BottomActions(
+              postType: postType,
               icon:
               "assets/svg/share.svg",
               label: ' షేర్',
@@ -108,7 +114,8 @@ class PostBottomActions extends StatelessWidget {
 
 class GalleryPostBottomActions extends StatelessWidget {
   final  article;
-  const GalleryPostBottomActions({super.key,required this.article,});
+  final bool isHome;
+  const GalleryPostBottomActions({super.key,required this.article,this.isHome = false});
 
   @override
   Widget build(BuildContext context) {
@@ -120,6 +127,7 @@ class GalleryPostBottomActions extends StatelessWidget {
         MainAxisAlignment.spaceAround,
         children: [
           BottomActions(
+              postType: "",
               icon: "assets/svg/like.svg",
               label: 'లైక్',
               isLike:  context.watch<FlipProvider>().isLikeList.contains(article.id.toString())?true:false,
@@ -131,6 +139,7 @@ class GalleryPostBottomActions extends StatelessWidget {
 
               }),
           BottomActions(
+              postType: "",
               icon:
               "assets/svg/comment.svg",
               label: 'కామెంట్',
@@ -162,6 +171,7 @@ class GalleryPostBottomActions extends StatelessWidget {
                 }
               }),
           BottomActions(
+              postType: "",
               icon:
               "assets/svg/share.svg",
               label: ' షేర్',

@@ -51,7 +51,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
           padding: const EdgeInsets.only(left: 14),
           child: IconButton(
             onPressed: () {
-              Navigator.pop(context);
+              Navigator.pushNamed(context,RoutesManager.homeScreen);
             },
             icon: const Icon(
               Icons.arrow_back_ios_rounded,

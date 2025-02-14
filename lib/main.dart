@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:chotanews/screens/Auth_module/auth_provider.dart';
 import 'package:chotanews/screens/testing_screen/provider.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -115,6 +116,7 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<FlipProvider>(create: (context) => FlipProvider()),
+        ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider()),
 
       ],
       child: MultiBlocProvider(

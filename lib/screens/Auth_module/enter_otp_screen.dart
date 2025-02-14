@@ -3,21 +3,19 @@ import 'dart:developer';
 
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
-import 'package:chotanews/screens/Auth_module/auth_state.dart';
-import 'package:chotanews/screens/home_screen/home_bloc.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:otp_text_field/otp_field.dart';
 import 'package:otp_text_field/style.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
-
-import '../../referral_code_screen/referral_code.dart';
+import 'package:pin_code_fields/pin_code_fields.dart';
+import 'package:provider/provider.dart';
+import 'package:sms_autofill/sms_autofill.dart';
 import 'auth_event.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -35,7 +33,7 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  OtpFieldController otpController = OtpFieldController();
+  TextEditingController otpController = TextEditingController();
   String enteredOtp = "";
 
   int _remainingTime = 60; // Initial time (60 seconds)
@@ -44,26 +42,18 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
+    log("mobile number ${widget.mobileNumber}");
+    log("mobile number ${widget.otp}");
     super.initState();
     enteredOtp = "";
-    WebEngagePlugin.userLogin(widget.mobileNumber.toString());
-    WebEngagePlugin.trackEvent('enterOtpScreen', {'mobileNumber': widget.mobileNumber.toString()});
     startCountdown();
+    _listenForSms();
   }
-
-  Future verifyOtp() async {
-    if (enteredOtp.length == 4) {
-      context.read<AuthBloc>().add(VerificationOtp(
-          Otp: enteredOtp,
-          mobileNumber: widget.mobileNumber,
-          context: context));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid OTP!')),
-      );
-    }
+  void _listenForSms() async {
+  var ddd =   await SmsAutoFill().listenForCode;
+  print(ddd);
   }
+  Future verifyOtp(context) async {}
 
   void startCountdown() {
     setState(() {
@@ -85,316 +75,180 @@ class _OtpScreenState extends State<OtpScreen> {
     });
   }
 
-  void resendOtp() {
-    context
-        .read<AuthBloc>()
-        .add(SendOtp(phoneNumber: widget.mobileNumber.toString()));
+  void resendOtp(context) {
+
+    context.read<AuthProvider>().sendOtp(widget.mobileNumber.toString(), context);
+    // context.read<AuthBloc>().add(
+    //     SendOtp(context: context, phoneNumber: widget.mobileNumber.toString()));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Padding(
         padding: const EdgeInsets.only(top: 32),
-        child:
-            BlocConsumer<AuthBloc, AuthState>(listener: (context, state) async {
-          SharedPreferences sharedPreferences =
-              await SharedPreferences.getInstance();
-          String code =
-              await sharedPreferences.getString("sharedReferralCode") ?? "";
-          if (state is SuccessScreen) {
-//             if (state.message == "OTP Verify"  ) {
-//               log(code);
-//               if( code != ""){
-//                 context.read<AuthBloc>().add(SendReferralCode(referralCodeNumber: code, mobileNumber: widget.mobileNumber, context:context));
-//               }else{
-            Navigator.pushNamedAndRemoveUntil(context, RoutesManager.districtSelectionScreen,
-                arguments: {"className": ""},(route) => false,);
-            // }
-          }
-        }, builder: (context, state) {
+        child: Consumer<AuthProvider>(builder: (context, authProvider, __) {
           return SingleChildScrollView(
             child: SizedBox(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              child: state is LoadingScreen
-                  ? const Center(
-                      child: AppLoadingScreen(),
-                    )
-                  : state is LoadingScreen
-                      ? Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              height(height: 100),
-                              SvgPicture.asset(
-                                'assets/svg/Chota_news_logo.svg',
-                                height: 24,
-                                width: 166,
-                              ),
-                              height(height: 30),
-                              Text(
-                                "OTP: ${widget.otp}",
-                                style: fontStyle(
-                                    fontSize: 24, fontWeight: FontWeight.bold),
-                              ),
-                              height(height: 30),
-                              Text(
-                                "Sign In",
-                                style: fontStyle(
-                                    fontSize: 24, fontWeight: FontWeight.bold),
-                              ),
-                              height(height: 10),
-                              Text(
-                                "Please enter the OTP sent to",
-                                style:
-                                    fontStyle(fontSize: 14, color: Colors.grey),
-                              ),
-                              height(height: 10),
-                              Row(
-                                children: [
-                                  Text(
-                                    "+91 ${widget.mobileNumber}",
-                                    style: fontStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Spacer(),
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        RoutesManager.signInScreen,
-                                        (route) => false,
-                                      );
-                                    },
-                                    child: Text(
-                                      "Change Phone Number",
-                                      style: fontStyle(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.blue),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              height(height: 10),
-                              OTPTextField(
-                                length: 4,
-                                width: MediaQuery.of(context).size.width,
-                                fieldWidth: 70,
-                                style: fontStyle(fontSize: 18),
-                                textFieldAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                fieldStyle: FieldStyle.box,
-                                controller: otpController,
-                                onChanged: (otp) {
-                                  setState(() {
-                                    enteredOtp = otp;
-                                  });
-                                },
-                                onCompleted: (otp) {
-                                  setState(() {
-                                    enteredOtp = otp;
-                                  });
-                                },
-                              ),
-                              height(height: 10),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    "OTP is valid for ${_remainingTime ~/ 60}:${(_remainingTime % 60).toString().padLeft(2, '0')}",
-                                    style: fontStyle(color: Colors.grey),
-                                  ),
-                                  GestureDetector(
-                                    onTap: canResend ? resendOtp : null,
-                                    child: Text(
-                                      "Resend OTP",
-                                      style: fontStyle(
-                                          color: canResend
-                                              ? Colors.blue
-                                              : Colors.grey,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              height(height: 20),
-                              InkWell(
-                                onTap: verifyOtp,
-                                child: Container(
-                                  height: 40,
-                                  decoration: const BoxDecoration(
-                                      color: AppColors.appButtonColor,
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8))),
-                                  width: double.infinity,
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    "Verify",
-                                    style: fontStyle(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600),
-                                  ),
-                                ),
-                              ),
-                            ],
+              child: authProvider.isLoading
+                  ? const AppLoadingScreen()
+                  : Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          height(height: 100),
+                          SvgPicture.asset(
+                            'assets/svg/Chota_news_logo.svg',
+                            height: 24,
+                            width: 166,
                           ),
-                        )
-                      : Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          height(height: 30),
+                          Text(
+                            "OTP: ${widget.otp}",
+                            style: fontStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                          height(height: 30),
+                          Text(
+                            "Sign In",
+                            style: fontStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
+                          height(height: 10),
+                          Text(
+                            "Please enter the OTP sent to",
+                            style: fontStyle(fontSize: 14, color: Colors.grey),
+                          ),
+                          height(height: 10),
+                          Row(
                             children: [
-                              height(height: 100),
-                              SvgPicture.asset(
-                                'assets/svg/Chota_news_logo.svg',
-                                height: 24,
-                                width: 166,
-                              ),
-                              height(height: 30),
                               Text(
-                                "OTP: ${widget.otp}",
+                                "+91 ${widget.mobileNumber}",
                                 style: fontStyle(
-                                    fontSize: 24, fontWeight: FontWeight.bold),
+                                    fontSize: 14, fontWeight: FontWeight.bold),
                               ),
-                              height(height: 30),
-                              Text(
-                                "Sign In",
-                                style: fontStyle(
-                                    fontSize: 24, fontWeight: FontWeight.bold),
-                              ),
-                              height(height: 10),
-                              Text(
-                                "Please enter the OTP sent to",
-                                style:
-                                    fontStyle(fontSize: 16, color: Colors.grey),
-                              ),
-                              height(height: 10),
-                              Row(
-                                children: [
-                                  Text(
-                                    "+91 ${widget.mobileNumber}",
-                                    style: fontStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  const Spacer(),
-                                  InkWell(
-                                    onTap: () {
-                                      Navigator.pushNamedAndRemoveUntil(
-                                        context,
-                                        RoutesManager.signInScreen,
-                                        (route) => false,
-                                      );
-                                    },
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 13),
-                                      child: Text(
-                                        "Edit",
-                                        style: fontStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.blue),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              height(height: 24),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8),
+                              const Spacer(),
+                              InkWell(
+                                onTap: () {
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    RoutesManager.signInScreen,
+                                    (route) => false,
+                                  );
+                                },
                                 child: Text(
-                                  "Enter OTP",
+                                  "Edit",
                                   style: fontStyle(
                                       fontSize: 14,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w600),
-                                ),
-                              ),
-                              height(height: 5),
-                              OTPTextField(
-                                // key: UniqueKey(),
-                                length: 4,
-                                width: MediaQuery.of(context).size.width,
-                                fieldWidth: 70,
-                                style: fontStyle(fontSize: 18),
-                                textFieldAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                fieldStyle: FieldStyle.box,
-
-                                controller: otpController,
-                                onChanged: (otp) {
-                                  setState(() {
-                                    enteredOtp = otp;
-                                  });
-                                },
-                                onCompleted: (otp) {
-                                  setState(() {
-                                    enteredOtp = otp;
-                                  });
-                                },
-                              ),
-                              height(height: 16),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Text(
-                                      "OTP is valid for ${_remainingTime ~/ 60}:${(_remainingTime % 60).toString().padLeft(2, '0')}",
-                                      style: fontStyle(color: Colors.grey),
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: canResend ? resendOtp : null,
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(right: 9),
-                                      child: Text(
-                                        "Resend OTP",
-                                        style: fontStyle(
-                                            color: canResend
-                                                ? Colors.blue
-                                                : Colors.grey,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              height(height: 32),
-                              InkWell(
-                                onTap: verifyOtp,
-                                child: Container(
-                                  height: 43,
-                                  decoration: BoxDecoration(
-                                      color: enteredOtp.length < 3
-                                          ? Colors.grey
-                                          : AppColors.appButtonColor,
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(8))),
-                                  width: double.infinity,
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    "Verify",
-                                    style: fontStyle(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600),
-                                  ),
+                                      fontWeight: FontWeight.w600,
+                                      color: Colors.blue),
                                 ),
                               ),
                             ],
                           ),
-                        ),
+                          height(height: 10),
+                          PinCodeTextField(
+                            appContext: context,
+                            length: 4,
+                            // OTP length
+                            controller: otpController,
+                            keyboardType: TextInputType.number,
+                            onChanged: (value) {
+                              print("Entered OTP: $value");
+                            },
+                            enablePinAutofill: true,
+                            pinTheme: PinTheme(
+                              shape: PinCodeFieldShape.box,
+                              borderRadius: BorderRadius.circular(10),
+                              // Rounded corners
+                              fieldHeight: 50,
+                              fieldWidth: 70,
+                              activeFillColor: Colors.white,
+                              activeColor: Colors.blue,
+                              selectedColor: Colors.blueAccent,
+                              selectedFillColor: Colors.white,
+                              inactiveColor: Colors.grey,
+                              inactiveFillColor: Colors.white,
+                              borderWidth: 1,
+                            ),
+
+                            autoDisposeControllers: false,
+                          ),
+                          // OTPTextField(
+                          //   length: 4,
+                          //   width: MediaQuery.of(context).size.width,
+                          //   fieldWidth: 70,
+                          //   style: fontStyle(fontSize: 18),
+                          //   textFieldAlignment:
+                          //       MainAxisAlignment.spaceEvenly,
+                          //   fieldStyle: FieldStyle.box,
+                          //   controller: otpController,
+                          //   onChanged: (otp) {
+                          //     setState(() {
+                          //       enteredOtp = otp;
+                          //     });
+                          //   },
+                          //   onCompleted: (otp) {
+                          //     setState(() {
+                          //       enteredOtp = otp;
+                          //     });
+                          //   },
+                          // ),
+                          height(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "OTP is valid for ${_remainingTime ~/ 60}:${(_remainingTime % 60).toString().padLeft(2, '0')}",
+                                style: fontStyle(color: Colors.grey),
+                              ),
+                              GestureDetector(
+                                onTap: () =>
+                                    canResend ? resendOtp(context) : null,
+                                child: Text(
+                                  "Resend OTP",
+                                  style: fontStyle(
+                                      color:
+                                          canResend ? Colors.blue : Colors.grey,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                          height(height: 20),
+                          InkWell(
+                            onTap: () {
+                              if (enteredOtp.length == 4) {
+                                context.read<AuthProvider>().verifyOtp(
+                                    context, widget.mobileNumber, enteredOtp);
+                              } else {
+                                CustomToast.showErrorToast(msg: "Invalid OTP");
+                              }
+                            },
+                            child: Container(
+                              height: 50,
+                              decoration: const BoxDecoration(
+                                  color: AppColors.appButtonColor,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(8))),
+                              width: double.infinity,
+                              alignment: Alignment.center,
+                              child: Text(
+                                "Verify",
+                                style: fontStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
             ),
           );
         }),

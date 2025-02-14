@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:geolocator/geolocator.dart';
+
 
 
 Future<void> requestManageStoragePermission() async {
@@ -48,6 +50,27 @@ Future<void> requestStoragePermission() async {
   }
 
 }
+
+
+Future<void> requestLocationPermission() async {
+  LocationPermission permission = await Geolocator.checkPermission();
+
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are permanently denied
+      print('Location permissions are permanently denied.');
+      return;
+    }
+  }
+
+  if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    print("Location: ${position.latitude}, ${position.longitude}");
+  }
+}
+
+
 Future<void> requestNotificationPermission() async {
   await FirebaseMessaging.instance.requestPermission(
     alert: true,

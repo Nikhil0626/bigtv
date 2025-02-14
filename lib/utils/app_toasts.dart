@@ -19,7 +19,7 @@ class CustomToast {
       backgroundColor: Colors.green,
       duration: duration ??
           const Duration(
-            seconds: 3,
+            seconds: 5,
           ),
       margin: const EdgeInsets.all(16),
       borderRadius: const BorderRadius.all(Radius.circular(12)),

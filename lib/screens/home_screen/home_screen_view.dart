@@ -4,9 +4,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../flip_page/artical_page.dart';
-import '../flip_page/flipe_pannel.dart';
+import '../flip_page/district_flip_panel.dart';
 import '../testing_screen/provider.dart';
-import '../testing_screen/test2.dart';
+import '../flip_page/home_flip_panel.dart';
 import 'home_screen_model.dart';
 
 class HomePage extends StatelessWidget {
@@ -49,7 +49,7 @@ class HomePage1 extends StatelessWidget {
     context.read<FlipProvider>().getArticles();
     double height = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
-        MediaQuery.of(context).padding.bottom)-(Platform.isIOS?100:36);
+        MediaQuery.of(context).padding.bottom)-(Platform.isIOS?100:32);
 
     return Consumer<FlipProvider>(
       builder: (_,flipProvider,__) {

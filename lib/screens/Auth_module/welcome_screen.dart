@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
 import 'package:chotanews/screens/Auth_module/auth_event.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider.dart';
 import 'package:chotanews/screens/Auth_module/auth_state.dart';
 import 'package:chotanews/screens/Auth_module/sign_in_screen.dart';
 import 'package:chotanews/screens/districts_selection/districts_selection_screen.dart';
@@ -13,12 +14,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import '../../services/permission_handler_services.dart';
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    requestLocationPermission();
     WebEngagePlugin.trackEvent('welcomeScreen', {'user': "unknown"});
+
     return Scaffold(
       backgroundColor: Colors.white,
 
@@ -94,7 +99,7 @@ class WelcomeScreen extends StatelessWidget {
                   InkWell(
                     onTap: (){
                       log("Goto Home Screen");
-                      context.read<AuthBloc>().add(SkipLogin());
+                      context.read<AuthProvider>().skipLogin(context);
                     },
                     child: Center(
                       child:  Text(
