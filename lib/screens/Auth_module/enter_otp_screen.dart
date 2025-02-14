@@ -94,25 +94,7 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(
-      //     "Back",
-      //     style: fontStyle(fontWeight: FontWeight.w600, fontSize: 16),
-      //   ),
-      //   leading: InkWell(
-      //     onTap: () {
-      //       Navigator.pushNamedAndRemoveUntil(
-      //         context,
-      //         RoutesManager.signInScreen,
-      //         (route) => false,
-      //       );
-      //     },
-      //     child: const Icon(
-      //       Icons.arrow_back_ios,
-      //       size: 24,
-      //     ),
-      //   ),
-      // ),
+
       body: Padding(
         padding: const EdgeInsets.only(top: 32),
         child:
@@ -122,17 +104,13 @@ class _OtpScreenState extends State<OtpScreen> {
           String code =
               await sharedPreferences.getString("sharedReferralCode") ?? "";
           if (state is SuccessScreen) {
-//       print("skbfjksfhksdhfkshjfskfhskjfkfhksdfdf");
 //             if (state.message == "OTP Verify"  ) {
-//               print("sjfhksehfksfshlkfhseflwfjil");
-//               log("code     $code"   );
 //               log(code);
 //               if( code != ""){
 //                 context.read<AuthBloc>().add(SendReferralCode(referralCodeNumber: code, mobileNumber: widget.mobileNumber, context:context));
 //               }else{
-//                 print("skbfjksfhksdhfkshjfskfhskjfkfhksdfdf1");
-            Navigator.pushNamed(context, RoutesManager.districtSelectionScreen,
-                arguments: {"mobileNumber": widget.mobileNumber});
+            Navigator.pushNamedAndRemoveUntil(context, RoutesManager.districtSelectionScreen,
+                arguments: {"className": ""},(route) => false,);
             // }
           }
         }, builder: (context, state) {

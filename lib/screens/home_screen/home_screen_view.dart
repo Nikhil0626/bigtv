@@ -18,6 +18,9 @@ class HomePage extends StatelessWidget {
     double height = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         MediaQuery.of(context).padding.bottom)-(Platform.isIOS?100:32);
+    double width = (MediaQuery.of(context).size.width -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom)-(Platform.isIOS?100:36);
     return Scaffold(
 
       body: Consumer<FlipProvider>(
@@ -47,14 +50,17 @@ class HomePage1 extends StatelessWidget {
     double height = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
         MediaQuery.of(context).padding.bottom)-(Platform.isIOS?100:36);
+
     return Consumer<FlipProvider>(
       builder: (_,flipProvider,__) {
         return DistrictFlipPanel<HomeScreenModel>(
+
           waitingForRefresh: flipProvider.isRefresh?true:false,
           itemStream: flipProvider.districtArticles,
           itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
               ArticlePage(article: article, flipBack: flipBack, height: height,),
           height: height,
+
         );
       }
     );

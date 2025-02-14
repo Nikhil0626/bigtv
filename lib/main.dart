@@ -1,13 +1,6 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/flip_page/articals_bloc.dart';
-import 'package:chotanews/screens/flip_page/article_bloc_provider.dart';
-import 'package:chotanews/screens/flip_page/test_one.dart';
-import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:chotanews/screens/testing_screen/provider.dart';
-import 'package:chotanews/screens/testing_screen/test4.dart';
-import 'package:chotanews/services/dynamic_link_service.dart';
-import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -21,7 +14,6 @@ import 'dart:io' show Platform;
 import 'globel_keys/app_router.dart';
 import 'globel_keys/global_variables_data.dart';
 import 'globel_keys/globel_keys.dart';
-import 'screens/testing_screen/test2.dart';
 
 
 Future<String?> getUniqueDeviceId(String token) async {

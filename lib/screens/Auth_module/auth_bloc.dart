@@ -113,7 +113,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<SkipLogin>((event, emit) async {
       SharedPreferences sharedPreferences =
           await SharedPreferences.getInstance();
-
       sharedPreferences.setString("loginId", "Skip");
       log("Login Skip ");
       GlobalVariables().loginId = "Skip";
@@ -193,7 +192,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           "familyName": "",
           "givenName": "",
           "id": "",
-          "name": "hello",
+          "name": "User${event.mobileNumber.toString().substring(6,10)}",
           "photo": ""
         };
         log(body.toString());

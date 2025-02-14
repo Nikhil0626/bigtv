@@ -95,8 +95,6 @@ class WelcomeScreen extends StatelessWidget {
                     onTap: (){
                       log("Goto Home Screen");
                       context.read<AuthBloc>().add(SkipLogin());
-
-                      
                     },
                     child: Center(
                       child:  Text(

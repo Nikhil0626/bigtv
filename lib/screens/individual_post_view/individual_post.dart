@@ -212,7 +212,7 @@ class _IndividualPostState extends State<IndividualPost> {
                                     label: 'కామెంట్',
                                     onTap: () {
                                       log("Comment");
-                                      showComments(context, "");
+                                      showComments(context, widget.postId);
                                       // context.read<HomeBloc>().add(GetAllNewsFeed());
                                     }),
                                 BottomActions(

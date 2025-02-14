@@ -20,7 +20,7 @@ class BottomNavigationItems extends StatelessWidget {
         builder: (context, state) {
           return Container(
             color: Colors.white,
-            height: 75,
+            height: 76,
             width: MediaQuery
                 .of(context)
                 .size

@@ -2,10 +2,13 @@ import 'dart:developer';
 
 import 'package:chotanews/screens/home_screen/home_screen_model.dart';
 import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/screens/videos_main/videos_model/videos_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../services/image_to_pdf_helper.dart';
 import '../../utils/app_loading_screen.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
@@ -27,7 +30,7 @@ class PostBottomActions extends StatelessWidget {
         MainAxisAlignment.spaceAround,
         children: [
           flipProvider.isRefresh
-              ? AppLoadingScreen()
+              ? const AppLoadingScreen()
               : BottomActions(
               icon:
               "assets/svg/reload.svg",
@@ -64,11 +67,86 @@ class PostBottomActions extends StatelessWidget {
                 String loginId =
                     sharedPreferences
                         .getString(
-                        "loginId") ??
-                        "";
+                        "loginId").toString() ;
                 log(loginId.toString());
-                if (loginId.isNotEmpty) {
+                if (loginId.isNotEmpty && loginId != "Skip" ) {
                   flipProvider
+                      .getAllPostById(
+                      article.id);
+                  showComments(
+                      context,
+                      article
+                          .id
+                          .toString());
+                } else {
+                  CustomToast.showInfoToast(
+                      msg:
+                      "Please Login And Continue");
+                }
+              }),
+          BottomActions(
+              icon:
+              "assets/svg/share.svg",
+              label: ' షేర్',
+              onTap: () async {
+                if(article.type=="Standard"){
+                  takeScreenshotAndShare(article,screenshotController);
+                }else if(article.type=="Image"){
+                  takeScreenshotAndShare(article,screenshotController);
+                  // convertImageUrlToPdfAndShare(context,article);
+                }else if(article.type == "Gallery"){
+                  createAndSharePdf(context,article);
+                }
+
+              }),
+        ],
+      ),
+    );
+  }
+}
+
+
+class GalleryPostBottomActions extends StatelessWidget {
+  final  article;
+  const GalleryPostBottomActions({super.key,required this.article,});
+
+  @override
+  Widget build(BuildContext context) {
+    return   Container(
+      color: Colors.white,
+      height: 50,
+      child: Row(
+        mainAxisAlignment:
+        MainAxisAlignment.spaceAround,
+        children: [
+          BottomActions(
+              icon: "assets/svg/like.svg",
+              label: 'లైక్',
+              isLike:  context.watch<FlipProvider>().isLikeList.contains(article.id.toString())?true:false,
+              onTap: () {
+                log(
+                  "Like",
+                );
+                context.read<FlipProvider>().isLikePost(article.id.toString());
+
+              }),
+          BottomActions(
+              icon:
+              "assets/svg/comment.svg",
+              label: 'కామెంట్',
+              onTap: () async {
+                log("Comment");
+                SharedPreferences
+                sharedPreferences =
+                await SharedPreferences
+                    .getInstance();
+                String  loginId =
+                    sharedPreferences
+                        .getString(
+                        "loginId").toString();
+                log(loginId.toString());
+                if (loginId.isNotEmpty && loginId != "Skip" ) {
+                  context.read<FlipProvider>()
                       .getAllPostById(
                       article.id)
                       .then((value) =>
@@ -88,10 +166,9 @@ class PostBottomActions extends StatelessWidget {
               "assets/svg/share.svg",
               label: ' షేర్',
               onTap: () async {
-                flipProvider
-                    .takeScreenshotAndShare(
-                    article,
-                    screenshotController);
+                if(article.type == "Gallery"){
+                  createAndSharePdf(context,article);
+                }
 
               }),
         ],

@@ -46,7 +46,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future<void> getPhoneNumber() async {
     try {
-      // Request Permission
+
       if (await Permission.location.request().isGranted) {
         
       }else{
@@ -106,6 +106,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     "mobileNumber": _mobileController.text.toString(),
                     "otp": state.otp
                   });
+            }else{
+              Navigator.pushNamedAndRemoveUntil(context,
+                RoutesManager.districtSelectionScreen,arguments: {"className":""},(route) => false,);
             }
           }
         }, builder: (context, state) {
@@ -280,8 +283,8 @@ class _SignInScreenState extends State<SignInScreen> {
                               height(height: 22),
                               TextButton(
                                   onPressed: () {
-                                    Navigator.pushNamed(context,
-                                        RoutesManager.districtSelectionScreen);
+                                    context.read<AuthBloc>().add(SkipLogin());
+
                                   },
                                   child:  Center(
                                     child: Text(
@@ -456,15 +459,12 @@ class _SignInScreenState extends State<SignInScreen> {
                                   ),
                                 ),
                               ),
-
-                              height(height: 20),
-                              ...simCards.map((sim) => Text("SIM: ${sim.carrierName}, ${sim.number ?? 'Unknown'}")).toList(),
-
                               height(height: 20),
                               TextButton(
                                   onPressed: () {
-                                    Navigator.pushNamed(context,
-                                        RoutesManager.districtSelectionScreen);
+                                    context.read<AuthBloc>().add(SkipLogin());
+
+
                                   },
                                   child:  Center(
                                     child: Text(

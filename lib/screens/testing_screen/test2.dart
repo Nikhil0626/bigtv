@@ -52,9 +52,9 @@ class _FlipPanelState<T> extends State<FlipPanel>
   int _currentIndex = 0;
   bool _isReversePhase = false;
   bool _running = false;
+  bool isLeft = false;
   final _perspective = 0.0003;
-  final _zeroAngle =
-  0.0001;
+  final _zeroAngle = 0.0001;
   late double _height;
 
   FlipDirection _direction = FlipDirection.none;
@@ -156,6 +156,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
               .map((item) => widget.itemBuilder(context, item, flipBack, _height))
               .toList());
         }
+        print("currenttttt itemm  ${items.toString()}");
         _availableItems += items.length;
         setState(() {});
       });
@@ -262,7 +263,19 @@ class _FlipPanelState<T> extends State<FlipPanel>
       _lowerChild1 = makeLowerClip(_currentChild!);
     }
   }
+  void _handleDragStartLeft(
+      DragStartDetails details,
+      ) {
 
+
+    _dragging = true;
+    _running = false;
+    isLeft = true;
+    _direction = FlipDirection.none;
+    setState(() {
+
+    });
+  }
   void _handleDragStart(DragStartDetails details,) {
     _dragging = true;
     _running = true;

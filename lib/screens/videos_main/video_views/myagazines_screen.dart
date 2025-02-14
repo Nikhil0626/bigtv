@@ -88,7 +88,7 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
                           MaterialPageRoute(
                             builder: (context) => FullPageCarousel(
                                 imageUrls:
-                                    state.getAllVideoList[index].gallery ?? [],className: "Magazine View",),
+                                    state.getAllVideoList[index].gallery ?? [],className: "Magazine View", postDetails:state.getAllVideoList[index] ,),
                           ));
                     },
                     child: Padding(
