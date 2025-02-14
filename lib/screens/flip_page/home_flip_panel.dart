@@ -1,5 +1,7 @@
 
 
+import 'dart:developer';
+
 import 'package:chotanews/screens/testing_screen/provider.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +17,7 @@ typedef ItemBuilder<T> = Widget Function(BuildContext, T, FlipBack?, double);
 
 typedef GetItems = void Function({bool refresh});
 
-enum FlipDirection { up, down, none }
+enum FlipDirection { up, down, none ,left,right}
 
 enum LastFlip { none, previous, next }
 
@@ -362,7 +364,13 @@ class _FlipPanelState<T> extends State<FlipPanel>
     }
   }
 
-  Widget _buildUpperFlipPanel() => _direction == FlipDirection.up
+
+
+  Widget _buildUpperFlipPanel() =>_direction == FlipDirection.right?Container(
+    width: 300,
+    height: 600,
+    color: Colors.blue,
+  ): _direction == FlipDirection.up
       ? Stack(
     children: [
       Transform(
@@ -474,6 +482,8 @@ class _FlipPanelState<T> extends State<FlipPanel>
     ],
   );
 
+
+
   Widget _buildPanel() {
     Widget content = _running
         ? Column(
@@ -514,6 +524,8 @@ class _FlipPanelState<T> extends State<FlipPanel>
           onVerticalDragStart: _handleDragStart,
           onVerticalDragUpdate: handleDragUpdate,
           onVerticalDragEnd: (details) => handleDragEnd(details,flipProvider),
+          onHorizontalDragStart: flipProvider.handelLeftDragStart,
+          onHorizontalDragUpdate: flipProvider.handelLeftDragUpdate,
           child: content,
         );
       }

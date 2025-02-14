@@ -256,4 +256,15 @@ class FlipProvider extends ChangeNotifier {
     }
     notifyListeners(); // Notify listeners if using ChangeNotifier
   }
+
+  void handelLeftDragStart(DragStartDetails details,){
+    log("vertical dra start");
+    notifyListeners();
+
+  }
+  void handelLeftDragUpdate(DragUpdateDetails details){
+    log("vertical dra update");
+    notifyListeners();
+
+  }
 }
