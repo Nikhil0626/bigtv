@@ -231,7 +231,7 @@ class ArticlePageState extends State<ArticlePage> {
                                                   fontSize: 18,
 
                                                   fontWeight: FontWeight.w600)),
-                                          height(height: 10),
+                                          height(height: 8),
                                           Expanded(
                                               //     child: RichText(
                                               //   text: TextSpan(

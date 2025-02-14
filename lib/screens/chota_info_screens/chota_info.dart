@@ -7,6 +7,7 @@ import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
 import 'package:chotanews/screens/home_screen/home_screen_view.dart';
 import 'package:chotanews/screens/profile_screen/profile_screen.dart';
+import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -16,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/app_router.dart';
@@ -30,7 +32,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-@override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -59,11 +61,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         title: Row(
           children: [
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
             Padding(
-              padding: const EdgeInsets.only(top: 7),
+              padding: const EdgeInsets.only(top: 1),
               child: Text(
-                "Settings",
+                "సెట్టింగ్స్",
                 style: fontStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -230,11 +232,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
             //       ),
             //     )),
             InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ContactUs()),
-                  );
+                onTap: ()async {
+                  if (await canLaunch(BaseUrls.contactPage)) {
+                    await launch(BaseUrls.contactPage);
+                  } else {
+                    CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.contactPage}");}
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(builder: (context) => const ContactUs()),
+                  // );
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -252,7 +258,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -263,14 +269,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          'Contact Us',
+                          'కాంటాక్ట్ అస్',
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color:  Colors.black,
                           ),
                         ),
-                        Spacer(),
+                        const Spacer(),
                         const Icon(
                           Icons.arrow_forward_ios,
                           size: 20,
@@ -280,12 +286,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 )),
             InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AdvertiseWithUs()),
-                  );
+                onTap: () async {
+                  if (await canLaunch(BaseUrls.advertisePage)) {
+                    await launch(BaseUrls.advertisePage);
+                  } else {
+                    CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.advertisePage}");}
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //       builder: (context) => const AdvertiseWithUs()),
+                  // );
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -303,7 +313,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -312,16 +322,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           height: 40,
                           width: 40,
                         ),
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         Text(
-                          'Advertise with us',
+                          'ఆడ్వర్టైజ్ విత్ అస్',
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: Colors.black,
                           ),
                         ),
-                        Spacer(),
+                        const Spacer(),
                         const Icon(
                           Icons.arrow_forward_ios,
                           size: 20,
@@ -331,12 +341,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 )),
             InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const TermsConditions()),
-                  );
+
+                onTap: () async {
+                  if (await canLaunch(BaseUrls.termsPage)) {
+                    await launch(BaseUrls.termsPage);
+                  } else {
+                    CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.termsPage}");}
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //       builder: (context) => const AdvertiseWithUs()),
+                  // );
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -354,7 +369,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -363,16 +378,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           height: 40,
                           width: 40,
                         ),
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         Text(
-                          'Terms and Conditions',
+                          'టర్మ్స్ అండ్ కండీషన్స్',
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color:Colors.black,
                           ),
                         ),
-                        Spacer(),
+                        const Spacer(),
                         const Icon(
                           Icons.arrow_forward_ios,
                           size: 20,
@@ -382,12 +397,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                 )),
             InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PrivacyPolicy()),
-                  );
+                onTap: () async {
+                  if (await canLaunch(BaseUrls.privacyPage)) {
+                    await launch(BaseUrls.privacyPage);
+                  } else {
+                    CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.privacyPage}");}
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //       builder: (context) => const AdvertiseWithUs()),
+                  // );
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -405,7 +424,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Padding(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -414,16 +433,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           height: 40,
                           width: 40,
                         ),
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         Text(
-                          'Privacy Policy',
+                          'ప్రైవసీ పాలసీ',
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color:  Colors.black,
                           ),
                         ),
-                        Spacer(),
+                        const Spacer(),
                         const Icon(
                           Icons.arrow_forward_ios,
                           size: 20,
@@ -440,7 +459,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 setState(() {}); // Force UI update after logout
                 Navigator.pushNamed(context, RoutesManager.signInScreen);
               },
-              child: Container(
+              child:  Container(
                 decoration: BoxDecoration(
                   color:  Colors.white,
                   borderRadius: BorderRadius.circular(8),
@@ -466,7 +485,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        isLogin? 'Logout':'Login',
+                        isLogin? 'లాగౌట్':'లాగిన్',
                         style: fontStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -504,12 +523,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
- bool isLogin=false;
+  bool isLogin=false;
   Future  getLogin()  async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String loginId = sharedPreferences.getString("loginId").toString();
     log(loginId.toString());
-    if ( loginId.isNotEmpty) {
+    if ( loginId.isNotEmpty && loginId != "Skip") {
       isLogin=true;
     } else {
       isLogin=false;

@@ -54,11 +54,6 @@ void fetchDeviceId(String token) async {
   print("Device ID: ${GlobalVariables().deviceId}");
 
 }
-
-
-
-
-
 Future<void> main() async{
   WidgetsFlutterBinding.ensureInitialized();
   WebEngagePlugin _webEngagePlugin =  WebEngagePlugin();
