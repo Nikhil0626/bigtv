@@ -12,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../../globel_keys/global_variables_data.dart';
@@ -119,34 +120,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       GlobalVariables().loginId = "Skip";
       log("Login Skip ${GlobalVariables().loginId}");
 
-      emit(SuccessScreen(message: "Skip"));
+      Navigator.pushNamedAndRemoveUntil(
+        event.context,
+        RoutesManager.districtSelectionScreen,
+        arguments: {"className": ""},
+            (route) => false,
+      );
+
+      // emit(SuccessScreen(message: "Skip"));
     });
 
 
     on<SendOtp>((event, emit) async {
       emit(LoadingScreen());
-      try {
-        String? deviceId = GlobalVariables().deviceId;
-        Map<String, dynamic> body = {
-          "mobile_number": event.phoneNumber.toString(),
-          "device_id": deviceId.toString(),
-        };
-        log(body.toString());
-        Response response = await AuthRepo().sendOtp(body);
-        if (response.statusCode == 200) {
-          log(response.data.toString());
-          CustomToast.showSuccessToast(msg: response.data['message']);
-          otp = response.data['Otp'].toString();
-          log(otp);
-          emit(SuccessScreen(
-              message: response.data['success'].toString(), otp: otp));
-        }
-      } catch (e, st) {
-        CustomToast.showErrorToast(msg: "Otp Not Send Try Again");
-        emit(InitialScreen());
-        log("error  $e");
-        log("error  $st");
-      }
+
     });
 
     on<SendReferralCode>((event, emit) async {
@@ -172,6 +159,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           Navigator.pushNamed(
             event.context,
             RoutesManager.districtSelectionScreen,
+            arguments: {
+              "className":""
+            }
           );
         }
       } catch (e, st) {
@@ -212,31 +202,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           preferences.setString(
               "referralCode", response.data['code'].toString());
 
-          // String code = preferences.getString("sharedReferralCode") ?? "";
-          // if (code != "" && code.isNotEmpty) {
-          //   String? loginId = preferences.getString(
-          //     "loginId",
-          //   );
-          //   Map<String, dynamic> body = {
-          //     "code": code,
-          //     "mobile_number": event.mobileNumber,
-          //     "child_id": loginId!
-          //   };
-          //   log(body.toString());
-          //   Response response = await AuthRepo().sendCode(body);
-          //   if (response.statusCode == 200) {
-          //     preferences.remove("sharedReferralCode");
-          //     log(response.data.toString());
-          //     CustomToast.showSuccessToast(msg: response.data['message']);
-          //
-          //     Navigator.pushNamed(
-          //       event.context,
-          //       RoutesManager.districtSelectionScreen,
-          //     );
-          //   }
-          // } else {
-            emit(SuccessScreen(message: "OTP Verify"));
-          // }
+          Navigator.pushNamed(
+              event.context,
+              RoutesManager.districtSelectionScreen,
+              arguments: {
+                "className":""
+              }
+          );
         }
       } catch (e, st) {
         CustomToast.showErrorToast(msg: "Otp Not Verify");

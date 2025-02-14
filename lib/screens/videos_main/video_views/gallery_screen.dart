@@ -177,7 +177,8 @@ class FullPageCarousel extends StatefulWidget {
   final List<GalleryImage> imageUrls;
   final String className;
   final  postDetails;
-  const FullPageCarousel({super.key, required this.imageUrls, this.className = "",required this.postDetails });
+  final bool isHome;
+  const FullPageCarousel({super.key, required this.imageUrls, this.className = "",required this.postDetails, this.isHome = false });
 
   @override
   _FullPageCarouselState createState() => _FullPageCarouselState();
@@ -252,9 +253,9 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
             }).toList(),
           ),
 
-          // Smooth Page Indicator
+
           Positioned(
-            bottom: 70,
+            bottom: widget.isHome?20:70,
             child: AnimatedSmoothIndicator(
               activeIndex: _currentIndex,
               count: widget.imageUrls.length,
@@ -269,7 +270,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
               },
             ),
           ),
-
+if(!widget.isHome)
           Align(
             alignment: Alignment.bottomCenter,
             child: GalleryPostBottomActions(article: widget.postDetails!,),

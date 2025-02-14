@@ -1,36 +1,22 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/screens/home_screen/home_screen_model.dart';
-import 'package:chotanews/screens/home_screen/home_top_tabs.dart';
 import 'package:chotanews/screens/testing_screen/provider.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_linkify/flutter_linkify.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
-import '../../utils/image_view_popup.dart';
-import '../home_screen/botton_actions.dart';
 import '../home_screen/first_card_home_feeds.dart';
-import '../home_screen/home_bloc.dart';
-import '../home_screen/home_event.dart';
 import '../home_screen/post_bottom_actions.dart';
 import '../videos_main/video_views/gallery_screen.dart';
 import '../videos_main/video_views/video_preview.dart';
-import 'article_bloc_provider.dart';
 
 typedef FlipBack = void Function({bool backToTop});
 
@@ -57,12 +43,11 @@ class ArticlePageState extends State<ArticlePage> {
   Widget build(BuildContext context) {
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
-        color: Colors.white,
+        color: widget.article.subType ==
+            "BigBlackStandard"?Colors.black:Colors.white,
         height: widget.height,
         width: MediaQuery.of(context).size.width,
-        child: Screenshot(
-          controller: screenshotController,
-          child: WillPopScope(
+        child: WillPopScope(
             onWillPop: () {
               return Future(() {
                 if (widget.flipBack == null) return true;
@@ -70,235 +55,219 @@ class ArticlePageState extends State<ArticlePage> {
                 return false;
               });
             },
-            child: Scaffold(
-                body: InkWell(
+            child: InkWell(
               onTap: () {
                 flipProvider
                     .isShowTopBottomChange(flipProvider.isShowTopBottomView);
               },
-              child: widget.article.type == "Image"
-                  ? Stack(
-                      children: [
-                        Expanded(
-                          child: Image.network(
-                            fit: BoxFit.cover,
-                            widget.article.imageUrl.url ?? "",
-                          ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Screenshot(
+                      controller: screenshotController,
+                      child: widget.article.type == "Image"
+                          ? SizedBox(
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: Image.network(
+                          fit: BoxFit.fill,
+                          widget.article.imageUrl.url ?? "",
                         ),
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: PostBottomActions(flipProvider: flipProvider,article: widget.article,screenshotController: screenshotController),
-                        ),
-                      ],
-                    )
-                  : widget.article.type == "Gallery"
-                      ? FullPageCarousel(
-                          imageUrls: widget.article.gallery ?? [], postDetails: null,  )
-                      : widget.article.homepage != null
-                          ? FirstCardHomeFeeds(
-                              getHomeList: widget.article.homepage)
-                          : Container(
-                              color: Colors.white,
-                              height: MediaQuery.of(context).size.height,
-                              width: MediaQuery.of(context).size.width,
-                              child: Column(
-                                mainAxisSize: MainAxisSize.max,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    flex: widget.article.subType ==
-                                            "BigBlackStandard"
-                                        ? 9
-                                        : 5,
-                                    child: Stack(
-                                      children: [
-                                        SizedBox(
-                                          child: widget.article.type == "Video"
-                                              ? Container(
-                                                  color: Colors.black,
-                                                  child: Center(
-                                                      child: VideoPreview(
-                                                          url: widget
-                                                                  .article
-                                                                  .videoUrl
-                                                                  ?.url ??
-                                                              "")))
-                                              : Image.network(
-                                                  widget.article.imageUrl.url,
-                                                  key: ValueKey(widget
-                                                      .article.imageUrl.url),
-                                                  fit: BoxFit.cover,
-                                                  width: double.infinity,
-                                                  height: double.infinity,
-                                                ),
-                                          // CachedNetworkImage(
-                                          //   imageUrl: widget.article.imageUrl.url ?? "",
-                                          //   imageBuilder: (context, imageProvider) =>
-                                          //       Container(
-                                          //         height: MediaQuery.of(context).size.height,
-                                          //         width: MediaQuery.of(context).size.width,
-                                          //         decoration: BoxDecoration(
-                                          //           image: DecorationImage(
-                                          //             image: imageProvider,
-                                          //             fit: BoxFit.cover,
-                                          //           ),
-                                          //         ),
-                                          //       ),
-                                          //   errorWidget: (context, url, error) => Container(
-                                          //     height: MediaQuery.of(context).size.height,
-                                          //     width: MediaQuery.of(context).size.width,
-                                          //     decoration: const BoxDecoration(
-                                          //       borderRadius:
-                                          //       BorderRadius.all(Radius.circular(32)),
-                                          //     ),
-                                          //     child: const Icon(
-                                          //       Icons.account_box,
-                                          //       size: 200,
-                                          //     ),
-                                          //   ),
-                                          // )
-                                        ),
-                                        Positioned(
-                                            bottom: -12,
-                                            child: Container(
-                                                margin: const EdgeInsets.all(8),
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 8),
-                                                height: 30,
-                                                width: 100,
-                                                decoration: const BoxDecoration(
-                                                    color: Colors.white,
-                                                    borderRadius:
-                                                        BorderRadius.all(
-                                                      Radius.circular(10),
-                                                    )),
-                                                child: Image.asset(
-                                                  "assets/images/brandlogo.png",
-                                                ))),
-                                        // Positioned(
-                                        //     bottom: 10,
-                                        //     right: 10,
-                                        //     child: InkWell(
-                                        //         onTap: () {
-                                        //           if (widget
-                                        //               .article.type == "Video") {
-                                        //             Navigator.push(
-                                        //                 context,
-                                        //                 MaterialPageRoute(
-                                        //                   builder: (context) => VideoPreview(
-                                        //                     url: widget.article.videoUrl!.url.toString(),
-                                        //                     isVideoScreen: true,
-                                        //                   ),
-                                        //                 ));
-                                        //           } else {
-                                        //           Navigator.push(
-                                        //               context,
-                                        //               MaterialPageRoute(
-                                        //                 builder: (context) =>
-                                        //                     ImageViewPopup(
-                                        //                   imageUrl: widget
-                                        //                       .article
-                                        //                       .imageUrl
-                                        //                       .url,
-                                        //                 ),
-                                        //               ));
-                                        //           }
-                                        //         },
-                                        //         child: const Center(
-                                        //             child: Icon(
-                                        //           Icons.zoom_out_map_sharp,
-                                        //           color:
-                                        //               AppColors.appButtonColor,
-                                        //           size: 24,
-                                        //         )))),
-                                      ],
-                                    ),
-                                  ),
-                                  Expanded(
-                                    flex: 6,
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 8.0, horizontal: 16.0),
+                      )
+                          : widget.article.type == "Gallery"
+                              ? FullPageCarousel(
+                                  isHome :true,
+                                  imageUrls: widget.article.gallery ?? [],
+                                  postDetails: widget.article,
+                                )
+                              : widget.article.homepage != null
+                                  ? FirstCardHomeFeeds(
+                                      getHomeList: widget.article.homepage)
+                                  : Container(
+                                      color: widget.article.subType ==
+                                              "BigBlackStandard"
+                                          ? Colors.black
+                                          : Colors.white,
+                                      height:
+                                          MediaQuery.of(context).size.height,
+                                      width: MediaQuery.of(context).size.width,
                                       child: Column(
+                                        mainAxisSize: MainAxisSize.max,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
                                         children: [
-                                          Text(
-                                              widget.article.title ??
-                                                  "No Title",
-                                              style: homeScreenFontStyle(
-                                                  fontSize: 18,
-                                                  fontWeight: FontWeight.w600)),
-                                          height(height: 8),
                                           Expanded(
-                                              //     child: RichText(
-                                              //   text: TextSpan(
-                                              //     text: '${widget.article.content} ',
-                                              //     // Normal text
-                                              //     style: const TextStyle(
-                                              //       fontSize: 16,
-                                              //       color: AppColors.bodyTextColor,
-                                              //       fontWeight: FontWeight.normal,
-                                              //     ),
-                                              //     children: <TextSpan>[
-                                              //       TextSpan(
-                                              //         text:
-                                              //             '\n\nPosted ${formatTimeDifference(widget.article.created)}  ',
-                                              //         // Bold text
-                                              //         style: fontStyle(
-                                              //             fontWeight: FontWeight.normal,
-                                              //             fontSize: 12,
-                                              //             color:
-                                              //                 AppColors.bodyTextColor),
-                                              //       ),
-                                              //       TextSpan(
-                                              //         text:
-                                              //             "${widget.article.type}  ${widget.article.subType}", // Bold text
-                                              //         style: fontStyle(
-                                              //             fontWeight: FontWeight.normal,
-                                              //             fontSize: 12),
-                                              //       ),
-                                              //     ],
-                                              //   ),
-                                              // )
-                                              child: RichText(
-                                            text: TextSpan(
-                                              text: '',
-                                              children: _parseText(
-                                                  context,
-                                                  '${widget.article.content}',
-                                                  widget.article.links),
+                                            flex: widget.article.subType ==
+                                                    "BigBlackStandard"
+                                                ? 10
+                                                : 5,
+                                            child: Stack(
+                                              children: [
+                                                SizedBox(
+                                                  child: widget.article.type ==
+                                                          "Video"
+                                                      ? Container(
+                                                          color: Colors.black,
+                                                          child: Center(
+                                                              child: VideoPreview(
+                                                                  url: widget
+                                                                          .article
+                                                                          .videoUrl
+                                                                          ?.url ??
+                                                                      "")))
+                                                      : Image.network(
+                                                          widget.article
+                                                              .imageUrl.url,
+                                                          key: ValueKey(widget
+                                                              .article
+                                                              .imageUrl
+                                                              .url),
+                                                          fit: BoxFit.cover,
+                                                          width:
+                                                              double.infinity,
+                                                          height:
+                                                              double.infinity,
+                                                        ),
+                                                ),
+                                                Positioned(
+                                                    bottom: -12,
+                                                    child: Container(
+                                                        margin: const EdgeInsets
+                                                            .all(8),
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .symmetric(
+                                                                horizontal: 8),
+                                                        height: 30,
+                                                        width: 100,
+                                                        decoration:
+                                                            const BoxDecoration(
+                                                                color: Colors
+                                                                    .white,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .only(topLeft:
+                                                                  Radius
+                                                                      .circular(
+                                                                          10),
+                                                                      topRight: Radius.circular(10)
+                                                                )),
+                                                        child: Image.asset(
+                                                          "assets/images/brandlogo.png",
+                                                        ))),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            flex: 5,
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      vertical: 8.0,
+                                                      horizontal: 16.0),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                      widget.article.title ??
+                                                          "No Title",
+                                                      style: fontStyle(
+                                                          color: widget.article
+                                                                      .subType ==
+                                                                  "BigBlackStandard"
+                                                              ? Colors.white
+                                                              : Colors.black,
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.w600)),
+                                                  height(height: 8),
+                                                  Expanded(
+                                                    child:
+                                                        widget.article
+                                                                    .subType ==
+                                                                "BulletPost"
+                                                            ? ListView(
+                                                                physics:
+                                                                    const NeverScrollableScrollPhysics(),
+                                                                children: widget
+                                                                    .article
+                                                                    .bulletPoints
+                                                                    .map<Widget>(
+                                                                        (item) {
+                                                                  // Explicitly specify <Widget>
+                                                                  return Padding(
+                                                                    padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                        vertical:
+                                                                            4.0),
+                                                                    child: Row(
+                                                                      crossAxisAlignment:
+                                                                          CrossAxisAlignment
+                                                                              .start,
+                                                                      children: [
+                                                                        const Text(
+                                                                            "• ",
+                                                                            style:
+                                                                                TextStyle(fontSize: 24)),
+                                                                        // Bullet point
+                                                                        Expanded(
+                                                                          child:
+                                                                              Text(
+                                                                            item,
+                                                                            style:
+                                                                                fontStyle(fontSize: 16),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  );
+                                                                }).toList(), // Ensure it is converted to List<Widget>
+                                                              )
+                                                            : RichText(
+                                                                text: TextSpan(
+                                                                  text: '',
+                                                                  children:
+                                                                      _parseText(
+                                                                    context,
+                                                                    '${widget.article.content}',
+                                                                    widget
+                                                                        .article
+                                                                        .links,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                  ),
+                                                  Text(
+                                                      "\nPosted ${formatTimeDifference(widget.article.created)}",
+                                                      style: fontStyle(
+                                                          fontSize: 12,
+                                                          color: widget.article
+                                                                      .subType ==
+                                                                  "BigBlackStandard"
+                                                              ? Colors.white
+                                                              : Colors
+                                                                  .grey[800])),
+                                                ],
+                                              ),
                                             ),
                                           )
-
-                                              // Text(
-                                              //     "${widget.article.content}\n\nPosted ${formatTimeDifference(widget.article.created)}",
-                                              //     style: fontStyle(
-                                              //         fontSize: 16,
-                                              //         color: Colors.grey[800])),
-                                              ),
-                                          Text(
-                                              "\nPosted ${formatTimeDifference(widget.article.created)}",
-                                              style: homeScreenFontStyle(
-                                                  fontSize: 12,
-                                                  color: Colors.grey[800])),
-                                          height(height: 4),
-                                          const Divider(
-                                              color: AppColors.borderColor),
-                                          PostBottomActions(flipProvider: flipProvider,article: widget.article,screenshotController: screenshotController)
                                         ],
                                       ),
                                     ),
-                                  )
-                                ],
-                              ),
-                            ),
+                    ),
+                  ),
+                  const Divider(color: AppColors.borderColor),
+                  PostBottomActions(
+                      postType: widget.article.subType,
+                      flipProvider: flipProvider,
+                      article: widget.article,
+                      screenshotController: screenshotController)
+                ],
+              ),
             )),
-          ),
-        ),
       );
     });
   }
@@ -349,8 +318,11 @@ class ArticlePageState extends State<ArticlePage> {
       onNonMatch: (nonMatch) {
         spans.add(TextSpan(
             text: nonMatch,
-            style: homeScreenFontStyle(
-              fontSize: 18,
+            style: fontStyle(
+              color: widget.article.subType == "BigBlackStandard"
+                  ? Colors.white
+                  : Colors.black,
+              fontSize: 16,
             )));
         return "";
       },

@@ -234,8 +234,8 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                             alignment: Alignment.bottomCenter,
                             child: InkWell(
                               onTap: () {
-                                if (state.selectedDistrictList.isEmpty) {
-                                  CustomToast.showInfoToast(
+                                if (state.selectedDistrictList.length<2) {
+                                  CustomToast.showErrorToast(
                                       msg: "Select at list two district");
                                 } else {
                                   context.read<DistrictSelectionBloc>().add(

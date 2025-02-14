@@ -6,12 +6,16 @@ class GoogleLogin extends AuthEvent {}
 
 class AppleLogin extends AuthEvent {}
 
-class SkipLogin extends AuthEvent {}
+class SkipLogin extends AuthEvent {
+ final BuildContext context;
+ SkipLogin({required this.context});
+}
 
 class SendOtp extends AuthEvent {
   final String phoneNumber;
+  final BuildContext context;
 
-  SendOtp({required this.phoneNumber});
+  SendOtp({required this.phoneNumber,required this.context});
 }
 
 class SendReferralCode extends AuthEvent{
