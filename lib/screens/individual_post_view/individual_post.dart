@@ -17,7 +17,7 @@ import '../../utils/app_spaces.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
 import '../../utils/image_view_popup.dart';
-import '../flip_page/flipe_pannel.dart';
+import '../flip_page/district_flip_panel.dart';
 import '../home_screen/botton_actions.dart';
 import '../home_screen/first_card_home_feeds.dart';
 import '../home_screen/home_bloc.dart';
@@ -189,7 +189,8 @@ class _IndividualPostState extends State<IndividualPost> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
-                                BottomActions(
+                                BottomActions( postType: "",
+
                                     icon: "assets/svg/reload.svg",
                                     label: 'రిలోడ్ ',
                                     onTap: () {
@@ -197,6 +198,7 @@ class _IndividualPostState extends State<IndividualPost> {
                                       context.read<HomeBloc>().add(GetAllNewsFeed());
                                     }),
                                 BottomActions(
+                                    postType: "",
                                     icon:  "assets/svg/like.svg",
                                     label: 'లైక్',
                                     onTap: () {
@@ -208,6 +210,7 @@ class _IndividualPostState extends State<IndividualPost> {
                                       // context.read<HomeBloc>().add(LikeByPost(isLike: true, postId: item.id.toString()));
                                     }),
                                 BottomActions(
+                                    postType: "",
                                     icon: "assets/svg/comment.svg",
                                     label: 'కామెంట్',
                                     onTap: () {
@@ -216,6 +219,7 @@ class _IndividualPostState extends State<IndividualPost> {
                                       // context.read<HomeBloc>().add(GetAllNewsFeed());
                                     }),
                                 BottomActions(
+                                    postType: "",
                                     icon: "assets/svg/share.svg",
                                     label: ' షేర్',
                                     onTap: () {
