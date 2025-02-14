@@ -267,12 +267,6 @@ class ArticlePageState extends State<ArticlePage> {
                                               child: RichText(
                                             text: TextSpan(
                                               text: '',
-                                              // Normal text
-                                              style: const TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.normal,
-                                              ),
                                               children: _parseText(
                                                   context,
                                                   '${widget.article.content}',
@@ -356,7 +350,7 @@ class ArticlePageState extends State<ArticlePage> {
         spans.add(TextSpan(
             text: nonMatch,
             style: fontStyle(
-              fontSize: 16,
+              fontSize: 18,
             )));
         return "";
       },
