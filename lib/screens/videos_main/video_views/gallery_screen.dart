@@ -17,10 +17,12 @@ import '../../../utils/date_conversion.dart';
 import '../../home_screen/home_screen_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
+import '../../home_screen/post_bottom_actions.dart';
 import '../tab_screen.dart';
 import '../video_bloc/videos_bloc.dart';
 import '../video_bloc/videos_event.dart';
 import '../video_bloc/videos_state.dart';
+import '../videos_model/videos_model.dart';
 
 class GalleryScreen extends StatefulWidget {
   final String postId;
@@ -96,6 +98,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                           builder: (context) => FullPageCarousel(
                             imageUrls: state.getAllVideoList[index].gallery ?? [],
                             className: "Gallery View",
+                            postDetails:state.getAllVideoList[index] ,
                           ),
                         ),
                       );
@@ -173,7 +176,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
 class FullPageCarousel extends StatefulWidget {
   final List<GalleryImage> imageUrls;
   final String className;
-  const FullPageCarousel({super.key, required this.imageUrls, this.className = ""});
+  final  postDetails;
+  const FullPageCarousel({super.key, required this.imageUrls, this.className = "",required this.postDetails });
 
   @override
   _FullPageCarouselState createState() => _FullPageCarouselState();
@@ -218,6 +222,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
             options: CarouselOptions(
               height: double.infinity,
               viewportFraction: 1.0,
+              pageSnapping: false,
               enableInfiniteScroll: true,
               autoPlay: false,
               autoPlayInterval: Duration(seconds: 3),
@@ -236,6 +241,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                   image: DecorationImage(
                     image: NetworkImage(image.url),
                     fit: BoxFit.cover,
+
                     filterQuality: FilterQuality.high, // Improves image quality
                     isAntiAlias: true, // Reduces shaking and improves clarity
                   ),
@@ -246,7 +252,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
 
           // Smooth Page Indicator
           Positioned(
-            bottom: 20,
+            bottom: 70,
             child: AnimatedSmoothIndicator(
               activeIndex: _currentIndex,
               count: widget.imageUrls.length,
@@ -260,6 +266,11 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                 _controller.jumpToPage(index);
               },
             ),
+          ),
+
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: GalleryPostBottomActions(article: widget.postDetails!,),
           ),
         ],
       ),

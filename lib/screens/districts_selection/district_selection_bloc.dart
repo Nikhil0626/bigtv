@@ -46,7 +46,7 @@ class DistrictSelectionBloc
             await SharedPreferences.getInstance();
         String result = sharedPreferences.getString("locationId") ?? "";
         print("selectedDistrictList.toString()   $result");
-        selectedDistrictList = result.split(',');
+        selectedDistrictList = result.toString().isEmpty?[]:result.split(',');
         print(selectedDistrictList.toString());
         Response response = await DistrictSelectionRepo().getAllDistricts();
         log(response.data.toString());

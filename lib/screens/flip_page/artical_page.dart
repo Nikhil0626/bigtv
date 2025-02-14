@@ -35,7 +35,7 @@ import 'article_bloc_provider.dart';
 typedef FlipBack = void Function({bool backToTop});
 
 class ArticlePage extends StatefulWidget {
-  final article;
+  final  article;
 
   final FlipBack? flipBack;
 
@@ -79,11 +79,9 @@ class ArticlePageState extends State<ArticlePage> {
               child: widget.article.type == "Image"
                   ? Stack(
                       children: [
-                        Expanded(
-                          child: Image.network(
-                            fit: BoxFit.cover,
-                            widget.article.imageUrl.url ?? "",
-                          ),
+                        Image.network(
+                          fit: BoxFit.cover,
+                          widget.article.imageUrl.url ?? "",
                         ),
                         Align(
                           alignment: Alignment.bottomCenter,
@@ -93,7 +91,7 @@ class ArticlePageState extends State<ArticlePage> {
                     )
                   : widget.article.type == "Gallery"
                       ? FullPageCarousel(
-                          imageUrls: widget.article.gallery ?? [])
+                          imageUrls: widget.article.gallery ?? [],postDetails:  widget.article,)
                       : widget.article.homepage != null
                           ? FirstCardHomeFeeds(
                               getHomeList: widget.article.homepage)
@@ -229,8 +227,9 @@ class ArticlePageState extends State<ArticlePage> {
                                           Text(
                                               widget.article.title ??
                                                   "No Title",
-                                              style: fontStyle(
+                                              style: const TextStyle(
                                                   fontSize: 18,
+
                                                   fontWeight: FontWeight.w600)),
                                           height(height: 8),
                                           Expanded(
