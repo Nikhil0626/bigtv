@@ -39,25 +39,17 @@ class DynamicLinkService {
   }
 
   static Future<void> _handleDeepLink(BuildContext context,  deepLink) async {
-    log("Handling Deep Link: $deepLink");
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String loginId = sharedPreferences.getString("loginId").toString();
-
 
     if (deepLink == null || deepLink =="") {
       log("No deep link parameters found, navigating normally.");
       if (!context.mounted) return;
-      if (loginId.isNotEmpty ) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeTopTabs(),));
-      } else {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen(),));
-      }
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen(),));
       return;
     };
 
 
 
-
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String? postId = deepLink.queryParameters["postId"];
     String? referralCode = deepLink.queryParameters["referralCode"];
 
@@ -76,11 +68,7 @@ class DynamicLinkService {
     } else {
       log("No deep link parameters found, navigating normally.");
       if (!context.mounted) return;
-      if (loginId.isNotEmpty) {
-        Navigator.pushNamed(context, RoutesManager.homeScreen);
-      } else {
         Navigator.pushNamed(context, RoutesManager.welcomeScreen);
-      }
     }
   }
 }

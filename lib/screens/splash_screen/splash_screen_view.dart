@@ -42,7 +42,7 @@ class _SplashScreenView extends State<SplashScreenView> {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String loginId = sharedPreferences.getString("loginId").toString();
     log(loginId.toString());
-    if ( loginId.isNotEmpty || loginId != "null"||loginId != "") {
+    if (loginId != "null" ) {
       Timer(const Duration(seconds: 5), () {
         Navigator.pushNamedAndRemoveUntil(context, RoutesManager.homeScreen,(route) => false,);
       });
