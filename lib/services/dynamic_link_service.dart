@@ -43,7 +43,7 @@ class DynamicLinkService {
     if (deepLink == null || deepLink =="") {
       log("No deep link parameters found, navigating normally.");
       if (!context.mounted) return;
-      Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen(),));
+      Navigator.pushNamedAndRemoveUntil(context, RoutesManager.welcomeScreen,(route) => false,);
       return;
     };
 

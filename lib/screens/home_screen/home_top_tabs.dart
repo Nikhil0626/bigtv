@@ -45,9 +45,6 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
     return false;
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
 
@@ -55,7 +52,6 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
       onWillPop: _onWillPop,
       child: Scaffold(
         backgroundColor: AppColors.appButtonColor,
-
         body: SafeArea(
           child: Consumer<FlipProvider>(
             builder: (context,flipProvider,__) {
@@ -86,8 +82,8 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                             isScrollable: false, // Disable scrolling of the TabBar
                             unselectedLabelColor: Colors.black,
                             indicatorColor: Colors.blue,
-                            unselectedLabelStyle: fontStyle(color: Colors.black,fontSize: 16,fontWeight: FontWeight.w600),
-                            labelStyle: fontStyle(color: Colors.blue,fontSize: 16,fontWeight: FontWeight.bold),
+                            unselectedLabelStyle: fontStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w700),
+                            labelStyle: fontStyle(color: Colors.blue,fontSize: 20 ,fontWeight: FontWeight.bold),
                             tabs: const [
                               Tab(text: 'న్యూస్'),
                               Tab(text: 'జిల్లాలు'),

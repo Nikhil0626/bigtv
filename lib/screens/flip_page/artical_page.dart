@@ -35,7 +35,7 @@ import 'article_bloc_provider.dart';
 typedef FlipBack = void Function({bool backToTop});
 
 class ArticlePage extends StatefulWidget {
-  final  article;
+  final article;
 
   final FlipBack? flipBack;
 
@@ -79,9 +79,11 @@ class ArticlePageState extends State<ArticlePage> {
               child: widget.article.type == "Image"
                   ? Stack(
                       children: [
-                        Image.network(
-                          fit: BoxFit.cover,
-                          widget.article.imageUrl.url ?? "",
+                        Expanded(
+                          child: Image.network(
+                            fit: BoxFit.cover,
+                            widget.article.imageUrl.url ?? "",
+                          ),
                         ),
                         Align(
                           alignment: Alignment.bottomCenter,
@@ -91,7 +93,7 @@ class ArticlePageState extends State<ArticlePage> {
                     )
                   : widget.article.type == "Gallery"
                       ? FullPageCarousel(
-                          imageUrls: widget.article.gallery ?? [],postDetails:  widget.article,)
+                          imageUrls: widget.article.gallery ?? [], postDetails: null,  )
                       : widget.article.homepage != null
                           ? FirstCardHomeFeeds(
                               getHomeList: widget.article.homepage)
@@ -227,9 +229,8 @@ class ArticlePageState extends State<ArticlePage> {
                                           Text(
                                               widget.article.title ??
                                                   "No Title",
-                                              style: const TextStyle(
+                                              style: homeScreenFontStyle(
                                                   fontSize: 18,
-
                                                   fontWeight: FontWeight.w600)),
                                           height(height: 8),
                                           Expanded(
@@ -281,7 +282,7 @@ class ArticlePageState extends State<ArticlePage> {
                                               ),
                                           Text(
                                               "\nPosted ${formatTimeDifference(widget.article.created)}",
-                                              style: fontStyle(
+                                              style: homeScreenFontStyle(
                                                   fontSize: 12,
                                                   color: Colors.grey[800])),
                                           height(height: 4),
@@ -348,7 +349,7 @@ class ArticlePageState extends State<ArticlePage> {
       onNonMatch: (nonMatch) {
         spans.add(TextSpan(
             text: nonMatch,
-            style: fontStyle(
+            style: homeScreenFontStyle(
               fontSize: 18,
             )));
         return "";
