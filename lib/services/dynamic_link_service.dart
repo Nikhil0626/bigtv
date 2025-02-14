@@ -14,7 +14,6 @@ class DynamicLinkService {
     log("Checking Initial Dynamic Link...");
 
     try {
-      // ✅ Step 1: Check if app was opened via a deep link
       final PendingDynamicLinkData? initialLink = await _firebaseDynamicLinks.getInitialLink();
       if (initialLink?.link != null) {
         log("Initial Deep Link Found: ${initialLink!.link}");
@@ -23,7 +22,6 @@ class DynamicLinkService {
         _handleDeepLink(context, "");
       }
 
-      // ✅ Step 2: Listen for deep links when app is already running
       _firebaseDynamicLinks.onLink.listen((PendingDynamicLinkData? data) {
         log("Dynamic Link Triggered: ${data?.link}");
         if (data?.link != null) {
@@ -41,25 +39,17 @@ class DynamicLinkService {
   }
 
   static Future<void> _handleDeepLink(BuildContext context,  deepLink) async {
-    log("Handling Deep Link: $deepLink");
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String loginId = sharedPreferences.getString("loginId") ?? "";
-
 
     if (deepLink == null || deepLink =="") {
       log("No deep link parameters found, navigating normally.");
       if (!context.mounted) return;
-      if (loginId.isNotEmpty) {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => HomeTopTabs(),));
-      } else {
-        Navigator.push(context, MaterialPageRoute(builder: (context) => WelcomeScreen(),));
-      }
+      Navigator.push(context, MaterialPageRoute(builder: (context) => const WelcomeScreen(),));
       return;
     };
 
 
 
-
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String? postId = deepLink.queryParameters["postId"];
     String? referralCode = deepLink.queryParameters["referralCode"];
 
@@ -78,11 +68,7 @@ class DynamicLinkService {
     } else {
       log("No deep link parameters found, navigating normally.");
       if (!context.mounted) return;
-      if (loginId.isNotEmpty) {
-        Navigator.pushNamed(context, RoutesManager.homeScreen);
-      } else {
         Navigator.pushNamed(context, RoutesManager.welcomeScreen);
-      }
     }
   }
 }

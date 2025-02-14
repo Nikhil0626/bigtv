@@ -26,6 +26,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
     super.initState();
     requestNotificationPermission();
     log(widget.tab);
+    context.read<FlipProvider>().isTabChange(int.parse(widget.tab),isMainPage: true );
     tabController = TabController(
       length: 2,
       vsync: this,

@@ -86,7 +86,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
                     ? CachedNetworkImage(
                         imageUrl: item.imageUrl.url ?? "",)
                     : state.pageType == "Gallery"
-                        ? FullPageCarousel(imageUrls: item.gallery ?? [])
+                        ? FullPageCarousel(imageUrls: item.gallery ?? [],postDetails: item,)
                         :item.homepage != null
                     ? FirstCardHomeFeeds(getHomeList: item.homepage): _buildTextContent(context, item, state,index),
               );
@@ -249,7 +249,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
                               label: 'కామెంట్',
                               onTap: () {
                                 log("Comment");
-                                showComments(context, item.id.toString());
+                                // showComments(context, item.id.toString());
                                 // context.read<HomeBloc>().add(GetAllNewsFeed());
                               }),
                           BottomActions(

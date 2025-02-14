@@ -50,6 +50,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                 padding: const EdgeInsets.all(14.0),
                 child: Row(
                   children: [
+                    if(widget.className!="")
                     InkWell(
                       onTap: () {
                         Navigator.pop(context);
@@ -276,15 +277,8 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                       ),
                     );
                   } else {
-                    return Center(
-                      child: Text(
-                        "No data available",
-                        style: fontStyle(
-                          color: Colors.lightBlue,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
+                    return const Center(
+                      child: AppLoadingScreen(),
                     );
                   }
                 },

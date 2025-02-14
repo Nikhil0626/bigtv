@@ -408,14 +408,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   //       builder: (context) => const AdvertiseWithUs()),
                   // );
                 },
-
-                // onTap: () {
-                //   Navigator.push(
-                //     context,
-                //     MaterialPageRoute(
-                //         builder: (context) => const PrivacyPolicy()),
-                //   );
-                // },
                 child: Container(
                   decoration: BoxDecoration(
                     color:  Colors.white,
@@ -534,7 +526,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool isLogin=false;
   Future  getLogin()  async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String loginId = sharedPreferences.getString("loginId")??"";
+    String loginId = sharedPreferences.getString("loginId").toString();
     log(loginId.toString());
     if ( loginId.isNotEmpty && loginId != "Skip") {
       isLogin=true;

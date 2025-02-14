@@ -1,5 +1,6 @@
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
@@ -7,12 +8,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import '../screens/home_screen/home_event.dart';
+import 'date_format.dart';
 
 void showComments(BuildContext context, String postId) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
-
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),
@@ -23,12 +24,12 @@ void showComments(BuildContext context, String postId) {
         minChildSize: 0.3,
         maxChildSize: 0.9,
         builder: (_, scrollController) {
-          return CommentSection(postId: postId,scrollController: scrollController);
+          return CommentSection(
+              postId: postId, scrollController: scrollController);
         },
       );
 
-
-        // CommentSection(postId:postId);
+      // CommentSection(postId:postId);
     },
   );
 }
@@ -37,7 +38,8 @@ class CommentSection extends StatelessWidget {
   final String postId;
   final ScrollController scrollController; // Accept ScrollController
 
-  const CommentSection({super.key, required this.postId, required this.scrollController});
+  const CommentSection(
+      {super.key, required this.postId, required this.scrollController});
 
   @override
   Widget build(BuildContext context) {
@@ -66,50 +68,103 @@ class CommentSection extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 30),
                 width: MediaQuery.of(context).size.width,
                 alignment: Alignment.centerLeft,
-                child: Text("Comments", style: fontStyle(fontWeight: FontWeight.w800, fontSize: 18)),
+                child: Text("Comments",
+                    style:
+                        fontStyle(fontWeight: FontWeight.w800, fontSize: 18)),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
               Expanded(
-                child: ListView(
-                  controller: scrollController, // Use the scroll controller
-                  shrinkWrap: true,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                      child: Row(
-                        children: [
-                          const CircleAvatar(child: Text('V')),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Vivek Varma',
-                                  style: fontStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  'Hee',
-                                  style: fontStyle(color: Colors.black87),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(Icons.thumb_up_alt_outlined, size: 20, color: Colors.grey),
-                          const SizedBox(width: 10),
-                          const Icon(Icons.thumb_down_alt_outlined, size: 20, color: Colors.grey),
-                        ],
-                      ),
-                    ),
-                    const Divider(),
-                  ],
-                ),
-              ),
+                  child: ListView.separated(
+                      itemBuilder: (context, index) {
+                        return ListView(
+                          controller:
+                              scrollController, // Use the scroll controller
+                          shrinkWrap: true,
+                          children: [
+                            Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12.0),
+                                child: Row(
+                                  children: [
+                                     CircleAvatar(child: Text(flipProvider
+                                        .allPostCommentModelList[
+                                    index]
+                                        .user.name.toString().split("").first)),
+                                    width(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            flipProvider
+                                                    .allPostCommentModelList[
+                                                        index]
+                                                    .user
+                                                    .name ??
+                                                "User8376",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: fontStyle(
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 12),
+                                          ),
+                                          height(height: 8),
+                                          Text(
+                                            flipProvider
+                                                    .allPostCommentModelList[
+                                                        index]
+                                                    .text ??
+                                                "Hai",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: fontStyle(
+                                              color: Colors.black87,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w300,
+                                            ),
+
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Column(
+                                      children: [
+                                        Text(
+                                          "${formatTimeDifference(flipProvider.allPostCommentModelList[index].createdAt.toString(),isComment: true)}",
+                                          style: fontStyle(
+                                            color: Colors.black87,
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        height(height: 8),
+                                        const Row(
+                                          children: [
+                                            Icon(Icons.thumb_up_alt_outlined,
+                                                size: 20, color: Colors.grey),
+                                            SizedBox(width: 10),
+                                            Icon(Icons.thumb_down_alt_outlined,
+                                                size: 20, color: Colors.grey),
+                                          ],
+                                        ),
+                                      ],
+                                    )
+                                  ],
+                                )),
+                          ],
+                        );
+                      },
+                      separatorBuilder: (context, index) {
+                        return Divider(
+                          color: AppColors.borderColor,
+                        );
+                      },
+                      itemCount: flipProvider.allPostCommentModelList.length)),
               Padding(
                 padding: EdgeInsets.only(
                   left: 12,
                   right: 12,
-                  bottom: MediaQuery.of(context).viewInsets.bottom + 10, // Moves above keyboard
+                  bottom: MediaQuery.of(context).viewInsets.bottom +
+                      10, // Moves above keyboard
                 ),
                 child: Row(
                   children: [
@@ -121,7 +176,8 @@ class CommentSection extends StatelessWidget {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(30),
                           ),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 20),
+                          contentPadding:
+                              const EdgeInsets.symmetric(horizontal: 20),
                         ),
                       ),
                     ),
@@ -129,7 +185,11 @@ class CommentSection extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.send, color: Colors.blue),
                       onPressed: () {
-                        flipProvider.addCommentPostById(postId, controller.text);
+                        flipProvider
+                            .addCommentPostById(postId, controller.text)
+                            .then(
+                              (value) => controller.text = '',
+                            );
                       },
                     ),
                   ],
@@ -142,11 +202,6 @@ class CommentSection extends StatelessWidget {
     );
   }
 }
-
-
-
-
-
 
 // class CommentSection extends StatelessWidget {
 //   final String postId;
