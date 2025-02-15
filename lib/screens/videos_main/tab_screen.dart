@@ -56,7 +56,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
             icon: const Icon(
               Icons.arrow_back_ios_rounded,
               color: Colors.white,
-              size: 20,
+              size: 22,
             ),
           ),
         ),
@@ -69,7 +69,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
                 "మెను",
                 style: fontStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: 20,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -83,7 +83,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
               icon: const Icon(
                 Icons.settings,
                 color: Colors.white,
-                size: 26,
+                size: 28,
               ),
               onPressed: () {
                 Navigator.pushNamed(context, RoutesManager.settingsScreen);
@@ -182,7 +182,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
                             title: Text(
                               state.getAllMenuList[index].name,
                               style: fontStyle(
-                                fontSize: 14,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.black,
                               ),

@@ -220,9 +220,11 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
         alignment: Alignment.bottomCenter,
         children: [
           CarouselSlider(
+
             options: CarouselOptions(
               height: double.infinity,
               viewportFraction: 1.0,
+
               pageSnapping: false,
               enableInfiniteScroll: true,
               autoPlay: false,
