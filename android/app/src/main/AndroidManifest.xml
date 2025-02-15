@@ -136,14 +136,14 @@
             <!--                &lt;!&ndash; <data android:scheme="sample" /> &ndash;&gt;-->
             <!--            </intent-filter>-->
         </activity>
-        <receiver
-            android:name="com.google.android.gms.auth.api.phone.SmsRetriever"
-            android:exported="true"
-            android:permission="android.permission.SEND_SMS">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver-->
+<!--            android:name="com.google.android.gms.auth.api.phone.SmsRetriever"-->
+<!--            android:exported="true"-->
+<!--            android:permission="android.permission.SEND_SMS">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.provider.Telephony.SMS_RECEIVED" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
         <receiver
             android:name="com.webengage.sdk.android.WebEngageBootReceiver"
             android:exported="false">
