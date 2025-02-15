@@ -146,7 +146,7 @@ class ArticlePageState extends State<ArticlePage> {
                                                                     .white,
                                                                 borderRadius:
                                                                     BorderRadius
-                                                                        .only(topLeft: 
+                                                                        .only(topLeft:
                                                                   Radius
                                                                       .circular(
                                                                           10),

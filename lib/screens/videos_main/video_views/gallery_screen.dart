@@ -285,5 +285,3 @@ if(!widget.isHome)
     );
   }
 }
-
-
