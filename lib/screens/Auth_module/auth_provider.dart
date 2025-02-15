@@ -103,7 +103,9 @@ class AuthProvider extends ChangeNotifier{
 
 
   Future skipLogin(context)async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
     loginSkip = "Skip";
+    sp.setString("loginId", loginSkip);
     Navigator.pushNamed(context, RoutesManager.districtSelectionScreen,
         arguments: {
           "className": ""

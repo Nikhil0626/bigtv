@@ -1,4 +1,3 @@
-import 'package:carousel_slider/carousel_options.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -7,8 +6,6 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-// import 'package:carousel_slider/carousel_slider.dart';
-import 'package:carousel_slider/carousel_controller.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../globel_keys/app_router.dart';
@@ -18,11 +15,9 @@ import '../../home_screen/home_screen_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../home_screen/post_bottom_actions.dart';
-import '../tab_screen.dart';
 import '../video_bloc/videos_bloc.dart';
 import '../video_bloc/videos_event.dart';
 import '../video_bloc/videos_state.dart';
-import '../videos_model/videos_model.dart';
 
 class GalleryScreen extends StatefulWidget {
   final String postId;
@@ -190,6 +185,17 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
   final CarouselSliderController _controller = CarouselSliderController();
 
   @override
+  void initState() {
+    super.initState();
+    // Animate first image swipe after a short delay
+    Future.delayed(const Duration(seconds: 2), () {
+      _controller.animateToPage(1,
+          duration: const Duration(milliseconds: 800),
+          curve: Curves.easeInOut);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: widget.className == "" ? null : AppBar(
@@ -219,39 +225,38 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          CarouselSlider(
-
-            options: CarouselOptions(
-              height: double.infinity,
-              viewportFraction: 1.0,
-
-              pageSnapping: false,
-              enableInfiniteScroll: true,
-              autoPlay: false,
-              autoPlayInterval: Duration(seconds: 3),
-              onPageChanged: (index, reason) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              scrollPhysics: BouncingScrollPhysics(), // Smooth scrolling to reduce shake
-              enlargeCenterPage: true, // Helps maintain focus and reduce blur
+        CarouselSlider(
+        carouselController: _controller,
+        options: CarouselOptions(
+          height: double.infinity,
+          viewportFraction: 1.0,
+          enableInfiniteScroll: true,
+          autoPlay: false,
+          autoPlayInterval: const Duration(seconds: 3),
+          onPageChanged: (index, reason) {
+            setState(() {
+              _currentIndex = index;
+            });
+          },
+          scrollPhysics: const BouncingScrollPhysics(),
+          enlargeCenterPage: true,
+        ),
+        items: widget.imageUrls.map((image) {
+          return AnimatedContainer(
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+            width: MediaQuery.of(context).size.width,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: NetworkImage(image.url),
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+                isAntiAlias: true,
+              ),
             ),
-            items: widget.imageUrls.map((image) {
-              return Container(
-                width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image: NetworkImage(image.url),
-                    fit: BoxFit.cover,
-
-                    filterQuality: FilterQuality.high, // Improves image quality
-                    isAntiAlias: true, // Reduces shaking and improves clarity
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
+          );
+        }).toList(),
+      ),
 
 
           Positioned(

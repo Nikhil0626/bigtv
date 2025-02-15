@@ -256,4 +256,6 @@ class FlipProvider extends ChangeNotifier {
     }
     notifyListeners(); // Notify listeners if using ChangeNotifier
   }
+
+
 }
