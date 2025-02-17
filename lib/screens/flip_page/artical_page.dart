@@ -41,11 +41,14 @@ class ArticlePageState extends State<ArticlePage> {
 
   @override
   Widget build(BuildContext context) {
+    double heights = (MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom)-32;
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
         color: widget.article.subType ==
             "BigBlackStandard"?Colors.black:Colors.white,
-        height: widget.height,
+        height:heights,
         width: MediaQuery.of(context).size.width,
         child: WillPopScope(
             onWillPop: () {
@@ -55,35 +58,35 @@ class ArticlePageState extends State<ArticlePage> {
                 return false;
               });
             },
-            child: InkWell(
-              onTap: () {
-                flipProvider
-                    .isShowTopBottomChange(flipProvider.isShowTopBottomView);
-              },
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Screenshot(
-                      controller: screenshotController,
-                      child: widget.article.type == "Image"
-                          ? SizedBox(
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        child: Image.network(
-                          fit: BoxFit.fill,
-                          widget.article.imageUrl.url ?? "",
-                        ),
-                      )
-                          : widget.article.type == "Gallery"
-                              ? FullPageCarousel(
-                                  isHome :true,
-                                  imageUrls: widget.article.gallery ?? [],
-                                  postDetails: widget.article,
-                                )
-                              : widget.article.homepage != null
-                                  ? FirstCardHomeFeeds(
-                                      getHomeList: widget.article.homepage)
-                                  : Container(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Screenshot(
+                    controller: screenshotController,
+                    child: widget.article.type == "Image"
+                        ? SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      child: Image.network(
+                        fit: BoxFit.fill,
+                        widget.article.imageUrl.url ?? "",
+                      ),
+                    )
+                        : widget.article.type == "Gallery"
+                            ? FullPageCarousel(
+                                isHome :true,
+                                imageUrls: widget.article.gallery ?? [],
+                                postDetails: widget.article,
+                              )
+                            : widget.article.homepage != null
+                                ? FirstCardHomeFeeds(
+                                    getHomeList: widget.article.homepage)
+                                : InkWell(
+                      onTap: (){
+                        flipProvider
+                            .isShowTopBottomChange(flipProvider.isShowTopBottomView);
+                      },
+                                  child: Container(
                                       color: widget.article.subType ==
                                               "BigBlackStandard"
                                           ? Colors.black
@@ -96,11 +99,12 @@ class ArticlePageState extends State<ArticlePage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Expanded(
-                                            flex: widget.article.subType ==
-                                                    "BigBlackStandard"
-                                                ? 10
-                                                : 5,
+                                          Container(
+                                            height: MediaQuery.of(context).size.height/2.35,
+                                            // widget.article.subType ==
+                                            //         "BigBlackStandard"
+                                            //     ? 10
+                                            //     : 4,
                                             child: Stack(
                                               children: [
                                                 SizedBox(
@@ -159,7 +163,7 @@ class ArticlePageState extends State<ArticlePage> {
                                             ),
                                           ),
                                           Expanded(
-                                            flex: 5,
+                                            flex: 4,
                                             child: Padding(
                                               padding:
                                                   const EdgeInsets.symmetric(
@@ -174,7 +178,7 @@ class ArticlePageState extends State<ArticlePage> {
                                                   Text(
                                                       widget.article.title ??
                                                           "No Title",
-                                                      style: fontStyle(
+                                                      style: homeScreenFontStyle(
                                                           color: widget.article
                                                                       .subType ==
                                                                   "BigBlackStandard"
@@ -250,6 +254,8 @@ class ArticlePageState extends State<ArticlePage> {
                                                               ? Colors.white
                                                               : Colors
                                                                   .grey[800])),
+                                                  height(height: 1)
+
                                                 ],
                                               ),
                                             ),
@@ -257,16 +263,17 @@ class ArticlePageState extends State<ArticlePage> {
                                         ],
                                       ),
                                     ),
-                    ),
+                                ),
                   ),
-                  const Divider(color: AppColors.borderColor),
-                  PostBottomActions(
-                      postType: widget.article.subType,
-                      flipProvider: flipProvider,
-                      article: widget.article,
-                      screenshotController: screenshotController)
-                ],
-              ),
+                ),
+                const Divider(color: AppColors.borderColor),
+                PostBottomActions(
+                    postType: widget.article.subType,
+                    flipProvider: flipProvider,
+                    article: widget.article,
+                    screenshotController: screenshotController),
+                // height(height: 2),
+              ],
             )),
       );
     });
@@ -318,7 +325,7 @@ class ArticlePageState extends State<ArticlePage> {
       onNonMatch: (nonMatch) {
         spans.add(TextSpan(
             text: nonMatch,
-            style: fontStyle(
+            style: homeScreenFontStyle(
               color: widget.article.subType == "BigBlackStandard"
                   ? Colors.white
                   : Colors.black,

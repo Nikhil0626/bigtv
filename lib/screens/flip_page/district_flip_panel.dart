@@ -521,6 +521,8 @@ class _FlipPanelState<T> extends State<FlipPanel>
 }
 */
 
+import 'dart:developer';
+
 import 'package:chotanews/screens/testing_screen/provider.dart';
 import 'package:flutter/material.dart';
 
@@ -538,7 +540,7 @@ typedef ItemBuilder<T> = Widget Function(BuildContext, T, FlipBack?, double);
 
 typedef GetItems = void Function({bool refresh});
 
-enum FlipDirection { up, down, none,lift,right }
+enum FlipDirection { up, down, none, lift, right }
 
 enum LastFlip { none, previous, next }
 
@@ -769,7 +771,6 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
           _lowerChild2 = makeLowerClip(_prevChild!);
         }
       }
-
     } else {
       _currentChild = widgets![_currentIndex];
       _upperChild1 = makeUpperClip(_currentChild!);
@@ -795,8 +796,6 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       _controller.stop();
     }
   }
-
-
 
   void handleDragUpdate(DragUpdateDetails details) {
     final double delta = details.primaryDelta!;
@@ -828,24 +827,65 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
     });
   }
 
+  // void handleDragEnd(DragEndDetails details, flipProvider) {
+  //   _dragging = false;
+  //
+  //   print(
+  //       "last post ${context.read<FlipProvider>().lastPostIdInMain}  ooooooo Next post ${context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id}");
+  //   if (context.read<FlipProvider>().lastPostIdInMain ==
+  //       context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id) {
+  //     context.read<FlipProvider>().getArticles(index: _currentIndex);
+  //   }
+  //
+  //   flipProvider.setIndex(_currentIndex);
+  //
+  //   if (_dragExtent == 0.0) {
+  //     if (_shouldShowNoMoreItemsMessage) {
+  //       _showNoMoreItemsMessage();
+  //       _shouldShowNoMoreItemsMessage = false;
+  //     }
+  //     return;
+  //   }
+  //
+  //   final double velocity = details.primaryVelocity!;
+  //   final bool fast = velocity.abs() > _kFastThreshold;
+  //
+  //   if (fast) {
+  //     if (_dragExtent.abs() > _flipExtent) {
+  //       _controller.animateTo(0.0);
+  //     } else {
+  //       _controller.animateTo(1.0);
+  //     }
+  //     _lastFlip =
+  //         _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
+  //   } else {
+  //     if (_dragExtent.abs() > _flipExtent) {
+  //       _lastFlip =
+  //           _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
+  //     } else {
+  //       _lastFlip = LastFlip.none;
+  //     }
+  //     _controller.animateTo(0.0);
+  //   }
+  // }
+
   void handleDragEnd(DragEndDetails details, flipProvider) {
     _dragging = false;
 
-    print(
-        "last post ${context.read<FlipProvider>().lastPostIdInMain}  ooooooo Next post ${context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id}");
     if (context.read<FlipProvider>().lastPostIdInMain ==
-        context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id) {
+        context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].id) {
       context.read<FlipProvider>().getArticles(index: _currentIndex);
     }
     flipProvider.setIndex(_currentIndex);
-
+    log("hello siva  ${context.read<FlipProvider>().isLastPost}");
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {
-        _showNoMoreItemsMessage();
+        _showNoMoreItemsMessage("Loading...");
         _shouldShowNoMoreItemsMessage = false;
       }
       return;
     }
+
 
     final double velocity = details.primaryVelocity!;
     final bool fast = velocity.abs() > _kFastThreshold;
@@ -885,7 +925,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
                       alignment: Alignment.bottomCenter,
                       height: _height / 2,
                       width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
+                      color: Colors.white,
                     ))
                 : Container(),
             Transform(
@@ -912,7 +952,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
                       alignment: Alignment.bottomCenter,
                       height: _height / 2,
                       width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
+                      color: Colors.white,
                     ))
                 : Container(),
             Transform(
@@ -941,7 +981,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
                       alignment: Alignment.bottomCenter,
                       height: _height / 2,
                       width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
+                      color: Colors.white,
                     ))
                 : Container(),
             Transform(
@@ -956,6 +996,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       : Stack(
           children: [
             Transform(
+
                 alignment: Alignment.topCenter,
                 transform: Matrix4.identity()
                   ..setEntry(3, 2, _perspective)
@@ -968,7 +1009,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
                       alignment: Alignment.bottomCenter,
                       height: _height / 2,
                       width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
+                      color: Colors.white,
                     ))
                 : Container(),
             Transform(
@@ -1019,20 +1060,22 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       return GestureDetector(
         onVerticalDragStart: _handleDragStart,
         onVerticalDragUpdate: handleDragUpdate,
-
         onVerticalDragEnd: (details) => handleDragEnd(details, flipProvider),
         child: content,
       );
     });
   }
 
-  void _showNoMoreItemsMessage() {
+  void _showNoMoreItemsMessage(data) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("Loading...",style: fontStyle(
-          fontSize: 16,
-          color: Colors.white,
-        ),),
+        content: Text(
+          data,
+          style: fontStyle(
+            fontSize: 16,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }

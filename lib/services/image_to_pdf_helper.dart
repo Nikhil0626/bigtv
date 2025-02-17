@@ -76,29 +76,14 @@ Future<void> convertImageUrlToPdfAndShare(BuildContext context,  article) async 
 }
 
 
-Future<void> takeScreenshotAndShare( article,screenshotController) async {
-  final DynamicLinkParameters parameters = DynamicLinkParameters(
-    uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
-    link: Uri.parse('https://chotanews.com/store?postId=${article.id}'), // Ensure this is a valid URL
-    androidParameters: const AndroidParameters(
-      packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
-    ),
-    iosParameters: const IOSParameters(
-      bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
-      appStoreId: '1631068092',
-    ),
-  );
+Future<void> takeScreenshotAndShare( article,screenshotController, ) async {
+  
   try {
-
-
-    final ShortDynamicLink shortLink =
-    await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-    print("Short Link Created: ${shortLink.shortUrl}");
-    // Share.share('${shortLink.shortUrl}');
-
-
+    // final ShortDynamicLink shortLink =
+    // await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+    // print("Short Link Created: ${shortLink.shortUrl}");
     final image = await screenshotController.capture(
-      pixelRatio: 3.0,
+      pixelRatio: 1.5,
     );
     if (image != null) {
       final directory = await getTemporaryDirectory();
@@ -106,15 +91,7 @@ Future<void> takeScreenshotAndShare( article,screenshotController) async {
       final imageFile = File(imagePath);
       await imageFile.writeAsBytes(image);
 
-      // Share the image
-
-      // InkWell(
-      //     onTap: () {
-      //
-      //     },
-      //     child: Text("www.google.com"));
-
-      Share.shareXFiles([XFile(imageFile.path)], text: '${shortLink.shortUrl}');
+      Share.shareXFiles([XFile(imageFile.path)], text: '${article.linkURLAndroid.toString()}');
 
     } else {
       CustomToast.showErrorToast(msg: "Failed to capture screenshot.");

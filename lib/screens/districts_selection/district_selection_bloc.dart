@@ -1,5 +1,9 @@
 import 'dart:developer';
 
+import 'package:chotanews/main.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider.dart';
+import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/utils/app_enums.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -90,7 +94,7 @@ class DistrictSelectionBloc
       sharedPreferences.setString("locationId", result);
       log(result);
       String? deviceId = GlobalVariables().deviceId;
-      print("Device ID: ${deviceId}");
+      print("Device ID: ${result}");
       var body = {
         "deviceId": deviceId.toString(),
         "isFollowed": "true",
@@ -100,8 +104,10 @@ class DistrictSelectionBloc
       try {
         Response response =
             await DistrictSelectionRepo().updateDistrictsList(body);
+        mainNavigatorKey.currentContext!.read<AuthProvider>().loginStatus(event.className == "Skip"?LoginStatus.skip:LoginStatus.login,event.context);
         log(response.data.toString());
         selectedDistrictList = [];
+        event.context.read<FlipProvider>().isLocationChange(true);
         emit(SubmitSuccessState(className:event.className));
       } catch (e, st) {}
     });

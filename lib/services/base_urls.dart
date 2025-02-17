@@ -5,7 +5,8 @@ class BaseUrls {
   /// Dev Base Url
   //   static const String baseUrl = "https://chotanews-fdcscrezbfd4befm.z01.azurefd.net/api";
   static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
-  static const String baseUrlAws = "https://devchota.signitivessoft.com/api";
+
+  static const String baseUrlAws = "http://35.174.155.208/api";
 
 
   static const String getNews = "/allposts";

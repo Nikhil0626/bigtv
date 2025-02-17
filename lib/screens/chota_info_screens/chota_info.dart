@@ -8,6 +8,7 @@ import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
 import 'package:chotanews/screens/home_screen/home_screen_view.dart';
 import 'package:chotanews/screens/profile_screen/profile_screen.dart';
 import 'package:chotanews/services/base_urls.dart';
+import 'package:chotanews/services/local_data.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -15,12 +16,15 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/app_router.dart';
+import '../../utils/app_enums.dart';
+import '../Auth_module/auth_provider.dart';
 import '../new_refer_earn_screen/new_refer_earn_screen.dart';
 import '../videos_main/tab_screen.dart';
 
@@ -34,14 +38,15 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   @override
   void initState() {
-    // TODO: implement initState
+ getLogin();
     super.initState();
-    getLogin();
+
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+return Scaffold(
       backgroundColor: AppColors.settingsPageBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.appButtonColor,
@@ -453,11 +458,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 )),
             InkWell(
               onTap: () async {
-                WebEngagePlugin.userLogout();
+                context.read<AuthProvider>().loginStatus(LoginStatus.none,context);
                 SharedPreferences sp = await SharedPreferences.getInstance();
-                await sp.remove("loginId"); // Remove only loginId
-                setState(() {}); // Force UI update after logout
-                Navigator.pushNamed(context, RoutesManager.signInScreen);
+                await sp.setString("loginId","");
+                await sp.clear();
+                WebEngagePlugin.userLogout();
+                Navigator.pushNamedAndRemoveUntil(context, RoutesManager.signInScreen,(route) => false,);
               },
               child:  Container(
                 decoration: BoxDecoration(
@@ -485,7 +491,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        isLogin? 'లాగౌట్':'లాగిన్',
+                        loginStatus == LoginStatus.skip?'లాగిన్': 'లాగౌట్',
                         style: fontStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -523,18 +529,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
     );
   }
-  bool isLogin=false;
-  Future  getLogin()  async{
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String loginId = sharedPreferences.getString("loginId").toString();
-    log(loginId.toString());
-    if ( loginId.isNotEmpty && loginId != "Skip") {
-      isLogin=true;
-    } else {
-      isLogin=false;
-    }
+  LoginStatus loginStatus = LoginStatus.none;
+  Future getLogin() async{
+    loginStatus  =await getLoginStatus();
     setState(() {
 
     });
   }
+
 }

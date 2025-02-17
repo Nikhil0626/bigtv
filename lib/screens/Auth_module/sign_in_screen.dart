@@ -3,6 +3,7 @@ import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider.dart';
 import 'package:chotanews/screens/Auth_module/auth_state.dart';
+import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -28,7 +29,6 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  final TextEditingController _mobileController = TextEditingController();
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -87,7 +87,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   @override
   void dispose() {
-    _mobileController.dispose();
+    // context.read<AuthProvider>().mobileNumberController.dispose();
     super.dispose();
   }
 
@@ -112,6 +112,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         height(height: 100),
+
                         SvgPicture.asset(
                           'assets/svg/Chota_news_logo.svg',
                           height: 24,
@@ -176,7 +177,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               ),
                               Expanded(
                                 child: TextFormField(
-                                  controller: _mobileController,
+                                  controller: authProvider.mobileNumberController,
                                   keyboardType: TextInputType.phone,
                                   maxLength: 10,
                                   decoration: const InputDecoration(
@@ -193,27 +194,33 @@ class _SignInScreenState extends State<SignInScreen> {
                                     }
                                     setState(() {});
                                   },
-                                  validator: (value) {
-                                    if (value == null ||
-                                        value.isEmpty) {
+                                    validator: (value) {
+                                      // Regular expression for Indian mobile numbers
+                                      final RegExp mobileRegex = RegExp(r'^[6789]\d{9}$');
+
+                                      if (value == null || value.isEmpty) {
+                                        setState(() {
+                                          _mobileNumberError = "Please enter your mobile number";
+                                        });
+                                        return "";
+                                      } else if (value.length != 10) {
+                                        setState(() {
+                                          _mobileNumberError = "Please enter a valid 10-digit mobile number";
+                                        });
+                                        return "";
+                                      } else if (!mobileRegex.hasMatch(value)) {
+                                        setState(() {
+                                          _mobileNumberError = "Please enter a valid mobile number";
+                                        });
+                                        return "";
+                                      }
+
                                       setState(() {
-                                        _mobileNumberError =
-                                        "Please enter your mobile number";
+                                        _mobileNumberError = null;
                                       });
-                                      return "";
-                                    } else if (value.length != 10) {
-                                      setState(() {
-                                        _mobileNumberError =
-                                        "Please enter a valid 10-digit mobile number";
-                                      });
-                                      return "";
+                                      return null;
                                     }
-                                    setState(() {
-                                      _mobileNumberError = null;
-                                    });
-                                    return null;
-                                    // context.watch<AuthBloc>().add(MobileNumberChanged(value!));
-                                  },
+
                                 ),
                               ),
                             ],
@@ -235,19 +242,19 @@ class _SignInScreenState extends State<SignInScreen> {
                         height(height: 20),
                         InkWell(
                           onTap: (){
-                            if (_mobileController.text.length < 9) {
+                            if (authProvider.mobileNumberController.text.length < 9) {
                             } else {
                               if (_formKey.currentState!
                                   .validate()) {
-                                log("phone number   ${_mobileController.text.toString()}");
-                                context.read<AuthProvider>().sendOtp(_mobileController.text, context);
+                                log("phone number   ${authProvider.mobileNumberController.text.toString()}");
+                                context.read<AuthProvider>().sendOtp(authProvider.mobileNumberController.text, context);
                               }
                             }
                           },
                           child: Container(
                             height: 50,
                             decoration:  BoxDecoration(
-                                color:_mobileController.text.length > 9
+                                color:authProvider.mobileNumberController.text.length > 9
                                     ? AppColors.appButtonColor
                                     : Colors.grey ,
                                 borderRadius:
@@ -266,7 +273,8 @@ class _SignInScreenState extends State<SignInScreen> {
                         height(height: 20),
                         TextButton(
                             onPressed: () {
-                              context.read<AuthProvider>().skipLogin(context);
+                              context.read<AuthProvider>().className = "Skip";
+                              context.read<AuthProvider>().loginStatus(LoginStatus.location,context);
                             },
                             child: Center(
                               child: Text(

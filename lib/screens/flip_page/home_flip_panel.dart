@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 
 import 'dart:async';
@@ -35,7 +36,6 @@ class FlipPanel<T> extends StatefulWidget {
     required this.itemBuilder,
     required this.itemStream,
     this.waitingForRefresh = false,
-    // required this.getItemsCallback,
     required this.height,
     this.duration = const Duration(milliseconds: 100),
   }) : super(key: key);
@@ -53,6 +53,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   bool _isReversePhase = false;
   bool _running = false;
   bool isLeft = false;
+  bool isLast = false;
   final _perspective = 0.0003;
   final _zeroAngle = 0.0001;
   late double _height;
@@ -115,7 +116,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
                       : _currentIndex;
           if (_lastFlip == LastFlip.next &&
               _currentIndex == _availableItems - _updateThreshold) {
-            context.read<FlipProvider>().getArticles(index: _currentIndex);
+            // context.read<FlipProvider>().getArticles(index: _currentIndex);
           }
         }
       })
@@ -149,12 +150,14 @@ class _FlipPanelState<T> extends State<FlipPanel>
         _upperChild1 = makeUpperClip(widgets![0]);
         _lowerChild1 = makeLowerClip(widgets![0]);
       } else {
+        print(items.last);
         widgets!.addAll(items
             .map((item) => widget.itemBuilder(context, item, flipBack, _height))
             .toList());
       }
-      print("currenttttt itemm  ${items.toString()}");
+
       _availableItems += items.length;
+      print("currenttttt itemm  ${_availableItems.toString()}");
       setState(() {});
     });
 
@@ -181,7 +184,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
           height: _height,
           width: MediaQuery.of(context).size.width,
           child: const Center(
-            child: CircularProgressIndicator(),
+            child: AppLoadingScreen(),
           ),
         );
       }
@@ -293,11 +296,13 @@ class _FlipPanelState<T> extends State<FlipPanel>
           : _dragExtent.clamp(0.0, _flipExtent * 2 - 0.01);
       if (_direction == FlipDirection.down && _currentIndex == 0) {
         _dragExtent = 0.0;
+        isLast = true;
       }
       if (_direction == FlipDirection.up &&
           _currentIndex == widgets!.length - 1) {
         _dragExtent = 0.0;
-        _shouldShowNoMoreItemsMessage = true;
+        isLast = true;
+        // _shouldShowNoMoreItemsMessage = true;
       }
       if (_dragExtent.abs() < _flipExtent) {
         _controller.value = (_dragExtent / _flipExtent).abs();
@@ -317,6 +322,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
     if (context.read<FlipProvider>().lastPostIdInMain ==
         context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id) {
       context.read<FlipProvider>().getArticles(index: _currentIndex);
+      return;
     }
 
     if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
@@ -328,11 +334,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
     }
 
     flipProvider.setIndex(_currentIndex);
-
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {
-        _showNoMoreItemsMessage();
-        _shouldShowNoMoreItemsMessage = false;
+        widget.waitingForRefresh = true;
+        isLast = true;
+        setState(() {});
       }
       return;
     }
@@ -359,67 +365,61 @@ class _FlipPanelState<T> extends State<FlipPanel>
     }
   }
 
-  Widget _buildUpperFlipPanel() => _direction == FlipDirection.right
-      ? Container(
-          width: 300,
-          height: 600,
-          color: Colors.blue,
+  Widget _buildUpperFlipPanel() => _direction == FlipDirection.up
+      ? Stack(
+          children: [
+            Transform(
+                alignment: Alignment.bottomCenter,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, _perspective)
+                  ..rotateX(_zeroAngle),
+                child: _upperChild1),
+            _isReversePhase
+                ? Opacity(
+                    opacity: 1 - _controller.value,
+                    child: Container(
+                      alignment: Alignment.bottomCenter,
+                      height: 300,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.white,
+                    ))
+                : Container(),
+            Transform(
+              alignment: Alignment.bottomCenter,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, _perspective)
+                ..rotateX(_isReversePhase ? _animation.value : math.pi / 2),
+              child: _upperChild2,
+            ),
+          ],
         )
-      : _direction == FlipDirection.up
-          ? Stack(
-              children: [
-                Transform(
-                    alignment: Alignment.bottomCenter,
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, _perspective)
-                      ..rotateX(_zeroAngle),
-                    child: _upperChild1),
-                _isReversePhase
-                    ? Opacity(
-                        opacity: 1 - _controller.value,
-                        child: Container(
-                          alignment: Alignment.bottomCenter,
-                          height: _height / 2,
-                          width: MediaQuery.of(context).size.width,
-                          color: Colors.black,
-                        ))
-                    : Container(),
-                Transform(
-                  alignment: Alignment.bottomCenter,
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, _perspective)
-                    ..rotateX(_isReversePhase ? _animation.value : math.pi / 2),
-                  child: _upperChild2,
-                ),
-              ],
-            )
-          : Stack(
-              children: [
-                Transform(
-                    alignment: Alignment.bottomCenter,
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, _perspective)
-                      ..rotateX(_zeroAngle),
-                    child: _upperChild2),
-                !_isReversePhase
-                    ? Opacity(
-                        opacity: 1 - _controller.value,
-                        child: Container(
-                          alignment: Alignment.bottomCenter,
-                          height: _height / 2,
-                          width: MediaQuery.of(context).size.width,
-                          color: Colors.black,
-                        ))
-                    : Container(),
-                Transform(
-                  alignment: Alignment.bottomCenter,
-                  transform: Matrix4.identity()
-                    ..setEntry(3, 2, _perspective)
-                    ..rotateX(_isReversePhase ? math.pi / 2 : _animation.value),
-                  child: _upperChild1,
-                ),
-              ],
-            );
+      : Stack(
+          children: [
+            Transform(
+                alignment: Alignment.bottomCenter,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, _perspective)
+                  ..rotateX(_zeroAngle),
+                child: _upperChild2),
+            !_isReversePhase
+                ? Opacity(
+                    opacity: 1 - _controller.value,
+                    child: Container(
+                      alignment: Alignment.bottomCenter,
+                      height: 300,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.white,
+                    ))
+                : Container(),
+            Transform(
+              alignment: Alignment.bottomCenter,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, _perspective)
+                ..rotateX(_isReversePhase ? math.pi / 2 : _animation.value),
+              child: _upperChild1,
+            ),
+          ],
+        );
 
   Widget _buildLowerFlipPanel() => _direction == FlipDirection.up
       ? Stack(
@@ -435,9 +435,9 @@ class _FlipPanelState<T> extends State<FlipPanel>
                     opacity: 1 - _controller.value,
                     child: Container(
                       alignment: Alignment.bottomCenter,
-                      height: _height / 2,
+                      height: 300,
                       width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
+                      color: Colors.white,
                     ))
                 : Container(),
             Transform(
@@ -462,9 +462,9 @@ class _FlipPanelState<T> extends State<FlipPanel>
                     opacity: 1 - _controller.value,
                     child: Container(
                       alignment: Alignment.bottomCenter,
-                      height: _height / 2,
+                      height: 300,
                       width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
+                      color: Colors.white,
                     ))
                 : Container(),
             Transform(
@@ -488,33 +488,81 @@ class _FlipPanelState<T> extends State<FlipPanel>
               _buildLowerFlipPanel(),
             ],
           )
-        :isImages?Container(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      child:_upperChild1,
-    )
-        :Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Stack(
-                children: <Widget>[
-                  _upperChild1!,
-                  widget.waitingForRefresh
-                      ? const Padding(
-                          padding: EdgeInsets.only(top: 100.0),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Center(child: RefreshProgressIndicator()),
-                          ),
-                        )
-                      : Container(),
-                ],
+        : isImages
+            ? SizedBox(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                child: _upperChild1,
+              )
+            : Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Stack(
+                    children: <Widget>[
+                      _upperChild1!,
+                      isLast
+                          ? const Padding(
+                              padding: EdgeInsets.only(top: 100.0),
+                              child: SizedBox(
+                                width: 100,
+                                height: 100,
+                                child: Center(child: AppLoadingScreen()),
+                              ),
+                            )
+                          : Container(),
+
+                    ],
+                  ),
+                _lowerChild1!,
+              ],
+            );
+    /*     :  Column(
+      mainAxisSize: MainAxisSize.min,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _upperChild1!,
+
+        Stack(
+          children: <Widget>[
+            widget.waitingForRefresh
+                ? const Padding(
+              padding: EdgeInsets.only(top: 100.0),
+              child: SizedBox(
+                width: double.infinity,
+                child: Center(child: AppLoadingScreen()),
               ),
-              _lowerChild1!,
-            ],
-          );
+            )
+                : Container(),
+          ],
+        ),
+        _lowerChild1!,
+      ],
+    ) ;*/
+
+    // Column(
+    //         mainAxisSize: MainAxisSize.min,
+    //         mainAxisAlignment: MainAxisAlignment.center,
+    //         crossAxisAlignment: CrossAxisAlignment.center,
+    //         children: [
+    //           // Stack(
+    //           //   children: <Widget>[
+    //           //     _upperChild1!,
+    //           //     widget.waitingForRefresh
+    //           //         ? const Padding(
+    //           //             padding: EdgeInsets.only(top: 100.0),
+    //           //             child: SizedBox(
+    //           //               width: double.infinity,
+    //           //               child: Center(child: RefreshProgressIndicator()),
+    //           //             ),
+    //           //           )
+    //           //         : Container(),
+    //           //   ],
+    //           // ),
+    //           _lowerChild1!,
+    //         ],
+    //       );
 
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return GestureDetector(

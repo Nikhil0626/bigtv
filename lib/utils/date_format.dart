@@ -32,7 +32,7 @@ String formatTimeDifference(String inputTime,{bool isComment= false} ) {
   } else if (difference.inHours < 24) {
     return difference.inHours==1?'${difference.inHours} hour ago':'${difference.inHours} hours ago';
   } else if (difference.inDays < 7) {
-    return difference.inDays==1?'${difference.inDays} days ago':'${difference.inDays} days ago';
+    return difference.inDays==1?'${difference.inDays} day ago':'${difference.inDays} days ago';
   } else if (difference.inDays < 30) {
     return '${(difference.inDays / 7).floor()} week ago';
   } else {
