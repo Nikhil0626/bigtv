@@ -13,6 +13,7 @@ class TermsConditions extends StatefulWidget {
 }
 
 class _TermsConditionsState extends State<TermsConditions> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

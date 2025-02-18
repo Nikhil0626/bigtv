@@ -42,9 +42,9 @@ class _ContactUsState extends State<ContactUs> {
   // }
   Future<void> launchSingleEmail(email) async {
     await EasyLauncher.email(
-        email: "sarwari.developer@gmail.com",
-        subject: "Test",
-        body: "Hello Flutter developer");
+        email: email,
+        subject: "",
+        body: "");
   }
 
   Future<void> _launchPhone(String phone) async {
@@ -170,12 +170,10 @@ class _ContactUsState extends State<ContactUs> {
                 style: fontStyle(fontSize: 14),
               ),
               height(height: 10),
-              InkWell(
-                onTap: () => _launchPhone('+91 9440913555'),
-                child: Text(
-                  "Phone: +91 9440913555",
-                  style: fontStyle(fontSize: 14),
-                ),
+              ContactDetailTile(
+                title: "Phone: ",
+                email: "+91 9440913555",
+                onEmailTap: () => _launchPhone("+91 9440913555"),
               ),
             ],
           ),
