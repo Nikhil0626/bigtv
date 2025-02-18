@@ -101,7 +101,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
                           builder: (context) => FullPageCarousel(
                             imageUrls:
                                 state.getAllVideoList[index].gallery ?? [],
-                            className: "Gallery View",
+                            className: "Gallery ",
                             postDetails: state.getAllVideoList[index],
                           ),
                         ),
