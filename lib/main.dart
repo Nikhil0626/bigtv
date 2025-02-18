@@ -2,11 +2,17 @@ import 'dart:developer';
 
 import 'package:chotanews/screens/Auth_module/auth_provider.dart';
 import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/screens/testing_screen/test4.dart';
+import 'package:chotanews/services/dynamic_link_service.dart';
+import 'package:chotanews/utils/app_lifecycle_manager.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/utils/register_providers.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
@@ -15,7 +21,6 @@ import 'dart:io' show Platform;
 import 'globel_keys/app_router.dart';
 import 'globel_keys/global_variables_data.dart';
 import 'globel_keys/globel_keys.dart';
-
 
 Future<String?> getUniqueDeviceId(String token) async {
   final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
@@ -47,53 +52,90 @@ Future<String?> getUniqueDeviceId(String token) async {
   }
 }
 
-
 void fetchDeviceId(String token) async {
   String? deviceId = await getUniqueDeviceId(token);
   GlobalVariables().deviceId = deviceId;
 
   print("Device ID: ${GlobalVariables().deviceId}");
-
 }
-Future<void> main() async{
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  WebEngagePlugin _webEngagePlugin =  WebEngagePlugin();
+  WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   await Firebase.initializeApp();
 
-  if(Platform.isIOS){
+  if (Platform.isIOS) {
     String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
     log('APNs Token: $apnsToken');
     fetchDeviceId("");
   }
-if(Platform.isAndroid){
-  // await WebEngagePlugin.userLogout();
-  var token = await FirebaseMessaging.instance.getToken();
-  if (token != null) {
+  if (Platform.isAndroid) {
+    var token = await FirebaseMessaging.instance.getToken();
+    if (token != null) {
+      fetchDeviceId(token);
+      _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
 
-    fetchDeviceId(token);
-    // _webEngagePlugin = new WebEngagePlugin();
-    _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
-
-     WebEngagePlugin.setPushToken(token);
-
-
+      WebEngagePlugin.setPushToken(token);
+    }
   }
-}
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     WebEngagePlugin.onPushMessageReceive(message.data);
-  });
-  runApp(const MyApp());
-}
 
+    print(message.data);
+    print("push data receive   &&& ${message.data}");
+  });
+
+  // Check if you received the link via `getInitialLink` first
+  final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
+
+  if (initialLink != null) {
+    final Uri deepLink = initialLink.link;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mainNavigatorKey.currentContext != null) {
+        DynamicLinkService.handleDeepLink(mainNavigatorKey.currentContext!, deepLink);
+      }
+    });
+
+  }
+
+  FirebaseDynamicLinks.instance.onLink.listen(
+        (pendingDynamicLinkData) {
+      if (pendingDynamicLinkData != null) {
+        final Uri deepLink = pendingDynamicLinkData.link;
+        DynamicLinkService.handleDeepLink(mainNavigatorKey.currentContext!, deepLink);
+      }
+    },
+  );
+  // debugPaintSizeEnabled = true;
+  runApp(MyApp());
+
+}
+void subscribeToPushCallbacks() async {
+  //Push click stream listener
+  WebEngagePlugin().pushStream.listen((event) {
+    String? deepLink = event.deepLink;
+    Map<String, dynamic> messagePayload = event.payload!;
+    CustomToast.showSuccessToast(msg: "PushAction click callback:  + ${event.toString()}");
+
+  });
+
+  //Push action click listener
+  WebEngagePlugin().pushActionStream.listen((event) {
+    print("pushActionStream:" + event.toString());
+    String? deepLink = event.deepLink;
+    Map<String, dynamic>? messagePayload = event.payload;
+    CustomToast.showSuccessToast(msg: "PushAction click callback:  + ${event.toString()}");
+  });
+}
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   WebEngagePlugin.onPushMessageReceive(message.data);
+
 }
 
 void _onTokenInvalidated(Map<String, dynamic>? message) {
   print("tokenInvalidated callback received $message");
-  // Reset with new Security Token in the callback
   WebEngagePlugin.setSecureToken("siva kumar", message.toString());
 }
 
@@ -105,7 +147,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
- @override
+  @override
   void initState() {
     // TODO: implement initState
     super.initState();
@@ -115,16 +157,16 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider<FlipProvider>(create: (context) => FlipProvider()),
-        ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider()),
-
+        ChangeNotifierProvider<FlipProvider>(
+            create: (context) => FlipProvider()),
+        ChangeNotifierProvider<AuthProvider>(
+            create: (context) => AuthProvider()),
       ],
       child: MultiBlocProvider(
         providers: RegisterProviders.providers(context),
         child: MaterialApp(
           theme: ThemeData(
-            colorScheme:
-            ColorScheme.fromSeed(seedColor: Colors.blue),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
             useMaterial3: true,
           ),
           scrollBehavior: MyBehavior(),
@@ -134,10 +176,9 @@ class _MyAppState extends State<MyApp> {
             return RoutesManager.generateRoute(setting);
           },
           builder: (
-              BuildContext context,
-              Widget? child,
-              ) {
-            // ScreenUtil.init(context, designSize: const Size(385, 890));
+            BuildContext context,
+            Widget? child,
+          ) {
             return child!;
           },
           // builder: (BuildContext context, Widget? child) {
@@ -150,18 +191,14 @@ class _MyAppState extends State<MyApp> {
           // },
           // home: WebDash(),
           debugShowCheckedModeBanner: false,
-          // initialRoute: RoutesManager.onboardingScreen,
+          initialRoute: RoutesManager.splashScreen,
         ),
       ),
     );
   }
 }
 
-
-
-
-final mainNavigatorKey =
-GlobalKey<NavigatorState>();
+final mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver =
-RouteObserver<ModalRoute<Object?>>();
+    RouteObserver<ModalRoute<Object?>>();
 final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey();

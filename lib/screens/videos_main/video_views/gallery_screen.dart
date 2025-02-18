@@ -34,11 +34,16 @@ class _GalleryScreenState extends State<GalleryScreen> {
     context.read<VideosBloc>().add(GetAllVideos(type: widget.postId));
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushNamedAndRemoveUntil(context, RoutesManager.getAllMenuItemScreen,(route) => false,);
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          RoutesManager.getAllMenuItemScreen,
+          (route) => false,
+        );
         return false;
       },
       child: Scaffold(
@@ -50,7 +55,10 @@ class _GalleryScreenState extends State<GalleryScreen> {
             padding: const EdgeInsets.only(left: 1),
             child: IconButton(
               onPressed: () {
-                Navigator.pushNamedAndRemoveUntil(context, RoutesManager.getAllMenuItemScreen,(route) => false,
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  RoutesManager.getAllMenuItemScreen,
+                  (route) => false,
                 );
               },
               icon: const Icon(
@@ -64,7 +72,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
             children: [
               SizedBox(width: 16),
               Padding(
-                padding: const EdgeInsets.only(top:6 ),
+                padding: const EdgeInsets.only(top: 6),
                 child: Text(
                   "Gallery View",
                   style: fontStyle(
@@ -91,23 +99,28 @@ class _GalleryScreenState extends State<GalleryScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => FullPageCarousel(
-                            imageUrls: state.getAllVideoList[index].gallery ?? [],
+                            imageUrls:
+                                state.getAllVideoList[index].gallery ?? [],
                             className: "Gallery View",
-                            postDetails:state.getAllVideoList[index] ,
+                            postDetails: state.getAllVideoList[index],
                           ),
                         ),
                       );
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           ClipRRect(
-                            borderRadius: const BorderRadius.all(Radius.circular(4)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(4)),
                             child: CachedNetworkImage(
-                              imageUrl: state.getAllVideoList[index].imageUrl!.url.toString(),
+                              imageUrl: state
+                                  .getAllVideoList[index].imageUrl!.url
+                                  .toString(),
                               height: 110,
                               width: 80,
                               fit: BoxFit.cover,
@@ -116,7 +129,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                 width: 80,
                                 color: Colors.grey[300],
                               ),
-                              errorWidget: (context, url, error) => const Icon(Icons.error),
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
                             ),
                           ),
                           width(width: 15),
@@ -136,7 +150,8 @@ class _GalleryScreenState extends State<GalleryScreen> {
                                 height(height: 10),
                                 Text(
                                   dateFormat(
-                                    state.getAllVideoList[index].created.toString(),
+                                    state.getAllVideoList[index].created
+                                        .toString(),
                                   ),
                                   style: fontStyle(
                                     color: Colors.black,
@@ -168,12 +183,19 @@ class _GalleryScreenState extends State<GalleryScreen> {
     );
   }
 }
+
 class FullPageCarousel extends StatefulWidget {
   final List<GalleryImage> imageUrls;
   final String className;
-  final  postDetails;
+  final postDetails;
   final bool isHome;
-  const FullPageCarousel({super.key, required this.imageUrls, this.className = "",required this.postDetails, this.isHome = false });
+
+  const FullPageCarousel(
+      {super.key,
+      required this.imageUrls,
+      this.className = "",
+      required this.postDetails,
+      this.isHome = false});
 
   @override
   _FullPageCarouselState createState() => _FullPageCarouselState();
@@ -188,79 +210,81 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
   void initState() {
     super.initState();
     // Animate first image swipe after a short delay
-    Future.delayed(const Duration(seconds: 2), () {
-      _controller.animateToPage(1,
-          duration: const Duration(milliseconds: 800),
-          curve: Curves.easeInOut);
-    });
+    // Future.delayed(const Duration(seconds: 1), () {
+    //   _controller.animateToPage(1,
+    //       duration: const Duration(milliseconds: 800),
+    //       curve: Curves.easeInOut);
+    // });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: widget.className == "" ? null : AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 14),
-          child: IconButton(
-            onPressed: () {
-              Navigator.pop(context, RoutesManager.getAllMenuItemScreen);
-            },
-            icon: const Icon(
-              Icons.arrow_back_ios_rounded,
-              color: Colors.white,
-              size: 20,
+      appBar: widget.className == ""
+          ? null
+          : AppBar(
+              leading: Padding(
+                padding: const EdgeInsets.only(left: 14),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context, RoutesManager.getAllMenuItemScreen);
+                  },
+                  icon: const Icon(
+                    Icons.arrow_back_ios_rounded,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              ),
+              backgroundColor: AppColors.appButtonColor,
+              title: Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Text(
+                  widget.className,
+                  style: fontStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white),
+                ),
+              ),
             ),
-          ),
-        ),
-        backgroundColor: AppColors.appButtonColor,
-        title: Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Text(
-            widget.className,
-            style: fontStyle(
-                fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
-          ),
-        ),
-      ),
       body: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-        CarouselSlider(
-        carouselController: _controller,
-        options: CarouselOptions(
-          height: double.infinity,
-          viewportFraction: 1.0,
-          enableInfiniteScroll: true,
-          autoPlay: false,
-          autoPlayInterval: const Duration(seconds: 3),
-          onPageChanged: (index, reason) {
-            setState(() {
-              _currentIndex = index;
-            });
-          },
-          scrollPhysics: const BouncingScrollPhysics(),
-          enlargeCenterPage: true,
-        ),
-        items: widget.imageUrls.map((image) {
-          return AnimatedContainer(
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.easeInOut,
-            width: MediaQuery.of(context).size.width,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: NetworkImage(image.url),
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
-                isAntiAlias: true,
-              ),
+          CarouselSlider(
+            carouselController: _controller,
+            options: CarouselOptions(
+              height: double.infinity,
+              viewportFraction: 1.0,
+              enableInfiniteScroll: true,
+              autoPlay: false,
+              autoPlayInterval: const Duration(seconds: 3),
+              onPageChanged: (index, reason) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              scrollPhysics: const BouncingScrollPhysics(),
+              enlargeCenterPage: true,
             ),
-          );
-        }).toList(),
-      ),
-
-
+            items: widget.imageUrls.map((image) {
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+                width: MediaQuery.of(context).size.width,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(image.url),
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
+                    isAntiAlias: true,
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
           Positioned(
-            bottom: widget.isHome?20:70,
+            bottom: widget.isHome ? 20 : 70,
             child: AnimatedSmoothIndicator(
               activeIndex: _currentIndex,
               count: widget.imageUrls.length,
@@ -275,11 +299,13 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
               },
             ),
           ),
-if(!widget.isHome)
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: GalleryPostBottomActions(article: widget.postDetails!,),
-          ),
+          if (!widget.isHome)
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: GalleryPostBottomActions(
+                article: widget.postDetails!,
+              ),
+            ),
         ],
       ),
     );

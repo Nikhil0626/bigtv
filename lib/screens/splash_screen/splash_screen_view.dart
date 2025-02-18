@@ -1,9 +1,11 @@
 import 'dart:developer';
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 
 import 'package:lottie/lottie.dart';
@@ -23,7 +25,10 @@ class _SplashScreenView extends State<SplashScreenView> {
   @override
   void initState() {
     super.initState();
-    navigateApp();
+    Future.delayed(Duration(seconds: 5),() {
+      context.read<AuthProvider>().checkLoginStatus(context);
+
+    },);
   }
 
   @override
@@ -42,7 +47,7 @@ class _SplashScreenView extends State<SplashScreenView> {
             right: 50,
             child: InkWell(
               onTap: () {
-                skipMethod();
+                context.read<AuthProvider>().checkLoginStatus(context);
               },
               child: Text(
                 "Skip  >>>",
@@ -56,39 +61,5 @@ class _SplashScreenView extends State<SplashScreenView> {
         ],
       ),
     );
-  }
-
-  Future navigateApp() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String loginId = sharedPreferences.getString("loginId").toString();
-    log(loginId.toString());
-    if (loginId != "null") {
-      Timer(const Duration(seconds: 5), () {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          RoutesManager.homeScreen,
-          (route) => false,
-        );
-      });
-    } else {
-      Timer(const Duration(seconds: 5), () {
-        DynamicLinkService.handleDynamicLinks(context);
-      });
-    }
-  }
-
-  Future skipMethod() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    String loginId = sharedPreferences.getString("loginId").toString();
-    log(loginId.toString());
-    if (loginId != "null") {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          RoutesManager.homeScreen,
-          (route) => false,
-        );
-    } else {
-        DynamicLinkService.handleDynamicLinks(context);
-    }
   }
 }

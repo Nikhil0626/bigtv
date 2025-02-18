@@ -1,3 +1,5 @@
+import 'package:flutter/cupertino.dart';
+
 abstract class DistrictSelectionEvent {}
 
 class  GetAllDistricts extends DistrictSelectionEvent{}
@@ -17,5 +19,6 @@ SearchDistricts({required this.searchName});
 
 class SubmitDistricts extends DistrictSelectionEvent{
  final String className ;
- SubmitDistricts({required this.className});
+ final BuildContext context;
+ SubmitDistricts({required this.className,required this.context,});
 }

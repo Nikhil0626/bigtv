@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
-import 'package:chotanews/screens/videos_main/videos_model/videos_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/global_variables_data.dart';
@@ -17,10 +17,17 @@ class FlipProvider extends ChangeNotifier {
   List<AllPostCommentModel> allPostCommentModelList = [];
   int isTab = 0;
   bool isShowTopBottomView = true;
+  bool isLastPost = false;
+  bool fromLocation = false;
 
-  void isTabChange(val,{bool isMainPage =false}) {
+  void isTabChange(val, BuildContext context, {bool isMainPage = false}) {
+    // if(){
+    //   context.read<HomeBloc>().add(MenuItemClickEvent(
+    //       context: context, currentMenuItem: "లొకేషన్స్"));
+    //   return ;
+    // }
     isTab = val;
-    if(!isMainPage){
+    if (!isMainPage) {
       notifyListeners();
     }
   }
@@ -51,6 +58,7 @@ class FlipProvider extends ChangeNotifier {
   Future<void> getArticles({bool refresh = false, int index = 0}) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String locationId = sp.getString("locationId") ?? "";
+    String loginId = sp.getString("loginId") ?? "";
     String deviceId = GlobalVariables().deviceId ?? "";
 
 
@@ -58,9 +66,10 @@ class FlipProvider extends ChangeNotifier {
       isLoading = true;
       isRefresh = true;
       notifyListeners();
+
       final Map<String, dynamic> queryParams = isTab == 1
           ? {
-              'userid': "1",
+              'userid': loginId ?? "",
               'postid': "0",
               'lpostid': "0",
               'homefeed': "1",
@@ -69,7 +78,7 @@ class FlipProvider extends ChangeNotifier {
               'locationIds': locationId,
             }
           : {
-              'userid': "1",
+              'userid': loginId ?? "",
               'postid': "0",
               'lpostid': "0",
               'includeHomePage': "0",
@@ -79,12 +88,11 @@ class FlipProvider extends ChangeNotifier {
       getData(queryParams);
       isLoading = false;
       notifyListeners();
-    }
-    else if (index != 0 && isTab == 0) {
+    } else if (index != 0 && isTab == 0) {
       log("Home index $index");
 
       final Map<String, dynamic> queryParams = {
-        'userid': GlobalVariables().userId.toString(),
+        'userid': loginId ?? "",
         'postid': lastPostIdInMain.toString(),
         'lpostid': "0",
         'includeHomePage': "0",
@@ -94,10 +102,10 @@ class FlipProvider extends ChangeNotifier {
       log(queryParams.toString());
       getData(queryParams);
     } else if (index != 0 && isTab == 1) {
-      log("State index");
+      log("State index $index");
 
       final Map<String, dynamic> queryParams = {
-        'userid': GlobalVariables().userId.toString(),
+        'userid': loginId ?? "",
         'postid': lastPostIdInDistrict.toString(),
         'lpostid': "0",
         'homefeed': "1",
@@ -111,7 +119,7 @@ class FlipProvider extends ChangeNotifier {
       log("elseeeeee $index");
       final Map<String, dynamic> queryParams = isTab != 0
           ? {
-              'userid': GlobalVariables().userId.toString(),
+              'userid': loginId ?? "",
               'postid': "0",
               'lpostid': "0",
               'homefeed': "1",
@@ -120,7 +128,7 @@ class FlipProvider extends ChangeNotifier {
               'locationIds': locationId,
             }
           : {
-              'userid': GlobalVariables().userId.toString(),
+              'userid': loginId,
               'postid': "0",
               'lpostid': "0",
               'includeHomePage': "0",
@@ -140,55 +148,55 @@ class FlipProvider extends ChangeNotifier {
         jsonList.map((item) => HomeScreenModel.fromJson(item)).toList();
 
     if (isTab == 0) {
-      // if (isRefresh) {
-      //   log("siva");
+      // mainArticlesController.add([]);
+      if (isRefresh) {
+        log("siva");
         mainArticlesController.add([]);
         mainArticlesData = [];
         notifyListeners();
-      // }
+      }
       mainArticlesData.addAll(data);
+      if (mainArticlesData.isEmpty) {
+        isLastPost = true;
+      }
       lastPostIdInMain = mainArticlesData.last.id;
       log(mainArticlesData.length.toString());
-      mainArticlesController.add(mainArticlesData);
+      mainArticlesController.add(data);
     } else if (isTab == 1) {
-      // if (isRefresh) {
-      //   log("siva");
+      if (isRefresh || fromLocation) {
+        log("siva");
         districtArticlesController.add([]);
         districtArticlesData = [];
         notifyListeners();
-      // }
+      }
       districtArticlesData.addAll(data);
+      if (districtArticlesData.isEmpty) {
+        isLastPost = true;
+      }
       lastPostIdInDistrict = districtArticlesData.last.id;
       log(lastPostIdInDistrict.toString());
-      districtArticlesController.add(districtArticlesData);
+
+      districtArticlesController.add(data);
     }
 
     isRefresh = false;
     notifyListeners();
   }
 
-  bool isIconcolor = false;
 
-  updateColor() {
-    isIconcolor = !isIconcolor;
-    notifyListeners();
-  }
+  final  districtArticlesController = StreamController<List<HomeScreenModel>?>();
+  final  mainArticlesController = StreamController<List<HomeScreenModel>?>();
 
-  final StreamController<List<HomeScreenModel>> districtArticlesController =
-      StreamController<List<HomeScreenModel>>.broadcast();
-  final StreamController<List<HomeScreenModel>> mainArticlesController =
-      StreamController<List<HomeScreenModel>>.broadcast();
 
-  Stream<List<HomeScreenModel>> get mainArticles =>
+  Stream<List<HomeScreenModel>?> get mainArticles =>
       mainArticlesController.stream;
 
-  Stream<List<HomeScreenModel>> get districtArticles =>
+  Stream<List<HomeScreenModel>?> get districtArticles =>
       districtArticlesController.stream;
 
   @override
   void dispose() {
-    districtArticlesController
-        .close();
+    districtArticlesController.close();
     mainArticlesController.close();
     super.dispose();
   }
@@ -197,11 +205,14 @@ class FlipProvider extends ChangeNotifier {
 
   Future getAllPostById(postId) async {
     isSendComment = true;
-    notifyListeners();
     try {
       Response response = await HomeRepo().getAllCommentByPost(postId);
       List data = response.data['comments'];
-      allPostCommentModelList = data.map((e)=> AllPostCommentModel.fromJson(e),).toList();
+      allPostCommentModelList = data
+          .map(
+            (e) => AllPostCommentModel.fromJson(e),
+          )
+          .toList();
       log(response.data.toString());
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
@@ -209,7 +220,7 @@ class FlipProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api catch ${st.toString()}");
-    }finally{
+    } finally {
       isSendComment = false;
       notifyListeners();
     }
@@ -218,8 +229,10 @@ class FlipProvider extends ChangeNotifier {
   Future addCommentPostById(postData, comment) async {
     isSendComment = true;
     notifyListeners();
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String loginId = sp.getString("loginId") ?? "";
     Map<String, dynamic> body = {
-      "UserId": GlobalVariables().userId.toString(),
+      "UserId": loginId??"",
       "PostId": postData.toString(),
       "Content": comment
     };
@@ -241,6 +254,8 @@ class FlipProvider extends ChangeNotifier {
       isSendComment = false;
       notifyListeners();
     }
+
+
   }
 
   List<String> isLikeList = [];
@@ -257,5 +272,8 @@ class FlipProvider extends ChangeNotifier {
     notifyListeners(); // Notify listeners if using ChangeNotifier
   }
 
-
+  void isLocationChange(val){
+    fromLocation = val;
+    notifyListeners();
+  }
 }

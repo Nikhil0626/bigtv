@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:chotanews/globel_keys/app_router.dart';
-import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -11,12 +10,9 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:otp_text_field/otp_field.dart';
-import 'package:otp_text_field/style.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:sms_autofill/sms_autofill.dart';
-import 'auth_event.dart';
 
 class OtpScreen extends StatefulWidget {
   final String mobileNumber;
@@ -101,6 +97,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           height(height: 100),
+
                           SvgPicture.asset(
                             'assets/svg/Chota_news_logo.svg',
                             height: 24,
@@ -154,6 +151,7 @@ class _OtpScreenState extends State<OtpScreen> {
                           PinCodeTextField(
                             appContext: context,
                             length: 4,
+
                             // OTP length
                             controller: otpController,
                             keyboardType: TextInputType.number,
@@ -162,6 +160,7 @@ class _OtpScreenState extends State<OtpScreen> {
                             },
                             enablePinAutofill: true,
                             pinTheme: PinTheme(
+
                               shape: PinCodeFieldShape.box,
                               borderRadius: BorderRadius.circular(10),
                               // Rounded corners
