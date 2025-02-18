@@ -91,7 +91,7 @@ class _ContactUsState extends State<ContactUs> {
                 "Contact Us",
                 style: fontStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -112,7 +112,7 @@ class _ContactUsState extends State<ContactUs> {
                     Text(
                       "Chota News",
                       style: fontStyle(
-                        fontSize: 24,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -134,45 +134,47 @@ class _ContactUsState extends State<ContactUs> {
               Text(
                 "Contact Details",
                 style: fontStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               height(height: 10),
               ContactDetailTile(
-                title: "For support/feedback queries",
-                email: "info@chotanews.com",
+                title: "For any support/feedback queries,please write to",
+                email: " info@chotanews.com",
                 onEmailTap: () => launchSingleEmail("info@chotanews.com"),
               ),
+              height(height: 10),
               ContactDetailTile(
-                title: "For advertising/partnership enquiries",
-                email: "advertising@chotanews.com",
+                title: "For advertising/partnership enquiries, please write to",
+                email: " advertising@chotanews.com",
                 onEmailTap: () => launchSingleEmail("advertising@chotanews.com"),
               ),
+              height(height: 10),
               ContactDetailTile(
-                title: "For complaints, queries, or grievances",
-                email: "grievance@chotanews.com",
+                title: "For any complaints,queries, or grievances, please write to",
+                email: " grievance@chotanews.com",
                 onEmailTap: () => launchSingleEmail("grievance@chotanews.com"),
               ),
               height(height: 20),
               Text(
                 "Address",
                 style: fontStyle(
-                  fontSize: 20,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               height(height: 10),
               Text(
                 "Pravasa Media LLP\nDwaraka Trident, 4th Floor\nKavuri Hills, JubileeHills, Hyderabad,\nTelangana 500033",
-                style: fontStyle(fontSize: 16),
+                style: fontStyle(fontSize: 14),
               ),
               height(height: 10),
               InkWell(
-                onTap: () => _launchPhone('+91 81210 31063'),
+                onTap: () => _launchPhone('+91 9440913555'),
                 child: Text(
-                  "Phone: +91 81210 31063",
-                  style: fontStyle(fontSize: 16),
+                  "Phone: +91 9440913555",
+                  style: fontStyle(fontSize: 14),
                 ),
               ),
             ],
@@ -197,23 +199,31 @@ class ContactDetailTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: fontStyle(fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        height(height: 5),
-        InkWell(
-          onTap: onEmailTap,
-          child: Text(
-            email,
-            style: fontStyle(fontSize: 16, color: Colors.blue),
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: title,
+            style: fontStyle(fontSize: 14, fontWeight: FontWeight.normal),
           ),
-        ),
-        height(height: 10),
-      ],
+          const WidgetSpan(
+            child: SizedBox(height: 5),
+          ),
+          WidgetSpan(
+            child: GestureDetector(
+              onTap: onEmailTap,
+              child: Text(
+                email,
+                style: fontStyle(fontSize: 14, color: Colors.blue),
+              ),
+            ),
+          ),
+          const WidgetSpan(
+            child: SizedBox(height: 10),
+          ),
+        ],
+      ),
     );
+
   }
 }
