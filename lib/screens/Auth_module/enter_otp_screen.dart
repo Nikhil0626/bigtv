@@ -32,7 +32,7 @@ class _OtpScreenState extends State<OtpScreen> {
   TextEditingController otpController = TextEditingController();
   String enteredOtp = "";
 
-  int _remainingTime = 60; // Initial time (60 seconds)
+  int _remainingTime = 120; // Initial time (60 seconds)
   late Timer _timer;
   bool canResend = false;
 
@@ -45,15 +45,17 @@ class _OtpScreenState extends State<OtpScreen> {
     startCountdown();
     _listenForSms();
   }
+
   void _listenForSms() async {
-  var ddd =   await SmsAutoFill().listenForCode;
-  print(ddd);
+    var ddd = await SmsAutoFill().listenForCode;
+    print("otp autofill ${ddd}");
   }
+
   Future verifyOtp(context) async {}
 
   void startCountdown() {
     setState(() {
-      _remainingTime = 60;
+      _remainingTime = 120;
       canResend = false;
     });
 
@@ -71,12 +73,6 @@ class _OtpScreenState extends State<OtpScreen> {
     });
   }
 
-  void resendOtp(context) {
-
-    context.read<AuthProvider>().sendOtp(widget.mobileNumber.toString(), context);
-    // context.read<AuthBloc>().add(
-    //     SendOtp(context: context, phoneNumber: widget.mobileNumber.toString()));
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +93,6 @@ class _OtpScreenState extends State<OtpScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           height(height: 100),
-
                           SvgPicture.asset(
                             'assets/svg/Chota_news_logo.svg',
                             height: 24,
@@ -150,20 +145,24 @@ class _OtpScreenState extends State<OtpScreen> {
                           height(height: 10),
                           PinCodeTextField(
                             appContext: context,
-                            length: 4,
-
-                            // OTP length
+                            length: 4, // OTP length
                             controller: otpController,
                             keyboardType: TextInputType.number,
                             onChanged: (value) {
-                              print("Entered OTP: $value");
+                              print("jshvfsjfsjfjhs ${value.length}");
+
+                             if(value.length ==0){
+                               authProvider.errorMessage = "";
+                               setState(() {
+
+                               });
+                             }
                             },
+                            cursorColor: Colors.grey,
                             enablePinAutofill: true,
                             pinTheme: PinTheme(
-
                               shape: PinCodeFieldShape.box,
                               borderRadius: BorderRadius.circular(10),
-                              // Rounded corners
                               fieldHeight: 50,
                               fieldWidth: 70,
                               activeFillColor: Colors.white,
@@ -173,31 +172,16 @@ class _OtpScreenState extends State<OtpScreen> {
                               inactiveColor: Colors.grey,
                               inactiveFillColor: Colors.white,
                               borderWidth: 1,
+                              errorBorderColor: authProvider.errorMessage != "" ? Colors.red : Colors.transparent, // Show red border if error
                             ),
-
                             autoDisposeControllers: false,
                           ),
-                          // OTPTextField(
-                          //   length: 4,
-                          //   width: MediaQuery.of(context).size.width,
-                          //   fieldWidth: 70,
-                          //   style: fontStyle(fontSize: 18),
-                          //   textFieldAlignment:
-                          //       MainAxisAlignment.spaceEvenly,
-                          //   fieldStyle: FieldStyle.box,
-                          //   controller: otpController,
-                          //   onChanged: (otp) {
-                          //     setState(() {
-                          //       enteredOtp = otp;
-                          //     });
-                          //   },
-                          //   onCompleted: (otp) {
-                          //     setState(() {
-                          //       enteredOtp = otp;
-                          //     });
-                          //   },
-                          // ),
-                          height(height: 10),
+                          if (authProvider.errorMessage != "")
+                            Text(
+                              authProvider.errorMessage,
+                              style: fontStyle(color: Colors.red,fontSize: 14),
+                            ),
+                            height(height: 10),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -206,8 +190,14 @@ class _OtpScreenState extends State<OtpScreen> {
                                 style: fontStyle(color: Colors.grey),
                               ),
                               GestureDetector(
-                                onTap: () =>
-                                    canResend ? resendOtp(context) : null,
+                                onTap: canResend
+                                    ? () {
+
+                                        authProvider.sendOtp(
+                                            widget.mobileNumber.toString(),
+                                            context);
+                                      }
+                                    : () {},
                                 child: Text(
                                   "Resend OTP",
                                   style: fontStyle(
@@ -222,8 +212,8 @@ class _OtpScreenState extends State<OtpScreen> {
                           InkWell(
                             onTap: () {
                               if (otpController.text.length == 4) {
-                                context.read<AuthProvider>().verifyOtp(
-                                    context, widget.mobileNumber, otpController.text);
+                                context.read<AuthProvider>().verifyOtp(context,
+                                    widget.mobileNumber, otpController.text);
                               } else {
                                 CustomToast.showErrorToast(msg: "Invalid OTP");
                               }

@@ -153,11 +153,11 @@ class BaseService {
       return response;
     } on DioException catch (e) {
       log('Request failed: ${e.response?.statusCode} - ${e.message}');
-      throw Exception('Failed to load data: ${e.response?.statusMessage}');
+    return e.response!;
     } catch (e,st) {
       log('Unexpected error: $e');
       log('Unexpected error: $st');
-      throw Exception('An unexpected error occurred');
+      return e;
     }
   }
 }

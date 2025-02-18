@@ -56,7 +56,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                   padding: const EdgeInsets.all(14.0),
                   child: Row(
                     children: [
-                      if(widget.className!="")
+                      if(widget.className=="Home")
                       InkWell(
                         onTap: () {
                           Navigator.pop(context);
@@ -244,6 +244,8 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                     CustomToast.showErrorToast(
                                         msg: "Select at least two districts");
                                   } else {
+
+                                    print("dfngvdklfgdlkfgdfgnfdk ${widget.className}");
                                     context.read<DistrictSelectionBloc>().add(
                                         SubmitDistricts(
                                             className: widget.className,context: context));

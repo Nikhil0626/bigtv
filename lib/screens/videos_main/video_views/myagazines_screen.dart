@@ -70,7 +70,7 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Text(
-                  "Magazine View",
+                  "Magazine",
                   style: fontStyle(
                     color: Colors.white,
                     fontSize: 18,

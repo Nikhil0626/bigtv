@@ -34,33 +34,25 @@ void showComments(BuildContext context, String postId) {
   );
 }
 
-// void showComments(BuildContext context, String postId) {
-//   showModalBottomSheet(
-//     context: context,
-//     isScrollControlled: true,
-//     shape: const RoundedRectangleBorder(
-//       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-//     ),
-//     builder: (context) {
-//       return SizedBox(
-//         height: 500,
-//         child: CommentSection(
-//             postId: postId, ),
-//       );
-//
-//       // CommentSection(postId:postId);
-//     },
-//   );
-// }
-
-class CommentSection extends StatelessWidget {
+class CommentSection extends StatefulWidget {
   final String postId;
   const CommentSection({super.key, required this.postId});
 
   @override
+  State<CommentSection> createState() => _CommentSectionState();
+}
+
+class _CommentSectionState extends State<CommentSection> {
+TextEditingController controller = TextEditingController();
+
+@override
+  void initState() {
+  context.read<FlipProvider>().getAllPostById(widget.postId);
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    TextEditingController controller = TextEditingController();
-    context.read<FlipProvider>().getAllPostById(postId);
 
     return Consumer<FlipProvider>(
       builder: (_, flipProvider, __) {
@@ -116,106 +108,109 @@ class CommentSection extends StatelessWidget {
 
                 // Comment List with Keyboard Scroll Fix
                 Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: flipProvider.isSendComment?const AppLoadingScreen():flipProvider.allPostCommentModelList.isEmpty
-                        ? Center(
-                      child: Text(
-                        "No Comments Yet...",
-                        style: fontStyle(
-                          fontSize: 14,
-                          color: const Color(0xff111928),
-                          fontWeight: FontWeight.bold,
-                        ),
+                  child:flipProvider.isSendComment?const AppLoadingScreen():flipProvider.allPostCommentModelList.isEmpty
+                      ? Center(
+                    child: Text(
+                      "No Comments Yet...",
+                      style: fontStyle(
+                        fontSize: 14,
+                        color: const Color(0xff111928),
+                        fontWeight: FontWeight.normal,
                       ),
-                    )
-                        : ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(), // Prevents nested scroll
-                      itemCount: flipProvider.allPostCommentModelList.length,
-                      itemBuilder: (context, index) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 8),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // User Avatar
-                              CircleAvatar(
-                                child: Text(
-                                  flipProvider.allPostCommentModelList[index].user.name
-                                      .toString()
-                                      .split("")
-                                      .first,
-                                  style: fontStyle(fontSize: 16,fontWeight: FontWeight.normal),
-                                ),
-                              ),
-                              width(width: 10),
-                              // Comment Content
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          flipProvider.allPostCommentModelList[index].user.name,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: fontStyle(
-                                            fontWeight: FontWeight.normal,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        width(width: 4),
-                                        Center(
-                                          child: Text("•",
-                                            textAlign: TextAlign.center,
-
-                                            style: fontStyle(
-                                              color: Colors.black,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-
-                                        width(width: 4),
-                                        Center(
-                                          child: Text(
-                                            formatTimeDifference(
-                                              flipProvider.allPostCommentModelList[index].createdAt.toString(),
-                                              isComment: true,
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            style: fontStyle(
-                                              color: Colors.black,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.normal,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    height(height: 8),
-                                    ExpandableTextWidget(
-                                      text: flipProvider.allPostCommentModelList[index].text,
-                                    ),
-                                    height(height: 8),
-                                    const Row(
-                                      children: [
-                                        Icon(Icons.thumb_up_alt_outlined, size: 20, color: Colors.grey),
-                                        SizedBox(width: 10),
-                                        Icon(Icons.thumb_down_alt_outlined, size: 20, color: Colors.grey),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
                     ),
+                  )
+                      :  ListView.builder(
+                    shrinkWrap: true,
+                    // physics: const NeverScrollableScrollPhysics(), // Prevents nested scroll
+                    itemCount: flipProvider.allPostCommentModelList.length,
+                    itemBuilder: (context, index) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // User Avatar
+                            CircleAvatar(
+                              child: Text(
+                                flipProvider.allPostCommentModelList[index].user.name
+                                    .toString()
+                                    .split("")
+                                    .first,
+                                style: fontStyle(fontSize: 16,fontWeight: FontWeight.normal),
+                              ),
+                            ),
+                            width(width: 10),
+                            // Comment Content
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        flipProvider.allPostCommentModelList[index].user.name,
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 1,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          fontSize: 12,
+
+                                        ),
+                                      ),
+                                      width(width: 4),
+                                      Center(
+                                        child: Text("•",
+                                          textAlign: TextAlign.center,
+
+                                          style: fontStyle(
+                                            color: Colors.black,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+
+                                      width(width: 4),
+                                      Center(
+                                        child: Text(
+                                          formatTimeDifference(
+                                            flipProvider.allPostCommentModelList[index].createdAt.toString(),
+                                            isComment: true,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                          style: fontStyle(
+                                            color: Colors.black,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  height(height: 8),
+                                  ExpandableTextWidget(
+                                    text: flipProvider.allPostCommentModelList[index].text,
+                                  ),
+                                  height(height: 8),
+                                  // Row(
+                                  //   children: [
+                                  //     InkWell(
+                                  //         onTap: (){
+                                  //
+                                  //         },
+                                  //         child: Icon(Icons.thumb_up_alt_outlined, size: 20, color: Colors.grey)),
+                                  //     SizedBox(width: 10),
+                                  //     Icon(Icons.thumb_down_alt_outlined, size: 20, color: Colors.grey),
+                                  //   ],
+                                  // ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
 
@@ -245,7 +240,7 @@ class CommentSection extends StatelessWidget {
                         icon: const Icon(Icons.send, color: Colors.blue),
                         onPressed: () {
                           if (context.read<AuthProvider>().loginType == LoginStatus.login) {
-                            flipProvider.addCommentPostById(postId, controller.text).then(
+                            flipProvider.addCommentPostById(widget.postId, controller.text).then(
                                   (value) => controller.text = '',
                             );
                           } else {
@@ -470,6 +465,7 @@ class CommentSection extends StatelessWidget {
 //   }
 // }
 //
+
 class ExpandableTextWidget extends StatefulWidget {
   final String text;
   const ExpandableTextWidget({super.key, required this.text});
@@ -480,6 +476,31 @@ class ExpandableTextWidget extends StatefulWidget {
 
 class _ExpandableTextWidgetState extends State<ExpandableTextWidget> {
   bool isExpanded = false;
+  bool isOverflowing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkOverflow();
+  }
+
+  void _checkOverflow() {
+    final textSpan = TextSpan(
+      text: widget.text,
+      style: fontStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
+    );
+    final textPainter = TextPainter(
+      text: textSpan,
+      maxLines: 4, // Limit to 4 lines
+      textDirection: TextDirection.ltr,
+    );
+
+    textPainter.layout(maxWidth: double.infinity);
+
+    setState(() {
+      isOverflowing = textPainter.didExceedMaxLines;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -489,30 +510,32 @@ class _ExpandableTextWidgetState extends State<ExpandableTextWidget> {
         Text(
           widget.text,
           style:  fontStyle(
-            color: Colors.black,
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: FontWeight.w500,
+            color: Colors.black,
           ),
           maxLines: isExpanded ? null : 4,  // Initially collapsed
           overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
         ),
-        GestureDetector(
-          onTap: () {
-            setState(() {
-              isExpanded = !isExpanded;
-            });
-          },
-          child: Text(
-            isExpanded ? "Show Less" : "Read More",
-            style: fontStyle(
-              color: Colors.blue,
-              fontSize: 12,
-              fontWeight: FontWeight.normal,
+        if (isOverflowing) // Only show "Read More" if text exceeds 4 lines
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                isExpanded = !isExpanded;
+              });
+            },
+            child: Text(
+              isExpanded ? "Show Less" : "Read More",
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.normal,
+                color: Colors.blue,
+              ),
             ),
           ),
-        ),
       ],
     );
   }
 }
+
 

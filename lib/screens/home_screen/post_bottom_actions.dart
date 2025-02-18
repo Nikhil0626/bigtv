@@ -11,10 +11,12 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/image_to_pdf_helper.dart';
+import '../../services/local_data.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
 import '../../utils/app_spaces.dart';
@@ -27,65 +29,58 @@ class PostBottomActions extends StatelessWidget {
   final FlipProvider flipProvider;
   final HomeScreenModel article;
   final ScreenshotController screenshotController;
-
-  const PostBottomActions(
-      {super.key,
-      required this.flipProvider,
-      required this.article,
-      required this.screenshotController,
-      this.postType = ""});
+  const PostBottomActions({super.key,required this.flipProvider,required this.article,required this.screenshotController,this.postType =""});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: postType == "BigBlackStandard" ? Colors.black : Colors.white,
+    return   Container(
+      color:postType == "BigBlackStandard" ?Colors.black:Colors.white,
       height: 50,
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment:
+        MainAxisAlignment.spaceAround,
         children: [
-          InkWell(
-            onTap: () {
-              log("Refresh");
-              flipProvider.getArticles(refresh: true);
-            },
-            child: SizedBox(
-              height: 52,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  height(height: 2),
-                  flipProvider.isRefresh
-                      ? const SizedBox(
-                          height: 20, width: 20, child: AppLoadingScreen())
-                      : SvgPicture.asset("assets/svg/reload.svg",
-                          height: 20,
-                          width: 20,
-                          color: postType == "BigBlackStandard"
-                              ? Colors.white
-                              : Colors.grey[600]),
-                  height(height: 4),
-                  Text(
-                    "రిలోడ్",
-                    style: fontStyle(
-                        fontSize: 14,
-                        color: postType == "BigBlackStandard"
-                            ? Colors.white
-                            : Colors.grey[600]),
-                  ),
-                ],
+
+        InkWell(
+        onTap: () {
+          log("Refresh");
+          flipProvider.getArticles(
+              refresh:
+              true);
+        },
+        child: SizedBox(
+          height: 52,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              height(height: 2),
+
+              flipProvider.isRefresh?const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: AppLoadingScreen()):  SvgPicture.asset("assets/svg/reload.svg",
+                    height: 20,
+                    width: 20,
+                    color: postType=="BigBlackStandard"?Colors.white:Colors.grey[600]
+                ),
+              height(height: 4),
+              Text(
+                "రిలోడ్",
+                style: fontStyle(fontSize: 14,
+                    color: postType=="BigBlackStandard"?Colors.white:Colors.grey[600]
+                ),
               ),
-            ),
+            ],
           ),
+        ),
+      ),
+
           BottomActions(
               postType: postType,
-              icon: flipProvider.isLikeList.contains(article.id.toString())
-                  ? "assets/svg/like_full.svg"
-                  : "assets/svg/like.svg",
+              icon: flipProvider.isLikeList.contains(article.id.toString())?"assets/svg/like_full.svg":"assets/svg/like.svg",
               label: 'లైక్',
-              isLike: flipProvider.isLikeList.contains(article.id.toString())
-                  ? true
-                  : false,
+              isLike: flipProvider.isLikeList.contains(article.id.toString())?true:false,
               onTap: () {
                 log(
                   "Like",
@@ -94,15 +89,19 @@ class PostBottomActions extends StatelessWidget {
               }),
           BottomActions(
               postType: postType,
-              icon: "assets/svg/comment.svg",
+              icon:
+              "assets/svg/comment.svg",
               label: 'కామెంట్',
               onTap: () async {
                 log("Comment --- ${context.read<AuthProvider>().loginType}");
                 showComments(context, article.id.toString());
+
               }),
+
           BottomActions(
               postType: postType,
-              icon: "assets/svg/share.svg",
+              icon:
+              "assets/svg/share.svg",
               label: ' షేర్',
               onTap: () async {
                 // final DynamicLinkParameters parameters = DynamicLinkParameters(
@@ -116,14 +115,15 @@ class PostBottomActions extends StatelessWidget {
                 //     appStoreId: '1631068092',
                 //   ),
                 // );
-                if (article.type == "Standard") {
-                  takeScreenshotAndShare(article, screenshotController);
-                } else if (article.type == "Image") {
-                  takeScreenshotAndShare(article, screenshotController);
+                if(article.type=="Standard"){
+                  takeScreenshotAndShare(article,screenshotController);
+                }else if(article.type=="Image"){
+                  takeScreenshotAndShare(article,screenshotController);
                   // convertImageUrlToPdfAndShare(context,article);
-                } else if (article.type == "Gallery") {
-                  createAndSharePdf(context, article);
+                }else if(article.type == "Gallery"){
+                  createAndSharePdf(context,article);
                 }
+
               }),
         ],
       ),
@@ -131,81 +131,84 @@ class PostBottomActions extends StatelessWidget {
   }
 }
 
-class GalleryPostBottomActions extends StatelessWidget {
-  final article;
-  final bool isHome;
 
-  const GalleryPostBottomActions(
-      {super.key, required this.article, this.isHome = false});
+class GalleryPostBottomActions extends StatelessWidget {
+  final  article;
+  final bool isHome;
+  const GalleryPostBottomActions({super.key,required this.article,this.isHome = false});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white.withOpacity(0.4),
-      height: 70,
-      child: Column(
-        children: [
-          const Divider(
-            color: Colors.black87,
-            thickness: 1,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
+    return   Consumer<FlipProvider>(
+      builder: (_,flipProvider,__) {
+        return Container(
+          color: Colors.white.withOpacity(0.4),
+          height: 70,
+          child: Column(
             children: [
-              BottomActions(
-                  postType: "",
-                  iconColor: Colors.black87,
-                  icon: "assets/svg/like.svg",
-                  label: 'లైక్',
-                  isLike: context
+              const Divider(
+                color: Colors.black87,
+                thickness: 1,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  BottomActions(
+                      postType: "",
+                      iconColor: Colors.black87,
+                      icon: "assets/svg/like.svg",
+                      label: 'లైక్',
+                      isLike: context
                           .watch<FlipProvider>()
                           .isLikeList
                           .contains(article.id.toString())
-                      ? true
-                      : false,
-                  onTap: () {
-                    log(
-                      "Like",
-                    );
-                    context
-                        .read<FlipProvider>()
-                        .isLikePost(article.id.toString());
-                  }),
-              BottomActions(
-                  postType: "",
-                  iconColor: Colors.black87,
-                  icon: "assets/svg/comment.svg",
-                  label: 'కామెంట్',
-                  onTap: () async {
-                    log("Comment --- ${context.read<AuthProvider>().loginType}");
+                          ? true
+                          : false,
+                      onTap: () {
+                        log(
+                          "Like",
+                        );
+                        context
+                            .read<FlipProvider>()
+                            .isLikePost(article.id.toString());
+                      }),
+                  BottomActions(
+                      postType: "",
+                      iconColor: Colors.black87,
+                      icon: "assets/svg/comment.svg",
+                      label: 'కామెంట్',
+                      onTap: () async {
+                        log("Comment --- ${context.read<AuthProvider>().loginType}");
 
-                    if (context.read<AuthProvider>().loginType ==
-                        LoginStatus.login) {
-                      context
-                          .read<FlipProvider>()
-                          .getAllPostById(article.id)
-                          .then(
-                            (value) =>
+                        if (context.read<AuthProvider>().loginType ==
+                            LoginStatus.login) {
+                          context
+                              .read<FlipProvider>()
+                              .getAllPostById(article.id)
+                              .then(
+                                (value) =>
                                 showComments(context, article.id.toString()),
                           );
-                    } else {
-                      Navigator.pushNamed(context, RoutesManager.signInScreen);
-                    }
-                  }),
-              BottomActions(
-                  postType: "",
-                  iconColor: Colors.black87,
-                  icon: "assets/svg/share.svg",
-                  label: ' షేర్',
-                  onTap: () async {
-                    if (article.type == "Gallery") {
-                      createAndSharePdf(context, article);
-                    }
-                  }),
+                        } else {
+                          Navigator.pushNamed(context, RoutesManager.signInScreen);
+                        }
+                      }),
+                  BottomActions(
+                      postType: "",
+                      iconColor: Colors.black87,
+                      icon: "assets/svg/share.svg",
+                      label: ' షేర్',
+                      onTap: () async {
+                        if (article.type == "Gallery") {
+                          createAndSharePdf(context, article);
+                        }
+                      }),
+                ],
+              ),
             ],
           ),
-        ],
-      ),
+        );
+      }
     );
   }
 }

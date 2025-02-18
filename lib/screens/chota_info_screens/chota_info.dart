@@ -518,7 +518,7 @@ return Scaffold(
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 child: Text(
-                  "App Version: 5.0.0+8",
+                  "App Version: 5.0.0+12",
                   style: fontStyle(
                     fontSize: 16,
                   ),
@@ -531,6 +531,7 @@ return Scaffold(
   LoginStatus loginStatus = LoginStatus.none;
   Future getLogin() async{
     loginStatus  =await getLoginStatus();
+
     setState(() {
 
     });

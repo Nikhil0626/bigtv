@@ -4,6 +4,7 @@ import 'package:chotanews/screens/Auth_module/auth_provider.dart';
 import 'package:chotanews/screens/testing_screen/provider.dart';
 import 'package:chotanews/screens/testing_screen/test4.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
+import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/app_lifecycle_manager.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/utils/register_providers.dart';
@@ -109,24 +110,7 @@ Future<void> main() async {
   );
   // debugPaintSizeEnabled = true;
   runApp(MyApp());
-
-}
-void subscribeToPushCallbacks() async {
-  //Push click stream listener
-  WebEngagePlugin().pushStream.listen((event) {
-    String? deepLink = event.deepLink;
-    Map<String, dynamic> messagePayload = event.payload!;
-    CustomToast.showSuccessToast(msg: "PushAction click callback:  + ${event.toString()}");
-
-  });
-
-  //Push action click listener
-  WebEngagePlugin().pushActionStream.listen((event) {
-    print("pushActionStream:" + event.toString());
-    String? deepLink = event.deepLink;
-    Map<String, dynamic>? messagePayload = event.payload;
-    CustomToast.showSuccessToast(msg: "PushAction click callback:  + ${event.toString()}");
-  });
+  subscribeToPushCallbacks(_webEngagePlugin);
 }
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {

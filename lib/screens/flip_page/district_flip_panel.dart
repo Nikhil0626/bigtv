@@ -1,70 +1,61 @@
-/*
-// The FlipPanel class is an evolution of the FlipPanel conceived and implemented
-// by Hunghd for the flip_panel package whose source code you can find here:
-//  https://github.com/hnvn/flutter_flip_panel
-//
-// It has been largely modified to adapt it to the manual gestures but the
-// build methods mostly remain as in the original source, though slightly
-// reduced.
+import 'dart:developer';
+
+import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
+import 'package:flutter/material.dart';
 
 import 'dart:async';
 
-import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:math' as math;
 
-import '../home_screen/home_bloc.dart';
-import '../home_screen/home_event.dart';
-import 'artical_page.dart';
-import 'article_bloc_provider.dart';
+import 'package:provider/provider.dart';
+
+typedef FlipBack = void Function({bool backToTop});
 
 typedef ItemBuilder<T> = Widget Function(BuildContext, T, FlipBack?, double);
 
-// Callback that allows to request for more items to the server or to refresh
-// the list if refresh is true.
 typedef GetItems = void Function({bool refresh});
 
-enum FlipDirection { up, down, none }
+enum FlipDirection { up, down, none, left, right }
 
 enum LastFlip { none, previous, next }
 
 const double _kFastThreshold = 800.0;
 
-class FlipPanel<T> extends StatefulWidget {
+class DistrictFlipPanel<T> extends StatefulWidget {
   final ItemBuilder<T> itemBuilder;
   final Duration duration;
   final double height;
-  final bool waitingForRefresh;
+  bool waitingForRefresh;
   final Stream<List<T>?> itemStream;
-  final GetItems getItemsCallback;
 
-  const FlipPanel({
-    super.key,
+  // final GetItems getItemsCallback;
+
+  DistrictFlipPanel({
+    Key? key,
     required this.itemBuilder,
     required this.itemStream,
-    required this.waitingForRefresh,
-    required this.getItemsCallback,
+    this.waitingForRefresh = false,
     required this.height,
     this.duration = const Duration(milliseconds: 100),
-  });
+  }) : super(key: key);
 
   @override
-  _FlipPanelState<T> createState() => _FlipPanelState<T>();
+  _DistrictFlipPanelState<T> createState() => _DistrictFlipPanelState<T>();
 }
 
-class _FlipPanelState<T> extends State<FlipPanel>
+class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
     with TickerProviderStateMixin {
   late AnimationController _controller;
+
   late Animation _animation;
   int _currentIndex = 0;
-  bool waitingForRefresh = false;
   bool _isReversePhase = false;
   bool _running = false;
-  final _perspective = 0.00003;
-  final _zeroAngle =
-      0.00001; // There's something wrong in the perspective transform, I use a very small value instead of zero to temporarily get it around.
-
+  bool isLeft = false;
+  bool isLast = false;
+  final _perspective = 0.0003;
+  final _zeroAngle = 0.0001;
   late double _height;
 
   FlipDirection _direction = FlipDirection.none;
@@ -77,22 +68,22 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   final _updateThreshold = 5;
 
-
   Widget? _prevChild, _currentChild, _nextChild;
   Widget? _upperChild1, _upperChild2;
   Widget? _lowerChild1, _lowerChild2;
 
   double _dragExtent = 0.0;
   bool _dragging = false;
+  bool isImages = false;
 
-  double _flipExtent = 100.0;
+  double _flipExtent = 200.0;
 
   LastFlip _lastFlip = LastFlip.none;
 
   bool _shouldShowNoMoreItemsMessage = false;
 
   @override
-  didUpdateWidget(FlipPanel oldWidget) {
+  didUpdateWidget(DistrictFlipPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
     _height = widget.height;
   }
@@ -118,15 +109,14 @@ class _FlipPanelState<T> extends State<FlipPanel>
           //_currentValue = _nextValue;
           _running = false;
           _currentIndex =
-              _lastFlip == LastFlip.next && _currentIndex < widgets!.length - 1
-                  ? _currentIndex + 1
-                  : _lastFlip == LastFlip.previous && _currentIndex > 0
-                      ? _currentIndex - 1
-                      : _currentIndex;
-          // Avoid going beyond max. items of widgets list
+          _lastFlip == LastFlip.next && _currentIndex < widgets!.length - 1
+              ? _currentIndex + 1
+              : _lastFlip == LastFlip.previous && _currentIndex > 0
+              ? _currentIndex - 1
+              : _currentIndex;
           if (_lastFlip == LastFlip.next &&
               _currentIndex == _availableItems - _updateThreshold) {
-            widget.getItemsCallback();
+            // context.read<FlipProvider>().getArticles(index: _currentIndex);
           }
         }
       })
@@ -143,11 +133,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
         widgets = null;
         _availableItems = 0;
         _currentIndex = 0;
-        waitingForRefresh = true;
+        widget.waitingForRefresh = true;
         setState(() {});
         return;
       }
-      waitingForRefresh = false;
+      widget.waitingForRefresh = false;
       if (_availableItems == 0) {
         widgets = [];
         widgets!.add(_buildFirstWidget(items[0]));
@@ -155,16 +145,23 @@ class _FlipPanelState<T> extends State<FlipPanel>
             .skip(1)
             .map((item) => widget.itemBuilder(context, item, flipBack, _height))
             .toList());
+        print("widgets");
+        print(widgets);
         _upperChild1 = makeUpperClip(widgets![0]);
         _lowerChild1 = makeLowerClip(widgets![0]);
       } else {
+        print(items.last);
         widgets!.addAll(items
             .map((item) => widget.itemBuilder(context, item, flipBack, _height))
             .toList());
       }
+
       _availableItems += items.length;
+      print("currenttttt itemm  ${_availableItems.toString()}");
       setState(() {});
     });
+
+    // }
   }
 
   @override
@@ -180,8 +177,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   @override
   Widget build(BuildContext context) {
-
-    if (!waitingForRefresh) {
+    if (!widget.waitingForRefresh) {
       if (widgets == null || _availableItems == 0) {
         return Container(
           color: Colors.white,
@@ -266,24 +262,27 @@ class _FlipPanelState<T> extends State<FlipPanel>
     }
   }
 
-  void _handleDragStart(DragStartDetails details) {
+  void _handleDragStart(
+      DragStartDetails details,
+      ) {
+    log("Vertical Drag Start");
     _dragging = true;
     _running = true;
     _direction = FlipDirection.none;
     _dragExtent = _controller.value * _dragExtent.sign;
 
-    double halfFlipPanel = context.size!.height / 3;
+    double _halfFlipPanel = context.size!.width / 2;
     RenderBox referenceBox = context.findRenderObject() as RenderBox;
     Offset localPosition = referenceBox.globalToLocal(details.globalPosition);
-    _flipExtent = (localPosition.dy - halfFlipPanel)
+    _flipExtent = (localPosition.dy - _halfFlipPanel)
         .abs()
-        .clamp(halfFlipPanel / 3, double.infinity);
+        .clamp(_halfFlipPanel / 2, double.infinity);
     if (_controller.isAnimating) {
       _controller.stop();
     }
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void handleDragUpdate(DragUpdateDetails details) {
     final double delta = details.primaryDelta!;
     _dragExtent += delta;
     setState(() {
@@ -297,11 +296,13 @@ class _FlipPanelState<T> extends State<FlipPanel>
           : _dragExtent.clamp(0.0, _flipExtent * 2 - 0.01);
       if (_direction == FlipDirection.down && _currentIndex == 0) {
         _dragExtent = 0.0;
+        isLast = true;
       }
       if (_direction == FlipDirection.up &&
           _currentIndex == widgets!.length - 1) {
-        // _dragExtent = 0.0;
-        _shouldShowNoMoreItemsMessage = false;
+        _dragExtent = 0.0;
+        isLast = true;
+        // _shouldShowNoMoreItemsMessage = true;
       }
       if (_dragExtent.abs() < _flipExtent) {
         _controller.value = (_dragExtent / _flipExtent).abs();
@@ -313,24 +314,31 @@ class _FlipPanelState<T> extends State<FlipPanel>
     });
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void handleDragEnd(DragEndDetails details, flipProvider) {
     _dragging = false;
-    print("kkkkk ${ArticleBlocProvider.of(context).articlesData.length-1}   tttttt $_currentIndex");
-    if (ArticleBlocProvider.of(context).articlesData.length -2==
-        _currentIndex) {
-      ArticleBlocProvider.of(context)
-          .getArticles(index: _currentIndex , isTab: false);
+
+    // print(
+        // "last post ${context.read<FlipProvider>().lastPostIdInDistrict}  ooooooo Next post ${context.read<FlipProvider>().districtArticlesData[_currentIndex + 2].id}");
+    if (context.read<FlipProvider>().lastPostIdInDistrict ==
+        context.read<FlipProvider>().districtArticlesData[_currentIndex + 2].id) {
+      context.read<FlipProvider>().getArticles(index: _currentIndex);
+      return;
     }
 
-    if (_currentIndex == 1) {
-      print("sbfsuifdsgfjsofgsijodgfs");
-      context.read<HomeBloc>().add(MenuChange());
+    if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
+        "Gallery") {
+      log("isImages changed");
+      setState(() {
+        isImages = true;
+      });
     }
 
+    flipProvider.setIndex(_currentIndex);
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {
-        _showNoMoreItemsMessage();
-        _shouldShowNoMoreItemsMessage = false;
+        widget.waitingForRefresh = true;
+        isLast = true;
+        setState(() {});
       }
       return;
     }
@@ -345,11 +353,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
         _controller.animateTo(1.0);
       }
       _lastFlip =
-          _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
+      _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
     } else {
       if (_dragExtent.abs() > _flipExtent) {
         _lastFlip =
-            _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
+        _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
       } else {
         _lastFlip = LastFlip.none;
       }
@@ -359,168 +367,193 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   Widget _buildUpperFlipPanel() => _direction == FlipDirection.up
       ? Stack(
-          children: [
-            Transform(
-                alignment: Alignment.bottomCenter,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, _perspective)
-                  ..rotateX(_zeroAngle),
-                child: _upperChild1),
-            _isReversePhase
-                ? Opacity(
-                    opacity: 1 - _controller.value,
-                    child: Container(
-                      alignment: Alignment.bottomCenter,
-                      height: _height / 2,
-                      width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
-                    ))
-                : Container(),
-            Transform(
-              alignment: Alignment.bottomCenter,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, _perspective)
-                ..rotateX(_isReversePhase ? _animation.value : math.pi / 2),
-              child: _upperChild2,
-            ),
-          ],
-        )
+    children: [
+      Transform(
+          alignment: Alignment.bottomCenter,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, _perspective)
+            ..rotateX(_zeroAngle),
+          child: _upperChild1),
+      _isReversePhase
+          ? Opacity(
+          opacity: 1 - _controller.value,
+          child: Container(
+            alignment: Alignment.bottomCenter,
+            height: 300,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.white,
+          ))
+          : Container(),
+      Transform(
+        alignment: Alignment.bottomCenter,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, _perspective)
+          ..rotateX(_isReversePhase ? _animation.value : math.pi / 2),
+        child: _upperChild2,
+      ),
+    ],
+  )
       : Stack(
-          children: [
-            Transform(
-                alignment: Alignment.bottomCenter,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, _perspective)
-                  ..rotateX(_zeroAngle),
-                child: _upperChild2),
-            !_isReversePhase
-                ? Opacity(
-                    opacity: 1 - _controller.value,
-                    child: Container(
-                      alignment: Alignment.bottomCenter,
-                      height: _height / 2,
-                      width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
-                    ))
-                : Container(),
-            Transform(
-              alignment: Alignment.bottomCenter,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, _perspective)
-                ..rotateX(_isReversePhase ? math.pi / 2 : _animation.value),
-              child: _upperChild1,
-            ),
-          ],
-        );
+    children: [
+      Transform(
+          alignment: Alignment.bottomCenter,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, _perspective)
+            ..rotateX(_zeroAngle),
+          child: _upperChild2),
+      !_isReversePhase
+          ? Opacity(
+          opacity: 1 - _controller.value,
+          child: Container(
+            alignment: Alignment.bottomCenter,
+            height: 300,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.white,
+          ))
+          : Container(),
+      Transform(
+        alignment: Alignment.bottomCenter,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, _perspective)
+          ..rotateX(_isReversePhase ? math.pi / 2 : _animation.value),
+        child: _upperChild1,
+      ),
+    ],
+  );
 
   Widget _buildLowerFlipPanel() => _direction == FlipDirection.up
       ? Stack(
-          children: [
-            Transform(
-                alignment: Alignment.topCenter,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, _perspective)
-                  ..rotateX(_zeroAngle),
-                child: _lowerChild2),
-            !_isReversePhase
-                ? Opacity(
-                    opacity: 1 - _controller.value,
-                    child: Container(
-                      alignment: Alignment.bottomCenter,
-                      height: _height / 2,
-                      width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
-                    ))
-                : Container(),
-            Transform(
-              alignment: Alignment.topCenter,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, _perspective)
-                ..rotateX(_isReversePhase ? math.pi / 2 : -_animation.value),
-              child: _lowerChild1,
-            )
-          ],
-        )
+    children: [
+      Transform(
+          alignment: Alignment.topCenter,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, _perspective)
+            ..rotateX(_zeroAngle),
+          child: _lowerChild2),
+      !_isReversePhase
+          ? Opacity(
+          opacity: 1 - _controller.value,
+          child: Container(
+            alignment: Alignment.bottomCenter,
+            height: 300,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.white,
+          ))
+          : Container(),
+      Transform(
+        alignment: Alignment.topCenter,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, _perspective)
+          ..rotateX(_isReversePhase ? math.pi / 2 : -_animation.value),
+        child: _lowerChild1,
+      )
+    ],
+  )
       : Stack(
-          children: [
-            Transform(
-                alignment: Alignment.topCenter,
-                transform: Matrix4.identity()
-                  ..setEntry(3, 2, _perspective)
-                  ..rotateX(_zeroAngle),
-                child: _lowerChild1),
-            _isReversePhase
-                ? Opacity(
-                    opacity: 1 - _controller.value,
-                    child: Container(
-                      alignment: Alignment.bottomCenter,
-                      height: _height / 2,
-                      width: MediaQuery.of(context).size.width,
-                      color: Colors.black,
-                    ))
-                : Container(),
-            Transform(
-              alignment: Alignment.topCenter,
-              transform: Matrix4.identity()
-                ..setEntry(3, 2, _perspective)
-                ..rotateX(_isReversePhase ? -_animation.value : math.pi / 2),
-              child: _lowerChild2,
-            ),
-          ],
-        );
+    children: [
+      Transform(
+          alignment: Alignment.topCenter,
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, _perspective)
+            ..rotateX(_zeroAngle),
+          child: _lowerChild1),
+      _isReversePhase
+          ? Opacity(
+          opacity: 1 - _controller.value,
+          child: Container(
+            alignment: Alignment.bottomCenter,
+            height: 300,
+            width: MediaQuery.of(context).size.width,
+            color: Colors.white,
+          ))
+          : Container(),
+      Transform(
+        alignment: Alignment.topCenter,
+        transform: Matrix4.identity()
+          ..setEntry(3, 2, _perspective)
+          ..rotateX(_isReversePhase ? -_animation.value : math.pi / 2),
+        child: _lowerChild2,
+      ),
+    ],
+  );
 
   Widget _buildPanel() {
     Widget content = _running
         ? Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _buildUpperFlipPanel(),
-              _buildLowerFlipPanel(),
-            ],
-          )
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        _buildUpperFlipPanel(),
+        _buildLowerFlipPanel(),
+      ],
+    )
+        : isImages
+        ? SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      child: _upperChild1,
+    )
         : Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Stack(
-                children: <Widget>[
-                  _upperChild1!,
-                  waitingForRefresh
-                      ? const Padding(
-                          padding: EdgeInsets.only(top: 100.0),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Center(child: RefreshProgressIndicator()),
-                          ),
-                        )
-                      : Container(),
-                ],
-              ),
-              _lowerChild1!,
-            ],
-          );
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Stack(
+          children: <Widget>[
+            _upperChild1!,
+            // isLast
+            //     ? const Padding(
+            //   padding: EdgeInsets.only(top: 100.0),
+            //   child: SizedBox(
+            //     width: 100,
+            //     height: 100,
+            //     child: Center(child: AppLoadingScreen()),
+            //   ),
+            // )
+            //     : Container(),
 
-    return GestureDetector(
-      onVerticalDragStart: _handleDragStart,
-      onVerticalDragUpdate: _handleDragUpdate,
-      onVerticalDragEnd: _handleDragEnd,
-      child: content,
+          ],
+        ),
+        _lowerChild1!,
+      ],
     );
+
+
+    return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
+      return GestureDetector(
+        onVerticalDragStart: _handleDragStart,
+        onVerticalDragUpdate: handleDragUpdate,
+        onVerticalDragEnd: (details) => handleDragEnd(details, flipProvider),
+        onHorizontalDragStart: handelLeftDragStart,
+        onHorizontalDragUpdate: handelLeftDragUpdate,
+        onHorizontalDragEnd: handelLeftDragEnd,
+        child: content,
+      );
+    });
   }
 
-  void _showNoMoreItemsMessage() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text("No more articles for selected sources"),
-      ),
-    );
+  void handelLeftDragStart(
+      DragStartDetails details,
+      ) {
+    log("Horizontal dra start");
+    setState(() {});
   }
+
+  void handelLeftDragEnd(
+      DragEndDetails details,
+      ) {
+    log("Horizontal dra end");
+    setState(() {});
+  }
+
+  void handelLeftDragUpdate(DragUpdateDetails details) {
+    log("Horizontal dra update");
+    setState(() {});
+  }
+
 }
-*/
 
+/*
 import 'dart:developer';
 
 import 'package:chotanews/screens/testing_screen/provider.dart';
@@ -827,48 +860,6 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
     });
   }
 
-  // void handleDragEnd(DragEndDetails details, flipProvider) {
-  //   _dragging = false;
-  //
-  //   print(
-  //       "last post ${context.read<FlipProvider>().lastPostIdInMain}  ooooooo Next post ${context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id}");
-  //   if (context.read<FlipProvider>().lastPostIdInMain ==
-  //       context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id) {
-  //     context.read<FlipProvider>().getArticles(index: _currentIndex);
-  //   }
-  //
-  //   flipProvider.setIndex(_currentIndex);
-  //
-  //   if (_dragExtent == 0.0) {
-  //     if (_shouldShowNoMoreItemsMessage) {
-  //       _showNoMoreItemsMessage();
-  //       _shouldShowNoMoreItemsMessage = false;
-  //     }
-  //     return;
-  //   }
-  //
-  //   final double velocity = details.primaryVelocity!;
-  //   final bool fast = velocity.abs() > _kFastThreshold;
-  //
-  //   if (fast) {
-  //     if (_dragExtent.abs() > _flipExtent) {
-  //       _controller.animateTo(0.0);
-  //     } else {
-  //       _controller.animateTo(1.0);
-  //     }
-  //     _lastFlip =
-  //         _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
-  //   } else {
-  //     if (_dragExtent.abs() > _flipExtent) {
-  //       _lastFlip =
-  //           _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
-  //     } else {
-  //       _lastFlip = LastFlip.none;
-  //     }
-  //     _controller.animateTo(0.0);
-  //   }
-  // }
-
   void handleDragEnd(DragEndDetails details, flipProvider) {
     _dragging = false;
 
@@ -1079,4 +1070,4 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       ),
     );
   }
-}
+}*/

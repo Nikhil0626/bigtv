@@ -70,11 +70,11 @@ class _GalleryScreenState extends State<GalleryScreen> {
           ),
           title: Row(
             children: [
-              SizedBox(width: 16),
+             width(width: 16),
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
-                  "Gallery View",
+                  "Gallery",
                   style: fontStyle(
                     color: Colors.white,
                     fontSize: 18,

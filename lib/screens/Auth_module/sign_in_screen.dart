@@ -273,8 +273,8 @@ class _SignInScreenState extends State<SignInScreen> {
                         height(height: 20),
                         TextButton(
                             onPressed: () {
-                              context.read<AuthProvider>().className = "Skip";
-                              context.read<AuthProvider>().loginStatus(LoginStatus.location,context);
+
+                              context.read<AuthProvider>().loginStatus(LoginStatus.location,context,page: "Skip");
                             },
                             child: Center(
                               child: Text(

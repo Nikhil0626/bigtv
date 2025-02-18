@@ -29,6 +29,8 @@ class AuthRepo extends BaseService{
 
   Future validateOtp(body) async {
     Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAws,url: BaseUrls.validateOtp,method: RequestType.post,body: body);
+
+
     return response;
   }
 

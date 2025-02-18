@@ -20,7 +20,7 @@ enum FlipDirection { up, down, none, left, right }
 
 enum LastFlip { none, previous, next }
 
-const double _kFastThreshold = 800.0;
+const double _kFastThreshold = 50.0;
 
 class FlipPanel<T> extends StatefulWidget {
   final ItemBuilder<T> itemBuilder;
@@ -501,13 +501,15 @@ class _FlipPanelState<T> extends State<FlipPanel>
                 Stack(
                     children: <Widget>[
                       _upperChild1!,
-                      isLast
+                      widget.waitingForRefresh
                           ? const Padding(
                               padding: EdgeInsets.only(top: 100.0),
-                              child: SizedBox(
-                                width: 100,
-                                height: 100,
-                                child: Center(child: AppLoadingScreen()),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 100,
+                                  height: 100,
+                                  child: AppLoadingScreen(),
+                                ),
                               ),
                             )
                           : Container(),
@@ -517,52 +519,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
                 _lowerChild1!,
               ],
             );
-    /*     :  Column(
-      mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _upperChild1!,
 
-        Stack(
-          children: <Widget>[
-            widget.waitingForRefresh
-                ? const Padding(
-              padding: EdgeInsets.only(top: 100.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: Center(child: AppLoadingScreen()),
-              ),
-            )
-                : Container(),
-          ],
-        ),
-        _lowerChild1!,
-      ],
-    ) ;*/
-
-    // Column(
-    //         mainAxisSize: MainAxisSize.min,
-    //         mainAxisAlignment: MainAxisAlignment.center,
-    //         crossAxisAlignment: CrossAxisAlignment.center,
-    //         children: [
-    //           // Stack(
-    //           //   children: <Widget>[
-    //           //     _upperChild1!,
-    //           //     widget.waitingForRefresh
-    //           //         ? const Padding(
-    //           //             padding: EdgeInsets.only(top: 100.0),
-    //           //             child: SizedBox(
-    //           //               width: double.infinity,
-    //           //               child: Center(child: RefreshProgressIndicator()),
-    //           //             ),
-    //           //           )
-    //           //         : Container(),
-    //           //   ],
-    //           // ),
-    //           _lowerChild1!,
-    //         ],
-    //       );
 
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return GestureDetector(
