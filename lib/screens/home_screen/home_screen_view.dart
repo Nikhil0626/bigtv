@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../utils/app_colors.dart';
 import '../flip_page/artical_page.dart';
 import '../flip_page/district_flip_panel.dart';
 import '../testing_screen/provider.dart';
@@ -20,6 +21,7 @@ class HomePage extends StatelessWidget {
         MediaQuery.of(context).padding.bottom;
     return  SafeArea(
       child: Scaffold(
+        backgroundColor: AppColors.appButtonColor,
         body: Consumer<FlipProvider>(
           builder: (_,flipProvider,__) {
             return FlipPanel<HomeScreenModel>(

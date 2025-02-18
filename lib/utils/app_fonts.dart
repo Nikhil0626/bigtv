@@ -10,7 +10,7 @@ TextStyle homeScreenFontStyle(
     GoogleFonts.mandali(
   textStyle: TextStyle(
   fontSize: fontSize ,
-  height: 1.3,
+  height: 1.5,
   wordSpacing: 2,
   fontWeight: fontWeight,
   color: color,)

@@ -11,10 +11,12 @@ import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/image_to_pdf_helper.dart';
+import '../../services/local_data.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
 import '../../utils/app_spaces.dart';
@@ -137,60 +139,60 @@ class GalleryPostBottomActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return   Container(
-      color: Colors.white,
-      height: 50,
-      child: Row(
-        mainAxisAlignment:
-        MainAxisAlignment.spaceAround,
-        children: [
-          BottomActions(
-              postType: "",
-              icon: "assets/svg/like.svg",
-              label: 'లైక్',
-              isLike:  context.watch<FlipProvider>().isLikeList.contains(article.id.toString())?true:false,
-              onTap: () {
-                log(
-                  "Like",
-                );
-                context.read<FlipProvider>().isLikePost(article.id.toString());
+    return   Consumer<FlipProvider>(
+      builder: (_,flipProvider,__) {
+        return Container(
+          color: Colors.white,
+          height: 50,
+          child: Row(
+            mainAxisAlignment:
+            MainAxisAlignment.spaceAround,
+            children: [
+              BottomActions(
+                  postType: "",
+                  icon: flipProvider.isLikeList.contains(article.id.toString())?"assets/svg/like_full.svg":"assets/svg/like.svg",
+                  label: 'లైక్',
+                  isLike: flipProvider.isLikeList.contains(article.id.toString())?true:false,
+                  onTap: () {
+                    log(
+                      "Like",
+                    );
+                    flipProvider.isLikePost(article.id.toString());
+                  }),
+              BottomActions(
+                  postType: "",
+                  icon:
+                  "assets/svg/comment.svg",
+                  label: 'కామెంట్',
+                  onTap: () async {
+                    LoginStatus  loginStatus  = await getLoginStatus();
+                    log("Comment --- ${loginStatus}");
+                    if (loginStatus == LoginStatus.login) {
+                      showComments(context, article.id.toString(),
+                      );
+                    } else {
+                      Navigator.pushNamed(
+                          context,
+                          RoutesManager.signInScreen
+                      );
+                    }
 
-              }),
-          BottomActions(
-              postType: "",
-              icon:
-              "assets/svg/comment.svg",
-              label: 'కామెంట్',
-              onTap: () async {
-                log("Comment --- ${context.read<AuthProvider>().loginType}");
+                  }),
+              BottomActions(
+                  postType: "",
+                  icon:
+                  "assets/svg/share.svg",
+                  label: ' షేర్',
+                  onTap: () async {
+                    if(article.type == "Gallery"){
+                      createAndSharePdf(context,article);
+                    }
 
-
-
-                if (context.read<AuthProvider>().loginType == LoginStatus.login) {
-                  context.read<FlipProvider>().getAllPostById(article.id).then(
-                        (value) => showComments(context, article.id.toString()),
-                  );
-                } else {
-                  Navigator.pushNamed(
-                      context,
-                      RoutesManager.signInScreen
-                  );
-                }
-
-              }),
-          BottomActions(
-              postType: "",
-              icon:
-              "assets/svg/share.svg",
-              label: ' షేర్',
-              onTap: () async {
-                if(article.type == "Gallery"){
-                  createAndSharePdf(context,article);
-                }
-
-              }),
-        ],
-      ),
+                  }),
+            ],
+          ),
+        );
+      }
     );
   }
 }

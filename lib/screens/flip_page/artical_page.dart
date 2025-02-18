@@ -99,12 +99,12 @@ class ArticlePageState extends State<ArticlePage> {
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          Container(
-                                            height: MediaQuery.of(context).size.height/2.35,
-                                            // widget.article.subType ==
-                                            //         "BigBlackStandard"
-                                            //     ? 10
-                                            //     : 4,
+                                          Expanded(
+                                            // height: MediaQuery.of(context).size.height/2.35,
+                                            flex:  widget.article.subType ==
+                                                    "BigBlackStandard"
+                                                ? 8
+                                                : 4,
                                             child: Stack(
                                               children: [
                                                 SizedBox(

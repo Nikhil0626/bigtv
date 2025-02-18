@@ -34,7 +34,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
   void initState() {
     super.initState();
     requestNotificationPermission();
-
+    // context.read<FlipProvider>().disposes("0");
     context.read<FlipProvider>().isTabChange(int.parse(widget.tab), context, isMainPage: true);
     tabController = TabController(
       length: 2,
@@ -42,9 +42,9 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
       initialIndex: int.parse(widget.tab),
     );
 
-    if (widget.tab != "1") {
-      subscribeToPushCallbacks();
-    }
+    // if (widget.tab != "1") {
+    //   subscribeToPushCallbacks();
+    // }
 
     log(widget.tab);
   }
@@ -92,10 +92,10 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
-      child: SafeArea(
-        child: Scaffold(
-          backgroundColor: AppColors.appButtonColor,
-          body: Consumer<FlipProvider>(
+      child: Scaffold(
+        backgroundColor: AppColors.appButtonColor,
+        body: SafeArea(
+          child: Consumer<FlipProvider>(
             builder: (context, flipProvider, __) {
               return Stack(
                 children: [
@@ -119,7 +119,10 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                           child: TabBar(
                             onTap: (val) {
                               if(val == 1){
+                               // context.read<FlipProvider>().disposes("1");
                                context.read<FlipProvider>().isLocationChange(false);
+                              }else{
+                                // context.read<FlipProvider>().disposes("0");
                               }
                               flipProvider.isTabChange(val, context);
                             },

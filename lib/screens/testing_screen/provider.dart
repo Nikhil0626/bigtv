@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:chotanews/screens/home_screen/home_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:rxdart/rxdart.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -184,21 +186,22 @@ class FlipProvider extends ChangeNotifier {
   }
 
 
-  final  districtArticlesController = StreamController<List<HomeScreenModel>?>();
-  final  mainArticlesController = StreamController<List<HomeScreenModel>?>();
+  final BehaviorSubject<List<HomeScreenModel>> districtArticlesController = BehaviorSubject<List<HomeScreenModel>>();
+  final BehaviorSubject<List<HomeScreenModel>> mainArticlesController = BehaviorSubject<List<HomeScreenModel>>();
+  // final StreamController<List<HomeScreenModel>> mainArticlesController = StreamController<List<HomeScreenModel>>().broadcast();
 
 
-  Stream<List<HomeScreenModel>?> get mainArticles =>
+  Stream<List<HomeScreenModel>> get mainArticles =>
       mainArticlesController.stream;
 
-  Stream<List<HomeScreenModel>?> get districtArticles =>
+  Stream<List<HomeScreenModel>> get districtArticles =>
       districtArticlesController.stream;
 
   @override
   void dispose() {
-    districtArticlesController.close();
     mainArticlesController.close();
-    super.dispose();
+    districtArticlesController.close();
+     super.dispose();
   }
 
   bool isSendComment = false;
@@ -208,15 +211,42 @@ class FlipProvider extends ChangeNotifier {
     try {
       Response response = await HomeRepo().getAllCommentByPost(postId);
       List data = response.data['comments'];
-      allPostCommentModelList = data
+      List<AllPostCommentModel> newComments = data
           .map(
             (e) => AllPostCommentModel.fromJson(e),
-          )
+      )
           .toList();
+
+      print("Old Comments Length: ${allPostCommentModelList.length}");
+
+      // Deduplicate the list by comparing the commentId
+      List<AllPostCommentModel> uniqueComments = [];
+
+      // Add new comments to the unique list if they don't exist already
+      for (var comment in newComments) {
+        if (!allPostCommentModelList.any((existingComment) => existingComment.text == comment.text)) {
+          uniqueComments.add(comment);  // Add only new comments
+        }
+      }
+
+      // If new comments exist, replace the old records
+      if (uniqueComments.isNotEmpty) {
+        // Remove old records that are duplicates
+        allPostCommentModelList = allPostCommentModelList
+            .where((existingComment) =>
+        !newComments.any((newComment) => newComment.text == existingComment.text))
+            .toList();
+
+        // Add the new comments (if any)
+        allPostCommentModelList.addAll(uniqueComments);
+
+        print("Updated Comments Length: ${allPostCommentModelList.length}");
+      }
+
       log(response.data.toString());
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
-      log("Get News Api  catch ${st.toString()}");
+      log("Get News Api catch ${st.toString()}");
     } catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api catch ${st.toString()}");
@@ -226,23 +256,32 @@ class FlipProvider extends ChangeNotifier {
     }
   }
 
+
   Future addCommentPostById(postData, comment) async {
     isSendComment = true;
     notifyListeners();
     SharedPreferences sp = await SharedPreferences.getInstance();
     String loginId = sp.getString("loginId") ?? "";
+    String userName = sp.getString("userName") ?? "";
     Map<String, dynamic> body = {
       "UserId": loginId??"",
       "PostId": postData.toString(),
       "Content": comment
     };
-    log(body.toString());
+    log(comment.toString());
     try {
       Response response = await HomeRepo().addCommentByPost(body);
       log(response.data.toString());
+      DateTime now = DateTime.now().add(const Duration(minutes: -330));
+      String formattedDate = DateFormat('yyyy-MM-ddTHH:mm:ss').format(now);
+      log(formattedDate.toString());
 
       if (response.statusCode == 200) {
-        getAllPostById(postData.toString());
+        allPostCommentModelList.insert(
+          0,
+          AllPostCommentModel.fromJson({"_id": 0000, "postId":int.parse( postData.toString()), "text":comment, "status": 1, 'displayText': comment, "userId": 0, 'createdAt': formattedDate, "user": {"_id":int.parse( loginId.toString()) , "name": userName, "avatar": null}, "redisId": ""}),
+        );
+        // getAllPostById(postData.toString());
       }
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
@@ -276,4 +315,21 @@ class FlipProvider extends ChangeNotifier {
     fromLocation = val;
     notifyListeners();
   }
+
+
+  List<String> isLikeByCommentList = [];
+
+  void isLikeByComment(val) async {
+    log(val.toString());
+    if (!isLikeByCommentList.contains(val)) {
+      isLikeByCommentList.add(val);
+      log(isLikeByCommentList.toString());
+    } else {
+      isLikeByCommentList.remove(val);
+      log(isLikeByCommentList.toString());
+    }
+    notifyListeners(); // Notify listeners if using ChangeNotifier
+  }
 }
+
+
