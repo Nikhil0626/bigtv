@@ -177,19 +177,19 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.waitingForRefresh) {
-      if (widgets == null || _availableItems == 0) {
-        return Container(
-          color: Colors.white,
-          height: _height,
-          width: MediaQuery.of(context).size.width,
-          child: const Center(
-            child: AppLoadingScreen(),
-          ),
-        );
-      }
-      _buildChildWidgetsIfNeed(context);
-    }
+    // if (!widget.waitingForRefresh) {
+    //   if (widgets == null || _availableItems == 0) {
+    //     return Container(
+    //       color: Colors.white,
+    //       height: _height,
+    //       width: MediaQuery.of(context).size.width,
+    //       child: const Center(
+    //         child: AppLoadingScreen(),
+    //       ),
+    //     );
+    //   }
+    //   _buildChildWidgetsIfNeed(context);
+    // }
 
     return _buildPanel();
   }
@@ -317,26 +317,26 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
   void handleDragEnd(DragEndDetails details, flipProvider) {
     _dragging = false;
 
-    // print(
-        // "last post ${context.read<FlipProvider>().lastPostIdInDistrict}  ooooooo Next post ${context.read<FlipProvider>().districtArticlesData[_currentIndex + 2].id}");
+    print(
+        "last post ${context.read<FlipProvider>().lastPostIdInDistrict}  ooooooo Next post ${context.read<FlipProvider>().districtArticlesData[_currentIndex + 2].id}");
     if (context.read<FlipProvider>().lastPostIdInDistrict ==
         context.read<FlipProvider>().districtArticlesData[_currentIndex + 2].id) {
       context.read<FlipProvider>().getArticles(index: _currentIndex);
       return;
     }
 
-    if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
-        "Gallery") {
-      log("isImages changed");
-      setState(() {
-        isImages = true;
-      });
-    }
+    // if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
+    //     "Gallery") {
+    //   log("isImages changed");
+    //   setState(() {
+    //     isImages = true;
+    //   });
+    // }
 
     flipProvider.setIndex(_currentIndex);
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {
-        widget.waitingForRefresh = true;
+        // widget.waitingForRefresh = true;
         isLast = true;
         setState(() {});
       }

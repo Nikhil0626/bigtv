@@ -177,19 +177,19 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   @override
   Widget build(BuildContext context) {
-    if (!widget.waitingForRefresh) {
-      if (widgets == null || _availableItems == 0) {
-        return Container(
-          color: Colors.white,
-          height: _height,
-          width: MediaQuery.of(context).size.width,
-          child: const Center(
-            child: AppLoadingScreen(),
-          ),
-        );
-      }
-      _buildChildWidgetsIfNeed(context);
-    }
+    // if (!widget.waitingForRefresh) {
+    //   if (widgets == null || _availableItems == 0) {
+    //     return Container(
+    //       color: Colors.white,
+    //       height: _height,
+    //       width: MediaQuery.of(context).size.width,
+    //       child: const Center(
+    //         child: AppLoadingScreen(),
+    //       ),
+    //     );
+    //   }
+    //   _buildChildWidgetsIfNeed(context);
+    // }
 
     return _buildPanel();
   }
