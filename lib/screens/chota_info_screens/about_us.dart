@@ -1,4 +1,3 @@
-import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:flutter/material.dart';
 
 import '../../utils/app_fonts.dart';

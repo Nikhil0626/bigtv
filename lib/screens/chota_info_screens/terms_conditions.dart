@@ -41,8 +41,8 @@ class _TermsConditionsState extends State<TermsConditions> {
                 "Terms and conditions",
                 style: fontStyle(
                   color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
                 ),
               ),
             ),

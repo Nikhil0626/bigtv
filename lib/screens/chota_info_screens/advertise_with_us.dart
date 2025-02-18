@@ -1,9 +1,10 @@
+import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
+import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import 'about_us.dart';
-import 'chota_info.dart';
 
 class AdvertiseWithUs extends StatefulWidget {
   const AdvertiseWithUs({super.key});
@@ -34,14 +35,14 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
         ),
         title: Row(
           children: [
-            const SizedBox(width: 2),
+            const SizedBox(width: 4),
             Padding(
               padding: const EdgeInsets.only(top: 1),
               child: Text(
                 "Advertise with Us",
                 style: fontStyle(
                   color: Colors.white,
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -62,7 +63,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                     Text(
                       "Chota News",
                       style: fontStyle(
-                        fontSize: 24,
+                        fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -81,25 +82,21 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
 
               Text(
                 "Chota News is a first of its kind unique mobile media company in the country. We produce & distribute “Made for Mobile Content” to Indian local language audience. Like TV media & Print media, we are building a technology-based mobile media company with short news and other rich content in local languages.",
-                style: fontStyle(fontSize: 16),
+                style: fontStyle(fontSize: 14),
                 textAlign: TextAlign.justify,
               ),
-              height(height: 16),
+              height(height: 14),
 
               Text(
                 "Get In Touch",
-                style: fontStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                style: fontStyle(fontWeight: FontWeight.w700, fontSize: 18),
               ),
-              height(height: 10),
+              height(height: 20),
 
-              // Support/Feedback Text
-              Text(
-                "For support/feedback queries, please write to ",
-                style: fontStyle(fontSize: 15),
-              ),
-              Text(
-                "info@chotanews.com",
-                style: fontStyle(color: Colors.lightBlue),
+              ContactDetailTile(
+                title: "For Advertising / partnership enquires,  please write to ",
+                email: " advertising@chotanews.com",
+                onEmailTap: () => launchSingleEmail("advertising@chotanews.com"),
               ),
               height(height: 20),
 
@@ -107,7 +104,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
               Text(
                 "Address",
                 style: fontStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -116,19 +113,43 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
               // Address Details
               Text(
                 "Pravasa Media LLP\nDwaraka Trident, 4th Floor\nKavuri Hills, JubileeHills, Hyderabad,\nTelangana 500033",
-                style: fontStyle(fontSize: 16),
+                style: fontStyle(fontSize: 14),
               ),
               height(height: 10),
 
-              // Phone Number
-              Text(
-                "Phone: +91 81210 31063",
-                style: fontStyle(fontSize: 16),
+              InkWell(
+                onTap: () => _launchPhone('+91 9440913555'),
+                child: Text(
+                  "Phone: +91 9440913555",
+                  style: fontStyle(fontSize: 14),
+                ),
               ),
+
             ],
           ),
         ),
       ),
     );
+  }
+  Future<void> _launchPhone(String phone) async {
+    final Uri phoneUri = Uri(
+      scheme: 'tel',
+      path: phone,
+    );
+    try {
+      if (await canLaunch(phoneUri.toString())) {
+        await launch(phoneUri.toString());
+      } else {
+        throw 'Could not launch phone: $phone';
+      }
+    } catch (e) {
+      print('Error launching phone: $e');
+    }
+  }
+  Future<void> launchSingleEmail(email) async {
+    await EasyLauncher.email(
+        email: "sarwari.developer@gmail.com",
+        subject: "Test",
+        body: "Hello Flutter developer");
   }
 }
