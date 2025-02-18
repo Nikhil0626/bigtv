@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
 import 'about_us.dart';
@@ -16,22 +17,36 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Advertise with Us",
-          style: fontStyle(
-              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-        leading: InkWell(
-          onTap: () {
-            Navigator.pop(context, );
-          },
-          child: const Icon(
-            Icons.arrow_back_ios,
-            size: 22,
-            color: Colors.white,
+        backgroundColor: AppColors.appButtonColor,
+        titleSpacing: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 2),
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
+        ),
+        title: Row(
+          children: [
+            const SizedBox(width: 2),
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Text(
+                "Advertise with Us",
+                style: fontStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       body: Padding(

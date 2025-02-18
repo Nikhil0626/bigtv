@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
 import 'chota_info.dart';
@@ -16,21 +17,37 @@ class _TermsConditionsState extends State<TermsConditions> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(
-              context,
-            );
-          },
+        backgroundColor: AppColors.appButtonColor,
+        titleSpacing: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 1),
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
+          ),
         ),
-        title: Text("Terms and Conditions",
-            style: fontStyle(
-                fontSize: 20,
-                color: Colors.white,
-                fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.lightBlue,
-        centerTitle: true,
+        title: Row(
+          children: [
+            const SizedBox(width: 2),
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Text(
+                "Terms and conditions",
+                style: fontStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

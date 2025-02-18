@@ -48,7 +48,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
         backgroundColor: AppColors.appButtonColor,
         titleSpacing: 0,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 14),
+          padding: const EdgeInsets.only(left: 18),
           child: IconButton(
             onPressed: () {
               Navigator.pushNamed(context,RoutesManager.homeScreen);
@@ -62,9 +62,9 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
         ),
         title: Row(
           children: [
-            const SizedBox(width: 16),
+            const SizedBox(width: 10),
             Padding(
-              padding: const EdgeInsets.only(top: 1),
+              padding: const EdgeInsets.only(top: 5),
               child: Text(
                 "మెను",
                 style: fontStyle(
@@ -95,14 +95,18 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
 
       body: Padding(
         padding: const EdgeInsets.all(5.0),
-        child: BlocBuilder<VideosBloc, VideosState>(builder: (context, state) {
+        child: BlocBuilder<VideosBloc, VideosState>
+          (builder: (context, state) {
           if (state is LoadingState) {
-            return const Center(child: AppLoadingScreen());
+            return const Center(
+                child: AppLoadingScreen()
+            );
           } else if (state is MenuItemState) {
             if (state.getAllMenuList.isEmpty) {
-              return const Center(child: Text('No menu items available.'));
+              return const Center(
+                  child: Text('No menu items available.')
+              );
             }
-
             return SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
