@@ -52,7 +52,7 @@ return Scaffold(
         backgroundColor: AppColors.appButtonColor,
         titleSpacing: 0,
         leading: Padding(
-          padding: const EdgeInsets.only(left: 14),
+          padding: const EdgeInsets.only(left: 16),
           child: IconButton(
             onPressed: () {
               Navigator.pop(context);
@@ -66,11 +66,11 @@ return Scaffold(
         ),
         title: Row(
           children: [
-            const SizedBox(width: 16),
+            const SizedBox(width: 10),
             Padding(
               padding: const EdgeInsets.only(top: 1),
               child: Text(
-                "సెట్టింగ్స్",
+                "Settings",
                 style: fontStyle(
                   color: Colors.white,
                   fontSize: 20,
@@ -238,14 +238,14 @@ return Scaffold(
             //     )),
             InkWell(
                 onTap: ()async {
-                  if (await canLaunch(BaseUrls.contactPage)) {
-                    await launch(BaseUrls.contactPage);
-                  } else {
-                    CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.contactPage}");}
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(builder: (context) => const ContactUs()),
-                  // );
+                  // if (await canLaunch(BaseUrls.contactPage)) {
+                  //   await launch(BaseUrls.contactPage);
+                  // } else {
+                  //   CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.contactPage}");}
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ContactUs()),
+                  );
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -274,9 +274,9 @@ return Scaffold(
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          'కాంటాక్ట్ అస్',
+                          'Contact Us',
                           style: fontStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color:  Colors.black,
                           ),
@@ -292,15 +292,15 @@ return Scaffold(
                 )),
             InkWell(
                 onTap: () async {
-                  if (await canLaunch(BaseUrls.advertisePage)) {
-                    await launch(BaseUrls.advertisePage);
-                  } else {
-                    CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.advertisePage}");}
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //       builder: (context) => const AdvertiseWithUs()),
-                  // );
+                  // if (await canLaunch(BaseUrls.advertisePage)) {
+                  //   await launch(BaseUrls.advertisePage);
+                  // } else {
+                  //   CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.advertisePage}");}
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const AdvertiseWithUs()),
+                  );
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -329,9 +329,9 @@ return Scaffold(
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          'ఆడ్వర్టైజ్ విత్ అస్',
+                          'Advertise with Us',
                           style: fontStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color: Colors.black,
                           ),
@@ -346,17 +346,16 @@ return Scaffold(
                   ),
                 )),
             InkWell(
-
                 onTap: () async {
-                  if (await canLaunch(BaseUrls.termsPage)) {
-                    await launch(BaseUrls.termsPage);
-                  } else {
-                    CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.termsPage}");}
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //       builder: (context) => const AdvertiseWithUs()),
-                  // );
+                  // if (await canLaunch(BaseUrls.termsPage)) {
+                  //   await launch(BaseUrls.termsPage);
+                  // } else {
+                  //   CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.termsPage}");}
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const TermsConditions()),
+                  );
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -385,9 +384,9 @@ return Scaffold(
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          'టర్మ్స్ అండ్ కండీషన్స్',
+                          'Terms and conditions',
                           style: fontStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color:Colors.black,
                           ),
@@ -403,15 +402,15 @@ return Scaffold(
                 )),
             InkWell(
                 onTap: () async {
-                  if (await canLaunch(BaseUrls.privacyPage)) {
-                    await launch(BaseUrls.privacyPage);
-                  } else {
-                    CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.privacyPage}");}
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //       builder: (context) => const AdvertiseWithUs()),
-                  // );
+                  // if (await canLaunch(BaseUrls.privacyPage)) {
+                  //   await launch(BaseUrls.privacyPage);
+                  // } else {
+                  //   CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.privacyPage}");}
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const PrivacyPolicy()),
+                  );
                 },
                 child: Container(
                   decoration: BoxDecoration(
@@ -440,9 +439,9 @@ return Scaffold(
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          'ప్రైవసీ పాలసీ',
+                          'Privay policy',
                           style: fontStyle(
-                            fontSize: 18,
+                            fontSize: 16,
                             fontWeight: FontWeight.w500,
                             color:  Colors.black,
                           ),
@@ -491,9 +490,9 @@ return Scaffold(
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        loginStatus == LoginStatus.skip?'లాగిన్': 'లాగౌట్',
+                        loginStatus == LoginStatus.skip?'Login': 'Logout',
                         style: fontStyle(
-                          fontSize: 18,
+                          fontSize: 16,
                           fontWeight: FontWeight.w500,
                           color: Colors.black,
                         ),
