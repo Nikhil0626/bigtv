@@ -1,9 +1,10 @@
+import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import 'about_us.dart';
-import 'chota_info.dart';
 
 class ContactUs extends StatefulWidget {
   const ContactUs({super.key});
@@ -13,26 +14,89 @@ class ContactUs extends StatefulWidget {
 }
 
 class _ContactUsState extends State<ContactUs> {
+  // Function to launch email
+  // Future<void> _launchEmail(String email) async {
+  //   final Uri emailUri = Uri(
+  //     scheme: 'mailto',
+  //     path: email,
+  //   );
+  //   print("emailUri");
+  //   try {
+  //     if (await canLaunch(emailUri.toString())) {
+  //       await launch(emailUri.toString());
+  //     } else {
+  //       throw 'Could not launch email: $email';
+  //     }
+  //   } catch (e) {
+  //     print('Error launching email: $e');
+  //   }
+  // }
+  // Future<void> launchSingleEmail() async {
+  //   final Email email = Email(
+  //     to: ['siva143145@gmail.com'], // Change this to the recipient email
+  //     subject: 'Hello from Flutter!',
+  //     body: 'This is a test email sent from my Flutter app.',
+  //   );
+  //
+  //   await EmailLauncher.launch(email);
+  // }
+  Future<void> launchSingleEmail(email) async {
+    await EasyLauncher.email(
+        email: "sarwari.developer@gmail.com",
+        subject: "Test",
+        body: "Hello Flutter developer");
+  }
+
+  Future<void> _launchPhone(String phone) async {
+    final Uri phoneUri = Uri(
+      scheme: 'tel',
+      path: phone,
+    );
+    try {
+      if (await canLaunch(phoneUri.toString())) {
+        await launch(phoneUri.toString());
+      } else {
+        throw 'Could not launch phone: $phone';
+      }
+    } catch (e) {
+      print('Error launching phone: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "Contact Us",
-          style: fontStyle(
-              color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-        leading: InkWell(
-          onTap: () {
-            Navigator.pop(context, );
-          },
-          child: const Icon(
-            Icons.arrow_back_ios,
-            size: 22,
-            color: Colors.white,
+        backgroundColor: AppColors.appButtonColor,
+        titleSpacing: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 10),
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back_ios_rounded,
+              color: Colors.white,
+              size: 22,
+            ),
           ),
+        ),
+        title: Row(
+          children: [
+            const SizedBox(width: 4),
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Text(
+                "Contact Us",
+                style: fontStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       body: Padding(
@@ -53,11 +117,14 @@ class _ContactUsState extends State<ContactUs> {
                       ),
                     ),
                     height(height: 10),
-                    Text(
-                      "info@chotanews.com",
-                      style: fontStyle(
-                        fontSize: 16,
-                        color: Colors.blue,
+                    InkWell(
+                      onTap: () => launchSingleEmail('info@gmail.com'),
+                      child: Text(
+                        "info@chotanews.com",
+                        style: fontStyle(
+                          fontSize: 16,
+                          color: Colors.blue,
+                        ),
                       ),
                     ),
                   ],
@@ -75,14 +142,17 @@ class _ContactUsState extends State<ContactUs> {
               ContactDetailTile(
                 title: "For support/feedback queries",
                 email: "info@chotanews.com",
+                onEmailTap: () => launchSingleEmail("info@chotanews.com"),
               ),
               ContactDetailTile(
                 title: "For advertising/partnership enquiries",
                 email: "advertising@chotanews.com",
+                onEmailTap: () => launchSingleEmail("advertising@chotanews.com"),
               ),
               ContactDetailTile(
                 title: "For complaints, queries, or grievances",
                 email: "grievance@chotanews.com",
+                onEmailTap: () => launchSingleEmail("grievance@chotanews.com"),
               ),
               height(height: 20),
               Text(
@@ -98,14 +168,52 @@ class _ContactUsState extends State<ContactUs> {
                 style: fontStyle(fontSize: 16),
               ),
               height(height: 10),
-              Text(
-                "Phone: +91 81210 31063",
-                style: fontStyle(fontSize: 16),
+              InkWell(
+                onTap: () => _launchPhone('+91 81210 31063'),
+                child: Text(
+                  "Phone: +91 81210 31063",
+                  style: fontStyle(fontSize: 16),
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class ContactDetailTile extends StatelessWidget {
+  final String title;
+  final String email;
+  final VoidCallback onEmailTap;
+
+  const ContactDetailTile({
+    Key? key,
+    required this.title,
+    required this.email,
+    required this.onEmailTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: fontStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        height(height: 5),
+        InkWell(
+          onTap: onEmailTap,
+          child: Text(
+            email,
+            style: fontStyle(fontSize: 16, color: Colors.blue),
+          ),
+        ),
+        height(height: 10),
+      ],
     );
   }
 }

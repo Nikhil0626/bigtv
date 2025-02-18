@@ -142,53 +142,69 @@ class GalleryPostBottomActions extends StatelessWidget {
     return   Consumer<FlipProvider>(
       builder: (_,flipProvider,__) {
         return Container(
-          color: Colors.white,
-          height: 50,
-          child: Row(
-            mainAxisAlignment:
-            MainAxisAlignment.spaceAround,
+          color: Colors.white.withOpacity(0.4),
+          height: 70,
+          child: Column(
             children: [
-              BottomActions(
-                  postType: "",
-                  icon: flipProvider.isLikeList.contains(article.id.toString())?"assets/svg/like_full.svg":"assets/svg/like.svg",
-                  label: 'లైక్',
-                  isLike: flipProvider.isLikeList.contains(article.id.toString())?true:false,
-                  onTap: () {
-                    log(
-                      "Like",
-                    );
-                    flipProvider.isLikePost(article.id.toString());
-                  }),
-              BottomActions(
-                  postType: "",
-                  icon:
-                  "assets/svg/comment.svg",
-                  label: 'కామెంట్',
-                  onTap: () async {
-                    LoginStatus  loginStatus  = await getLoginStatus();
-                    log("Comment --- ${loginStatus}");
-                    if (loginStatus == LoginStatus.login) {
-                      showComments(context, article.id.toString(),
-                      );
-                    } else {
-                      Navigator.pushNamed(
-                          context,
-                          RoutesManager.signInScreen
-                      );
-                    }
+              const Divider(
+                color: Colors.black87,
+                thickness: 1,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  BottomActions(
+                      postType: "",
+                      iconColor: Colors.black87,
+                      icon: "assets/svg/like.svg",
+                      label: 'లైక్',
+                      isLike: context
+                          .watch<FlipProvider>()
+                          .isLikeList
+                          .contains(article.id.toString())
+                          ? true
+                          : false,
+                      onTap: () {
+                        log(
+                          "Like",
+                        );
+                        context
+                            .read<FlipProvider>()
+                            .isLikePost(article.id.toString());
+                      }),
+                  BottomActions(
+                      postType: "",
+                      iconColor: Colors.black87,
+                      icon: "assets/svg/comment.svg",
+                      label: 'కామెంట్',
+                      onTap: () async {
+                        log("Comment --- ${context.read<AuthProvider>().loginType}");
 
-                  }),
-              BottomActions(
-                  postType: "",
-                  icon:
-                  "assets/svg/share.svg",
-                  label: ' షేర్',
-                  onTap: () async {
-                    if(article.type == "Gallery"){
-                      createAndSharePdf(context,article);
-                    }
-
-                  }),
+                        if (context.read<AuthProvider>().loginType ==
+                            LoginStatus.login) {
+                          context
+                              .read<FlipProvider>()
+                              .getAllPostById(article.id)
+                              .then(
+                                (value) =>
+                                showComments(context, article.id.toString()),
+                          );
+                        } else {
+                          Navigator.pushNamed(context, RoutesManager.signInScreen);
+                        }
+                      }),
+                  BottomActions(
+                      postType: "",
+                      iconColor: Colors.black87,
+                      icon: "assets/svg/share.svg",
+                      label: ' షేర్',
+                      onTap: () async {
+                        if (article.type == "Gallery") {
+                          createAndSharePdf(context, article);
+                        }
+                      }),
+                ],
+              ),
             ],
           ),
         );

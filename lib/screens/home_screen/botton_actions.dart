@@ -13,6 +13,7 @@ import '../../utils/app_spaces.dart';
 class BottomActions extends StatelessWidget {
   final String icon;
   final String label;
+  final  iconColor;
   final String postType;
   final bool isLike;
   final onTap;
@@ -24,6 +25,7 @@ class BottomActions extends StatelessWidget {
       required this.label,
       required this.postType,
        this.isLike=false,
+       this.iconColor=Colors.grey,
         this.iconWidget = null,
       required this.onTap});
 
@@ -44,20 +46,20 @@ class BottomActions extends StatelessWidget {
                   SvgPicture.asset(icon,
                       height: 20,
                       width: 20,
-                      color: isLike ?Colors.green:postType=="BigBlackStandard"?Colors.white:Colors.grey[600]
+                      color: isLike ?Colors.green:postType=="BigBlackStandard"?Colors.white:iconColor
                   ),
 
                 if(label != "లైక్")
                 SvgPicture.asset(icon,
                     height: 20,
                     width: 20,
-                    color: postType=="BigBlackStandard"?Colors.white:Colors.grey[600]
+                    color: postType=="BigBlackStandard"?Colors.white:iconColor
                 ),
                 height(height: 4),
                 Text(
                   label,
                   style: fontStyle(fontSize: 14,
-                      color: postType=="BigBlackStandard"?Colors.white:Colors.grey[600]
+                      color: postType=="BigBlackStandard"?Colors.white:iconColor
                   ),
                 ),
               ],
