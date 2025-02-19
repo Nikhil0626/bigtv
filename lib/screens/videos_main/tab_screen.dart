@@ -56,7 +56,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
             icon: const Icon(
               Icons.arrow_back_ios_rounded,
               color: Colors.white,
-              size: 22,
+              size: 20,
             ),
           ),
         ),
@@ -66,11 +66,11 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 5),
               child: Text(
-                "మెను",
+                "Menu",
                 style: fontStyle(
                   color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),

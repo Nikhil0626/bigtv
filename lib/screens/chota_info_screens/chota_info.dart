@@ -73,8 +73,8 @@ return Scaffold(
                 "Settings",
                 style: fontStyle(
                   color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -518,7 +518,7 @@ return Scaffold(
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 child: Text(
-                  "App Version: 5.0.0+12",
+                  "App Version: 5.0.0+13",
                   style: fontStyle(
                     fontSize: 16,
                   ),

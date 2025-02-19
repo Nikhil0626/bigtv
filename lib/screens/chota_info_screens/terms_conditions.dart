@@ -13,7 +13,6 @@ class TermsConditions extends StatefulWidget {
 }
 
 class _TermsConditionsState extends State<TermsConditions> {
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,7 +28,7 @@ class _TermsConditionsState extends State<TermsConditions> {
             icon: const Icon(
               Icons.arrow_back_ios_rounded,
               color: Colors.white,
-              size: 22,
+              size: 20,
             ),
           ),
         ),
@@ -43,7 +42,7 @@ class _TermsConditionsState extends State<TermsConditions> {
                 style: fontStyle(
                   color: Colors.white,
                   fontSize: 16,
-                  fontWeight: FontWeight.normal,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -54,30 +53,110 @@ class _TermsConditionsState extends State<TermsConditions> {
         padding: const EdgeInsets.all(16.0),
         child: ListView(
           children: [
-            headlineWithContent("1. What is Chote News Network Program",
-                "The Chote News Network Program is a platform dedicated to providing users with reliable, well-curated news and updates. It aims to empower contributors by allowing them to share verified and impactful stories that resonate with the audience."),
-            headlineWithContent("2. Why contribute to us?",
-                "By contributing to the Chote News Network, you become part of a community focused on spreading accurate, meaningful, and diverse perspectives. Your contributions can help inform and inspire millions while offering a platform to showcase your expertise."),
-            headlineWithContent("3. Registration",
-                "Becoming a contributor is simple. Sign up by providing your details, agree to the terms, and start submitting content. Once registered, you gain access to tools and resources to enhance the quality of your submissions."),
-            headlineWithContent("4. Note",
-                "Contributions must comply with platform guidelines. Ensure that your submissions are original, factual, and relevant to the target audience. The Chote News Network values authenticity above all else."),
-            headlineWithContent("5. Content Policy",
-                "All content submitted to the platform must adhere to our content policy. It should be free from plagiarism, biased opinions, and any material that could mislead or harm the community."),
-            headlineWithContent("6. Title",
-                "The title of your article must be clear, concise, and engaging. It serves as the gateway to attract readers' attention and should summarize the article effectively."),
-            headlineWithContent("7. Content",
-                "The content of your submission should be well-researched, informative, and written in a way that captivates readers. Quality is the cornerstone of our platform's credibility."),
-            headlineWithContent("8. Quality of the article",
-                "Articles should maintain high standards of writing, including proper grammar, structure, and factual accuracy. Submissions undergo a review process to ensure quality before publication."),
-            headlineWithContent("9. Image",
-                "Images play a vital role in enhancing your articles. Ensure all images are relevant, high-quality, and appropriately credited. Avoid using copyrighted material without permission."),
-            headlineWithContent("10. Video",
-                "Video content should complement your articles, providing additional depth and engagement. Like images, videos must be of high quality and free from copyright violations."),
-            headlineWithContent("11. Advertising & Promotions",
-                "Advertising and promotional content should align with the platform's values and policies. Ensure that such material does not overshadow the core message of your article."),
-            headlineWithContent("12. Terms",
-                "By using the Chote News Network, you agree to adhere to the terms and conditions. These guidelines ensure a safe, productive, and reliable platform for all users."),
+             Text(style: fontStyle(fontSize: 14,fontWeight: FontWeight.normal),
+              "Chota News Network is a perfect platform for citizens"
+               " to report news and make your content reach millions"
+               " of users every day. The whole idea is to empower the"
+               " audience with vivid categories and local happenings"
+               " before any other medium, making them stay ahead of the"
+               " rest"
+            ),
+            height(height: 5),
+            headlineWithContent(
+                "1. What is Chote News Network",
+                    "ChotaNews Network is the easiest way to publish"
+                    " articles on ChotaNews app if you have a zeal to"
+                    " write and make some earnings additionally. Network"
+                    " by ChotaNews is an easy citizen powered, content"
+                " publishing option to reach millions of readers and "
+                "monetize content."
+
+
+                ),
+            headlineWithContent(
+                "2. Why contribute to us?",
+                "ChotaNews assures your content reaches to the right audience. "
+                    "A very unique and classy reading experience has enabled us to engage millions of active readers who are constantly consuming interesting content just like yours. "
+                    "Various categories and proper localization helped us to connect vernacular readers with diverse tastes and preferences. "
+                    "We want you to have a great experience when using ChotaNews. "
+                    "We are a small team working extremely hard on a mission to build great vernacular content for India and also power every "
+                    "locality, "
+                    "by building a 'civic Reporting' community. "
+
+                   ),
+            headlineWithContent(
+                "3. Registration",
+
+                    "You need to register as a contributor on ChotaNews Network to publish your articles and videos so that the content can reach millions of readers on the ChotaNews App. "
+                    "We are open to common people, writers, and bloggers who want to write, gain weight, and make some earnings. "
+                  ),
+            headlineWithContent(
+                "4. Note",
+
+                    "Name should be as per your photo ID. Do not use fake, alias, celebrity, or corporate names of any person or entity."),
+            headlineWithContent(
+                "5. Content Policy",
+
+                    "ChotaNews Network provides a platform for people to put their views as well as news for the audience. "
+                    "In order to ensure a good experience for both contributors and writers, read our content policy carefully."),
+            headlineWithContent(
+                "6. Title",
+
+                    "No wrong usage of punctuation. "
+                    "The title should be related to the story and informative. "
+                    "It should not be less than 20 characters."),
+
+            headlineWithContent(
+                "7. Content",
+                    "Minimum 200 characters and a maximum of 400. "
+                    "Only relevant content/news needs to be submitted. Outdated and fake news will lead to escalations on the contributor. "
+                    "Content that is obscene in any form (text, image, or video) will not be accepted. "
+                    "No sensitive content or content that creates visual discomfort will be published. "
+                    "Religiously provoking, criminal, and sensitive content is strictly prohibited. "
+                    "Content should be original and should not be the property of any person or entity."),
+        headlineWithContent(
+            "8. Quality of the article",
+                 "Articles should be complete and should have the elements of What, Why, Where, Who, When, and How. "
+                "The image should be clear and of decent visual quality. "
+                 "The story should be understandable and error-free with no biased or plagiarized content."
+        ),
+
+        headlineWithContent(
+            "9. Copy Rights",
+            "Images play a vital role in enhancing your articles. Ensure all images are relevant, high-quality, and appropriately credited. "
+                "Avoid using copyrighted material without permission. "
+                "With strong checks in place, there is no scope for plagiarized content. Contributors will face escalations if observed doing any practices of this sort. "
+                "Unauthorized use of images, videos, or articles is prohibited. "
+                "Unauthorized use of corporate names, logos, or titles should be strictly avoided. "
+                "Unauthorized use of personal fame, image, or privacy will lead to legal escalations."
+        ),
+
+
+        headlineWithContent(
+                "10. Image",
+                "Image should be relevant to content only. Multiple images cannot be sent. No sensitive or sexually explicit images . "
+                    ),
+            headlineWithContent(
+                "11. Video",
+                "Video should be relevant to content only. Shaky and amateur videos will not be accepted. "
+                    "No sensitive or sexually explicit videos. "
+
+                    ""),
+            headlineWithContent(
+                "12. Advertising & promotion",
+                "No links or landing pages will be accepted. "
+                    "Ads and promotional posts will not be accepted. "
+                    "No content will be promoted on our app. "
+                    "Content on how to buy/sell products or make easy money is prohibited. "
+                    "Content containing any kind of job offers or self-promotions is restricted."),
+            headlineWithContent(
+                "13. Terms",
+                "ChotaNews reserves the right to remove any content that it feels is not relevant on the platform without any prior notice. "
+                    "Please go through the revenue model carefully to understand all financial terms. "
+                    "Signing up on ChotaNews Network allows ChotaNews to use your content on its app. "
+                    "Our app may transmit your personal information to our internal servers, which may be situated outside India. "
+                    "This personal information is deleted from our servers 180 days after you delete the app or cancel/terminate your user account on the app, "
+                    "except to the extent storage of such data, including your personal information, is necessary for our purposes and/or required under applicable laws."),
           ],
         ),
       ),
@@ -91,12 +170,12 @@ class _TermsConditionsState extends State<TermsConditions> {
         Text(
           headline,
           style: fontStyle(
-            fontSize: 18,
+            fontSize: 16,
             fontWeight: FontWeight.bold,
             color: Colors.black,
           ),
         ),
-       height(height: 8),
+        height(height: 8),
         Text(
           content,
           style: fontStyle(
@@ -104,7 +183,7 @@ class _TermsConditionsState extends State<TermsConditions> {
             color: Colors.black87,
           ),
         ),
-       height(height: 16),
+        height(height: 16),
       ],
     );
   }
