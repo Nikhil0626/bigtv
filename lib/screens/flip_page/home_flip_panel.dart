@@ -97,7 +97,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
     _direction = FlipDirection.none;
     _height = widget.height;
 
-    WidgetsBinding.instance!.addPostFrameCallback((_) {});
+    WidgetsBinding.instance.addPostFrameCallback((_) {});
 
     _controller = AnimationController(duration: widget.duration, vsync: this)
       ..addStatusListener((status) {
@@ -494,37 +494,30 @@ class _FlipPanelState<T> extends State<FlipPanel>
                 height: MediaQuery.of(context).size.height,
                 child: _upperChild1,
               )
-            : SizedBox(
-      width: MediaQuery.of(context).size.width,
-      height: MediaQuery.of(context).size.height,
-      child: _upperChild1!,
-    );
-    // Column(
-    //   mainAxisAlignment: MainAxisAlignment.center,
-    //   crossAxisAlignment: CrossAxisAlignment.center,
-    //           children: [
-    //             Stack(
-    //                 children: <Widget>[
-    //                   _upperChild1!,
-    //                   widget.waitingForRefresh
-    //                       ? const Padding(
-    //                           padding: EdgeInsets.only(top: 100.0),
-    //                           child: Center(
-    //                             child: SizedBox(
-    //                               width: 100,
-    //                               height: 100,
-    //                               child: AppLoadingScreen(),
-    //                             ),
-    //                           ),
-    //                         )
-    //                       : Container(),
-    //
-    //                 ],
-    //               ),
-    //             _lowerChild1!,
-    //           ],
-    //         );
-
+            : Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Stack(
+                    children: <Widget>[
+                      _upperChild1!,
+                      widget.waitingForRefresh
+                          ? const Padding(
+                              padding: EdgeInsets.only(top: 100.0),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 100,
+                                  height: 100,
+                                  child: AppLoadingScreen(),
+                                ),
+                              ),
+                            )
+                          : Container(),
+                    ],
+                  ),
+                  _lowerChild1!,
+                ],
+              );
 
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return GestureDetector(

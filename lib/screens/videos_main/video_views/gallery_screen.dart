@@ -219,6 +219,8 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    final displayFeatures = MediaQuery.of(context).displayFeatures;
+    bool isFoldable = displayFeatures.isNotEmpty;
     return Scaffold(
       appBar: widget.className == ""
           ? null
@@ -275,7 +277,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(image.url),
-                    fit: BoxFit.cover,
+                    fit: isFoldable?BoxFit.fill:BoxFit.cover,
                     filterQuality: FilterQuality.high,
                     isAntiAlias: true,
                   ),

@@ -98,12 +98,12 @@ class _OtpScreenState extends State<OtpScreen> {
                             height: 24,
                             width: 166,
                           ),
-                          height(height: 30),
-                          Text(
-                            "OTP: ${widget.otp}",
-                            style: fontStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
+                          // height(height: 30),
+                          // Text(
+                          //   "OTP: ${widget.otp}",
+                          //   style: fontStyle(
+                          //       fontSize: 24, fontWeight: FontWeight.bold),
+                          // ),
                           height(height: 30),
                           Text(
                             "Sign In",

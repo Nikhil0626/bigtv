@@ -57,7 +57,7 @@ class FlipProvider extends ChangeNotifier {
   bool isLoading = false;
   bool isRefresh = false;
 
-  Future<void> getArticles({bool refresh = false, int index = 0}) async {
+  Future<void> getArticles({bool refresh = false, int index = 0,bool isMain = true}) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String locationId = sp.getString("locationId") ?? "";
     String loginId = sp.getString("loginId") ?? "";
@@ -138,11 +138,11 @@ class FlipProvider extends ChangeNotifier {
               'platform': Platform.isIOS ? "apple" : "android",
             };
       log(queryParams.toString());
-      getData(queryParams);
+      getData(queryParams,isMain: isMain);
     }
   }
 
-  Future getData(queryParams) async {
+  Future getData(queryParams,{bool isMain = false}) async {
     Response jsonString = await HomeRepo().getAllNewsFeeds(queryParams);
     print(jsonString.toString());
     List jsonList = jsonString.data['posts'];
@@ -151,9 +151,11 @@ class FlipProvider extends ChangeNotifier {
 
     if (isTab == 0) {
       // mainArticlesController.add([]);
-      if (isRefresh) {
+      if (isRefresh||isMain) {
         log("siva");
-        mainArticlesController.add([]);
+        if (!mainArticlesController.isClosed) {
+          mainArticlesController.add([]);
+        }
         mainArticlesData = [];
         notifyListeners();
       }
@@ -205,55 +207,37 @@ class FlipProvider extends ChangeNotifier {
 
   bool isSendComment = false;
 
-  Future getAllPostById(postId) async {
+  Future<void> getAllPostById(String postId) async {
     isSendComment = true;
     try {
       Response response = await HomeRepo().getAllCommentByPost(postId);
       List data = response.data['comments'];
-      List<AllPostCommentModel> newComments = data
-          .map(
-            (e) => AllPostCommentModel.fromJson(e),
-      )
-          .toList();
 
-      print("Old Comments Length: ${allPostCommentModelList.toString()}");
-
-      // Deduplicate the list by comparing the commentId
-      List<AllPostCommentModel> uniqueComments = [];
-
-      // Add new comments to the unique list if they don't exist already
+      List<AllPostCommentModel> newComments =
+      data.map((e) => AllPostCommentModel.fromJson(e)).toList();
       for (var comment in newComments) {
-        if (!allPostCommentModelList.any((existingComment) =>  existingComment.postId.toString() == postId.toString())) {
-          uniqueComments.add(comment);  // Add only new comments
+        if (!allPostCommentModelList.contains(comment)) {
+          log(comment.postId.toString());
+          allPostCommentModelList.map((e) {
+            if(e.postId != comment.postId){
+              allPostCommentModelList.add(comment);
+            }
+          },);
         }
       }
 
-      // If new comments exist, replace the old records
-      if (uniqueComments.isNotEmpty) {
-        // Remove old records that are duplicates
-        allPostCommentModelList = allPostCommentModelList
-            .where((existingComment) =>
-        !newComments.any((newComment) =>  newComment.postId.toString() == postId.toString()))
-            .toList();
-
-        // Add the new comments (if any)
-        allPostCommentModelList.addAll(uniqueComments);
-
-        print("Updated Comments Length: ${allPostCommentModelList.length}");
-      }
-
       log(response.data.toString());
-    } on DioException catch (e, st) {
-      log("Get News Api catch error ${st.toString()}");
-      log("Get News Api catch ${st.toString()}");
-    } catch (e, st) {
-      log("Get News Api catch error ${st.toString()}");
-      log("Get News Api catch ${st.toString()}");
+    } on DioException catch (e) {
+      log("Get News API error: ${e.toString()}");
+    } catch (e) {
+      log("Unexpected error: ${e.toString()}");
     } finally {
       isSendComment = false;
       notifyListeners();
     }
   }
+
+
 
 
   Future addCommentPostById(postData, comment) async {
@@ -280,7 +264,8 @@ class FlipProvider extends ChangeNotifier {
           0,
           AllPostCommentModel.fromJson({"_id": 0000, "postId":int.parse( postData.toString()), "text":comment, "status": 1, 'displayText': comment, "userId": 0, 'createdAt': formattedDate, "user": {"_id":int.parse( loginId.toString()) , "name": userName, "avatar": null}, "redisId": ""}),
         );
-        // getAllPostById(postData.toString());
+        isSendComment = false;
+        notifyListeners();
       }
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");

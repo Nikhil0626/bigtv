@@ -2,6 +2,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../utils/app_colors.dart';
 import '../flip_page/artical_page.dart';
@@ -16,23 +17,20 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read<FlipProvider>().getArticles();
-    double height = MediaQuery.of(context).size.height -
-        MediaQuery.of(context).padding.top -
-        MediaQuery.of(context).padding.bottom;
-    return  SafeArea(
-      child: Scaffold(
-        backgroundColor: AppColors.appButtonColor,
-        body: Consumer<FlipProvider>(
-          builder: (_,flipProvider,__) {
-            return FlipPanel<HomeScreenModel>(
-              itemStream: flipProvider.mainArticles,
-              waitingForRefresh: flipProvider.isRefresh?true:false,
-              itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
-                  ArticlePage(article: article, flipBack: flipBack, height: height,),
-              height: height,
-            );
-          }
-        ),
+    final padding = MediaQuery.of(context).padding;
+    double height = 1.h ;
+    return  Scaffold(
+      // backgroundColor: AppColors.appButtonColor,
+      body: Consumer<FlipProvider>(
+        builder: (_,flipProvider,__) {
+          return FlipPanel<HomeScreenModel>(
+            itemStream: flipProvider.mainArticles,
+            waitingForRefresh: flipProvider.isRefresh?true:false,
+            itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
+                ArticlePage(article: article, flipBack: flipBack, height: height,),
+            height: height,
+          );
+        }
       ),
     );
   }
@@ -53,7 +51,7 @@ class HomePage1 extends StatelessWidget {
 
     return SafeArea(
         child: Scaffold(
-        backgroundColor: AppColors.appButtonColor,
+        // backgroundColor: AppColors.appButtonColor,
       body: Consumer<FlipProvider>(
         builder: (_,flipProvider,__) {
           return DistrictFlipPanel<HomeScreenModel>(
