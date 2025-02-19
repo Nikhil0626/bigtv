@@ -70,7 +70,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                     ),
                     height(height: 10),
                     InkWell(
-                      onTap: () => launchSingleEmail('info@gmail.com'),
+                      onTap: () => launchSingleEmail('info@chotanews.com'),
                       child: Text(
                         "info@chotanews.com",
                         style: fontStyle(

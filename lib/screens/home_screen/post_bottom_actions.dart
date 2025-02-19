@@ -35,7 +35,7 @@ class PostBottomActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return   Container(
       color:postType == "BigBlackStandard" ?Colors.black:Colors.white,
-      height: 70,
+      height: 68,
       child: Row(
         mainAxisAlignment:
         MainAxisAlignment.spaceAround,
@@ -179,19 +179,7 @@ class GalleryPostBottomActions extends StatelessWidget {
                       label: 'కామెంట్',
                       onTap: () async {
                         log("Comment --- ${context.read<AuthProvider>().loginType}");
-
-                        if (context.read<AuthProvider>().loginType ==
-                            LoginStatus.login) {
-                          context
-                              .read<FlipProvider>()
-                              .getAllPostById(article.id)
-                              .then(
-                                (value) =>
-                                showComments(context, article.id.toString()),
-                          );
-                        } else {
-                          Navigator.pushNamed(context, RoutesManager.signInScreen);
-                        }
+                        showComments(context, article.id.toString());
                       }),
                   BottomActions(
                       postType: "",

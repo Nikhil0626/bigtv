@@ -17,8 +17,11 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read<FlipProvider>().getArticles();
-    final padding = MediaQuery.of(context).padding;
-    double height = 1.sh ;
+    final displayFeatures = MediaQuery.of(context).displayFeatures;
+    bool isFoldable = displayFeatures.isNotEmpty;
+    double height =( MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom)-(isFoldable?34:32);
     return  Scaffold(
       // backgroundColor: AppColors.appButtonColor,
       body: Consumer<FlipProvider>(
@@ -45,9 +48,11 @@ class HomePage1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read<FlipProvider>().getArticles();
-    double height = MediaQuery.of(context).size.height -
+    final displayFeatures = MediaQuery.of(context).displayFeatures;
+    bool isFoldable = displayFeatures.isNotEmpty;
+    double height = (MediaQuery.of(context).size.height -
         MediaQuery.of(context).padding.top -
-        MediaQuery.of(context).padding.bottom;
+        MediaQuery.of(context).padding.bottom)-(isFoldable?34:32);
 
     return SafeArea(
         child: Scaffold(

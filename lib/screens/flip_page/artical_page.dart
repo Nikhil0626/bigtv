@@ -42,13 +42,16 @@ class ArticlePageState extends State<ArticlePage> {
   @override
   Widget build(BuildContext context) {
     final displayFeatures = MediaQuery.of(context).displayFeatures;
-    final padding = MediaQuery.of(context).padding;
-    bool isFoldable = displayFeatures.isNotEmpty;
+    bool isFoldable = false;
+
+    double heights =( MediaQuery.of(context).size.height -
+        MediaQuery.of(context).padding.top -
+        MediaQuery.of(context).padding.bottom)-(isFoldable?34:32);
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
         color: widget.article.subType ==
             "BigBlackStandard"?Colors.black:Colors.white,
-        height:(MediaQuery.of(context).size.height),
+        height:heights,
         width: MediaQuery.of(context).size.width,
         child: WillPopScope(
             onWillPop: () {
@@ -332,7 +335,7 @@ class ArticlePageState extends State<ArticlePage> {
                   ? Colors.white
                   : Colors.black,
               fontWeight: FontWeight.w400,
-              fontSize: 18,
+              fontSize: 17,
             )));
         return "";
       },

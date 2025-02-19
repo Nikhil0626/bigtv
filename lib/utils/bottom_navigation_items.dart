@@ -89,11 +89,11 @@ class RowItem extends StatelessWidget {
       onTap: onTap,
       child: Column(
         children: [
-          Icon(icon, size: 24,color: text == "హోమ్"?Colors.blue:Colors.black,),
+          Icon(icon, size: 24,color: text == "హోమ్"?Colors.blue:Colors.grey,),
           height(height: 2),
           Text(
             text,
-            style: fontStyle(color: text == "హోమ్"?Colors.blue:Colors.black,
+            style: fontStyle(color: text == "హోమ్"?Colors.blue:Colors.grey,
                 fontWeight: FontWeight.w500,
                 fontSize: 14),
           ),

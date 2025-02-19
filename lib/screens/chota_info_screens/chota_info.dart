@@ -511,14 +511,14 @@ return Scaffold(
 
 
 
-            const Spacer(),
+            height(height: 20),
             Container(
                 height: 40,
                 padding: const EdgeInsets.only(bottom: 20),
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 child: Text(
-                  "App Version: 5.0.0+13",
+                  "App Version: 5.0.0+5",
                   style: fontStyle(
                     fontSize: 16,
                   ),

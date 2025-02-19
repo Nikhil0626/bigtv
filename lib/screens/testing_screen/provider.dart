@@ -116,6 +116,7 @@ class FlipProvider extends ChangeNotifier {
         'locationIds': locationId,
       };
       log(queryParams.toString());
+      fromLocation = false;
       getData(queryParams);
     } else {
       log("elseeeeee $index");
