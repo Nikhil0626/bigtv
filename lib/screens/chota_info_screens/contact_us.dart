@@ -78,7 +78,7 @@ class _ContactUsState extends State<ContactUs> {
             icon: const Icon(
               Icons.arrow_back_ios_rounded,
               color: Colors.white,
-              size: 22,
+              size: 20,
             ),
           ),
         ),
@@ -91,8 +91,8 @@ class _ContactUsState extends State<ContactUs> {
                 "Contact Us",
                 style: fontStyle(
                   color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
