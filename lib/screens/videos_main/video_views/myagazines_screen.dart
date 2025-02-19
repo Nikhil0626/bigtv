@@ -30,7 +30,6 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
     context.read<VideosBloc>().add(GetAllVideos(type: widget.postId));
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -96,7 +95,7 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
                           MaterialPageRoute(
                             builder: (context) => FullPageCarousel(
                                 imageUrls:
-                                    state.getAllVideoList[index].gallery ?? [],className: "Magazine View", postDetails:state.getAllVideoList[index] ,),
+                                    state.getAllVideoList[index].gallery ?? [],className: "Magazine ", postDetails:state.getAllVideoList[index] ,),
                           ));
                     },
                     child: Padding(

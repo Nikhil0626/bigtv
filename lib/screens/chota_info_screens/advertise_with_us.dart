@@ -14,6 +14,7 @@ class AdvertiseWithUs extends StatefulWidget {
 }
 
 class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,13 +69,16 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                       ),
                     ),
                     height(height: 10),
-                    Text(
-                      "info@chotanews.com",
-                      style: fontStyle(
-                        fontSize: 16,
-                        color: Colors.blue,
+                    InkWell(
+                      onTap: () => launchSingleEmail('info@gmail.com'),
+                      child: Text(
+                        "info@chotanews.com",
+                        style: fontStyle(
+                          fontSize: 16,
+                          color: Colors.blue,
+                        ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -148,8 +152,8 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
   }
   Future<void> launchSingleEmail(email) async {
     await EasyLauncher.email(
-        email: "sarwari.developer@gmail.com",
-        subject: "Test",
-        body: "Hello Flutter developer");
+        email: email,
+        subject: "",
+        body: "");
   }
 }

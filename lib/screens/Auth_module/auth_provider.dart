@@ -51,6 +51,7 @@ class AuthProvider extends ChangeNotifier {
           "mobileNumber": mobileNumberController.text,
           "otp": currentOtp.toString(),
         });
+
       }
     } catch (e, st) {
       CustomToast.showErrorToast(msg: "Otp Not Send Try Again");
@@ -112,6 +113,7 @@ class AuthProvider extends ChangeNotifier {
         preferences.setString("referralCode", response.data['code'].toString());
         isLoading = false;
         loginStatus(LoginStatus.location, context);
+        mobileNumberController.text = "";
         notifyListeners();
       } else {
         errorMessage = response.data['message'];
