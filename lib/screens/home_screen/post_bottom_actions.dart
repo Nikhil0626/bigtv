@@ -49,7 +49,7 @@ class PostBottomActions extends StatelessWidget {
               true);
         },
         child: SizedBox(
-          height: 52,
+          height: 50,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,

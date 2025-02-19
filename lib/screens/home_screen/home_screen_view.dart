@@ -18,7 +18,7 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     context.read<FlipProvider>().getArticles();
     final padding = MediaQuery.of(context).padding;
-    double height = 1.h ;
+    double height = 1.sh ;
     return  Scaffold(
       // backgroundColor: AppColors.appButtonColor,
       body: Consumer<FlipProvider>(
