@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:chotanews/screens/home_screen/home_bloc.dart';
 import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/services/local_data.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
@@ -16,7 +19,7 @@ import 'app_enums.dart';
 import 'date_format.dart';
 
 
-void showComments(BuildContext context, String postId) {
+void  showComments(BuildContext context, String postId) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true, // Allows BottomSheet to resize with keyboard
@@ -238,8 +241,10 @@ TextEditingController controller = TextEditingController();
                       const SizedBox(width: 8),
                       IconButton(
                         icon: const Icon(Icons.send, color: Colors.blue),
-                        onPressed: () {
-                          if (context.read<AuthProvider>().loginType == LoginStatus.login) {
+                        onPressed: () async{
+                          LoginStatus status =await getLoginStatus();
+                          log(status.toString());
+                          if (status == LoginStatus.login) {
                             flipProvider.addCommentPostById(widget.postId, controller.text).then(
                                   (value) => controller.text = '',
                             );

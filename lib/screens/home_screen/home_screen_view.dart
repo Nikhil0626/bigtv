@@ -51,17 +51,21 @@ class HomePage1 extends StatelessWidget {
         MediaQuery.of(context).padding.top -
         MediaQuery.of(context).padding.bottom;
 
-    return Consumer<FlipProvider>(
-      builder: (_,flipProvider,__) {
-        return DistrictFlipPanel<HomeScreenModel>(
-          waitingForRefresh: flipProvider.isRefresh?true:false,
-          itemStream: flipProvider.districtArticles,
-          itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
-              ArticlePage(article: article, flipBack: flipBack, height: height,),
-          height: height,
+    return SafeArea(
+        child: Scaffold(
+        backgroundColor: AppColors.appButtonColor,
+      body: Consumer<FlipProvider>(
+        builder: (_,flipProvider,__) {
+          return DistrictFlipPanel<HomeScreenModel>(
+            waitingForRefresh: flipProvider.isRefresh?true:false,
+            itemStream: flipProvider.districtArticles,
+            itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
+                ArticlePage(article: article, flipBack: flipBack, height: height,),
+            height: height,
 
-        );
-      }
+          );
+        }
+      ),),
     );
   }
 }
