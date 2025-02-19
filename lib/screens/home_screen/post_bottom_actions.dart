@@ -35,7 +35,7 @@ class PostBottomActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return   Container(
       color:postType == "BigBlackStandard" ?Colors.black:Colors.white,
-      height: 50,
+      height: 70,
       child: Row(
         mainAxisAlignment:
         MainAxisAlignment.spaceAround,

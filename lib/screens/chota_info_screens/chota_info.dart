@@ -439,7 +439,7 @@ return Scaffold(
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          'Privay policy',
+                          'Privacy policy',
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,

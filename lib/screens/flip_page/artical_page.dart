@@ -5,7 +5,6 @@ import 'package:chotanews/screens/home_screen/home_screen_model.dart';
 import 'package:chotanews/screens/testing_screen/provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -43,12 +42,13 @@ class ArticlePageState extends State<ArticlePage> {
   @override
   Widget build(BuildContext context) {
     final displayFeatures = MediaQuery.of(context).displayFeatures;
+    final padding = MediaQuery.of(context).padding;
     bool isFoldable = displayFeatures.isNotEmpty;
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
         color: widget.article.subType ==
             "BigBlackStandard"?Colors.black:Colors.white,
-        height:MediaQuery.of(context).size.height,
+        height:(MediaQuery.of(context).size.height),
         width: MediaQuery.of(context).size.width,
         child: WillPopScope(
             onWillPop: () {
@@ -184,9 +184,9 @@ class ArticlePageState extends State<ArticlePage> {
                                                                   "BigBlackStandard"
                                                               ? Colors.white
                                                               : Colors.black,
-                                                          fontSize: 18,
+                                                          fontSize: 20,
                                                           fontWeight:
-                                                              FontWeight.w600)),
+                                                              FontWeight.bold)),
                                                   height(height: 8),
                                                   Expanded(
                                                     child:
@@ -265,7 +265,10 @@ class ArticlePageState extends State<ArticlePage> {
                                 ),
                   ),
                 ),
-                const Divider(color: AppColors.borderColor),
+                Container(
+                  color: AppColors.borderColor,
+                  height: 1,
+                ),
                 PostBottomActions(
                     postType: widget.article.subType,
                     flipProvider: flipProvider,
@@ -328,7 +331,8 @@ class ArticlePageState extends State<ArticlePage> {
               color: widget.article.subType == "BigBlackStandard"
                   ? Colors.white
                   : Colors.black,
-              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              fontSize: 18,
             )));
         return "";
       },

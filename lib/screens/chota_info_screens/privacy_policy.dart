@@ -76,26 +76,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              // Section 1: Introduction
-              // sectionTitle("Smart News, Tailored for You"),
-              sectionContent(
-                  "Please carefully read our privacy policies. This provides important details on Your rights and obligations. "
-                  "The data collection, use, storage, and disclosure procedures for the desktop and mobile apps of ChotaNews are described in this privacy statement "
-                  "(hereafter referred to as 'You', 'Your', or 'User'). This privacy statement applies to the ChotaNews mobile application "
-                  "(hereinafter referred to as 'App'), which is owned by ChotaNews Private Limited. By downloading, installing, or using this App, "
-                  "you consent to the use of Your personal information as stated in this privacy notice. By downloading, installing, using, or creating a ChotaNews profile, "
-                  "you consent to the collection, transfer, storage, disclosure, and other uses of Your information as outlined in this Privacy Policy. "
-                  "Please read this Privacy Policy very carefully. This contains important information about Your rights and obligations. "
-                  "This Privacy Policy sets out the manner in which ChotaNews collects, uses, maintains and discloses information collected from the users of our "
-                  "mobile or desktop application "
-                  "(hereinafter referred to as 'You', 'Your', 'User'). This Privacy Policy applies to the ChotaNews mobile, technology"
-                  " (hereinafter referred as App) which is owned by ChotaNews Private Limited. "
-                  "By downloading, installing or using this App, you are consenting to the use of your personal information in the manner"
-                  " set out in this Privacy policy. "
-                  "By downloading, installing or using this App or by registering your profile with ChotaNews you are consenting to the "
-                  "collection, transfer, storage, disclosure and other uses of Your information "
-                  "as set out in this Privacy Policy. "),
+              sectionContent("Please carefully read our privacy policies. This provides important details on Your rights and obligations. The data collection, use, storage, and disclosure procedures for the desktop and mobile apps of ChotaNews are described in this privacy statement (hereafter referred to as You, Your, or User). This privacy statement applies to the ChotaNews mobile application (hereinafter referred to as (App), which is owned by ChotaNews Private Limited. By downloading, installing, or using this App, you consent to the use of Your personal information as stated in this privacy notice. By downloading, installing, using, or creating a ChotaNews profile, you consent to the collection, transfer, storage, disclosure, and other uses of Your information as outlined in this Privacy Policy.\n "),
               height(height: 10),
                Text(
                   "This privacy notice does not cover any websites, services, applications, or businesses provided by "
@@ -187,25 +168,6 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                   "You are not allowed to use or access this application if you disagree with our privacy policy. "
                   "If this Privacy Policy is revised and you continue to use the App, it will be considered that you agree to the revised policy."),
 
-              // // Section 5: Data Security
-              // sectionTitle("Changes to this Privacy Policy"),
-              // sectionContent(
-              //   "ChotaNews may update and revise this Privacy Policy from time to time. The revised Privacy Policy "
-              //       "will be posted as notification here on this link http://ChotaNewsapp.com/privacy-policy.php. "
-              //       "You are encouraged to periodically check this page to stay informed about changes to this Privacy Policy. "
-              //       "You hereby acknowledge and agree that it is your responsibility to review this Privacy Policy periodically "
-              //       "and become aware of the modifications. If You disagree to any of the changes to the Privacy Policy, "
-              //       "you shall refrain from using or accessing the App. Your continued use of the App following the posting "
-              //       "of the revised Policy shall indicate your acceptance and acknowledgement of the changes and you will"
-              //       " be bound by it."
-              //   ),
-              //
-              // // Section 6: Your Rights
-              // sectionTitle("Your Acceptance of this Privacy Policy"),
-              // sectionContent(
-              //   "By using this App, you are signifying your acceptance of this Privacy Policy. If you do not agree to this Privacy Policy, you shall not access or use this App. Your continued access or use of the App following the posting of changes to this Privacy Policy will be deemed to be the acceptance of these changes by the user."
-              //
-              // ),
 
               height(height: 20),
               Text(

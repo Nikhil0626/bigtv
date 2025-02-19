@@ -32,7 +32,7 @@ class _OtpScreenState extends State<OtpScreen> {
   TextEditingController otpController = TextEditingController();
   String enteredOtp = "";
 
-  int _remainingTime = 120; // Initial time (60 seconds)
+  int _remainingTime = 60; // Initial time (60 seconds)
   late Timer _timer;
   bool canResend = false;
 
@@ -55,7 +55,7 @@ class _OtpScreenState extends State<OtpScreen> {
 
   void startCountdown() {
     setState(() {
-      _remainingTime = 120;
+      _remainingTime = 60;
       canResend = false;
     });
 
@@ -98,12 +98,12 @@ class _OtpScreenState extends State<OtpScreen> {
                             height: 24,
                             width: 166,
                           ),
-                          // height(height: 30),
-                          // Text(
-                          //   "OTP: ${widget.otp}",
-                          //   style: fontStyle(
-                          //       fontSize: 24, fontWeight: FontWeight.bold),
-                          // ),
+                          height(height: 30),
+                          Text(
+                            "OTP: ${widget.otp}",
+                            style: fontStyle(
+                                fontSize: 24, fontWeight: FontWeight.bold),
+                          ),
                           height(height: 30),
                           Text(
                             "Sign In",
@@ -126,18 +126,23 @@ class _OtpScreenState extends State<OtpScreen> {
                               const Spacer(),
                               InkWell(
                                 onTap: () {
-                                  Navigator.pushNamedAndRemoveUntil(
-                                    context,
-                                    RoutesManager.signInScreen,
-                                    (route) => false,
-                                  );
+                                  if(!canResend){
+
+                                  }else{
+                                    Navigator.pushNamedAndRemoveUntil(
+                                      context,
+                                      RoutesManager.signInScreen,
+                                          (route) => false,
+                                    );
+                                  }
+
                                 },
                                 child: Text(
                                   "Edit",
                                   style: fontStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w600,
-                                      color: Colors.blue),
+                                      color:!canResend?Colors.grey: Colors.blue),
                                 ),
                               ),
                             ],
@@ -151,16 +156,14 @@ class _OtpScreenState extends State<OtpScreen> {
                             onChanged: (value) {
                               print("jshvfsjfsjfjhs ${value.length}");
 
-                             if(value.length ==0){
+                             if(value.isEmpty){
                                authProvider.errorMessage = "";
-                               setState(() {
-
-                               });
                              }
                             },
                             cursorColor: Colors.grey,
                             enablePinAutofill: true,
                             pinTheme: PinTheme(
+
                               shape: PinCodeFieldShape.box,
                               borderRadius: BorderRadius.circular(10),
                               fieldHeight: 50,
@@ -175,6 +178,7 @@ class _OtpScreenState extends State<OtpScreen> {
                               errorBorderColor: authProvider.errorMessage != "" ? Colors.red : Colors.transparent, // Show red border if error
                             ),
                             autoDisposeControllers: false,
+                            autoDismissKeyboard: false,
                           ),
                           if (authProvider.errorMessage != "")
                             Text(
@@ -220,8 +224,8 @@ class _OtpScreenState extends State<OtpScreen> {
                             },
                             child: Container(
                               height: 50,
-                              decoration: const BoxDecoration(
-                                  color: AppColors.appButtonColor,
+                              decoration:  BoxDecoration(
+                                  color: otpController.text.length<4?AppColors.borderColor:AppColors.appButtonColor,
                                   borderRadius:
                                       BorderRadius.all(Radius.circular(8))),
                               width: double.infinity,
