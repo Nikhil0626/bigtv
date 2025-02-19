@@ -4,9 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/screens/home_screen/home_screen_model.dart';
 import 'package:chotanews/screens/individual_post_view/individual_post_event.dart';
 import 'package:chotanews/screens/individual_post_view/individual_post_state.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../../globel_keys/global_variables_data.dart';
@@ -79,183 +81,172 @@ appBar: AppBar(
               return const Center(child: AppLoadingScreen());
             } else if (state is SuccessPostState) {
               return Container(
-                color: Colors.white,
-                height: MediaQuery.of(context).size.height,
+                color: state.getPost.subType ==
+                    "BigBlackStandard"
+                    ? Colors.black
+                    : Colors.white,
+                height:
+                MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment:
+                  CrossAxisAlignment.start,
                   children: [
                     Expanded(
-                      flex: 5,
+                      // height: MediaQuery.of(context).size.height/2.35,
+                      flex: state.getPost.subType ==
+                          "BigBlackStandard"
+                          ? 8
+                          : 4,
                       child: Stack(
                         children: [
                           SizedBox(
-                              child: state.getPost.type == "Video"
-                                  ? Container(
-                                  color: Colors.black,
-                                  child: Center(child: VideoPreview(url:  state.getPost.videoUrl!.url.toString())))
-                                  : CachedNetworkImage(
-                                imageUrl:state.getPost.imageUrl.url ,
-                                imageBuilder: (context, imageProvider) =>
-                                    Container(
-                                      height: MediaQuery.of(context).size.height,
-                                      width: MediaQuery.of(context).size.width,
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: imageProvider,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                errorWidget: (context, url, error) => Container(
-                                  height: MediaQuery.of(context).size.height,
-                                  width: MediaQuery.of(context).size.width,
-                                  decoration: const BoxDecoration(
-                                    borderRadius:
-                                    BorderRadius.all(Radius.circular(32)),
-                                  ),
-                                  child: const Icon(
-                                    Icons.account_box,
-                                    size: 200,
-                                  ),
-                                ),
-                              )),
+                            child: state.getPost.type ==
+                                "Video"
+                                ? Container(
+                                color: Colors.black,
+                                child: Center(
+                                    child: VideoPreview(
+                                        url: state.getPost
+                                            .videoUrl
+                                            ?.url ??
+                                            "")))
+                                : Image.network(
+                              state.getPost
+                                  .imageUrl.url,
+                              key: ValueKey(state.getPost
+                                  .imageUrl
+                                  .url),
+                              fit: BoxFit.cover,
+                              width:
+                              double.infinity,
+                              height:
+                              double.infinity,
+                            ),
+                          ),
                           Positioned(
-                              bottom: 1,
+                              bottom: -12,
                               child: Container(
-                                  margin: const EdgeInsets.all(8),
-                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  margin: const EdgeInsets
+                                      .all(8),
+                                  padding:
+                                  const EdgeInsets
+                                      .symmetric(
+                                      horizontal: 8),
                                   height: 30,
                                   width: 100,
-                                  decoration: BoxDecoration(
-                                      color: AppColors.appButtonColor.withOpacity(.4),
-                                      borderRadius: const BorderRadius.only(
-                                          topRight: Radius.circular(10),
-                                          bottomLeft: Radius.circular(10))),
-                                  child: Image.asset("assets/images/brandlogo.png",))),
-                          Positioned(
-                              bottom: 10,
-                              right: 10,
-                              child: InkWell(
-                                  onTap: () {
-                                    if (state.getPost.type.toString() == "Video") {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => VideoPreview(
-                                              url: "",
-                                              isVideoScreen: true,
-                                            ),
-                                          ));
-                                    } else {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => const ImageViewPopup(
-                                              imageUrl: "",
-                                            ),
-                                          ));
-                                    }
-                                  },
-                                  child: const Center(
-                                      child: Icon(
-                                        Icons.zoom_out_map_sharp,
-                                        color: AppColors.appButtonColor,
-                                        size: 24,
-                                      )))),
+                                  decoration:
+                                  const BoxDecoration(
+                                      color: Colors
+                                          .white,
+                                      borderRadius:
+                                      BorderRadius
+                                          .only(topLeft:
+                                      Radius
+                                          .circular(
+                                          10),
+                                          topRight: Radius.circular(10)
+                                      )),
+                                  child: Image.asset(
+                                    "assets/images/brandlogo.png",
+                                  ))),
                         ],
                       ),
                     ),
                     Expanded(
-                      flex: 6,
+                      flex: 4,
                       child: Padding(
                         padding:
-                        const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                        const EdgeInsets.symmetric(
+                            vertical: 8.0,
+                            horizontal: 16.0),
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          mainAxisAlignment:
+                          MainAxisAlignment.start,
                           children: [
-                            Text( state.getPost.title.toString(),
-                                style: fontStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold)),
-                            height(height: 10),
+                            Text(
+                                state.getPost.title ??
+                                    "No Title",
+                                style: homeScreenFontStyle(
+                                    color:state.getPost
+                                        .subType ==
+                                        "BigBlackStandard"
+                                        ? Colors.white
+                                        : Colors.black,
+                                    fontSize: 18,
+                                    fontWeight:
+                                    FontWeight.w600)),
+                            height(height: 8),
                             Expanded(
-                                child: RichText(
-                                  text:  TextSpan(
-                                    text: '${state.getPost.content} ', // Normal text
-                                    style: fontStyle(fontSize: 16, color: AppColors.bodyTextColor,fontWeight: FontWeight.normal,),
-                                    children: <TextSpan>[
-                                      TextSpan(
-                                        text: '\n\nPosted ${formatTimeDifference(state.getPost.created)}  ', // Bold text
-                                        style: fontStyle(fontWeight: FontWeight.normal,fontSize: 12,color: AppColors.bodyTextColor),
-                                      ),
-
-                                      TextSpan(
-                                        text: "${state.getPost.type}  ${state.getPost.subType}", // Bold text
-                                        style: fontStyle(fontWeight: FontWeight.normal,fontSize: 12),
-                                      ),
-
-                                    ],
+                              child:
+                              state.getPost
+                                  .subType ==
+                                  "BulletPost"
+                                  ? ListView(
+                                physics:
+                                const NeverScrollableScrollPhysics(),
+                                children: state.getPost
+                                    .bulletPoints!
+                                    .map<Widget>(
+                                        (item) {
+                                      // Explicitly specify <Widget>
+                                      return Padding(
+                                        padding: const EdgeInsets
+                                            .symmetric(
+                                            vertical:
+                                            4.0),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment
+                                              .start,
+                                          children: [
+                                            const Text(
+                                                "• ",
+                                                style:
+                                                TextStyle(fontSize: 24)),
+                                            // Bullet point
+                                            Expanded(
+                                              child:
+                                              Text(
+                                                item,
+                                                style:
+                                                fontStyle(fontSize: 16),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }).toList(), // Ensure it is converted to List<Widget>
+                              )
+                                  : RichText(
+                                text: TextSpan(
+                                  text: '',
+                                  children:
+                                  _parseText(
+                                    context,
+                                    '${state.getPost.content}',
+                                    state.getPost
+                                        .links,
+                                      state.getPost
                                   ),
-                                )
-
-
-                              // Text(
-                              //     "${widget.article.content}\n\nPosted ${formatTimeDifference(widget.article.created)}",
-                              //     style: fontStyle(
-                              //         fontSize: 16,
-                              //         color: Colors.grey[800])),
-                            ),
-                            height(height: 4),
-                            const Divider(color: AppColors.borderColor),
-                            SizedBox(
-                              height: 50,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: [
-                                  BottomActions( postType: "",
-
-                                      icon: "assets/svg/reload.svg",
-                                      label: 'రిలోడ్ ',
-                                      onTap: () {
-                                        log("Refresh");
-                                        context.read<HomeBloc>().add(GetAllNewsFeed());
-                                      }),
-                                  BottomActions(
-                                      postType: "",
-                                      icon:  "assets/svg/like.svg",
-                                      label: 'లైక్',
-                                      onTap: () {
-                                        log(
-                                          "Like",
-                                        );
-                                        // isLike = !isLike;
-                                        setState(() {});
-                                        // context.read<HomeBloc>().add(LikeByPost(isLike: true, postId: item.id.toString()));
-                                      }),
-                                  BottomActions(
-                                      postType: "",
-                                      icon: "assets/svg/comment.svg",
-                                      label: 'కామెంట్',
-                                      onTap: () {
-                                        log("Comment");
-                                        showComments(context, widget.postId);
-                                        // context.read<HomeBloc>().add(GetAllNewsFeed());
-                                      }),
-                                  BottomActions(
-                                      postType: "",
-                                      icon: "assets/svg/share.svg",
-                                      label: ' షేర్',
-                                      onTap: () {
-                                        log("Share");
-                                        context.read<HomeBloc>().add(
-                                            SendNewsToSocialMedia(
-                                                id:""));
-                                      }),
-                                ],
+                                ),
                               ),
                             ),
+                            Text(
+                                "\nPosted ${formatTimeDifference(state.getPost.created)}",
+                                style: fontStyle(
+                                    fontSize: 12,
+                                    color: state.getPost
+                                        .subType ==
+                                        "BigBlackStandard"
+                                        ? Colors.white
+                                        : Colors
+                                        .grey[800])),
+                            height(height: 1)
+
                           ],
                         ),
                       ),
@@ -272,5 +263,62 @@ appBar: AppBar(
         ),
       ),
     );
+  }
+
+  List<TextSpan> _parseText(
+      BuildContext context, String text, List<LinkModel>? links, HomeScreenModel getPost) {
+    RegExp linkRegExp =
+    RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
+    List<TextSpan> spans = [];
+
+    text.splitMapJoin(
+      linkRegExp,
+      onMatch: (match) {
+        String link = match.group(0)!;
+
+        if (link.contains('<link1>')) {
+          log("click linkss    ${links!.first.value.toString()}");
+          link = links!.first.value.toString();
+        }
+        spans.add(TextSpan(
+          text: match
+              .group(0)
+              .toString()
+              .replaceFirst('<link1>', '')
+              .replaceFirst('</link1>', '')
+              .replaceFirst('<link2>', '')
+              .replaceFirst('</link2>', '')
+              .replaceFirst('<link3>', '')
+              .replaceFirst('</link3>', ''),
+          style: fontStyle(
+            color: Colors.blue,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              print("ghhgjjkjjhg $link");
+              if (await canLaunch(link)) {
+                await launch(link);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Could not launch $link")));
+              }
+            },
+        ));
+        return "";
+      },
+      onNonMatch: (nonMatch) {
+        spans.add(TextSpan(
+            text: nonMatch,
+            style: homeScreenFontStyle(
+              color: getPost.subType == "BigBlackStandard"
+                  ? Colors.white
+                  : Colors.black,
+              fontSize: 16,
+            )));
+        return "";
+      },
+    );
+
+    return spans;
   }
 }
