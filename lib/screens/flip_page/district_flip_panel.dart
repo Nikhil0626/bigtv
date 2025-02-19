@@ -116,7 +116,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
               : _currentIndex;
           if (_lastFlip == LastFlip.next &&
               _currentIndex == _availableItems - _updateThreshold) {
-            // context.read<FlipProvider>().getArticles(index: _currentIndex);
+            context.read<FlipProvider>().getArticles(index: _currentIndex);
           }
         }
       })
@@ -177,19 +177,21 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
 
   @override
   Widget build(BuildContext context) {
-    // if (!widget.waitingForRefresh) {
-    //   if (widgets == null || _availableItems == 0) {
-    //     return Container(
-    //       color: Colors.white,
-    //       height: _height,
-    //       width: MediaQuery.of(context).size.width,
-    //       child: const Center(
-    //         child: AppLoadingScreen(),
-    //       ),
-    //     );
-    //   }
-    //   _buildChildWidgetsIfNeed(context);
-    // }
+
+
+    if (!widget.waitingForRefresh) {
+      if (widgets == null || _availableItems == 0) {
+        return Container(
+          color: Colors.transparent,
+          height: _height,
+          width: MediaQuery.of(context).size.width,
+          child: const Center(
+            child: AppLoadingScreen(),
+          ),
+        );
+      }
+      _buildChildWidgetsIfNeed(context);
+    }
 
     return _buildPanel();
   }
@@ -317,13 +319,13 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
   void handleDragEnd(DragEndDetails details, flipProvider) {
     _dragging = false;
 
-    print(
-        "last post ${context.read<FlipProvider>().lastPostIdInDistrict}  ooooooo Next post ${context.read<FlipProvider>().districtArticlesData[_currentIndex + 2].id}");
-    if (context.read<FlipProvider>().lastPostIdInDistrict ==
-        context.read<FlipProvider>().districtArticlesData[_currentIndex + 2].id) {
-      context.read<FlipProvider>().getArticles(index: _currentIndex);
-      return;
-    }
+    // print(
+    //     "last post ${context.read<FlipProvider>().lastPostIdInDistrict}  ooooooo Next post ${context.read<FlipProvider>().districtArticlesData[_currentIndex + 2].id}");
+    // if (context.read<FlipProvider>().lastPostIdInDistrict ==
+    //     context.read<FlipProvider>().districtArticlesData[_currentIndex + 2].id) {
+    //   context.read<FlipProvider>().getArticles(index: _currentIndex);
+    //   return;
+    // }
 
     // if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
     //     "Gallery") {
@@ -494,29 +496,35 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       height: MediaQuery.of(context).size.height,
       child: _upperChild1,
     )
-        : Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Stack(
-          children: <Widget>[
-            _upperChild1!,
-            // isLast
-            //     ? const Padding(
-            //   padding: EdgeInsets.only(top: 100.0),
-            //   child: SizedBox(
-            //     width: 100,
-            //     height: 100,
-            //     child: Center(child: AppLoadingScreen()),
-            //   ),
-            // )
-            //     : Container(),
-
-          ],
-        ),
-        _lowerChild1!,
-      ],
+        : SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      child: _upperChild1!,
     );
+
+    // Column(
+    //   mainAxisAlignment: MainAxisAlignment.center,
+    //   crossAxisAlignment: CrossAxisAlignment.center,
+    //   children: [
+    //     Stack(
+    //       children: <Widget>[
+    //         _upperChild1!,
+    //         // isLast
+    //         //     ? const Padding(
+    //         //   padding: EdgeInsets.only(top: 100.0),
+    //         //   child: SizedBox(
+    //         //     width: 100,
+    //         //     height: 100,
+    //         //     child: Center(child: AppLoadingScreen()),
+    //         //   ),
+    //         // )
+    //         //     : Container(),
+    //
+    //       ],
+    //     ),
+    //     _lowerChild1!,
+    //   ],
+    // );
 
 
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {

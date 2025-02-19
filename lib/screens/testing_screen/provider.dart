@@ -97,7 +97,7 @@ class FlipProvider extends ChangeNotifier {
         'userid': loginId ?? "",
         'postid': lastPostIdInMain.toString(),
         'lpostid': "0",
-        'includeHomePage': "0",
+        // 'includeHomePage': "0",
         'deviceid': deviceId,
         'platform': Platform.isIOS ? "apple" : "android",
       };
@@ -188,7 +188,6 @@ class FlipProvider extends ChangeNotifier {
 
   final BehaviorSubject<List<HomeScreenModel>> districtArticlesController = BehaviorSubject<List<HomeScreenModel>>();
   final BehaviorSubject<List<HomeScreenModel>> mainArticlesController = BehaviorSubject<List<HomeScreenModel>>();
-  // final StreamController<List<HomeScreenModel>> mainArticlesController = StreamController<List<HomeScreenModel>>().broadcast();
 
 
   Stream<List<HomeScreenModel>> get mainArticles =>
@@ -199,8 +198,8 @@ class FlipProvider extends ChangeNotifier {
 
   @override
   void dispose() {
-    mainArticlesController.close();
-    districtArticlesController.close();
+    // mainArticlesController.close();
+    // districtArticlesController.close();
      super.dispose();
   }
 
@@ -217,14 +216,14 @@ class FlipProvider extends ChangeNotifier {
       )
           .toList();
 
-      print("Old Comments Length: ${allPostCommentModelList.length}");
+      print("Old Comments Length: ${allPostCommentModelList.toString()}");
 
       // Deduplicate the list by comparing the commentId
       List<AllPostCommentModel> uniqueComments = [];
 
       // Add new comments to the unique list if they don't exist already
       for (var comment in newComments) {
-        if (!allPostCommentModelList.any((existingComment) => existingComment.text == comment.text)) {
+        if (!allPostCommentModelList.any((existingComment) =>  existingComment.postId.toString() == postId.toString())) {
           uniqueComments.add(comment);  // Add only new comments
         }
       }
@@ -234,7 +233,7 @@ class FlipProvider extends ChangeNotifier {
         // Remove old records that are duplicates
         allPostCommentModelList = allPostCommentModelList
             .where((existingComment) =>
-        !newComments.any((newComment) => newComment.text == existingComment.text))
+        !newComments.any((newComment) =>  newComment.postId.toString() == postId.toString()))
             .toList();
 
         // Add the new comments (if any)
@@ -268,13 +267,13 @@ class FlipProvider extends ChangeNotifier {
       "PostId": postData.toString(),
       "Content": comment
     };
-    log(comment.toString());
+    log(body.toString());
     try {
       Response response = await HomeRepo().addCommentByPost(body);
       log(response.data.toString());
       DateTime now = DateTime.now().add(const Duration(minutes: -330));
       String formattedDate = DateFormat('yyyy-MM-ddTHH:mm:ss').format(now);
-      log(formattedDate.toString());
+      log({"_id": 0000, "postId":int.parse( postData.toString()), "text":comment, "status": 1, 'displayText': comment, "userId": 0, 'createdAt': formattedDate, "user": {"_id":int.parse( loginId.toString()) , "name": userName, "avatar": null}, "redisId": ""}.toString());
 
       if (response.statusCode == 200) {
         allPostCommentModelList.insert(

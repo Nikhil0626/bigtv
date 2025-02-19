@@ -116,7 +116,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
                       : _currentIndex;
           if (_lastFlip == LastFlip.next &&
               _currentIndex == _availableItems - _updateThreshold) {
-            // context.read<FlipProvider>().getArticles(index: _currentIndex);
+            context.read<FlipProvider>().getArticles(index: _currentIndex);
           }
         }
       })
@@ -177,19 +177,19 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   @override
   Widget build(BuildContext context) {
-    // if (!widget.waitingForRefresh) {
-    //   if (widgets == null || _availableItems == 0) {
-    //     return Container(
-    //       color: Colors.white,
-    //       height: _height,
-    //       width: MediaQuery.of(context).size.width,
-    //       child: const Center(
-    //         child: AppLoadingScreen(),
-    //       ),
-    //     );
-    //   }
-    //   _buildChildWidgetsIfNeed(context);
-    // }
+    if (!widget.waitingForRefresh) {
+      if (widgets == null || _availableItems == 0) {
+        return Container(
+          color: Colors.white,
+          height: _height,
+          width: MediaQuery.of(context).size.width,
+          child: const Center(
+            child: AppLoadingScreen(),
+          ),
+        );
+      }
+      _buildChildWidgetsIfNeed(context);
+    }
 
     return _buildPanel();
   }
@@ -319,11 +319,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
     print(
         "last post ${context.read<FlipProvider>().lastPostIdInMain}  ooooooo Next post ${context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id}");
-    if (context.read<FlipProvider>().lastPostIdInMain ==
-        context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id) {
-      context.read<FlipProvider>().getArticles(index: _currentIndex);
-      return;
-    }
+    // if (context.read<FlipProvider>().lastPostIdInMain ==
+    //     context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].id) {
+    //   context.read<FlipProvider>().getArticles(index: _currentIndex);
+    //   return;
+    // }
 
     if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
         "Gallery") {
@@ -336,7 +336,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
     flipProvider.setIndex(_currentIndex);
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {
-        widget.waitingForRefresh = true;
+        // widget.waitingForRefresh = true;
         isLast = true;
         setState(() {});
       }
@@ -494,31 +494,36 @@ class _FlipPanelState<T> extends State<FlipPanel>
                 height: MediaQuery.of(context).size.height,
                 child: _upperChild1,
               )
-            : Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Stack(
-                    children: <Widget>[
-                      _upperChild1!,
-                      widget.waitingForRefresh
-                          ? const Padding(
-                              padding: EdgeInsets.only(top: 100.0),
-                              child: Center(
-                                child: SizedBox(
-                                  width: 100,
-                                  height: 100,
-                                  child: AppLoadingScreen(),
-                                ),
-                              ),
-                            )
-                          : Container(),
-
-                    ],
-                  ),
-                _lowerChild1!,
-              ],
-            );
+            : SizedBox(
+      width: MediaQuery.of(context).size.width,
+      height: MediaQuery.of(context).size.height,
+      child: _upperChild1!,
+    );
+    // Column(
+    //   mainAxisAlignment: MainAxisAlignment.center,
+    //   crossAxisAlignment: CrossAxisAlignment.center,
+    //           children: [
+    //             Stack(
+    //                 children: <Widget>[
+    //                   _upperChild1!,
+    //                   widget.waitingForRefresh
+    //                       ? const Padding(
+    //                           padding: EdgeInsets.only(top: 100.0),
+    //                           child: Center(
+    //                             child: SizedBox(
+    //                               width: 100,
+    //                               height: 100,
+    //                               child: AppLoadingScreen(),
+    //                             ),
+    //                           ),
+    //                         )
+    //                       : Container(),
+    //
+    //                 ],
+    //               ),
+    //             _lowerChild1!,
+    //           ],
+    //         );
 
 
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
