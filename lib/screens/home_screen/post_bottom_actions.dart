@@ -1,26 +1,17 @@
 import 'dart:developer';
 
-import 'package:chotanews/globel_keys/app_router.dart';
-import 'package:chotanews/screens/Auth_module/auth_provider.dart';
-import 'package:chotanews/screens/Auth_module/auth_screen.dart';
-import 'package:chotanews/screens/home_screen/home_screen_model.dart';
-import 'package:chotanews/screens/testing_screen/provider.dart';
-import 'package:chotanews/screens/videos_main/videos_model/videos_model.dart';
-import 'package:chotanews/utils/app_enums.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
+import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
+import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/image_to_pdf_helper.dart';
-import '../../services/local_data.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
 import '../../utils/app_spaces.dart';
-import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import 'botton_actions.dart';
 

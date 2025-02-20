@@ -5,8 +5,6 @@ import 'package:chotanews/screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
 import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
-import 'package:chotanews/screens/Auth_module/auth_screen.dart';
-import 'package:chotanews/screens/new_refer_earn_screen/new_refer_earn_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/devotional_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/gallery_screen.dart';
 import 'package:chotanews/screens/videos_main/video_views/myagazines_screen.dart';
@@ -15,13 +13,12 @@ import 'package:chotanews/screens/videos_main/video_views/videos_view_screen.dar
 import 'package:flutter/material.dart';
 
 import '../onbording_screens/onboarding_screen.dart';
-import '../screens/Auth_module/enter_otp_screen.dart';
-import '../screens/Auth_module/sign_in_screen.dart';
-import '../screens/Auth_module/welcome_screen.dart';
+import '../screens/Auth_module/auth_screens/enter_otp_screen.dart';
+import '../screens/Auth_module/auth_screens/sign_in_screen.dart';
+import '../screens/Auth_module/auth_screens/welcome_screen.dart';
 import '../screens/chota_info_screens/chota_info.dart';
 import '../screens/districts_selection/districts_selection_screen.dart';
-import '../screens/home_screen/home_top_tabs.dart';
-import '../screens/profile_screen/profile_screen.dart';
+import '../screens/home_screen/home_screens/home_top_tabs.dart';
 import '../screens/splash_screen/splash_screen_view.dart';
 import '../screens/videos_main/tab_screen.dart';
 

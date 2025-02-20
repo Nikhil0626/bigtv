@@ -1,4 +1,4 @@
-import '../../home_screen/home_screen_model.dart';
+import '../../home_screen/home_models/home_screen_model.dart';
 
 class GetAllVideosModel {
   int? id;

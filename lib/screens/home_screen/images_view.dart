@@ -81,7 +81,7 @@
 
 import 'package:flutter/material.dart';
 
-import 'home_screen_model.dart';
+import 'home_models/home_screen_model.dart';
 
 class CarouselScreen extends StatelessWidget {
     List<GalleryImage> imageList =[];

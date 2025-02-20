@@ -11,7 +11,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../../globel_keys/app_router.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
-import '../../home_screen/home_screen_model.dart';
+import '../../home_screen/home_models/home_screen_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../home_screen/post_bottom_actions.dart';

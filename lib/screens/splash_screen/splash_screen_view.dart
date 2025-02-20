@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
-import 'package:chotanews/screens/Auth_module/auth_provider.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +12,7 @@ import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../services/dynamic_link_service.dart';
-import '../Auth_module/welcome_screen.dart';
+import '../Auth_module/auth_screens/welcome_screen.dart';
 
 class SplashScreenView extends StatefulWidget {
   const SplashScreenView({super.key});

@@ -1,4 +1,4 @@
-import 'package:chotanews/screens/home_screen/home_screen_model.dart';
+import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 
 abstract class IndividualPostState {}
 

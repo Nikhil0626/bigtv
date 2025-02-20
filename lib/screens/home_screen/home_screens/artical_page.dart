@@ -1,22 +1,23 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:chotanews/screens/home_screen/home_screen_model.dart';
-import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/main.dart';
+import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
+import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../utils/app_colors.dart';
-import '../../utils/app_fonts.dart';
-import '../../utils/app_spaces.dart';
-import '../../utils/date_format.dart';
-import '../home_screen/first_card_home_feeds.dart';
-import '../home_screen/post_bottom_actions.dart';
-import '../videos_main/video_views/gallery_screen.dart';
-import '../videos_main/video_views/video_preview.dart';
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_fonts.dart';
+import '../../../utils/app_spaces.dart';
+import '../../../utils/date_format.dart';
+import '../first_card_home_feeds.dart';
+import '../post_bottom_actions.dart';
+import '../../videos_main/video_views/gallery_screen.dart';
+import '../../videos_main/video_views/video_preview.dart';
 
 typedef FlipBack = void Function({bool backToTop});
 
@@ -38,20 +39,23 @@ class ArticlePage extends StatefulWidget {
 
 class ArticlePageState extends State<ArticlePage> {
   final ScreenshotController screenshotController = ScreenshotController();
-
+  int newHeight = 0;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    newHeight = (MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).round().toInt();
+  }
   @override
   Widget build(BuildContext context) {
     final displayFeatures = MediaQuery.of(context).displayFeatures;
-    bool isFoldable = false;
-
-    double heights =( MediaQuery.of(context).size.height -
-        MediaQuery.of(context).padding.top -
-        MediaQuery.of(context).padding.bottom)-(isFoldable?34:32);
+    bool isFoldable = displayFeatures.isNotEmpty;
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
+
         color: widget.article.subType ==
             "BigBlackStandard"?Colors.black:Colors.white,
-        height:heights,
+        height:widget.height-newHeight,
         width: MediaQuery.of(context).size.width,
         child: WillPopScope(
             onWillPop: () {
@@ -248,7 +252,7 @@ class ArticlePageState extends State<ArticlePage> {
                                                               ),
                                                   ),
                                                   Text(
-                                                      "\nPosted ${formatTimeDifference(widget.article.created)}",
+                                                      "Posted ${formatTimeDifference(widget.article.created)}",
                                                       style: fontStyle(
                                                           fontSize: 12,
                                                           color: widget.article

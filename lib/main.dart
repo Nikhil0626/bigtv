@@ -1,7 +1,7 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/Auth_module/auth_provider.dart';
-import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
+import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/testing_screen/test4.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
@@ -110,7 +110,7 @@ Future<void> main() async {
     },
   );
   // debugPaintSizeEnabled = true;
-  runApp(MyApp());
+  runApp(const MyApp());
   subscribeToPushCallbacks(_webEngagePlugin);
 }
 @pragma('vm:entry-point')

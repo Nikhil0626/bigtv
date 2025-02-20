@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/home_screen/home_screen_model.dart';
+import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/screens/individual_post_view/individual_post_event.dart';
 import 'package:chotanews/screens/individual_post_view/individual_post_state.dart';
 import 'package:dio/dio.dart';
@@ -8,7 +8,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/global_variables_data.dart';
-import '../home_screen/home_repo.dart';
+import '../home_screen/home_repo/home_repo.dart';
 
 class IndividualPostBloc extends Bloc<IndividualPostEvent,IndividualPostState> {
   IndividualPostBloc() : super(InitialPostState()) {

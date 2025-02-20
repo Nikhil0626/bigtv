@@ -1,8 +1,8 @@
 import 'dart:developer';
 
 import 'package:chotanews/main.dart';
-import 'package:chotanews/screens/Auth_module/auth_provider.dart';
-import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
+import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

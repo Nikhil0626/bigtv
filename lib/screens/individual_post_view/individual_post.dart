@@ -1,32 +1,20 @@
 import 'dart:developer';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/screens/home_screen/home_screen_model.dart';
+import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/screens/individual_post_view/individual_post_event.dart';
 import 'package:chotanews/screens/individual_post_view/individual_post_state.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../globel_keys/app_router.dart';
-import '../../globel_keys/global_variables_data.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
 import '../../utils/app_no_data.dart';
 import '../../utils/app_spaces.dart';
-import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
-import '../../utils/image_view_popup.dart';
-import '../flip_page/district_flip_panel.dart';
-import '../home_screen/botton_actions.dart';
-import '../home_screen/first_card_home_feeds.dart';
-import '../home_screen/home_bloc.dart';
-import '../home_screen/home_event.dart';
-import '../home_screen/home_state.dart';
-import '../videos_main/video_views/gallery_screen.dart';
 import '../videos_main/video_views/video_preview.dart';
 import 'individual_post_bloc.dart';
 

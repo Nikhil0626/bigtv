@@ -1,13 +1,9 @@
-import 'package:chotanews/screens/testing_screen/provider.dart';
-import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/app_fonts.dart';
-import '../../utils/app_loading_screen.dart';
 import '../../utils/app_spaces.dart';
 
 class BottomActions extends StatelessWidget {

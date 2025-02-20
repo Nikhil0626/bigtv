@@ -1,15 +1,11 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/home_screen/home_bloc.dart';
-import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/services/local_data.dart';
-import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import '../globel_keys/app_router.dart';
@@ -236,9 +232,14 @@ TextEditingController controller = TextEditingController();
                           LoginStatus status =await getLoginStatus();
                           log(status.toString());
                           if (status == LoginStatus.login) {
-                            flipProvider.addCommentPostById(widget.postId, controller.text).then(
-                                  (value) => controller.text = '',
-                            );
+                            if(controller.text.isEmpty){
+
+                            }else{
+                              flipProvider.addCommentPostById(widget.postId, controller.text).then(
+                                    (value) => controller.text = '',
+                              );
+                            }
+
                           } else {
                             Navigator.pushNamed(context, RoutesManager.signInScreen);
                           }
