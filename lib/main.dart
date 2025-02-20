@@ -1,7 +1,7 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/Auth_module/auth_provider.dart';
-import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
+import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/testing_screen/test4.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
@@ -15,6 +15,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'dart:io' show Platform;
@@ -109,7 +110,7 @@ Future<void> main() async {
     },
   );
   // debugPaintSizeEnabled = true;
-  runApp(MyApp());
+  runApp(const MyApp());
   subscribeToPushCallbacks(_webEngagePlugin);
 }
 @pragma('vm:entry-point')
@@ -139,43 +140,47 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<FlipProvider>(
-            create: (context) => FlipProvider()),
-        ChangeNotifierProvider<AuthProvider>(
-            create: (context) => AuthProvider()),
-      ],
-      child: MultiBlocProvider(
-        providers: RegisterProviders.providers(context),
-        child: MaterialApp(
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-            useMaterial3: true,
+    return ScreenUtilInit(
+      designSize: const Size(360, 690), // Set according to your design
+      minTextAdapt: true,
+      child: MultiProvider(
+        providers: [
+          ChangeNotifierProvider<FlipProvider>(
+              create: (context) => FlipProvider()),
+          ChangeNotifierProvider<AuthProvider>(
+              create: (context) => AuthProvider()),
+        ],
+        child: MultiBlocProvider(
+          providers: RegisterProviders.providers(context),
+          child: MaterialApp(
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+              useMaterial3: true,
+            ),
+            scrollBehavior: MyBehavior(),
+            navigatorKey: mainNavigatorKey,
+            navigatorObservers: [routeObserver],
+            onGenerateRoute: (RouteSettings setting) {
+              return RoutesManager.generateRoute(setting);
+            },
+            builder: (
+              BuildContext context,
+              Widget? child,
+            ) {
+              return child!;
+            },
+            // builder: (BuildContext context, Widget? child) {
+            //   ScreenUtil.init(context, designSize: const Size(385, 890));
+            //   return MediaQuery(
+            //     data: MediaQuery.of(context)
+            //         .copyWith(textScaler: const TextScaler.linear(1)),
+            //     child: child!,
+            //   );
+            // },
+            // home: WebDash(),
+            debugShowCheckedModeBanner: false,
+            initialRoute: RoutesManager.splashScreen,
           ),
-          scrollBehavior: MyBehavior(),
-          navigatorKey: mainNavigatorKey,
-          navigatorObservers: [routeObserver],
-          onGenerateRoute: (RouteSettings setting) {
-            return RoutesManager.generateRoute(setting);
-          },
-          builder: (
-            BuildContext context,
-            Widget? child,
-          ) {
-            return child!;
-          },
-          // builder: (BuildContext context, Widget? child) {
-          //   ScreenUtil.init(context, designSize: const Size(385, 890));
-          //   return MediaQuery(
-          //     data: MediaQuery.of(context)
-          //         .copyWith(textScaler: const TextScaler.linear(1)),
-          //     child: child!,
-          //   );
-          // },
-          // home: WebDash(),
-          debugShowCheckedModeBanner: false,
-          initialRoute: RoutesManager.splashScreen,
         ),
       ),
     );

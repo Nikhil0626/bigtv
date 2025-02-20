@@ -63,7 +63,7 @@ class _TermsConditionsState extends State<TermsConditions> {
             ),
             height(height: 5),
             headlineWithContent(
-                "1. What is Chote News Network",
+                "1. What is Chota News Network",
                     "ChotaNews Network is the easiest way to publish"
                     " articles on ChotaNews app if you have a zeal to"
                     " write and make some earnings additionally. Network"
@@ -171,7 +171,7 @@ class _TermsConditionsState extends State<TermsConditions> {
           headline,
           style: fontStyle(
             fontSize: 16,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w600,
             color: Colors.black,
           ),
         ),

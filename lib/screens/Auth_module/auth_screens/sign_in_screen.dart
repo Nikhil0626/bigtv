@@ -1,25 +1,16 @@
 import 'dart:developer';
-import 'package:chotanews/globel_keys/app_router.dart';
-import 'package:chotanews/screens/Auth_module/auth_bloc.dart';
-import 'package:chotanews/screens/Auth_module/auth_provider.dart';
-import 'package:chotanews/screens/Auth_module/auth_state.dart';
+import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:flutter/services.dart';
 import 'package:mobile_number/mobile_number.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
 import 'dart:async';
-import '../../utils/app_colors.dart';
-import 'auth_event.dart';
+import '../../../utils/app_colors.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});

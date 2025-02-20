@@ -9,7 +9,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
 
-import '../screens/home_screen/home_screen_model.dart';
+import '../screens/home_screen/home_models/home_screen_model.dart';
 
 Future<void> convertImageUrlToPdfAndShare(BuildContext context,  article) async {
   try {

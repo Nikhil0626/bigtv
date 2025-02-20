@@ -5,7 +5,7 @@ import 'package:chotanews/screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
 import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
-import 'package:chotanews/screens/home_screen/home_screen_view.dart';
+import 'package:chotanews/screens/home_screen/home_screens/home_screen_view.dart';
 import 'package:chotanews/screens/profile_screen/profile_screen.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/services/local_data.dart';
@@ -24,7 +24,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../../utils/app_enums.dart';
-import '../Auth_module/auth_provider.dart';
+import '../Auth_module/auth_provider/auth_provider.dart';
 import '../new_refer_earn_screen/new_refer_earn_screen.dart';
 import '../videos_main/tab_screen.dart';
 
@@ -439,7 +439,7 @@ return Scaffold(
                         ),
                         const SizedBox(width: 16),
                         Text(
-                          'Privay policy',
+                          'Privacy policy',
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
@@ -511,14 +511,14 @@ return Scaffold(
 
 
 
-            const Spacer(),
+            height(height: 20),
             Container(
                 height: 40,
                 padding: const EdgeInsets.only(bottom: 20),
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 child: Text(
-                  "App Version: 5.0.0+13",
+                  "App Version: 5.0.0+6",
                   style: fontStyle(
                     fontSize: 16,
                   ),

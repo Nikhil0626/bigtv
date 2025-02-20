@@ -1,9 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/screens/home_screen/home_screen_model.dart';
+import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 
-import '../../utils/app_loading_screen.dart';
 
 class FirstCardHomeFeeds extends StatelessWidget {
   final List<Article>? getHomeList;
@@ -25,7 +24,7 @@ class FirstCardHomeFeeds extends StatelessWidget {
                   imageUrl: getHomeList![0].imageUrl!.url,
                   title: getHomeList![0].title,
                   isMainCard: true)),
-           Divider(
+           const Divider(
             height: 4,
             color: Colors.white,
           ),

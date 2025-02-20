@@ -1,7 +1,5 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/Auth_module/auth_event.dart';
-import 'package:chotanews/screens/Auth_module/auth_state.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
@@ -9,7 +7,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../globel_keys/app_router.dart';
-import '../screens/Auth_module/auth_bloc.dart';
 import '../screens/videos_main/video_bloc/videos_state.dart';
 
 class ReferralCode extends StatefulWidget {
@@ -32,165 +29,145 @@ class _ReferralCodeState extends State<ReferralCode> {
       backgroundColor: Colors.white,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: BlocConsumer<AuthBloc, AuthState>(
-          listener: (context, state) {
-            if (state is SuccessScreen && state.message == "true") {
-              Navigator.pushNamed(context, RoutesManager.districtSelectionScreen);
-            }
-          },
-          builder: (context, state) {
-            if (state is LoadingState) {
-              return const Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            return Form(
-              key: _formKey,
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SvgPicture.asset(
-                      'assets/svg/Chota_news_logo.svg',
-                      height: 24,
-                      width: 166,
+        child: Form(
+          key: _formKey,
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SvgPicture.asset(
+                  'assets/svg/Chota_news_logo.svg',
+                  height: 24,
+                  width: 166,
+                ),
+                height(height: 34),
+                Text(
+                  "Sign in",
+                  style: fontStyle(
+                    fontSize: 24,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                height(height: 7),
+                Text(
+                  "Please enter the referral code shared by your friend. If you don’t have one, proceed with skip",
+                  maxLines: 3,
+                  style: fontStyle(fontSize: 16, color: Colors.grey[600]),
+                ),
+                height(height: 20),
+                Text(
+                  "Apply Referral Code",
+                  style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
+                height(height: 5),
+                Container(
+                  height: 45,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: TextFormField(
+                    controller: referralCode,
+                    keyboardType: TextInputType.text,
+                    maxLength: 8,
+                    decoration: const InputDecoration(
+                      counterText: "",
+                      hintText: "Enter Referral Code",
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
                     ),
-                    height(height: 34),
-                    Text(
-                      "Sign in",
+                    onChanged: (value) {
+                      if (value.length == 8) {
+                        _mobileNumberError = null;
+                      }
+                      setState(() {});
+                    },
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        setState(() {
+                          _mobileNumberError = "Please enter your Referral Code";
+                        });
+                        return "";
+                      } else if (value.length != 8) {
+                        setState(() {
+                          _mobileNumberError = "Please enter a valid 8-digit Referral Code";
+                        });
+                        return "";
+                      }
+                      setState(() {
+                        _mobileNumberError = null;
+                      });
+                      return null;
+                    },
+                  ),
+                ),
+                if (_mobileNumberError != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0, left: 10.0),
+                    child: Text(
+                      _mobileNumberError!,
                       style: fontStyle(
-                        fontSize: 24,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w600,
+                        color: Colors.red,
+                        fontSize: 12,
+                        fontWeight: FontWeight.normal,
                       ),
                     ),
-                    height(height: 7),
-                    Text(
-                      "Please enter the referral code shared by your friend. If you don’t have one, proceed with skip",
-                      maxLines: 3,
-                      style: fontStyle(fontSize: 16, color: Colors.grey[600]),
-                    ),
-                    height(height: 20),
-                    Text(
-                      "Apply Referral Code",
-                      style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
-                    ),
-                    height(height: 5),
-                    Container(
-                      height: 45,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
+                  ),
+                height(height: 40),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: referralCode.text.length == 8
+                        ? () {
+                      if (_formKey.currentState!.validate()) {
+                        log("Referral Code: \${referralCode.text}");
+                      }
+                    }
+                        : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: referralCode.text.length == 8
+                          ? Colors.lightBlue
+                          : Colors.grey,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: TextFormField(
-                        controller: referralCode,
-                        keyboardType: TextInputType.text,
-                        maxLength: 8,
-                        decoration: const InputDecoration(
-                          counterText: "",
-                          hintText: "Enter Referral Code",
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                        ),
-                        onChanged: (value) {
-                          if (value.length == 8) {
-                            _mobileNumberError = null;
-                          }
-                          setState(() {});
-                        },
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            setState(() {
-                              _mobileNumberError = "Please enter your Referral Code";
-                            });
-                            return "";
-                          } else if (value.length != 8) {
-                            setState(() {
-                              _mobileNumberError = "Please enter a valid 8-digit Referral Code";
-                            });
-                            return "";
-                          }
-                          setState(() {
-                            _mobileNumberError = null;
-                          });
-                          return null;
-                        },
+                    ),
+                    child: Text(
+                      "Submit",
+                      style: fontStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    if (_mobileNumberError != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0, left: 10.0),
-                        child: Text(
-                          _mobileNumberError!,
-                          style: fontStyle(
-                            color: Colors.red,
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal,
-                          ),
-                        ),
-                      ),
-                    height(height: 40),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: referralCode.text.length == 8
-                            ? () {
-                          if (_formKey.currentState!.validate()) {
-                            log("Referral Code: \${referralCode.text}");
-                            context.read<AuthBloc>().add(SendReferralCode(
-                              referralCodeNumber: referralCode.text,
-                              mobileNumber: widget.mobileNumber,
-                              context: context,
-                            ));
-                          }
-                        }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: referralCode.text.length == 8
-                              ? Colors.lightBlue
-                              : Colors.grey,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                        ),
-                        child: Text(
-                          "Submit",
-                          style: fontStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                    height(height: 16),
-                    Center(
-                      child: TextButton(
-                        onPressed: () async {
-                          SharedPreferences sp = await SharedPreferences.getInstance();
-                          sp.remove("sharedReferralCode");
-                          if (!context.mounted) return;
-                          Navigator.pushNamed(context, RoutesManager.districtSelectionScreen);
-                        },
-                        child: Text(
-                          "Skip",
-                          style: fontStyle(
-                            fontSize: 16,
-                            color: Colors.blue,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
-        ),
+                height(height: 16),
+                Center(
+                  child: TextButton(
+                    onPressed: () async {
+                      SharedPreferences sp = await SharedPreferences.getInstance();
+                      sp.remove("sharedReferralCode");
+                      if (!context.mounted) return;
+                      Navigator.pushNamed(context, RoutesManager.districtSelectionScreen);
+                    },
+                    child: Text(
+                      "Skip",
+                      style: fontStyle(
+                        fontSize: 16,
+                        color: Colors.blue,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )
       ),
     );
   }

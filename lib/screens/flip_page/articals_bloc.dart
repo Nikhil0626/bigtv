@@ -3,14 +3,14 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:chotanews/screens/home_screen/home_repo.dart';
+import 'package:chotanews/screens/home_screen/home_repo/home_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/global_variables_data.dart';
-import '../home_screen/home_screen_model.dart';
+import '../home_screen/home_models/home_screen_model.dart';
 
 class ArticleBloc extends  ChangeNotifier {
 

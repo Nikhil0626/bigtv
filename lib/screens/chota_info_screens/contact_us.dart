@@ -118,7 +118,7 @@ class _ContactUsState extends State<ContactUs> {
                     ),
                     height(height: 10),
                     InkWell(
-                      onTap: () => launchSingleEmail('info@gmail.com'),
+                      onTap: () => launchSingleEmail('info@chotanews.com'),
                       child: Text(
                         "info@chotanews.com",
                         style: fontStyle(
@@ -211,6 +211,7 @@ class ContactDetailTile extends StatelessWidget {
             child: GestureDetector(
               onTap: onEmailTap,
               child: Text(
+                textAlign: TextAlign.center,
                 email,
                 style: fontStyle(fontSize: 14, color: Colors.blue),
               ),

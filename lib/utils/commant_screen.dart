@@ -1,20 +1,14 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/home_screen/home_bloc.dart';
-import 'package:chotanews/screens/testing_screen/provider.dart';
+import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/services/local_data.dart';
-import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 import '../globel_keys/app_router.dart';
-import '../screens/Auth_module/auth_provider.dart';
-import '../screens/home_screen/home_event.dart';
 import 'app_enums.dart';
 import 'date_format.dart';
 
@@ -111,10 +105,12 @@ TextEditingController controller = TextEditingController();
 
                 // Comment List with Keyboard Scroll Fix
                 Expanded(
-                  child:flipProvider.isSendComment?const AppLoadingScreen():flipProvider.allPostCommentModelList.isEmpty
+                  child:flipProvider.isSendComment?const AppLoadingScreen():flipProvider.allPostCommentModelList
+                      .where((comment) => comment.postId.toString() == widget.postId.toString())
+                      .toList().isEmpty
                       ? Center(
                     child: Text(
-                      "No Comments Yet...",
+                      "No comments yet...",
                       style: fontStyle(
                         fontSize: 14,
                         color: const Color(0xff111928),
@@ -124,22 +120,25 @@ TextEditingController controller = TextEditingController();
                   )
                       :  ListView.builder(
                     shrinkWrap: true,
-                    // physics: const NeverScrollableScrollPhysics(), // Prevents nested scroll
-                    itemCount: flipProvider.allPostCommentModelList.length,
+                    itemCount: flipProvider.allPostCommentModelList
+                        .where((comment) => comment.postId.toString() == widget.postId.toString())
+                        .toList()
+                        .length,
                     itemBuilder: (context, index) {
+                      var filteredComments = flipProvider.allPostCommentModelList
+                          .where((comment) => comment.postId.toString() == widget.postId.toString())
+                          .toList();
+
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 12.0,vertical: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             // User Avatar
                             CircleAvatar(
                               child: Text(
-                                flipProvider.allPostCommentModelList[index].user.name
-                                    .toString()
-                                    .split("")
-                                    .first,
-                                style: fontStyle(fontSize: 16,fontWeight: FontWeight.normal),
+                                filteredComments[index].user.name.toString().split("").first,
+                                style: fontStyle(fontSize: 16, fontWeight: FontWeight.normal),
                               ),
                             ),
                             width(width: 10),
@@ -152,20 +151,19 @@ TextEditingController controller = TextEditingController();
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Text(
-                                        flipProvider.allPostCommentModelList[index].user.name,
+                                        filteredComments[index].user.name,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                         style: const TextStyle(
                                           fontWeight: FontWeight.normal,
                                           fontSize: 12,
-
                                         ),
                                       ),
                                       width(width: 4),
                                       Center(
-                                        child: Text("•",
+                                        child: Text(
+                                          "•",
                                           textAlign: TextAlign.center,
-
                                           style: fontStyle(
                                             color: Colors.black,
                                             fontSize: 12,
@@ -173,12 +171,11 @@ TextEditingController controller = TextEditingController();
                                           ),
                                         ),
                                       ),
-
                                       width(width: 4),
                                       Center(
                                         child: Text(
                                           formatTimeDifference(
-                                            flipProvider.allPostCommentModelList[index].createdAt.toString(),
+                                            filteredComments[index].createdAt.toString(),
                                             isComment: true,
                                           ),
                                           textAlign: TextAlign.center,
@@ -193,20 +190,9 @@ TextEditingController controller = TextEditingController();
                                   ),
                                   height(height: 8),
                                   ExpandableTextWidget(
-                                    text: flipProvider.allPostCommentModelList[index].text,
+                                    text: filteredComments[index].text,
                                   ),
                                   height(height: 8),
-                                  // Row(
-                                  //   children: [
-                                  //     InkWell(
-                                  //         onTap: (){
-                                  //
-                                  //         },
-                                  //         child: Icon(Icons.thumb_up_alt_outlined, size: 20, color: Colors.grey)),
-                                  //     SizedBox(width: 10),
-                                  //     Icon(Icons.thumb_down_alt_outlined, size: 20, color: Colors.grey),
-                                  //   ],
-                                  // ),
                                 ],
                               ),
                             ),
@@ -215,6 +201,7 @@ TextEditingController controller = TextEditingController();
                       );
                     },
                   ),
+
                 ),
 
                 // Comment Input Field
@@ -245,9 +232,14 @@ TextEditingController controller = TextEditingController();
                           LoginStatus status =await getLoginStatus();
                           log(status.toString());
                           if (status == LoginStatus.login) {
-                            flipProvider.addCommentPostById(widget.postId, controller.text).then(
-                                  (value) => controller.text = '',
-                            );
+                            if(controller.text.isEmpty){
+
+                            }else{
+                              flipProvider.addCommentPostById(widget.postId, controller.text).then(
+                                    (value) => controller.text = '',
+                              );
+                            }
+
                           } else {
                             Navigator.pushNamed(context, RoutesManager.signInScreen);
                           }

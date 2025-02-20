@@ -11,7 +11,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../../globel_keys/app_router.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
-import '../../home_screen/home_screen_model.dart';
+import '../../home_screen/home_models/home_screen_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import '../../home_screen/post_bottom_actions.dart';
@@ -219,6 +219,8 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    final displayFeatures = MediaQuery.of(context).displayFeatures;
+    bool isFoldable = displayFeatures.isNotEmpty;
     return Scaffold(
       appBar: widget.className == ""
           ? null
@@ -275,7 +277,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: NetworkImage(image.url),
-                    fit: BoxFit.cover,
+                    fit: isFoldable?BoxFit.fill:BoxFit.cover,
                     filterQuality: FilterQuality.high,
                     isAntiAlias: true,
                   ),

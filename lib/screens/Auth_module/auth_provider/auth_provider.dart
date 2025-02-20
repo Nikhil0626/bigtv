@@ -6,13 +6,13 @@ import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import '../../globel_keys/app_router.dart';
-import '../../globel_keys/global_variables_data.dart';
-import '../../services/dynamic_link_service.dart';
-import '../../services/local_data.dart';
-import '../../utils/app_enums.dart';
-import '../../utils/app_toasts.dart';
-import 'auth_repo.dart';
+import '../../../globel_keys/app_router.dart';
+import '../../../globel_keys/global_variables_data.dart';
+import '../../../services/dynamic_link_service.dart';
+import '../../../services/local_data.dart';
+import '../../../utils/app_enums.dart';
+import '../../../utils/app_toasts.dart';
+import '../auth_repo/auth_repo.dart';
 
 class AuthProvider extends ChangeNotifier {
   final TextEditingController mobileNumberController = TextEditingController();

@@ -11,7 +11,7 @@ class BaseUrls {
 
   static const String getNews = "/allposts";
   static const String getPostById = "/post";
-  static const String getAllDistricts = "/user/1/locations";
+  static const String getAllDistricts = "/user";
 
   static const String updateDistricts ="/upsert/location";
 

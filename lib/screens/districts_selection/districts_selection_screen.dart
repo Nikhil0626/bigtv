@@ -1,4 +1,4 @@
-import 'package:chotanews/screens/home_screen/home_top_tabs.dart';
+import 'package:chotanews/screens/home_screen/home_screens/home_top_tabs.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -9,7 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../globel_keys/app_router.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_enums.dart';
-import '../Auth_module/auth_provider.dart';
+import '../Auth_module/auth_provider/auth_provider.dart';
 import 'district_selection_bloc.dart';
 import 'district_selection_event.dart';
 import 'district_selection_state.dart';
@@ -280,7 +280,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                     } else if (state is ErrorDistrictsState) {
                       return Center(
                         child: Text(
-                          "Please try again later.",
+                          "Please reload",
                           style: fontStyle(color: Colors.red),
                         ),
                       );
