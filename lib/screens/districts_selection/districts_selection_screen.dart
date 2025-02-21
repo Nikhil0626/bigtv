@@ -293,15 +293,11 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                   listener: (context, state) {
                     if (state is SubmitSuccessState) {
                       if (state.className == "Home") {
-                        Navigator.push(
+                        Navigator.pushNamed(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => const HomeTopTabs(
-                                tab: "1",
-                              ),
-                            ));
+                            RoutesManager.homeScreen,arguments: {"postId":"","tab":"0"});
                       } else {
-                        Navigator.pushNamed(context, RoutesManager.homeScreen);
+                        Navigator.pushNamed(context, RoutesManager.homeScreen,arguments: {"postId":"","tab":"0"});
                       }
                     }
                   },

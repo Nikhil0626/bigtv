@@ -158,7 +158,7 @@ class AuthProvider extends ChangeNotifier {
     switch (status) {
       case LoginStatus.skip:
         Navigator.pushNamedAndRemoveUntil(
-            context, RoutesManager.homeScreen, (route) => false);
+            context, RoutesManager.homeScreen, (route) => false,arguments: {"postId":"","tab":"0"});
         break;
       case LoginStatus.home:
         Navigator.pushNamedAndRemoveUntil(
@@ -173,7 +173,7 @@ class AuthProvider extends ChangeNotifier {
         break;
       case LoginStatus.login:
         Navigator.pushNamedAndRemoveUntil(
-            context, RoutesManager.homeScreen, (route) => false);
+            context, RoutesManager.homeScreen, (route) => false,arguments: {"postId":"","tab":"0"});
         break;
       case LoginStatus.location:
         log("className $className");

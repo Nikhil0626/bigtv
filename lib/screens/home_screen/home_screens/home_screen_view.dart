@@ -11,14 +11,32 @@ import '../home_provider/provider.dart';
 import '../../flip_page/home_flip_panel.dart';
 import '../home_models/home_screen_model.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+
+class HomeScreenView extends StatefulWidget {
+  final String postId;
+  const HomeScreenView({super.key, this.postId = ""});
+
+  @override
+  State<HomeScreenView> createState() => _HomeScreenViewState();
+}
+
+class _HomeScreenViewState extends State<HomeScreenView> {
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    if(widget.postId == ""){
+      context.read<FlipProvider>().getArticles();
+
+    }else{
+      context.read<FlipProvider>().getIndividualPost(widget.postId);
+
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    context.read<FlipProvider>().getArticles();
-    final displayFeatures = MediaQuery.of(context).displayFeatures;
-    bool isFoldable = displayFeatures.isNotEmpty;
 
 
     double heightsInt = (MediaQuery.of(context).size.height-MediaQuery.of(context).padding.vertical);
@@ -28,7 +46,6 @@ class HomePage extends StatelessWidget {
         builder: (_,flipProvider,__) {
           return FlipPanel<HomeScreenModel>(
             itemStream: flipProvider.mainArticles,
-            // waitingForRefresh: flipProvider.isRefresh?true:false,
             itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
                 ArticlePage(article: article, flipBack: flipBack,height: heightsInt, ),
             height: heightsInt,
@@ -48,8 +65,7 @@ class HomePage1 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read<FlipProvider>().getArticles();
-    final displayFeatures = MediaQuery.of(context).displayFeatures;
-    bool isFoldable = displayFeatures.isNotEmpty;
+
     double heightsInt = (MediaQuery.of(context).size.height-MediaQuery.of(context).padding.vertical);
 
 
@@ -57,12 +73,10 @@ class HomePage1 extends StatelessWidget {
           body: Consumer<FlipProvider>(
     builder: (_,flipProvider,__) {
       return DistrictFlipPanel<HomeScreenModel>(
-        // waitingForRefresh: flipProvider.isRefresh?true:false,
         itemStream: flipProvider.districtArticles,
         itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
             ArticlePage(article: article, flipBack: flipBack, height: heightsInt,),
         height: heightsInt,
-
       );
     }
           ),);

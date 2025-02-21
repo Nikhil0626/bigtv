@@ -91,7 +91,7 @@ Future<void> takeScreenshotAndShare( article,screenshotController, ) async {
       final imageFile = File(imagePath);
       await imageFile.writeAsBytes(image);
 
-      Share.shareXFiles([XFile(imageFile.path)], text: '${article.linkURLAndroid.toString()}');
+      Share.shareXFiles([XFile(imageFile.path)], text:Platform.isIOS?article.linkURLIos.toString(): article.linkURLAndroid.toString());
 
     } else {
       CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
@@ -104,6 +104,8 @@ Future<void> takeScreenshotAndShare( article,screenshotController, ) async {
 
 
 Future<void> createAndSharePdf(BuildContext context, article ) async {
+
+  print("snkvsnknv ${article.gallery}");
   List<GalleryImage>? imageData = article.gallery;
   try {
     final pdf = pw.Document();

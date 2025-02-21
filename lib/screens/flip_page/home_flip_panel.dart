@@ -1615,6 +1615,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   }
 
   void _handleDragEnd(DragEndDetails details) {
+    log("indexxxxxxx ---- $_currentIndex");
     _dragging = false;
     if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
         "Gallery") {
@@ -1623,7 +1624,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
         isImages = true;
       });
     }
-
+    if(_currentIndex > 0 && _direction == FlipDirection.up) {
+      context.read<FlipProvider>().isShowTopBottomChange(true);
+    }else{
+      context.read<FlipProvider>().isShowTopBottomChange(false);
+    }
 
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {

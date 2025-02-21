@@ -25,11 +25,7 @@ class FlipProvider extends ChangeNotifier {
   bool fromLocation = false;
 
   void isTabChange(val, BuildContext context, {bool isMainPage = false}) {
-    // if(){
-    //   context.read<HomeBloc>().add(MenuItemClickEvent(
-    //       context: context, currentMenuItem: "లొకేషన్స్"));
-    //   return ;
-    // }
+
     isTab = val;
     if (!isMainPage) {
       notifyListeners();
@@ -41,6 +37,8 @@ class FlipProvider extends ChangeNotifier {
     isShowTopBottomView = !val;
     notifyListeners();
   }
+
+
 
   int initialIndex = 0;
   int lastPostIdInMain = 0;
@@ -59,12 +57,36 @@ class FlipProvider extends ChangeNotifier {
   bool isLoading = false;
   bool isRefresh = false;
 
-  Future<void> getArticles({bool refresh = false, int index = 0,bool isMain = true}) async {
+  Future getIndividualPost(postId) async {
+    log("Push Notification Received: get Call ${postId.toString()}");
+    try {
+      Response response = await HomeRepo().getSinglePost(postId);
+      log(response.data.toString());
+      List data = response.data['posts'];
+      HomeScreenModel getSinglePost = HomeScreenModel.fromJson(data[0]);
+      List<HomeScreenModel> currentList =
+          mainArticlesController.valueOrNull ?? [];
+      currentList.insert(0,getSinglePost);
+      mainArticlesController.add([]);
+      mainArticlesController.add(currentList);
+      notifyListeners();
+    } on DioException catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api  catch ${st.toString()}");
+    } catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api catch ${st.toString()}");
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> getArticles(
+      {bool refresh = false, int index = 0, bool isMain = true}) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String locationId = sp.getString("locationId") ?? "";
     String loginId = sp.getString("loginId") ?? "";
     String deviceId = GlobalVariables().deviceId ?? "";
-
 
     if (refresh == true) {
       isLoading = true;
@@ -142,11 +164,11 @@ class FlipProvider extends ChangeNotifier {
               'platform': Platform.isIOS ? "apple" : "android",
             };
       log(queryParams.toString());
-      getData(queryParams,isMain: isMain);
+      getData(queryParams, isMain: isMain);
     }
   }
 
-  Future getData(queryParams,{bool isMain = false}) async {
+  Future getData(queryParams, {bool isMain = false}) async {
     Response jsonString = await HomeRepo().getAllNewsFeeds(queryParams);
     print(jsonString.toString());
     List jsonList = jsonString.data['posts'];
@@ -243,9 +265,10 @@ class FlipProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  final BehaviorSubject<List<HomeScreenModel>> districtArticlesController = BehaviorSubject<List<HomeScreenModel>>();
-  final BehaviorSubject<List<HomeScreenModel>> mainArticlesController = BehaviorSubject<List<HomeScreenModel>>();
-
+  final BehaviorSubject<List<HomeScreenModel>> districtArticlesController =
+      BehaviorSubject<List<HomeScreenModel>>();
+  final BehaviorSubject<List<HomeScreenModel>> mainArticlesController =
+      BehaviorSubject<List<HomeScreenModel>>();
 
   Stream<List<HomeScreenModel>> get mainArticles =>
       mainArticlesController.stream;
@@ -257,7 +280,7 @@ class FlipProvider extends ChangeNotifier {
   void dispose() {
     // mainArticlesController.close();
     // districtArticlesController.close();
-     super.dispose();
+    super.dispose();
   }
 
   bool isSendComment = false;
@@ -269,15 +292,17 @@ class FlipProvider extends ChangeNotifier {
       List data = response.data['comments'];
 
       List<AllPostCommentModel> newComments =
-      data.map((e) => AllPostCommentModel.fromJson(e)).toList();
+          data.map((e) => AllPostCommentModel.fromJson(e)).toList();
       for (var comment in newComments) {
         if (!allPostCommentModelList.contains(comment)) {
           log(comment.postId.toString());
-          allPostCommentModelList.map((e) {
-            if(e.postId != comment.postId){
-              allPostCommentModelList.add(comment);
-            }
-          },);
+          allPostCommentModelList.map(
+            (e) {
+              if (e.postId != comment.postId) {
+                allPostCommentModelList.add(comment);
+              }
+            },
+          );
         }
       }
 
@@ -292,9 +317,6 @@ class FlipProvider extends ChangeNotifier {
     }
   }
 
-
-
-
   Future addCommentPostById(postData, comment) async {
     isSendComment = true;
     notifyListeners();
@@ -302,7 +324,7 @@ class FlipProvider extends ChangeNotifier {
     String loginId = sp.getString("loginId") ?? "";
     String userName = sp.getString("userName") ?? "";
     Map<String, dynamic> body = {
-      "UserId": loginId??"",
+      "UserId": loginId ?? "",
       "PostId": postData.toString(),
       "Content": comment
     };
@@ -312,12 +334,40 @@ class FlipProvider extends ChangeNotifier {
       log(response.data.toString());
       DateTime now = DateTime.now().add(const Duration(minutes: -330));
       String formattedDate = DateFormat('yyyy-MM-ddTHH:mm:ss').format(now);
-      log({"_id": 0000, "postId":int.parse( postData.toString()), "text":comment, "status": 1, 'displayText': comment, "userId": 0, 'createdAt': formattedDate, "user": {"_id":int.parse( loginId.toString()) , "name": userName, "avatar": null}, "redisId": ""}.toString());
+      log({
+        "_id": 0000,
+        "postId": int.parse(postData.toString()),
+        "text": comment,
+        "status": 1,
+        'displayText': comment,
+        "userId": 0,
+        'createdAt': formattedDate,
+        "user": {
+          "_id": int.parse(loginId.toString()),
+          "name": userName,
+          "avatar": null
+        },
+        "redisId": ""
+      }.toString());
 
       if (response.statusCode == 200) {
         allPostCommentModelList.insert(
           0,
-          AllPostCommentModel.fromJson({"_id": 0000, "postId":int.parse( postData.toString()), "text":comment, "status": 1, 'displayText': comment, "userId": 0, 'createdAt': formattedDate, "user": {"_id":int.parse( loginId.toString()) , "name": userName, "avatar": null}, "redisId": ""}),
+          AllPostCommentModel.fromJson({
+            "_id": 0000,
+            "postId": int.parse(postData.toString()),
+            "text": comment,
+            "status": 1,
+            'displayText': comment,
+            "userId": 0,
+            'createdAt': formattedDate,
+            "user": {
+              "_id": int.parse(loginId.toString()),
+              "name": userName,
+              "avatar": null
+            },
+            "redisId": ""
+          }),
         );
         isSendComment = false;
         notifyListeners();
@@ -332,8 +382,6 @@ class FlipProvider extends ChangeNotifier {
       isSendComment = false;
       notifyListeners();
     }
-
-
   }
 
   List<String> isLikeList = [];
@@ -350,11 +398,10 @@ class FlipProvider extends ChangeNotifier {
     notifyListeners(); // Notify listeners if using ChangeNotifier
   }
 
-  void isLocationChange(val){
+  void isLocationChange(val) {
     fromLocation = val;
     notifyListeners();
   }
-
 
   List<String> isLikeByCommentList = [];
 
@@ -370,13 +417,12 @@ class FlipProvider extends ChangeNotifier {
     notifyListeners(); // Notify listeners if using ChangeNotifier
   }
 
-
-  Future menuChange(currentMenuItem,context)async{
+  Future menuChange(currentMenuItem, context) async {
     if (currentMenuItem == "హోమ్") {
-      Navigator.pushNamed(context, RoutesManager.homeScreen);
+      Navigator.pushNamed(context, RoutesManager.homeScreen,
+          arguments: {"postId": "", "tab": "0"});
     } else if (currentMenuItem == "లొకేషన్స్") {
-      Navigator.pushNamed(
-          context, RoutesManager.districtSelectionScreen,
+      Navigator.pushNamed(context, RoutesManager.districtSelectionScreen,
           arguments: {
             "className": "Home",
           });
@@ -388,5 +434,3 @@ class FlipProvider extends ChangeNotifier {
     }
   }
 }
-
-

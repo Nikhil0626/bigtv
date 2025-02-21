@@ -42,11 +42,7 @@ class DynamicLinkService {
     if (postId != null && postId.isNotEmpty) {
       log("Navigating to Post ID: $postId");
       if (!context.mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => IndividualPost(postId: postId)),
-        (route) => false,
-      );
+      Navigator.pushNamed(mainNavigatorKey.currentContext!, RoutesManager.homeScreen,arguments: {"postId":"$postId","tab":"0"});
       return;
     }
 

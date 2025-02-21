@@ -867,8 +867,8 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
         widgets!.addAll(items!.skip(1)
             .map((item) => widget.itemBuilder(context, item, flipBack, _height))
             .toList());
-        print("widgets");
-        print(widgets);
+        // print("widgets");
+        // print(widgets);
         _upperChild1 = makeUpperClip(widgets![0]);
         _lowerChild1 = makeLowerClip(widgets![0]);
       } else {

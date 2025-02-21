@@ -11,7 +11,7 @@ class DistrictSelectionRepo extends BaseService{
   Future getAllDistricts() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("loginId");
-    Response response = await makeRequest(url:"${BaseUrls.getAllDistricts}/$userId/locations",method: RequestType.get );
+    Response response = await makeRequest(url:"${BaseUrls.getAllDistricts}/id/locations",method: RequestType.get );
     return response ;
   }
 

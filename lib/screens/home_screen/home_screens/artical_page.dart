@@ -44,7 +44,7 @@ class ArticlePageState extends State<ArticlePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    newHeight = (MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).round().toInt();
+    newHeight = (MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).toInt();
   }
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class ArticlePageState extends State<ArticlePage> {
 
         color: widget.article.subType ==
             "BigBlackStandard"?Colors.black:Colors.white,
-        height:widget.height-newHeight,
+        height:widget.height-35.6667,
         width: MediaQuery.of(context).size.width,
         child: WillPopScope(
             onWillPop: () {
@@ -75,7 +75,7 @@ class ArticlePageState extends State<ArticlePage> {
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
                       child: Image.network(
-                        fit: BoxFit.fill,
+                        fit: BoxFit.cover,
                         widget.article.imageUrl.url ?? "",
                       ),
                     )

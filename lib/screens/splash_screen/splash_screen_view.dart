@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../main.dart';
 import '../../services/dynamic_link_service.dart';
 import '../Auth_module/auth_screens/welcome_screen.dart';
 
@@ -59,6 +60,63 @@ class _SplashScreenView extends State<SplashScreenView> {
             ),
           )
         ],
+      ),
+    );
+  }
+}
+
+
+
+
+class SplashScreen extends StatefulWidget {
+  @override
+  _SplashScreenState createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  bool showGif = false;
+
+  @override
+  void initState() {
+    super.initState();
+    checkLastShownDate();
+  }
+
+  Future<void> checkLastShownDate() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? lastDate = prefs.getString('last_shown_date');
+    String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD format
+
+    if (lastDate != today) {
+      setState(() {
+        showGif = true;
+      });
+      await prefs.setString('last_shown_date', today);
+    }
+    Future.delayed( Duration(seconds:showGif? 5:2),() {
+
+      mainNavigatorKey.currentContext!.read<AuthProvider>().checkLoginStatus(mainNavigatorKey.currentContext!);
+
+    },);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: showGif
+            ?  Image.asset(
+          "assets/svg/splash_video.gif",
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+        )// Show GIF
+            :  Center(
+              child: Image.asset(
+                    "assets/playstore.png",
+                    height: 100,
+                    width: 100,
+                  ),
+            ), // Show Image
       ),
     );
   }
