@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/global_variables_data.dart';
+import '../../services/webengage_event_tracks.dart';
 import 'district_selection_event.dart';
 import 'district_selection_model.dart';
 import 'district_selection_repo.dart';
@@ -101,6 +102,7 @@ class DistrictSelectionBloc
         "locationId": result,
         "type": "bulk",
       };
+      districtLocationUpdate("",result,"");
       try {
         Response response =
             await DistrictSelectionRepo().updateDistrictsList(body);

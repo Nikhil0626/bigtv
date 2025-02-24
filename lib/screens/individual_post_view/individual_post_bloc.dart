@@ -25,8 +25,6 @@ class IndividualPostBloc extends Bloc<IndividualPostEvent,IndividualPostState> {
       ) ??
           "";
       log(locationId);
-      String deviceId = GlobalVariables().deviceId ?? "";
-      String platForm = GlobalVariables().platForm ?? "";
 
       try {
         Response response = await HomeRepo().getSinglePost(event.postId);

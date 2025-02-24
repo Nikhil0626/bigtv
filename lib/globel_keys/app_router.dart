@@ -56,11 +56,12 @@ abstract class RoutesManager {
   static Route<dynamic>? generateRoute(RouteSettings setting) {
     switch (setting.name) {
       case splashScreen:
-        return MaterialPageRoute(builder: (context) =>  const SplashScreenView());
+        return MaterialPageRoute(builder: (context) =>   SplashScreen());
       // case login:
       //   return MaterialPageRoute(builder: (context) => const LoginScreen(),);
       case homeScreen:
-        return MaterialPageRoute(builder: (context) => const HomeTopTabs(),);
+        final args = setting.arguments as Map<String, dynamic>?;
+        return MaterialPageRoute(builder: (context) =>  HomeTopTabs(postId:args?['postId'] ?? '',tab:args?['tab'] ?? '',),);
       // case newReferEarnScreen:
       //   return MaterialPageRoute(builder: (context) =>  const NewReferEarnScreen());
 
@@ -137,7 +138,7 @@ abstract class RoutesManager {
 
       default:
         // return null;
-        return MaterialPageRoute(builder: (context) =>  const SplashScreenView());
+        return MaterialPageRoute(builder: (context) =>   SplashScreen());
     }
   }
 }

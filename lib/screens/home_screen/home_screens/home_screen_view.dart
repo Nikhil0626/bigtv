@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -11,60 +10,86 @@ import '../home_provider/provider.dart';
 import '../../flip_page/home_flip_panel.dart';
 import '../home_models/home_screen_model.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+class HomeScreenView extends StatefulWidget {
+  final String postId;
+
+  const HomeScreenView({super.key, this.postId = ""});
+
+  @override
+  State<HomeScreenView> createState() => _HomeScreenViewState();
+}
+
+class _HomeScreenViewState extends State<HomeScreenView> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<FlipProvider>().  isDeviceData();
+
+    if (widget.postId == "") {
+      context.read<FlipProvider>().getArticles();
+    } else {
+      context.read<FlipProvider>().getIndividualPost(widget.postId);
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
-    context.read<FlipProvider>().getArticles();
-    final displayFeatures = MediaQuery.of(context).displayFeatures;
-    bool isFoldable = displayFeatures.isNotEmpty;
-
-
-    double heightsInt = (MediaQuery.of(context).size.height-MediaQuery.of(context).padding.vertical);
+    double heightsInt = MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Consumer<FlipProvider>(
-        builder: (_,flipProvider,__) {
-          return FlipPanel<HomeScreenModel>(
-            itemStream: flipProvider.mainArticles,
-            // waitingForRefresh: flipProvider.isRefresh?true:false,
-            itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
-                ArticlePage(article: article, flipBack: flipBack,height: heightsInt, ),
+      body: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
+        return FlipPanel<HomeScreenModel>(
+          itemStream: flipProvider.mainArticles,
+          itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
+              ArticlePage(
+            article: article,
+            flipBack: flipBack,
             height: heightsInt,
-          );
-        }
-      ),
+          ),
+          height: heightsInt,
+        );
+      }),
     );
   }
 }
 
+class HomeScreenView1 extends StatefulWidget {
+  const HomeScreenView1({super.key});
 
+  @override
+  State<HomeScreenView1> createState() => _HomeScreenView1State();
+}
 
+class _HomeScreenView1State extends State<HomeScreenView1> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<FlipProvider>(). isDeviceData();
 
-class HomePage1 extends StatelessWidget {
-  const HomePage1({super.key});
+    context.read<FlipProvider>().getArticles();
+  }
 
   @override
   Widget build(BuildContext context) {
-    context.read<FlipProvider>().getArticles();
-    final displayFeatures = MediaQuery.of(context).displayFeatures;
-    bool isFoldable = displayFeatures.isNotEmpty;
-    double heightsInt = (MediaQuery.of(context).size.height-MediaQuery.of(context).padding.vertical);
-
+    double heightsInt = (MediaQuery.of(context).size.height);
 
     return Scaffold(
-          body: Consumer<FlipProvider>(
-    builder: (_,flipProvider,__) {
-      return DistrictFlipPanel<HomeScreenModel>(
-        // waitingForRefresh: flipProvider.isRefresh?true:false,
-        itemStream: flipProvider.districtArticles,
-        itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
-            ArticlePage(article: article, flipBack: flipBack, height: heightsInt,),
-        height: heightsInt,
-
-      );
-    }
-          ),);
+      body: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
+        return DistrictFlipPanel<HomeScreenModel>(
+          itemStream: flipProvider.districtArticles,
+          itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
+              ArticlePage(
+            article: article,
+            flipBack: flipBack,
+            height: heightsInt,
+          ),
+          height: heightsInt,
+        );
+      }),
+    );
   }
 }

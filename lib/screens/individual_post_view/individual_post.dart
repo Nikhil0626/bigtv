@@ -43,7 +43,7 @@ appBar: AppBar(
     padding: const EdgeInsets.only(left: 14),
     child: IconButton(
       onPressed: () {
-        Navigator.pushNamedAndRemoveUntil(context, RoutesManager.homeScreen,(route) => false,);
+        Navigator.pushNamedAndRemoveUntil(context, RoutesManager.homeScreen,(route) => false,arguments: {"postId":"","tab":"0"});
       },
       icon: const Icon(
         Icons.arrow_back_ios_rounded,

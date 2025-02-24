@@ -3,10 +3,12 @@ import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+
+// import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../globel_keys/app_router.dart';
 import '../../../utils/app_strings.dart';
@@ -95,17 +97,22 @@ class _GalleryScreenState extends State<GalleryScreen> {
                 itemBuilder: (context, index) {
                   return InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => FullPageCarousel(
-                            imageUrls:
-                                state.getAllVideoList[index].gallery ?? [],
-                            className: "Gallery ",
-                            postDetails: state.getAllVideoList[index],
+                      if(state.getAllVideoList[index].gallery!.isEmpty ){
+                      CustomToast.showErrorToast(msg: "Images Not Found...");
+                      }else{
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FullPageCarousel(
+                              imageUrls:
+                              state.getAllVideoList[index].gallery ?? [],
+                              className: "Gallery ",
+                              postDetails: state.getAllVideoList[index],
+                            ),
                           ),
-                        ),
-                      );
+                        );
+                      }
+
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
@@ -205,6 +212,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
   int _currentIndex = 0;
 
   final CarouselSliderController _controller = CarouselSliderController();
+  PageController _pageController = PageController(initialPage: 0);
 
   @override
   void initState() {
@@ -221,6 +229,8 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
   Widget build(BuildContext context) {
     final displayFeatures = MediaQuery.of(context).displayFeatures;
     bool isFoldable = displayFeatures.isNotEmpty;
+
+    print(widget.imageUrls.length);
     return Scaffold(
       appBar: widget.className == ""
           ? null
@@ -256,11 +266,11 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
           CarouselSlider(
             carouselController: _controller,
             options: CarouselOptions(
-              height: double.infinity,
+              height: MediaQuery.of(context).size.height,
               viewportFraction: 1.0,
               enableInfiniteScroll: true,
               autoPlay: false,
-              autoPlayInterval: const Duration(seconds: 3),
+              // autoPlayInterval: const Duration(seconds: 3),
               onPageChanged: (index, reason) {
                 setState(() {
                   _currentIndex = index;
@@ -273,13 +283,15 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 500),
                 curve: Curves.easeInOut,
+
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: NetworkImage(image.url),
+                    image: NetworkImage(image.url,),
                     fit: isFoldable?BoxFit.fill:BoxFit.cover,
-                    filterQuality: FilterQuality.high,
+                    filterQuality: FilterQuality.medium,
                     isAntiAlias: true,
+
                   ),
                 ),
               );
@@ -287,19 +299,27 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
           ),
           Positioned(
             bottom: widget.isHome ? 20 : 70,
-            child: AnimatedSmoothIndicator(
-              activeIndex: _currentIndex,
-              count: widget.imageUrls.length,
-              effect: ExpandingDotsEffect(
-                dotHeight: 8,
-                dotWidth: 8,
-                activeDotColor: Colors.white,
-                dotColor: Colors.grey.shade400,
-              ),
-              onDotClicked: (index) {
-                _controller.jumpToPage(index);
-              },
-            ),
+            child: SmoothPageIndicator(
+              controller: _pageController,
+              count: widget.imageUrls.length, // Set the correct number of pages
+              effect: const ExpandingDotsEffect( expansionFactor: 2, // Avoid using extreme values
+                dotHeight: 10,
+                dotWidth: 10,),
+            )
+
+            // AnimatedSmoothIndicator(
+            //   activeIndex: _currentIndex,
+            //   count: widget.imageUrls.length,
+            //   effect: ExpandingDotsEffect(
+            //     dotHeight: 8,
+            //     dotWidth: 8,
+            //     activeDotColor: Colors.white,
+            //     dotColor: Colors.grey.shade400,
+            //   ),
+            //   onDotClicked: (index) {
+            //     _controller.jumpToPage(index);
+            //   },
+            // ),
           ),
           if (!widget.isHome)
             Align(

@@ -3,7 +3,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../../services/permission_handler_services.dart';
 import '../../../utils/bottom_navigation_items.dart';
@@ -12,14 +11,14 @@ import 'home_screen_view.dart';
 
 class HomeTopTabs extends StatefulWidget {
   final String tab;
-  const HomeTopTabs({super.key, this.tab = "0"});
+  final String postId;
+  const HomeTopTabs({super.key, this.tab = "0",this.postId = "",});
 
   @override
   State<HomeTopTabs> createState() => _HomeTopTabsState();
 }
 
 class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStateMixin {
-  final WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   late TabController tabController;
   bool isChange = true;
 
@@ -29,6 +28,10 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
+    // if(widget.tab == "0" && widget.postId !=""){
+    //   context.read<FlipProvider>().getIndividualPost(widget.postId).then((value) => context.read<FlipProvider>().getArticles(),);
+    //
+    // }
     requestNotificationPermission();
     context.read<FlipProvider>().isTabChange(int.parse(widget.tab), context, isMainPage: true);
     tabController = TabController(
@@ -54,19 +57,12 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-
-    double height = (
-        MediaQuery.of(context).padding.top );
-    double height1 = (MediaQuery.of(context).padding.bottom);
-
-    log("height height height ${height}");
-    log("height1 height2 height3 ${height1}");
     return WillPopScope(
       onWillPop: _onWillPop,
-      child: SafeArea(
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          body: Consumer<FlipProvider>(
+      child: Scaffold(
+        backgroundColor: Colors.blue,
+        body: SafeArea(
+          child: Consumer<FlipProvider>(
             builder: (context, flipProvider, __) {
               return Stack(
                 children: [
@@ -75,9 +71,9 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                     controller: tabController,
 
                     physics: const NeverScrollableScrollPhysics(),
-                    children: const [
-                      HomePage(),
-                      HomePage1(),
+                    children:  [
+                      HomeScreenView(postId:  widget.postId ),
+                      const HomeScreenView1(),
                     ],
                   ),
 

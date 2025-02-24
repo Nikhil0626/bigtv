@@ -129,7 +129,3 @@ class ContactDetailTile extends StatelessWidget {
   }
 }
 
-void main() => runApp(MaterialApp(
-      home: AboutUs(),
-      theme: ThemeData(primarySwatch: Colors.blue),
-    ));

@@ -309,7 +309,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
     if (_controller.isAnimating) {
       _controller.stop();
     }
-  }*//*
+  }*/ /*
 
 
   // void handleDragUpdate(DragUpdateDetails details) {
@@ -376,7 +376,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       }
       _controller.animateTo(0.0);
     }
-  }*//*
+  }*/ /*
 
 
   void _handleDragEnd(DragEndDetails details) {
@@ -631,7 +631,6 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
 
 */
 
-
 // The FlipPanel class is an evolution of the FlipPanel conceived and implemented
 // by Hunghd for the flip_panel package whose source code you can find here:
 //  https://github.com/hnvn/flutter_flip_panel
@@ -691,15 +690,15 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       "source": {"id": "bbc-news", "name": "BBC News"},
       "author": "BBC News",
       "title":
-      "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
+          "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
       "description":
-      "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
+          "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
       "url": "https://www.bbc.co.uk/news/articles/c897ew0ekp4o",
       "urlToImage":
-      "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
+          "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
       "publishedAt": "2025-02-08T05:37:30.0626341Z",
       "content":
-      "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
+          "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
     },
     {
       "source": {"id": "bbc-news", "name": "BBC News"},
@@ -708,7 +707,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       "description": "Some description here...",
       "url": "https://www.bbc.co.uk/news/articles/sample-url",
       "urlToImage":
-      "https://images.unsplash.com/photo-1575936123452-b67c3203c357?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
+          "https://images.unsplash.com/photo-1575936123452-b67c3203c357?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
       "publishedAt": "2025-02-08T05:37:30.0626341Z",
       "content": "Some sample content..."
     },
@@ -716,15 +715,15 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       "source": {"id": "bbc-news", "name": "BBC News"},
       "author": "BBC News",
       "title":
-      "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
+          "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
       "description":
-      "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
+          "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
       "url": "https://www.bbc.co.uk/news/articles/c897ew0ekp4o",
       "urlToImage":
-      "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
+          "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
       "publishedAt": "2025-02-08T05:37:30.0626341Z",
       "content":
-      "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
+          "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
     },
     {
       "source": {"id": "bbc-news", "name": "BBC News"},
@@ -733,7 +732,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       "description": "Some description here...",
       "url": "https://www.bbc.co.uk/news/articles/sample-url",
       "urlToImage":
-      "https://images.unsplash.com/photo-1575936123452-b67c3203c357?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
+          "https://images.unsplash.com/photo-1575936123452-b67c3203c357?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
       "publishedAt": "2025-02-08T05:37:30.0626341Z",
       "content": "Some sample content..."
     },
@@ -741,15 +740,15 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       "source": {"id": "bbc-news", "name": "BBC News"},
       "author": "BBC News",
       "title":
-      "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
+          "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
       "description":
-      "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
+          "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
       "url": "https://www.bbc.co.uk/news/articles/c897ew0ekp4o",
       "urlToImage":
-      "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
+          "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
       "publishedAt": "2025-02-08T05:37:30.0626341Z",
       "content":
-      "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
+          "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
     },
   ];
 
@@ -759,7 +758,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
   bool _running = false;
   final _perspective = 0.0003;
   final _zeroAngle =
-  0.0001; // There's something wrong in the perspective transform, I use a very small value instead of zero to temporarily get it around.
+      0.0001; // There's something wrong in the perspective transform, I use a very small value instead of zero to temporarily get it around.
 
   late double _height;
 
@@ -802,7 +801,9 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
     super.didUpdateWidget(oldWidget);
     _height = widget.height;
   }
-  int  newHeight=0;
+
+  int newHeight = 0;
+
   @override
   void initState() {
     super.initState();
@@ -811,7 +812,12 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
     _running = false;
     _direction = FlipDirection.none;
 
-    newHeight = (((MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).round().toInt())/2).round().toInt();
+    newHeight = (((MediaQuery.of(mainNavigatorKey.currentContext!).padding.top)
+                .round()
+                .toInt()) /
+            2)
+        .round()
+        .toInt();
     newHeight = newHeight.round();
     print("vjhjknbhvhjhgcfxxfcghjkgfdxcvhbjnkjhvgf   $newHeight");
     _height = widget.height;
@@ -828,14 +834,13 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
           //_currentValue = _nextValue;
           _running = false;
           _currentIndex =
-          _lastFlip == LastFlip.next && _currentIndex < widgets!.length - 1
-              ? _currentIndex + 1
-              : _lastFlip == LastFlip.previous && _currentIndex > 0
-              ? _currentIndex - 1
-              : _currentIndex;
+              _lastFlip == LastFlip.next && _currentIndex < widgets!.length - 1
+                  ? _currentIndex + 1
+                  : _lastFlip == LastFlip.previous && _currentIndex > 0
+                      ? _currentIndex - 1
+                      : _currentIndex;
           if (_lastFlip == LastFlip.next &&
               _currentIndex == _availableItems - _updateThreshold) {
-
             context.read<FlipProvider>().getArticles(index: _currentIndex);
           }
         }
@@ -852,23 +857,24 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       // A null items list is sent to indicate that a refresh
       // request has been sent to the server. It will be used to show a refresh
       // indicator
-      // if (items == null || items.isEmpty) {
-      //   widgets = null;
-      //   _availableItems = 0;
-      //   _currentIndex = 0;
-      //   // _waitingForRefresh = true;
-      //   setState(() {});
-      //   return;
-      // }
+      if (items == null || items.isEmpty) {
+        widgets = null;
+        _availableItems = 0;
+        _currentIndex = 0;
+        _waitingForRefresh = true;
+        setState(() {});
+        return;
+      }
       _waitingForRefresh = false;
       if (_availableItems == 0) {
         widgets = [];
         widgets!.add(_buildFirstWidget(items?[0]));
-        widgets!.addAll(items!.skip(1)
+        widgets!.addAll(items!
+            .skip(1)
             .map((item) => widget.itemBuilder(context, item, flipBack, _height))
             .toList());
-        print("widgets");
-        print(widgets);
+        // print("widgets");
+        // print(widgets);
         _upperChild1 = makeUpperClip(widgets![0]);
         _lowerChild1 = makeLowerClip(widgets![0]);
       } else {
@@ -899,7 +905,6 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
 
   @override
   Widget build(BuildContext context) {
-
     if (!_waitingForRefresh) {
       if (widgets == null || _availableItems == 0) {
         return Container(
@@ -926,8 +931,8 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       ),
     );
   }
-  Widget makeLowerClip(Widget widget) {
 
+  Widget makeLowerClip(Widget widget) {
     return ClipRect(
       child: Align(
         alignment: Alignment.bottomCenter,
@@ -1034,7 +1039,14 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
 
   void _handleDragEnd(DragEndDetails details) {
     _dragging = false;
+    context.read<FlipProvider>().loadUserId(_currentIndex);
 
+    if(_currentIndex > 0 && _direction == FlipDirection.up) {
+      context.read<FlipProvider>().isShowTopBottomChange(true);
+    }else{
+      context.read<FlipProvider>().isShowTopBottomChange(false);
+    }
+    context.read<FlipProvider>().loadUserId(_currentIndex);
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {
         // _showNoMoreItemsMessage();
@@ -1053,11 +1065,11 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
         _controller.animateTo(1.0);
       }
       _lastFlip =
-      _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
+          _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
     } else {
       if (_dragExtent.abs() > _flipExtent) {
         _lastFlip =
-        _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
+            _direction == FlipDirection.up ? LastFlip.next : LastFlip.previous;
       } else {
         _lastFlip = LastFlip.none;
       }
@@ -1067,149 +1079,149 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
 
   Widget _buildUpperFlipPanel() => _direction == FlipDirection.up
       ? Stack(
-    children: [
-      Transform(
-          alignment: Alignment.bottomCenter,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, _perspective)
-            ..rotateX(_zeroAngle),
-          child: _upperChild1),
-      _isReversePhase
-          ? Opacity(
-          opacity: 1 - _controller.value,
-          child: Container(
-            alignment: Alignment.bottomCenter,
-            height:(_height / 2)-newHeight,
-            width: MediaQuery.of(context).size.width,
-            color: Colors.black,
-          ))
-          : Container(),
-      Transform(
-        alignment: Alignment.bottomCenter,
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, _perspective)
-          ..rotateX(_isReversePhase ? _animation.value : math.pi / 2),
-        child: _upperChild2,
-      ),
-    ],
-  )
+          children: [
+            Transform(
+                alignment: Alignment.bottomCenter,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, _perspective)
+                  ..rotateX(_zeroAngle),
+                child: _upperChild1),
+            _isReversePhase
+                ? Opacity(
+                    opacity: 1 - _controller.value,
+                    child: Container(
+                      alignment: Alignment.bottomCenter,
+                      height: (_height / 2) - newHeight,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.black,
+                    ))
+                : Container(),
+            Transform(
+              alignment: Alignment.bottomCenter,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, _perspective)
+                ..rotateX(_isReversePhase ? _animation.value : math.pi / 2),
+              child: _upperChild2,
+            ),
+          ],
+        )
       : Stack(
-    children: [
-      Transform(
-          alignment: Alignment.bottomCenter,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, _perspective)
-            ..rotateX(_zeroAngle),
-          child: _upperChild2),
-      !_isReversePhase
-          ? Opacity(
-          opacity: 1 - _controller.value,
-          child: Container(
-            alignment: Alignment.bottomCenter,
-            height:(_height / 2)-newHeight,
-            width: MediaQuery.of(context).size.width,
-            color: Colors.black,
-          ))
-          : Container(),
-      Transform(
-        alignment: Alignment.bottomCenter,
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, _perspective)
-          ..rotateX(_isReversePhase ? math.pi / 2 : _animation.value),
-        child: _upperChild1,
-      ),
-    ],
-  );
+          children: [
+            Transform(
+                alignment: Alignment.bottomCenter,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, _perspective)
+                  ..rotateX(_zeroAngle),
+                child: _upperChild2),
+            !_isReversePhase
+                ? Opacity(
+                    opacity: 1 - _controller.value,
+                    child: Container(
+                      alignment: Alignment.bottomCenter,
+                      height: (_height / 2) - newHeight,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.black,
+                    ))
+                : Container(),
+            Transform(
+              alignment: Alignment.bottomCenter,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, _perspective)
+                ..rotateX(_isReversePhase ? math.pi / 2 : _animation.value),
+              child: _upperChild1,
+            ),
+          ],
+        );
 
   Widget _buildLowerFlipPanel() => _direction == FlipDirection.up
       ? Stack(
-    children: [
-      Transform(
-          alignment: Alignment.topCenter,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, _perspective)
-            ..rotateX(_zeroAngle),
-          child: _lowerChild2),
-      !_isReversePhase
-          ? Opacity(
-          opacity: 1 - _controller.value,
-          child: Container(
-            alignment: Alignment.bottomCenter,
-            height:(_height / 2)-newHeight,
-            width: MediaQuery.of(context).size.width,
-            color: Colors.black,
-          ))
-          : Container(),
-      Transform(
-        alignment: Alignment.topCenter,
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, _perspective)
-          ..rotateX(_isReversePhase ? math.pi / 2 : -_animation.value),
-        child: _lowerChild1,
-      )
-    ],
-  )
+          children: [
+            Transform(
+                alignment: Alignment.topCenter,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, _perspective)
+                  ..rotateX(_zeroAngle),
+                child: _lowerChild2),
+            !_isReversePhase
+                ? Opacity(
+                    opacity: 1 - _controller.value,
+                    child: Container(
+                      alignment: Alignment.bottomCenter,
+                      height: (_height / 2) - newHeight,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.black,
+                    ))
+                : Container(),
+            Transform(
+              alignment: Alignment.topCenter,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, _perspective)
+                ..rotateX(_isReversePhase ? math.pi / 2 : -_animation.value),
+              child: _lowerChild1,
+            )
+          ],
+        )
       : Stack(
-    children: [
-      Transform(
-          alignment: Alignment.topCenter,
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, _perspective)
-            ..rotateX(_zeroAngle),
-          child: _lowerChild1),
-      _isReversePhase
-          ? Opacity(
-          opacity: 1 - _controller.value,
-          child: Container(
-            alignment: Alignment.bottomCenter,
-            height:(_height / 2)-newHeight,
-            width: MediaQuery.of(context).size.width,
-            color: Colors.black,
-          ))
-          : Container(),
-      Transform(
-        alignment: Alignment.topCenter,
-        transform: Matrix4.identity()
-          ..setEntry(3, 2, _perspective)
-          ..rotateX(_isReversePhase ? -_animation.value : math.pi / 2),
-        child: _lowerChild2,
-      ),
-    ],
-  );
+          children: [
+            Transform(
+                alignment: Alignment.topCenter,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, _perspective)
+                  ..rotateX(_zeroAngle),
+                child: _lowerChild1),
+            _isReversePhase
+                ? Opacity(
+                    opacity: 1 - _controller.value,
+                    child: Container(
+                      alignment: Alignment.bottomCenter,
+                      height: (_height / 2) - newHeight,
+                      width: MediaQuery.of(context).size.width,
+                      color: Colors.black,
+                    ))
+                : Container(),
+            Transform(
+              alignment: Alignment.topCenter,
+              transform: Matrix4.identity()
+                ..setEntry(3, 2, _perspective)
+                ..rotateX(_isReversePhase ? -_animation.value : math.pi / 2),
+              child: _lowerChild2,
+            ),
+          ],
+        );
 
   Widget _buildPanel() {
     Widget content = _running
         ? Column(
-      // mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        _buildUpperFlipPanel(),
-        _buildLowerFlipPanel(),
-      ],
-    )
+            // mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildUpperFlipPanel(),
+              _buildLowerFlipPanel(),
+            ],
+          )
         : Column(
-      // mainAxisSize: MainAxisSize.min,
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Stack(
-          children: <Widget>[
-            _upperChild1!,
-            _waitingForRefresh
-                ? const Padding(
-              padding: EdgeInsets.only(top: 100.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: Center(child: RefreshProgressIndicator()),
+            // mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Stack(
+                children: <Widget>[
+                  _upperChild1!,
+                  _waitingForRefresh
+                      ? const Padding(
+                          padding: EdgeInsets.only(top: 100.0),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: Center(child: RefreshProgressIndicator()),
+                          ),
+                        )
+                      : Container(),
+                ],
               ),
-            )
-                : Container(),
-          ],
-        ),
-        _lowerChild1!,
-      ],
-    );
+              _lowerChild1!,
+            ],
+          );
 
     return GestureDetector(
       onVerticalDragStart: _handleDragStart,

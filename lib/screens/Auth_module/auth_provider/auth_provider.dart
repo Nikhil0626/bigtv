@@ -1,15 +1,14 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../../globel_keys/app_router.dart';
 import '../../../globel_keys/global_variables_data.dart';
-import '../../../services/dynamic_link_service.dart';
-import '../../../services/local_data.dart';
+import '../../../services/webengage_event_tracks.dart';
+import '../../../utils/local_data.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_toasts.dart';
 import '../auth_repo/auth_repo.dart';
@@ -41,17 +40,11 @@ class AuthProvider extends ChangeNotifier {
         CustomToast.showSuccessToast(msg: response.data['message']);
         currentOtp = response.data['Otp'].toString();
         log(currentOtp);
-
-        // loginStatus(LoginStatus.,context);
-
-        // WebEngagePlugin.userLogin(phoneNumber.toString());
-        WebEngagePlugin.trackEvent('loginMobileNumber',
-            {'mobileNumber': phoneNumber.toString(), "verifyStatus": "false"});
+        mobileVerificationDetails(phoneNumber.toString(), true);
         Navigator.pushNamed(context, RoutesManager.enterOtpScreen, arguments: {
           "mobileNumber": mobileNumberController.text,
           "otp": currentOtp.toString(),
         });
-
       }
     } catch (e, st) {
       CustomToast.showErrorToast(msg: "Otp Not Send Try Again");
@@ -94,20 +87,12 @@ class AuthProvider extends ChangeNotifier {
         className = "Login";
         WebEngagePlugin.userLogin(response.data['data']['id'].toString());
         WebEngagePlugin.setUserPhone(mobileNumber.toString());
-        WebEngagePlugin.trackEvent(
-          'loginMobileNumber',
-          {
-            'mobileNumber': mobileNumberController.text.toString(),
-            "verifyStatus": "true"
-          },
-        );
+        mobileVerificationDetails(mobileNumber.toString(), true);
 
         currentOtp = "";
         GlobalVariables().userId = response.data['data']['id'].toString();
         SharedPreferences preferences = await SharedPreferences.getInstance();
-
-        preferences.setString(
-            "loginId", response.data['data']['id'].toString());
+        saveUserid(response.data['data']['id'].toString());
         preferences.setString("userName",
             "User${mobileNumberController.text.substring(mobileNumberController.text.length - 4)}");
         preferences.setString("referralCode", response.data['code'].toString());
@@ -135,17 +120,18 @@ class AuthProvider extends ChangeNotifier {
     SharedPreferences sp = await SharedPreferences.getInstance();
     loginSkip = "Skip";
     sp.setString("loginId", loginSkip);
+    skipUser();
     Navigator.pushNamed(context, RoutesManager.districtSelectionScreen,
         arguments: {"className": ""});
     notifyListeners();
   }
 
-  void loginStatus(LoginStatus loginStatus, context, {String page=""}) {
-    if(page !=""){
+  void loginStatus(LoginStatus loginStatus, context, {String page = ""}) {
+    if (page != "") {
       className = page;
     }
 
-    print("nbsdmsjfbsfskfskjfsdkjf ${className}");
+    log("class Name  $className");
     loginType = loginStatus;
     notifyListeners();
     saveLoginStatus(loginStatus);
@@ -154,11 +140,12 @@ class AuthProvider extends ChangeNotifier {
 
   void checkLoginStatus(context) async {
     LoginStatus status = await getLoginStatus();
-    print("dfngvdklfgdlkfgdfgnfdk ${status}");
+    log("Page Name $status");
     switch (status) {
       case LoginStatus.skip:
         Navigator.pushNamedAndRemoveUntil(
-            context, RoutesManager.homeScreen, (route) => false);
+            context, RoutesManager.homeScreen, (route) => false,
+            arguments: {"postId": "", "tab": "0"});
         break;
       case LoginStatus.home:
         Navigator.pushNamedAndRemoveUntil(
@@ -173,7 +160,8 @@ class AuthProvider extends ChangeNotifier {
         break;
       case LoginStatus.login:
         Navigator.pushNamedAndRemoveUntil(
-            context, RoutesManager.homeScreen, (route) => false);
+            context, RoutesManager.homeScreen, (route) => false,
+            arguments: {"postId": "", "tab": "0"});
         break;
       case LoginStatus.location:
         log("className $className");

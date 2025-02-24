@@ -209,6 +209,7 @@ class MediaUrl {
     );
   }
 
+
   Map<String, dynamic> toJson() {
     return {
       'url': url,

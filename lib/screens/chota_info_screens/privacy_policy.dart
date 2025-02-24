@@ -1,4 +1,5 @@
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
+import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -15,10 +16,12 @@ class PrivacyPolicy extends StatefulWidget {
 
 class _PrivacyPolicyState extends State<PrivacyPolicy> {
   Future<void> launchSingleEmail(email) async {
+    contactViaMail();
     await EasyLauncher.email(email: email, subject: "", body: "");
   }
 
   Future<void> _launchPhone(String phone) async {
+    contactViaCall();
     final Uri phoneUri = Uri(
       scheme: 'tel',
       path: phone,

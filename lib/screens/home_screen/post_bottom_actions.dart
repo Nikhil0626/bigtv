@@ -30,6 +30,7 @@ class PostBottomActions extends StatelessWidget {
       child: Row(
         mainAxisAlignment:
         MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
 
         InkWell(
@@ -136,6 +137,9 @@ class GalleryPostBottomActions extends StatelessWidget {
           color: Colors.white.withOpacity(0.4),
           height: 70,
           child: Column(
+            mainAxisAlignment:
+            MainAxisAlignment.spaceAround,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Divider(
                 color: Colors.black87,

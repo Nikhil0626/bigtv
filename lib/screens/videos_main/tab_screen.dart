@@ -51,7 +51,7 @@ class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
           padding: const EdgeInsets.only(left: 18),
           child: IconButton(
             onPressed: () {
-              Navigator.pushNamed(context,RoutesManager.homeScreen);
+              Navigator.pushNamed(context,RoutesManager.homeScreen,arguments: {"postId":"","tab":"0"});
             },
             icon: const Icon(
               Icons.arrow_back_ios_rounded,

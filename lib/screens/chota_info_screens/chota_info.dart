@@ -1,32 +1,21 @@
-import 'dart:developer';
-
-import 'package:chotanews/screens/chota_info_screens/about_us.dart';
 import 'package:chotanews/screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
 import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/screens/chota_info_screens/terms_conditions.dart';
-import 'package:chotanews/screens/home_screen/home_screens/home_screen_view.dart';
-import 'package:chotanews/screens/profile_screen/profile_screen.dart';
-import 'package:chotanews/services/base_urls.dart';
-import 'package:chotanews/services/local_data.dart';
+import 'package:chotanews/utils/local_data.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
-import 'package:chotanews/utils/app_toasts.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/app_router.dart';
+import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_enums.dart';
 import '../Auth_module/auth_provider/auth_provider.dart';
-import '../new_refer_earn_screen/new_refer_earn_screen.dart';
-import '../videos_main/tab_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -36,17 +25,22 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  LoginStatus loginStatus = LoginStatus.none;
+
   @override
   void initState() {
- getLogin();
+    getLogin();
     super.initState();
+  }
 
+  Future getLogin() async {
+    loginStatus = await getLoginStatus();
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-
-return Scaffold(
+    return Scaffold(
       backgroundColor: AppColors.settingsPageBackgroundColor,
       appBar: AppBar(
         backgroundColor: AppColors.appButtonColor,
@@ -81,170 +75,16 @@ return Scaffold(
           ],
         ),
       ),
-
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 16,
           children: [
-            // InkWell(
-            //
-            //     onTap: () async{
-            //       SharedPreferences sp = await SharedPreferences.getInstance();
-            //       String? getCode= sp.getString("referralCode");
-            //       String loginId = sp.getString("loginId")??"";
-            //       if ( loginId.isEmpty) {
-            //         CustomToast.showErrorToast(msg: "Without login we can't referral");
-            //       } else {
-            //
-            //      final DynamicLinkParameters parameters = DynamicLinkParameters(
-            //        uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
-            //        link: Uri.parse('https://chotanews.com/store?referralCode=$getCode'), // Ensure this is a valid URL
-            //        androidParameters: const AndroidParameters(
-            //          packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
-            //        ),
-            //        iosParameters: const IOSParameters(
-            //          bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
-            //          appStoreId: '1631068092',
-            //        ),
-            //      );
-            //
-            //      try {
-            //        final ShortDynamicLink shortLink =
-            //        await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-            //        print("Short Link Created: ${shortLink.shortUrl}");
-            //        Navigator.push(
-            //          context,
-            //          MaterialPageRoute(
-            //              builder: (context) =>  NewReferEarnScreen(shortLink:shortLink.shortUrl.toString(),getCode:getCode.toString())),
-            //        );
-            //      } catch (e) {
-            //        print("Error creating dynamic link: $e");
-            //      }
-            //    }
-            //
-            //
-            //     },
-            //     child: Container(
-            //       decoration: BoxDecoration(
-            //         color: isDarkTheme ? Colors.grey[800] : Colors.white,
-            //         borderRadius: BorderRadius.circular(8),
-            //         boxShadow: const [
-            //           BoxShadow(
-            //             color: Colors.black12,
-            //             blurRadius: 20,
-            //             spreadRadius: 1,
-            //             offset: Offset(0, 4), // Adjust shadow position
-            //           ),
-            //         ],
-            //       ),
-            //       margin: const EdgeInsets.symmetric(horizontal: 8),
-            //       child: Padding(
-            //         padding:
-            //             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            //         child: Row(
-            //           crossAxisAlignment: CrossAxisAlignment.center,
-            //           children: [
-            //             SvgPicture.asset(
-            //               'assets/settings_icons/refer_earn.svg',
-            //               height: 40,
-            //               width: 40,
-            //             ),
-            //             SizedBox(width: 16),
-            //             Text(
-            //               'Refer&Earn',
-            //               style: fontStyle(
-            //                 fontSize: 16,
-            //                 fontWeight: FontWeight.w500,
-            //                 color: isDarkTheme ? Colors.white : Colors.black,
-            //               ),
-            //             ),
-            //             Spacer(),
-            //             const Icon(
-            //               Icons.arrow_forward_ios,
-            //               size: 20,
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            //     )),
-            // InkWell(
-            //     onTap: () async{
-            //       SharedPreferences sp = await SharedPreferences.getInstance();
-            //       String? getCode= sp.getString("referralCode");
-            //       final DynamicLinkParameters parameters = DynamicLinkParameters(
-            //         uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
-            //         link: Uri.parse('https://chotanews.com/store?referralCode=$getCode'), // Ensure this is a valid URL
-            //         androidParameters: const AndroidParameters(
-            //           packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
-            //         ),
-            //         iosParameters: const IOSParameters(
-            //           bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
-            //           appStoreId: '1631068092',
-            //         ),
-            //       );
-            //
-            //       try {
-            //         final ShortDynamicLink shortLink =
-            //             await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-            //         print("Short Link Created: ${shortLink.shortUrl}");
-            //         Share.share('${shortLink.shortUrl}');
-            //       } catch (e) {
-            //         print("Error creating dynamic link: $e");
-            //       }
-            //     },
-            //     child: Container(
-            //       decoration: BoxDecoration(
-            //         color: isDarkTheme ? Colors.grey[800] : Colors.white,
-            //         borderRadius: BorderRadius.circular(8),
-            //         boxShadow: const [
-            //           BoxShadow(
-            //             color: Colors.black12,
-            //             blurRadius: 20,
-            //             spreadRadius: 1,
-            //             offset: Offset(0, 4), // Adjust shadow position
-            //           ),
-            //         ],
-            //       ),
-            //       margin: const EdgeInsets.symmetric(horizontal: 8),
-            //       child: Padding(
-            //         padding:
-            //             const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            //         child: Row(
-            //           crossAxisAlignment: CrossAxisAlignment.center,
-            //           children: [
-            //             SvgPicture.asset(
-            //               'assets/settings_icons/shareapp_icon.svg',
-            //               height: 40,
-            //               width: 40,
-            //             ),
-            //             width(width: 16),
-            //             Text(
-            //               'Share app',
-            //               style: fontStyle(
-            //                 fontSize: 16,
-            //                 fontWeight: FontWeight.w500,
-            //                 color: isDarkTheme ? Colors.white : Colors.black,
-            //               ),
-            //             ),
-            //             Spacer(),
-            //             const Icon(
-            //               Icons.arrow_forward_ios,
-            //               size: 20,
-            //             ),
-            //           ],
-            //         ),
-            //       ),
-            //     )),
             InkWell(
-                onTap: ()async {
-                  // if (await canLaunch(BaseUrls.contactPage)) {
-                  //   await launch(BaseUrls.contactPage);
-                  // } else {
-                  //   CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.contactPage}");}
-                  Navigator.push(
+                onTap: () async {
+                  Navigator.pushNamed(
                     context,
-                    MaterialPageRoute(builder: (context) => const ContactUs()),
+                    RoutesManager.contactUs,
                   );
                 },
                 child: Container(
@@ -263,7 +103,7 @@ return Scaffold(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Padding(
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -278,7 +118,7 @@ return Scaffold(
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color:  Colors.black,
+                            color: Colors.black,
                           ),
                         ),
                         const Spacer(),
@@ -292,19 +132,11 @@ return Scaffold(
                 )),
             InkWell(
                 onTap: () async {
-                  // if (await canLaunch(BaseUrls.advertisePage)) {
-                  //   await launch(BaseUrls.advertisePage);
-                  // } else {
-                  //   CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.advertisePage}");}
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const AdvertiseWithUs()),
-                  );
+                  Navigator.pushNamed(context, RoutesManager.advertiseWithUs);
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color:  Colors.white,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
                       BoxShadow(
@@ -318,7 +150,7 @@ return Scaffold(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Padding(
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -347,19 +179,11 @@ return Scaffold(
                 )),
             InkWell(
                 onTap: () async {
-                  // if (await canLaunch(BaseUrls.termsPage)) {
-                  //   await launch(BaseUrls.termsPage);
-                  // } else {
-                  //   CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.termsPage}");}
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const TermsConditions()),
-                  );
+                  Navigator.pushNamed(context, RoutesManager.termsConditions);
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color:Colors.white,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
                       BoxShadow(
@@ -373,7 +197,7 @@ return Scaffold(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Padding(
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -388,7 +212,7 @@ return Scaffold(
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color:Colors.black,
+                            color: Colors.black,
                           ),
                         ),
                         const Spacer(),
@@ -402,19 +226,11 @@ return Scaffold(
                 )),
             InkWell(
                 onTap: () async {
-                  // if (await canLaunch(BaseUrls.privacyPage)) {
-                  //   await launch(BaseUrls.privacyPage);
-                  // } else {
-                  //   CustomToast.showErrorToast(msg: "Could not launch ${BaseUrls.privacyPage}");}
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const PrivacyPolicy()),
-                  );
+                  Navigator.pushNamed(context, RoutesManager.privacyPolicy);
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                    color:  Colors.white,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(8),
                     boxShadow: const [
                       BoxShadow(
@@ -428,7 +244,7 @@ return Scaffold(
                   margin: const EdgeInsets.symmetric(horizontal: 8),
                   child: Padding(
                     padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -443,7 +259,7 @@ return Scaffold(
                           style: fontStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
-                            color:  Colors.black,
+                            color: Colors.black,
                           ),
                         ),
                         const Spacer(),
@@ -457,16 +273,22 @@ return Scaffold(
                 )),
             InkWell(
               onTap: () async {
-                context.read<AuthProvider>().loginStatus(LoginStatus.none,context);
+                logoutUser();
+                context
+                    .read<AuthProvider>()
+                    .loginStatus(LoginStatus.none, context);
                 SharedPreferences sp = await SharedPreferences.getInstance();
-                await sp.setString("loginId","");
+                await sp.setString("loginId", "");
                 await sp.clear();
-                WebEngagePlugin.userLogout();
-                Navigator.pushNamedAndRemoveUntil(context, RoutesManager.signInScreen,(route) => false,);
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  RoutesManager.signInScreen,
+                  (route) => false,
+                );
               },
-              child:  Container(
+              child: Container(
                 decoration: BoxDecoration(
-                  color:  Colors.white,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
                   boxShadow: const [
                     BoxShadow(
@@ -479,7 +301,8 @@ return Scaffold(
                 ),
                 margin: const EdgeInsets.symmetric(horizontal: 8),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -490,7 +313,7 @@ return Scaffold(
                       ),
                       const SizedBox(width: 16),
                       Text(
-                        loginStatus == LoginStatus.skip?'Login': 'Logout',
+                        loginStatus == LoginStatus.skip ? 'Login' : 'Logout',
                         style: fontStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -507,10 +330,6 @@ return Scaffold(
                 ),
               ),
             ),
-
-
-
-
             height(height: 20),
             Container(
                 height: 40,
@@ -518,7 +337,7 @@ return Scaffold(
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 child: Text(
-                  "App Version: 5.0.0+6",
+                  "App Version: 5.0.0+9",
                   style: fontStyle(
                     fontSize: 16,
                   ),
@@ -528,13 +347,4 @@ return Scaffold(
       ),
     );
   }
-  LoginStatus loginStatus = LoginStatus.none;
-  Future getLogin() async{
-    loginStatus  =await getLoginStatus();
-
-    setState(() {
-
-    });
-  }
-
 }

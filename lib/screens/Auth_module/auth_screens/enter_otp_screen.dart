@@ -47,11 +47,10 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 
   void _listenForSms() async {
-    var ddd = await SmsAutoFill().listenForCode;
-    print("otp autofill ${ddd}");
+    var otpCode = SmsAutoFill().listenForCode;
+    log("otp autofill $otpCode");
   }
 
-  Future verifyOtp(context) async {}
 
   void startCountdown() {
     setState(() {

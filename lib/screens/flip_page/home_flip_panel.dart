@@ -1386,7 +1386,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   @override
   didUpdateWidget(FlipPanel oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _height = widget.height;
+    _height = widget.height ;
   }
   int  newHeight=0;
   @override
@@ -1615,6 +1615,9 @@ class _FlipPanelState<T> extends State<FlipPanel>
   }
 
   void _handleDragEnd(DragEndDetails details) {
+    log("indexxxxxxx ---- $_currentIndex");
+
+    context.read<FlipProvider>().loadUserId(_currentIndex);
     _dragging = false;
     if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
         "Gallery") {
@@ -1623,7 +1626,11 @@ class _FlipPanelState<T> extends State<FlipPanel>
         isImages = true;
       });
     }
-
+    if(_currentIndex > 0 && _direction == FlipDirection.up) {
+      context.read<FlipProvider>().isShowTopBottomChange(true);
+    }else{
+      context.read<FlipProvider>().isShowTopBottomChange(false);
+    }
 
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {
@@ -1770,7 +1777,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
   Widget _buildPanel() {
     Widget content = _running
         ? Column(
-      // mainAxisSize: MainAxisSize.max,
+      mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -1784,7 +1791,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
       child: _upperChild1,
     )
         : Column(
-      // mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [

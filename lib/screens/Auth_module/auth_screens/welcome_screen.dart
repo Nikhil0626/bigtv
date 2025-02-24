@@ -8,7 +8,6 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../../services/permission_handler_services.dart';
 
@@ -18,17 +17,13 @@ class WelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     requestLocationPermission();
-    WebEngagePlugin.trackEvent('welcomeScreen', {'user': "unknown"});
 
     return WillPopScope(
       onWillPop: () async {
-        // Exit the app when back button is pressed
         return true;
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-
-
         body:
         Padding(
           padding: const EdgeInsets.only(top: 30),
