@@ -11,9 +11,10 @@ import 'package:share_plus/share_plus.dart';
 
 import '../screens/home_screen/home_models/home_screen_model.dart';
 
+
+/// Create A Pdf Single News Article
 Future<void> convertImageUrlToPdfAndShare(BuildContext context,  article) async {
   try {
-    // Fetch image from URL
     final response = await http.get(Uri.parse(article.imageUrl.url.toString(),));
 
     if (response.statusCode == 200) {
@@ -21,7 +22,6 @@ Future<void> convertImageUrlToPdfAndShare(BuildContext context,  article) async 
 
       final pdf = pw.Document();
 
-      // Convert image to PDF
       final pdfImage = pw.MemoryImage(imageData);
 
       pdf.addPage(
@@ -39,11 +39,9 @@ Future<void> convertImageUrlToPdfAndShare(BuildContext context,  article) async 
         ),
       );
 
-      // Get local storage directory
       final directory = await getApplicationDocumentsDirectory();
       final filePath = "${directory.path}/";
 
-      // Save PDF file
       final file = File(filePath);
       await file.writeAsBytes(await pdf.save());
 
@@ -75,13 +73,11 @@ Future<void> convertImageUrlToPdfAndShare(BuildContext context,  article) async 
   }
 }
 
-
+/// Take A Screen News Article
 Future<void> takeScreenshotAndShare( article,screenshotController, ) async {
   
   try {
-    // final ShortDynamicLink shortLink =
-    // await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-    // print("Short Link Created: ${shortLink.shortUrl}");
+
     final image = await screenshotController.capture(
       pixelRatio: 1.5,
     );
@@ -102,7 +98,7 @@ Future<void> takeScreenshotAndShare( article,screenshotController, ) async {
 }
 
 
-
+/// Create A Pdf Multiple News Article
 Future<void> createAndSharePdf(BuildContext context, article ) async {
 
   print("snkvsnknv ${article.gallery}");
@@ -140,7 +136,6 @@ Future<void> createAndSharePdf(BuildContext context, article ) async {
       }
     }
 
-    // Save PDF to local storage
     final directory = await getApplicationDocumentsDirectory();
     final filePath = "${directory.path}/${article.id}.pdf";
     final file = File(filePath);
@@ -161,7 +156,7 @@ Future<void> createAndSharePdf(BuildContext context, article ) async {
     final ShortDynamicLink shortLink =
     await FirebaseDynamicLinks.instance.buildShortLink(parameters);
     print("Short Link Created: ${shortLink.shortUrl}");
-    await Share.shareXFiles([XFile(filePath)], text: "${shortLink.shortUrl}");
+    await Share.shareXFiles([XFile(filePath)], text: Platform.isIOS?article.linkURLIos.toString(): article.linkURLAndroid.toString());
 
   } catch (e) {
     print("Error: $e");

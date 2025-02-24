@@ -59,10 +59,10 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: _onWillPop,
-      child: SafeArea(
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          body: Consumer<FlipProvider>(
+      child: Scaffold(
+        backgroundColor: Colors.blue,
+        body: SafeArea(
+          child: Consumer<FlipProvider>(
             builder: (context, flipProvider, __) {
               return Stack(
                 children: [
@@ -73,7 +73,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                     physics: const NeverScrollableScrollPhysics(),
                     children:  [
                       HomeScreenView(postId:  widget.postId ),
-                      const HomePage1(),
+                      const HomeScreenView1(),
                     ],
                   ),
 

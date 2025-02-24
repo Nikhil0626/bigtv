@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/services/local_data.dart';
+import 'package:chotanews/utils/local_data.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -137,7 +137,7 @@ TextEditingController controller = TextEditingController();
                             // User Avatar
                             CircleAvatar(
                               child: Text(
-                                filteredComments[index].user.name.toString().split("").first,
+                        filteredComments[index].user.name == ""?"U": filteredComments[index].user.name.toString().split("").first.toString()??"U",
                                 style: fontStyle(fontSize: 16, fontWeight: FontWeight.normal),
                               ),
                             ),
@@ -151,7 +151,7 @@ TextEditingController controller = TextEditingController();
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Text(
-                                        filteredComments[index].user.name,
+                                        filteredComments[index].user.name==""?"User":filteredComments[index].user.name,
                                         overflow: TextOverflow.ellipsis,
                                         maxLines: 1,
                                         style: const TextStyle(

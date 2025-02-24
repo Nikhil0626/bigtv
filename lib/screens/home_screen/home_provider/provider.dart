@@ -2,15 +2,18 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:chotanews/screens/home_screen/home_repo/home_repo.dart';
+import 'package:chotanews/utils/local_data.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../../globel_keys/app_router.dart';
 import '../../../globel_keys/global_variables_data.dart';
+import '../../../services/webengage_event_tracks.dart';
 import '../home_models/all_post_comment_model.dart';
 import '../home_models/home_screen_model.dart';
 import '../../videos_main/tab_screen.dart';
@@ -23,6 +26,8 @@ class FlipProvider extends ChangeNotifier {
   bool isShowTopBottomView = true;
   bool isLastPost = false;
   bool fromLocation = false;
+  String? get userId => _userId;
+  String get deviceId => _deviceId!;
 
   void isTabChange(val, BuildContext context, {bool isMainPage = false}) {
 
@@ -38,6 +43,15 @@ class FlipProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+int flipCount =0;
+
+  Future<void> loadUserId(count) async {
+    _userId = await getUserid();
+    log(_userId.toString());
+    flipCount =flipCount+1;
+    sandFlipData(userId,flipCount,isTab);
+
+  }
 
 
   int initialIndex = 0;
@@ -79,6 +93,15 @@ class FlipProvider extends ChangeNotifier {
     } finally {
       notifyListeners();
     }
+  }
+
+  String? _userId;
+  String? _deviceId;
+
+  Future isDeviceData()async{
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    _userId = getUserid().toString() ;
+    _deviceId = preferences.getString("");
   }
 
   Future<void> getArticles(
@@ -305,7 +328,7 @@ class FlipProvider extends ChangeNotifier {
           );
         }
       }
-
+      allPostCommentModelList.addAll(newComments);
       log(response.data.toString());
     } on DioException catch (e) {
       log("Get News API error: ${e.toString()}");
@@ -334,21 +357,6 @@ class FlipProvider extends ChangeNotifier {
       log(response.data.toString());
       DateTime now = DateTime.now().add(const Duration(minutes: -330));
       String formattedDate = DateFormat('yyyy-MM-ddTHH:mm:ss').format(now);
-      log({
-        "_id": 0000,
-        "postId": int.parse(postData.toString()),
-        "text": comment,
-        "status": 1,
-        'displayText': comment,
-        "userId": 0,
-        'createdAt': formattedDate,
-        "user": {
-          "_id": int.parse(loginId.toString()),
-          "name": userName,
-          "avatar": null
-        },
-        "redisId": ""
-      }.toString());
 
       if (response.statusCode == 200) {
         allPostCommentModelList.insert(
@@ -369,6 +377,7 @@ class FlipProvider extends ChangeNotifier {
             "redisId": ""
           }),
         );
+        sendCommentDetails(userId,postData,true);
         isSendComment = false;
         notifyListeners();
       }
@@ -390,11 +399,14 @@ class FlipProvider extends ChangeNotifier {
     log(val.toString());
     if (!isLikeList.contains(val)) {
       isLikeList.add(val);
+      sendLikeDetails(userId,val,true);
       log(isLikeList.toString());
     } else {
       isLikeList.remove(val);
+      sendLikeDetails(userId,val,false);
       log(isLikeList.toString());
     }
+
     notifyListeners(); // Notify listeners if using ChangeNotifier
   }
 
@@ -414,6 +426,7 @@ class FlipProvider extends ChangeNotifier {
       isLikeByCommentList.remove(val);
       log(isLikeByCommentList.toString());
     }
+
     notifyListeners(); // Notify listeners if using ChangeNotifier
   }
 

@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/main.dart';
 import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -40,22 +43,27 @@ class ArticlePage extends StatefulWidget {
 class ArticlePageState extends State<ArticlePage> {
   final ScreenshotController screenshotController = ScreenshotController();
   int newHeight = 0;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    newHeight = (MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).toInt();
+    newHeight =
+        (MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).toInt();
   }
+
   @override
   Widget build(BuildContext context) {
     final displayFeatures = MediaQuery.of(context).displayFeatures;
-    bool isFoldable = displayFeatures.isNotEmpty;
+    bool isFoldable = Platform.isIOS?false:displayFeatures.isNotEmpty;
+    log(displayFeatures.toString());
+    log(isFoldable.toString());
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
-
-        color: widget.article.subType ==
-            "BigBlackStandard"?Colors.black:Colors.white,
-        height:widget.height-35.6667,
+        color: widget.article.subType == "BigBlackStandard"
+            ? Colors.black
+            : Colors.white,
+        height: widget.height - newHeight,
         width: MediaQuery.of(context).size.width,
         child: WillPopScope(
             onWillPop: () {
@@ -72,16 +80,16 @@ class ArticlePageState extends State<ArticlePage> {
                     controller: screenshotController,
                     child: widget.article.type == "Image"
                         ? SizedBox(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      child: Image.network(
-                        fit: BoxFit.cover,
-                        widget.article.imageUrl.url ?? "",
-                      ),
-                    )
+                            width: MediaQuery.of(context).size.width,
+                            height: MediaQuery.of(context).size.height,
+                            child: Image.network(
+                              fit: BoxFit.cover,
+                              widget.article.imageUrl.url ?? "",
+                            ),
+                          )
                         : widget.article.type == "Gallery"
                             ? FullPageCarousel(
-                                isHome :true,
+                                isHome: true,
                                 imageUrls: widget.article.gallery ?? [],
                                 postDetails: widget.article,
                               )
@@ -89,11 +97,11 @@ class ArticlePageState extends State<ArticlePage> {
                                 ? FirstCardHomeFeeds(
                                     getHomeList: widget.article.homepage)
                                 : InkWell(
-                      onTap: (){
-                        flipProvider
-                            .isShowTopBottomChange(flipProvider.isShowTopBottomView);
-                      },
-                                  child: Container(
+                                    onTap: () {
+                                      flipProvider.isShowTopBottomChange(
+                                          flipProvider.isShowTopBottomView);
+                                    },
+                                    child: Container(
                                       color: widget.article.subType ==
                                               "BigBlackStandard"
                                           ? Colors.black
@@ -108,61 +116,86 @@ class ArticlePageState extends State<ArticlePage> {
                                         children: [
                                           Expanded(
                                             // height: MediaQuery.of(context).size.height/2.35,
-                                            flex:  widget.article.subType ==
+                                            flex: widget.article.subType ==
                                                     "BigBlackStandard"
-                                                ? isFoldable?9:8
-                                                : isFoldable?9:4,
+                                                ? isFoldable
+                                                    ? 9
+                                                    : 7
+                                                : isFoldable
+                                                    ? widget.article
+                                                .subType ==
+                                                "BulletPost"?7:9
+                                                    : 4,
                                             child: Stack(
                                               children: [
                                                 SizedBox(
-                                                  child: widget.article.type ==
-                                                          "Video"
-                                                      ? Container(
-                                                          color: Colors.black,
-                                                          child: Center(
-                                                              child: VideoPreview(
-                                                                  url: widget
-                                                                          .article
-                                                                          .videoUrl
-                                                                          ?.url ??
-                                                                      "")))
-                                                      : Image.network(
-                                                          widget.article
-                                                              .imageUrl.url,
-                                                          key: ValueKey(widget
-                                                              .article
-                                                              .imageUrl
-                                                              .url),
-                                                          fit: isFoldable?BoxFit.fill: BoxFit.cover,
-                                                          width:
-                                                              double.infinity,
-                                                          height:
-                                                              double.infinity,
-                                                        ),
-                                                ),
+                                                    child: widget
+                                                                .article.type ==
+                                                            "Video"
+                                                        ? Container(
+                                                            color: Colors.black,
+                                                            child: Center(
+                                                                child: VideoPreview(
+                                                                    url: widget
+                                                                            .article
+                                                                            .videoUrl
+                                                                            ?.url ??
+                                                                        "")))
+                                                        : CachedNetworkImage(
+                                                            imageUrl:
+                                                                '${widget.article.imageUrl.url}',
+                                                            height:
+                                                                MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .height,
+                                                            width:
+                                                                MediaQuery.of(
+                                                                        context)
+                                                                    .size
+                                                                    .width,
+                                                            fit: isFoldable
+                                                                ? BoxFit.fill
+                                                                : BoxFit.cover,
+                                                            placeholder:
+                                                                (context,
+                                                                        url) =>
+                                                                    Container(
+                                                              color: AppColors
+                                                                  .borderColor
+                                                                  .withOpacity(
+                                                                      .2),
+                                                            ),
+                                                            errorWidget: (context,
+                                                                    url,
+                                                                    error) =>
+                                                                Center(
+                                                                    child: Icon(
+                                                              Icons.image,
+                                                              size: 100,
+                                                              color: Colors.grey
+                                                                  .shade300,
+                                                            )),
+                                                          )),
                                                 Positioned(
                                                     bottom: -12,
                                                     child: Container(
                                                         margin: const EdgeInsets
                                                             .all(8),
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal: 8),
+                                                        padding: const EdgeInsets
+                                                            .symmetric(
+                                                            horizontal: 8),
                                                         height: 30,
                                                         width: 100,
-                                                        decoration:
-                                                            const BoxDecoration(
-                                                                color: Colors
-                                                                    .white,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .only(topLeft:
-                                                                  Radius
-                                                                      .circular(
-                                                                          10),
-                                                                      topRight: Radius.circular(10)
-                                                                )),
+                                                        decoration: const BoxDecoration(
+                                                            color: Colors.white,
+                                                            borderRadius: BorderRadius.only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        10),
+                                                                topRight: Radius
+                                                                    .circular(
+                                                                        10))),
                                                         child: Image.asset(
                                                           "assets/images/brandlogo.png",
                                                         ))),
@@ -191,7 +224,7 @@ class ArticlePageState extends State<ArticlePage> {
                                                                   "BigBlackStandard"
                                                               ? Colors.white
                                                               : Colors.black,
-                                                          fontSize: 20,
+                                                          fontSize: 18,
                                                           fontWeight:
                                                               FontWeight.bold)),
                                                   height(height: 8),
@@ -200,42 +233,69 @@ class ArticlePageState extends State<ArticlePage> {
                                                         widget.article
                                                                     .subType ==
                                                                 "BulletPost"
-                                                            ? ListView(
-                                                                physics:
-                                                                    const NeverScrollableScrollPhysics(),
-                                                                children: widget
-                                                                    .article
-                                                                    .bulletPoints
-                                                                    .map<Widget>(
-                                                                        (item) {
-                                                                  // Explicitly specify <Widget>
-                                                                  return Padding(
-                                                                    padding: const EdgeInsets
-                                                                        .symmetric(
-                                                                        vertical:
-                                                                            4.0),
-                                                                    child: Row(
-                                                                      crossAxisAlignment:
-                                                                          CrossAxisAlignment
-                                                                              .start,
-                                                                      children: [
-                                                                        const Text(
-                                                                            "• ",
-                                                                            style:
-                                                                                TextStyle(fontSize: 24)),
-                                                                        // Bullet point
-                                                                        Expanded(
+                                                            ? Column(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .start,
+                                                                crossAxisAlignment:
+                                                                    CrossAxisAlignment
+                                                                        .start,
+                                                                children: [
+                                                                  ( widget.article.content !="")? Text(
+                                                            widget
+                                                                .article
+                                                                .content,
+                                                            style:
+                                                            homeScreenFontStyle(
+                                                              color:  Colors.black,
+                                                              fontWeight:
+                                                              FontWeight.w500,
+                                                              fontSize:
+                                                              16,
+                                                            )):SizedBox.shrink(),
+
+                                                                  height(
+                                                                      height:
+                                                                          8),
+                                                                  Expanded(
+                                                                    child:
+                                                                        ListView(
+                                                                      physics:
+                                                                          const NeverScrollableScrollPhysics(),
+                                                                      children: widget
+                                                                          .article
+                                                                          .bulletPoints
+                                                                          .map<Widget>(
+                                                                              (item) {
+                                                                        // Explicitly specify <Widget>
+                                                                        return Padding(
+                                                                          padding: const EdgeInsets
+                                                                              .symmetric(
+                                                                              vertical: 2.0),
                                                                           child:
-                                                                              Text(
-                                                                            item,
-                                                                            style:
-                                                                                fontStyle(fontSize: 16),
+                                                                              Row(
+                                                                            crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+                                                                            children: [
+                                                                              const Text("• ", style: TextStyle(fontSize: 24)),
+                                                                              // Bullet point
+                                                                              Expanded(
+                                                                                child: Text(
+                                                                                  item,
+                                                                                  style: homeScreenFontStyle(
+                                                                                    color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black,
+                                                                                    fontWeight: FontWeight.w400,
+                                                                                    fontSize: 16,
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
                                                                           ),
-                                                                        ),
-                                                                      ],
+                                                                        );
+                                                                      }).toList(), // Ensure it is converted to List<Widget>
                                                                     ),
-                                                                  );
-                                                                }).toList(), // Ensure it is converted to List<Widget>
+                                                                  ),
+                                                                ],
                                                               )
                                                             : RichText(
                                                                 text: TextSpan(
@@ -261,7 +321,6 @@ class ArticlePageState extends State<ArticlePage> {
                                                               ? Colors.white
                                                               : Colors
                                                                   .grey[800])),
-
                                                 ],
                                               ),
                                             ),
@@ -269,7 +328,7 @@ class ArticlePageState extends State<ArticlePage> {
                                         ],
                                       ),
                                     ),
-                                ),
+                                  ),
                   ),
                 ),
                 Container(
@@ -320,12 +379,11 @@ class ArticlePageState extends State<ArticlePage> {
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
-              print("ghhgjjkjjhg $link");
+              print(" $link");
               if (await canLaunch(link)) {
                 await launch(link);
               } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Could not launch $link")));
+                CustomToast.showErrorToast(msg: "Could not launch $link");
               }
             },
         ));

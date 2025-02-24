@@ -1,13 +1,13 @@
+import 'dart:developer';
 import 'dart:io';
+import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:mobile_number/mobile_number.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 
-
-
 Future<void> requestManageStoragePermission() async {
-
-
   if (Platform.isAndroid) {
     var status = await Permission.manageExternalStorage.status;
     if (status.isGranted) {
@@ -20,17 +20,14 @@ Future<void> requestManageStoragePermission() async {
         await Permission.manageExternalStorage.request();
       }
     } else if (status.isPermanentlyDenied) {
-      print("⚠️ Manage External Storage permission permanently denied. Opening settings...");
+      print(
+          "⚠️ Manage External Storage permission permanently denied. Opening settings...");
       await openAppSettings();
     }
   }
-
 }
 
-
-
 Future<void> requestStoragePermission() async {
-
   if (Platform.isAndroid) {
     var status = await Permission.storage.status;
 
@@ -48,9 +45,7 @@ Future<void> requestStoragePermission() async {
       await openAppSettings();
     }
   }
-
 }
-
 
 Future<void> requestLocationPermission() async {
   LocationPermission permission = await Geolocator.checkPermission();
@@ -58,18 +53,55 @@ Future<void> requestLocationPermission() async {
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.deniedForever) {
-      // Permissions are permanently denied
       print('Location permissions are permanently denied.');
       return;
     }
   }
 
-  if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
-    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+  if (permission == LocationPermission.always ||
+      permission == LocationPermission.whileInUse) {
+    Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
     print("Location: ${position.latitude}, ${position.longitude}");
+    getAddressFromLatLng(position.latitude, position.longitude);
   }
 }
 
+Future<void> getAddressFromLatLng(double latitude, double longitude) async {
+  try {
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(latitude, longitude);
+    print("location ------ $placemarks");
+    Placemark place = placemarks[0];
+    sendLiveLocationDetails(place);
+  } catch (e) {
+    print(e);
+  }
+}
+
+Future<String> getPhoneNumber() async {
+  try {
+    if (await Permission.location.request().isGranted) {
+    } else {
+      Permission.location;
+      Permission.locationAlways;
+    }
+    if (await Permission.phone.request().isGranted) {
+      bool hasPermission = await MobileNumber.hasPhonePermission ?? false;
+      if (!hasPermission) {
+        await MobileNumber.requestPhonePermission;
+      }
+
+    String  mobileNumber = await MobileNumber.mobileNumber ?? "";
+      return mobileNumber??"";
+    } else {
+       return "Permission Denied";
+    }
+  } catch (e) {
+    log(e.toString());
+   return "Error: ${e.toString()}";
+  }
+}
 
 Future<void> requestNotificationPermission() async {
   await FirebaseMessaging.instance.requestPermission(
@@ -77,5 +109,4 @@ Future<void> requestNotificationPermission() async {
     badge: true,
     sound: true,
   );
-
 }

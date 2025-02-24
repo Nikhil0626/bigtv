@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
@@ -105,17 +106,27 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       body: Center(
         child: showGif
-            ?  Image.asset(
-          "assets/svg/splash_video.gif",
+            ?  Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
-        )// Show GIF
-            :  Center(
+              color: Colors.white,
               child: Image.asset(
-                    "assets/playstore.png",
-                    height: 100,
-                    width: 100,
-                  ),
+                        "assets/svg/splash_video.gif",
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                      ),
+            )// Show GIF
+            :  Container(
+          color: AppColors.appButtonColor,
+          height: MediaQuery.of(context).size.height,
+          width: MediaQuery.of(context).size.width,
+              child: Center(
+                child: Image.asset(
+                      "assets/playstore.png",
+                      height: 100,
+                      width: 100,
+                    ),
+              ),
             ), // Show Image
       ),
     );

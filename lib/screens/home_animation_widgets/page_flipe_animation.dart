@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flip_board/flip_widget.dart';
 import 'package:flutter/material.dart';
 
 class PageFlipAnimation extends StatefulWidget {
@@ -81,13 +80,13 @@ class _PageFlipAnimationState extends State<PageFlipAnimation> {
           }// Swiping down
         },
         child: Center(
-          child: FlipWidget(
-            initialValue: _currentIndex,
-            flipType: FlipType.middleFlip,
-            itemStream: _streamController.stream,
-            itemBuilder: (_, index) => widget.bodyCard,
-            flipDirection: _flipDirection, // Dynamic flip direction
-          ),
+          // child: FlipWidget(
+          //   initialValue: _currentIndex,
+          //   flipType: FlipType.middleFlip,
+          //   itemStream: _streamController.stream,
+          //   itemBuilder: (_, index) => widget.bodyCard,
+          //   flipDirection: _flipDirection, // Dynamic flip direction
+          // ),
         ),
       ),
     );

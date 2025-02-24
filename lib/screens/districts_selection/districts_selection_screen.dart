@@ -1,4 +1,5 @@
-import 'package:chotanews/screens/home_screen/home_screens/home_top_tabs.dart';
+import 'dart:developer';
+
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -8,8 +9,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../../utils/app_colors.dart';
-import '../../utils/app_enums.dart';
-import '../Auth_module/auth_provider/auth_provider.dart';
 import 'district_selection_bloc.dart';
 import 'district_selection_event.dart';
 import 'district_selection_state.dart';
@@ -86,7 +85,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
               height(height: 16.0),
               Padding(
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2),
+                    const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
                 child: Container(
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
@@ -190,19 +189,9 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                                     district.id.toString()),
                                           );
                                     },
-                                    child: Container(
+                                    child: SizedBox(
                                       width: MediaQuery.of(context).size.width,
                                       height: 40,
-                                      decoration: const BoxDecoration(
-                                          // color: Colors.white,
-                                          // border: Border.all(
-                                          //   color: isSelected
-                                          //       ? AppColors.appButtonColor
-                                          //       : AppColors.borderColor,
-                                          //   width: 1,
-                                          // ),
-                                          // borderRadius: BorderRadius.circular(8),
-                                          ),
                                       child: Padding(
                                         padding: const EdgeInsets.symmetric(
                                             horizontal: 16.0),
@@ -244,8 +233,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                     CustomToast.showErrorToast(
                                         msg: "Select at least two districts");
                                   } else {
-
-                                    print("dfngvdklfgdlkfgdfgnfdk ${widget.className}");
+                                    log("Class Name  ${widget.className}");
                                     context.read<DistrictSelectionBloc>().add(
                                         SubmitDistricts(
                                             className: widget.className,context: context));
@@ -295,7 +283,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                       if (state.className == "Home") {
                         Navigator.pushNamed(
                             context,
-                            RoutesManager.homeScreen,arguments: {"postId":"","tab":"0"});
+                            RoutesManager.homeScreen,arguments: {"postId":"","tab":"1"});
                       } else {
                         Navigator.pushNamed(context, RoutesManager.homeScreen,arguments: {"postId":"","tab":"0"});
                       }

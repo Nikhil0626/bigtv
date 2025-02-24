@@ -19,6 +19,9 @@ class BottomNavigationItems extends StatelessWidget {
           .size
           .width,
       child: Column(
+        mainAxisAlignment:
+        MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             color: AppColors.borderColor,

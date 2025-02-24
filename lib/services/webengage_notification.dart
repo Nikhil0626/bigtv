@@ -19,11 +19,6 @@ void subscribeToPushCallbacks(WebEngagePlugin webEngagePlugin) {
     Map<String, dynamic> messagePayload = event.payload!;
     log("Push Notification Received: ${messagePayload["postId"]}");
     Navigator.pushNamed(mainNavigatorKey.currentContext!, RoutesManager.homeScreen,arguments: {"postId":"${messagePayload["postId"]}","tab":"0"});
-    // Navigator.pushAndRemoveUntil(
-    //   mainNavigatorKey.currentContext!,
-    //   MaterialPageRoute(builder: (context) => IndividualPost(postId: messagePayload["postId"].toString())),
-    //       (route) => false,
-    // );
   });
 
  webEngagePlugin.pushActionStream.listen((event) {

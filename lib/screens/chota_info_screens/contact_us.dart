@@ -2,6 +2,7 @@ import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
@@ -41,6 +42,7 @@ class _ContactUsState extends State<ContactUs> {
   //   await EmailLauncher.launch(email);
   // }
   Future<void> launchSingleEmail(email) async {
+    contactViaMail();
     await EasyLauncher.email(
         email: email,
         subject: "",
@@ -48,6 +50,7 @@ class _ContactUsState extends State<ContactUs> {
   }
 
   Future<void> _launchPhone(String phone) async {
+    contactViaCall();
     final Uri phoneUri = Uri(
       scheme: 'tel',
       path: phone,

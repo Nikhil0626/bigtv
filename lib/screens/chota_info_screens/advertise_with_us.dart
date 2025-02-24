@@ -2,6 +2,7 @@ import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
@@ -136,6 +137,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
     );
   }
   Future<void> _launchPhone(String phone) async {
+    contactViaCall();
     final Uri phoneUri = Uri(
       scheme: 'tel',
       path: phone,
@@ -151,6 +153,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
     }
   }
   Future<void> launchSingleEmail(email) async {
+    contactViaMail();
     await EasyLauncher.email(
         email: email,
         subject: "",

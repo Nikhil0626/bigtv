@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import '../globel_keys/app_router.dart';
 import '../screens/individual_post_view/individual_post.dart';
-import 'local_data.dart';
+import '../utils/local_data.dart';
 
 bool isLink = false;
 
