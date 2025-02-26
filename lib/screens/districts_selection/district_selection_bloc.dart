@@ -51,7 +51,8 @@ class DistrictSelectionBloc
             await SharedPreferences.getInstance();
         String result = sharedPreferences.getString("locationId") ?? "";
         print("selectedDistrictList.toString()   $result");
-        selectedDistrictList = result.toString().isEmpty?[]:result.split(',');
+        selectedDistrictList =
+            result.toString().isEmpty ? [] : result.split(',');
         print(selectedDistrictList.toString());
         Response response = await DistrictSelectionRepo().getAllDistricts();
         log(response.data.toString());
@@ -95,22 +96,33 @@ class DistrictSelectionBloc
       sharedPreferences.setString("locationId", result);
       log(result);
       String? deviceId = GlobalVariables().deviceId;
-      print("Device ID: ${result}");
+
+      districtLocationUpdate("", result, "");
+      List<String> selectedDistrictNames = districtList
+          .where((district) {
+            return selectedDistrictList.contains(district.id.toString());
+          })
+          .map((district) => district.name.toString())
+          .toList();
+      String nameOfDistrict = selectedDistrictNames.toSet().join(',');
+
+      sendUserAttribute(nameOfDistrict);
       var body = {
         "deviceId": deviceId.toString(),
         "isFollowed": "true",
         "locationId": result,
         "type": "bulk",
       };
-      districtLocationUpdate("",result,"");
       try {
         Response response =
             await DistrictSelectionRepo().updateDistrictsList(body);
-        mainNavigatorKey.currentContext!.read<AuthProvider>().loginStatus(event.className == "Skip"?LoginStatus.skip:LoginStatus.login,event.context);
+        mainNavigatorKey.currentContext!.read<AuthProvider>().loginStatus(
+            event.className == "Skip" ? LoginStatus.skip : LoginStatus.login,
+            event.context);
         log(response.data.toString());
         selectedDistrictList = [];
         event.context.read<FlipProvider>().isLocationChange(true);
-        emit(SubmitSuccessState(className:event.className));
+        emit(SubmitSuccessState(className: event.className));
       } catch (e, st) {}
     });
   }

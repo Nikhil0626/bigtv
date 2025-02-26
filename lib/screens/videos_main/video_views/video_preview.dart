@@ -1,14 +1,16 @@
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../utils/app_colors.dart';
 
 class VideoPreview extends StatefulWidget {
   final String url;
+  final String imageUrl;
   final bool isVideoScreen;
 
-  VideoPreview({super.key, required this.url, this.isVideoScreen = false});
+  VideoPreview({super.key, required this.url,required this.imageUrl, this.isVideoScreen = false});
 
   @override
   _VideoPreview createState() => _VideoPreview();
@@ -24,8 +26,9 @@ class _VideoPreview extends State<VideoPreview> {
     controller = YoutubePlayerController(
       initialVideoId: widget.url,
       flags: const YoutubePlayerFlags(
-        autoPlay: false,
-        mute: true,
+        autoPlay: true,
+        mute: false,
+
         hideControls: false, // This hides fullscreen button
       ),
     );
@@ -82,13 +85,12 @@ class _VideoPreview extends State<VideoPreview> {
       alignment: Alignment.center,
       children: [
         Image.network(
-          "https://img.youtube.com/vi/${widget.url}/hqdefault.jpg",
+          widget.imageUrl,
+          // "https://img.youtube.com/vi/${widget.url}/hqdefault.jpg",
           fit: BoxFit.cover,
-          width: double.infinity,
-          height: double.infinity,
         ),
         IconButton(
-          icon: Icon(Icons.play_circle_filled, size: 70, color: Colors.blue),
+          icon: SvgPicture.asset("assets/svg/play_circle.svg",height: 58,width: 58,),
           onPressed: () {
             setState(() {
               isPlaying = true;

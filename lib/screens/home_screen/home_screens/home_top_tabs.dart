@@ -28,10 +28,6 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    // if(widget.tab == "0" && widget.postId !=""){
-    //   context.read<FlipProvider>().getIndividualPost(widget.postId).then((value) => context.read<FlipProvider>().getArticles(),);
-    //
-    // }
     requestNotificationPermission();
     context.read<FlipProvider>().isTabChange(int.parse(widget.tab), context, isMainPage: true);
     tabController = TabController(

@@ -908,12 +908,10 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
     if (!_waitingForRefresh) {
       if (widgets == null || _availableItems == 0) {
         return Container(
-          color: Colors.white,
-          height: _height,
-          width: MediaQuery.of(context).size.width,
-          child: const Center(
-            child: CircularProgressIndicator(),
-          ),
+          color: Colors.transparent,
+          height: 10,
+          width:10
+
         );
       }
       _buildChildWidgetsIfNeed(context);
@@ -1208,15 +1206,15 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
               Stack(
                 children: <Widget>[
                   _upperChild1!,
-                  _waitingForRefresh
-                      ? const Padding(
-                          padding: EdgeInsets.only(top: 100.0),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: Center(child: RefreshProgressIndicator()),
-                          ),
-                        )
-                      : Container(),
+                  // _waitingForRefresh
+                  //     ? const Padding(
+                  //         padding: EdgeInsets.only(top: 100.0),
+                  //         child: SizedBox(
+                  //           width: double.infinity,
+                  //           child: Center(child: RefreshProgressIndicator()),
+                  //         ),
+                  //       )
+                  //     : Container(),
                 ],
               ),
               _lowerChild1!,
