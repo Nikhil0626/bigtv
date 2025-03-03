@@ -9,14 +9,12 @@ import 'package:intl/intl.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../../globel_keys/app_router.dart';
 import '../../../globel_keys/global_variables_data.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../home_models/all_post_comment_model.dart';
 import '../home_models/home_screen_model.dart';
-import '../../videos_main/tab_screen.dart';
 
 class FlipProvider extends ChangeNotifier {
   List<HomeScreenModel> mainArticlesData = [];
@@ -26,11 +24,12 @@ class FlipProvider extends ChangeNotifier {
   bool isShowTopBottomView = true;
   bool isLastPost = false;
   bool fromLocation = false;
+
   String? get userId => _userId;
+
   String get deviceId => _deviceId!;
 
   void isTabChange(val, BuildContext context, {bool isMainPage = false}) {
-
     isTab = val;
     if (!isMainPage) {
       notifyListeners();
@@ -43,16 +42,14 @@ class FlipProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-int flipCount =0;
+  int flipCount = 0;
 
   Future<void> loadUserId(count) async {
     _userId = await getUserid();
     log(_userId.toString());
-    flipCount =flipCount+1;
-    sandFlipData(userId,flipCount,isTab);
-
+    flipCount = flipCount + 1;
+    sandFlipData(userId, flipCount, isTab,);
   }
-
 
   int initialIndex = 0;
   int lastPostIdInMain = 0;
@@ -80,7 +77,7 @@ int flipCount =0;
       HomeScreenModel getSinglePost = HomeScreenModel.fromJson(data[0]);
       List<HomeScreenModel> currentList =
           mainArticlesController.valueOrNull ?? [];
-      currentList.insert(0,getSinglePost);
+      currentList.insert(0, getSinglePost);
       mainArticlesController.add([]);
       mainArticlesController.add(currentList);
       notifyListeners();
@@ -98,9 +95,9 @@ int flipCount =0;
   String? _userId;
   String? _deviceId;
 
-  Future isDeviceData()async{
+  Future isDeviceData() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    _userId = getUserid().toString() ;
+    _userId = getUserid().toString();
     _deviceId = preferences.getString("");
   }
 
@@ -108,7 +105,7 @@ int flipCount =0;
       {bool refresh = false, int index = 0, bool isMain = true}) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String locationId = sp.getString("locationId") ?? "";
-    String loginId = sp.getString("loginId") ?? "";
+    String loginId = sp.getString("loginId") ?? "1";
     String deviceId = GlobalVariables().deviceId ?? "";
 
     if (refresh == true) {
@@ -170,7 +167,7 @@ int flipCount =0;
       log("elseeeeee $index");
       final Map<String, dynamic> queryParams = isTab != 0
           ? {
-              'userid': loginId ?? "",
+              'userid': loginId ?? "1",
               'postid': "0",
               'lpostid': "0",
               'homefeed': "1",
@@ -224,7 +221,7 @@ int flipCount =0;
       mainArticlesController.add(data);
       notifyListeners();
     } else if (isTab == 1) {
-      if (isRefresh) {
+      if (isRefresh || fromLocation) {
         log("siva $isTab");
 
         // Clear the previous data properly
@@ -301,8 +298,6 @@ int flipCount =0;
 
   @override
   void dispose() {
-    // mainArticlesController.close();
-    // districtArticlesController.close();
     super.dispose();
   }
 
@@ -310,26 +305,40 @@ int flipCount =0;
 
   Future<void> getAllPostById(String postId) async {
     isSendComment = true;
+    allPostCommentModelList = [];
+
+
     try {
       Response response = await HomeRepo().getAllCommentByPost(postId);
       List data = response.data['comments'];
+      print("comment list  ${data.toString()}");
+      print("comment list  ${localCommentsList.length.toString()}");
+      allPostCommentModelList =
+      data.map((e) => AllPostCommentModel.fromJson(e)).toList();
 
-      List<AllPostCommentModel> newComments =
-          data.map((e) => AllPostCommentModel.fromJson(e)).toList();
-      for (var comment in newComments) {
-        if (!allPostCommentModelList.contains(comment)) {
-          log(comment.postId.toString());
-          allPostCommentModelList.map(
-            (e) {
-              if (e.postId != comment.postId) {
-                allPostCommentModelList.add(comment);
-              }
-            },
-          );
+      for(var record in localCommentsList){
+        print("comment id  ${record.postId}========= ${postId.toString()}");
+        if(record.postId.toString()==postId.toString()){
+          allPostCommentModelList.add(record);
+          // if(allPostCommentModelList.isEmpty){
+          //   allPostCommentModelList.add(record);
+          // }else{
+          //   allPostCommentModelList.map((e) {
+          //     print("comment id 123c  ${e.postId.toString()}-------${record.postId.toString()}");
+          //     if(e.postId.toString() == record.postId.toString()){
+          //       allPostCommentModelList.add(record);
+                // localCommentsList.remove(record);
+          //     };
+          //   },);
+          // }
         }
+
+
+
       }
-      allPostCommentModelList.addAll(newComments);
-      log(response.data.toString());
+
+
+
     } on DioException catch (e) {
       log("Get News API error: ${e.toString()}");
     } catch (e) {
@@ -340,7 +349,10 @@ int flipCount =0;
     }
   }
 
-  Future addCommentPostById(postData, comment) async {
+
+
+  List<AllPostCommentModel> localCommentsList=[];
+  Future addCommentPostById(HomeScreenModel postData, comment) async {
     isSendComment = true;
     notifyListeners();
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -348,27 +360,26 @@ int flipCount =0;
     String userName = sp.getString("userName") ?? "";
     Map<String, dynamic> body = {
       "UserId": loginId ?? "",
-      "PostId": postData.toString(),
+      "PostId": postData.id.toString(),
       "Content": comment
     };
     log(body.toString());
     try {
       Response response = await HomeRepo().addCommentByPost(body);
       log(response.data.toString());
-      DateTime now = DateTime.now().add(const Duration(minutes: -330));
+      DateTime now = DateTime.now().toUtc();
       String formattedDate = DateFormat('yyyy-MM-ddTHH:mm:ss').format(now);
-
+      print(formattedDate.toString());
       if (response.statusCode == 200) {
-        allPostCommentModelList.insert(
-          0,
+        localCommentsList.add(
           AllPostCommentModel.fromJson({
             "_id": 0000,
-            "postId": int.parse(postData.toString()),
+            "postId": int.parse(postData.id.toString()),
             "text": comment,
             "status": 1,
             'displayText': comment,
             "userId": 0,
-            'createdAt': formattedDate,
+            'createdAt': now.toString(),
             "user": {
               "_id": int.parse(loginId.toString()),
               "name": userName,
@@ -377,7 +388,22 @@ int flipCount =0;
             "redisId": ""
           }),
         );
-        sendCommentDetails(userId,postData,true);
+        allPostCommentModelList.add(AllPostCommentModel.fromJson({
+          "_id": 0000,
+          "postId": int.parse(postData.id.toString()),
+          "text": comment,
+          "status": 1,
+          'displayText': comment,
+          "userId": 0,
+          'createdAt': now.toString(),
+          "user": {
+            "_id": int.parse(loginId.toString()),
+            "name": userName,
+            "avatar": null
+          },
+          "redisId": ""
+        }));
+        sendCommentDetails(userId, postData.id, true,postData.title);
         isSendComment = false;
         notifyListeners();
       }
@@ -395,15 +421,15 @@ int flipCount =0;
 
   List<String> isLikeList = [];
 
-  void isLikePost(val) async {
-    log(val.toString());
-    if (!isLikeList.contains(val)) {
-      isLikeList.add(val);
-      sendLikeDetails(userId,val,true);
+  void isLikePost(HomeScreenModel val) async {
+    log(val.id.toString());
+    if (!isLikeList.contains(val.id.toString())) {
+      isLikeList.add(val.id.toString());
+      sendLikeDetails(userId, val, true,val.title.toString());
       log(isLikeList.toString());
     } else {
-      isLikeList.remove(val);
-      sendLikeDetails(userId,val,false);
+      isLikeList.remove(val.id.toString());
+      sendLikeDetails(userId, val.id.toString(), false,val.title.toString());
       log(isLikeList.toString());
     }
 

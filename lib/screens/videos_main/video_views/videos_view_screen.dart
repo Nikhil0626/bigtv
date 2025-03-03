@@ -71,8 +71,9 @@ class _VideosScreenState extends State<VideosScreen> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => VideoPreview(
-                            url: state.getAllVideoList[index].videoUrl!.url
-                                .toString(),
+                            url: state.getAllVideoList[index].videoUrl!.url.toString(),
+                                imageUrl:  state.getAllVideoList[index].imageUrl.toString(),
+
                             isVideoScreen: true,
                           ),
                         ),

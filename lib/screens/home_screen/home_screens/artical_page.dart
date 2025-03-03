@@ -25,7 +25,7 @@ import '../../videos_main/video_views/video_preview.dart';
 typedef FlipBack = void Function({bool backToTop});
 
 class ArticlePage extends StatefulWidget {
-  final article;
+  final  article;
 
   final FlipBack? flipBack;
 
@@ -56,8 +56,6 @@ class ArticlePageState extends State<ArticlePage> {
   Widget build(BuildContext context) {
     final displayFeatures = MediaQuery.of(context).displayFeatures;
     bool isFoldable = Platform.isIOS?false:displayFeatures.isNotEmpty;
-    log(displayFeatures.toString());
-    log(isFoldable.toString());
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
         color: widget.article.subType == "BigBlackStandard"
@@ -136,6 +134,8 @@ class ArticlePageState extends State<ArticlePage> {
                                                             color: Colors.black,
                                                             child: Center(
                                                                 child: VideoPreview(
+                                                                  imageUrl:  widget
+                                                                      .article.imageUrl!.url.toString(),
                                                                     url: widget
                                                                             .article
                                                                             .videoUrl
@@ -298,29 +298,27 @@ class ArticlePageState extends State<ArticlePage> {
                                                                 ],
                                                               )
                                                             : RichText(
-                                                                text: TextSpan(
-                                                                  text: '',
-                                                                  children:
-                                                                      _parseText(
-                                                                    context,
-                                                                    '${widget.article.content}',
-                                                                    widget
-                                                                        .article
-                                                                        .links,
-                                                                  ),
+                                                          text: TextSpan(
+                                                            text: '',
+                                                            children: [
+                                                              ..._parseText(
+                                                                context,
+                                                                '${widget.article.content}',
+                                                                widget.article.links,
+                                                              ),
+                                                              TextSpan(
+                                                                text: '\n\nPosted ${formatTimeDifference(widget.article.created)}',
+                                                                style: fontStyle(
+                                                                  fontSize: 10,
+                                                                  fontWeight: FontWeight.w400,
+                                                                  color: Colors.grey,
                                                                 ),
                                                               ),
+                                                            ],
+                                                          ),
+                                                        ),
+
                                                   ),
-                                                  Text(
-                                                      "Posted ${formatTimeDifference(widget.article.created)}",
-                                                      style: fontStyle(
-                                                          fontSize: 12,
-                                                          color: widget.article
-                                                                      .subType ==
-                                                                  "BigBlackStandard"
-                                                              ? Colors.white
-                                                              : Colors
-                                                                  .grey[800])),
                                                 ],
                                               ),
                                             ),
@@ -387,6 +385,7 @@ class ArticlePageState extends State<ArticlePage> {
               }
             },
         ));
+
         return "";
       },
       onNonMatch: (nonMatch) {
@@ -397,7 +396,7 @@ class ArticlePageState extends State<ArticlePage> {
                   ? Colors.white
                   : Colors.black,
               fontWeight: FontWeight.w400,
-              fontSize: 17,
+              fontSize: 16,
             )));
         return "";
       },

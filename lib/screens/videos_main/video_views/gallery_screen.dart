@@ -299,27 +299,21 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
           ),
           Positioned(
             bottom: widget.isHome ? 20 : 70,
-            child: SmoothPageIndicator(
-              controller: _pageController,
-              count: widget.imageUrls.length, // Set the correct number of pages
-              effect: const ExpandingDotsEffect( expansionFactor: 2, // Avoid using extreme values
-                dotHeight: 10,
-                dotWidth: 10,),
-            )
+            child:
 
-            // AnimatedSmoothIndicator(
-            //   activeIndex: _currentIndex,
-            //   count: widget.imageUrls.length,
-            //   effect: ExpandingDotsEffect(
-            //     dotHeight: 8,
-            //     dotWidth: 8,
-            //     activeDotColor: Colors.white,
-            //     dotColor: Colors.grey.shade400,
-            //   ),
-            //   onDotClicked: (index) {
-            //     _controller.jumpToPage(index);
-            //   },
-            // ),
+            AnimatedSmoothIndicator(
+              activeIndex: _currentIndex,
+              count: widget.imageUrls.length,
+              effect: ExpandingDotsEffect(
+                dotHeight: 8,
+                dotWidth: 8,
+                activeDotColor: Colors.white,
+                dotColor: Colors.grey.shade400,
+              ),
+              onDotClicked: (index) {
+                _controller.jumpToPage(index);
+              },
+            ),
           ),
           if (!widget.isHome)
             Align(

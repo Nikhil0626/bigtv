@@ -68,8 +68,7 @@ class _HomeScreenView1State extends State<HomeScreenView1> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    context.read<FlipProvider>(). isDeviceData();
-
+    context.read<FlipProvider>().isDeviceData();
     context.read<FlipProvider>().getArticles();
   }
 

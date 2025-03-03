@@ -337,7 +337,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 child: Text(
-                  "App Version: 5.0.0+9",
+                  "App Version: 5.0.0+10",
                   style: fontStyle(
                     fontSize: 16,
                   ),
