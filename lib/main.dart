@@ -14,7 +14,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
-import 'dart:io' show Platform;
+
 
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
@@ -73,10 +73,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 }
 
-void _onTokenInvalidated(Map<String, dynamic>? message) {
-  print("tokenInvalidated callback received $message");
-  WebEngagePlugin.setSecureToken("siva kumar", message.toString());
-}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -96,7 +92,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(360, 690), // Set according to your design
-      minTextAdapt: true,
+      // minTextAdapt: true,
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider<FlipProvider>(
@@ -124,7 +120,7 @@ class _MyAppState extends State<MyApp> {
               return child!;
             },
             debugShowCheckedModeBanner: false,
-            initialRoute: RoutesManager.splashScreen,
+            // initialRoute: RoutesManager.splashScreen,
           ),
         ),
       ),

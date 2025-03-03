@@ -47,6 +47,8 @@ class ArticlePageState extends State<ArticlePage> {
   int topSpace = 0;
   int bottomSpace = 0;
   String? displayFeatures;
+  bool isFoldable = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -60,8 +62,6 @@ class ArticlePageState extends State<ArticlePage> {
 
   @override
   Widget build(BuildContext context) {
-
-    bool isFoldable = foldableModels.contains(displayFeatures);
     log("topSpace+++  ${bottomSpace} ------- bottomSpace+++  ${topSpace} -----isfold -- ${isFoldable} -----fidetails  ${displayFeatures}");
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
@@ -82,19 +82,30 @@ class ArticlePageState extends State<ArticlePage> {
               children: [
                 Expanded(
                   child: InkWell(
-                    onTap: () {
+                    onTap: () async {
+                      if (widget.article.type == "Image") {
+                        if (await canLaunchUrl(
+                            Uri.parse(widget.article.content.toString()))) {
+                          await launchUrl(
+                              Uri.parse(widget.article.content.toString()));
+                        } else {
+                          throw 'Could not launch ${Uri.parse(widget.article.content.toString())}';
+                        }
+                      }
                       flipProvider.isShowTopBottomChange(
                           flipProvider.isShowTopBottomView);
                     },
                     child: Screenshot(
                       controller: screenshotController,
                       child: widget.article.type == "Image"
-                          ? SizedBox(
-                              width: MediaQuery.of(context).size.width,
-                              height: MediaQuery.of(context).size.height,
-                              child: Image.network(
-                                fit: BoxFit.cover,
-                                widget.article.imageUrl.url ?? "",
+                          ? Container(
+                              child: SizedBox(
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height,
+                                child: Image.network(
+                                  fit: BoxFit.cover,
+                                  widget.article.imageUrl.url ?? "",
+                                ),
                               ),
                             )
                           : widget.article.type == "Gallery"
@@ -257,7 +268,10 @@ class ArticlePageState extends State<ArticlePage> {
                                                                   "BigBlackStandard"
                                                               ? Colors.white
                                                               : Colors.black,
-                                                          fontSize:Platform.isIOS?19: 18,
+                                                          fontSize:
+                                                              Platform.isIOS
+                                                                  ? 19
+                                                                  : 18,
                                                           fontWeight:
                                                               FontWeight.bold)),
                                                   height(height: 8),
@@ -322,7 +336,7 @@ class ArticlePageState extends State<ArticlePage> {
                                                                                 style: homeScreenFontStyle(
                                                                                   color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black,
                                                                                   fontWeight: FontWeight.w400,
-                                                                                  fontSize: Platform.isIOS?17:16,
+                                                                                  fontSize: Platform.isIOS ? 17 : 16,
                                                                                 ),
                                                                               ),
                                                                             ),
@@ -451,7 +465,7 @@ class ArticlePageState extends State<ArticlePage> {
                   ? Colors.white
                   : Colors.black,
               fontWeight: FontWeight.w400,
-              fontSize:Platform.isIOS?17: 16,
+              fontSize: Platform.isIOS ? 17 : 16,
             )));
         return "";
       },
@@ -466,11 +480,12 @@ class ArticlePageState extends State<ArticlePage> {
 
       if (Platform.isAndroid) {
         AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-     log(androidInfo.toString());
+        log(androidInfo.toString());
 
-        displayFeatures =androidInfo.model;
-        // return androidInfo.model; // Example: "Samsung Galaxy Z Fold 5"
-      }  else {
+        displayFeatures = androidInfo.model;
+        isFoldable = foldableModels.contains(displayFeatures) ?? false;
+        setState(() {});
+      } else {
         displayFeatures = "";
 
         // return "";
@@ -479,10 +494,8 @@ class ArticlePageState extends State<ArticlePage> {
       log("Error getting device info: $e");
       displayFeatures = "";
       return null; // Handle errors gracefully
-    }finally{
-      setState(() {
-
-      });
+    } finally {
+      setState(() {});
     }
   }
 }

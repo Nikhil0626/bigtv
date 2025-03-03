@@ -3,7 +3,7 @@ description: "A new Flutter project."
 
 publish_to: 'none'
 
-version: 5.0.0+9
+version: 5.0.0+17
 
 environment:
   sdk: ^3.5.4
@@ -60,6 +60,8 @@ dependencies:
   easy_url_launcher: ^0.0.7
   geocoding: ^3.0.0
   social_sharing_plus: ^1.2.3
+  image_gallery_saver_plus: ^3.0.5
+  social_share: ^2.3.1
 
 
 #  kochava_tracker: ^2.6.0

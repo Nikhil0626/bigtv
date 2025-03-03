@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-// import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../globel_keys/app_router.dart';
 import '../../../main.dart';
@@ -305,7 +304,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
             }).toList(),
           ),
           Positioned(
-            bottom: widget.isHome ?Platform.isIOS? 45:20 : Platform.isIOS? 95:70,
+            bottom: widget.isHome ?Platform.isIOS? 45:20 : Platform.isIOS? 95:70+MediaQuery.of(context).padding.bottom+5,
             child:
 
             AnimatedSmoothIndicator(
@@ -325,8 +324,11 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
           if (!widget.isHome)
             Align(
               alignment: Alignment.bottomCenter,
-              child: GalleryPostBottomActions(
-                article: widget.postDetails!,
+              child: Padding(
+                padding:  EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom,),
+                child: GalleryPostBottomActions(
+                  article: widget.postDetails!,
+                ),
               ),
             ),
         ],

@@ -101,5 +101,46 @@
 	<string>in~~1341061ba</string>
 	<key>WEGLogLevel</key>
 	<string>VERBOSE</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app requires access to your photo library to share media.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>This app requires access to save media to your photo library.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+	<string>whatsapp</string>
+	</array>
+	<key>NSPhotoLibraryUsageDescription</key>
+
+	<string>We need access to save screenshots.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>App requires permission to add photos to the library.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+    <string>App needs access to save screenshots</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>App needs access to save and share images</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+    <string>We need access to your photo library to save the screenshot.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>We need access to your photo library to save the screenshot.</string>
+    <key>LSApplicationQueriesSchemes</key>
+    	<array>
+    	<string>instagram-stories</string>
+    	<string>facebook-stories</string>
+    	<string>facebook</string>
+    	<string>instagram</string>
+    	<string>twitter</string>
+    	<string>whatsapp</string>
+        <string>tg</string>
+    	</array>
+    <key>UIFileSharingEnabled</key>
+    <true/>
+    <key>LSSupportsOpeningDocumentsInPlace</key>
+    <true/>
+
+
 </dict>
 </plist>

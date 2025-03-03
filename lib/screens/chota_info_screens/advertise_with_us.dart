@@ -53,7 +53,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
         ),
       ),
       body: Padding(
-        padding:  EdgeInsets.all(16.0),
+        padding:  EdgeInsets.only(bottom: 16.0+ MediaQuery.of(context).padding.bottom,right: 16,top: 16,left: 16),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,12 +122,10 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
               ),
               height(height: 10),
 
-              InkWell(
-                onTap: () => _launchPhone('+91 9440913555'),
-                child: Text(
-                  "Phone: +91 9440913555",
-                  style: fontStyle(fontSize: 14),
-                ),
+              ContactDetailTile(
+                title: "Phone: ",
+                email: "+91 9440913555",
+                onEmailTap: () => _launchPhone("+91 9440913555"),
               ),
 
             ],
