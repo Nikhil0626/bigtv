@@ -1,19 +1,57 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/Auth_module/auth_screens/sign_in_screen.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 
+import '../../../services/deviice_details.dart';
 import '../../../services/permission_handler_services.dart';
 
-class WelcomeScreen extends StatelessWidget {
+
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
 
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+ @override
+  void initState() {
+   getMobileNumber();
+    super.initState();
+  }
+ getMobileNumber()async{
+   SharedPreferences sp = await SharedPreferences.getInstance();
+   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
+   if (Platform.isIOS) {
+     String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+     log('APNS Token: $apnsToken');
+     getUniqueDeviceId(apnsToken??"",sp);
+   }else if (Platform.isAndroid) {
+     var token = await FirebaseMessaging.instance.getToken();
+     if (token != null) {
+       getUniqueDeviceId(token,sp);
+       log('FCM Token: $token');
+       _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
+       WebEngagePlugin.setPushToken(token);
+     }
+   }
+ }
+
+ void _onTokenInvalidated(Map<String, dynamic>? message) {
+   print("tokenInvalidated callback received $message");
+   WebEngagePlugin.setSecureToken("siva kumar", message.toString());
+ }
   @override
   Widget build(BuildContext context) {
     requestLocationPermission();

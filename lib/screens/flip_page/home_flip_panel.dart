@@ -1397,8 +1397,9 @@ class _FlipPanelState<T> extends State<FlipPanel>
     _running = false;
     _direction = FlipDirection.none;
 
-    newHeight = (((MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).round().toInt())/2).round().toInt();
+    newHeight = (((MediaQuery.of(mainNavigatorKey.currentContext!).padding.top+MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom).round().toInt())/2).round().toInt();
     newHeight = newHeight.round();
+    print("vjhjknbhvhjhgcfxxfcghjkgfdxcvhbjnkjhvgf   ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.top}");
     print("vjhjknbhvhjhgcfxxfcghjkgfdxcvhbjnkjhvgf   $newHeight");
     _height = widget.height;
 
@@ -1793,20 +1794,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Stack(
-          children: <Widget>[
-            _upperChild1!,
-            // _waitingForRefresh
-            //     ? const Padding(
-            //   padding: EdgeInsets.only(top: 100.0),
-            //   child: SizedBox(
-            //     width: double.infinity,
-            //     child: Center(child: RefreshProgressIndicator()),
-            //   ),
-            // )
-            //     : Container(),
-          ],
-        ),
+        _upperChild1!,
         _lowerChild1!,
       ],
     );

@@ -352,7 +352,7 @@ class FlipProvider extends ChangeNotifier {
 
 
   List<AllPostCommentModel> localCommentsList=[];
-  Future addCommentPostById(HomeScreenModel postData, comment) async {
+  Future addCommentPostById( postData, comment) async {
     isSendComment = true;
     notifyListeners();
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -421,7 +421,7 @@ class FlipProvider extends ChangeNotifier {
 
   List<String> isLikeList = [];
 
-  void isLikePost(HomeScreenModel val) async {
+  void isLikePost( val) async {
     log(val.id.toString());
     if (!isLikeList.contains(val.id.toString())) {
       isLikeList.add(val.id.toString());

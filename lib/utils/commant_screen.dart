@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
@@ -34,7 +35,7 @@ void showComments(BuildContext context,  postId) {
 }
 
 class CommentSection extends StatefulWidget {
-  final HomeScreenModel postId;
+  final  postId;
 
   const CommentSection({super.key, required this.postId});
 
@@ -234,10 +235,10 @@ class _CommentSectionState extends State<CommentSection> {
 
                 // Comment Input Field
                 Padding(
-                  padding: const EdgeInsets.only(
+                  padding:  EdgeInsets.only(
                     left: 12,
                     right: 12,
-                    bottom: 10, // Moves above keyboard
+                    bottom: Platform.isIOS?30:10, // Moves above keyboard
                   ),
                   child: Row(
                     children: [

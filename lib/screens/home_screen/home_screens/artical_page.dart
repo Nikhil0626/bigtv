@@ -7,6 +7,7 @@ import 'package:chotanews/main.dart';
 import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/utils/app_toasts.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,6 +18,7 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
 import '../../../utils/date_format.dart';
+import '../../../utils/fold_models.dart';
 import '../first_card_home_feeds.dart';
 import '../post_bottom_actions.dart';
 import '../../videos_main/video_views/gallery_screen.dart';
@@ -25,7 +27,7 @@ import '../../videos_main/video_views/video_preview.dart';
 typedef FlipBack = void Function({bool backToTop});
 
 class ArticlePage extends StatefulWidget {
-  final  article;
+  final article;
 
   final FlipBack? flipBack;
 
@@ -42,26 +44,31 @@ class ArticlePage extends StatefulWidget {
 
 class ArticlePageState extends State<ArticlePage> {
   final ScreenshotController screenshotController = ScreenshotController();
-  int newHeight = 0;
-
+  int topSpace = 0;
+  int bottomSpace = 0;
+  String? displayFeatures;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    newHeight =
-        (MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).toInt();
+    getDetails();
+    topSpace =
+        (MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).toInt() +
+            (MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom)
+                .toInt();
   }
 
   @override
   Widget build(BuildContext context) {
-    final displayFeatures = MediaQuery.of(context).displayFeatures;
-    bool isFoldable = Platform.isIOS?false:displayFeatures.isNotEmpty;
+
+    bool isFoldable = foldableModels.contains(displayFeatures);
+    log("topSpace+++  ${bottomSpace} ------- bottomSpace+++  ${topSpace} -----isfold -- ${isFoldable} -----fidetails  ${displayFeatures}");
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
         color: widget.article.subType == "BigBlackStandard"
             ? Colors.black
             : Colors.white,
-        height: widget.height - newHeight,
+        height: widget.height - topSpace,
         width: MediaQuery.of(context).size.width,
         child: WillPopScope(
             onWillPop: () {
@@ -74,32 +81,32 @@ class ArticlePageState extends State<ArticlePage> {
             child: Column(
               children: [
                 Expanded(
-                  child: Screenshot(
-                    controller: screenshotController,
-                    child: widget.article.type == "Image"
-                        ? SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                            child: Image.network(
-                              fit: BoxFit.cover,
-                              widget.article.imageUrl.url ?? "",
-                            ),
-                          )
-                        : widget.article.type == "Gallery"
-                            ? FullPageCarousel(
-                                isHome: true,
-                                imageUrls: widget.article.gallery ?? [],
-                                postDetails: widget.article,
-                              )
-                            : widget.article.homepage != null
-                                ? FirstCardHomeFeeds(
-                                    getHomeList: widget.article.homepage)
-                                : InkWell(
-                                    onTap: () {
-                                      flipProvider.isShowTopBottomChange(
-                                          flipProvider.isShowTopBottomView);
-                                    },
-                                    child: Container(
+                  child: InkWell(
+                    onTap: () {
+                      flipProvider.isShowTopBottomChange(
+                          flipProvider.isShowTopBottomView);
+                    },
+                    child: Screenshot(
+                      controller: screenshotController,
+                      child: widget.article.type == "Image"
+                          ? SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              height: MediaQuery.of(context).size.height,
+                              child: Image.network(
+                                fit: BoxFit.cover,
+                                widget.article.imageUrl.url ?? "",
+                              ),
+                            )
+                          : widget.article.type == "Gallery"
+                              ? FullPageCarousel(
+                                  isHome: true,
+                                  imageUrls: widget.article.gallery ?? [],
+                                  postDetails: widget.article,
+                                )
+                              : widget.article.homepage != null
+                                  ? FirstCardHomeFeeds(
+                                      getHomeList: widget.article.homepage)
+                                  : Container(
                                       color: widget.article.subType ==
                                               "BigBlackStandard"
                                           ? Colors.black
@@ -120,9 +127,10 @@ class ArticlePageState extends State<ArticlePage> {
                                                     ? 9
                                                     : 7
                                                 : isFoldable
-                                                    ? widget.article
-                                                .subType ==
-                                                "BulletPost"?7:9
+                                                    ? widget.article.subType ==
+                                                            "BulletPost"
+                                                        ? 7
+                                                        : 9
                                                     : 4,
                                             child: Stack(
                                               children: [
@@ -134,8 +142,11 @@ class ArticlePageState extends State<ArticlePage> {
                                                             color: Colors.black,
                                                             child: Center(
                                                                 child: VideoPreview(
-                                                                  imageUrl:  widget
-                                                                      .article.imageUrl!.url.toString(),
+                                                                    imageUrl: widget
+                                                                        .article
+                                                                        .imageUrl!
+                                                                        .url
+                                                                        .toString(),
                                                                     url: widget
                                                                             .article
                                                                             .videoUrl
@@ -177,6 +188,28 @@ class ArticlePageState extends State<ArticlePage> {
                                                                   .shade300,
                                                             )),
                                                           )),
+                                                if (widget.article.isReporter)
+                                                  Positioned(
+                                                      bottom: 30,
+                                                      child: Container(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal:
+                                                                      8),
+                                                          // width: 100,
+                                                          child: Text(
+                                                            widget.article
+                                                                .reportedBy
+                                                                .toString(),
+                                                            style: homeScreenFontStyle(
+                                                                fontWeight:
+                                                                    FontWeight
+                                                                        .w900,
+                                                                fontSize: 16,
+                                                                color: Colors
+                                                                    .white),
+                                                          ))),
                                                 Positioned(
                                                     bottom: -12,
                                                     child: Container(
@@ -224,7 +257,7 @@ class ArticlePageState extends State<ArticlePage> {
                                                                   "BigBlackStandard"
                                                               ? Colors.white
                                                               : Colors.black,
-                                                          fontSize: 18,
+                                                          fontSize:Platform.isIOS?19: 18,
                                                           fontWeight:
                                                               FontWeight.bold)),
                                                   height(height: 8),
@@ -241,19 +274,24 @@ class ArticlePageState extends State<ArticlePage> {
                                                                     CrossAxisAlignment
                                                                         .start,
                                                                 children: [
-                                                                  ( widget.article.content !="")? Text(
-                                                            widget
-                                                                .article
-                                                                .content,
-                                                            style:
-                                                            homeScreenFontStyle(
-                                                              color:  Colors.black,
-                                                              fontWeight:
-                                                              FontWeight.w500,
-                                                              fontSize:
-                                                              16,
-                                                            )):SizedBox.shrink(),
-
+                                                                  (widget.article
+                                                                              .content !=
+                                                                          "")
+                                                                      ? Text(
+                                                                          widget
+                                                                              .article
+                                                                              .content,
+                                                                          style:
+                                                                              homeScreenFontStyle(
+                                                                            color:
+                                                                                Colors.black,
+                                                                            fontWeight:
+                                                                                FontWeight.w500,
+                                                                            fontSize:
+                                                                                16,
+                                                                          ))
+                                                                      : const SizedBox
+                                                                          .shrink(),
                                                                   height(
                                                                       height:
                                                                           8),
@@ -268,56 +306,73 @@ class ArticlePageState extends State<ArticlePage> {
                                                                           .map<Widget>(
                                                                               (item) {
                                                                         // Explicitly specify <Widget>
-                                                                        return Padding(
-                                                                          padding: const EdgeInsets
-                                                                              .symmetric(
-                                                                              vertical: 2.0),
-                                                                          child:
-                                                                              Row(
-                                                                            crossAxisAlignment:
-                                                                                CrossAxisAlignment.start,
-                                                                            children: [
-                                                                              const Text("• ", style: TextStyle(fontSize: 24)),
-                                                                              // Bullet point
-                                                                              Expanded(
-                                                                                child: Text(
-                                                                                  item,
-                                                                                  style: homeScreenFontStyle(
-                                                                                    color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black,
-                                                                                    fontWeight: FontWeight.w400,
-                                                                                    fontSize: 16,
-                                                                                  ),
+                                                                        return Row(
+                                                                          crossAxisAlignment:
+                                                                              CrossAxisAlignment.start,
+                                                                          mainAxisAlignment:
+                                                                              MainAxisAlignment.start,
+                                                                          children: [
+                                                                            const Text("• ",
+                                                                                textAlign: TextAlign.start,
+                                                                                style: TextStyle(fontSize: 30)),
+                                                                            // Bullet point
+                                                                            Expanded(
+                                                                              child: Text(
+                                                                                item,
+                                                                                style: homeScreenFontStyle(
+                                                                                  color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black,
+                                                                                  fontWeight: FontWeight.w400,
+                                                                                  fontSize: Platform.isIOS?17:16,
                                                                                 ),
                                                                               ),
-                                                                            ],
-                                                                          ),
+                                                                            ),
+                                                                          ],
                                                                         );
                                                                       }).toList(), // Ensure it is converted to List<Widget>
+                                                                    ),
+                                                                  ),
+                                                                  Text(
+                                                                    '\n\nPosted ${formatTimeDifference(widget.article.created)}',
+                                                                    style:
+                                                                        fontStyle(
+                                                                      fontSize:
+                                                                          10,
+                                                                      fontWeight:
+                                                                          FontWeight
+                                                                              .w400,
+                                                                      color: Colors
+                                                                          .grey,
                                                                     ),
                                                                   ),
                                                                 ],
                                                               )
                                                             : RichText(
-                                                          text: TextSpan(
-                                                            text: '',
-                                                            children: [
-                                                              ..._parseText(
-                                                                context,
-                                                                '${widget.article.content}',
-                                                                widget.article.links,
-                                                              ),
-                                                              TextSpan(
-                                                                text: '\n\nPosted ${formatTimeDifference(widget.article.created)}',
-                                                                style: fontStyle(
-                                                                  fontSize: 10,
-                                                                  fontWeight: FontWeight.w400,
-                                                                  color: Colors.grey,
+                                                                text: TextSpan(
+                                                                  text: '',
+                                                                  children: [
+                                                                    ..._parseText(
+                                                                      context,
+                                                                      '${widget.article.content}',
+                                                                      widget
+                                                                          .article
+                                                                          .links,
+                                                                    ),
+                                                                    TextSpan(
+                                                                      text:
+                                                                          '\n\nPosted ${formatTimeDifference(widget.article.created)}',
+                                                                      style:
+                                                                          fontStyle(
+                                                                        fontSize:
+                                                                            10,
+                                                                        fontWeight:
+                                                                            FontWeight.w400,
+                                                                        color: Colors
+                                                                            .grey,
+                                                                      ),
+                                                                    ),
+                                                                  ],
                                                                 ),
                                                               ),
-                                                            ],
-                                                          ),
-                                                        ),
-
                                                   ),
                                                 ],
                                               ),
@@ -326,7 +381,7 @@ class ArticlePageState extends State<ArticlePage> {
                                         ],
                                       ),
                                     ),
-                                  ),
+                    ),
                   ),
                 ),
                 Container(
@@ -396,12 +451,38 @@ class ArticlePageState extends State<ArticlePage> {
                   ? Colors.white
                   : Colors.black,
               fontWeight: FontWeight.w400,
-              fontSize: 16,
+              fontSize:Platform.isIOS?17: 16,
             )));
         return "";
       },
     );
 
     return spans;
+  }
+
+  getDetails() async {
+    try {
+      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
+      if (Platform.isAndroid) {
+        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+     log(androidInfo.toString());
+
+        displayFeatures =androidInfo.model;
+        // return androidInfo.model; // Example: "Samsung Galaxy Z Fold 5"
+      }  else {
+        displayFeatures = "";
+
+        // return "";
+      }
+    } catch (e) {
+      log("Error getting device info: $e");
+      displayFeatures = "";
+      return null; // Handle errors gracefully
+    }finally{
+      setState(() {
+
+      });
+    }
   }
 }

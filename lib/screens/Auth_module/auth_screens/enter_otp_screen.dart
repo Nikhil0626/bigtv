@@ -91,18 +91,18 @@ class _OtpScreenState extends State<OtpScreen> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          height(height: 100),
+                          height(height: 150),
                           SvgPicture.asset(
                             'assets/svg/Chota_news_logo.svg',
                             height: 24,
                             width: 166,
                           ),
-                          height(height: 30),
-                          Text(
-                            "OTP: ${widget.otp}",
-                            style: fontStyle(
-                                fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
+                          // height(height: 30),
+                          // Text(
+                          //   "OTP: ${widget.otp}",
+                          //   style: fontStyle(
+                          //       fontSize: 24, fontWeight: FontWeight.bold),
+                          // ),
                           height(height: 30),
                           Text(
                             "Sign In",

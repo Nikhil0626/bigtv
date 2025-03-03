@@ -24,14 +24,19 @@ class _VideoPreview extends State<VideoPreview> {
   void initState() {
     super.initState();
     controller = YoutubePlayerController(
-      initialVideoId: widget.url,
+      initialVideoId: widget.url, // Example YouTube video ID
       flags: const YoutubePlayerFlags(
         autoPlay: true,
-        mute: false,
-
-        hideControls: false, // This hides fullscreen button
+        enableCaption: false,
+        forceHD: true,
+        disableDragSeek: true,
+        isLive: false,
       ),
-    );
+    )..addListener(() {
+      if (controller.value.isFullScreen) {
+        controller.toggleFullScreenMode(); // Prevent full-screen mode
+      }
+    });
   }
 
   @override

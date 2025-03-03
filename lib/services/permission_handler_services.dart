@@ -79,29 +79,6 @@ Future<void> getAddressFromLatLng(double latitude, double longitude) async {
   }
 }
 
-Future<String> getPhoneNumber() async {
-  try {
-    if (await Permission.location.request().isGranted) {
-    } else {
-      Permission.location;
-      Permission.locationAlways;
-    }
-    if (await Permission.phone.request().isGranted) {
-      bool hasPermission = await MobileNumber.hasPhonePermission ?? false;
-      if (!hasPermission) {
-        await MobileNumber.requestPhonePermission;
-      }
-
-    String  mobileNumber = await MobileNumber.mobileNumber ?? "";
-      return mobileNumber??"";
-    } else {
-       return "Permission Denied";
-    }
-  } catch (e) {
-    log(e.toString());
-   return "Error: ${e.toString()}";
-  }
-}
 
 Future<void> requestNotificationPermission() async {
   await FirebaseMessaging.instance.requestPermission(

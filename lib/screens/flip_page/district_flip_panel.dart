@@ -685,72 +685,6 @@ class DistrictFlipPanel<T> extends StatefulWidget {
 class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  List<Map<String, dynamic>> data = [
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title":
-          "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
-      "description":
-          "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
-      "url": "https://www.bbc.co.uk/news/articles/c897ew0ekp4o",
-      "urlToImage":
-          "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content":
-          "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
-    },
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title": "Another sample news article",
-      "description": "Some description here...",
-      "url": "https://www.bbc.co.uk/news/articles/sample-url",
-      "urlToImage":
-          "https://images.unsplash.com/photo-1575936123452-b67c3203c357?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content": "Some sample content..."
-    },
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title":
-          "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
-      "description":
-          "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
-      "url": "https://www.bbc.co.uk/news/articles/c897ew0ekp4o",
-      "urlToImage":
-          "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content":
-          "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
-    },
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title": "Another sample news article",
-      "description": "Some description here...",
-      "url": "https://www.bbc.co.uk/news/articles/sample-url",
-      "urlToImage":
-          "https://images.unsplash.com/photo-1575936123452-b67c3203c357?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content": "Some sample content..."
-    },
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title":
-          "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
-      "description":
-          "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
-      "url": "https://www.bbc.co.uk/news/articles/c897ew0ekp4o",
-      "urlToImage":
-          "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content":
-          "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
-    },
-  ];
 
   late Animation _animation;
   int _currentIndex = 0;
@@ -812,12 +746,7 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
     _running = false;
     _direction = FlipDirection.none;
 
-    newHeight = (((MediaQuery.of(mainNavigatorKey.currentContext!).padding.top)
-                .round()
-                .toInt()) /
-            2)
-        .round()
-        .toInt();
+    newHeight = (((MediaQuery.of(mainNavigatorKey.currentContext!).padding.top+MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom).round().toInt())/2).round().toInt();
     newHeight = newHeight.round();
     print("vjhjknbhvhjhgcfxxfcghjkgfdxcvhbjnkjhvgf   $newHeight");
     _height = widget.height;

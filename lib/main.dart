@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/services/deviice_details.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/register_providers.dart';
@@ -27,19 +26,6 @@ Future<void> main() async {
   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   await Firebase.initializeApp();
 
-  if (Platform.isIOS) {
-    String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-    log('APNS Token: $apnsToken');
-    getUniqueDeviceId(apnsToken??"");
-  }else if (Platform.isAndroid) {
-    var token = await FirebaseMessaging.instance.getToken();
-    if (token != null) {
-      getUniqueDeviceId(token);
-      log('FCM Token: $token');
-      _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
-      WebEngagePlugin.setPushToken(token);
-    }
-  }
 
 
 
@@ -78,7 +64,7 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]).then((_) {
     runApp(MyApp());
-  });;
+  });
   subscribeToPushCallbacks(_webEngagePlugin);
 }
 @pragma('vm:entry-point')
@@ -137,15 +123,6 @@ class _MyAppState extends State<MyApp> {
             ) {
               return child!;
             },
-            // builder: (BuildContext context, Widget? child) {
-            //   ScreenUtil.init(context, designSize: const Size(385, 890));
-            //   return MediaQuery(
-            //     data: MediaQuery.of(context)
-            //         .copyWith(textScaler: const TextScaler.linear(1)),
-            //     child: child!,
-            //   );
-            // },
-            // home: WebDash(),
             debugShowCheckedModeBanner: false,
             initialRoute: RoutesManager.splashScreen,
           ),

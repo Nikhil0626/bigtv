@@ -1,13 +1,17 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import '../../../services/permission_handler_services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
+import '../../../services/deviice_details.dart';
 import '../../../utils/app_colors.dart';
 
 class SignInScreen extends StatefulWidget {
@@ -27,12 +31,8 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   void initState()  {
     super.initState();
-    getMobileNumber();
   }
-getMobileNumber()async{
-  mobileNumber =  await getPhoneNumber();
-  log("mobile number ---- ${mobileNumber}");
-}
+
   @override
   void dispose() {
     super.dispose();

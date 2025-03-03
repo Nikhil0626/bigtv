@@ -97,7 +97,7 @@ class DistrictSelectionBloc
       log(result);
       String? deviceId = GlobalVariables().deviceId;
 
-      districtLocationUpdate("", result, "");
+
       List<String> selectedDistrictNames = districtList
           .where((district) {
             return selectedDistrictList.contains(district.id.toString());
@@ -105,7 +105,7 @@ class DistrictSelectionBloc
           .map((district) => district.name.toString())
           .toList();
       String nameOfDistrict = selectedDistrictNames.toSet().join(',');
-
+      districtLocationUpdate(nameOfDistrict, result, "");
       sendUserAttribute(nameOfDistrict);
       var body = {
         "deviceId": deviceId.toString(),

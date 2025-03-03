@@ -34,7 +34,7 @@ class BottomActions extends StatelessWidget {
           child: SizedBox(
             height: 52,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 height(height: 2),

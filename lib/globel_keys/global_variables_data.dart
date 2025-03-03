@@ -11,4 +11,5 @@ class GlobalVariables {
   String? userId;
   String? loginId;
   String? platForm;
+  bool isDeviceDetailsSent = false;
 }
