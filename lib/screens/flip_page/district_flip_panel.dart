@@ -783,9 +783,6 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
         Tween(begin: _zeroAngle, end: math.pi / 2).animate(_controller);
 
     _subscription = widget.itemStream.distinct().listen((items) {
-      // A null items list is sent to indicate that a refresh
-      // request has been sent to the server. It will be used to show a refresh
-      // indicator
       if (items == null || items.isEmpty) {
         widgets = null;
         _availableItems = 0;
@@ -797,8 +794,8 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
       _waitingForRefresh = false;
       if (_availableItems == 0) {
         widgets = [];
-        widgets!.add(_buildFirstWidget(items?[0]));
-        widgets!.addAll(items!
+        widgets!.add(_buildFirstWidget(items[0]));
+        widgets!.addAll(items
             .skip(1)
             .map((item) => widget.itemBuilder(context, item, flipBack, _height))
             .toList());

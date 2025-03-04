@@ -176,63 +176,6 @@ class PostBottomActions extends StatelessWidget {
                     log("❌ Error taking screenshot: $e");
                     log("📄 Stacktrace: $stacktrace");
                   }
-                  // try {
-                  //   debugPrint("Capturing screenshot...");
-                  //   Uint8List? image = await screenshotController.capture();
-                  //
-                  //   if (image == null) {
-                  //     debugPrint("Failed to capture screenshot");
-                  //     return;
-                  //   }
-                  //
-                  //   // Get correct directory for saving the image
-                  //   final directory = Platform.isIOS
-                  //       ? await getApplicationDocumentsDirectory() // iOS: Use Documents directory
-                  //       : await getTemporaryDirectory();           // Android: Use Temporary directory
-                  //
-                  //   final String imagePath = '${directory.path}/${article.id}.png';
-                  //
-                  //   // Save the image to file
-                  //   File imageFile = File(imagePath);
-                  //   await imageFile.writeAsBytes(image, flush: true);
-                  //
-                  //   await Future.delayed(const Duration(milliseconds: 500));
-                  //
-                  //   if (!await imageFile.exists()) {
-                  //     debugPrint("Error: File not found at $imagePath");
-                  //     return;
-                  //   }
-                  //
-                  //   debugPrint("Image saved at: $imagePath");
-                  //
-                  //   // Save to gallery (iOS required)
-                  //   if (Platform.isIOS) {
-                  //     final result = await ImageGallerySaverPlus.saveImage(image, name: article.id.toString());
-                  //     debugPrint("Image saved to gallery result: $result");
-                  //   } else {
-                  //     final result = await ImageGallerySaverPlus.saveFile(imageFile.path);
-                  //     debugPrint("Image saved to gallery result: $result");
-                  //   }
-                  //
-                  //   // Use the locally saved file for WhatsApp sharing
-                  //   String filePath = imageFile.absolute.path;
-                  //   debugPrint("Final file path for sharing: $filePath");
-                  //
-                  //   // Share to WhatsApp
-                  //   await SocialSharingPlus.shareToSocialMedia(
-                  //     SocialPlatform.whatsapp,
-                  //     Platform.isIOS ? article.linkURLIos.toString() : article.linkURLAndroid.toString(),
-                  //     media: Platform.isAndroid ?filePath:"", // Use the local file path
-                  //     onAppNotInstalled: () {
-                  //       debugPrint("WhatsApp not installed");
-                  //     },
-                  //     isOpenBrowser: false,
-                  //   );
-                  //
-                  // } catch (e, stacktrace) {
-                  //   debugPrint("Error taking screenshot: $e");
-                  //   debugPrint("Stacktrace: $stacktrace");
-                  // }
 
 
                 }
@@ -443,10 +386,14 @@ void showSaveBottomSheet(
     ),
     builder: (context) {
       return Padding(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.only(bottom: 16.0+ MediaQuery.of(context).padding.bottom,right: 16,top: 16,left: 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text("Share Post",style: fontStyle(fontWeight: FontWeight.w500,fontSize: 18),textAlign: TextAlign.start,),
+            height(height: 20),
             InkWell(
               onTap: () async {
                 try {
@@ -524,7 +471,7 @@ void showSaveBottomSheet(
                 width: double.infinity,
                 alignment: Alignment.center,
                 child: Text(
-                  "Download Single Post",
+                  "Share Single Post",
                   style: fontStyle(
                       fontSize: 16,
                       color: Colors.white,
@@ -545,7 +492,7 @@ void showSaveBottomSheet(
                 width: double.infinity,
                 alignment: Alignment.center,
                 child: Text(
-                  "Download Entire gallery",
+                  "Share Entire gallery",
                   style: fontStyle(
                       fontSize: 16,
                       color: Colors.white,

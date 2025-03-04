@@ -1397,10 +1397,9 @@ class _FlipPanelState<T> extends State<FlipPanel>
     _running = false;
     _direction = FlipDirection.none;
 
-    newHeight = (((MediaQuery.of(mainNavigatorKey.currentContext!).padding.top+MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom).round().toInt())/2).round().toInt();
+    newHeight = (((MediaQuery.of(mainNavigatorKey.currentContext!).padding.top + MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom).round().toInt())/2).round().toInt();
     newHeight = newHeight.round();
-    print("vjhjknbhvhjhgcfxxfcghjkgfdxcvhbjnkjhvgf   ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.top}");
-    print("vjhjknbhvhjhgcfxxfcghjkgfdxcvhbjnkjhvgf   $newHeight");
+    print("New height   $newHeight");
     _height = widget.height;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {});
@@ -1436,9 +1435,6 @@ class _FlipPanelState<T> extends State<FlipPanel>
         Tween(begin: _zeroAngle, end: math.pi / 2).animate(_controller);
 
     _subscription = widget.itemStream.distinct().listen((items) {
-      // A null items list is sent to indicate that a refresh
-      // request has been sent to the server. It will be used to show a refresh
-      // indicator
       if (items == null || items.isEmpty) {
         widgets = null;
         _availableItems = 0;
@@ -1482,6 +1478,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   @override
   Widget build(BuildContext context) {
+    print("bottom ---> ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom} top --->  ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.top}");
 
     if (!_waitingForRefresh) {
       if (widgets == null || _availableItems == 0) {

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -58,7 +59,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: Platform.isIOS?Colors.white:Colors.blue,
+        backgroundColor: Platform.isIOS?Colors.white70:AppColors.appButtonColor,
         body: SafeArea(
           child: Consumer<FlipProvider>(
             builder: (context, flipProvider, __) {

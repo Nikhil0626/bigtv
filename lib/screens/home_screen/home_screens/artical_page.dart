@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/main.dart';
@@ -47,28 +48,34 @@ class ArticlePageState extends State<ArticlePage> {
   int topSpace = 0;
   int bottomSpace = 0;
   String? displayFeatures;
-  bool isFoldable = false;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    getDetails();
     topSpace =
         (MediaQuery.of(mainNavigatorKey.currentContext!).padding.top).toInt() +
             (MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom)
                 .toInt();
+    log("bottom --- ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom}  top --- ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.top}");
   }
+  bool isFoldableDevice(BuildContext context) {
+    final displayFeatures = MediaQuery.of(context).displayFeatures;
 
+    // Check if there is a hinge or fold
+    return displayFeatures.any((feature) =>
+    feature.type == DisplayFeatureType.hinge ||
+        feature.type == DisplayFeatureType.fold);
+  }
   @override
   Widget build(BuildContext context) {
-    log("topSpace+++  ${bottomSpace} ------- bottomSpace+++  ${topSpace} -----isfold -- ${isFoldable} -----fidetails  ${displayFeatures}");
+    bool isFoldable = isFoldableDevice(context);
     return Consumer<FlipProvider>(builder: (context, flipProvider, __) {
       return Container(
         color: widget.article.subType == "BigBlackStandard"
             ? Colors.black
             : Colors.white,
-        height: widget.height - topSpace,
+        height: widget.height - topSpace-0.239,
         width: MediaQuery.of(context).size.width,
         child: WillPopScope(
             onWillPop: () {
@@ -474,28 +481,5 @@ class ArticlePageState extends State<ArticlePage> {
     return spans;
   }
 
-  getDetails() async {
-    try {
-      DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
-      if (Platform.isAndroid) {
-        AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-        log(androidInfo.toString());
-
-        displayFeatures = androidInfo.model;
-        isFoldable = foldableModels.contains(displayFeatures) ?? false;
-        setState(() {});
-      } else {
-        displayFeatures = "";
-
-        // return "";
-      }
-    } catch (e) {
-      log("Error getting device info: $e");
-      displayFeatures = "";
-      return null; // Handle errors gracefully
-    } finally {
-      setState(() {});
-    }
-  }
 }
