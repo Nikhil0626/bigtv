@@ -218,7 +218,7 @@ class _OtpScreenState extends State<OtpScreen> {
                                 context.read<AuthProvider>().verifyOtp(context,
                                     widget.mobileNumber, otpController.text);
                               } else {
-                                CustomToast.showErrorToast(msg: "Invalid OTP");
+                                // CustomToast.showErrorToast(msg: "Invalid OTP");
                               }
                             },
                             child: Container(
@@ -226,7 +226,7 @@ class _OtpScreenState extends State<OtpScreen> {
                               decoration:  BoxDecoration(
                                   color: otpController.text.length<4?AppColors.borderColor:AppColors.appButtonColor,
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(8))),
+                                      const BorderRadius.all(Radius.circular(8))),
                               width: double.infinity,
                               alignment: Alignment.center,
                               child: Text(

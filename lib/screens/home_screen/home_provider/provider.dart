@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../globel_keys/app_router.dart';
 import '../../../globel_keys/global_variables_data.dart';
+import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../home_models/all_post_comment_model.dart';
 import '../home_models/home_screen_model.dart';
@@ -103,10 +104,12 @@ class FlipProvider extends ChangeNotifier {
 
   Future<void> getArticles(
       {bool refresh = false, int index = 0, bool isMain = true}) async {
+
     SharedPreferences sp = await SharedPreferences.getInstance();
     String locationId = sp.getString("locationId") ?? "";
     String loginId = sp.getString("loginId") ?? "1";
     String deviceId = GlobalVariables().deviceId ?? "";
+    getUniqueDeviceId("",sp);
 
     if (refresh == true) {
       isLoading = true;
