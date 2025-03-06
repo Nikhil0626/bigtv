@@ -420,3 +420,62 @@
 // //     );
 // //   }
 // // }
+
+
+/*
+import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+class BannerAdScreen extends StatefulWidget {
+  @override
+  _BannerAdScreenState createState() => _BannerAdScreenState();
+}
+
+class _BannerAdScreenState extends State<BannerAdScreen> {
+  late BannerAd _bannerAd;
+  bool _isAdLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBannerAd();
+  }
+
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      adUnitId: 'ca-app-pub-3940256099942544/9214589741',  // ✅ Test Ad Unit ID
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (add){
+          print("Banner ad loading to load: ${add.adUnitId..toString()} - ");
+        },
+        onAdFailedToLoad: (ad, error) {
+          print("Banner ad failed to load: ${error.code} - ${error.message}");
+        },
+      ),
+    );
+    _bannerAd.load();
+  }
+
+  @override
+  void dispose() {
+    _bannerAd.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('AdMob Banner Ad')),
+      bottomNavigationBar: _isAdLoaded
+          ? Container(
+        height: _bannerAd.size.height.toDouble(),
+        width: _bannerAd.size.width.toDouble(),
+        child: AdWidget(ad: _bannerAd),
+      )
+          : SizedBox(),
+      body: Center(child: Text('Hello, AdMob!')),
+    );
+  }
+}*/

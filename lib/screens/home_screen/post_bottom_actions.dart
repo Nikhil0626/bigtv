@@ -107,79 +107,90 @@ class PostBottomActions extends StatelessWidget {
             flex: 1,
             child: InkWell(
               onTap: () async {
-                if (article.type == "Gallery") {
-                  showSaveBottomSheet(context, article, screenshotController);
+                if(Platform.isIOS){
+                  sendShareDetails(context.read<FlipProvider>().userId,
+                      article.id, article.content.toString());
+                  if (article.type == "Standard" || article.type == "Image") {
+                    takeScreenshotAndShare(article, screenshotController);
+                  } else if (article.type == "Gallery") {
+                    createAndSharePdf(context, article);
+                  }
+                }else{
+                  if (article.type == "Gallery") {
+                    showSaveBottomSheet(context, article, screenshotController);
 
-                } else {
+                  }
+                  else {
 
-                  try {
-                    log("📸 Capturing screenshot...");
-                    Uint8List? image = await screenshotController.capture();
-
-                    if (image == null) {
-                      log("⚠️ Failed to capture screenshot");
-                      return;
-                    }
-
-                    // Save image to a temporary directory
-                    final directory = await getTemporaryDirectory();
-                    final String imagePath = '${directory.path}/${article.id}.png';
-                    File imageFile = File(imagePath);
-                    await imageFile.writeAsBytes(image);
-                    log("✅ Image saved at: $imagePath");
-
-                    // Ensure the file exists before proceeding
-                    if (!await imageFile.exists()) {
-                      log("❌ Error: Image file does not exist at $imagePath");
-                      return;
-                    }
-
-                    // Save to gallery (useful for iOS)
-                    final result = await ImageGallerySaverPlus.saveFile(imageFile.path, isReturnPathOfIOS: true);
-                    if (result == null || result['filePath'] == null) {
-                      log("⚠️ Failed to save image to gallery");
-                    } else {
-                      log("📁 Image saved to gallery at: ${result['filePath']}");
-                    }
-
-                    // Ensure proper file path formatting for iOS
-                    String filePath = Platform.isIOS ? await getValidPathForSharing(imageFile.path,article.id) : imageFile.path;
-
-                    // Check if WhatsApp is installed before sharing
-                    final whatsappInstalled = await canLaunchUrl(Uri.parse("whatsapp://send?text=Hello"));
-                    if (!whatsappInstalled) {
-                      log("🚫 WhatsApp not installed");
-                      return;
-                    }
-
-                    // Share the screenshot via WhatsApp
                     try {
-                      await SocialSharingPlus.shareToSocialMedia(
-                        SocialPlatform.whatsapp,
-                        Platform.isIOS ? article.linkURLIos : article.linkURLAndroid,
-                        media:  filePath ,
-                        onAppNotInstalled: () {
-                          log("🚫 WhatsApp not installed");
-                        },
-                        isOpenBrowser: false,
-                      );
-                    } catch (e) {
-                      log("⚠️ Error sharing via social_sharing_plus, trying share_plus... ${e.toString()}");
+                      log("📸 Capturing screenshot...");
+                      Uint8List? image = await screenshotController.capture();
 
-                      // Fallback to share_plus
-                      await Share.shareXFiles(
-                        [XFile(filePath)],
-                        text: Platform.isIOS ? article.linkURLIos : article.linkURLAndroid,
-                      );
+                      if (image == null) {
+                        log("⚠️ Failed to capture screenshot");
+                        return;
+                      }
+
+                      // Save image to a temporary directory
+                      final directory = await getTemporaryDirectory();
+                      final String imagePath = '${directory.path}/${article.id}.png';
+                      File imageFile = File(imagePath);
+                      await imageFile.writeAsBytes(image);
+                      log("✅ Image saved at: $imagePath");
+
+                      // Ensure the file exists before proceeding
+                      if (!await imageFile.exists()) {
+                        log("❌ Error: Image file does not exist at $imagePath");
+                        return;
+                      }
+
+                      // Save to gallery (useful for iOS)
+                      final result = await ImageGallerySaverPlus.saveFile(imageFile.path, isReturnPathOfIOS: true);
+                      if (result == null || result['filePath'] == null) {
+                        log("⚠️ Failed to save image to gallery");
+                      } else {
+                        log("📁 Image saved to gallery at: ${result['filePath']}");
+                      }
+
+                      // Ensure proper file path formatting for iOS
+                      String filePath = Platform.isIOS ? await getValidPathForSharing(imageFile.path,article.id) : imageFile.path;
+
+                      // Check if WhatsApp is installed before sharing
+                      final whatsappInstalled = await canLaunchUrl(Uri.parse("whatsapp://send?text=Hello"));
+                      if (!whatsappInstalled) {
+                        log("🚫 WhatsApp not installed");
+                        return;
+                      }
+
+                      // Share the screenshot via WhatsApp
+                      try {
+                        await SocialSharingPlus.shareToSocialMedia(
+                          SocialPlatform.whatsapp,
+                          Platform.isIOS ? article.linkURLIos : article.linkURLAndroid,
+                          media:  filePath ,
+                          onAppNotInstalled: () {
+                            log("🚫 WhatsApp not installed");
+                          },
+                          isOpenBrowser: false,
+                        );
+                      } catch (e) {
+                        log("⚠️ Error sharing via social_sharing_plus, trying share_plus... ${e.toString()}");
+
+                        // Fallback to share_plus
+                        await Share.shareXFiles(
+                          [XFile(filePath)],
+                          text: Platform.isIOS ? article.linkURLIos : article.linkURLAndroid,
+                        );
+                      }
+                    } catch (e, stacktrace) {
+                      log("❌ Error taking screenshot: $e");
+                      log("📄 Stacktrace: $stacktrace");
                     }
-                  } catch (e, stacktrace) {
-                    log("❌ Error taking screenshot: $e");
-                    log("📄 Stacktrace: $stacktrace");
+
+
                   }
 
-
                 }
-
 
                 // try {
                 //   log("Capturing screenshot...");

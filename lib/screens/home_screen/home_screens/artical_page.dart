@@ -487,7 +487,8 @@ class ArticlePageState extends State<ArticlePage> {
                   ? Colors.white
                   : Colors.black,
               fontWeight: FontWeight.w400,
-              fontSize: Platform.isIOS ? 17 : 16,
+              fontSize: Platform.isIOS ? 17 : 16
+              ,
             )));
         return "";
       },

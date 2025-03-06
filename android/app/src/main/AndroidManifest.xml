@@ -37,6 +37,9 @@
         <meta-data
             android:name="com.webengage.sdk.android.environment"
             android:value="in" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>  <!-- ✅ Correct: This is a Test App ID -->
 
         <activity
             android:name=".MainActivity"
@@ -56,6 +59,7 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
+
 
 <!--            <meta-data-->
 <!--                android:name="com.webengage.sdk.android.debug"-->

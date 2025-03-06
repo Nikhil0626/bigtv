@@ -1,4 +1,4 @@
-import 'dart:developer';
+// import 'dart:developer';
 
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
@@ -24,6 +24,7 @@ import 'globel_keys/globel_keys.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
+  // MobileAds.instance.initialize();
   await Firebase.initializeApp();
 
 
@@ -120,7 +121,7 @@ class _MyAppState extends State<MyApp> {
               return child!;
             },
             debugShowCheckedModeBanner: false,
-            // initialRoute: RoutesManager.splashScreen,
+            // home: BannerAdScreen(),
           ),
         ),
       ),
