@@ -182,6 +182,9 @@
         <meta-data
             android:name="com.webengage.sdk.android.key"
             android:value="in~~1341061ba" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3940256099942544~3347511713"/>
     </application>
     <queries>
         <intent>

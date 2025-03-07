@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
+import 'package:chotanews/screens/testing_screen/admob.dart';
 import 'package:chotanews/services/deviice_details.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'dart:io' show Platform;
@@ -24,9 +26,10 @@ import 'globel_keys/globel_keys.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   await Firebase.initializeApp();
-
+  MobileAds.instance.initialize();
   if (Platform.isIOS) {
     String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
     log('APNS Token: $apnsToken');
@@ -104,6 +107,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // TODO: implement initState
     super.initState();
+
   }
 
   @override
@@ -146,6 +150,7 @@ class _MyAppState extends State<MyApp> {
             //   );
             // },
             // home: WebDash(),
+            home: Admob(),
             debugShowCheckedModeBanner: false,
             initialRoute: RoutesManager.splashScreen,
           ),
