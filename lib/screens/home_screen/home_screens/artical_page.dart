@@ -11,6 +11,7 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -58,6 +59,9 @@ class ArticlePageState extends State<ArticlePage> {
             (MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom)
                 .toInt();
     log("bottom --- ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom}  top --- ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.top}");
+    _loadAd();
+
+
   }
   bool isFoldableDevice(BuildContext context) {
     final displayFeatures = MediaQuery.of(context).displayFeatures;
@@ -67,6 +71,33 @@ class ArticlePageState extends State<ArticlePage> {
     feature.type == DisplayFeatureType.hinge ||
         feature.type == DisplayFeatureType.fold);
   }
+
+  NativeAd? _nativeAd;
+  bool _isAdLoaded = false;
+
+
+  void _loadAd() {
+    _nativeAd = NativeAd(
+      adUnitId: 'ca-app-pub-3940256099942544/2247696110', // Test ID
+      request: const AdRequest(),
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _isAdLoaded = true;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          print('Native Ad failed to load: $error');
+          ad.dispose();
+          _isAdLoaded = false;
+        },
+      ),
+      nativeTemplateStyle: NativeTemplateStyle(templateType: TemplateType.medium)
+    );
+    _nativeAd!.load();
+  }
+
+
   @override
   Widget build(BuildContext context) {
     bool isFoldable = isFoldableDevice(context);
@@ -119,7 +150,11 @@ class ArticlePageState extends State<ArticlePage> {
                                   ),
                                 ),
                               )
-                            : widget.article.type == "Gallery"
+                            : widget.article.type == "addMob"
+                                ?_isAdLoaded
+                                    ? AdWidget(ad: _nativeAd!)
+                                    : SizedBox()
+                                :widget.article.type == "Gallery"
                                 ? FullPageCarousel(
                                     isHome: true,
                                     imageUrls: widget.article.gallery ?? [],

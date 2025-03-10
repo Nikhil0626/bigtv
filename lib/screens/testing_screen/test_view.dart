@@ -422,11 +422,13 @@
 // // }
 
 
-/*
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:kochava_measurement/kochava_measurement.dart';
 
 class BannerAdScreen extends StatefulWidget {
+  const BannerAdScreen({super.key});
+
   @override
   _BannerAdScreenState createState() => _BannerAdScreenState();
 }
@@ -434,28 +436,145 @@ class BannerAdScreen extends StatefulWidget {
 class _BannerAdScreenState extends State<BannerAdScreen> {
   late BannerAd _bannerAd;
   bool _isAdLoaded = false;
+  String _deviceId = 'N/A';
+
 
   @override
   void initState() {
     super.initState();
-    _loadBannerAd();
+
+    // _loadBannerAd();
+    _showInterstitialAd();
+    _loadInterstitialAd(); // Load an ad when the app starts
+
+    startSdk();
   }
+
+  InterstitialAd? _interstitialAd;
+
+  // Load the interstitial ad
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: 'ca-app-pub-3940256099942544/1033173712', // Test ID
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          setState(() {
+            _interstitialAd = ad;
+          });
+          print("Interstitial Ad Loaded!");
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print("Failed to load interstitial ad: $error");
+          _interstitialAd = null;
+        },
+      ),
+    );
+  }
+
+  // Show the interstitial ad
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd!.show();
+      _interstitialAd = null; // Dispose of the old ad and load a new one
+      _loadInterstitialAd();
+    } else {
+      print("Interstitial Ad not ready yet.");
+    }
+  }
+
+
+  Future<void> startSdk() async {
+    // Start the Kochava SDK.
+    KochavaMeasurement.instance.registerAndroidAppGuid("kochotanews-i0dt55qy");
+    KochavaMeasurement.instance.registerIosAppGuid("kochotanews-4zrr8u7az");
+    KochavaMeasurement.instance.setLogLevel(KochavaMeasurementLogLevel.Trace);
+    KochavaMeasurement.instance.start();
+
+    // Retrieve the Kochava Device ID.
+    String deviceId = await KochavaMeasurement.instance.retrieveInstallId();
+
+    if (!mounted) return;
+
+    setState(() {
+      _deviceId = deviceId;
+    });
+  }
+
 
   void _loadBannerAd() {
     _bannerAd = BannerAd(
       adUnitId: 'ca-app-pub-3940256099942544/9214589741',  // ✅ Test Ad Unit ID
       size: AdSize.banner,
+
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (add){
-          print("Banner ad loading to load: ${add.adUnitId..toString()} - ");
+          setState(() {
+            _isAdLoaded = true;
+          });
         },
         onAdFailedToLoad: (ad, error) {
-          print("Banner ad failed to load: ${error.code} - ${error.message}");
+         ad.dispose();
+         setState(() {
+           _isAdLoaded = true;
+         });
         },
       ),
     );
     _bannerAd.load();
+  }
+
+
+  RewardedAd? _rewardedAd;
+  int rewardPoints = 0; // Track user rewards
+  // Show Rewarded Ad
+  void _showRewardedAd() {
+    if (_rewardedAd != null) {
+      _rewardedAd!.fullScreenContentCallback = FullScreenContentCallback(
+        onAdDismissedFullScreenContent: (RewardedAd ad) {
+          print("✅ Rewarded Ad Closed!");
+          ad.dispose();
+          _loadRewardedAd(); // Load new ad
+        },
+        onAdFailedToShowFullScreenContent: (RewardedAd ad, AdError error) {
+          print("⚠️ Failed to show rewarded ad: $error");
+          ad.dispose();
+          _loadRewardedAd();
+        },
+      );
+
+      _rewardedAd!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+        setState(() {
+          rewardPoints += int.parse(reward.amount.toString()); // Increase user rewards
+        });
+        print("🎉 User earned ${reward.amount} ${reward.type}");
+      });
+
+      _rewardedAd = null; // Clear ad after showing
+    } else {
+      print("⚠️ Rewarded Ad not ready.");
+    }
+  }
+
+  // Load Rewarded Ad
+  void _loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId: 'ca-app-pub-3940256099942544/5224354917', // Test ID
+      request: AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (RewardedAd ad) {
+          setState(() {
+            _rewardedAd = ad;
+          });
+          print("✅ Rewarded Ad Loaded!");
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print("⚠️ Failed to load rewarded ad: $error");
+          _rewardedAd = null;
+        },
+      ),
+    );
   }
 
   @override
@@ -467,7 +586,8 @@ class _BannerAdScreenState extends State<BannerAdScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('AdMob Banner Ad')),
+
+      appBar: AppBar(title: Text('DeviceId: $rewardPoints'),),
       bottomNavigationBar: _isAdLoaded
           ? Container(
         height: _bannerAd.size.height.toDouble(),
@@ -475,7 +595,10 @@ class _BannerAdScreenState extends State<BannerAdScreen> {
         child: AdWidget(ad: _bannerAd),
       )
           : SizedBox(),
-      body: Center(child: Text('Hello, AdMob!')),
+      body: Center(
+      child: ElevatedButton(
+      onPressed: _loadRewardedAd,
+    child: const Text("Show Interstitial Ad"),))
     );
   }
-}*/
+}

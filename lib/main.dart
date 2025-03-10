@@ -2,6 +2,7 @@
 
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
+import 'package:chotanews/screens/testing_screen/test_view.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/register_providers.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
@@ -24,7 +26,7 @@ import 'globel_keys/globel_keys.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
-  // MobileAds.instance.initialize();
+  MobileAds.instance.initialize();
   await Firebase.initializeApp();
 
 
