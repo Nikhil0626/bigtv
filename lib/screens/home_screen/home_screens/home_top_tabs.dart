@@ -1,6 +1,9 @@
 import 'dart:developer';
 import 'dart:async';
+import 'dart:io';
 
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -56,7 +59,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: Colors.blue,
+        backgroundColor: Platform.isIOS?Colors.white:AppColors.appButtonColor,
         body: SafeArea(
           child: Consumer<FlipProvider>(
             builder: (context, flipProvider, __) {
@@ -96,8 +99,8 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
                                 controller: tabController,
                                 indicatorColor: Colors.blue,
                                 unselectedLabelColor: Colors.black,
-                                unselectedLabelStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
-                                labelStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
+                                unselectedLabelStyle:  fontStyle(fontSize: 18, fontWeight: FontWeight.w700),
+                                labelStyle: fontStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.blue),
                                 tabs: const [
                                   Tab(text: 'న్యూస్'),
                                   Tab(text: 'జిల్లాలు'),

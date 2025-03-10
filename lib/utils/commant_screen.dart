@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
@@ -34,7 +35,7 @@ void showComments(BuildContext context,  postId) {
 }
 
 class CommentSection extends StatefulWidget {
-  final HomeScreenModel postId;
+  final  postId;
 
   const CommentSection({super.key, required this.postId});
 
@@ -53,6 +54,9 @@ class _CommentSectionState extends State<CommentSection> {
 
   @override
   Widget build(BuildContext context) {
+    EdgeInsets gestureInsets = MediaQuery.of(context).systemGestureInsets;
+
+    String navigationMode = (gestureInsets.bottom > 0) ? "Gesture" : "Button";
     return Consumer<FlipProvider>(
       builder: (_, flipProvider, __) {
         return FractionallySizedBox(
@@ -112,7 +116,7 @@ class _CommentSectionState extends State<CommentSection> {
                       : flipProvider.allPostCommentModelList.isEmpty
                           ? Center(
                               child: Text(
-                                "No comments yet...",
+                                "No comments yet... ",
                                 style: fontStyle(
                                   fontSize: 14,
                                   color: const Color(0xff111928),
@@ -234,11 +238,8 @@ class _CommentSectionState extends State<CommentSection> {
 
                 // Comment Input Field
                 Padding(
-                  padding: const EdgeInsets.only(
-                    left: 12,
-                    right: 12,
-                    bottom: 10, // Moves above keyboard
-                  ),
+                  padding:  EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom,left: 12),
+
                   child: Row(
                     children: [
                       Expanded(
@@ -289,6 +290,7 @@ class _CommentSectionState extends State<CommentSection> {
 }
 
 
+
 class ExpandableTextWidget extends StatefulWidget {
   final String text;
 
@@ -303,62 +305,57 @@ class _ExpandableTextWidgetState extends State<ExpandableTextWidget> {
   bool isOverflowing = false;
 
   @override
-  void initState() {
-    super.initState();
-    _checkOverflow();
-  }
-
-  void _checkOverflow() {
-    final textSpan = TextSpan(
-      text: widget.text,
-      style: fontStyle(
-          fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
-    );
-    final textPainter = TextPainter(
-      text: textSpan,
-      maxLines: 4, // Limit to 4 lines
-      textDirection: TextDirection.ltr,
-    );
-
-    textPainter.layout(maxWidth: double.infinity);
-
-    setState(() {
-      isOverflowing = textPainter.didExceedMaxLines;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.text,
-          style: fontStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
-          ),
-          maxLines: isExpanded ? null : 4, // Initially collapsed
-          overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-        ),
-        if (isOverflowing) // Only show "Read More" if text exceeds 4 lines
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                isExpanded = !isExpanded;
-              });
-            },
-            child: Text(
-              isExpanded ? "Show Less" : "Read More",
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.normal,
-                color: Colors.blue,
-              ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Measure text overflow dynamically
+        final textSpan = TextSpan(
+          text: widget.text,
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
+        );
+
+        final textPainter = TextPainter(
+          text: textSpan,
+          maxLines: 4, // Check overflow for 4 lines
+          textDirection: TextDirection.ltr,
+        );
+
+        textPainter.layout(maxWidth: constraints.maxWidth);
+
+        bool isOverflowing = textPainter.didExceedMaxLines;
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              widget.text,
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
+              maxLines: isExpanded ? null : 4, // Initially collapsed
+              overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
             ),
-          ),
-      ],
+            if (isOverflowing) // Show "Read More" only if needed
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    isExpanded = !isExpanded;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    isExpanded ? "Show Less" : "Read More",
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.normal,
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }
+

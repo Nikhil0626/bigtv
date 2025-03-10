@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -8,9 +10,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
-// import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../globel_keys/app_router.dart';
+import '../../../main.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
 import '../../home_screen/home_models/home_screen_model.dart';
@@ -31,9 +33,13 @@ class GalleryScreen extends StatefulWidget {
 }
 
 class _GalleryScreenState extends State<GalleryScreen> {
+  int topSpace = 0;
+
   @override
   void initState() {
     context.read<VideosBloc>().add(GetAllVideos(type: widget.postId));
+    topSpace = (MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom)
+                .toInt();
     super.initState();
   }
 
@@ -298,16 +304,16 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
             }).toList(),
           ),
           Positioned(
-            bottom: widget.isHome ? 20 : 70,
+            bottom: widget.isHome ?Platform.isIOS? 45:20 : Platform.isIOS? 95:70+MediaQuery.of(context).padding.bottom+5,
             child:
 
             AnimatedSmoothIndicator(
               activeIndex: _currentIndex,
               count: widget.imageUrls.length,
               effect: ExpandingDotsEffect(
-                dotHeight: 8,
-                dotWidth: 8,
-                activeDotColor: Colors.white,
+                dotHeight: 7,
+                dotWidth: 7,
+                activeDotColor: Colors.cyan.withOpacity(.3),
                 dotColor: Colors.grey.shade400,
               ),
               onDotClicked: (index) {
@@ -318,8 +324,11 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
           if (!widget.isHome)
             Align(
               alignment: Alignment.bottomCenter,
-              child: GalleryPostBottomActions(
-                article: widget.postDetails!,
+              child: Padding(
+                padding:  EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom,),
+                child: GalleryPostBottomActions(
+                  article: widget.postDetails!,
+                ),
               ),
             ),
         ],

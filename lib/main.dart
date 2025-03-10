@@ -1,9 +1,8 @@
-import 'dart:developer';
+// import 'dart:developer';
 
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/screens/testing_screen/admob.dart';
-import 'package:chotanews/services/deviice_details.dart';
+import 'package:chotanews/screens/testing_screen/test_view.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/register_providers.dart';
@@ -17,7 +16,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
-import 'dart:io' show Platform;
+
 
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
@@ -26,23 +25,10 @@ import 'globel_keys/globel_keys.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MobileAds.instance.initialize();
   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
-  await Firebase.initializeApp();
   MobileAds.instance.initialize();
-  if (Platform.isIOS) {
-    String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-    log('APNS Token: $apnsToken');
-    getUniqueDeviceId(apnsToken??"");
-  }else if (Platform.isAndroid) {
-    var token = await FirebaseMessaging.instance.getToken();
-    if (token != null) {
-      getUniqueDeviceId(token);
-      log('FCM Token: $token');
-      _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
-      WebEngagePlugin.setPushToken(token);
-    }
-  }
+  await Firebase.initializeApp();
+
 
 
 
@@ -81,7 +67,7 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]).then((_) {
     runApp(MyApp());
-  });;
+  });
   subscribeToPushCallbacks(_webEngagePlugin);
 }
 @pragma('vm:entry-point')
@@ -90,10 +76,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 }
 
-void _onTokenInvalidated(Map<String, dynamic>? message) {
-  print("tokenInvalidated callback received $message");
-  WebEngagePlugin.setSecureToken("siva kumar", message.toString());
-}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -107,14 +89,13 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
   }
 
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
       designSize: const Size(360, 690), // Set according to your design
-      minTextAdapt: true,
+      // minTextAdapt: true,
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider<FlipProvider>(
@@ -141,18 +122,8 @@ class _MyAppState extends State<MyApp> {
             ) {
               return child!;
             },
-            // builder: (BuildContext context, Widget? child) {
-            //   ScreenUtil.init(context, designSize: const Size(385, 890));
-            //   return MediaQuery(
-            //     data: MediaQuery.of(context)
-            //         .copyWith(textScaler: const TextScaler.linear(1)),
-            //     child: child!,
-            //   );
-            // },
-            // home: WebDash(),
-            home: Admob(),
             debugShowCheckedModeBanner: false,
-            initialRoute: RoutesManager.splashScreen,
+            // home: BannerAdScreen(),
           ),
         ),
       ),

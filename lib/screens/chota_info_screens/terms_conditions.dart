@@ -50,7 +50,7 @@ class _TermsConditionsState extends State<TermsConditions> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding:  EdgeInsets.only(bottom: 16.0+ MediaQuery.of(context).padding.bottom,right: 16,top: 16,left: 16),
         child: ListView(
           children: [
              Text(style: fontStyle(fontSize: 14,fontWeight: FontWeight.normal),

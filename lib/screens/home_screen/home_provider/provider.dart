@@ -12,6 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../globel_keys/app_router.dart';
 import '../../../globel_keys/global_variables_data.dart';
+import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../home_models/all_post_comment_model.dart';
 import '../home_models/home_screen_model.dart';
@@ -103,10 +104,12 @@ class FlipProvider extends ChangeNotifier {
 
   Future<void> getArticles(
       {bool refresh = false, int index = 0, bool isMain = true}) async {
+
     SharedPreferences sp = await SharedPreferences.getInstance();
     String locationId = sp.getString("locationId") ?? "";
     String loginId = sp.getString("loginId") ?? "1";
     String deviceId = GlobalVariables().deviceId ?? "";
+    getUniqueDeviceId("",sp);
 
     if (refresh == true) {
       isLoading = true;
@@ -197,17 +200,63 @@ class FlipProvider extends ChangeNotifier {
     if (isTab == 0) {
       if (isRefresh) {
         log("siva $isTab");
-
-        // Clear the previous data properly
         mainArticlesData.clear();
         isLastPost = false; // Reset last post flag
-
-        // Refresh Stream
         mainArticlesController.sink.add([]);
       }
 
-      // Append new data and update stream
       mainArticlesData.addAll(data);
+      HomeScreenModel homeScreenData = const HomeScreenModel(
+        id: 90009,
+        author: "21",
+        title: "sfkbnsjfasnjkfsklfansbhjfgvasdjhfjsnkc sskdjvas",
+        content: "TG: రాష్ట్రంలో ఒకటో తరగతి నుంచే కృత్రిమ మేధపై విద్యార్థులకు అవగాహన కల్పించాలని ప్రభుత్వం నిర్ణయించింది.",
+        type: "addMob",
+        subType: "",
+        isSensitive: false,
+        isAd: false,
+        isBlurGallery: false,
+        isBigBlackStandard: false,
+        isTitleOnTop: false,
+        isLengthyPost: false,
+        isChotaBytes: false,
+        isStandardVideo: false,
+        isStandardFullVideo: false,
+        isBulletPost: false,
+        isStandardLink: false,
+        isBigStandardFullVideo: false,
+        isReporter: false,
+        isHomePage: false,
+        gallery: null,
+        imageUrl: ImageUrl(url: ""),
+        videoUrl: null,
+        vdoUrl: null,
+        status: null,
+        created: "2025-03-05T00:31:08",
+        totalLikes: 13,
+        isLiked: false,
+        totalComments: 0,
+        totalViews: 13529,
+        totalShares: 6,
+        categoryName: "తెలంగాణ,నేషనల్",
+        postOrder: 772760,
+        isStickyPost: false,
+        homepage: null,
+        downloadUrl: null,
+        bulletPoints: [],
+        links: [],
+        reportedBy: "రిపోర్టర్",
+        linkURLAndroid: "https://chotanews.page.link/yQ4hch8jAXu4hTm67",
+        linkURLIos: "https://chotanews.page.link/yQ4hch8jAXu4hTm67", categoryId: 56,
+      );
+
+
+          mainArticlesData.insert(5,homeScreenData);
+      log(mainArticlesData[5].title.toString());
+          mainArticlesData.insert(10,homeScreenData);
+          mainArticlesData.insert(15,homeScreenData);
+          mainArticlesData.insert(20,homeScreenData);
+          mainArticlesData.insert(25,homeScreenData);
 
       if (mainArticlesData.isEmpty) {
         isLastPost = true;
@@ -216,34 +265,22 @@ class FlipProvider extends ChangeNotifier {
       }
 
       log(mainArticlesData.length.toString());
-
-      // Send updated data to stream
-      mainArticlesController.add(data);
+      mainArticlesController.add(mainArticlesData);
       notifyListeners();
     } else if (isTab == 1) {
       if (isRefresh || fromLocation) {
         log("siva $isTab");
-
-        // Clear the previous data properly
         districtArticlesData.clear();
         isLastPost = false; // Reset last post flag
-
-        // Refresh Stream
         districtArticlesController.add([]);
       }
-
-      // Append new data and update stream
       districtArticlesData.addAll(data);
-
       if (districtArticlesData.isEmpty) {
         isLastPost = true;
       } else {
         lastPostIdInDistrict = districtArticlesData.last.id;
       }
-
       log(lastPostIdInDistrict.toString());
-
-      // Send updated data to stream
       districtArticlesController.add(data);
       notifyListeners();
     }
@@ -352,7 +389,7 @@ class FlipProvider extends ChangeNotifier {
 
 
   List<AllPostCommentModel> localCommentsList=[];
-  Future addCommentPostById(HomeScreenModel postData, comment) async {
+  Future addCommentPostById( postData, comment) async {
     isSendComment = true;
     notifyListeners();
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -421,7 +458,7 @@ class FlipProvider extends ChangeNotifier {
 
   List<String> isLikeList = [];
 
-  void isLikePost(HomeScreenModel val) async {
+  void isLikePost( val) async {
     log(val.id.toString());
     if (!isLikeList.contains(val.id.toString())) {
       isLikeList.add(val.id.toString());
