@@ -17,20 +17,14 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
-
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   MobileAds.instance.initialize();
   await Firebase.initializeApp();
-
-
-
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -41,23 +35,25 @@ Future<void> main() async {
   });
 
   // Check if you received the link via `getInitialLink` first
-  final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
+  final PendingDynamicLinkData? initialLink =
+      await FirebaseDynamicLinks.instance.getInitialLink();
 
   if (initialLink != null) {
     final Uri deepLink = initialLink.link;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mainNavigatorKey.currentContext != null) {
-        DynamicLinkService.handleDeepLink(mainNavigatorKey.currentContext!, deepLink);
+        DynamicLinkService.handleDeepLink(
+            mainNavigatorKey.currentContext!, deepLink);
       }
     });
-
   }
 
   FirebaseDynamicLinks.instance.onLink.listen(
-        (pendingDynamicLinkData) {
+    (pendingDynamicLinkData) {
       if (pendingDynamicLinkData != null) {
         final Uri deepLink = pendingDynamicLinkData.link;
-        DynamicLinkService.handleDeepLink(mainNavigatorKey.currentContext!, deepLink);
+        DynamicLinkService.handleDeepLink(
+            mainNavigatorKey.currentContext!, deepLink);
       }
     },
   );
@@ -70,12 +66,11 @@ Future<void> main() async {
   });
   subscribeToPushCallbacks(_webEngagePlugin);
 }
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   WebEngagePlugin.onPushMessageReceive(message.data);
-
 }
-
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});

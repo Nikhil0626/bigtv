@@ -273,14 +273,38 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                         );
                       } else if (state is ErrorDistrictsState) {
                         return Center(
-                          child: Text(
-                            "Please reload",
-                            style: fontStyle(color: Colors.red),
+                         child:  InkWell(
+                            onTap: () {
+                              context.read<DistrictSelectionBloc>().add(GetAllDistricts());
+                            },
+                            child: Container(
+                              height: 100,
+                              // width:40,
+                              // decoration: const BoxDecoration(
+                              //   color: AppColors.appButtonColor,
+                              //   borderRadius: BorderRadius.all(Radius.circular(8)),
+                              // ),
+                              width: 130,
+                              alignment: Alignment.center,
+                              child: Column(
+                                children: [
+                                  Icon(Icons.refresh,color: Colors.lightBlue,),
+                                  height(height: 5),
+                                  Text(
+                                    "Retry",
+                                    style: fontStyle(
+                                        fontSize: 18,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         );
                       } else {
                         return const Center(
-                          child: AppLoadingScreen(),
+                          // child: Navigator.pushNamed(context, routeName),
                         );
                       }
                     },

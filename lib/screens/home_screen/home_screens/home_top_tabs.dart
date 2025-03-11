@@ -2,11 +2,13 @@ import 'dart:developer';
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../globel_keys/global_variables_data.dart';
 import '../../../services/permission_handler_services.dart';
 import '../../../utils/bottom_navigation_items.dart';
 import '../home_provider/provider.dart';
@@ -30,6 +32,9 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
 
   @override
   void initState() {
+    EventRepo().sendEvent({"key":"opened_app",
+
+        "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now()}});
     super.initState();
     requestNotificationPermission();
     context.read<FlipProvider>().isTabChange(int.parse(widget.tab), context, isMainPage: true);
