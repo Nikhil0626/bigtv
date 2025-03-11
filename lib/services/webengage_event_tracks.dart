@@ -9,6 +9,36 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 import '../globel_keys/global_variables_data.dart';
 import '../main.dart';
 
+/// Local Events For New Implementation
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/// Webengage events tracking
+
 void sendAndroidDeviceDetails(AndroidDeviceInfo details) {
   WebEngagePlugin.trackEvent('device_details', {
     "device_id": details.id.toString(),
@@ -187,3 +217,5 @@ void connectViaPostLink(){
     "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
   });
 }
+
+

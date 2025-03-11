@@ -455,7 +455,8 @@ class _BannerAdScreenState extends State<BannerAdScreen> {
   // Load the interstitial ad
   void _loadInterstitialAd() {
     InterstitialAd.load(
-      adUnitId: 'ca-app-pub-3940256099942544/1033173712', // Test ID
+      // adUnitId: 'ca-app-pub-4822261519089529/9923394963', // Test ID
+      adUnitId: 'ca-app-pub-4822261519089529/4402371323', // Test ID
       request: AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (InterstitialAd ad) {
