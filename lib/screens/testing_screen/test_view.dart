@@ -421,7 +421,6 @@
 // //   }
 // // }
 
-
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:kochava_measurement/kochava_measurement.dart';
@@ -437,7 +436,6 @@ class _BannerAdScreenState extends State<BannerAdScreen> {
   late BannerAd _bannerAd;
   bool _isAdLoaded = false;
   String _deviceId = 'N/A';
-
 
   @override
   void initState() {
@@ -483,7 +481,6 @@ class _BannerAdScreenState extends State<BannerAdScreen> {
     }
   }
 
-
   Future<void> startSdk() async {
     // Start the Kochava SDK.
     KochavaMeasurement.instance.registerAndroidAppGuid("kochotanews-i0dt55qy");
@@ -501,30 +498,28 @@ class _BannerAdScreenState extends State<BannerAdScreen> {
     });
   }
 
-
   void _loadBannerAd() {
     _bannerAd = BannerAd(
-      adUnitId: 'ca-app-pub-3940256099942544/9214589741',  // ✅ Test Ad Unit ID
+      adUnitId: 'ca-app-pub-3940256099942544/9214589741', // ✅ Test Ad Unit ID
       size: AdSize.banner,
 
       request: const AdRequest(),
       listener: BannerAdListener(
-        onAdLoaded: (add){
+        onAdLoaded: (add) {
           setState(() {
             _isAdLoaded = true;
           });
         },
         onAdFailedToLoad: (ad, error) {
-         ad.dispose();
-         setState(() {
-           _isAdLoaded = true;
-         });
+          ad.dispose();
+          setState(() {
+            _isAdLoaded = true;
+          });
         },
       ),
     );
     _bannerAd.load();
   }
-
 
   RewardedAd? _rewardedAd;
   int rewardPoints = 0; // Track user rewards
@@ -544,9 +539,11 @@ class _BannerAdScreenState extends State<BannerAdScreen> {
         },
       );
 
-      _rewardedAd!.show(onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+      _rewardedAd!.show(
+          onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
         setState(() {
-          rewardPoints += int.parse(reward.amount.toString()); // Increase user rewards
+          rewardPoints +=
+              int.parse(reward.amount.toString()); // Increase user rewards
         });
         print("🎉 User earned ${reward.amount} ${reward.type}");
       });
@@ -586,19 +583,20 @@ class _BannerAdScreenState extends State<BannerAdScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      appBar: AppBar(title: Text('DeviceId: $rewardPoints'),),
-      bottomNavigationBar: _isAdLoaded
-          ? Container(
-        height: _bannerAd.size.height.toDouble(),
-        width: _bannerAd.size.width.toDouble(),
-        child: AdWidget(ad: _bannerAd),
-      )
-          : SizedBox(),
-      body: Center(
-      child: ElevatedButton(
-      onPressed: _loadRewardedAd,
-    child: const Text("Show Interstitial Ad"),))
-    );
+        appBar: AppBar(
+          title: Text('DeviceId: $rewardPoints'),
+        ),
+        bottomNavigationBar: _isAdLoaded
+            ? Container(
+                height: _bannerAd.size.height.toDouble(),
+                width: _bannerAd.size.width.toDouble(),
+                child: AdWidget(ad: _bannerAd),
+              )
+            : SizedBox(),
+        body: Center(
+            child: ElevatedButton(
+          onPressed: _loadRewardedAd,
+          child: const Text("Show Interstitial Ad"),
+        )));
   }
 }
