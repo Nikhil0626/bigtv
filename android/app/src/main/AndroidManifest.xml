@@ -39,7 +39,7 @@
             android:value="in" />
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713"/>  <!-- ✅ Correct: This is a Test App ID -->
+            android:value="ca-app-pub-4822261519089529~7079340869"/>  <!-- ✅ Correct: This is a Test App ID -->
 
         <activity
             android:name=".MainActivity"
