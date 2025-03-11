@@ -8,6 +8,11 @@ class BaseUrls {
 
   static const String baseUrlAws = "http://35.174.155.208/api";
 
+  /// event states
+   static const String baseUrlAwsDev = "http://35.170.191.53/api";
+   static const String eventUrl = "/logs";
+
+
 
   static const String getNews = "/allposts";
   static const String getPostById = "/post";

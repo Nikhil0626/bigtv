@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,11 +16,12 @@ Future<String?> getUniqueDeviceId(String token, SharedPreferences sp,) async {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
     GlobalVariables().platForm = androidInfo.brand;
     GlobalVariables().deviceId = androidInfo.id;
-    log("Android Details ---- $androidInfo");
-    log("Android Details ---- ${sp.getString("deviceName").toString()}");
+
 
     if (sp.getString("deviceName").toString() != "true") {
       sendAndroidDeviceDetails( androidInfo);
+     EventRepo().sendEvent({"key":"device_details",
+         "data":androidInfo.data});
       sp.setString("deviceName", "true");
     }
     // return androidInfo.id;

@@ -14,6 +14,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:social_sharing_plus/social_sharing_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../globel_keys/global_variables_data.dart';
 import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
@@ -23,6 +24,8 @@ import '../../utils/app_spaces.dart';
 import '../../utils/commant_screen.dart';
 import 'botton_actions.dart';
 import 'dart:typed_data';
+
+import 'home_repo/event_repo.dart';
 
 class PostBottomActions extends StatelessWidget {
   final String postType;
@@ -54,6 +57,8 @@ class PostBottomActions extends StatelessWidget {
             child: InkWell(
               onTap: () {
                 log("Refresh");
+                EventRepo().sendEvent({"key":"reload",
+                  "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now().toString()}});
                 flipProvider.getArticles(refresh: true);
               },
               child: Column(
@@ -98,6 +103,10 @@ class PostBottomActions extends StatelessWidget {
               label: 'లైక్',
               isLike: flipProvider.isLikeList.contains(article.id.toString()),
               onTap: () {
+                EventRepo().sendEvent({"key":"liked_article",
+
+                  "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now().toString()}});
+
                 log("Like");
                 flipProvider.isLikePost(article);
               },
@@ -107,6 +116,7 @@ class PostBottomActions extends StatelessWidget {
             flex: 1,
             child: InkWell(
               onTap: () async {
+
                 if(Platform.isIOS){
                   sendShareDetails(context.read<FlipProvider>().userId,
                       article.id, article.content.toString());
@@ -279,6 +289,11 @@ class PostBottomActions extends StatelessWidget {
               onTap: () {
                 log("Comment --- ${context.read<AuthProvider>().loginType}");
                 showComments(context, article);
+                EventRepo().sendEvent({"key":"comments",
+
+                  "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now().toString()}});
+
+
               },
             ),
           ),
@@ -292,6 +307,8 @@ class PostBottomActions extends StatelessWidget {
               icon: "assets/svg/share.svg",
               label: 'షేర్',
               onTap: () {
+
+
                 sendShareDetails(context.read<FlipProvider>().userId,
                     article.id, article.content.toString());
                 if (article.type == "Standard" || article.type == "Image") {
@@ -299,6 +316,10 @@ class PostBottomActions extends StatelessWidget {
                 } else if (article.type == "Gallery") {
                   createAndSharePdf(context, article);
                 }
+                EventRepo().sendEvent({"key":"share_via_articles",
+
+                  "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now().toString()}});
+
               },
             ),
           ),
