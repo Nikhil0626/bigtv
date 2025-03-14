@@ -9,6 +9,7 @@ import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
+import '../../Auth_module/auth_provider/auth_provider.dart';
 import '../video_bloc/videos_bloc.dart';
 import '../video_bloc/videos_event.dart';
 import '../video_bloc/videos_state.dart';
@@ -27,6 +28,7 @@ class _MyagazinesScreen extends State<MyagazinesScreen> {
   @override
   void initState() {
     print(widget.postId);
+    context.read<AuthProvider>().sendEvent("MagazinesPage");
     context.read<VideosBloc>().add(GetAllVideos(type: widget.postId));
     super.initState();
   }

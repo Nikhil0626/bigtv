@@ -7,6 +7,9 @@ import 'package:mobile_number/mobile_number.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 
+import '../globel_keys/global_variables_data.dart';
+import '../screens/home_screen/home_repo/event_repo.dart';
+
 Future<void> requestManageStoragePermission() async {
   if (Platform.isAndroid) {
     var status = await Permission.manageExternalStorage.status;
@@ -73,6 +76,17 @@ Future<void> getAddressFromLatLng(double latitude, double longitude) async {
         await placemarkFromCoordinates(latitude, longitude);
     print("location ------ $placemarks");
     Placemark place = placemarks[0];
+
+    EventRepo().sendEvent({"key":"live_location",
+      "data":{
+        "device_id": "${GlobalVariables().deviceId}",
+        "country": "${place.country}",
+        "state": "${place.administrativeArea}",
+        "district": place.locality.toString(),
+        "mandel": "${place.subLocality}",
+        "village": "",
+      }
+    });
     sendLiveLocationDetails(place);
   } catch (e) {
     print(e);

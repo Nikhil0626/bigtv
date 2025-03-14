@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Chota News</string>
+    <string name="facebook_app_id">555454566786542</string>
+    <string name="fb_login_protocol_scheme">fb555454566786542</string>
+</resources>

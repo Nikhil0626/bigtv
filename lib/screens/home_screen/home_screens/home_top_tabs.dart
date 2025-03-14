@@ -7,6 +7,7 @@ import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../globel_keys/global_variables_data.dart';
 import '../../../services/permission_handler_services.dart';
@@ -32,9 +33,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
 
   @override
   void initState() {
-    EventRepo().sendEvent({"key":"opened_app",
 
-        "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now()}});
     super.initState();
     requestNotificationPermission();
     context.read<FlipProvider>().isTabChange(int.parse(widget.tab), context, isMainPage: true);
@@ -43,7 +42,6 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
       vsync: this,
       initialIndex: int.parse(widget.tab),
     );
-
     log(widget.tab);
   }
 
@@ -139,4 +137,6 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
       ),
     );
   }
+
+
 }

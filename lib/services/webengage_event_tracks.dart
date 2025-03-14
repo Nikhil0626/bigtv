@@ -8,34 +8,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../globel_keys/global_variables_data.dart';
 import '../main.dart';
-
-/// Local Events For New Implementation
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import '../screens/home_screen/home_repo/event_repo.dart';
 
 /// Webengage events tracking
 
@@ -118,12 +91,13 @@ void sandFlipData(userId,count, int isTab,){
 
 
 void districtLocationUpdate(locationName,locationId,userId){
-  WebEngagePlugin.trackEvent('district_location', {
-    "device_id": "${GlobalVariables().deviceId}",
-    "location_name": locationName??"",
-    "location_id": "${locationId??""}",
-    "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
-  });
+
+  // WebEngagePlugin.trackEvent('district_location', {
+  //   "device_id": "${GlobalVariables().deviceId}",
+  //   "location_name": locationName??"",
+  //   "location_id": "${locationId??""}",
+  //   "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
+  // });
 }
 
 
@@ -209,6 +183,7 @@ void connectViaNotification(){
 
 
 void connectViaPostLink(){
+
   WebEngagePlugin.trackEvent('connect_via_postlink', {
     "device_id": "${GlobalVariables().deviceId}",
     "date_time": DateTime.now().toString(),

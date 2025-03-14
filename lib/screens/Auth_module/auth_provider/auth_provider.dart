@@ -11,6 +11,7 @@ import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/local_data.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_toasts.dart';
+import '../../home_screen/home_repo/event_repo.dart';
 import '../auth_repo/auth_repo.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -22,6 +23,18 @@ class AuthProvider extends ChangeNotifier {
 
   bool isLoading = false;
   String className = "";
+
+  void sendEvent(pageName)async{
+    SharedPreferences sp  = await SharedPreferences.getInstance();
+
+
+    EventRepo().sendEvent({"key":"visited_page",
+      "data":{
+      "device_id": GlobalVariables().deviceId,
+        "userId":sp.getString("loginId")??"",
+        "visitedPage":pageName,
+        }});
+  }
 
   Future sendOtp(phoneNumber, context) async {
     isLoading = true;
@@ -36,6 +49,18 @@ class AuthProvider extends ChangeNotifier {
       log(body.toString());
       Response response = await AuthRepo().sendOtp(body);
       if (response.statusCode == 200) {
+        EventRepo().sendEvent({
+          "key": "otp_verify",
+          "data": {
+            "device_id": "${GlobalVariables().deviceId}",
+            "isVerify": false,
+            "mobileNumber":mobileNumberController.text,
+            "otp": currentOtp.toString(),
+            "userId":""
+          }
+        });
+
+
         log(response.data.toString());
         CustomToast.showSuccessToast(msg: response.data['message']);
         currentOtp = response.data['Otp'].toString();
@@ -84,6 +109,25 @@ class AuthProvider extends ChangeNotifier {
       Response response = await AuthRepo().validateOtp(body);
       log(response.data.toString());
       if (response.statusCode == 200 && response.data['success'] == true) {
+        EventRepo().sendEvent({
+          "key": "otp_verify",
+          "data": {
+            "device_id": "${GlobalVariables().deviceId}",
+            "isVerify": true,
+            "mobileNumber":mobileNumberController.text,
+            "otp": currentOtp.toString(),
+            "userId":response.data['data']['id'].toString()
+          }
+        });
+
+        EventRepo().sendEvent({
+          "key": "login_skip",
+          "data": {
+            "device_id": "${GlobalVariables().deviceId}",
+            "isLogin": true,
+            "userId":response.data['data']['id'].toString()
+          }
+        });
         className = "Login";
         WebEngagePlugin.userLogin(response.data['data']['id'].toString());
         WebEngagePlugin.setUserPhone(mobileNumber.toString());
@@ -98,6 +142,7 @@ class AuthProvider extends ChangeNotifier {
         preferences.setString("referralCode", response.data['code'].toString());
         isLoading = false;
         loginStatus(LoginStatus.location, context);
+
         mobileNumberController.text = "";
         notifyListeners();
       } else {

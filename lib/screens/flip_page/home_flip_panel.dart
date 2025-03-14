@@ -237,7 +237,6 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   @override
   Widget build(BuildContext context) {
-    print("bottom ---> ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom} top --->  ${MediaQuery.of(mainNavigatorKey.currentContext!).padding.top}");
 
     if (!_waitingForRefresh) {
       if (widgets == null || _availableItems == 0) {
@@ -381,10 +380,27 @@ class _FlipPanelState<T> extends State<FlipPanel>
         isImages = true;
       });
     }
+
+    if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
+        "addMob") {
+      log("load ads for showing");
+      context.read<FlipProvider>().loadAds();
+
+    }else if(context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].type ==
+        "addMob"){
+      context.read<FlipProvider>().closeAds();
+
+    }
     if(_currentIndex > 0 && _direction == FlipDirection.up) {
-      context.read<FlipProvider>().isShowTopBottomChange(true);
+      context.read<FlipProvider>().isShowTopBottomChange(true,);
     }else{
-      context.read<FlipProvider>().isShowTopBottomChange(false);
+      context.read<FlipProvider>().isShowTopBottomChange(false,);
+    }
+
+    if(_direction == FlipDirection.up){
+      context.read<FlipProvider>().flipEvent(true,isHome: true,_currentIndex + 1);
+    }else{
+      context.read<FlipProvider>().flipEvent(false,isHome: true,_currentIndex - 1);
     }
 
     if (_dragExtent == 0.0) {

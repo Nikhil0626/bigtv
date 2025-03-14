@@ -31,6 +31,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   void initState()  {
     super.initState();
+    context.read<AuthProvider>().sendEvent("LoginPage");
   }
 
   @override

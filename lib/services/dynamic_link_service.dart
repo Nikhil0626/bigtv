@@ -9,6 +9,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import '../globel_keys/app_router.dart';
+import '../globel_keys/global_variables_data.dart';
+import '../screens/home_screen/home_repo/event_repo.dart';
 import '../screens/individual_post_view/individual_post.dart';
 import '../utils/local_data.dart';
 
@@ -40,9 +42,15 @@ class DynamicLinkService {
     log("Navigating to : $deepLink");
 
     if (postId != null && postId.isNotEmpty) {
+      EventRepo().sendEvent({"key":"dynamic_link_app_open",
+        "data":{
+          "device_id": GlobalVariables().deviceId,
+          "userId":sharedPreferences.getString('loginId')??"",
+          "postId":postId.toString(),
+        }});
       log("Navigating to Post ID: $postId");
       if (!context.mounted) return;
-      Navigator.pushNamed(mainNavigatorKey.currentContext!, RoutesManager.homeScreen,arguments: {"postId":"$postId","tab":"0"});
+      Navigator.pushNamed(mainNavigatorKey.currentContext!, RoutesManager.homeScreen,arguments: {"postId":postId,"tab":"0"});
       return;
     }
 

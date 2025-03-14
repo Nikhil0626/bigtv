@@ -5,7 +5,9 @@ import 'package:chotanews/screens/home_screen/home_repo/home_repo.dart';
 import 'package:chotanews/utils/local_data.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:rxdart/rxdart.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,8 +16,10 @@ import '../../../globel_keys/app_router.dart';
 import '../../../globel_keys/global_variables_data.dart';
 import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
+import '../../Auth_module/auth_provider/auth_provider.dart';
 import '../home_models/all_post_comment_model.dart';
 import '../home_models/home_screen_model.dart';
+import '../home_repo/event_repo.dart';
 
 class FlipProvider extends ChangeNotifier {
   List<HomeScreenModel> mainArticlesData = [];
@@ -30,16 +34,64 @@ class FlipProvider extends ChangeNotifier {
 
   String get deviceId => _deviceId!;
 
+
+
+  NativeAd? _nativeAd;
+  BannerAd? _bannerAd;
+  bool _isAdLoaded = false;
+
+  bool get isAdLoaded => _isAdLoaded;
+  NativeAd? get nativeAd => _nativeAd;
+  BannerAd? get bannerAd => _bannerAd;
+
+  void closeAds() {
+    // nativeAd!.dispose();
+    _isAdLoaded = false;
+    notifyListeners();
+  }
+  void loadAds() {
+
+    // _bannerAd = BannerAd(
+    //   adUnitId: 'ca-app-pub-2405357352181832/9297875326',
+    //   size: AdSize.banner,
+    //   request: AdRequest(),
+    //   listener: BannerAdListener(),
+    // )..load();
+    // _nativeAd!.dispose();
+
+  }
+
   void isTabChange(val, BuildContext context, {bool isMainPage = false}) {
+    if(isTab ==0){
+      context.read<AuthProvider>().sendEvent("HomePage");
+
+    }else{
+      context.read<AuthProvider>().sendEvent("DistrictPage");
+
+    }
     isTab = val;
     if (!isMainPage) {
       notifyListeners();
     }
   }
 
-  void isShowTopBottomChange(val) {
+  void isShowTopBottomChange(val,) {
     print("set change value $val");
     isShowTopBottomView = !val;
+    notifyListeners();
+  }
+
+  void flipEvent(val,  index,{bool isHome =false}) {
+    print("set change value $val");
+    isShowTopBottomView = !val;
+    EventRepo().sendEvent({"key":"flip_count",
+
+      "data":{"deviceId": GlobalVariables().deviceId,
+        "userId":_userId,
+        "isFlip":val,
+        "isHome":isHome,
+        "postId":isHome?mainArticlesData[index].id.toString():districtArticlesData[index].id.toString(),
+      }});
     notifyListeners();
   }
 
@@ -49,6 +101,7 @@ class FlipProvider extends ChangeNotifier {
     _userId = await getUserid();
     log(_userId.toString());
     flipCount = flipCount + 1;
+
     sandFlipData(userId, flipCount, isTab,);
   }
 
@@ -70,8 +123,12 @@ class FlipProvider extends ChangeNotifier {
   bool isRefresh = false;
 
   Future getIndividualPost(postId) async {
+
+    SharedPreferences sp = await SharedPreferences.getInstance();
     log("Push Notification Received: get Call ${postId.toString()}");
     try {
+
+
       Response response = await HomeRepo().getSinglePost(postId);
       log(response.data.toString());
       List data = response.data['posts'];
@@ -109,7 +166,7 @@ class FlipProvider extends ChangeNotifier {
     String locationId = sp.getString("locationId") ?? "";
     String loginId = sp.getString("loginId") ?? "1";
     String deviceId = GlobalVariables().deviceId ?? "";
-    getUniqueDeviceId("",sp);
+    getUniqueDeviceId("",);
 
     if (refresh == true) {
       isLoading = true;
@@ -209,10 +266,10 @@ class FlipProvider extends ChangeNotifier {
       HomeScreenModel homeScreenData = const HomeScreenModel(
         id: 90009,
         author: "21",
-        title: "sfkbnsjfasnjkfsklfansbhjfgvasdjhfjsnkc sskdjvas",
-        content: "TG: రాష్ట్రంలో ఒకటో తరగతి నుంచే కృత్రిమ మేధపై విద్యార్థులకు అవగాహన కల్పించాలని ప్రభుత్వం నిర్ణయించింది.",
+        title: "ads",
+        content: "ads",
         type: "addMob",
-        subType: "",
+        subType: "banner",
         isSensitive: false,
         isAd: false,
         isBlurGallery: false,
@@ -241,7 +298,8 @@ class FlipProvider extends ChangeNotifier {
         categoryName: "తెలంగాణ,నేషనల్",
         postOrder: 772760,
         isStickyPost: false,
-        homepage: null,
+        homepage:
+        [],
         downloadUrl: null,
         bulletPoints: [],
         links: [],
@@ -459,13 +517,33 @@ class FlipProvider extends ChangeNotifier {
   List<String> isLikeList = [];
 
   void isLikePost( val) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? userId = sp.getString("loginId");
     log(val.id.toString());
     if (!isLikeList.contains(val.id.toString())) {
+      EventRepo().sendEvent({
+        "key": "liked_article",
+        "data": {
+          "device_id": "${GlobalVariables().deviceId}",
+          "userId":userId,
+          "postId":val.id.toString(),
+          "isLike":true
+        }
+      });
       isLikeList.add(val.id.toString());
       sendLikeDetails(userId, val, true,val.title.toString());
       log(isLikeList.toString());
     } else {
       isLikeList.remove(val.id.toString());
+      EventRepo().sendEvent({
+        "key": "liked_article",
+        "data": {
+          "device_id": "${GlobalVariables().deviceId}",
+          "userId":userId,
+          "postId":val.id.toString(),
+          "isLike":false
+        }
+      });
       sendLikeDetails(userId, val.id.toString(), false,val.title.toString());
       log(isLikeList.toString());
     }

@@ -1,5 +1,7 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../globel_keys/global_variables_data.dart';
+import '../screens/home_screen/home_repo/event_repo.dart';
 import 'app_enums.dart';
 
 
@@ -13,6 +15,7 @@ Future<void> saveLoginStatus(LoginStatus status) async {
 Future<LoginStatus> getLoginStatus() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   String? status = prefs.getString('loginStatus');
+
 
   if (status != null) {
     return LoginStatus.values.firstWhere((e) => e.toString() == status, orElse: () => LoginStatus.none);

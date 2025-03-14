@@ -1,3 +1,4 @@
+import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:chotanews/screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
 import 'package:chotanews/screens/chota_info_screens/privacy_policy.dart';
@@ -16,6 +17,7 @@ import '../../globel_keys/app_router.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_enums.dart';
 import '../Auth_module/auth_provider/auth_provider.dart';
+import '../home_screen/home_repo/event_repo.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -27,9 +29,11 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   LoginStatus loginStatus = LoginStatus.none;
 
+
   @override
   void initState() {
     getLogin();
+    context.read<AuthProvider>().sendEvent("SettingPage");
     super.initState();
   }
 
@@ -273,11 +277,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 )),
             InkWell(
               onTap: () async {
+
                 logoutUser();
                 context
                     .read<AuthProvider>()
                     .loginStatus(LoginStatus.none, context);
                 SharedPreferences sp = await SharedPreferences.getInstance();
+                String? userId =  sp.getString("loginId",);
+                EventRepo().sendEvent({
+                  "key": "logout",
+                  "data": {
+                    "device_id": "${GlobalVariables().deviceId}",
+                    "logout":true,
+                    "userId": userId??"",
+                  }
+                });
                 await sp.setString("loginId", "");
                 await sp.clear();
                 Navigator.pushNamedAndRemoveUntil(

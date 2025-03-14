@@ -44,6 +44,7 @@ class _OtpScreenState extends State<OtpScreen> {
     enteredOtp = "";
     startCountdown();
     _listenForSms();
+    context.read<AuthProvider>().sendEvent("OtpPage");
   }
 
   void _listenForSms() async {
