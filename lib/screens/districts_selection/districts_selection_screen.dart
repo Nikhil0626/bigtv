@@ -31,9 +31,11 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
     context.read<DistrictSelectionBloc>().add(GetAllDistricts());
     super.initState();
   }
+
   Future<bool> _onWillPop() async {
     return false;
   }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -52,26 +54,24 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: Container(
-
                     margin: const EdgeInsets.only(top: 16),
                     decoration: BoxDecoration(
                         color: AppColors.appButtonColor,
-
                         borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.all(14.0),
                     child: Row(
                       children: [
-                        if(widget.className=="Home")
-                        InkWell(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: const Icon(
-                            color: Colors.white,
-                            Icons.arrow_back_ios,
-                            size: 18,
+                        if (widget.className == "Home")
+                          InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: const Icon(
+                              color: Colors.white,
+                              Icons.arrow_back_ios,
+                              size: 18,
+                            ),
                           ),
-                        ),
                         Expanded(
                           child: Text(
                             "మీ ప్రాంతాన్ని ఎంచుకోండి, ప్రతిరోజు మీ ఊరిలో ఏం జరుగుతుందో తెలుసుకోండి.",
@@ -90,8 +90,8 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                 ),
                 height(height: 16.0),
                 Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 15.0, vertical: 2.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0, vertical: 2.0),
                   child: Container(
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
@@ -140,8 +140,8 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                               print(value.toString());
                               context.read<DistrictSelectionBloc>().add(
                                   SearchDistricts(
-                                      searchName:
-                                          searchDistrictController.text.trim()));
+                                      searchName: searchDistrictController.text
+                                          .trim()));
                             },
                           ),
                         ),
@@ -163,8 +163,8 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                   ),
                 ),
                 Expanded(
-                  child:
-                      BlocConsumer<DistrictSelectionBloc, DistrictSelectionState>(
+                  child: BlocConsumer<DistrictSelectionBloc,
+                      DistrictSelectionState>(
                     builder: (context, state) {
                       if (state is LoadingDistrictsState ||
                           state is SubmitLoadingState) {
@@ -179,7 +179,8 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                               child: ListView.builder(
                                 itemCount: state.filterDistrictsList.length,
                                 itemBuilder: (context, index) {
-                                  final district = state.filterDistrictsList[index];
+                                  final district =
+                                      state.filterDistrictsList[index];
 
                                   final isSelected = state.selectedDistrictList
                                       .contains(district.id.toString());
@@ -189,14 +190,17 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                         vertical: 8.0, horizontal: 20.0),
                                     child: GestureDetector(
                                       onTap: () {
-                                        context.read<DistrictSelectionBloc>().add(
+                                        context
+                                            .read<DistrictSelectionBloc>()
+                                            .add(
                                               SelectedDistrictsUpdate(
                                                   selectedDistrict:
                                                       district.id.toString()),
                                             );
                                       },
                                       child: SizedBox(
-                                        width: MediaQuery.of(context).size.width,
+                                        width:
+                                            MediaQuery.of(context).size.width,
                                         height: 40,
                                         child: Padding(
                                           padding: const EdgeInsets.symmetric(
@@ -216,7 +220,8 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                               Icon(
                                                 isSelected
                                                     ? Icons.check_circle
-                                                    : Icons.check_circle_outline,
+                                                    : Icons
+                                                        .check_circle_outline,
                                                 color: Colors.lightBlue,
                                                 size: 22,
                                               ),
@@ -235,14 +240,15 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                 alignment: Alignment.bottomCenter,
                                 child: InkWell(
                                   onTap: () {
-                                    if (state.selectedDistrictList.length<2) {
+                                    if (state.selectedDistrictList.length < 2) {
                                       CustomToast.showErrorToast(
                                           msg: "Select at least two districts");
                                     } else {
                                       log("Class Name  ${widget.className}");
                                       context.read<DistrictSelectionBloc>().add(
                                           SubmitDistricts(
-                                              className: widget.className,context: context));
+                                              className: widget.className,
+                                              context: context));
                                     }
                                   },
                                   child: Container(
@@ -251,9 +257,10 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                                     padding: const EdgeInsets.symmetric(
                                         vertical: 10.0, horizontal: 20.0),
                                     decoration: BoxDecoration(
-                                      color: state.selectedDistrictList.length<2
-                                          ? Colors.grey
-                                          : Colors.lightBlue,
+                                      color:
+                                          state.selectedDistrictList.length < 2
+                                              ? Colors.grey
+                                              : Colors.lightBlue,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: Text(
@@ -272,50 +279,61 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
                           ],
                         );
                       } else if (state is ErrorDistrictsState) {
-                        return Center(
-                         child:  InkWell(
-                            onTap: () {
-                              context.read<DistrictSelectionBloc>().add(GetAllDistricts());
-                            },
-                            child: Container(
-                              height: 100,
-                              // width:40,
-                              // decoration: const BoxDecoration(
-                              //   color: AppColors.appButtonColor,
-                              //   borderRadius: BorderRadius.all(Radius.circular(8)),
-                              // ),
-                              width: 130,
-                              alignment: Alignment.center,
-                              child: Column(
-                                children: [
-                                  Icon(Icons.refresh,color: Colors.lightBlue,),
-                                  height(height: 5),
-                                  Text(
-                                    "Retry",
-                                    style: fontStyle(
-                                        fontSize: 18,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.w600),
+                        return Align(
+                          alignment: Alignment.topCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 210),
+                            child: InkWell(
+                              onTap: () {
+                                context.read<DistrictSelectionBloc>().add(GetAllDistricts());
+                              },
+                              child: Container(
+                                height: 30,
+                                width: 100,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(25),
+                                  color: Colors.lightBlue,
+                                ),
+                                alignment: Alignment.center,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(Icons.refresh, color: Colors.white, size: 20),
+                                      width(width: 5),
+                                      Text(
+                                        "Retry",
+                                        style: fontStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
                         );
+
+
+
                       } else {
                         return const Center(
-                          // child: Navigator.pushNamed(context, routeName),
-                        );
+                            // child: Navigator.pushNamed(context, routeName),
+                            );
                       }
                     },
                     listener: (context, state) {
                       if (state is SubmitSuccessState) {
                         if (state.className == "Home") {
-                          Navigator.pushNamed(
-                              context,
-                              RoutesManager.homeScreen,arguments: {"postId":"","tab":"1"});
+                          Navigator.pushNamed(context, RoutesManager.homeScreen,
+                              arguments: {"postId": "", "tab": "1"});
                         } else {
-                          Navigator.pushNamed(context, RoutesManager.homeScreen,arguments: {"postId":"","tab":"0"});
+                          Navigator.pushNamed(context, RoutesManager.homeScreen,
+                              arguments: {"postId": "", "tab": "0"});
                         }
                       }
                     },
