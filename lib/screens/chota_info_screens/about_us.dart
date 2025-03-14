@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
+import '../Auth_module/auth_provider/auth_provider.dart';
 
 class AboutUs extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
+    context.read<AuthProvider>().sendEvent("AdvertisePage");
+
     return Scaffold(
       appBar: AppBar(
         title: Text(

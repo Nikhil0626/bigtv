@@ -9,6 +9,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../globel_keys/app_router.dart';
 import '../../utils/app_colors.dart';
+import '../Auth_module/auth_provider/auth_provider.dart';
 import 'district_selection_bloc.dart';
 import 'district_selection_event.dart';
 import 'district_selection_state.dart';
@@ -28,6 +29,7 @@ class _DistrictsSelectionScreenState extends State<DistrictsSelectionScreen> {
 
   @override
   void initState() {
+    context.read<AuthProvider>().sendEvent("DistrictSelectionPage");
     context.read<DistrictSelectionBloc>().add(GetAllDistricts());
     super.initState();
   }

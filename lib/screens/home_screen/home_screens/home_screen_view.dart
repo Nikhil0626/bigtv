@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../../../utils/app_colors.dart';
+import '../../Auth_module/auth_provider/auth_provider.dart';
 import 'artical_page.dart';
 import '../../flip_page/district_flip_panel.dart';
 import '../home_provider/provider.dart';
@@ -43,12 +45,14 @@ class _HomeScreenViewState extends State<HomeScreenView> {
       body: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
         return FlipPanel<HomeScreenModel>(
           itemStream: flipProvider.mainArticles,
-          itemBuilder: <HomeScreenModel>(context, article, flipBack, height) =>
-              ArticlePage(
-            article: article,
-            flipBack: flipBack,
-            height: heightsInt,
-          ),
+          itemBuilder: <HomeScreenModel>(context, article, flipBack, height) {
+
+         return   ArticlePage(
+              article: article,
+              flipBack: flipBack,
+              height: heightsInt,
+            );
+          },
           height: heightsInt,
         );
       }),

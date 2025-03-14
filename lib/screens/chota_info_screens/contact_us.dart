@@ -1,11 +1,16 @@
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../globel_keys/global_variables_data.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
+import '../Auth_module/auth_provider/auth_provider.dart';
+import '../home_screen/home_repo/event_repo.dart';
 
 class ContactUs extends StatefulWidget {
   const ContactUs({super.key});
@@ -42,6 +47,13 @@ class _ContactUsState extends State<ContactUs> {
   //   await EmailLauncher.launch(email);
   // }
   Future<void> launchSingleEmail(email) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? userId = sp.getString("loginId")??"";
+    EventRepo().sendEvent({"key":"contact_via_email",
+      "data":{
+        "device_id": GlobalVariables().deviceId,
+        "userId":userId,
+      }});
     contactViaMail();
     await EasyLauncher.email(
         email: email,
@@ -50,6 +62,13 @@ class _ContactUsState extends State<ContactUs> {
   }
 
   Future<void> _launchPhone(String phone) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? userId = sp.getString("loginId")??"";
+    EventRepo().sendEvent({"key":"contact_via_number",
+      "data":{
+      "device_id": GlobalVariables().deviceId,
+        "userId":userId,
+      }});
     contactViaCall();
     final Uri phoneUri = Uri(
       scheme: 'tel',
@@ -65,7 +84,11 @@ class _ContactUsState extends State<ContactUs> {
       print('Error launching phone: $e');
     }
   }
-
+@override
+  void initState() {
+  context.read<AuthProvider>().sendEvent("ContactPage");
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

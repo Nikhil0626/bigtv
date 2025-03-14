@@ -51,14 +51,16 @@ class PostBottomActions extends StatelessWidget {
         children: [
           Expanded(
             flex: 1,
-            // color: Colors.cyan,
-            // height: 52,
-            // width: 60,
             child: InkWell(
               onTap: () {
                 log("Refresh");
-                EventRepo().sendEvent({"key":"reload",
-                  "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now().toString()}});
+                EventRepo().sendEvent({
+                  "key": "reload",
+                  "data": {
+                    "device_id": "${GlobalVariables().deviceId}",
+                    "userId": GlobalVariables().userId??"",
+                  }
+                });
                 flipProvider.getArticles(refresh: true);
               },
               child: Column(
@@ -92,9 +94,6 @@ class PostBottomActions extends StatelessWidget {
           ),
           Expanded(
             flex: 1,
-            // color: Colors.brown,
-            // height: 52,
-            // width: 60,
             child: BottomActions(
               postType: postType,
               icon: flipProvider.isLikeList.contains(article.id.toString())
@@ -103,10 +102,6 @@ class PostBottomActions extends StatelessWidget {
               label: 'లైక్',
               isLike: flipProvider.isLikeList.contains(article.id.toString()),
               onTap: () {
-                EventRepo().sendEvent({"key":"liked_article",
-
-                  "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now().toString()}});
-
                 log("Like");
                 flipProvider.isLikePost(article);
               },
@@ -116,7 +111,15 @@ class PostBottomActions extends StatelessWidget {
             flex: 1,
             child: InkWell(
               onTap: () async {
-
+                EventRepo().sendEvent({
+                  "key": "share_via_articles",
+                  "data": {
+                    "device_id": "${GlobalVariables().deviceId}",
+                    "userId": context.read<FlipProvider>().userId??"",
+                    "postId":article.id.toString(),
+                    "isWhatAppShare":true,
+                  }
+                });
                 if(Platform.isIOS){
                   sendShareDetails(context.read<FlipProvider>().userId,
                       article.id, article.content.toString());
@@ -201,71 +204,6 @@ class PostBottomActions extends StatelessWidget {
                   }
 
                 }
-
-                // try {
-                //   log("Capturing screenshot...");
-                //   Uint8List? image = await screenshotController.capture();
-                //
-                //   if (image == null) {
-                //     print("Failed to capture screenshot");
-                //     return;
-                //   }
-                //
-                //   final directory = await getTemporaryDirectory();
-                //   final imagePath = '${directory.path}/${article.id}.png';
-                //
-                //   File imageFile = File(imagePath);
-                //   await imageFile.writeAsBytes(image);
-                //
-                //   log("Image saved at: $imagePath");
-                //
-                //   // Convert to XFile (especially for iOS)
-                //   XFile xFile = XFile(imageFile.path);
-                //
-                //   // Ensure iOS path is prefixed with "file://"
-                //   String filePath = Platform.isIOS ? "file://${imageFile.path}" : imageFile.path;
-                //
-                //   await SocialSharingPlus.shareToSocialMedia(
-                //     SocialPlatform.whatsapp,
-                //     Platform.isIOS ? article.linkURLIos.toString() : article.linkURLAndroid.toString(),
-                //     media: filePath, // Try changing this to `xFile.path` if needed
-                //     onAppNotInstalled: () {
-                //       log("WhatsApp not installed");
-                //     },
-                //     isOpenBrowser: false,
-                //   );
-                // } catch (e) {
-                //   print("Error taking screenshot: $e");
-                // }
-
-                /// hello
-
-                // try {
-                //   log("ghfdsfghjkhgfdszxfghjkhjhgfsdsfygukhhgf");
-                //   Uint8List? image = await screenshotController.capture();
-                //   if (image == null) {
-                //     print("Failed to capture screenshot");
-                //     return;
-                //   }
-                //   final directory = await getTemporaryDirectory();
-                //   final imagePath = '${directory.path}/${article.id}.png';
-                //   final imageFile = File(imagePath);
-                //   await imageFile.writeAsBytes(image);
-                //   log(",knlkjkjhkjhk ${imagePath}");
-                //   await SocialSharingPlus.shareToSocialMedia(
-                //     SocialPlatform.whatsapp,
-                //     Platform.isIOS
-                //         ? article.linkURLIos.toString()
-                //         : article.linkURLAndroid.toString(),
-                //     media: imagePath,
-                //     onAppNotInstalled: () {
-                //       log(",knlkjkjhkjhk ${imagePath}");
-                //     },
-                //     isOpenBrowser: false,
-                //   );
-                // } catch (e) {
-                //   print("Error taking screenshot: $e");
-                // }
               },
               child: Container(
                 // color: Colors.white,
@@ -287,6 +225,16 @@ class PostBottomActions extends StatelessWidget {
               icon: "assets/svg/comment.svg",
               label: 'కామెంట్',
               onTap: () {
+                context.read<AuthProvider>().sendEvent("CommentPage");
+                EventRepo().sendEvent({
+                  "key": "comments",
+                  "data": {
+                    "device_id": "${GlobalVariables().deviceId}",
+                    "userId": context.read<FlipProvider>().userId??"",
+                    "postId":article.id.toString(),
+
+                  }
+                });
                 log("Comment --- ${context.read<AuthProvider>().loginType}");
                 showComments(context, article);
                 EventRepo().sendEvent({"key":"comments",
@@ -299,15 +247,20 @@ class PostBottomActions extends StatelessWidget {
           ),
           Expanded(
             flex: 1,
-            // color: Colors.green,
-            // height: 52,
-            // width: 60,
             child: BottomActions(
               postType: postType,
               icon: "assets/svg/share.svg",
               label: 'షేర్',
               onTap: () {
-
+                EventRepo().sendEvent({
+                  "key": "share_via_articles",
+                  "data": {
+                    "device_id": "${GlobalVariables().deviceId}",
+                    "userId": context.read<FlipProvider>().userId??"",
+                    "postId":article.id.toString(),
+                    "isWhatAppShare":false,
+                  }
+                });
 
                 sendShareDetails(context.read<FlipProvider>().userId,
                     article.id, article.content.toString());
@@ -316,9 +269,6 @@ class PostBottomActions extends StatelessWidget {
                 } else if (article.type == "Gallery") {
                   createAndSharePdf(context, article);
                 }
-                EventRepo().sendEvent({"key":"share_via_articles",
-
-                  "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now().toString()}});
 
               },
             ),

@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../services/webengage_event_tracks.dart';
+import '../home_screen/home_repo/event_repo.dart';
 import 'district_selection_event.dart';
 import 'district_selection_model.dart';
 import 'district_selection_repo.dart';
@@ -94,6 +95,7 @@ class DistrictSelectionBloc
       );
       String result = selectedDistrictList.toSet().join(',');
       sharedPreferences.setString("locationId", result);
+     String? userId = sharedPreferences.getString("loginId",);
       log(result);
       String? deviceId = GlobalVariables().deviceId;
 
@@ -105,6 +107,15 @@ class DistrictSelectionBloc
           .map((district) => district.name.toString())
           .toList();
       String nameOfDistrict = selectedDistrictNames.toSet().join(',');
+      EventRepo().sendEvent({
+        "key": "selected_districts",
+        "data": {
+          "device_id": "$deviceId",
+          "location_name": nameOfDistrict??"",
+          "location_id": result??"",
+          "userId": userId??"",
+        }
+      });
       districtLocationUpdate(nameOfDistrict, result, "");
       sendUserAttribute(nameOfDistrict);
       var body = {

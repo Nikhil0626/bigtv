@@ -15,6 +15,7 @@ import '../../../globel_keys/app_router.dart';
 import '../../../main.dart';
 import '../../../utils/app_strings.dart';
 import '../../../utils/date_conversion.dart';
+import '../../Auth_module/auth_provider/auth_provider.dart';
 import '../../home_screen/home_models/home_screen_model.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -37,6 +38,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 
   @override
   void initState() {
+    context.read<AuthProvider>().sendEvent("GalleryPage");
     context.read<VideosBloc>().add(GetAllVideos(type: widget.postId));
     topSpace = (MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom)
                 .toInt();

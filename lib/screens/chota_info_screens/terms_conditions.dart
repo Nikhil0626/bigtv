@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
+import '../Auth_module/auth_provider/auth_provider.dart';
 import 'chota_info.dart';
 
 class TermsConditions extends StatefulWidget {
@@ -13,6 +15,13 @@ class TermsConditions extends StatefulWidget {
 }
 
 class _TermsConditionsState extends State<TermsConditions> {
+
+  @override
+  void initState() {
+    context.read<AuthProvider>().sendEvent("TermsAndConditionsPage");
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

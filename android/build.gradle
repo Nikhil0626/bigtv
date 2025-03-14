@@ -24,6 +24,7 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:8.0.2' // Or the latest version compatible with your Flutter version
         classpath 'com.google.gms:google-services:4.4.2'
+//        classpath 'com.facebook.android:facebook-android-sdk:16.+'
     }
 }
 

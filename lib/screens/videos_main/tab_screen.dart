@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../utils/app_colors.dart';
+import '../Auth_module/auth_provider/auth_provider.dart';
 import '../chota_info_screens/chota_info.dart';
 import '../profile_screen/profile_screen.dart';
 
@@ -24,6 +25,7 @@ class GetAllMenuItemScreen extends StatefulWidget {
 class _GetAllMenuItemScreenState extends State<GetAllMenuItemScreen> {
   @override
   void initState() {
+    context.read<AuthProvider>().sendEvent("MenuPage");
     context.read<VideosBloc>().add(GetAllMenu());
     super.initState();
   }

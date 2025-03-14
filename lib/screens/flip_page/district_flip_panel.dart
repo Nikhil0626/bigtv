@@ -7,8 +7,10 @@ import 'dart:math' as math;
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../globel_keys/global_variables_data.dart';
 import '../../main.dart';
 import '../home_screen/home_provider/provider.dart';
+import '../home_screen/home_repo/event_repo.dart';
 
 typedef FlipBack = void Function({bool backToTop});
 
@@ -317,9 +319,17 @@ class _DistrictFlipPanelState<T> extends State<DistrictFlipPanel>
 
     if(_currentIndex > 0 && _direction == FlipDirection.up) {
       context.read<FlipProvider>().isShowTopBottomChange(true);
+
     }else{
       context.read<FlipProvider>().isShowTopBottomChange(false);
     }
+
+    if(_direction == FlipDirection.up){
+      context.read<FlipProvider>().flipEvent(true,isHome: false,_currentIndex + 1);
+    }else{
+      context.read<FlipProvider>().flipEvent(false,isHome: false,_currentIndex - 1);
+    }
+
     context.read<FlipProvider>().loadUserId(_currentIndex);
     if (_dragExtent == 0.0) {
       if (_shouldShowNoMoreItemsMessage) {
