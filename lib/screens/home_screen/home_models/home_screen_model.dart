@@ -1,3 +1,4 @@
+
 class HomeScreenModel {
   final int id;
   final String author;
@@ -39,7 +40,7 @@ class HomeScreenModel {
   final bool isStickyPost;
   final List<Article>? homepage;
   final String? downloadUrl;
-  final String? choices;
+  // final String? choices;
   final String? adPosition;
   final String linkURLAndroid;
   final String linkURLIos;
@@ -79,13 +80,13 @@ class HomeScreenModel {
     required this.categoryId,
     required this.categoryName,
     this.bulletPoints,
-      this.links,
+    this.links,
     this.reportedBy,
     required this.postOrder,
     required this.isStickyPost,
     this.homepage,
     this.downloadUrl,
-    this.choices,
+    // this.choices,
     this.adPosition,
     required this.linkURLAndroid,
     required this.linkURLIos,
@@ -146,7 +147,7 @@ class HomeScreenModel {
           .map((item) => Article.fromJson(item)).toList()
           : null,
       downloadUrl: json['downloadUrl'],
-      choices: json['choices'],
+      // choices: json['choices']??"",
       adPosition: json['adPosition'],
       linkURLAndroid: json['linkURLAndroid'] ?? '',
       linkURLIos: json['linkURLIos'] ?? '',
@@ -160,6 +161,7 @@ class Article {
   final String title;
   final String content;
   final String type;
+  final String subType;
   final List<String> links;
   final String? reportedBy;
   final List<String>? gallery;
@@ -179,6 +181,7 @@ class Article {
     required this.title,
     required this.content,
     required this.type,
+    required this.subType,
     required this.links,
     this.reportedBy,
     this.gallery,
@@ -198,6 +201,7 @@ class Article {
       id: json['id'],
       author: json['author'],
       title: json['title'],
+      subType: json['subType'],
       content: json['content'],
       type: json['type'],
       links: List<String>.from(json['links']),

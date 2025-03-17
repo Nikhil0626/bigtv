@@ -6,7 +6,10 @@ import 'package:dio/dio.dart';
 class HomeRepo extends BaseService{
 
   Future getAllNewsFeeds(queryParams) async{
-    Response response = await makeRequest(url: BaseUrls.getNews,method: RequestType.get,queryParameters: queryParams);
+    Response response = await makeRequest(
+        baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.getNews,method: RequestType.get,queryParameters: queryParams);
+    print(response.data);
     return response;
   }
 

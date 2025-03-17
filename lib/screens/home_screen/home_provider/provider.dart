@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:chotanews/screens/home_screen/home_repo/home_repo.dart';
+import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/utils/local_data.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -74,6 +75,21 @@ class FlipProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  //
+  // Future<void> trackArticlesRead() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   String today = DateTime.now().toString().substring(0, 10);
+  //   int count = prefs.getInt("articles_read_$today") ?? 0;
+  //   count++;
+  //   prefs.setInt("articles_read_$today", count);
+  //
+  //   if (count == 10) {
+  //     logEvent("user_red_10_article_on_day_0", null);
+  //   }
+  //   if (count == 20) {
+  //     logEvent("user_red_20_article_on_day_0", null);
+  //   }
+  // }
 
   void isShowTopBottomChange(val,) {
     print("set change value $val");
@@ -92,6 +108,7 @@ class FlipProvider extends ChangeNotifier {
         "isHome":isHome,
         "postId":isHome?mainArticlesData[index].id.toString():districtArticlesData[index].id.toString(),
       }});
+    AnalyticsService().trackArticlesRead();
     notifyListeners();
   }
 
@@ -165,7 +182,8 @@ class FlipProvider extends ChangeNotifier {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String locationId = sp.getString("locationId") ?? "";
     String loginId = sp.getString("loginId") ?? "1";
-    String deviceId = GlobalVariables().deviceId ?? "";
+    String deviceId = sp.getString("deviceId") ?? "1";
+    // String deviceId = GlobalVariables().deviceId ?? "";
     getUniqueDeviceId("",);
 
     if (refresh == true) {
@@ -175,27 +193,30 @@ class FlipProvider extends ChangeNotifier {
 
       final Map<String, dynamic> queryParams = isTab == 1
           ? {
-              'userid': loginId ?? "",
-              'postid': "0",
-              'lpostid': "0",
-              'homefeed': "1",
-              'deviceid': deviceId,
-              'platform': Platform.isIOS ? "apple" : "android",
-              'locationIds': locationId,
-            }
+        'userid': loginId ?? "",
+        'postid': "0",
+        'lpostid': "0",
+        'homefeed': "1",
+        'deviceid': deviceId,
+        'platform': Platform.isIOS ? "apple" : "android",
+        'locationIds': locationId,
+        "Ads":"true"
+      }
           : {
-              'userid': loginId ?? "",
-              'postid': "0",
-              'lpostid': "0",
-              'includeHomePage': "0",
-              'deviceid': deviceId,
-              'platform': Platform.isIOS ? "apple" : "android",
-            };
+        'userid': loginId ?? "",
+        'postid': "0",
+        'lpostid': "0",
+        'includeHomePage': "0",
+        'deviceid': deviceId,
+        'platform': Platform.isIOS ? "apple" : "android",
+        "Ads":"true"
+      };
       isLoading = false;
       log(queryParams.toString());
       getData(queryParams);
       notifyListeners();
-    } else if (index != 0 && isTab == 0) {
+    }
+    else if (index != 0 && isTab == 0) {
       log("Home index $index");
 
       final Map<String, dynamic> queryParams = {
@@ -205,10 +226,12 @@ class FlipProvider extends ChangeNotifier {
         // 'includeHomePage': "0",
         'deviceid': deviceId,
         'platform': Platform.isIOS ? "apple" : "android",
+        "Ads":"true"
       };
       log(queryParams.toString());
       getData(queryParams);
-    } else if (index != 0 && isTab == 1) {
+    }
+    else if (index != 0 && isTab == 1) {
       log("State index $index");
 
       final Map<String, dynamic> queryParams = {
@@ -219,6 +242,7 @@ class FlipProvider extends ChangeNotifier {
         'deviceid': deviceId,
         'platform': Platform.isIOS ? "apple" : "android",
         'locationIds': locationId,
+        "Ads":"true"
       };
       log(queryParams.toString());
       fromLocation = false;
@@ -227,22 +251,24 @@ class FlipProvider extends ChangeNotifier {
       log("elseeeeee $index");
       final Map<String, dynamic> queryParams = isTab != 0
           ? {
-              'userid': loginId ?? "1",
-              'postid': "0",
-              'lpostid': "0",
-              'homefeed': "1",
-              'deviceid': deviceId,
-              'platform': Platform.isIOS ? "apple" : "android",
-              'locationIds': locationId,
-            }
+        'userid': loginId ?? "1",
+        'postid': "0",
+        'lpostid': "0",
+        'homefeed': "1",
+        'deviceid': deviceId,
+        'platform': Platform.isIOS ? "apple" : "android",
+        'locationIds': locationId,
+        "Ads":"true"
+      }
           : {
-              'userid': loginId,
-              'postid': "0",
-              'lpostid': "0",
-              'includeHomePage': "0",
-              'deviceid': deviceId,
-              'platform': Platform.isIOS ? "apple" : "android",
-            };
+        'userid': loginId,
+        'postid': "0",
+        'lpostid': "0",
+        'includeHomePage': "0",
+        'deviceid': deviceId,
+        'platform': Platform.isIOS ? "apple" : "android",
+        "Ads":"true"
+      };
       log(queryParams.toString());
       getData(queryParams, isMain: isMain);
     }
@@ -251,9 +277,9 @@ class FlipProvider extends ChangeNotifier {
   Future getData(queryParams, {bool isMain = false}) async {
     Response jsonString = await HomeRepo().getAllNewsFeeds(queryParams);
     print(jsonString.toString());
-    List jsonList = jsonString.data['posts'];
+    List jsonList = jsonString.data['response']['Posts'];
     List<HomeScreenModel> data =
-        jsonList.map((item) => HomeScreenModel.fromJson(item)).toList();
+    jsonList.map((item) => HomeScreenModel.fromJson(item)).toList();
     if (isTab == 0) {
       if (isRefresh) {
         log("siva $isTab");
@@ -263,58 +289,58 @@ class FlipProvider extends ChangeNotifier {
       }
 
       mainArticlesData.addAll(data);
-      HomeScreenModel homeScreenData = const HomeScreenModel(
-        id: 90009,
-        author: "21",
-        title: "ads",
-        content: "ads",
-        type: "addMob",
-        subType: "banner",
-        isSensitive: false,
-        isAd: false,
-        isBlurGallery: false,
-        isBigBlackStandard: false,
-        isTitleOnTop: false,
-        isLengthyPost: false,
-        isChotaBytes: false,
-        isStandardVideo: false,
-        isStandardFullVideo: false,
-        isBulletPost: false,
-        isStandardLink: false,
-        isBigStandardFullVideo: false,
-        isReporter: false,
-        isHomePage: false,
-        gallery: null,
-        imageUrl: ImageUrl(url: ""),
-        videoUrl: null,
-        vdoUrl: null,
-        status: null,
-        created: "2025-03-05T00:31:08",
-        totalLikes: 13,
-        isLiked: false,
-        totalComments: 0,
-        totalViews: 13529,
-        totalShares: 6,
-        categoryName: "తెలంగాణ,నేషనల్",
-        postOrder: 772760,
-        isStickyPost: false,
-        homepage:
-        [],
-        downloadUrl: null,
-        bulletPoints: [],
-        links: [],
-        reportedBy: "రిపోర్టర్",
-        linkURLAndroid: "https://chotanews.page.link/yQ4hch8jAXu4hTm67",
-        linkURLIos: "https://chotanews.page.link/yQ4hch8jAXu4hTm67", categoryId: 56,
-      );
+      // HomeScreenModel homeScreenData = const HomeScreenModel(
+      //   id: 90009,
+      //   author: "21",
+      //   title: "ads",
+      //   content: "ads",
+      //   type: "addMob",
+      //   subType: "banner",
+      //   isSensitive: false,
+      //   isAd: false,
+      //   isBlurGallery: false,
+      //   isBigBlackStandard: false,
+      //   isTitleOnTop: false,
+      //   isLengthyPost: false,
+      //   isChotaBytes: false,
+      //   isStandardVideo: false,
+      //   isStandardFullVideo: false,
+      //   isBulletPost: false,
+      //   isStandardLink: false,
+      //   isBigStandardFullVideo: false,
+      //   isReporter: false,
+      //   isHomePage: false,
+      //   gallery: null,
+      //   imageUrl: ImageUrl(url: ""),
+      //   videoUrl: null,
+      //   vdoUrl: null,
+      //   status: null,
+      //   created: "2025-03-05T00:31:08",
+      //   totalLikes: 13,
+      //   isLiked: false,
+      //   totalComments: 0,
+      //   totalViews: 13529,
+      //   totalShares: 6,
+      //   categoryName: "తెలంగాణ,నేషనల్",
+      //   postOrder: 772760,
+      //   isStickyPost: false,
+      //   homepage:
+      //   [],
+      //   downloadUrl: null,
+      //   bulletPoints: [],
+      //   links: [],
+      //   reportedBy: "రిపోర్టర్",
+      //   linkURLAndroid: "https://chotanews.page.link/yQ4hch8jAXu4hTm67",
+      //   linkURLIos: "https://chotanews.page.link/yQ4hch8jAXu4hTm67", categoryId: 56,
+      // );
 
 
-          mainArticlesData.insert(5,homeScreenData);
-      log(mainArticlesData[5].title.toString());
-          mainArticlesData.insert(10,homeScreenData);
-          mainArticlesData.insert(15,homeScreenData);
-          mainArticlesData.insert(20,homeScreenData);
-          mainArticlesData.insert(25,homeScreenData);
+      //     mainArticlesData.insert(5,homeScreenData);
+      // log(mainArticlesData[5].title.toString());
+      //     mainArticlesData.insert(10,homeScreenData);
+      //     mainArticlesData.insert(15,homeScreenData);
+      //     mainArticlesData.insert(20,homeScreenData);
+      //     mainArticlesData.insert(25,homeScreenData);
 
       if (mainArticlesData.isEmpty) {
         isLastPost = true;
@@ -381,9 +407,9 @@ class FlipProvider extends ChangeNotifier {
   }
 
   final BehaviorSubject<List<HomeScreenModel>> districtArticlesController =
-      BehaviorSubject<List<HomeScreenModel>>();
+  BehaviorSubject<List<HomeScreenModel>>();
   final BehaviorSubject<List<HomeScreenModel>> mainArticlesController =
-      BehaviorSubject<List<HomeScreenModel>>();
+  BehaviorSubject<List<HomeScreenModel>>();
 
   Stream<List<HomeScreenModel>> get mainArticles =>
       mainArticlesController.stream;
@@ -409,7 +435,7 @@ class FlipProvider extends ChangeNotifier {
       print("comment list  ${data.toString()}");
       print("comment list  ${localCommentsList.length.toString()}");
       allPostCommentModelList =
-      data.map((e) => AllPostCommentModel.fromJson(e)).toList();
+          data.map((e) => AllPostCommentModel.fromJson(e)).toList();
 
       for(var record in localCommentsList){
         print("comment id  ${record.postId}========= ${postId.toString()}");
@@ -422,7 +448,7 @@ class FlipProvider extends ChangeNotifier {
           //     print("comment id 123c  ${e.postId.toString()}-------${record.postId.toString()}");
           //     if(e.postId.toString() == record.postId.toString()){
           //       allPostCommentModelList.add(record);
-                // localCommentsList.remove(record);
+          // localCommentsList.remove(record);
           //     };
           //   },);
           // }

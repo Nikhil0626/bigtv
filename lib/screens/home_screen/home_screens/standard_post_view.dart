@@ -294,16 +294,20 @@ import '../home_models/home_screen_model.dart';
 import '../home_provider/provider.dart';
 import '../home_repo/event_repo.dart';
 
-
-
 class StandardPostView extends StatefulWidget {
-
   final article;
   final isFoldable;
   final FlipProvider flipProvider;
   final ScreenshotController screenshotController;
-
-  const StandardPostView({super.key,required this.article,required this.isFoldable,required this.flipProvider,required this.screenshotController,});
+  final isAds ;
+  const StandardPostView({
+    super.key,
+    required this.article,
+    required this.isFoldable,
+    required this.flipProvider,
+    required this.screenshotController,
+    this.isAds = false
+  });
 
   @override
   _StandardPostViewState createState() => _StandardPostViewState();
@@ -316,14 +320,14 @@ class _StandardPostViewState extends State<StandardPostView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      body: Container(
-height: MediaQuery.of(context).size.height,
+      body: SizedBox(
+        height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
         child: Stack(
           children: [
             Container(
               width: double.infinity,
-              height: MediaQuery.of(context).size.height*.40, // Adjusted height to match the image
+              height: MediaQuery.of(context).size.height * .40, // Adjusted height to match the image
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.only(
                   topRight: Radius.circular(10),
@@ -359,122 +363,81 @@ height: MediaQuery.of(context).size.height,
                 ),
               ),
             ),
-
             Positioned(
               bottom: 1,
               child: Container(
-                height: MediaQuery.of(context).size.height*.58,
+                height: MediaQuery.of(context).size.height * .58,
                 width: MediaQuery.of(context).size.width,
-                decoration: BoxDecoration(color: Colors.white,
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.only(
                     topRight: Radius.circular(10),
                     topLeft: Radius.circular(10),
-                  ),),
+                  ),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-
                       height(height: 8),
-                  Text(
-                      widget.article.title ??
-                          "No Title",
-                      style: homeScreenFontStyle(
-                          color: widget.article
-                              .subType ==
-                              "BigBlackStandard"
-                              ? Colors.white
-                              : Colors.black.withOpacity(0.6),
-                          fontSize:18,
-                          // Platform.isIOS
-                          //     ? 19
-                          //     : 18,
-                          fontWeight:
-                          FontWeight.bold)),
+                      Text(widget.article.title ?? "No Title",
+                          style: homeScreenFontStyle(
+                              color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black.withOpacity(0.6),
+                              fontSize: 18,
+                              // Platform.isIOS
+                              //     ? 19
+                              //     : 18,
+                              fontWeight: FontWeight.bold)),
                       height(height: 6),
                       Expanded(
-                        child:
-                        widget.article
-                            .subType ==
-                            "BulletPost"
+                        child: widget.article.subType == "BulletPost"
                             ? Column(
-                          mainAxisAlignment:
-                          MainAxisAlignment
-                              .start,
-                          crossAxisAlignment:
-                          CrossAxisAlignment
-                              .start,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            (widget.article
-                                .content !=
-                                "")
-                                ? Text(
-                                widget
-                                    .article
-                                    .content,
-                                style:
-                                homeScreenFontStyle(
-                                  color:
-                                  Colors.grey,
-                                  fontWeight:
-                                  FontWeight.w500,
-                                  fontSize:
-                                  16,
+                            (widget.article.content != "")
+                                ? Text(widget.article.content,
+                                style: homeScreenFontStyle(
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 16,
                                 ))
-                                : const SizedBox
-                                .shrink(),
-                            height(
-                                height:
-                                8),
+                                : const SizedBox.shrink(),
+                            height(height: 8),
                             Expanded(
-                              child:
-                              ListView(
-                                physics:
-                                const NeverScrollableScrollPhysics(),
-                                children: widget
-                                    .article
-                                    .bulletPoints
-                                    .map<Widget>(
-                                        (item) {
-                                      // Explicitly specify <Widget>
-                                      return Row(
-                                        crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.start,
-                                        children: [
-                                          const Text("• ",
-                                              textAlign: TextAlign.start,
-                                              style: TextStyle(fontSize: 30)),
-                                          // Bullet point
-                                          Expanded(
-                                            child: Text(
-                                              item,
-                                              style: homeScreenFontStyle(
-                                                color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black,
-                                                fontWeight: FontWeight.w400,
-                                                fontSize:  16,
-                                              ),
-                                            ),
+                              child: ListView(
+                                physics: const NeverScrollableScrollPhysics(),
+                                children: widget.article.bulletPoints.map<Widget>((item) {
+                                  // Explicitly specify <Widget>
+                                  return Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      const Text("• ", textAlign: TextAlign.start, style: TextStyle(fontSize: 30)),
+                                      // Bullet point
+                                      Expanded(
+                                        child: Text(
+                                          item,
+                                          style: homeScreenFontStyle(
+                                            color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black,
+                                            fontWeight: FontWeight.w400,
+                                            fontSize: 16,
                                           ),
-                                        ],
-                                      );
-                                    }).toList(), // Ensure it is converted to List<Widget>
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }).toList(), // Ensure it is converted to List<Widget>
                               ),
                             ),
                             Text(
                               '\n\nPosted ${formatTimeDifference(widget.article.created)}',
-                              style:
-                              fontStyle(
-                                fontSize:
-                                10,
-                                fontWeight:
-                                FontWeight
-                                    .w400,
-                                color: Colors
-                                    .grey,
+                              style: fontStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.grey,
                               ),
                             ),
                           ],
@@ -486,23 +449,17 @@ height: MediaQuery.of(context).size.height,
                               ..._parseText(
                                 context,
                                 '${widget.article.content}',
-                                widget
-                                    .article
-                                    .links,
+                                widget.article.links,
                               ),
-                              TextSpan(
-                                text:
-                                '\n\nPosted ${formatTimeDifference(widget.article.created)}',
-                                style:
-                                fontStyle(
-                                  fontSize:
-                                  10,
-                                  fontWeight:
-                                  FontWeight.w400,
-                                  color: Colors
-                                      .grey,
+                              if(!widget.isAds)
+                                TextSpan(
+                                  text: '\n\nPosted ${formatTimeDifference(widget.article.created)}',
+                                  style: fontStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w400,
+                                    color: Colors.grey,
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
@@ -512,14 +469,11 @@ height: MediaQuery.of(context).size.height,
                       ),
                       height(height: 4),
                       Row(
-
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                           BottomActions(
+                          BottomActions(
                             postType: widget.article.subType,
-                            icon: widget.flipProvider.isLikeList.contains(widget.article.id.toString())
-                                ? "assets/svg/like_full.svg"
-                                : "assets/svg/like.svg",
+                            icon: widget.flipProvider.isLikeList.contains(widget.article.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                             label: 'లైక్',
                             isLike: widget.flipProvider.isLikeList.contains(widget.article.id.toString()),
                             onTap: () {
@@ -527,8 +481,8 @@ height: MediaQuery.of(context).size.height,
                               widget.flipProvider.isLikePost(widget.article);
                             },
                           ),
-                           width(width: 20),
-                           BottomActions(
+                          width(width: 20),
+                          BottomActions(
                             postType: widget.article.subType,
                             icon: "assets/svg/comment.svg",
                             label: 'కామెంట్',
@@ -538,18 +492,16 @@ height: MediaQuery.of(context).size.height,
                                 "key": "comments",
                                 "data": {
                                   "device_id": "${GlobalVariables().deviceId}",
-                                  "userId": context.read<FlipProvider>().userId??"",
-                                  "postId":widget.article.id.toString(),
-
+                                  "userId": context.read<FlipProvider>().userId ?? "",
+                                  "postId": widget.article.id.toString(),
                                 }
                               });
                               log("Comment --- ${context.read<AuthProvider>().loginType}");
                               showComments(context, widget.article);
-                              EventRepo().sendEvent({"key":"comments",
-
-                                "data":{"deviceId":GlobalVariables().deviceId.toString(),"openTime":DateTime.now().toString()}});
-
-
+                              EventRepo().sendEvent({
+                                "key": "comments",
+                                "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}
+                              });
                             },
                           ),
                           Spacer(),
@@ -562,132 +514,107 @@ height: MediaQuery.of(context).size.height,
                                 "key": "share_via_articles",
                                 "data": {
                                   "device_id": "${GlobalVariables().deviceId}",
-                                  "userId": context.read<FlipProvider>().userId??"",
-                                  "postId":widget.article.id.toString(),
-                                  "isWhatAppShare":false,
+                                  "userId": context.read<FlipProvider>().userId ?? "",
+                                  "postId": widget.article.id.toString(),
+                                  "isWhatAppShare": false,
                                 }
                               });
 
-                              sendShareDetails(context.read<FlipProvider>().userId,
-                                  widget.article.id, widget.article.content.toString());
+                              sendShareDetails(context.read<FlipProvider>().userId, widget.article.id, widget.article.content.toString());
                               if (widget.article.type == "Standard" || widget.article.type == "Image") {
                                 takeScreenshotAndShare(widget.article, widget.screenshotController);
                               } else if (widget.article.type == "Gallery") {
                                 createAndSharePdf(context, widget.article);
                               }
-
                             },
                           ),
-                         width(width: 10),
-                         InkWell(
-                            onTap: () {
-                              log("Refresh");
-                              EventRepo().sendEvent({
-                                "key": "reload",
-                                "data": {
-                                  "device_id": "${GlobalVariables().deviceId}",
-                                  "userId": GlobalVariables().userId??"",
-                                }
-                              });
-                              widget.flipProvider.getArticles(refresh: true);
-                            },
-                            child: widget.flipProvider.isRefresh
-                                ? const SizedBox(
-                                height: 22, width: 22, child: AppLoadingScreen())
-                                : SvgPicture.asset(
-                              "assets/svg/reload.svg",
-                              height: 22,
-                              width: 22,
-                              color: widget.article.subType == "BigBlackStandard"
-                                  ? Colors.white
-                                  : Colors.grey,
+                          width(width: 10),
+                          if(!widget.isAds)
+                            InkWell(
+                              onTap: () {
+                                log("Refresh");
+                                EventRepo().sendEvent({
+                                  "key": "reload",
+                                  "data": {
+                                    "device_id": "${GlobalVariables().deviceId}",
+                                    "userId": GlobalVariables().userId ?? "",
+                                  }
+                                });
+                                widget.flipProvider.getArticles(refresh: true);
+                              },
+                              child: widget.flipProvider.isRefresh
+                                  ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                  : SvgPicture.asset(
+                                "assets/svg/reload.svg",
+                                height: 22,
+                                width: 22,
+                                color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.grey,
+                              ),
                             ),
-                          ),
-
-
-
                         ],
                       ),
                       height(height: 10),
-
-
                     ],
                   ),
                 ),
               ),
             ),
-            Positioned(
-                top: MediaQuery.of(context).size.height*.40-(widget.article.isReporter?85:35),
-                left: widget.article.isReporter?10:20,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.article.isReporter)
-                      Container(
-                          padding:
-                          const EdgeInsets
-                              .symmetric(
-                              horizontal:
-                              8),
-                          // width: 100,
-                          child: Text(
-                            widget.article
-                                .reportedBy
-                                .toString(),
-                            style: homeScreenFontStyle(
-                                fontWeight:
-                                FontWeight
-                                    .w900,
-                                fontSize: 16,
-                                color: Colors
-                                    .white),
-                          )),
-                    SizedBox(
-                      height: 40,
-                      child: Row(
-                        children: [
-                          Container(
-                              margin: const EdgeInsets
-                                  .all(8),
-                              padding: const EdgeInsets
-                                  .symmetric(
-                                  horizontal: 8),
+            if(!widget.isAds)
+              Positioned(
+                  top: MediaQuery.of(context).size.height * .40 - (widget.article.isReporter ? 85 : 35),
+                  left: widget.article.isReporter ? 10 : 20,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (widget.article.isReporter)
+                        Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            // width: 100,
+                            child: Text(
+                              widget.article.reportedBy.toString(),
+                              style: homeScreenFontStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Colors.white),
+                            )),
+                      SizedBox(
+                        height: 40,
+                        child: Row(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.all(8),
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
                               height: 30,
                               width: 110,
                               decoration: const BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.all(
-                                    Radius
-                                        .circular(
-                                        10),)),
-                            child: Row(
-                              children: [
-                                Text("Chota ",style: TextStyle(color: Colors.black,fontSize: 15,fontWeight: FontWeight.bold),
-                                ),
-                                Text("News",style: TextStyle(color: Colors.lightBlue,fontSize: 16,fontWeight: FontWeight.bold),)
-                              ],
-                            ),
-                            
-                            
-                            
+                                    Radius.circular(10),
+                                  )),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    "Chota ",
+                                    style: TextStyle(color: Colors.black, fontSize: 15, fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    "News",
+                                    style: TextStyle(color: Colors.lightBlue, fontSize: 16, fontWeight: FontWeight.bold),
+                                  )
+                                ],
                               ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                )),
-
-
+                    ],
+                  )),
           ],
         ),
       ),
     );
   }
-  List<TextSpan> _parseText(
-      BuildContext context, String text, List<LinkModel>? links) {
-    RegExp linkRegExp =
-    RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
+
+  List<TextSpan> _parseText(BuildContext context, String text,  links) {
+    RegExp linkRegExp = RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
     List<TextSpan> spans = [];
 
     text.splitMapJoin(
@@ -739,12 +666,9 @@ height: MediaQuery.of(context).size.height,
         spans.add(TextSpan(
             text: nonMatch,
             style: homeScreenFontStyle(
-              color: widget.article.subType == "BigBlackStandard"
-                  ? Colors.white
-                  : Colors.black.withOpacity(0.5),
+              color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black.withOpacity(0.5),
               fontWeight: FontWeight.w400,
-              fontSize: Platform.isIOS ? 17 : 18
-              ,
+              fontSize: Platform.isIOS ? 17 : 18,
             )));
         return "";
       },

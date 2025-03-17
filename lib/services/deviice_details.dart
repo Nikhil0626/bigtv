@@ -2,53 +2,88 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
+import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../globel_keys/global_variables_data.dart';
 
-Future<String?> getUniqueDeviceId(String token, ) async {
-  SharedPreferences sp =await SharedPreferences.getInstance();
-  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+Future<String?> getUniqueDeviceId(
+    String token,
+    ) async {
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  log("app latest version ${packageInfo.version}");
+  log("app latest version ${packageInfo.buildNumber}");
 
+  String? storedVersion = sp.getString("app_version");
+  log("app latest version $storedVersion");
+  if ("${packageInfo.version}+${packageInfo.buildNumber}" !=
+      (sp.getString("app_version") ?? "")) {
+    AnalyticsService.logEvent2("app_update");
+    sp.setString(
+        "app_version", "${packageInfo.version}+${packageInfo.buildNumber}");
+  }
+
+  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
 
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-
-    if(token == "close"){
-      EventRepo().sendEvent({"key":"opened_app",
-        "data":{"device_id": androidInfo.id.toString(),"userId":sp.getString("loginId")??"","isOpen":false}});
+    sp.setString("deviceId", androidInfo.id.toString());
+    if (token == "close") {
+      EventRepo().sendEvent({
+        "key": "opened_app",
+        "data": {
+          "device_id": androidInfo.id.toString(),
+          "userId": sp.getString("loginId") ?? "",
+          "isOpen": false
+        }
+      });
       return "";
     }
     GlobalVariables().platForm = androidInfo.brand;
     GlobalVariables().deviceId = androidInfo.id;
 
-
     if (sp.getString("deviceName").toString() != "true") {
-      sendAndroidDeviceDetails( androidInfo);
-     EventRepo().sendEvent({"key":"device_details",
-         "data":{
-           "device_id": androidInfo.id.toString(),
-           "device_brand": androidInfo.brand.toString(),
-           "device_model": androidInfo.model.toString(),
-           "device_sdk": androidInfo.version.sdkInt.toString(),
-           "device_os": "android",
-         }
-     });
+      sendAndroidDeviceDetails(androidInfo);
+      EventRepo().sendEvent({
+        "key": "device_details",
+        "data": {
+          "device_id": androidInfo.id.toString(),
+          "device_brand": androidInfo.brand.toString(),
+          "device_model": androidInfo.model.toString(),
+          "device_sdk": androidInfo.version.sdkInt.toString(),
+          "device_os": "android",
+        }
+      });
 
       sp.setString("deviceName", "true");
     }
     String? userId = sp.getString('loginId');
 
-    EventRepo().sendEvent({"key":"opened_app",
-      "data":{"device_id": androidInfo.id.toString(),"userId":userId,"isOpen":true}});
+    EventRepo().sendEvent({
+      "key": "opened_app",
+      "data": {
+        "device_id": androidInfo.id.toString(),
+        "userId": userId,
+        "isOpen": true
+      }
+    });
     // return androidInfo.id;
   } else if (Platform.isIOS) {
     IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
-    if(token == "close"){
-      EventRepo().sendEvent({"key":"opened_app",
-        "data":{"device_id": iosInfo.identifierForVendor.toString(),"userId":sp.getString("loginId")??"","isOpen":false}});
+    sp.setString("deviceId", iosInfo.identifierForVendor.toString());
+    if (token == "close") {
+      EventRepo().sendEvent({
+        "key": "opened_app",
+        "data": {
+          "device_id": iosInfo.identifierForVendor.toString(),
+          "userId": sp.getString("loginId") ?? "",
+          "isOpen": false
+        }
+      });
       return "";
     }
     GlobalVariables().platForm = iosInfo.systemName;
@@ -58,8 +93,9 @@ Future<String?> getUniqueDeviceId(String token, ) async {
 
     if (sp.getString("deviceName").toString() != "true") {
       sendiOSDeviceDetails(iosInfo);
-      EventRepo().sendEvent({"key":"device_details",
-        "data":{
+      EventRepo().sendEvent({
+        "key": "device_details",
+        "data": {
           "device_id": iosInfo.identifierForVendor.toString(),
           "device_brand": iosInfo.model.toString(), // iPhone/iPad
           "device_model": iosInfo.utsname.machine.toString(), // Corrected field
@@ -71,8 +107,14 @@ Future<String?> getUniqueDeviceId(String token, ) async {
     }
     String? userId = sp.getString('loginId');
 
-    EventRepo().sendEvent({"key":"opened_app",
-      "data":{"device_id": iosInfo.identifierForVendor.toString(),"userId":userId,"isOpen":true}});
+    EventRepo().sendEvent({
+      "key": "opened_app",
+      "data": {
+        "device_id": iosInfo.identifierForVendor.toString(),
+        "userId": userId,
+        "isOpen": true
+      }
+    });
     // sendiOSDeviceDetails(iosInfo);
     // return iosInfo.identifierForVendor; // Returns a unique ID for iOS devices
   } else {

@@ -1,16 +1,19 @@
 package com.chotanews
 
+import android.app.Application
+import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
 import com.webengage.sdk.android.LocationTrackingStrategy
-import com.webengage.sdk.android.WebEngage
 import com.webengage.sdk.android.WebEngageConfig
 import com.webengage.sdk.android.actions.database.ReportingStrategy
 import com.webengage.webengage_plugin.WebengageInitializer
-import io.flutter.app.FlutterApplication
 
-class MainApplication : FlutterApplication() {
+class MainApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Initialize WebEngage
         val webEngageConfig = WebEngageConfig.Builder()
             .setWebEngageKey("in~~1341061ba")
             .setEventReportingStrategy(ReportingStrategy.FORCE_SYNC)
@@ -20,10 +23,8 @@ class MainApplication : FlutterApplication() {
             .build()
         WebengageInitializer.initialize(this, webEngageConfig)
 
-//        val webEngageConfig1 = WebEngageConfig.Builder()
-//            .setDebugMode(true)
-//            .build()
-//
-//        WebEngage.engage(applicationContext, webEngageConfig1)
+        // Initialize Facebook SDK
+        FacebookSdk.sdkInitialize(this)
+        AppEventsLogger.activateApp(this)
     }
 }
