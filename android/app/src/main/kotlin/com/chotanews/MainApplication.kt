@@ -1,12 +1,13 @@
 package com.chotanews
 
 import android.app.Application
-import com.facebook.FacebookSdk
-import com.facebook.appevents.AppEventsLogger
+
 import com.webengage.sdk.android.LocationTrackingStrategy
 import com.webengage.sdk.android.WebEngageConfig
 import com.webengage.sdk.android.actions.database.ReportingStrategy
 import com.webengage.webengage_plugin.WebengageInitializer
+import com.facebook.FacebookSdk
+import com.facebook.appevents.AppEventsLogger
 
 class MainApplication : Application() {
 

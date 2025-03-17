@@ -1,0 +1,2 @@
+C:/Users/Signi/AndroidStudioProjects/ChotaNewsMobile/android/app/.cxx/Debug/3k4l555v/x86/CMakeFiles/edit_cache.dir
+C:/Users/Signi/AndroidStudioProjects/ChotaNewsMobile/android/app/.cxx/Debug/3k4l555v/x86/CMakeFiles/rebuild_cache.dir

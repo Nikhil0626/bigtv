@@ -38,7 +38,7 @@ class HomeScreenModel {
   final String? reportedBy;
   final int postOrder;
   final bool isStickyPost;
-  final List<Article>? homepage;
+  final List<HomeScreenModel>? homepage;
   final String? downloadUrl;
   // final String? choices;
   final String? adPosition;
@@ -144,7 +144,7 @@ class HomeScreenModel {
       isStickyPost: json['isStickyPost'] ?? false,
       homepage:json['homepage'] != null
           ? (json['homepage'] as List)
-          .map((item) => Article.fromJson(item)).toList()
+          .map((item) => HomeScreenModel.fromJson(item)).toList()
           : null,
       downloadUrl: json['downloadUrl'],
       // choices: json['choices']??"",

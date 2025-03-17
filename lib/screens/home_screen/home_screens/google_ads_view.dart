@@ -91,7 +91,7 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
             padding: const EdgeInsets.all(30.0),
             child: Column(
               children: [
-                Text("Recommended New`s",
+                Text("Recommended News",
                   maxLines: 2
                   ,style: fontStyle(fontSize: 14,fontWeight: FontWeight.w700,color: AppColors.borderColor),),
                 height(height: 10),

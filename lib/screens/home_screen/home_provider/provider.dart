@@ -289,58 +289,6 @@ class FlipProvider extends ChangeNotifier {
       }
 
       mainArticlesData.addAll(data);
-      // HomeScreenModel homeScreenData = const HomeScreenModel(
-      //   id: 90009,
-      //   author: "21",
-      //   title: "ads",
-      //   content: "ads",
-      //   type: "addMob",
-      //   subType: "banner",
-      //   isSensitive: false,
-      //   isAd: false,
-      //   isBlurGallery: false,
-      //   isBigBlackStandard: false,
-      //   isTitleOnTop: false,
-      //   isLengthyPost: false,
-      //   isChotaBytes: false,
-      //   isStandardVideo: false,
-      //   isStandardFullVideo: false,
-      //   isBulletPost: false,
-      //   isStandardLink: false,
-      //   isBigStandardFullVideo: false,
-      //   isReporter: false,
-      //   isHomePage: false,
-      //   gallery: null,
-      //   imageUrl: ImageUrl(url: ""),
-      //   videoUrl: null,
-      //   vdoUrl: null,
-      //   status: null,
-      //   created: "2025-03-05T00:31:08",
-      //   totalLikes: 13,
-      //   isLiked: false,
-      //   totalComments: 0,
-      //   totalViews: 13529,
-      //   totalShares: 6,
-      //   categoryName: "తెలంగాణ,నేషనల్",
-      //   postOrder: 772760,
-      //   isStickyPost: false,
-      //   homepage:
-      //   [],
-      //   downloadUrl: null,
-      //   bulletPoints: [],
-      //   links: [],
-      //   reportedBy: "రిపోర్టర్",
-      //   linkURLAndroid: "https://chotanews.page.link/yQ4hch8jAXu4hTm67",
-      //   linkURLIos: "https://chotanews.page.link/yQ4hch8jAXu4hTm67", categoryId: 56,
-      // );
-
-
-      //     mainArticlesData.insert(5,homeScreenData);
-      // log(mainArticlesData[5].title.toString());
-      //     mainArticlesData.insert(10,homeScreenData);
-      //     mainArticlesData.insert(15,homeScreenData);
-      //     mainArticlesData.insert(20,homeScreenData);
-      //     mainArticlesData.insert(25,homeScreenData);
 
       if (mainArticlesData.isEmpty) {
         isLastPost = true;
@@ -369,38 +317,6 @@ class FlipProvider extends ChangeNotifier {
       notifyListeners();
     }
 
-    // if (isTab == 0) {
-    //   // mainArticlesController.add([]);
-    //   if (isRefresh) {
-    //     log("siva  $isTab");
-    //       mainArticlesController.add([]);
-    //     mainArticlesData = [];
-    //     notifyListeners();
-    //   }
-    //   mainArticlesData.addAll(data);
-    //   if (mainArticlesData.isEmpty) {
-    //     isLastPost = true;
-    //   }
-    //   lastPostIdInMain = mainArticlesData.last.id;
-    //   log(mainArticlesData.length.toString());
-    //   mainArticlesController.add(data);
-    // }
-    // else if (isTab == 1) {
-    //   if (isRefresh ) {
-    //     log("siva  $isTab");
-    //     districtArticlesController.add([]);
-    //     districtArticlesData = [];
-    //     notifyListeners();
-    //   }
-    //   districtArticlesData.addAll(data);
-    //   if (districtArticlesData.isEmpty) {
-    //     isLastPost = true;
-    //   }
-    //   lastPostIdInDistrict = districtArticlesData.last.id;
-    //   log(lastPostIdInDistrict.toString());
-    //
-    //   districtArticlesController.add(data);
-    // }
 
     isRefresh = false;
     notifyListeners();

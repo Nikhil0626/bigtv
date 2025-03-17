@@ -1,0 +1,2 @@
+C:/Users/Signi/AndroidStudioProjects/ChotaNewsMobile/android/app/.cxx/RelWithDebInfo/4h1a5iw5/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/Signi/AndroidStudioProjects/ChotaNewsMobile/android/app/.cxx/RelWithDebInfo/4h1a5iw5/armeabi-v7a/CMakeFiles/rebuild_cache.dir
