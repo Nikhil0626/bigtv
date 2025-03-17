@@ -65,7 +65,7 @@ class ArticlePageState extends State<ArticlePage> {
   bool isFoldableDevice(BuildContext context) {
     final displayFeatures = MediaQuery.of(context).displayFeatures;
     return displayFeatures.any((feature) =>
-        feature.type == DisplayFeatureType.hinge ||
+    feature.type == DisplayFeatureType.hinge ||
         feature.type == DisplayFeatureType.fold);
   }
 
@@ -113,40 +113,40 @@ class ArticlePageState extends State<ArticlePage> {
                           child: widget.article.type == "addMob"
                               ? GoogleAdsView()
                               : widget.article.type == "Image"
-                                  ? Container(
-                                      child: SizedBox(
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        height:
-                                            MediaQuery.of(context).size.height,
-                                        child: Image.network(
-                                          fit: BoxFit.cover,
-                                          widget.article.imageUrl.url ?? "",
-                                        ),
-                                      ),
-                                    )
-                                  : widget.article.type == "Gallery"
-                                      ? FullPageCarousel(
-                                          isHome: true,
-                                          imageUrls:
-                                              widget.article.gallery ?? [],
-                                          postDetails: widget.article,
-                                        )
-                                      : StandardPostView(
-                                          article: widget.article,
-                                          isFoldable: isFoldable,
-                                        )),
+                              ? SizedBox(
+                            width:
+                            MediaQuery.of(context).size.width,
+                            height:
+                            MediaQuery.of(context).size.height,
+                            child: Image.network(
+                              fit: BoxFit.cover,
+                              widget.article.imageUrl.url ?? "",
+                            ),
+                          )
+                              : widget.article.type == "Gallery"
+                              ? FullPageCarousel(
+                            isHome: true,
+                            imageUrls:
+                            widget.article.gallery ?? [],
+                            postDetails: widget.article,
+                          )
+                              : StandardPostView(
+                            screenshotController:screenshotController,
+                            flipProvider: flipProvider,
+                            article: widget.article,
+                            isFoldable: isFoldable,
+                          )),
                     ),
                   ),
-                  Container(
-                    color: AppColors.borderColor,
-                    height: 1,
-                  ),
-                  PostBottomActions(
-                      postType: widget.article.subType,
-                      flipProvider: flipProvider,
-                      article: widget.article,
-                      screenshotController: screenshotController),
+                  // Container(
+                  //   color: AppColors.borderColor,
+                  //   height: 1,
+                  // ),
+                  // PostBottomActions(
+                  //     postType: widget.article.subType,
+                  //     flipProvider: flipProvider,
+                  //     article: widget.article,
+                  //     screenshotController: screenshotController),
                   // height(height: 2),
                 ],
               ),

@@ -31,36 +31,20 @@ class BottomActions extends StatelessWidget {
       builder: (_,flipProvider,__) {
         return InkWell(
           onTap: onTap,
-          child: SizedBox(
-            height: 52,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                height(height: 2),
-                if(label == "లైక్")
-                  SvgPicture.asset(icon,
-                      height: 20,
-                      width: 20,
-                      color: isLike ?Colors.green:postType=="BigBlackStandard"?Colors.white:iconColor
-                  ),
+          child: label== "లైక్"?
+          SvgPicture.asset(icon,
+              height: 22,
+              width: 22,
+              color: isLike ?Colors.green:postType=="BigBlackStandard"?Colors.white:iconColor
+          ):
+          label != "లైక్"?
+          SvgPicture.asset(icon,
+              height: 22,
+              width: 22,
+              color: postType=="BigBlackStandard"?Colors.white:iconColor
+          ):
+              SizedBox.shrink(),
 
-                if(label != "లైక్")
-                SvgPicture.asset(icon,
-                    height: 20,
-                    width: 20,
-                    color: postType=="BigBlackStandard"?Colors.white:iconColor
-                ),
-                height(height: 4),
-                Text(
-                  label,
-                  style: fontStyle(fontSize: 14,
-                      color: postType=="BigBlackStandard"?Colors.white:iconColor
-                  ),
-                ),
-              ],
-            ),
-          ),
         );
       }
     );

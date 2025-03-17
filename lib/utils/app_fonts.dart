@@ -7,7 +7,7 @@ TextStyle homeScreenFontStyle(
       double? fontSize = 14,
       FontWeight? fontWeight = FontWeight.normal}) {
   return
-    GoogleFonts.mandali(
+    GoogleFonts.notoSansTelugu(
   textStyle: TextStyle(
   fontSize: fontSize ,
   height: 1.5,
@@ -16,8 +16,6 @@ TextStyle homeScreenFontStyle(
   color: color,)
   );
 }
-
-
 TextStyle fontStyle(
     {Color? color = Colors.black,
       double? fontSize = 14,

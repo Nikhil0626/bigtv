@@ -8,7 +8,7 @@ import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 import 'package:chotanews/utils/register_providers.dart';
-import 'package:facebook_app_events/facebook_app_events.dart';
+// import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -25,12 +25,16 @@ import 'globel_keys/globel_keys.dart';
 
 
 
-final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
+// final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await facebookAppEvents.setAdvertiserTracking(enabled: true);
+  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent, // Transparent status bar
+    statusBarIconBrightness: Brightness.dark, // Dark icons (black)
+  ));
+  // await facebookAppEvents.setAdvertiserTracking(enabled: true);
   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   MobileAds.instance.initialize();
   await Firebase.initializeApp();
@@ -89,7 +93,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
+  // final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
   @override
   void initState() {
     appEventLogs();
@@ -97,13 +101,13 @@ class _MyAppState extends State<MyApp> {
   }
 void appEventLogs() async{
 
-  facebookAppEvents.logEvent(
-  name: 'app_open_user',
-  parameters: {
-  'name': 'siva',
-  'time': 123,  // You can pass int, double, String
-  },
-  );
+  // facebookAppEvents.logEvent(
+  // name: 'app_open_user',
+  // parameters: {
+  // 'name': 'siva',
+  // 'time': 123,  // You can pass int, double, String
+  // },
+  // );
 }
   @override
   Widget build(BuildContext context) {

@@ -62,7 +62,7 @@ class _HomeTopTabsState extends State<HomeTopTabs> with SingleTickerProviderStat
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
-        backgroundColor: Platform.isIOS?Colors.white:AppColors.appButtonColor,
+        backgroundColor: Colors.white,
         body: SafeArea(
           child: Consumer<FlipProvider>(
             builder: (context, flipProvider, __) {
