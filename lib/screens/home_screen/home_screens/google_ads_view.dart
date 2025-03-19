@@ -28,6 +28,8 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
 
+  late BannerAd _bannerAd;
+
   @override
   void initState() {
     super.initState();
@@ -35,32 +37,51 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
   }
 
   void _loadAd() {
-    _nativeAd = NativeAd(
-      adUnitId: 'ca-app-pub-2405357352181832/9820571770', // Your Ad Unit ID
-      // factoryId: 'listTile',
-      request: const AdRequest(),
-      listener: NativeAdListener(
-        onAdLoaded: (ad) {
-          if (mounted) {
-            setState(() {
-              _isAdLoaded = true;
-            });
-          }
+
+    _bannerAd = BannerAd(
+      adUnitId: 'YOUR_AD_UNIT_ID', // Replace with your Google Ad Manager Ad Unit ID
+      size: AdSize.banner,
+      request: AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (_) {
+          setState(() {
+            _isAdLoaded = true;
+          });
         },
         onAdFailedToLoad: (ad, error) {
+          print('Banner Ad failed to load: $error');
           ad.dispose();
-          if (mounted) {
-            setState(() {
-              _isAdLoaded = false;
-              _nativeAd = null;
-            });
-          }
-          print('Ad failed to load: $error');
         },
       ),
-      nativeTemplateStyle:
-      NativeTemplateStyle(templateType: TemplateType.medium),
-    )..load();
+    );
+    _bannerAd.load();
+    // _nativeAd = NativeAd(
+    //   adUnitId: '23289484163',
+    //   // Your Ad Unit ID
+    //   // factoryId: 'listTile',
+    //   request: const AdRequest(),
+    //   listener: NativeAdListener(
+    //     onAdLoaded: (ad) {
+    //       if (mounted) {
+    //         setState(() {
+    //           _isAdLoaded = true;
+    //         });
+    //       }
+    //     },
+    //     onAdFailedToLoad: (ad, error) {
+    //       ad.dispose();
+    //       if (mounted) {
+    //         setState(() {
+    //           _isAdLoaded = false;
+    //           _nativeAd = null;
+    //         });
+    //       }
+    //       print('Ad failed to load: $error');
+    //     },
+    //   ),
+    //   nativeTemplateStyle:
+    //   NativeTemplateStyle(templateType: TemplateType.medium),
+    // )..load();
     if(_nativeAd != null){
       AnalyticsService.logEvent2("ads_available", );
     }
@@ -82,7 +103,7 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
             padding: const EdgeInsets.all(50.0),
             child:!_isAdLoaded || _nativeAd == null?ClipRRect(
                 borderRadius: BorderRadius.circular(8), // Adjust radius as needed
-                child:Image.asset("assets/playstore.png")): AdWidget(ad: _nativeAd!),
+                child:Image.asset("assets/playstore.png")): AdWidget(ad: _bannerAd!),
           ),
         ),
         Expanded(
