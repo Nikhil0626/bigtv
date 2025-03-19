@@ -32,6 +32,7 @@ class _SignInScreenState extends State<SignInScreen> {
   void initState()  {
     super.initState();
     context.read<AuthProvider>().sendEvent("LoginPage");
+    context.read<AuthProvider>().mobileNumberController.text ="";
   }
 
   @override
