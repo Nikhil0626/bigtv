@@ -10,7 +10,7 @@ TextStyle homeScreenFontStyle(
     GoogleFonts.notoSansTelugu(
   textStyle: TextStyle(
   fontSize: fontSize ,
-  height: 1.5,
+  height: 1.4,
   wordSpacing: 2,
   fontWeight: fontWeight,
   color: color,)

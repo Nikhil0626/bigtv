@@ -32,7 +32,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
     context.read<AuthProvider>().sendEvent("WellComePage");
     super.initState();
   }
-
   getMobileNumber() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
@@ -50,16 +49,13 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       }
     }
   }
-
   void _onTokenInvalidated(Map<String, dynamic>? message) {
     print("tokenInvalidated callback received $message");
     WebEngagePlugin.setSecureToken("siva kumar", message.toString());
   }
-
   @override
   Widget build(BuildContext context) {
     requestLocationPermission();
-
     return WillPopScope(
       onWillPop: () async {
         return true;

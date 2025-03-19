@@ -200,7 +200,7 @@ class FlipProvider extends ChangeNotifier {
         'deviceid': deviceId,
         'platform': Platform.isIOS ? "apple" : "android",
         'locationIds': locationId,
-        "Ads":"true"
+        "Ads":"false"
       }
           : {
         'userid': loginId ?? "",
@@ -249,7 +249,7 @@ class FlipProvider extends ChangeNotifier {
       getData(queryParams);
     } else {
       log("elseeeeee $index");
-      final Map<String, dynamic> queryParams = isTab != 0
+      final Map<String, dynamic> queryParams = isTab == 1
           ? {
         'userid': loginId ?? "1",
         'postid': "0",
@@ -277,7 +277,7 @@ class FlipProvider extends ChangeNotifier {
   Future getData(queryParams, {bool isMain = false}) async {
     Response jsonString = await HomeRepo().getAllNewsFeeds(queryParams);
     print(jsonString.toString());
-    List jsonList = jsonString.data['response']['Posts'];
+    List jsonList = jsonString.data['posts'];
     List<HomeScreenModel> data =
     jsonList.map((item) => HomeScreenModel.fromJson(item)).toList();
     if (isTab == 0) {

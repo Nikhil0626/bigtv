@@ -243,18 +243,24 @@ class _CommentSectionState extends State<CommentSection> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: TextField(
-                          controller: controller,
-                          decoration: InputDecoration(
-                            hintText: 'Add a comment...',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
+                        child: SizedBox(
+                          height: 40,
+                          child: TextField(
+                            controller: controller,
+                            decoration: InputDecoration(
+                              hintText: 'Add a comment...',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
                             ),
-                            contentPadding:
-                                const EdgeInsets.symmetric(horizontal: 20),
                           ),
                         ),
                       ),
+
                       const SizedBox(width: 8),
                       IconButton(
                         icon: const Icon(Icons.send, color: Colors.blue),

@@ -1,16 +1,28 @@
 
 import 'dart:async';
+import 'dart:developer';
 import 'dart:ui';
 
 import 'package:chotanews/main.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/home_screen/home_screens/standard_post_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../globel_keys/global_variables_data.dart';
+import '../../../services/image_to_pdf_helper.dart';
+import '../../../services/webengage_event_tracks.dart';
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_loading_screen.dart';
+import '../../../utils/app_spaces.dart';
+import '../../../utils/commant_screen.dart';
+import '../../Auth_module/auth_provider/auth_provider.dart';
 import '../../videos_main/video_views/gallery_screen.dart';
+import '../botton_actions.dart';
+import '../home_repo/event_repo.dart';
 import 'google_ads_view.dart';
 
 typedef FlipBack = void Function({bool backToTop});
@@ -96,7 +108,8 @@ class ArticlePageState extends State<ArticlePage> {
                       child: Screenshot(
                           controller: screenshotController,
                           child: widget.article.type == "GoogleAds"
-                              ? GoogleAdsView( article: widget.article, flipProvider: flipProvider,screenshotController: screenshotController, isFoldable: isFoldable,)
+                              ? GoogleAdsView( article: widget.article, flipProvider: flipProvider,
+                            screenshotController: screenshotController, isFoldable: isFoldable,)
                               : widget.article.type == "Image"
                               ? Image.network(
                             width:
@@ -121,16 +134,154 @@ class ArticlePageState extends State<ArticlePage> {
                           )),
                     ),
                   ),
-                  // Container(
-                  //   color: AppColors.borderColor,
-                  //   height: 1,
-                  // ),
-                  // PostBottomActions(
-                  //     postType: widget.article.subType,
-                  //     flipProvider: flipProvider,
-                  //     article: widget.article,
-                  //     screenshotController: screenshotController),
-                  // height(height: 2),
+                  if(widget.article.type == "Gallery" ||  widget.article.type == "Image")
+                  Container(
+                    color: Colors.transparent,
+                    height: 45,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Container(
+                          color: AppColors.borderColor,
+                          width: MediaQuery.of(context).size.width,
+                          height: 1,
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 5),
+                          child: Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Consumer<FlipProvider>(
+                                  builder: (_, flipProvider, __) {
+                                    return BottomActions(
+                                      postType: widget.article.subType ?? "",
+                                      icon: flipProvider.isLikeList.contains(
+                                          widget.article.id.toString())
+                                          ? "assets/svg/like_full.svg"
+                                          : "assets/svg/like.svg",
+                                      label: 'లైక్',
+                                      isLike: flipProvider.isLikeList
+                                          .contains(
+                                          widget.article.id.toString()),
+                                      onTap: () {
+                                        log("Like");
+                                        flipProvider
+                                            .isLikePost(widget.article);
+                                      },
+                                    );
+                                  }),
+                              width(width: 20),
+                              BottomActions(
+                                postType: widget.article.subType ?? "",
+                                icon: "assets/svg/comment.svg",
+                                label: 'కామెంట్',
+                                onTap: () {
+                                  context
+                                      .read<AuthProvider>()
+                                      .sendEvent("CommentPage");
+                                  EventRepo().sendEvent({
+                                    "key": "comments",
+                                    "data": {
+                                      "device_id":
+                                      "${GlobalVariables().deviceId}",
+                                      "userId": context
+                                          .read<FlipProvider>()
+                                          .userId ??
+                                          "",
+                                      "postId":
+                                      widget.article.id.toString(),
+                                    }
+                                  });
+                                  log("Comment --- ${context.read<AuthProvider>().loginType}");
+                                  showComments(context, widget.article);
+                                  EventRepo().sendEvent({
+                                    "key": "comments",
+                                    "data": {
+                                      "deviceId": GlobalVariables()
+                                          .deviceId
+                                          .toString(),
+                                      "openTime":
+                                      DateTime.now().toString()
+                                    }
+                                  });
+                                },
+                              ),
+                              Spacer(),
+                              BottomActions(
+                                postType: widget.article.subType ?? "",
+                                icon: "assets/svg/share.svg",
+                                label: 'షేర్',
+                                onTap: () {
+                                  EventRepo().sendEvent({
+                                    "key": "share_via_articles",
+                                    "data": {
+                                      "device_id":
+                                      "${GlobalVariables().deviceId}",
+                                      "userId": context
+                                          .read<FlipProvider>()
+                                          .userId ??
+                                          "",
+                                      "postId":
+                                      widget.article.id.toString(),
+                                      "isWhatAppShare": false,
+                                    }
+                                  });
+
+                                  sendShareDetails(
+                                      context.read<FlipProvider>().userId,
+                                      widget.article.id,
+                                      widget.article.content.toString());
+                                  if (widget.article.type == "Standard" ||
+                                      widget.article.type == "Image") {
+                                    takeScreenshotAndShare(widget.article, screenshotController);
+                                  } else if (widget.article.type ==
+                                      "Gallery") {
+                                    createAndSharePdf(
+                                        context, widget.article);
+                                  }
+                                },
+                              ),
+                              width(width: 20),
+                                InkWell(
+                                  onTap: () {
+                                    log("Refresh");
+                                    EventRepo().sendEvent({
+                                      "key": "reload",
+                                      "data": {
+                                        "device_id":
+                                        "${GlobalVariables().deviceId}",
+                                        "userId":
+                                        GlobalVariables().userId ??
+                                            "",
+                                      }
+                                    });
+                                    flipProvider
+                                        .getArticles(refresh: true);
+                                  },
+                                  child: flipProvider.isRefresh
+                                      ? const SizedBox(
+                                      height: 22,
+                                      width: 22,
+                                      child: AppLoadingScreen())
+                                      : SvgPicture.asset(
+                                    "assets/svg/reload.svg",
+                                    height: 22,
+                                    width: 22,
+                                    color: widget.article.subType ==
+                                        "BigBlackStandard"
+                                        ? Colors.white
+                                        : Colors.grey,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             )),
