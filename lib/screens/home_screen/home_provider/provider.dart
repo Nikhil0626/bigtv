@@ -31,6 +31,7 @@ class FlipProvider extends ChangeNotifier {
   bool isLastPost = false;
   bool fromLocation = false;
 
+
   String? get userId => _userId;
 
   String get deviceId => _deviceId!;
@@ -529,4 +530,5 @@ class FlipProvider extends ChangeNotifier {
       );
     }
   }
+
 }

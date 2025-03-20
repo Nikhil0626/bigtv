@@ -22,7 +22,6 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import 'aggricator_screens/onBording_screen1.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
@@ -84,7 +83,6 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) {
-    // debugPaintSizeEnabled = true;
     runApp(AppLifecycleManager(child: const MyApp()));
   });
   subscribeToPushCallbacks(_webEngagePlugin);
@@ -155,7 +153,6 @@ class _MyAppState extends State<MyApp> {
                 ) {
               return child!;
             },
-            debugShowCheckedModeBanner: false,
             // home: OnboardingScreen1(),
           ),
         ),
