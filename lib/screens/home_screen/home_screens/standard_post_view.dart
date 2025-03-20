@@ -516,20 +516,22 @@ class _StandardPostViewState extends State<StandardPostView> {
                                           icon: "assets/svg/share.svg",
                                           label: 'షేర్',
                                           onTap: () async {
-                                            EventRepo().sendEvent({
-                                              "key": "share_via_articles",
-                                              "data": {
-                                                "device_id": "${GlobalVariables().deviceId}",
-                                                "userId": context.read<FlipProvider>().userId ?? "",
-                                                "postId": widget.article.id.toString(),
-                                                "isWhatAppShare": false,
-                                              }
-                                            });
+                                            // EventRepo().sendEvent({
+                                            //   "key": "share_via_articles",
+                                            //   "data": {
+                                            //     "device_id": "${GlobalVariables().deviceId}",
+                                            //     "userId": context.read<FlipProvider>().userId ?? "",
+                                            //     "postId": widget.article.id.toString(),
+                                            //     "isWhatAppShare": false,
+                                            //   }
+                                            // });
+                                            log("hello siva1");
+                                            // sendShareDetails(context.read<FlipProvider>().userId, widget.article.id, widget.article.content.toString());
 
-                                            sendShareDetails(context.read<FlipProvider>().userId, widget.article.id, widget.article.content.toString());
-
-                                            if (widget.article.type == "Standard" || widget.article.type == "Image") {
+                                            if (widget.article.type == "Standard" || widget.article.type == "Image" || widget.article.type == "Video" ) {
+                                              log("hello ddd");
                                               if (widget.isAds) {
+                                                log("hello siva2");
                                                 try {
                                                   final image = await adsScreenshotController.capture(
                                                     pixelRatio: 1.5,
@@ -548,9 +550,12 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                   CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                                                 }
                                               } else {
+                                                log("hello siva");
+
                                                 takeScreenshotAndShare(widget.article, widget.isAds ? adsScreenshotController : widget.screenshotController);
                                               }
                                             } else if (widget.article.type == "Gallery") {
+                                              log("hello siva3");
                                               createAndSharePdf(context, widget.article);
                                             }
                                           },
