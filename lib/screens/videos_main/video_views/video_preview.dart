@@ -1,9 +1,9 @@
-import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-import '../../../utils/app_colors.dart';
 
 class VideoPreview extends StatefulWidget {
   final String url;
@@ -28,14 +28,12 @@ class _VideoPreview extends State<VideoPreview> {
       flags: const YoutubePlayerFlags(
         autoPlay: true,
         enableCaption: false,
-        forceHD: true,
+        forceHD: false,
         disableDragSeek: true,
         isLive: false,
       ),
     )..addListener(() {
-      if (controller.value.isFullScreen) {
-        controller.toggleFullScreenMode(); // Prevent full-screen mode
-      }
+
     });
   }
 
@@ -48,51 +46,29 @@ class _VideoPreview extends State<VideoPreview> {
   @override
   Widget build(BuildContext context) {
     return isPlaying
-        ? YoutubePlayer(
-      onEnded: (metaData) {
-        isPlaying = false;
-        setState(() {
-
-        });
-      },
-          controller: controller,
-          // showVideoProgressIndicator: true,
-          progressIndicatorColor: Colors.red,
-
-        )
-        : Stack(
-      alignment: Alignment.center,
-      children: [
-        Image.network(
-          widget.imageUrl,
-          // "https://img.youtube.com/vi/${widget.url}/hqdefault.jpg",
-          fit: BoxFit.cover,
-        ),
-        IconButton(
-          icon: SvgPicture.asset("assets/svg/play_circle.svg",height: 58,width: 58,),
-          onPressed: () {
-            setState(() {
-              isPlaying = true;
-            });
-          },
-        ),
-      ],
-    );
-  }
-
-  Widget _buildVideoPlayer() {
-    return isPlaying
         ? Container(
-      width: 300, // Set width of the player
-      height: 200,
-          color: Colors.greenAccent,
-          child: YoutubePlayer(
-                controller: controller,
-                showVideoProgressIndicator: true,
-                progressIndicatorColor: Colors.red,
+      width: MediaQuery.of(context).size.width, // Fixed width
+      height: 280, // Fixed height
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: YoutubePlayer(
+          controller: controller,
+          onEnded: (metaData) {
+            isPlaying= false;
+            setState(() {
 
-              ),
-        )
+            });
+          },
+          showVideoProgressIndicator: false,
+          onReady: () => debugPrint("YouTube Player Ready"),
+        ),
+      ),
+    )
+
+
         : Stack(
       alignment: Alignment.center,
       children: [
@@ -104,12 +80,14 @@ class _VideoPreview extends State<VideoPreview> {
         IconButton(
           icon: SvgPicture.asset("assets/svg/play_circle.svg",height: 58,width: 58,),
           onPressed: () {
-            setState(() {
-              isPlaying = true;
-            });
+           isPlaying= true;
+           setState(() {
+
+           });
           },
         ),
       ],
     );
   }
+
 }
