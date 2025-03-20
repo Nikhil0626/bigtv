@@ -31,6 +31,7 @@ class _VideoPreview extends State<VideoPreview> {
         forceHD: false,
         disableDragSeek: true,
         isLive: false,
+        showLiveFullscreenButton: false,
       ),
     )..addListener(() {
 
