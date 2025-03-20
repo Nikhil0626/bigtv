@@ -153,6 +153,7 @@ class _MyAppState extends State<MyApp> {
                 ) {
               return child!;
             },
+            debugShowCheckedModeBanner: false,
             // home: OnboardingScreen1(),
           ),
         ),
