@@ -7,6 +7,7 @@ import 'package:chotanews/main.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/home_screen/home_screens/standard_post_view.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -58,6 +59,7 @@ class ArticlePageState extends State<ArticlePage> {
             (MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom)
                 .toInt();
   }
+
 
   bool isFoldableDevice(BuildContext context) {
     final displayFeatures = MediaQuery.of(context).displayFeatures;

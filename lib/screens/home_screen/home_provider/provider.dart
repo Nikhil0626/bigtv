@@ -297,7 +297,7 @@ class FlipProvider extends ChangeNotifier {
       }
 
       log(mainArticlesData.length.toString());
-      mainArticlesController.add(mainArticlesData);
+      mainArticlesController.add(data);
       notifyListeners();
     } else if (isTab == 1) {
       if (isRefresh || fromLocation) {

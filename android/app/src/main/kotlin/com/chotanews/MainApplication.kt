@@ -13,7 +13,6 @@ class MainApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
-
         // Initialize WebEngage
         val webEngageConfig = WebEngageConfig.Builder()
             .setWebEngageKey("in~~1341061ba")

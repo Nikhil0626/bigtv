@@ -44,72 +44,6 @@ class FlipPanel<T> extends StatefulWidget {
 class _FlipPanelState<T> extends State<FlipPanel>
     with TickerProviderStateMixin {
   late AnimationController _controller;
-  List<Map<String, dynamic>> data = [
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title":
-      "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
-      "description":
-      "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
-      "url": "https://www.bbc.co.uk/news/articles/c897ew0ekp4o",
-      "urlToImage":
-      "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content":
-      "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
-    },
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title": "Another sample news article",
-      "description": "Some description here...",
-      "url": "https://www.bbc.co.uk/news/articles/sample-url",
-      "urlToImage":
-      "https://images.unsplash.com/photo-1575936123452-b67c3203c357?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content": "Some sample content..."
-    },
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title":
-      "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
-      "description":
-      "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
-      "url": "https://www.bbc.co.uk/news/articles/c897ew0ekp4o",
-      "urlToImage":
-      "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content":
-      "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
-    },
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title": "Another sample news article",
-      "description": "Some description here...",
-      "url": "https://www.bbc.co.uk/news/articles/sample-url",
-      "urlToImage":
-      "https://images.unsplash.com/photo-1575936123452-b67c3203c357?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content": "Some sample content..."
-    },
-    {
-      "source": {"id": "bbc-news", "name": "BBC News"},
-      "author": "BBC News",
-      "title":
-      "gjfsdfd evicted from NHS hospital ward after being stuck for 18 months",
-      "description":
-      "She lived in a cubicle, despite being fit to leave, because of difficulties finding a care home.",
-      "url": "https://www.bbc.co.uk/news/articles/c897ew0ekp4o",
-      "urlToImage":
-      "https://ichef.bbci.co.uk/ace/branded_news/1200/cpsprodpb/0854/live/a2d41ea0-dcb0-11ef-bc01-8f2c83dad217.jpg",
-      "publishedAt": "2025-02-08T05:37:30.0626341Z",
-      "content":
-      "Under the 2014 Care Act, Jessie should be able to express a preference about where she lives..."
-    },
-  ];
 
   late Animation _animation;
   int _currentIndex = 0;
@@ -126,7 +60,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   late StreamSubscription<List<dynamic>?> _subscription;
   int _availableItems = 0;
-  final _updateThreshold = 5;
+  final _updateThreshold = 7;
 
   bool _waitingForRefresh = false;
 
@@ -370,6 +304,7 @@ class _FlipPanelState<T> extends State<FlipPanel>
 
   void _handleDragEnd(DragEndDetails details) {
     log("indexxxxxxx ---- $_currentIndex");
+    log("indexxxxxxx ---- $_updateThreshold");
 
     context.read<FlipProvider>().loadUserId(_currentIndex);
     _dragging = false;
@@ -381,16 +316,6 @@ class _FlipPanelState<T> extends State<FlipPanel>
       });
     }
 
-    if (context.read<FlipProvider>().mainArticlesData[_currentIndex + 1].type ==
-        "addMob") {
-      log("load ads for showing");
-      context.read<FlipProvider>().loadAds();
-
-    }else if(context.read<FlipProvider>().mainArticlesData[_currentIndex + 2].type ==
-        "addMob"){
-      context.read<FlipProvider>().closeAds();
-
-    }
     if(_currentIndex > 0 && _direction == FlipDirection.up) {
       context.read<FlipProvider>().isShowTopBottomChange(true,);
     }else{

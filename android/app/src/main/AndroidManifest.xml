@@ -297,11 +297,21 @@
         <!-- Boot Receiver -->
         <receiver
             android:name="com.webengage.sdk.android.WebEngageBootReceiver"
+            android:enabled="true"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
+<!--        <receiver-->
+<!--            android:name="com.webengage.sdk.android.WebEngageBootReceiver"-->
+<!--            android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
 
         <!-- FileProvider (Fixed Duplicate Issue) -->
         <provider
