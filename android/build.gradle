@@ -2,6 +2,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://webengage.bintray.com/android' }
     }
 }
 
@@ -31,5 +32,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://webengage.bintray.com/android' }
     }
 }

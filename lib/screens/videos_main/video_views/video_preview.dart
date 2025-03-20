@@ -47,45 +47,52 @@ class _VideoPreview extends State<VideoPreview> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.isVideoScreen
-        ? SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          leading: InkWell(
-            onTap: () {
-              Navigator.pop(context);
-            },
-            child: const Icon(
-              color: Colors.white,
-              Icons.arrow_back_ios,
-              size: 18,
-            ),
-          ),
-          backgroundColor: AppColors.appButtonColor,
-          title: Text(
-            "Video View",
-            style: fontStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white),
-          ),
+    return isPlaying
+        ? YoutubePlayer(
+      onEnded: (metaData) {
+        isPlaying = false;
+        setState(() {
+
+        });
+      },
+          controller: controller,
+          // showVideoProgressIndicator: true,
+          progressIndicatorColor: Colors.red,
+
+        )
+        : Stack(
+      alignment: Alignment.center,
+      children: [
+        Image.network(
+          widget.imageUrl,
+          // "https://img.youtube.com/vi/${widget.url}/hqdefault.jpg",
+          fit: BoxFit.cover,
         ),
-        body: Center(child: _buildVideoPlayer()),
-      ),
-    )
-        : _buildVideoPlayer();
+        IconButton(
+          icon: SvgPicture.asset("assets/svg/play_circle.svg",height: 58,width: 58,),
+          onPressed: () {
+            setState(() {
+              isPlaying = true;
+            });
+          },
+        ),
+      ],
+    );
   }
 
   Widget _buildVideoPlayer() {
     return isPlaying
-        ? YoutubePlayer(
+        ? Container(
+      width: 300, // Set width of the player
+      height: 200,
+          color: Colors.greenAccent,
+          child: YoutubePlayer(
+                controller: controller,
+                showVideoProgressIndicator: true,
+                progressIndicatorColor: Colors.red,
 
-      controller: controller,
-      showVideoProgressIndicator: true,
-      progressIndicatorColor: Colors.red,
-
-    )
+              ),
+        )
         : Stack(
       alignment: Alignment.center,
       children: [

@@ -19,5 +19,4 @@
 -dontwarn com.facebook.**
 -keepattributes *Annotation*
 -keep class com.facebook.infer.annotation.** { *; }
--keep class com.chotanews.MyFirebaseMessagingService { *; }
 # Add any project specific keep options here:

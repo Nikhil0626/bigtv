@@ -90,7 +90,7 @@ Future<void> takeScreenshotAndShare( article,screenshotController, ) async {
       Share.shareXFiles([XFile(imageFile.path)], text:Platform.isIOS?article.linkURLIos.toString(): article.linkURLAndroid.toString());
 
     } else {
-      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+      CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
     }
   } catch (e) {
     CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
