@@ -30,11 +30,11 @@ class _VideoPreview extends State<VideoPreview> {
         forceHD: false,
         disableDragSeek: true,
         isLive: false,
-        showLiveFullscreenButton: false,
-      ),
-    )..addListener(() {
 
-    });
+        showLiveFullscreenButton: false,
+        // hideControls: true,
+      ),
+    );
   }
 
   @override
@@ -56,6 +56,21 @@ class _VideoPreview extends State<VideoPreview> {
         borderRadius: BorderRadius.circular(12),
         child: YoutubePlayer(
           controller: controller,
+          bottomActions: [
+            CurrentPosition(),
+            ProgressBar(isExpanded: true),
+            RemainingDuration(),       // ✅ Show remaining time
+            IconButton(
+              icon: Icon(controller.value.volume == 0 ? Icons.volume_off : Icons.volume_up),
+              onPressed: () {
+                if (controller.value.volume == 0) {
+                  controller.setVolume(100); // ✅ Unmute
+                } else {
+                  controller.setVolume(0);   // ✅ Mute
+                }
+              },
+            ),
+          ],
           onEnded: (metaData) {
             isPlaying= false;
             setState(() {
