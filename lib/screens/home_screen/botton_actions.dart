@@ -31,19 +31,23 @@ class BottomActions extends StatelessWidget {
       builder: (_,flipProvider,__) {
         return InkWell(
           onTap: onTap,
-          child: label== "లైక్"?
-          SvgPicture.asset(icon,
-              height: 20,
-              width: 20,
-              color: isLike ?Colors.green:postType=="BigBlackStandard"?Colors.white:iconColor
-          ):
-          label != "లైక్"?
-          SvgPicture.asset(icon,
-              height: 20,
-              width: 20,
-              color: postType=="BigBlackStandard"?Colors.white:iconColor
-          ):
-              SizedBox.shrink(),
+          child: SizedBox(
+
+            width:  40,
+            child: label== "లైక్"?
+            SvgPicture.asset(icon,
+                height: 20,
+                width: 20,
+                color: isLike ?Colors.green:postType=="BigBlackStandard"?Colors.white:iconColor
+            ):
+            label != "లైక్"?
+            SvgPicture.asset(icon,
+                height: 20,
+                width: 20,
+                color: postType=="BigBlackStandard"?Colors.white:iconColor
+            ):
+                SizedBox.shrink(),
+          ),
 
         );
       }

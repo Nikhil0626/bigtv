@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
@@ -42,7 +43,7 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
 
   void _loadAd() {
     _nativeAd = NativeAd(
-      adUnitId: 'ca-app-pub-2405357352181832/9820571770', // Your Ad Unit ID
+      adUnitId: Platform.isIOS?"ca-app-pub-2405357352181832/7643871122": 'ca-app-pub-2405357352181832/9820571770', // Your Ad Unit ID
       // factoryId: 'listTile',
       request: const AdRequest(),
       listener: NativeAdListener(

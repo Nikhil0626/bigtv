@@ -1,7 +1,6 @@
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
@@ -31,11 +30,11 @@ class _VideoPreview extends State<VideoPreview> {
         forceHD: false,
         disableDragSeek: true,
         isLive: false,
-        showLiveFullscreenButton: false,
-      ),
-    )..addListener(() {
 
-    });
+        showLiveFullscreenButton: false,
+        // hideControls: true,
+      ),
+    );
   }
 
   @override
@@ -57,6 +56,21 @@ class _VideoPreview extends State<VideoPreview> {
         borderRadius: BorderRadius.circular(12),
         child: YoutubePlayer(
           controller: controller,
+          bottomActions: [
+            CurrentPosition(),
+            ProgressBar(isExpanded: true),
+            RemainingDuration(),       // ✅ Show remaining time
+            IconButton(
+              icon: Icon(controller.value.volume == 0 ? Icons.volume_off : Icons.volume_up),
+              onPressed: () {
+                if (controller.value.volume == 0) {
+                  controller.setVolume(100); // ✅ Unmute
+                } else {
+                  controller.setVolume(0);   // ✅ Mute
+                }
+              },
+            ),
+          ],
           onEnded: (metaData) {
             isPlaying= false;
             setState(() {
