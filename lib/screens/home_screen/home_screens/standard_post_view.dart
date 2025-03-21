@@ -53,8 +53,8 @@ class _StandardPostViewState extends State<StandardPostView> {
       backgroundColor: widget.article.type == "Video" ? Colors.black : Colors.white,
       body: SafeArea(
         child: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
-          int data = (MediaQuery.of(context).size.height * 0.40).round();
-          int bigData = Platform.isIOS?(MediaQuery.of(context).size.height * 0.52).round():(MediaQuery.of(context).size.height * 0.58).round();
+          int data = widget.isFoldable?(MediaQuery.of(context).size.height * 0.60).round():(MediaQuery.of(context).size.height * 0.40).round();
+          int bigData = Platform.isIOS?(MediaQuery.of(context).size.height * 0.52).round():widget.isFoldable?(MediaQuery.of(context).size.height * 0.30).round():(MediaQuery.of(context).size.height * 0.58).round();
           log("height is :  ${MediaQuery.of(context).size.width}");
           return GestureDetector(
             onVerticalDragUpdate: widget.isAds
@@ -143,14 +143,14 @@ class _StandardPostViewState extends State<StandardPostView> {
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  height(height: 8.sp),
+                                  height(height: widget.isFoldable?8:8.sp),
                                   Padding(
-                                    padding: EdgeInsets.only(right: 16.0.sp, left: 16.0.sp, top: 16.sp),
+                                    padding: EdgeInsets.only(right: 16.0.sp, left: 16.0.sp, top: widget.isFoldable?16:16.sp),
                                     child: Text(widget.article.title ?? "No Title",
                                         style: homeScreenFontStyle(
-                                            color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black.withOpacity(0.6), fontSize: 18.sp, fontWeight: FontWeight.bold)),
+                                            color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black.withOpacity(0.6), fontSize:  widget.isFoldable?22:18.sp, fontWeight: FontWeight.bold)),
                                   ),
-                                  height(height: 6.sp),
+                                  height(height:widget.isFoldable?6: 6.sp),
                                   Expanded(
                                     child: Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 16.0.sp),
@@ -164,10 +164,10 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                         style: homeScreenFontStyle(
                                                           color: Colors.black.withOpacity(0.5),
                                                           fontWeight: FontWeight.w500,
-                                                          fontSize: 16.sp,
+                                                          fontSize:  widget.isFoldable?20:16.sp,
                                                         ))
                                                     : const SizedBox.shrink(),
-                                                height(height: 8.sp),
+                                                height(height: widget.isFoldable?8:8.sp),
                                                 Expanded(
                                                   child: ListView(
                                                     physics: const NeverScrollableScrollPhysics(),
@@ -180,7 +180,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                           Text(
                                                             "● ",
                                                             style: TextStyle(
-                                                              fontSize: 16.sp,
+                                                              fontSize: widget.isFoldable?20:16.sp,
                                                               color: Colors.black.withOpacity(0.5),
                                                               // Reduce bullet size for better alignment
                                                               height: 1, // Ensures proper line height
@@ -192,14 +192,14 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                             child: Text(
                                                               item,
                                                               strutStyle: StrutStyle(
-                                                                fontSize: 16.sp,
+                                                                fontSize:  widget.isFoldable?20:16.sp,
                                                                 // Match font size
-                                                                height: 1.sp, // Ensures consistent line height
+                                                                height: 1, // Ensures consistent line height
                                                               ),
                                                               style: homeScreenFontStyle(
                                                                 color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black.withOpacity(0.5),
                                                                 fontWeight: FontWeight.w400,
-                                                                fontSize: 16.sp,
+                                                                fontSize:widget.isFoldable?20: 16.sp,
                                                               ),
                                                             ),
                                                           ),
@@ -221,12 +221,12 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                               if (widget.article.isReporter == true)
                                                                 Text(
                                                                   ' ${widget.article.reportedBy} | ',
-                                                                  style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                  style: fontStyle(fontSize:  widget.isFoldable?14:12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                                 ),
                                                               Icon(Icons.access_time, size: 14, color: Colors.grey),
                                                               Text(
                                                                 " ${formatTimeDifference(widget.article.created)}",
-                                                                style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                style: fontStyle(fontSize: widget.isFoldable?14:12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                               ),
                                                             ],
                                                           ),
@@ -257,12 +257,12 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                               if (widget.article.isReporter == true)
                                                                 Text(
                                                                   ' ${widget.article.reportedBy} | ',
-                                                                  style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                  style: fontStyle(fontSize: widget.isFoldable?14:12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                                 ),
                                                               Icon(Icons.access_time, size: 14, color: Colors.grey),
                                                               Text(
                                                                 " ${formatTimeDifference(widget.article.created)}",
-                                                                style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                style: fontStyle(fontSize: widget.isFoldable?14:12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                               ),
                                                             ],
                                                           ),
@@ -315,7 +315,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                       TextSpan(
                                         text: "Chota ",
                                         style: fontStyle(
-                                          fontSize: 16,
+                                          fontSize:  widget.isFoldable?16:16.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black,
                                         ),
@@ -323,7 +323,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                       TextSpan(
                                         text: "News",
                                         style: fontStyle(
-                                          fontSize: 16,
+                                          fontSize:  widget.isFoldable?16:16.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Color(0xff00A8FF),
                                         ),
@@ -340,7 +340,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                   ),
                   Container(
                     color: widget.article.subType == "BigBlackStandard" ? Colors.black : Colors.white,
-                    height: 45.sp,
+                    height: widget.isFoldable?45:45.sp,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -510,7 +510,7 @@ class _StandardPostViewState extends State<StandardPostView> {
           style: homeScreenFontStyle(
             color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.blue,
             fontWeight: FontWeight.w400,
-            fontSize: 16.sp,
+            fontSize:  widget.isFoldable?20:16.sp,
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
@@ -531,7 +531,7 @@ class _StandardPostViewState extends State<StandardPostView> {
             style: homeScreenFontStyle(
               color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black.withOpacity(0.5),
               fontWeight: FontWeight.w400,
-              fontSize: 16.sp,
+              fontSize: widget.isFoldable?20:16.sp,
             )));
         return "";
       },

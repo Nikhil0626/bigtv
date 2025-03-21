@@ -76,7 +76,7 @@ class ArticlePageState extends State<ArticlePage> {
         color: widget.article.subType == "BigBlackStandard"
             ? Colors.black
             : Colors.white,
-        height: widget.height - topSpace,
+        height: widget.height - topSpace-.8,
         width: MediaQuery.of(context).size.width,
         child: WillPopScope(
             onWillPop: () {
