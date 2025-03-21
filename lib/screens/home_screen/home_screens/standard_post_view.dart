@@ -36,13 +36,7 @@ class StandardPostView extends StatefulWidget {
   final ScreenshotController screenshotController;
   final isAds;
 
-  const StandardPostView(
-      {super.key,
-      required this.article,
-      required this.isFoldable,
-      required this.flipProvider,
-      required this.screenshotController,
-      this.isAds = false});
+  const StandardPostView({super.key, required this.article, required this.isFoldable, required this.flipProvider, required this.screenshotController, this.isAds = false});
 
   @override
   _StandardPostViewState createState() => _StandardPostViewState();
@@ -56,8 +50,7 @@ class _StandardPostViewState extends State<StandardPostView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          widget.article.type == "Video" ? Colors.black : Colors.white,
+      backgroundColor: widget.article.type == "Video" ? Colors.black : Colors.white,
       body: SafeArea(
         child: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
           int data = (MediaQuery.of(context).size.height * 0.40).round();
@@ -90,9 +83,7 @@ class _StandardPostViewState extends State<StandardPostView> {
 
                     Container(
                       width: MediaQuery.of(context).size.width,
-                      height: widget.article.subType == "BigBlackStandard"
-                          ? bigData.toDouble()
-                          : data.toDouble(), // Image takes 40% of screen
+                      height: widget.article.subType == "BigBlackStandard" ? bigData.toDouble() : data.toDouble(), // Image takes 40% of screen
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(16.r),
@@ -115,12 +106,9 @@ class _StandardPostViewState extends State<StandardPostView> {
                               ),
                               child: CachedNetworkImage(
                                 imageUrl: widget.article.imageUrl.url,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.40,
+                                height: MediaQuery.of(context).size.height * 0.40,
                                 width: MediaQuery.of(context).size.width,
-                                fit: widget.isFoldable
-                                    ? BoxFit.fill
-                                    : BoxFit.fill,
+                                fit: widget.isFoldable ? BoxFit.fill : BoxFit.fill,
                                 placeholder: (context, url) => Container(
                                   color: AppColors.borderColor.withOpacity(.2),
                                 ),
@@ -138,15 +126,11 @@ class _StandardPostViewState extends State<StandardPostView> {
                     Positioned(
                       bottom: 0,
                       child: Container(
-                        height: widget.article.subType != "BigBlackStandard"
-                            ? bigData.toDouble()
-                            : data.toDouble(),
+                        height: widget.article.subType != "BigBlackStandard" ? bigData.toDouble() : data.toDouble(),
                         // Bottom part takes 60% of screen
                         width: MediaQuery.of(context).size.width,
                         decoration: BoxDecoration(
-                          color: widget.article.subType == "BigBlackStandard"
-                              ? Colors.black
-                              : Colors.white,
+                          color: widget.article.subType == "BigBlackStandard" ? Colors.black : Colors.white,
                           borderRadius: BorderRadius.only(
                             topRight: Radius.circular(10.sp),
                             topLeft: Radius.circular(10.sp),
@@ -158,34 +142,24 @@ class _StandardPostViewState extends State<StandardPostView> {
                           children: [
                             height(height: 8.sp),
                             Padding(
-                              padding: EdgeInsets.only(
-                                  right: 16.0.sp, left: 16.0.sp, top: 16.sp),
+                              padding: EdgeInsets.only(right: 16.0.sp, left: 16.0.sp, top: 16.sp),
                               child: Text(widget.article.title ?? "No Title",
                                   style: homeScreenFontStyle(
-                                      color: widget.article.subType ==
-                                              "BigBlackStandard"
-                                          ? Colors.white
-                                          : Colors.black.withOpacity(0.6),
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.bold)),
+                                      color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black.withOpacity(0.6), fontSize: 18.sp, fontWeight: FontWeight.bold)),
                             ),
                             height(height: 6.sp),
                             Expanded(
                               child: Padding(
-                                padding:
-                                    EdgeInsets.symmetric(horizontal: 16.0.sp),
+                                padding: EdgeInsets.symmetric(horizontal: 16.0.sp),
                                 child: widget.article.subType == "BulletPost"
                                     ? Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment: MainAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
                                           (widget.article.content != "")
                                               ? Text(widget.article.content,
                                                   style: homeScreenFontStyle(
-                                                    color: Colors.black
-                                                        .withOpacity(0.5),
+                                                    color: Colors.black.withOpacity(0.5),
                                                     fontWeight: FontWeight.w500,
                                                     fontSize: 16.sp,
                                                   ))
@@ -193,26 +167,20 @@ class _StandardPostViewState extends State<StandardPostView> {
                                           height(height: 8.sp),
                                           Expanded(
                                             child: ListView(
-                                              physics:
-                                                  const NeverScrollableScrollPhysics(),
-                                              children: widget
-                                                  .article.bulletPoints
-                                                  .map<Widget>((item) {
+                                              physics: const NeverScrollableScrollPhysics(),
+                                              children: widget.article.bulletPoints.map<Widget>((item) {
                                                 // Explicitly specify <Widget>
                                                 return Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   // Align items at the top
                                                   children: [
                                                     Text(
                                                       "● ",
                                                       style: TextStyle(
                                                         fontSize: 16.sp,
-                                                        color: Colors.black
-                                                            .withOpacity(0.5),
+                                                        color: Colors.black.withOpacity(0.5),
                                                         // Reduce bullet size for better alignment
-                                                        height:
-                                                            1, // Ensures proper line height
+                                                        height: 1, // Ensures proper line height
                                                       ),
                                                     ),
                                                     SizedBox(width: 5.sp),
@@ -223,20 +191,11 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                         strutStyle: StrutStyle(
                                                           fontSize: 17.sp,
                                                           // Match font size
-                                                          height: 1
-                                                              .sp, // Ensures consistent line height
+                                                          height: 1.sp, // Ensures consistent line height
                                                         ),
-                                                        style:
-                                                            homeScreenFontStyle(
-                                                          color: widget.article
-                                                                      .subType ==
-                                                                  "BigBlackStandard"
-                                                              ? Colors.white
-                                                              : Colors.black
-                                                                  .withOpacity(
-                                                                      0.5),
-                                                          fontWeight:
-                                                              FontWeight.w400,
+                                                        style: homeScreenFontStyle(
+                                                          color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black.withOpacity(0.5),
+                                                          fontWeight: FontWeight.w400,
                                                           fontSize: 17.sp,
                                                         ),
                                                       ),
@@ -247,16 +206,31 @@ class _StandardPostViewState extends State<StandardPostView> {
                                             ),
                                           ),
                                           if (!widget.isAds)
-                                            Text(
-                                              widget.article.isReporter == true
-                                                  ? '\n\nరిపోర్టర్ ${widget.article.reportedBy.toString()} | ${formatTimeDifference(widget.article.created)}'
-                                                  : '\n\nPosted ${formatTimeDifference(widget.article.created)}',
-                                              style: fontStyle(
-                                                fontSize: 11.sp,
-                                                fontWeight: FontWeight.w400,
-                                                color: Colors.grey,
+                                            RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  TextSpan(text: "\n\n"),
+                                                  WidgetSpan(
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        if (widget.article.isReporter == true) Icon(Icons.person, size: 14, color: Colors.grey),
+                                                        if (widget.article.isReporter == true)
+                                                          Text(
+                                                            ' ${widget.article.reportedBy} | ',
+                                                            style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                          ),
+                                                        Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                        Text(
+                                                          " ${formatTimeDifference(widget.article.created)}",
+                                                          style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ),
+                                            )
                                         ],
                                       )
                                     : RichText(
@@ -270,16 +244,27 @@ class _StandardPostViewState extends State<StandardPostView> {
                                             ),
                                             if (!widget.isAds)
                                               TextSpan(
-                                                text: widget.article
-                                                            .isReporter ==
-                                                        true
-                                                    ? '\n\nరిపోర్టర్ ${widget.article.reportedBy.toString()} | ${formatTimeDifference(widget.article.created)}'
-                                                    : '\n\nPosted ${formatTimeDifference(widget.article.created)}',
-                                                style: fontStyle(
-                                                  fontSize: 11.sp,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: Colors.grey,
-                                                ),
+                                                children: [
+                                                  TextSpan(text: "\n\n"),
+                                                  WidgetSpan(
+                                                    child: Row(
+                                                      mainAxisSize: MainAxisSize.min,
+                                                      children: [
+                                                        if (widget.article.isReporter == true) Icon(Icons.person, size: 14, color: Colors.grey),
+                                                        if (widget.article.isReporter == true)
+                                                          Text(
+                                                            ' ${widget.article.reportedBy} | ',
+                                                            style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                          ),
+                                                        Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                        Text(
+                                                          " ${formatTimeDifference(widget.article.created)}",
+                                                          style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
 
                                             // TextSpan(
@@ -297,15 +282,11 @@ class _StandardPostViewState extends State<StandardPostView> {
                               ),
                             ),
                             Container(
-                              color:
-                                  widget.article.subType == "BigBlackStandard"
-                                      ? Colors.black
-                                      : Colors.white,
+                              color: widget.article.subType == "BigBlackStandard" ? Colors.black : Colors.white,
                               height: 45.sp,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
+                                mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: [
                                   Container(
                                     color: AppColors.borderColor,
@@ -313,151 +294,87 @@ class _StandardPostViewState extends State<StandardPostView> {
                                     height: 1,
                                   ),
                                   Padding(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 16.0.sp, vertical: 5.sp),
+                                    padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
                                     child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceEvenly,
+                                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                       children: [
-                                        Consumer<FlipProvider>(
-                                            builder: (_, flipProvider, __) {
+                                        Consumer<FlipProvider>(builder: (_, flipProvider, __) {
                                           return BottomActions(
-                                            postType:
-                                                widget.article.subType ?? "",
-                                            icon: flipProvider.isLikeList
-                                                    .contains(widget.article.id
-                                                        .toString())
-                                                ? "assets/svg/like_full.svg"
-                                                : "assets/svg/like.svg",
+                                            postType: widget.article.subType ?? "",
+                                            icon: flipProvider.isLikeList.contains(widget.article.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                                             label: 'లైక్',
-                                            isLike: flipProvider.isLikeList
-                                                .contains(widget.article.id
-                                                    .toString()),
+                                            isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
                                             onTap: () {
                                               log("Like");
-                                              flipProvider
-                                                  .isLikePost(widget.article);
+                                              flipProvider.isLikePost(widget.article);
                                             },
                                           );
                                         }),
                                         width(width: 20),
                                         BottomActions(
-                                          postType:
-                                              widget.article.subType ?? "",
+                                          postType: widget.article.subType ?? "",
                                           icon: "assets/svg/comment.svg",
                                           label: 'కామెంట్',
                                           onTap: () {
-                                            context
-                                                .read<AuthProvider>()
-                                                .sendEvent("CommentPage");
+                                            context.read<AuthProvider>().sendEvent("CommentPage");
                                             EventRepo().sendEvent({
                                               "key": "comments",
                                               "data": {
-                                                "device_id":
-                                                    "${GlobalVariables().deviceId}",
-                                                "userId": context
-                                                        .read<FlipProvider>()
-                                                        .userId ??
-                                                    "",
-                                                "postId": widget.article.id
-                                                    .toString(),
+                                                "device_id": "${GlobalVariables().deviceId}",
+                                                "userId": context.read<FlipProvider>().userId ?? "",
+                                                "postId": widget.article.id.toString(),
                                               }
                                             });
                                             log("Comment --- ${context.read<AuthProvider>().loginType}");
-                                            showComments(
-                                                context, widget.article);
+                                            showComments(context, widget.article);
                                             EventRepo().sendEvent({
                                               "key": "comments",
-                                              "data": {
-                                                "deviceId": GlobalVariables()
-                                                    .deviceId
-                                                    .toString(),
-                                                "openTime":
-                                                    DateTime.now().toString()
-                                              }
+                                              "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}
                                             });
                                           },
                                         ),
                                         Spacer(),
                                         BottomActions(
-                                          postType:
-                                              widget.article.subType ?? "",
+                                          postType: widget.article.subType ?? "",
                                           icon: "assets/svg/share.svg",
                                           label: 'షేర్',
                                           onTap: () async {
                                             EventRepo().sendEvent({
                                               "key": "share_via_articles",
                                               "data": {
-                                                "device_id":
-                                                    "${GlobalVariables().deviceId}",
-                                                "userId": context
-                                                        .read<FlipProvider>()
-                                                        .userId ??
-                                                    "",
-                                                "postId": widget.article.id
-                                                    .toString(),
+                                                "device_id": "${GlobalVariables().deviceId}",
+                                                "userId": context.read<FlipProvider>().userId ?? "",
+                                                "postId": widget.article.id.toString(),
                                                 "isWhatAppShare": false,
                                               }
                                             });
 
-                                            sendShareDetails(
-                                                context
-                                                    .read<FlipProvider>()
-                                                    .userId,
-                                                widget.article.id,
-                                                widget.article.content
-                                                    .toString());
-
+                                            sendShareDetails(context.read<FlipProvider>().userId, widget.article.id, widget.article.content.toString());
 
                                             if (widget.article.type == "Standard" || widget.article.type == "Image" || widget.article.type == "Video") {
                                               if (widget.isAds) {
                                                 try {
-                                                  final image =
-                                                      await adsScreenshotController
-                                                          .capture(
+                                                  final image = await adsScreenshotController.capture(
                                                     pixelRatio: 1.5,
                                                   );
                                                   if (image != null) {
-                                                    final directory =
-                                                        await getTemporaryDirectory();
-                                                    final imagePath =
-                                                        '${directory.path}/${widget.article.id}.png';
-                                                    final imageFile =
-                                                        File(imagePath);
-                                                    await imageFile
-                                                        .writeAsBytes(image);
+                                                    final directory = await getTemporaryDirectory();
+                                                    final imagePath = '${directory.path}/${widget.article.id}.png';
+                                                    final imageFile = File(imagePath);
+                                                    await imageFile.writeAsBytes(image);
 
-                                                    Share.shareXFiles(
-                                                        [XFile(imageFile.path)],
-                                                        text: Platform.isIOS
-                                                            ? widget.article
-                                                                .linkURLIos
-                                                                .toString()
-                                                            : widget.article
-                                                                .linkURLAndroid
-                                                                .toString());
+                                                    Share.shareXFiles([XFile(imageFile.path)], text: Platform.isIOS ? widget.article.linkURLIos.toString() : widget.article.linkURLAndroid.toString());
                                                   } else {
-                                                    CustomToast.showErrorToast(
-                                                        msg:
-                                                            "Failed to capture screenshot.123");
+                                                    CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                                                   }
                                                 } catch (e) {
-                                                  CustomToast.showErrorToast(
-                                                      msg:
-                                                          "Failed to capture screenshot.");
+                                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                                                 }
                                               } else {
-                                                takeScreenshotAndShare(
-                                                    widget.article,
-                                                    widget.isAds
-                                                        ? adsScreenshotController
-                                                        : widget
-                                                            .screenshotController);
+                                                takeScreenshotAndShare(widget.article, widget.isAds ? adsScreenshotController : widget.screenshotController);
                                               }
-                                            } else if (widget.article.type ==
-                                                "Gallery") {
-                                              createAndSharePdf(
-                                                  context, widget.article);
+                                            } else if (widget.article.type == "Gallery") {
+                                              createAndSharePdf(context, widget.article);
                                             }
                                           },
                                         ),
@@ -469,30 +386,19 @@ class _StandardPostViewState extends State<StandardPostView> {
                                               EventRepo().sendEvent({
                                                 "key": "reload",
                                                 "data": {
-                                                  "device_id":
-                                                      "${GlobalVariables().deviceId}",
-                                                  "userId": GlobalVariables()
-                                                          .userId ??
-                                                      "",
+                                                  "device_id": "${GlobalVariables().deviceId}",
+                                                  "userId": GlobalVariables().userId ?? "",
                                                 }
                                               });
-                                              widget.flipProvider
-                                                  .getArticles(refresh: true);
+                                              widget.flipProvider.getArticles(refresh: true);
                                             },
                                             child: widget.flipProvider.isRefresh
-                                                ? const SizedBox(
-                                                    height: 22,
-                                                    width: 22,
-                                                    child: AppLoadingScreen())
+                                                ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
                                                 : SvgPicture.asset(
                                                     "assets/svg/reload.svg",
                                                     height: 22,
                                                     width: 22,
-                                                    color: widget.article
-                                                                .subType ==
-                                                            "BigBlackStandard"
-                                                        ? Colors.white
-                                                        : Colors.grey,
+                                                    color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.grey,
                                                   ),
                                           ),
                                       ],
@@ -507,15 +413,12 @@ class _StandardPostViewState extends State<StandardPostView> {
                     ),
 
                     Positioned(
-                      bottom: widget.article.subType != "BigBlackStandard"
-                          ? bigData.toDouble() - 16
-                          : data.toDouble() - 16, // Half in image, half in news
+                      bottom: widget.article.subType != "BigBlackStandard" ? bigData.toDouble() - 16 : data.toDouble() - 16, // Half in image, half in news
                       left: 20,
                       // right: MediaQuery.of(context).size.width * 0.3,
                       child: Container(
                         height: 30,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.grey.shade50,
                           borderRadius: BorderRadius.circular(20),
@@ -949,8 +852,7 @@ class _StandardPostViewState extends State<StandardPostView> {
   }
 
   List<TextSpan> _parseText(BuildContext context, String text, links) {
-    RegExp linkRegExp =
-        RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
+    RegExp linkRegExp = RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
     List<TextSpan> spans = [];
 
     text.splitMapJoin(
@@ -965,13 +867,9 @@ class _StandardPostViewState extends State<StandardPostView> {
 
         if (link.contains('<link1>') && links != null && links.isNotEmpty) {
           link = links[0].value.toString();
-        } else if (link.contains('<link2>') &&
-            links != null &&
-            links.length > 1) {
+        } else if (link.contains('<link2>') && links != null && links.length > 1) {
           link = links[1].value.toString();
-        } else if (link.contains('<link3>') &&
-            links != null &&
-            links.length > 2) {
+        } else if (link.contains('<link3>') && links != null && links.length > 2) {
           link = links[2].value.toString();
         } else {
           link = link;
@@ -987,9 +885,7 @@ class _StandardPostViewState extends State<StandardPostView> {
               .replaceFirst('<link3>', '')
               .replaceFirst('</link3>', ''),
           style: homeScreenFontStyle(
-            color: widget.article.subType == "BigBlackStandard"
-                ? Colors.white
-                : Colors.blue,
+            color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.blue,
             fontWeight: FontWeight.w400,
             fontSize: 17.sp,
           ),
@@ -1010,9 +906,7 @@ class _StandardPostViewState extends State<StandardPostView> {
         spans.add(TextSpan(
             text: nonMatch,
             style: homeScreenFontStyle(
-              color: widget.article.subType == "BigBlackStandard"
-                  ? Colors.white
-                  : Colors.black.withOpacity(0.5),
+              color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.black.withOpacity(0.5),
               fontWeight: FontWeight.w400,
               fontSize: 17.sp,
             )));
