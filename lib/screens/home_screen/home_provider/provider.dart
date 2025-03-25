@@ -33,6 +33,9 @@ class FlipProvider extends ChangeNotifier {
   bool isWebView = false;
   String webUrl = '';
 
+
+
+
   String? get userId => _userId;
 
   String get deviceId => _deviceId!;
