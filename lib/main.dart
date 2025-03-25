@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
+import 'package:chotanews/screens/testing_screen/test1.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/kochava_service.dart';
@@ -154,7 +155,7 @@ class _MyAppState extends State<MyApp> {
               return child!;
             },
             debugShowCheckedModeBanner: false,
-            // home: OnboardingScreen1(),
+            // home: WebViewExample(),
           ),
         ),
       ),

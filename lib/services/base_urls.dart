@@ -6,10 +6,10 @@ class BaseUrls {
   //   static const String baseUrl = "https://chotanews-fdcscrezbfd4befm.z01.azurefd.net/api";
   static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
 
-  static const String baseUrlAws = "http://35.174.155.208/api";
+  static const String baseUrlAws = "https://prodchotanews.signitivessoft.com/api";
 
   /// event states
-   static const String baseUrlAwsDev = "http://52.207.134.157/api";
+   static const String baseUrlAwsDev = "https://prodchotanews.signitivessoft.com/api";
    static const String eventUrl = "/logs";
 
 

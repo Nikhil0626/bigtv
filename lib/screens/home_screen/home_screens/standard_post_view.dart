@@ -54,7 +54,7 @@ class _StandardPostViewState extends State<StandardPostView> {
       body: SafeArea(
         child: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
           int data = widget.isFoldable?(MediaQuery.of(context).size.height * 0.60).round():(MediaQuery.of(context).size.height * 0.40).round();
-          int bigData = Platform.isIOS?(MediaQuery.of(context).size.height * 0.52).round():widget.isFoldable?(MediaQuery.of(context).size.height * 0.30).round():(MediaQuery.of(context).size.height * 0.58).round();
+          int bigData = Platform.isIOS?(MediaQuery.of(context).size.height * 0.52).round():widget.isFoldable?(MediaQuery.of(context).size.height * 0.30).round():(MediaQuery.of(context).size.height * 0.53).round();
           log("height is :  ${MediaQuery.of(context).size.width}");
           return GestureDetector(
             onVerticalDragUpdate: widget.isAds
@@ -100,6 +100,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                     child: VideoPreview(
                                       imageUrl: widget.article.imageUrl.url,
                                       url: widget.article.videoUrl?.url ?? "",
+                                      isFoldable: widget.isFoldable,
                                     ),
                                   )
                                 : ClipRRect(
@@ -129,7 +130,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                           Positioned(
                             bottom: 0,
                             child: Container(
-                              height: widget.article.subType != "BigBlackStandard" ? bigData.toDouble() : data.toDouble(),
+                              height: widget.article.subType == "BigBlackStandard" ? data.toDouble() : bigData.toDouble(),
                               // Bottom part takes 60% of screen
                               width: MediaQuery.of(context).size.width,
                               decoration: BoxDecoration(
@@ -180,7 +181,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                           Text(
                                                             "● ",
                                                             style: TextStyle(
-                                                              fontSize: widget.isFoldable?20:16.sp,
+                                                              fontSize: widget.isFoldable?20:14.sp,
                                                               color: Colors.black.withOpacity(0.5),
                                                               // Reduce bullet size for better alignment
                                                               height: 1, // Ensures proper line height
@@ -315,7 +316,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                       TextSpan(
                                         text: "Chota ",
                                         style: fontStyle(
-                                          fontSize:  widget.isFoldable?16:16.sp,
+                                          fontSize:  widget.isFoldable?16:16,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black,
                                         ),
@@ -323,7 +324,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                       TextSpan(
                                         text: "News",
                                         style: fontStyle(
-                                          fontSize:  widget.isFoldable?16:16.sp,
+                                          fontSize:  widget.isFoldable?16:16,
                                           fontWeight: FontWeight.bold,
                                           color: Color(0xff00A8FF),
                                         ),
