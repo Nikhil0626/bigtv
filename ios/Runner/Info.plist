@@ -1,142 +1,101 @@
+
+
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>CFBundleDevelopmentRegion</key>
-	<string>$(DEVELOPMENT_LANGUAGE)</string>
-	<key>CFBundleDisplayName</key>
-	<string>ChotaNews</string>
-	<key>CFBundleExecutable</key>
-	<string>$(EXECUTABLE_NAME)</string>
-	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
-	<key>CFBundleInfoDictionaryVersion</key>
-	<string>6.0</string>
-	<key>CFBundleName</key>
-	<string>chotaNews</string>
-	<key>CFBundlePackageType</key>
-	<string>APPL</string>
-	<key>CFBundleShortVersionString</key>
-	<string>$(FLUTTER_BUILD_NAME)</string>
-	<key>CFBundleSignature</key>
-	<string>????</string>
-	<key>CFBundleURLTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>myapp</string>
-				<string>com.chotanewstelugu.app</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.454332164931-dtg9hd0455oo6ufjvs442siogrdso0ll</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>exp+chotanews</string>
-			</array>
-		</dict>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLName</key>
-			<string>Bundle Id</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.chotanewstelugu.app</string>
-			</array>
-		</dict>
-	</array>
-	<key>CFBundleVersion</key>
-	<string>$(FLUTTER_BUILD_NUMBER)</string>
-	<key>FirebaseAppDelegateProxyEnabled</key>
-	<false/>
-	<key>FirebaseDynamicLinksCustomDomains</key>
-	<array>
-		<string>https://chotanews.page.link</string>
-	</array>
-	<key>LSRequiresIPhoneOS</key>
-	<true/>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsArbitraryLoads</key>
-		<true/>
-	</dict>
-	<key>NSLocalNetworkUsageDescription</key>
-	<string>This app requires access to the local network for notifications.</string>
-	<key>NSPushKitUsageDescription</key>
-	<string>Allows the app to receive push notifications even when running in the background.</string>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>fetch</string>
-		<string>remote-notification</string>
-	</array>
-	<key>UILaunchStoryboardName</key>
-	<string>LaunchScreen</string>
-	<key>UIMainStoryboardFile</key>
-	<string>Main</string>
-	<key>UISupportedInterfaceOrientations</key>
-	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-	</array>
-	<key>UISupportedInterfaceOrientations~ipad</key>
-	<array>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-	</array>
-	<key>WEGEnvironment</key>
-	<string>IN</string>
-	<key>WEGLicenseCode</key>
-	<string>in~~1341061ba</string>
-	<key>WEGLogLevel</key>
-	<string>VERBOSE</string>
+    <key>CADisableMinimumFrameDurationOnPhone</key>
+    <true/>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleDisplayName</key>
+    <string>ChotaNews</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>chotaNews</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(FLUTTER_BUILD_NAME)</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleVersion</key>
+    <string>$(FLUTTER_BUILD_NUMBER)</string>
+    <key>FirebaseAppDelegateProxyEnabled</key>
+    <false/>
+    <key>FirebaseDynamicLinksCustomDomains</key>
+    <array>
+        <string>https://chotanews.page.link</string>
+    </array>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>ChotaNews requires access to the local network to enable seamless notifications and content updates.</string>
+    <key>NSPushKitUsageDescription</key>
+    <string>ChotaNews uses PushKit to enhance notifications when the app is in the background.</string>
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>fetch</string>
+        <string>remote-notification</string>
+    </array>
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    <key>UIMainStoryboardFile</key>
+    <string>Main</string>
 
-	<key>GADApplicationIdentifier</key>
+    <key>UIDeviceFamily</key>
+    <array>
+        <integer>1</integer>
+    </array>
+<key>UISupportedInterfaceOrientations</key>
+<array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationPortraitUpsideDown</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+</array>
+
+
+    <key>WEGEnvironment</key>
+    <string>IN</string>
+    <key>WEGLicenseCode</key>
+    <string>in~~1341061ba</string>
+    <key>WEGLogLevel</key>
+    <string>VERBOSE</string>
+
+    <!-- AdMob Integration -->
+    <key>GADApplicationIdentifier</key>
     <string>ca-app-pub-2405357352181832~7031527412</string>
 
-    <key>FacebookAppID</key>
-    <string>YOUR_FACEBOOK_APP_ID</string>
-
-    <key>FacebookClientToken</key>
-    <string>YOUR_FACEBOOK_CLIENT_TOKEN</string>
-
-    <key>LSApplicationQueriesSchemes</key>
-    <array>
-        <string>fbapi</string>
-        <string>fbauth2</string>
-        <string>fb-messenger-share-api</string>
-        <string>fbshareextension</string>
-    </array>
-
-    <key>CFBundleURLTypes</key>
-    <array>
-        <dict>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>fbYOUR_FACEBOOK_APP_ID</string>
-            </array>
-        </dict>
-    </array>
-
-    <key>NSUserTrackingUsageDescription</key>
-    <string>This identifier will be used to provide better advertising experiences.</string>
+    <!-- Facebook Integration -->
     <key>FacebookAppID</key>
     <string>fb555454566786542</string>
-
     <key>FacebookClientToken</key>
     <string>6e90f4c57af59cdd7a42120d5118495b</string>
 
+    <!-- URL Schemes -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>myapp</string>
+                <string>com.chotanewstelugu.app</string>
+                <string>com.googleusercontent.apps.454332164931-dtg9hd0455oo6ufjvs442siogrdso0ll</string>
+                <string>exp+chotanews</string>
+                <string>fb555454566786542</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- Facebook Queries -->
     <key>LSApplicationQueriesSchemes</key>
     <array>
         <string>fbapi</string>
@@ -145,18 +104,6 @@
         <string>fbshareextension</string>
     </array>
 
-    <key>CFBundleURLTypes</key>
-    <array>
-        <dict>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>fb565418025640844</string>
-            </array>
-        </dict>
-    </array>
-
-    <key>NSUserTrackingUsageDescription</key>
-    <string>This identifier will be used to provide better advertising experiences.</string>
 
 </dict>
 </plist>

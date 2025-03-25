@@ -8,8 +8,9 @@ class VideoPreview extends StatefulWidget {
   final String url;
   final String imageUrl;
   final bool isVideoScreen;
+  final bool isFoldable;
 
-  VideoPreview({super.key, required this.url,required this.imageUrl, this.isVideoScreen = false});
+  VideoPreview({super.key, required this.url,required this.imageUrl, this.isVideoScreen = false, this.isFoldable = false});
 
   @override
   _VideoPreview createState() => _VideoPreview();
@@ -48,7 +49,7 @@ class _VideoPreview extends State<VideoPreview> {
     return isPlaying
         ? Container(
       width: MediaQuery.of(context).size.width, // Fixed width
-      height: 280, // Fixed height
+      height: widget.isFoldable?(MediaQuery.of(context).size.height*0.60-100):280, // Fixed height
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
       ),

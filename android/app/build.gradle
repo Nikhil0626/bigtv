@@ -84,18 +84,18 @@ flutter {
 dependencies {
 
 
-    implementation 'com.facebook.android:facebook-android-sdk:latest.release'
 
-    implementation 'com.google.android.gms:play-services-auth:21.3.0'
+//    implementation 'com.google.android.gms:play-services-auth:21.3.0'
     implementation platform('com.google.firebase:firebase-bom:32.1.1') // Update version
     implementation 'com.google.firebase:firebase-dynamic-links'
-    implementation 'com.google.android.gms:play-services-location:21.0.1'
+//    implementation 'com.google.android.gms:play-services-location:21.0.1'
     implementation 'androidx.multidex:multidex:2.0.1'
 
 
     implementation 'com.google.android.gms:play-services-ads:23.3.0'
+
     implementation 'com.google.ads.mediation:facebook:6.18.0.0'
-    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
+//    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.1'
     implementation 'com.google.android.gms:play-services-appset:16.0.2'
     implementation 'com.facebook.android:audience-network-sdk:6.+'
 
