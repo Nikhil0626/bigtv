@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-
-
 class RegionSelectionScreen extends StatefulWidget {
   @override
   _RegionSelectionScreenState createState() => _RegionSelectionScreenState();
@@ -30,9 +28,12 @@ class _RegionSelectionScreenState extends State<RegionSelectionScreen> with Sing
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {},
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 16.0),
+          child: IconButton(
+            icon: Icon(Icons.arrow_back, color: Colors.black, size: 28),
+            onPressed: () {},
+          ),
         ),
       ),
       body: Padding(
@@ -42,16 +43,16 @@ class _RegionSelectionScreenState extends State<RegionSelectionScreen> with Sing
           children: [
             Row(
               children: [
-        SvgPicture.asset(
-          'assets/svg/Chota_news_logo.svg',
-          height: 24,
-          width: 167,
-          alignment: Alignment.centerLeft,
-        ),
-
+                SizedBox(width: 16),
+                SvgPicture.asset(
+                  'assets/svg/Chota_news_logo.svg',
+                  height: 24,
+                  width: 167,
+                  alignment: Alignment.centerLeft,
+                ),
               ],
             ),
-            SizedBox(height: 10),
+            SizedBox(height: 30),
             Text(
               "Let's personalise",
               style: GoogleFonts.poppins(
@@ -60,6 +61,7 @@ class _RegionSelectionScreenState extends State<RegionSelectionScreen> with Sing
                 color: Colors.black,
               ),
             ),
+            SizedBox(height: 5),
             Text(
               "your experience",
               style: GoogleFonts.poppins(
@@ -101,8 +103,7 @@ class _RegionSelectionScreenState extends State<RegionSelectionScreen> with Sing
               child: TabBarView(
                 controller: _tabController,
                 children: [
-                  Center(child: Text("Andhra Pradesh Regions")),
-                  Center(child: Text("Telangana Regions")),
+
                 ],
               ),
             ),
