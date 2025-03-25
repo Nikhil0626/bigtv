@@ -1,0 +1,23 @@
+{
+  "welcome": "Welcome",
+  "SignInWithMobileNumber" : "Sign in with Mobile Number",
+  "TheBigAppForTheHyperlocalShortNews": "The Big App for the Hyperlocal Short News",
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+  "enterMobileNumber": "Enter your mobile number",
+  "sendOtp": "Send OTP",
+  "enterOtp": "Enter OTP",
+  "verify": "Verify",
+  "resendOtp": "Resend OTP",
+  "continue": "Continue",
+  "continueAsGuest": "Continue as Guest",
+  "OTpVerification" : "OTP Verification",
+  "EnterThe4-digitVerificationCodeSenTo" : "Enter the 4-digit verification code sent to",
+  "yourMobileNumber": "  your mobile number.",
+  "EnterTheCodeBelow" : " Enter the code below",
+  "Didn'tReceiveTheCode" : "Didn't receive the code?",
+  "ReSend" : "Resend"
+
+
+
+}
