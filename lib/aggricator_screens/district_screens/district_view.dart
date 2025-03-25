@@ -1,0 +1,135 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+
+
+class RegionSelectionScreen extends StatefulWidget {
+  @override
+  _RegionSelectionScreenState createState() => _RegionSelectionScreenState();
+}
+
+class _RegionSelectionScreenState extends State<RegionSelectionScreen> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () {},
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+        SvgPicture.asset(
+          'assets/svg/Chota_news_logo.svg',
+          height: 24,
+          width: 167,
+          alignment: Alignment.centerLeft,
+        ),
+
+              ],
+            ),
+            SizedBox(height: 10),
+            Text(
+              "Let's personalise",
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+                color: Colors.black,
+              ),
+            ),
+            Text(
+              "your experience",
+              style: GoogleFonts.poppins(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+            SizedBox(height: 20),
+            Text(
+              "Choose Regions",
+              style: GoogleFonts.poppins(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            Text(
+              "Select your districts to receive hyperlocal news and relevant local information tailored to your area.",
+              style: GoogleFonts.poppins(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Colors.black54,
+              ),
+            ),
+            SizedBox(height: 20),
+            TabBar(
+              controller: _tabController,
+              labelColor: Colors.blue,
+              unselectedLabelColor: Colors.black,
+              indicatorColor: Colors.blue,
+              tabs: [
+                Tab(text: "Andhra Pradesh"),
+                Tab(text: "Telangana"),
+              ],
+            ),
+            SizedBox(height: 20),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  Center(child: Text("Andhra Pradesh Regions")),
+                  Center(child: Text("Telangana Regions")),
+                ],
+              ),
+            ),
+            Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.5,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Center(
+                  child: Text(
+                    "Skip",
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+}

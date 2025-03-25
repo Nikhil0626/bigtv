@@ -1,6 +1,7 @@
 
 import 'dart:developer';
 
+import 'package:chotanews/aggricator_screens/onboarding_screen/app_welcome_view.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/services/analytics_service.dart';
@@ -9,6 +10,7 @@ import 'package:chotanews/services/kochava_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 import 'package:chotanews/utils/register_providers.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
@@ -22,12 +24,15 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import 'aggricator_screens/district_screens/district_view.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // Transparent status bar
     statusBarIconBrightness: Brightness.dark, // Dark icons (black)
@@ -83,7 +88,18 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) {
-    runApp(AppLifecycleManager(child: const MyApp()));
+    runApp(
+        EasyLocalization(
+            supportedLocales: [
+              Locale('en' ),
+              Locale('te' ),
+              Locale('hi'),
+            ],
+        path: 'assets/translations',
+        fallbackLocale: Locale("en"),
+        child: AppLifecycleManager(child:  MyApp()))
+
+    );
   });
   subscribeToPushCallbacks(_webEngagePlugin);
 }
@@ -95,6 +111,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
+  static void setLocale(BuildContext context, Locale newLocale) {  _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();  state?.setLocale(newLocale);}
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -102,11 +119,13 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
+   Locale? _locale ;
   @override
   void initState() {
     appEventLogs();
     super.initState();
   }
+  void setLocale(Locale locale) {  setState(() {    _locale = locale;  });}
   void appEventLogs() async{
     try{
       facebookAppEvents.logEvent(
@@ -137,6 +156,7 @@ class _MyAppState extends State<MyApp> {
         child: MultiBlocProvider(
           providers: RegisterProviders.providers(context),
           child: MaterialApp(
+            localizationsDelegates: context.localizationDelegates,supportedLocales: context.supportedLocales,locale: _locale ?? context.locale,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
               useMaterial3: true,
@@ -154,14 +174,13 @@ class _MyAppState extends State<MyApp> {
               return child!;
             },
             debugShowCheckedModeBanner: false,
-            // home: OnboardingScreen1(),
+            home: RegionSelectionScreen(),
           ),
         ),
       ),
     );
   }
 }
-
 final mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver =
 RouteObserver<ModalRoute<Object?>>();

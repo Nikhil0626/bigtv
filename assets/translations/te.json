@@ -1,0 +1,25 @@
+{
+  "welcome": "స్వాగతం",
+  "SignInWithMobileNumber" : "మొబైల్ నంబర్తో సైన్ ఇన్ చేయండిं",
+
+  "TheBigAppForTheHyperlocalShortNews": " హైపర్లోకల్ షార్ట్ న్యూస్ కోసం పెద్ద యాప్",
+  "signIn": "సైన్ ఇన్",
+  "signUp": "సైన్ అప్",
+  "enterMobileNumber": "మీ మొబైల్ నంబర్ ను నమోదు చేయండి",
+  "sendOtp": "OTP పంపండి",
+  "enterOtp": "OTP నమోదు చేయండి",
+  "verify": "ధృవీకరించండి",
+  "resendOtp": "OTP మళ్లీ పంపండి",
+  "continue": "కొనసాగించండి",
+  "continueAsGuest": "అతిథిగా కొనసాగండి",
+  "OTpVerification" : "OTP నిర్ధారణ",
+  "EnterThe4-digitVerificationCodeSenToyourMobileNumber": "  మీ మొబైల్ నంబర్కు పంపిన 4 అంకెల నిర్ధారణ కోడ్ను నమోదు చేయండి..",
+  "EnterTheCodeBelow" : "క్రింద ఉన్న కోడ్ను నమోదు చేయండి",
+  "Didn'tReceiveTheCode" : "కోడ్ రాలేదా?",
+  "ReSend" : "మళ్లీ పంపండి"
+
+
+
+
+
+}
