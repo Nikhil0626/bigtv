@@ -16,7 +16,21 @@ TextStyle homeScreenFontStyle(
   color: color,)
   );
 }
+
 TextStyle fontStyle(
+    {Color? color = Colors.black,
+      double? fontSize = 14,
+      FontWeight? fontWeight = FontWeight.normal}) {
+  return
+    GoogleFonts.poppins(
+        textStyle: TextStyle(
+          fontSize: fontSize ,
+          fontWeight: fontWeight,
+          color: color,)
+    );
+}
+
+TextStyle newAppFont(
     {Color? color = Colors.black,
       double? fontSize = 14,
       FontWeight? fontWeight = FontWeight.normal}) {
