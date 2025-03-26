@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:geocoding/geocoding.dart';
@@ -47,6 +48,20 @@ Future<void> requestStoragePermission() async {
       print("⚠️ Storage permission permanently denied. Opening settings...");
       await openAppSettings();
     }
+  }
+}
+
+
+Future<void> requestATTPermission() async {
+  final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+  log("Current ATT Status BEFORE request: $status");
+
+  if (status == TrackingStatus.notDetermined) {
+    // Ensure the app waits for permission request
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final newStatus = await AppTrackingTransparency.requestTrackingAuthorization();
+    log("New ATT Status AFTER request: $newStatus");
   }
 }
 

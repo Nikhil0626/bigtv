@@ -104,6 +104,10 @@
         <string>fbshareextension</string>
     </array>
 
+    <key>NSUserTrackingUsageDescription</key>
+    <string>We use this data to provide you with personalized ads and analytics.</string>
+
+
 
 </dict>
 </plist>

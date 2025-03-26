@@ -7,6 +7,7 @@ import 'package:chotanews/screens/testing_screen/test1.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/kochava_service.dart';
+import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 import 'package:chotanews/utils/register_providers.dart';
@@ -29,6 +30,8 @@ final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
+  await requestATTPermission();
+
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // Transparent status bar
     statusBarIconBrightness: Brightness.dark, // Dark icons (black)

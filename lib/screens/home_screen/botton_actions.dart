@@ -1,5 +1,6 @@
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
@@ -32,18 +33,17 @@ class BottomActions extends StatelessWidget {
         return InkWell(
           onTap: onTap,
           child: SizedBox(
-
-            width:  40,
+            width:  40.w,
             child: label== "లైక్"?
             SvgPicture.asset(icon,
-                height: 20,
-                width: 20,
+                height: 20.w,
+                width: 20.w,
                 color: isLike ?Colors.green:postType=="BigBlackStandard"?Colors.white:iconColor
             ):
             label != "లైక్"?
             SvgPicture.asset(icon,
-                height: 20,
-                width: 20,
+                height: 20.w,
+                width: 20.w,
                 color: postType=="BigBlackStandard"?Colors.white:iconColor
             ):
                 SizedBox.shrink(),

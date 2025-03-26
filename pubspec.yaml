@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 5.0.0+29
+version: 5.0.0+31
 environment:
   sdk: ^3.5.4
 dependencies:
@@ -58,6 +58,7 @@ dependencies:
   facebook_app_events: ^0.19.5
   package_info_plus: ^8.3.0
   flutter_inappwebview: ^6.1.5
+  app_tracking_transparency: ^2.0.6+1
 #  android_play_install_referrer: ^0.4.0
 
 
