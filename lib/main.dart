@@ -24,7 +24,10 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import 'aggricator_screens/categories_screen/categories_view.dart';
 import 'aggricator_screens/district_screens/district_view.dart';
+import 'aggricator_screens/profile_screen/profile_view.dart';
+import 'aggricator_screens/settings_screen/settings_view.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
@@ -174,7 +177,7 @@ class _MyAppState extends State<MyApp> {
               return child!;
             },
             debugShowCheckedModeBanner: false,
-            home: RegionSelectionScreen(),
+            home: SettingsView(),
           ),
         ),
       ),

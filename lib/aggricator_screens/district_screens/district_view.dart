@@ -1,6 +1,7 @@
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class RegionSelectionScreen extends StatefulWidget {
   @override
@@ -17,117 +18,72 @@ class _RegionSelectionScreenState extends State<RegionSelectionScreen> with Sing
   }
 
   @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 16.0),
-          child: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.black, size: 28),
-            onPressed: () {},
-          ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.black, size: 28),
+          onPressed: () {},
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                SizedBox(width: 16),
-                SvgPicture.asset(
-                  'assets/svg/Chota_news_logo.svg',
-                  height: 24,
-                  width: 167,
-                  alignment: Alignment.centerLeft,
-                ),
-              ],
+            SvgPicture.asset(
+              'assets/svg/Chota_news_logo.svg',
+              height: 30,
+              width: 180,
+              alignment: Alignment.centerLeft,
             ),
-            SizedBox(height: 30),
-            Text(
-              "Let's personalise",
-              style: GoogleFonts.poppins(
-                fontSize: 20,
-                fontWeight: FontWeight.w400,
-                color: Colors.black,
-              ),
-            ),
-            SizedBox(height: 5),
-            Text(
-              "your experience",
-              style: GoogleFonts.poppins(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
-              ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              "Choose Regions",
-              style: GoogleFonts.poppins(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            Text(
-              "Select your districts to receive hyperlocal news and relevant local information tailored to your area.",
-              style: GoogleFonts.poppins(
-                fontSize: 14,
-                fontWeight: FontWeight.w400,
-                color: Colors.black54,
-              ),
-            ),
-            SizedBox(height: 20),
+            height(height: 40.h),
+            Text("Let's personalise", style: TextStyle(fontSize: 32, color: Colors.blue, fontWeight: FontWeight.w400)),
+            Text("your experience", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue)),
+            SizedBox(height: 16),
+            Text("Choose Regions",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                )),
+            SizedBox(height: 4),
+            Text("Select your districts to receive hyperlocal news and relevant local information tailored to your area.",
+                style: TextStyle(fontSize: 12, color: Colors.black)),
+            SizedBox(height: 16),
             TabBar(
               controller: _tabController,
               labelColor: Colors.blue,
               unselectedLabelColor: Colors.black,
-              indicatorColor: Colors.blue,
+              indicator: UnderlineTabIndicator(
+                borderSide: BorderSide(color: Colors.lightBlue, width: 2.0),
+              ),
+              labelStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              unselectedLabelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               tabs: [
                 Tab(text: "Andhra Pradesh"),
                 Tab(text: "Telangana"),
               ],
             ),
-            SizedBox(height: 20),
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                children: [
-
-                ],
+                children: [],
               ),
             ),
+            height(height: 16),
             Center(
-              child: Container(
-                width: MediaQuery.of(context).size.width * 0.5,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(25),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: EdgeInsets.symmetric(horizontal: 60, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: Center(
-                  child: Text(
-                    "Skip",
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                onPressed: () {},
+                child: Text("Skip", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
               ),
             ),
-            SizedBox(height: 20),
           ],
         ),
       ),

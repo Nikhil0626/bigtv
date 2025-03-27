@@ -75,8 +75,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 );
               },
               child: Container(
-                height: 50.h,
-
+                height: 52.h,
+                width: 326.w,
                 margin: EdgeInsets.symmetric(horizontal: 20.w),
                 decoration: BoxDecoration(
                   color: Colors.lightBlue,

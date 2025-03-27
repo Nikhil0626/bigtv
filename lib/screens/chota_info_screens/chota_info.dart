@@ -277,11 +277,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 )),
             InkWell(
               onTap: () async {
-
-                logoutUser();
-                context
-                    .read<AuthProvider>()
-                    .loginStatus(LoginStatus.none, context);
+                logoutUser();context.read<AuthProvider>().loginStatus(LoginStatus.none, context);
                 SharedPreferences sp = await SharedPreferences.getInstance();
                 String? userId =  sp.getString("loginId",);
                 EventRepo().sendEvent({
