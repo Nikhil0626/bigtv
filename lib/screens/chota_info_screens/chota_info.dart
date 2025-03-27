@@ -9,6 +9,7 @@ import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
@@ -36,9 +37,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     context.read<AuthProvider>().sendEvent("SettingPage");
     super.initState();
   }
-
+  PackageInfo? packageInfo;
   Future getLogin() async {
     loginStatus = await getLoginStatus();
+    packageInfo = await PackageInfo.fromPlatform();
     setState(() {});
   }
 
@@ -347,7 +349,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 alignment: Alignment.center,
                 width: MediaQuery.of(context).size.width,
                 child: Text(
-                  "App Version: 5.0.1+0",
+                  "App Version: ${packageInfo!.version}+${packageInfo!.buildNumber}",
                   style: fontStyle(
                     fontSize: 16,
                   ),

@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:chotanews/main.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
+import 'package:chotanews/screens/home_screen/home_screens/in_app_web_view.dart';
 import 'package:chotanews/screens/home_screen/home_screens/standard_post_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -109,7 +110,13 @@ class ArticlePageState extends State<ArticlePage> {
                       },
                       child: Screenshot(
                           controller: screenshotController,
-                          child: widget.article.type == "GoogleAds"
+                          child:
+                          widget.article.type == "WebView"
+                              ?SizedBox(
+                              height: MediaQuery.of(context).size.height,
+                              width: MediaQuery.of(context).size.width,
+                              child: InAppWebViewScreen(webUrl: flipProvider.webUrl.toString())):
+                          widget.article.type == "GoogleAds"
                               ? GoogleAdsView( article: widget.article, flipProvider: flipProvider,
                             screenshotController: screenshotController, isFoldable: isFoldable,)
                               : widget.article.type == "Image"
