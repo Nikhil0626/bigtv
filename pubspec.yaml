@@ -65,6 +65,7 @@ dependencies:
 
   card_swiper: ^3.0.1
   app_tracking_transparency: ^2.0.6+1
+  shimmer: ^3.0.0
 #  appinio_swiper: ^2.1.1
 
 #  android_play_install_referrer: ^0.4.0
@@ -104,6 +105,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/settings_icons/
+    - assets/new_app_icon/
     - assets/svg/
     - shorebird.yaml
 

@@ -1,5 +1,8 @@
 {
+
+
   "welcome": "Welcome",
+
   "SignInWithMobileNumber" : "Sign in with Mobile Number",
   "TheBigAppForTheHyperlocalShortNews": "The Big App for the Hyperlocal Short News",
   "signIn": "Sign In",
@@ -16,8 +19,10 @@
   "yourMobileNumber": "  your mobile number.",
   "EnterTheCodeBelow" : " Enter the code below",
   "Didn'tReceiveTheCode" : "Didn't receive the code?",
-  "ReSend" : "Resend"
+  "ReSend" : "Resend",
 
-
-
+  "news": "News",
+  "ePaper": "ePaper",
+  "reels": "Reels",
+  "more": "More"
 }

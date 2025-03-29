@@ -82,152 +82,149 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
       children: [
         Expanded(
           flex: 1,
-          child: Padding(
-            padding: const EdgeInsets.all(50.0),
-            child: !_isAdLoaded || _nativeAd == null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    // Adjust radius as needed
-                    child: Image.asset("assets/playstore.png"))
-                : AdWidget(ad: _nativeAd!),
-          ),
+          child: !_isAdLoaded || _nativeAd == null
+              ? ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  // Adjust radius as needed
+                  child: Image.asset("assets/playstore.png"))
+              : AdWidget(ad: _nativeAd!),
         ),
-        Expanded(
-          flex: 1,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10),
-            child: Column(
-              children: [
-                Text(
-                  "Recommended News",
-                  maxLines: 2,
-                  style: fontStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.borderColor),
-                ),
-                height(height: 10),
-                Expanded(
-                  child: ListView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: widget.article.homepage!.length,
-                    itemBuilder: (context, index) {
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => StandardPostView(
-                                  article: widget.article.homepage![index],
-                                  screenshotController:
-                                      widget.screenshotController,
-                                  flipProvider: widget.flipProvider,
-                                  isFoldable: widget.isFoldable,
-                                  isAds: true,
-                                ),
-                              ));
-                        },
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 5.0, horizontal: 15),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 5.0, horizontal: 15),
-                              decoration: BoxDecoration(
-                                  border: Border.all(
-                                      width: 2, color: AppColors.borderColor),
-                                  borderRadius:
-                                      BorderRadius.all(Radius.circular(10))),
-                              child: Row(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    // Adjust radius as needed
-                                    child: CachedNetworkImage(
-                                      imageUrl: widget.article.homepage![index]
-                                          .imageUrl!.url,
-                                      height: 50,
-                                      width: 50,
-                                      fit: BoxFit.cover,
-                                      placeholder: (context, url) => Container(
-                                        height: 50,
-                                        width: 50,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.borderColor
-                                              .withOpacity(.2),
-                                          borderRadius: BorderRadius.circular(
-                                              8), // Same radius here
-                                        ),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          Container(
-                                        height: 50,
-                                        width: 50,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          // Ensure consistency
-                                          color: Colors.grey.shade300,
-                                        ),
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.image,
-                                            size: 30,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  width(width: 10),
-                                  Expanded(
-                                    child: Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.start,
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          "${widget.article.homepage![index].title}",
-                                          maxLines: 2,
-                                          style: fontStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.borderColor),
-                                        ),
-                                        Row(
-                                          children: [
-                                            Icon(
-                                              Icons.shortcut_sharp,
-                                              color: Colors.greenAccent,
-                                            ),
-                                            width(width: 6),
-                                            Text(
-                                              "టాప్ స్టోరీస్",
-                                              style: fontStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: AppColors.borderColor),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            ),
-          ),
-        )
+        // Expanded(
+        //   flex: 1,
+        //   child: Padding(
+        //     padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 10),
+        //     child: Column(
+        //       children: [
+        //         Text(
+        //           "Recommended News",
+        //           maxLines: 2,
+        //           style: fontStyle(
+        //               fontSize: 14,
+        //               fontWeight: FontWeight.w700,
+        //               color: AppColors.borderColor),
+        //         ),
+        //         height(height: 10),
+        //         Expanded(
+        //           child: ListView.builder(
+        //             physics: const NeverScrollableScrollPhysics(),
+        //             itemCount: widget.article.homepage!.length,
+        //             itemBuilder: (context, index) {
+        //               return InkWell(
+        //                 onTap: () {
+        //                   Navigator.push(
+        //                       context,
+        //                       MaterialPageRoute(
+        //                         builder: (context) => StandardPostView(
+        //                           article: widget.article.homepage![index],
+        //                           screenshotController:
+        //                               widget.screenshotController,
+        //                           flipProvider: widget.flipProvider,
+        //                           isFoldable: widget.isFoldable,
+        //                           isAds: true,
+        //                         ),
+        //                       ));
+        //                 },
+        //                 child: Center(
+        //                   child: Padding(
+        //                     padding: const EdgeInsets.symmetric(
+        //                         vertical: 5.0, horizontal: 15),
+        //                     child: Container(
+        //                       padding: const EdgeInsets.symmetric(
+        //                           vertical: 5.0, horizontal: 15),
+        //                       decoration: BoxDecoration(
+        //                           border: Border.all(
+        //                               width: 2, color: AppColors.borderColor),
+        //                           borderRadius:
+        //                               BorderRadius.all(Radius.circular(10))),
+        //                       child: Row(
+        //                         children: [
+        //                           ClipRRect(
+        //                             borderRadius: BorderRadius.circular(8),
+        //                             // Adjust radius as needed
+        //                             child: CachedNetworkImage(
+        //                               imageUrl: widget.article.homepage![index]
+        //                                   .imageUrl!.url,
+        //                               height: 50,
+        //                               width: 50,
+        //                               fit: BoxFit.cover,
+        //                               placeholder: (context, url) => Container(
+        //                                 height: 50,
+        //                                 width: 50,
+        //                                 decoration: BoxDecoration(
+        //                                   color: AppColors.borderColor
+        //                                       .withOpacity(.2),
+        //                                   borderRadius: BorderRadius.circular(
+        //                                       8), // Same radius here
+        //                                 ),
+        //                               ),
+        //                               errorWidget: (context, url, error) =>
+        //                                   Container(
+        //                                 height: 50,
+        //                                 width: 50,
+        //                                 decoration: BoxDecoration(
+        //                                   borderRadius:
+        //                                       BorderRadius.circular(8),
+        //                                   // Ensure consistency
+        //                                   color: Colors.grey.shade300,
+        //                                 ),
+        //                                 child: Center(
+        //                                   child: Icon(
+        //                                     Icons.image,
+        //                                     size: 30,
+        //                                     color: Colors.white,
+        //                                   ),
+        //                                 ),
+        //                               ),
+        //                             ),
+        //                           ),
+        //                           width(width: 10),
+        //                           Expanded(
+        //                             child: Column(
+        //                               mainAxisAlignment:
+        //                                   MainAxisAlignment.start,
+        //                               crossAxisAlignment:
+        //                                   CrossAxisAlignment.start,
+        //                               children: [
+        //                                 Text(
+        //                                   "${widget.article.homepage![index].title}",
+        //                                   maxLines: 2,
+        //                                   style: fontStyle(
+        //                                       fontSize: 14,
+        //                                       fontWeight: FontWeight.w700,
+        //                                       color: AppColors.borderColor),
+        //                                 ),
+        //                                 Row(
+        //                                   children: [
+        //                                     Icon(
+        //                                       Icons.shortcut_sharp,
+        //                                       color: Colors.greenAccent,
+        //                                     ),
+        //                                     width(width: 6),
+        //                                     Text(
+        //                                       "టాప్ స్టోరీస్",
+        //                                       style: fontStyle(
+        //                                           fontSize: 12,
+        //                                           fontWeight: FontWeight.w400,
+        //                                           color: AppColors.borderColor),
+        //                                     ),
+        //                                   ],
+        //                                 ),
+        //                               ],
+        //                             ),
+        //                           )
+        //                         ],
+        //                       ),
+        //                     ),
+        //                   ),
+        //                 ),
+        //               );
+        //             },
+        //           ),
+        //         ),
+        //       ],
+        //     ),
+        //   ),
+        // )
       ],
     );
   }

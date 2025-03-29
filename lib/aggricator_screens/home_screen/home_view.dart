@@ -1,9 +1,17 @@
+import 'package:chotanews/aggricator_screens/e_papers_screens/papers_screen_card.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
+import 'package:chotanews/aggricator_screens/home_screen/main_screen_list.dart';
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
-import 'main_screen.dart';
+import '../../utils/custom_switch.dart';
+import '../e_papers_screens/papers_screen_list.dart';
+import 'main_screen_card.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -14,12 +22,13 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
 
-  final List<Widget> pages = [
-    MainScreen(), // Using the HomeView widget
-    Center(child: Text('Search Page', style: TextStyle(fontSize: 24))),
-    Center(child: Text('Profile Page', style: TextStyle(fontSize: 24))),
-    Center(child: Text('Reels Page', style: TextStyle(fontSize: 24))),
-  ];
+  late PageController _pageController;
+
+  @override
+  void initState() {
+    _pageController = PageController(initialPage: 0);
+    super.initState();
+  }
 
 
   @override
@@ -27,15 +36,72 @@ class _HomeViewState extends State<HomeView> {
     return Consumer<HomeProvider>(
       builder: (_,homeProvider,__) {
         return Scaffold(
-          body: pages[homeProvider.selectedIndex],
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            title: Row(
+              children: [
+                Text(
+                  "Chota",
+                  style: fontStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(6),
+                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                  decoration: BoxDecoration(
+                    color:AppColors.appButtonColor,
+                    borderRadius: BorderRadius.only(
+                      topRight:Radius.circular( 10),
+                      bottomLeft:Radius.circular( 10),
+                    ),
+                  ),
+                  child: Text(
+                    "News",
+                    style: fontStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 12.0),
+                child: CustomSwitch(),
+              ),
+            ],
+          ),
+          body:PageView(
+            controller: _pageController,
+            physics: NeverScrollableScrollPhysics(),
+            onPageChanged: (index) {
+              homeProvider.onItemTapped(index);
+            },
+            children:  [
+              homeProvider.isSwitched?MainScreenList(): MainScreenCard(),
+              homeProvider.isSwitched?PapersScreenList(): PapersScreenCard(),
+              Center(child: Text('Reels Page', style: TextStyle(fontSize: 24))),
+              Center(child: Text('Profile Page', style: TextStyle(fontSize: 24))),
+            ],
+          ),
           bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed, //
             currentIndex: homeProvider.selectedIndex,
-            onTap: homeProvider.onItemTapped,
-            selectedItemColor: Colors.blue, // Highlight color
-            unselectedItemColor: Colors.grey,
+            onTap: (index) {
+              _pageController.jumpToPage(index); // Change the page when tapping the bottom bar
+            },
+            selectedItemColor: AppColors.appButtonColor, // Highlight color
+            unselectedItemColor: AppColors.bodyTextColor,
             showSelectedLabels: true,
             showUnselectedLabels: true,
-            selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold), // Emphasized label
+unselectedLabelStyle:  fontStyle(fontWeight: FontWeight.normal,fontSize: 14),
+            selectedLabelStyle: fontStyle(fontWeight: FontWeight.w600,fontSize: 14), // Emphasized label
             items: [
               BottomNavigationBarItem(
                 icon: Column(
@@ -46,12 +112,15 @@ class _HomeViewState extends State<HomeView> {
                         height: 3,
                         color: Colors.blue, // Small bar under icon
                       ),
-                    height(height: 2),
-                    Icon(Icons.home),
-
+                    height(height: 4),
+                    SvgPicture.asset("assets/new_app_icon/bytes.svg",
+                      colorFilter: ColorFilter.mode(
+                      homeProvider.selectedIndex == 0 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                      BlendMode.srcIn,
+                    ),),
                   ],
                 ),
-                label: 'Home',
+                label: 'news'.tr(),
               ),
               BottomNavigationBarItem(
                 icon: Column(
@@ -62,12 +131,14 @@ class _HomeViewState extends State<HomeView> {
                         height: 3,
                         color: Colors.blue,
                       ),
-                    height(height: 2),
-                    Icon(Icons.search),
-
+                    height(height: 4),
+                    SvgPicture.asset("assets/new_app_icon/paper.svg",colorFilter: ColorFilter.mode(
+                      homeProvider.selectedIndex == 1 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                      BlendMode.srcIn,
+                    )),
                   ],
                 ),
-                label: 'Search',
+                label: 'ePaper'.tr(),
               ),
               BottomNavigationBarItem(
                 icon: Column(
@@ -78,12 +149,14 @@ class _HomeViewState extends State<HomeView> {
                         height: 3,
                         color: Colors.blue,
                       ),
-                    height(height: 2),
-                    Icon(Icons.book),
-
+                    height(height: 4),
+                    SvgPicture.asset("assets/new_app_icon/reel.svg",colorFilter: ColorFilter.mode(
+                      homeProvider.selectedIndex == 2 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                      BlendMode.srcIn,
+                    )),
                   ],
                 ),
-                label: 'Reels',
+                label: 'reels'.tr(),
               ),
               BottomNavigationBarItem(
                 icon: Column(
@@ -94,12 +167,14 @@ class _HomeViewState extends State<HomeView> {
                         height: 3,
                         color: Colors.blue,
                       ),
-                    height(height: 2),
-                    Icon(Icons.person),
-
+                    height(height: 4),
+                    SvgPicture.asset("assets/new_app_icon/menu.svg",colorFilter: ColorFilter.mode(
+                      homeProvider.selectedIndex == 3 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                      BlendMode.srcIn,
+                    )),
                   ],
                 ),
-                label: 'Profile',
+                label: 'more'.tr(),
               ),
 
             ],
@@ -110,5 +185,7 @@ class _HomeViewState extends State<HomeView> {
       }
     );
   }
+
+
 }
 
