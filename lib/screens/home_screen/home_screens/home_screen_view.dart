@@ -39,7 +39,7 @@ class _HomeScreenViewState extends State<HomeScreenView> {
 
   @override
   Widget build(BuildContext context) {
-    double heightsInt = MediaQuery.of(context).size.height;
+    double heightsInt = (MediaQuery.of(context).size.height);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
@@ -60,6 +60,12 @@ class _HomeScreenViewState extends State<HomeScreenView> {
   }
 }
 
+
+
+
+
+
+
 class HomeScreenView1 extends StatefulWidget {
   const HomeScreenView1({super.key});
 
@@ -70,7 +76,6 @@ class HomeScreenView1 extends StatefulWidget {
 class _HomeScreenView1State extends State<HomeScreenView1> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     context.read<FlipProvider>().isDeviceData();
     context.read<FlipProvider>().getArticles();
