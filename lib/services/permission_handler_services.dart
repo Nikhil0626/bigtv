@@ -52,19 +52,17 @@ Future<void> requestStoragePermission() async {
 }
 
 
-Future<void> requestATTPermission() async {
-  final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-  log("Current ATT Status BEFORE request: $status");
-
+Future<void> initPlugin() async {
+  final TrackingStatus status =
+  await AppTrackingTransparency.trackingAuthorizationStatus;
   if (status == TrackingStatus.notDetermined) {
-    // Ensure the app waits for permission request
-    await Future.delayed(const Duration(milliseconds: 500));
 
-    final newStatus = await AppTrackingTransparency.requestTrackingAuthorization();
-    log("New ATT Status AFTER request: $newStatus");
+    await AppTrackingTransparency.requestTrackingAuthorization();
   }
-}
 
+  final uuid = await AppTrackingTransparency.getAdvertisingIdentifier();
+  print("UUID: $uuid");
+}
 Future<void> requestLocationPermission() async {
   LocationPermission permission = await Geolocator.checkPermission();
 

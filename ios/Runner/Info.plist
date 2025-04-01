@@ -50,6 +50,10 @@
     <key>UIMainStoryboardFile</key>
     <string>Main</string>
 
+    <key>NSUserTrackingUsageDescription</key>
+    <string>We use this data to provide you with personalized ads and analytics.</string>
+
+
     <key>UIDeviceFamily</key>
     <array>
         <integer>1</integer>
@@ -104,8 +108,6 @@
         <string>fbshareextension</string>
     </array>
 
-    <key>NSUserTrackingUsageDescription</key>
-    <string>We use this data to provide you with personalized ads and analytics.</string>
 
 
 

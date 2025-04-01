@@ -1,6 +1,7 @@
 
 import 'dart:developer';
 
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/testing_screen/test1.dart';
@@ -30,7 +31,7 @@ final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 Future<void> main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
-  await requestATTPermission();
+  initPlugin();
 
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent, // Transparent status bar
@@ -108,6 +109,7 @@ class _MyAppState extends State<MyApp> {
   final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
   @override
   void initState() {
+    initPlugin();
     appEventLogs();
     super.initState();
   }
