@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../utils/app_colors.dart';
-import '../settings_screen/settings_view.dart';
 
 class ProfileView extends StatefulWidget {
   ProfileView({Key? key}) : super(key: key);
@@ -64,7 +63,7 @@ class _ProfileViewState extends State<ProfileView> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            Navigator.pop(context, MaterialPageRoute(builder: (context) => SettingsView()));
+            // Navigator.pop(context, MaterialPageRoute(builder: (context) => ()));
 
           },
         ),

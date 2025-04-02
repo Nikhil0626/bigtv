@@ -115,7 +115,7 @@ class ArticlePageState extends State<ArticlePage> {
                               ?SizedBox(
                               height: MediaQuery.of(context).size.height,
                               width: MediaQuery.of(context).size.width,
-                              child: InAppWebViewScreen(webUrl: flipProvider.webUrl.toString())):
+                              child: InAppWebViewScreen(webUrl: flipProvider.webUrl.toString(), title: '',)):
                           widget.article.type == "GoogleAds"
                               ? GoogleAdsView( article: widget.article, flipProvider: flipProvider,
                             screenshotController: screenshotController, isFoldable: isFoldable,)

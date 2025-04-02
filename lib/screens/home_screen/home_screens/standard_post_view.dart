@@ -36,7 +36,10 @@ class StandardPostView extends StatefulWidget {
   final ScreenshotController screenshotController;
   final isAds;
 
-  const StandardPostView({super.key, required this.article, required this.isFoldable, required this.flipProvider, required this.screenshotController, this.isAds = false});
+  const StandardPostView({super.key, required this.article,
+    required this.isFoldable,
+    required this.flipProvider,
+    required this.screenshotController, this.isAds = false});
 
   @override
   _StandardPostViewState createState() => _StandardPostViewState();
