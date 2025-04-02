@@ -1,11 +1,11 @@
 
+import 'dart:async';
 import 'dart:developer';
 
+import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
-import 'package:chotanews/aggricator_screens/onboarding_screen/app_welcome_view.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/screens/testing_screen/test1.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/kochava_service.dart';
@@ -18,7 +18,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -26,7 +25,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import 'aggricator_screens/district_screens/district_view.dart';
+import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
@@ -61,7 +60,6 @@ Future<void> main() async {
     print("push data receive   &&& ${message.data}");
   });
 
-  // Check if you received the link via `getInitialLink` first
   final PendingDynamicLinkData? initialLink =
   await FirebaseDynamicLinks.instance.getInitialLink();
 
@@ -122,11 +120,26 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
+  StreamSubscription<Uri>? _linkSubscription;
    Locale? _locale ;
   @override
   void initState() {
     appEventLogs();
+    initDeepLinks();
     super.initState();
+  }
+
+  Future<void> initDeepLinks() async {
+    // Handle links
+    _linkSubscription = AppLinks().uriLinkStream.listen((uri) {
+      debugPrint('onAppLink: $uri');
+      openAppLink(uri);
+    });
+  }
+
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  void openAppLink(Uri uri) {
+    _navigatorKey.currentState?.pushNamed(uri.fragment);
   }
   void setLocale(Locale locale) {  setState(() {    _locale = locale;  });}
   void appEventLogs() async{
@@ -152,7 +165,8 @@ class _MyAppState extends State<MyApp> {
       child: MultiProvider(
         providers: [
           ChangeNotifierProvider<FlipProvider>(
-              create: (context) => FlipProvider()),
+              create: (context) => FlipProvider()),  ChangeNotifierProvider<EPapersProvider>(
+              create: (context) => EPapersProvider()),
           ChangeNotifierProvider<AuthProvider>(
               create: (context) => AuthProvider()),
           ChangeNotifierProvider<HomeProvider>(

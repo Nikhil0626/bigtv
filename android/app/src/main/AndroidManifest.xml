@@ -263,6 +263,10 @@
         <meta-data
             android:name="com.webengage.sdk.android.key"
             android:value="in~~1341061ba" />
+        <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
+
+
+
 
         <!-- Main Activity -->
         <activity
@@ -275,6 +279,7 @@
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
                 android:resource="@style/NormalTheme" />
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -285,12 +290,34 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
-            <intent-filter>
+
+            <!-- App Link sample -->
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="chotanews.page.link" android:scheme="https" />
+                <data android:scheme="https" android:host="apps.signitivessoft.com" android:pathPrefix="/homeScreen"/>
+          />
             </intent-filter>
+
+            <!-- Deep Link sample -->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.VIEW" />-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+<!--                &lt;!&ndash; Add optional android:host to distinguish your app-->
+<!--                     from others in case of conflicting scheme name &ndash;&gt;-->
+<!--                <data android:scheme="sample" android:host="open.my.app" />-->
+<!--                &lt;!&ndash; <data android:scheme="sample" /> &ndash;&gt;-->
+<!--            </intent-filter>-->
+
+
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.VIEW" />-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <category android:name="android.intent.category.BROWSABLE" />-->
+<!--                <data android:host="chotanews.page.link" android:scheme="https" />-->
+<!--            </intent-filter>-->
         </activity>
 
         <!-- Firebase Cloud Messaging Service -->
