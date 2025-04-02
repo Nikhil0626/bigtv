@@ -1,6 +1,7 @@
 
 import 'dart:developer';
 
+import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/aggricator_screens/onboarding_screen/app_welcome_view.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
@@ -26,6 +27,7 @@ import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import 'aggricator_screens/district_screens/district_view.dart';
+import 'aggricator_screens/home_screen/home_provider.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
@@ -153,6 +155,8 @@ class _MyAppState extends State<MyApp> {
               create: (context) => FlipProvider()),
           ChangeNotifierProvider<AuthProvider>(
               create: (context) => AuthProvider()),
+          ChangeNotifierProvider<HomeProvider>(
+              create: (context) => HomeProvider()),
         ],
         child: MultiBlocProvider(
           providers: RegisterProviders.providers(context),
@@ -176,7 +180,7 @@ class _MyAppState extends State<MyApp> {
             },
             debugShowCheckedModeBanner: false,
 
-            home: RegionSelectionScreen(),
+            home: HomeView(),
 
           ),
         ),

@@ -17,8 +17,6 @@ TextStyle homeScreenFontStyle(
   color: color,)
   );
 }
-
-
 TextStyle fontStyle(
     {Color? color = Colors.black,
       double? fontSize = 14,

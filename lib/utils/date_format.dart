@@ -28,7 +28,7 @@ String formatTimeDifference(String inputTime,{bool isComment= false} ) {
   if (difference.inSeconds < 60) {
     return '${difference.inSeconds} seconds ago';
   } else if (difference.inMinutes < 60) {
-    return difference.inMinutes==1?'${difference.inMinutes} minute ago':'${difference.inMinutes} minutes ago';
+    return difference.inMinutes==1?'${difference.inMinutes} min ago':'${difference.inMinutes} mins ago';
   } else if (difference.inHours < 24) {
     return difference.inHours==1?'${difference.inHours} hour ago':'${difference.inHours} hours ago';
   } else if (difference.inDays < 7) {

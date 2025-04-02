@@ -2,6 +2,8 @@
   "welcome": "స్వాగతం",
   "signInWithMobileNumber" : "మొబైల్ నంబర్తో సైన్ ఇన్ చేయండిं",
   "theBigAppForTheHyperlocalShortNews": " హైపర్లోకల్ షార్ట్ న్యూస్ కోసం పెద్ద యాప్",
+  "SignInWithMobileNumber" : "మొబైల్ నంబర్తో సైన్ ఇన్ చేయండిं",
+  "TheBigAppForTheHyperlocalShortNews": " హైపర్లోకల్ షార్ట్ న్యూస్ కోసం పెద్ద యాప్",
   "signIn": "సైన్ ఇన్",
   "signUp": "సైన్ అప్",
   "enterMobileNumber": "మీ మొబైల్ నంబర్ ను నమోదు చేయండి",
@@ -17,4 +19,16 @@
   "enterTheCodeBelow" : "క్రింద ఉన్న కోడ్ను నమోదు చేయండి",
   "didNotReceiveTheCode" : "కోడ్ రాలేదా?",
   "reSend" : "మళ్లీ పంపండి"
+  "OTpVerification" : "OTP నిర్ధారణ",
+  "EnterThe4-digitVerificationCodeSenToyourMobileNumber": "  మీ మొబైల్ నంబర్కు పంపిన 4 అంకెల నిర్ధారణ కోడ్ను నమోదు చేయండి..",
+  "EnterTheCodeBelow" : "క్రింద ఉన్న కోడ్ను నమోదు చేయండి",
+  "Didn'tReceiveTheCode" : "కోడ్ రాలేదా?",
+  "ReSend" : "మళ్లీ పంపండి",
+
+
+
+  "news": "వార్తలు",
+  "ePaper": "ఇ-పేపర్",
+  "reels": "రీల్స్",
+  "more": "మరిన్ని"
 }

@@ -49,7 +49,7 @@ class _VideoPreview extends State<VideoPreview> {
     return isPlaying
         ? Container(
       width: MediaQuery.of(context).size.width, // Fixed width
-      height: widget.isFoldable?(MediaQuery.of(context).size.height*0.60-100):280, // Fixed height
+      height: 334, // Fixed height
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -89,6 +89,7 @@ class _VideoPreview extends State<VideoPreview> {
       alignment: Alignment.center,
       children: [
         Image.network(
+          height: 330,
           widget.imageUrl,
           // "https://img.youtube.com/vi/${widget.url}/hqdefault.jpg",
           fit: BoxFit.cover,
