@@ -1,11 +1,7 @@
 {
-
   "welcome": "Welcome",
   "signInWithMobileNumber" : "Sign in with Mobile Number",
   "theBigAppForTheHyperlocalShortNews": "The Big App for the Hyperlocal Short News",
-
-  "SignInWithMobileNumber" : "Sign in with Mobile Number",
-  "TheBigAppForTheHyperlocalShortNews": "The Big App for the Hyperlocal Short News",
   "signIn": "Sign In",
   "signUp": "Sign Up",
   "enterMobileNumber": "Enter your mobile number",
@@ -20,12 +16,7 @@
   "yourMobileNumber": "  your mobile number.",
   "enterTheCodeBelow" : " Enter the code below",
   "didNotReceiveTheCode" : "DidNot receive the code?",
-  "reSend" : "Resend"
-
-  "EnterTheCodeBelow" : " Enter the code below",
-  "Didn'tReceiveTheCode" : "Didn't receive the code?",
-  "ReSend" : "Resend",
-
+  "reSend" : "Resend",
   "news": "News",
   "ePaper": "ePaper",
   "reels": "Reels",

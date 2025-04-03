@@ -59,7 +59,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   child:widget.article.type == "WebView"
                       ? Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: InAppWebViewScreen(webUrl: context.read<FlipProvider>().webUrl.toString()),
+                    child: InAppWebViewScreen(webUrl: context.read<FlipProvider>().webUrl.toString(), title: '',),
                   )
                       : widget.article.type == "GoogleAds"
                       ? Padding(

@@ -28,6 +28,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   String mobileNumber = "Fetching...";
 
+
   @override
   void initState()  {
     super.initState();
@@ -122,8 +123,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     ),
                                     Expanded(
                                       child: TextFormField(
-                                          controller: authProvider
-                                              .mobileNumberController,
+                                          controller: authProvider.mobileNumberController,
                                           keyboardType: TextInputType.phone,
                                           maxLength: 10,
                                           decoration: const InputDecoration(
@@ -208,11 +208,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 child: Container(
                                   height: 50,
                                   decoration: BoxDecoration(
-                                      color: authProvider.mobileNumberController
-                                                  .text.length >
-                                              9
-                                          ? AppColors.appButtonColor
-                                          : Colors.grey,
+                                      color: authProvider.mobileNumberController.text.length > 9 ? AppColors.appButtonColor : Colors.grey,
                                       borderRadius: const BorderRadius.all(
                                           Radius.circular(8))),
                                   width: double.infinity,

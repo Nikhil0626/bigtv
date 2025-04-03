@@ -1,8 +1,6 @@
-
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
-import 'package:chotanews/aggricator_screens/onboarding_screen/app_welcome_view.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/testing_screen/test1.dart';
@@ -26,13 +24,18 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'aggricator_screens/categories_screen/categories_view.dart';
 import 'aggricator_screens/district_screens/district_view.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
+import 'aggricator_screens/auth_screens/authentication_view/login_view.dart';
+import 'aggricator_screens/onboarding_screen/otp_verification_view.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
-final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
-Future<void> main() async {
 
+final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
 
@@ -45,12 +48,12 @@ Future<void> main() async {
   MobileAds.instance.initialize();
   await Firebase.initializeApp();
   KochavaService.initKochava();
+
   /// app Events firebase
   AnalyticsService.logAppOpen();
   AnalyticsService().trackAppOpen();
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
-
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -62,27 +65,22 @@ Future<void> main() async {
   });
 
   // Check if you received the link via `getInitialLink` first
-  final PendingDynamicLinkData? initialLink =
-  await FirebaseDynamicLinks.instance.getInitialLink();
+  final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
 
   if (initialLink != null) {
     final Uri deepLink = initialLink.link;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mainNavigatorKey.currentContext != null) {
-
-        DynamicLinkService.handleDeepLink(
-            mainNavigatorKey.currentContext!, deepLink);
+        DynamicLinkService.handleDeepLink(mainNavigatorKey.currentContext!, deepLink);
       }
     });
   }
 
   FirebaseDynamicLinks.instance.onLink.listen(
-        (pendingDynamicLinkData) {
+    (pendingDynamicLinkData) {
       if (pendingDynamicLinkData != null) {
-
         final Uri deepLink = pendingDynamicLinkData.link;
-        DynamicLinkService.handleDeepLink(
-            mainNavigatorKey.currentContext!, deepLink);
+        DynamicLinkService.handleDeepLink(mainNavigatorKey.currentContext!, deepLink);
       }
     },
   );
@@ -91,18 +89,11 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) {
-    runApp(
-        EasyLocalization(
-            supportedLocales: [
-              Locale('en' ),
-              Locale('te' ),
-              Locale('hi'),
-            ],
-        path: 'assets/translations',
-        fallbackLocale: Locale("en"),
-        child: AppLifecycleManager(child:  MyApp()))
-
-    );
+    runApp(EasyLocalization(supportedLocales: [
+      Locale('en'),
+      Locale('te'),
+      Locale('hi'),
+    ], path: 'assets/translations', fallbackLocale: Locale("en"), child: AppLifecycleManager(child: MyApp())));
   });
   subscribeToPushCallbacks(_webEngagePlugin);
 }
@@ -114,7 +105,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
-  static void setLocale(BuildContext context, Locale newLocale) {  _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();  state?.setLocale(newLocale);}
+
+  static void setLocale(BuildContext context, Locale newLocale) {
+    _MyAppState? state = context.findAncestorStateOfType<_MyAppState>();
+    state?.setLocale(newLocale);
+  }
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -122,28 +117,35 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
-   Locale? _locale ;
+  Locale? _locale;
+
   @override
   void initState() {
     appEventLogs();
     super.initState();
   }
-  void setLocale(Locale locale) {  setState(() {    _locale = locale;  });}
-  void appEventLogs() async{
-    try{
+
+  void setLocale(Locale locale) {
+    setState(() {
+      _locale = locale;
+    });
+  }
+
+  void appEventLogs() async {
+    try {
       facebookAppEvents.logEvent(
         name: 'flutter_test',
         parameters: {
           'name': 'siva',
-          'time': 123,  // You can pass int, double, String
+          'time': 123, // You can pass int, double, String
         },
       );
       log("facebook event success");
-    }catch(e){
+    } catch (e) {
       log("facebook event fail");
     }
-
   }
+
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -151,17 +153,17 @@ class _MyAppState extends State<MyApp> {
       // minTextAdapt: true,
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider<FlipProvider>(
-              create: (context) => FlipProvider()),
-          ChangeNotifierProvider<AuthProvider>(
-              create: (context) => AuthProvider()),
-          ChangeNotifierProvider<HomeProvider>(
-              create: (context) => HomeProvider()),
+          ChangeNotifierProvider<FlipProvider>(create: (context) => FlipProvider()),
+          ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider()),
+          ChangeNotifierProvider<HomeProvider>(create: (context) => HomeProvider()),
+          ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider()),
         ],
         child: MultiBlocProvider(
           providers: RegisterProviders.providers(context),
           child: MaterialApp(
-            localizationsDelegates: context.localizationDelegates,supportedLocales: context.supportedLocales,locale: _locale ?? context.locale,
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: _locale ?? context.locale,
             theme: ThemeData(
               colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
               useMaterial3: true,
@@ -173,22 +175,20 @@ class _MyAppState extends State<MyApp> {
               return RoutesManager.generateRoute(setting);
             },
             builder: (
-                BuildContext context,
-                Widget? child,
-                ) {
+              BuildContext context,
+              Widget? child,
+            ) {
               return child!;
             },
             debugShowCheckedModeBanner: false,
-
-            home: HomeView(),
-
+            home: LoginView(),
           ),
         ),
       ),
     );
   }
 }
+
 final mainNavigatorKey = GlobalKey<NavigatorState>();
-final RouteObserver<ModalRoute<Object?>> routeObserver =
-RouteObserver<ModalRoute<Object?>>();
+final RouteObserver<ModalRoute<Object?>> routeObserver = RouteObserver<ModalRoute<Object?>>();
 final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey();
