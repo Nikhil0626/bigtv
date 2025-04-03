@@ -12,7 +12,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // Better visibility
+      backgroundColor: Colors.white, // Better visibility
       body: Center(
         child: InteractiveViewer(
           boundaryMargin: const EdgeInsets.all(6),

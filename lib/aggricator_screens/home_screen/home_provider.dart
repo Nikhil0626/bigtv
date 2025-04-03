@@ -9,6 +9,10 @@ class HomeProvider extends ChangeNotifier{
       selectedIndex = index;
       notifyListeners();
   }
+  void isTabChange() {
+    isSwitched = false;
+    notifyListeners();
+  }
 
   void switchChange(value) {
       isSwitched = !isSwitched;

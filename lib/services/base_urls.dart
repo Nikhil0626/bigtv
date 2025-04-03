@@ -7,13 +7,16 @@ class BaseUrls {
   static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
 
   static const String baseUrlAws = "https://prodchotanews.signitivessoft.com/api";
+  static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
 
   /// event states
    static const String baseUrlAwsDev = "https://prodchotanews.signitivessoft.com/api";
    static const String eventUrl = "/logs";
+///ENewsPapers
+  static const String getMainEPapers = "/enewspaper/first_pages";
+  static const String getSingleEPapers = "/enewspapers";
 
-
-
+/// all posts
   static const String getNews = "/allposts";
   static const String getPostById = "/post";
   static const String getAllDistricts = "/user";

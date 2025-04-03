@@ -1,9 +1,9 @@
 import 'dart:developer';
 
+import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/screens/testing_screen/test1.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/kochava_service.dart';
@@ -16,7 +16,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -24,6 +23,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/categories_screen/categories_view.dart';
 import 'aggricator_screens/district_screens/district_view.dart';
@@ -32,9 +32,7 @@ import 'aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'aggricator_screens/onboarding_screen/otp_verification_view.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
-
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
@@ -48,12 +46,12 @@ Future<void> main() async {
   MobileAds.instance.initialize();
   await Firebase.initializeApp();
   KochavaService.initKochava();
-
   /// app Events firebase
   AnalyticsService.logAppOpen();
   AnalyticsService().trackAppOpen();
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
+
 
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -66,6 +64,8 @@ Future<void> main() async {
 
   // Check if you received the link via `getInitialLink` first
   final PendingDynamicLinkData? initialLink = await FirebaseDynamicLinks.instance.getInitialLink();
+  final PendingDynamicLinkData? initialLink =
+  await FirebaseDynamicLinks.instance.getInitialLink();
 
   if (initialLink != null) {
     final Uri deepLink = initialLink.link;
@@ -119,9 +119,12 @@ class _MyAppState extends State<MyApp> {
   final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
   Locale? _locale;
 
+  StreamSubscription<Uri>? _linkSubscription;
+   Locale? _locale ;
   @override
   void initState() {
     appEventLogs();
+    initDeepLinks();
     super.initState();
   }
 
@@ -133,6 +136,22 @@ class _MyAppState extends State<MyApp> {
 
   void appEventLogs() async {
     try {
+
+  Future<void> initDeepLinks() async {
+    // Handle links
+    _linkSubscription = AppLinks().uriLinkStream.listen((uri) {
+      debugPrint('onAppLink: $uri');
+      openAppLink(uri);
+    });
+  }
+
+  final _navigatorKey = GlobalKey<NavigatorState>();
+  void openAppLink(Uri uri) {
+    _navigatorKey.currentState?.pushNamed(uri.fragment);
+  }
+  void setLocale(Locale locale) {  setState(() {    _locale = locale;  });}
+  void appEventLogs() async{
+    try{
       facebookAppEvents.logEvent(
         name: 'flutter_test',
         parameters: {
@@ -145,7 +164,6 @@ class _MyAppState extends State<MyApp> {
       log("facebook event fail");
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
@@ -157,6 +175,13 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider()),
           ChangeNotifierProvider<HomeProvider>(create: (context) => HomeProvider()),
           ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider()),
+          ChangeNotifierProvider<FlipProvider>(
+              create: (context) => FlipProvider()),  ChangeNotifierProvider<EPapersProvider>(
+              create: (context) => EPapersProvider()),
+          ChangeNotifierProvider<AuthProvider>(
+              create: (context) => AuthProvider()),
+          ChangeNotifierProvider<HomeProvider>(
+              create: (context) => HomeProvider()),
         ],
         child: MultiBlocProvider(
           providers: RegisterProviders.providers(context),
@@ -188,7 +213,6 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
 final mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver = RouteObserver<ModalRoute<Object?>>();
 final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey();
