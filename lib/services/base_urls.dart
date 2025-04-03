@@ -45,11 +45,11 @@ class BaseUrls {
   static const String validateOtp = "/validateOtp";
 
   ///Web Pages
-  // static const String aboutPage = "https://settingsfiles.s3.us-east-1.amazonaws.com/Terms.html";
-  static const String contactPage ="https://settingsfiles.s3.us-east-1.amazonaws.com/Contact.html";
-  static const String advertisePage =  "https://settingsfiles.s3.us-east-1.amazonaws.com/Advertise.html";
-  static const String termsPage =  "https://settingsfiles.s3.us-east-1.amazonaws.com/Terms.html";
-  static const String privacyPage = "https://settingsfiles.s3.us-east-1.amazonaws.com/Privacy.html";
+  static const String aboutPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/About+5.html";
+  static const String contactPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/ContactPage+2.html";
+  static const String advertisePage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/AdvertisePage+2.html";
+  static const String termsPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Terms%26Conditions+1.html";
+  static const String privacyPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Privacy+5.html";
 
 
 

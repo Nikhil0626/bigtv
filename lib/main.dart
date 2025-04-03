@@ -96,9 +96,9 @@ Future<void> main() async {
               Locale('te' ),
               Locale('hi'),
             ],
-        path: 'assets/translations',
-        fallbackLocale: Locale("en"),
-        child: AppLifecycleManager(child:  MyApp()))
+            path: 'assets/translations',
+            fallbackLocale: Locale("en"),
+            child: AppLifecycleManager(child:  MyApp()))
 
     );
   });
@@ -121,7 +121,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
   StreamSubscription<Uri>? _linkSubscription;
-   Locale? _locale ;
+  Locale? _locale ;
   @override
   void initState() {
     appEventLogs();

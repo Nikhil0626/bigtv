@@ -79,7 +79,7 @@ class _MainScreenListState extends State<MainScreenList> {
                     : flipProvider.mainArticlesData[index].type == "WebView"
                         ? Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: InAppWebViewScreen(webUrl: flipProvider.webUrl.toString()),
+                            child: InAppWebViewScreen(webUrl: flipProvider.webUrl.toString(), title: '',),
                           )
                         : flipProvider.mainArticlesData[index].type == "GoogleAds"
                             ? Padding(

@@ -1,3 +1,25 @@
+// ✅ Keep buildscript at the top
+buildscript {
+    ext.kotlin_version = '1.9.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'com.android.tools.build:gradle:8.3.0' // Updated to latest stable Gradle version
+        classpath 'com.google.gms:google-services:4.4.2' // Google services plugin
+    }
+}
+
+// ✅ Move plugins AFTER buildscript
+plugins {
+    id 'com.android.application' version '8.2.1' apply false
+    id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
+}
+
+
+
 allprojects {
     repositories {
         google()
@@ -13,25 +35,4 @@ subprojects {
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
-}
-
-buildscript {
-    ext.kotlin_version = '1.9.0'
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath 'com.android.tools.build:gradle:8.3.0' // Updated to latest stable Gradle version
-        classpath 'com.google.gms:google-services:4.4.2' // Google services plugin
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url 'https://webengage.bintray.com/android' }
-    }
 }

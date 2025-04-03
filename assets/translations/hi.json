@@ -1,8 +1,7 @@
 {
   "welcome": "स्वागत है",
-
-  "SignInWithMobileNumber" : "मोबाइल नंबर से साइन इन करें",
-  "TheBigAppForTheHyperlocalShortNews": "हाइपरलोकल शॉर्ट न्यूज़ के लिए बड़ा ऐप",
+  "signInWithMobileNumber" : "मोबाइल नंबर से साइन इन करें",
+  "theBigAppForTheHyperlocalShortNews": "हाइपरलोकल शॉर्ट न्यूज़ के लिए बड़ा ऐप",
   "signIn": "साइन इन",
   "signUp": "साइन अप",
   "enterMobileNumber": "अपना मोबाइल नंबर दर्ज करें",
@@ -12,12 +11,13 @@
   "resendOtp": "OTP पुनः भेजें",
   "continue": "जारी रखें",
   "continueAsGuest": "अतिथि के रूप में जारी रखें",
+  "oTpVerification" : "ओटीपी सत्यापन",
+  "enterThe4DigitVerificationCodeSentTo" :"भेजा गया 4-अंकीय सत्यापन कोड दर्ज करें",
+  "yourMobileNumber" : "आपका मोबाइल नंबर",
+  "enterTheCodeBelow" : " नीचे दिया गया कोड दर्ज करें",
+  "didNotReceiveTheCode" : "कोड प्राप्त नहीं हुआ?",
   "OTpVerification" : "ओटीपी सत्यापन",
-  "EnterThe4-digitVerificationCodeSenToyourMobileNumber": " अपने मोबाइल नंबर पर भेजा गया 4-अंकों का सत्यापन कोड दर्ज करें।.",
-  "EnterTheCodeBelow" : " नीचे दिया गया कोड दर्ज करें",
-  "Didn'tReceiveTheCode" : "कोड प्राप्त नहीं हुआ?",
   "ReSend" : "पुनः भेजें",
-
   "news": "समाचार",
   "ePaper": "ई-पेपर",
   "reels": "रील्स",

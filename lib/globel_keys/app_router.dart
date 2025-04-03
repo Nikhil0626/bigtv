@@ -125,16 +125,19 @@ abstract class RoutesManager {
         args?['postId'] ?? '',));
 
 
+        /// newAggregator appRouter screens
 
-      // case newsGenerateScreen:
-      //   final args = setting.arguments as Map<String, dynamic>?;
-      //   return MaterialPageRoute(
-      //       builder: (context) => NewsGenerateScreen(
-      //             tweetId:
-      //                 args?['tweetId'] ?? '', // Use a default value if null
-      //             tweetText: args?['tweetText'] ?? '',
-      //         screenType: args?['screenType'] ?? '',
-      //           ));
+    
+
+
+
+
+
+
+
+
+
+
 
       default:
         // return null;
