@@ -187,9 +187,13 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                     height(height: 8),
                                                     Padding(
                                                       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 6),
-                                                      child: Text(
-                                                        flipProvider.mainArticlesData[index].title,
-                                                        style: fontStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
+                                                      child: Container(
+                                                          height: 100,
+                                                        color: Colors.red,
+                                                        child: Text(
+                                                         "మీరు అంటే దీర్ఘంగా ఉండే తెలుగు కంటెంట్ కోరుకుంటున్నారా? అంటే లేకపోతే మీరు అర్థం చేసుకోవాల0",
+                                                          style: fontStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
+                                                        ),
                                                       ),
                                                     ),
                                                     Spacer(),

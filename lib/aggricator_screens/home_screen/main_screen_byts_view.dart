@@ -155,18 +155,20 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 height(height: 8),
-                                Text(widget.article.title ?? "No Title",
+                                Text("మీరు అంటే దీర్ఘంగా ఉండే తెలుగు కంటెంట్ కోరుకుంటున్నారా? అంటే లేకపోతే మీరు అర్థం చేసుకోవాల0",
                                     style: homeScreenFontStyle(
                                         color: widget.article.subType != "BigBlackStandard" ? AppColors.textColor:AppColors.cardBackgroundColor, fontSize: 18.sp, fontWeight: FontWeight.bold)),
                                 height(height: 8),
-                                Expanded(
+                                Container(
+                                  height: 250,
+                                  color: Colors.green,
                                   child: widget.article.subType == "BulletPost"
                                       ? Column(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       (widget.article.content != "")
-                                          ? Text(widget.article.content,
+                                          ? Text("తెలుగు భాషకు ఎంతో ప్రాచీనత ఉంది. ఇది ప్రపంచంలోని మధురమైన భాషలలో ఒకటి. తెలుగు సాహిత్యంలో కవిత్వం, నాటకాలు, కథలు ఎంతో ప్రాచుర్యం పొందాయి. శ్రీకృష్ణదేవరాయల కాలంలో తెలుగు భాషకు స్వర్ణయుగం వచ్చింది. పండితులు, కవులు ఈ భాషను మరింత శ్రీకారం చుట్టారు. భాషాభిమానంతో తెలుగు మాట్లాడటం, చదవటం, రాయడం మన బాధ్యత.",
                                           style: homeScreenFontStyle(
                                             color: widget.article.subType == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5):AppColors.cardBackgroundColor,
                                             fontWeight: FontWeight.w500,
