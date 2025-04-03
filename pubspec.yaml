@@ -101,6 +101,8 @@ flutter:
     - assets/translations/te.json
     - assets/translations/hi.json
     - assets/svg/Chota_news_logo.svg
+    - assets/svg/logo_ChotaNews_black.svg
+    - assets/svg/indianFlag.svg
     - assets/
     - assets/images/
     - assets/icons/
