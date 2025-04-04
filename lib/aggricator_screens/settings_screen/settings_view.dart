@@ -17,9 +17,7 @@ import '../filters_screen/filter_view.dart';
 import '../profile_screen/profile_view.dart';
 
 class SettingsView extends StatefulWidget {
-  const SettingsView({
-    super.key,
-  });
+  const SettingsView({super.key,});
 
   @override
   _SettingsViewState createState() => _SettingsViewState();
@@ -40,7 +38,6 @@ class _SettingsViewState extends State<SettingsView> {
     loginStatus = await getLoginStatus();
     setState(() {});
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -55,12 +52,10 @@ class _SettingsViewState extends State<SettingsView> {
             size: 24,
           ),
         ),
-        title: Padding(
-          padding: const EdgeInsets.only(right: 5),
-          child: Text(
-            "Settings",
-            style: newAppFont(fontSize: 18, fontWeight: FontWeight.w500),
-          ),
+        centerTitle: false,
+        title: Text(
+          "Settings",
+          style: newAppFont(fontSize: 18, fontWeight: FontWeight.w500),
         ),
       ),
       body: Padding(

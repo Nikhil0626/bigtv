@@ -27,6 +27,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
+import 'aggricator_screens/settings_screen/settings_view.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
@@ -36,8 +37,8 @@ Future<void> main() async {
   await EasyLocalization.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent, // Transparent status bar
-    statusBarIconBrightness: Brightness.dark, // Dark icons (black)
+    statusBarColor: Colors.transparent,
+    statusBarIconBrightness: Brightness.dark,
   ));
   await facebookAppEvents.setAdvertiserTracking(enabled: true);
   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
@@ -84,7 +85,6 @@ Future<void> main() async {
       }
     },
   );
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -193,8 +193,7 @@ class _MyAppState extends State<MyApp> {
               return child!;
             },
             debugShowCheckedModeBanner: false,
-
-            home: HomeView(),
+            home: SettingsView(),
 
           ),
         ),
