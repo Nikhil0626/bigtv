@@ -1,3 +1,5 @@
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -12,6 +14,7 @@ import '../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../utils/app_enums.dart';
 import '../../utils/local_data.dart';
+import '../auth_screens/authentication_view/login_background_view.dart';
 import '../book_marks_view/book_marks_screen.dart';
 import '../filters_screen/filter_view.dart';
 import '../profile_screen/profile_view.dart';
@@ -41,23 +44,7 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(
-            Icons.arrow_back,
-            color: Colors.black,
-            size: 24,
-          ),
-        ),
-        centerTitle: false,
-        title: Text(
-          "Settings",
-          style: newAppFont(fontSize: 18, fontWeight: FontWeight.w500),
-        ),
-      ),
+
       body: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
@@ -158,8 +145,12 @@ class _SettingsViewState extends State<SettingsView> {
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "Signout.svg", "Logout", () {
+
+              context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+              context.read<AuthenticationProvider>().saveLoginState();
+              context.read<AuthenticationProvider>().isPageNavigation(context);
               // loginStatus == LoginStatus.skip ? 'Login' : 'Logout';
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => LogoutScreen()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginBackgroundView()));
             }),
           ],
         ),
