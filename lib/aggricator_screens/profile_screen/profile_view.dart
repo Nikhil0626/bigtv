@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:chotanews/aggricator_screens/settings_screen/settings_view.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../utils/app_colors.dart';
+import '../settings_screen/settings_view/settings_view.dart';
 
 class ProfileView extends StatefulWidget {
   ProfileView({Key? key}) : super(key: key);

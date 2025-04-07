@@ -11,16 +11,32 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../globel_keys/global_variables_data.dart';
-import '../../screens/Auth_module/auth_provider/auth_provider.dart';
-import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../../screens/home_screen/home_screens/in_app_web_view.dart';
-import '../../services/webengage_event_tracks.dart';
-import '../../utils/app_enums.dart';
-import '../../utils/local_data.dart';
-import '../book_marks_view/book_marks_screen.dart';
-import '../filters_screen/filter_view.dart';
-import '../profile_screen/profile_view.dart';
+import '../../../globel_keys/global_variables_data.dart';
+import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
+import '../../../screens/home_screen/home_repo/event_repo.dart';
+import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
+import '../../../services/webengage_event_tracks.dart';
+import '../../../utils/app_enums.dart';
+import '../../../utils/local_data.dart';
+import '../../auth_screens/authentication_provider/authentication_provider.dart';
+import '../../auth_screens/authentication_view/login_background_view.dart';
+import '../../book_marks_view/book_marks_screen.dart';
+import '../../filters_screen/filter_view.dart';
+import '../../profile_screen/profile_view.dart';
+//
+// import '../../globel_keys/global_variables_data.dart';
+// import '../../profile_screen/profile_view.dart';
+// import '../../screens/Auth_module/auth_provider/auth_provider.dart';
+// import '../../screens/home_screen/home_repo/event_repo.dart';
+// import '../../screens/home_screen/home_screens/in_app_web_view.dart';
+// import '../../services/webengage_event_tracks.dart';
+// import '../../utils/app_enums.dart';
+// import '../../utils/local_data.dart';
+// import '../auth_screens/authentication_provider/authentication_provider.dart';
+// import '../auth_screens/authentication_view/login_background_view.dart';
+// import '../book_marks_view/book_marks_screen.dart';
+// import '../filters_screen/filter_view.dart';
+// import '../profile_screen/profile_view.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({super.key,});
@@ -69,22 +85,22 @@ class _SettingsViewState extends State<SettingsView> {
         child: Column(
           children: [
             // if (loginStatus == LoginStatus.skip)
-          _buildSettingsRow(
-          context,
-          "Profile.svg",
-          "Edit Profile",
-              () {
-            // if (loginStatus == LoginStatus.skip) {
-            //   CustomToast.showErrorToast(msg: 'Please login with mobile number');
-            // } else if (loginStatus == LoginStatus.loggedIn) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProfileView()),
-              );
-            // }
-          },
+            _buildSettingsRow(
+              context,
+              "Profile.svg",
+              "Edit Profile",
+                  () {
+                // if (loginStatus == LoginStatus.skip) {
+                //   CustomToast.showErrorToast(msg: 'Please login with mobile number');
+                // } else if (loginStatus == LoginStatus.loggedIn) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ProfileView()),
+                );
+                // }
+              },
 
-      ),
+            ),
             // else
             SizedBox.shrink(),
 
@@ -161,30 +177,35 @@ class _SettingsViewState extends State<SettingsView> {
               // Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackScreen()));
             }),
 
-          _buildSettingsRow(
-            context,
-            "Signout.svg",
-            loginStatus == LoginStatus.skip ? "Login" : "Logout",
-                () async {
-                  logoutUser();context.read<AuthProvider>().loginStatus(LoginStatus.none, context);
-                  SharedPreferences sp = await SharedPreferences.getInstance();
-                  String? userId =  sp.getString("loginId",);
-                  EventRepo().sendEvent({
-                    "key": "logout",
-                    "data": {
-                      "device_id": "${GlobalVariables().deviceId}",
-                      "logout":true,
-                      "userId": userId??"",
-                    }
-                  });
-                  await sp.setString("loginId", "");
-                  await sp.clear();
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => LoginView()),
-              );
-            },
-          ),
+            _buildSettingsRow(
+              context,
+              "Signout.svg",
+              loginStatus == LoginStatus.skip ? "Login" : "Logout",
+                  () async {
+                context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+                context.read<AuthenticationProvider>().saveLoginState();
+                context.read<AuthenticationProvider>().isPageNavigation(context);
+                // loginStatus == LoginStatus.skip ? 'Login' : 'Logout';
+                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginBackgroundView()));
+                logoutUser();context.read<AuthProvider>().loginStatus(LoginStatus.none, context);
+                SharedPreferences sp = await SharedPreferences.getInstance();
+                String? userId =  sp.getString("loginId",);
+                EventRepo().sendEvent({
+                  "key": "logout",
+                  "data": {
+                    "device_id": "${GlobalVariables().deviceId}",
+                    "logout":true,
+                    "userId": userId??"",
+                  }
+                });
+                await sp.setString("loginId", "");
+                await sp.clear();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginView()),
+                );
+              },
+            ),
           ],
         ),
       ),
