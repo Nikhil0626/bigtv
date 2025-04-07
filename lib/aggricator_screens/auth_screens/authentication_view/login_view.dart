@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../../services/deviice_details.dart';
+import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
 
@@ -189,13 +190,12 @@ class _LoginViewState extends State<LoginView> {
                 height(height: 20.h),
 
                 InkWell(
-                  onTap: authenticationProvider.isButtonEnabled
-                      ? () {
-                    if (_formKey.currentState!.validate()) {
-                      authenticationProvider.sendOtp(context);
-                    }
-                  }
-                      : null,
+                  onTap:() {
+                    context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.home;
+                    context.read<AuthenticationProvider>().saveLoginState();
+                    context.read<AuthenticationProvider>().isPageNavigation(context);
+
+                  },
 
                   child: Container(
                       width: MediaQuery.of(context).size.width,

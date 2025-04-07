@@ -75,7 +75,7 @@ class LoginBackgroundView extends StatelessWidget {
                             ],
                           ),
                           height(height: 10.h),
-                         if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.login)
+                         if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.login ||authenticationProvider.newAppLoginStatus == NewAppLoginStatus.none )
                          Column(
                            children: [
                              Text(
