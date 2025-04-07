@@ -1,4 +1,6 @@
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:chotanews/services/base_urls.dart';
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/app_toasts.dart';
@@ -7,9 +9,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../globel_keys/global_variables_data.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
+import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
+import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_enums.dart';
 import '../../utils/local_data.dart';
 import '../book_marks_view/book_marks_screen.dart';
@@ -47,7 +53,7 @@ class _SettingsViewState extends State<SettingsView> {
             Navigator.pop(context);
           },
           icon: Icon(
-            Icons.arrow_back,
+            Icons.arrow_back_outlined,
             color: Colors.black,
             size: 24,
           ),
@@ -55,7 +61,7 @@ class _SettingsViewState extends State<SettingsView> {
         centerTitle: false,
         title: Text(
           "Settings",
-          style: newAppFont(fontSize: 18, fontWeight: FontWeight.w500),
+          style: newAppFont(fontSize: 18.sp, fontWeight: FontWeight.w600),
         ),
       ),
       body: Padding(
@@ -63,24 +69,28 @@ class _SettingsViewState extends State<SettingsView> {
         child: Column(
           children: [
             // if (loginStatus == LoginStatus.skip)
-            _buildSettingsRow(context, "Profile.svg", "Edit Profile", () {
-              if (loginStatus == LoginStatus.skip) {
-                CustomToast.showErrorToast(msg: 'Please login with mobile number');
-              } else if (loginStatus == LoginStatus.loggedIn) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProfileView()),
-                );
-              }
-            }),
+          _buildSettingsRow(
+          context,
+          "Profile.svg",
+          "Edit Profile",
+              () {
+            // if (loginStatus == LoginStatus.skip) {
+            //   CustomToast.showErrorToast(msg: 'Please login with mobile number');
+            // } else if (loginStatus == LoginStatus.loggedIn) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfileView()),
+              );
+            // }
+          },
+
+      ),
             // else
             SizedBox.shrink(),
 
-            height(height: 5.h),
             _buildSettingsRow(context, "Filter.svg", "Filter", () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
             }),
-            height(height: 5.h),
             _buildSettingsRow(context, "BookMarks.svg", "Bookmarks", () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => SavedArticles()));
             }),
@@ -90,7 +100,6 @@ class _SettingsViewState extends State<SettingsView> {
               Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.example.yourapp");
             }),
 
-            height(height: 5.h),
 
             _buildSettingsRow(context, "Help_support.svg", "Help & Support", () {
               Navigator.push(
@@ -104,7 +113,6 @@ class _SettingsViewState extends State<SettingsView> {
               );
             }),
 
-            height(height: 5.h),
             _buildSettingsRow(context, "Advertise_icon.svg", "Advertise With Us", () {
               Navigator.push(
                 context,
@@ -116,7 +124,6 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            height(height: 5.h),
             _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
               Navigator.push(
                 context,
@@ -128,7 +135,6 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            height(height: 5.h),
             _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
               Navigator.push(
                 context,
@@ -140,7 +146,6 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            height(height: 5.h),
             _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy", () {
               Navigator.push(
                 context,
@@ -152,15 +157,34 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            height(height: 5.h),
             _buildSettingsRow(context, "Feedback.svg", "Feedback", () {
               // Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackScreen()));
             }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "Signout.svg", "Logout", () {
-              // loginStatus == LoginStatus.skip ? 'Login' : 'Logout';
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => LogoutScreen()));
-            }),
+
+          _buildSettingsRow(
+            context,
+            "Signout.svg",
+            loginStatus == LoginStatus.skip ? "Login" : "Logout",
+                () async {
+                  logoutUser();context.read<AuthProvider>().loginStatus(LoginStatus.none, context);
+                  SharedPreferences sp = await SharedPreferences.getInstance();
+                  String? userId =  sp.getString("loginId",);
+                  EventRepo().sendEvent({
+                    "key": "logout",
+                    "data": {
+                      "device_id": "${GlobalVariables().deviceId}",
+                      "logout":true,
+                      "userId": userId??"",
+                    }
+                  });
+                  await sp.setString("loginId", "");
+                  await sp.clear();
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginView()),
+              );
+            },
+          ),
           ],
         ),
       ),
@@ -171,12 +195,12 @@ class _SettingsViewState extends State<SettingsView> {
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
+        padding: EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
-            SvgPicture.asset('assets/svg/$iconName', height: 20, width: 20),
-            SizedBox(width: 25),
-            Text(title, style: TextStyle(fontSize: 16)),
+            SvgPicture.asset('assets/svg/$iconName', height: 20.h, width: 20.w,color: AppColors.settingsPageIconColor,),
+            width(width: 25.w),
+            Text(title, style: newAppFont(fontSize: 16.sp,fontWeight: FontWeight.w400,color: AppColors.settingsPageTextColor)),
           ],
         ),
       ),

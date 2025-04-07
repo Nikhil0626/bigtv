@@ -28,7 +28,6 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
       isButtonEnabled = value.length == 4;
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,9 +56,6 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
           ),
         ),
       ),
-
-
-
       body: Stack(
         children: [
           Column(

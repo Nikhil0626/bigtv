@@ -143,7 +143,7 @@ class _LoginViewState extends State<LoginView> {
                                               } else if (value.length < 10) {
                                                 return 'Enter exactly 10 digits';
                                               } else if (!RegExp(r'^[6789]\d{9}$').hasMatch(value)) {
-                                                return '';
+                                                return 'enter mobile number';
                                               }
                                               return null;
                                             },

@@ -1,8 +1,12 @@
+import 'dart:io';
+
+import 'package:chotanews/aggricator_screens/settings_screen/settings_view.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../utils/app_colors.dart';
 
 class ProfileView extends StatefulWidget {
@@ -29,7 +33,6 @@ class _ProfileViewState extends State<ProfileView> {
     String year = _yearController.text.trim();
 
     bool isValid = name.isNotEmpty && phone.length == 10 && day.length == 2 && month.length == 2 && year.length == 4;
-
     setState(() {
       isButtonEnabled = isValid;
     });
@@ -63,16 +66,17 @@ class _ProfileViewState extends State<ProfileView> {
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            // Navigator.pop(context, MaterialPageRoute(builder: (context) => ()));
-
+            Navigator.pop(context, MaterialPageRoute(builder: (context) => SettingsView()));
           },
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 25),
-            child: Icon(Icons.settings, color: Colors.black54, size: 25),
-          )
-        ],
+        centerTitle: false,
+        title: Padding(
+          padding: const EdgeInsets.only(right: 4),
+          child: Text(
+            "Profile",
+            style: newAppFont(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+          ),
+        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -87,16 +91,22 @@ class _ProfileViewState extends State<ProfileView> {
                   child: Stack(
                     children: [
                       CircleAvatar(
-                        radius: 50,
+                        radius: 60,
                         backgroundColor: Colors.grey[300],
                       ),
                       Positioned(
                         bottom: 0,
                         right: 0,
-                        child: CircleAvatar(
-                          radius: 15.r,
-                          backgroundColor: Colors.white,
-                          child: Icon(Icons.edit, size: 18, color: Colors.black),
+                        child: GestureDetector(
+                          onTap: () {
+                            // Edit logic goes here
+                            print("Edit icon tapped");
+                          },
+                          child: CircleAvatar(
+                            radius: 15.r,
+                            backgroundColor: Colors.white,
+                            child: Icon(Icons.edit, size: 18, color: Colors.black),
+                          ),
                         ),
                       ),
                     ],
@@ -105,8 +115,8 @@ class _ProfileViewState extends State<ProfileView> {
                 height(height: 10.h),
                 Center(
                   child: Text(
-                    '',
-                    style: newAppFont(fontSize: 20, fontWeight: FontWeight.bold),
+                    'Siri',
+                    style: newAppFont(fontSize: 20.sp, fontWeight: FontWeight.w500),
                   ),
                 ),
                 height(height: 20.h),
@@ -127,7 +137,7 @@ class _ProfileViewState extends State<ProfileView> {
                 height(height: 20.h),
 
                 // Date of Birth Fields
-                Text("Date of Birth", style: newAppFont(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black87)),
+                Text("Date of Birth", style: newAppFont(fontSize: 12.sp, fontWeight: FontWeight.w500, color: Colors.black87)),
                 height(height: 5.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -161,7 +171,7 @@ class _ProfileViewState extends State<ProfileView> {
                           filled: true,
                           fillColor: Colors.grey[300],
                           border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(10.r),
                             borderSide: BorderSide.none,
                           ),
                         ),
@@ -190,10 +200,10 @@ class _ProfileViewState extends State<ProfileView> {
                 height(height: 15.h),
 
                 // Mobile Number Field
-                Text("Mobile Number", style: newAppFont(fontSize: 12, fontWeight: FontWeight.w500, color: Colors.black87)),
+                Text("Mobile Number", style: newAppFont(fontSize: 12.sp, fontWeight: FontWeight.w500, color: Colors.black87)),
                 height(height: 5.h),
                 Container(
-                  height: 55.h,
+                  height: 46.h,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
                     border: Border.all(color: Colors.grey.shade300),
@@ -204,8 +214,8 @@ class _ProfileViewState extends State<ProfileView> {
                       Padding(
                         padding: EdgeInsets.all(2.0),
                         child: Container(
-                          height: 52.h,
-                          width: 100,
+                          height: 38.h,
+                          width: 100.w,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10.r),
                             color: Colors.white,
@@ -219,8 +229,9 @@ class _ProfileViewState extends State<ProfileView> {
                                 child: SvgPicture.asset('assets/svg/indianFlag.svg', fit: BoxFit.contain),
                               ),
                               width(width: 4.w),
-                              Text("+91", style: newAppFont(fontSize: 16, fontWeight: FontWeight.bold)),
-                              Icon(Icons.keyboard_arrow_down_outlined, size: 20),
+                              Text("+91", style: newAppFont(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                              width(width: 2),
+                              Icon(Icons.keyboard_arrow_down_outlined, size: 26),
                             ],
                           ),
                         ),
@@ -241,9 +252,8 @@ class _ProfileViewState extends State<ProfileView> {
                     ],
                   ),
                 ),
-                height(height: 40.h),
+                height(height: 100.h),
 
-                // Update Button
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 50),
                   child: ElevatedButton(
@@ -253,7 +263,7 @@ class _ProfileViewState extends State<ProfileView> {
                       minimumSize: Size(double.infinity, 50),
                     ),
                     onPressed: isButtonEnabled ? () => print("Form Submitted!") : null,
-                    child: Text('Update', style: newAppFont(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                    child: Text('Update', style: newAppFont(fontSize: 18.sp, color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
                 ),
               ],

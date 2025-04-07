@@ -9,4 +9,12 @@ class AuthenticationRepo extends BaseService {
         body: body, baseUrl: BaseUrls.baseUrlAws);
     return response;
   }
+//
+// Future updateProfile(Map<String,dynamic> body) async {
+//     Response response = await makeRequest(url: BaseUrls.updateProfile,method: RequestType.put,
+//       body: body, baseUrl: BaseUrls.
+//
+//   );
+//   }
+
 }

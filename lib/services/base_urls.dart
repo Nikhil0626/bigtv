@@ -43,6 +43,8 @@ class BaseUrls {
   static const String sendOtp = "/generateOtp";
   static const String sendCode= "/validateReferalCode";
   static const String validateOtp = "/validateOtp";
+  static const String updateProfile = "/";
+
 
   ///Web Pages
   static const String aboutPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/About+5.html";
@@ -50,6 +52,7 @@ class BaseUrls {
   static const String advertisePage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/AdvertisePage+2.html";
   static const String termsPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Terms%26Conditions+1.html";
   static const String privacyPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Privacy+5.html";
+
 
 
 

@@ -29,16 +29,20 @@ class _SavedArticlesState extends State<SavedArticles> {
           onPressed: () {
             Navigator.pop(context);
           },
-          icon: const Icon(Icons.arrow_back, color: Colors.black, size: 24),
+          icon: Icon(Icons.arrow_back, color: Colors.black, size: 24),
         ),
-        title: const Text(
-          "Bookmarks",
-          style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+        centerTitle: false,
+        title: Padding(
+          padding: const EdgeInsets.only(right: 1),
+          child: Text(
+            "Bookmarks",
+            style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+          ),
         ),
       ),
       body: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
         return Padding(
-          padding: const EdgeInsets.all(18.0),
+          padding: EdgeInsets.all(18.0),
           child: ListView.builder(
               itemCount: flipProvider.mainArticlesData.length,
               itemBuilder: (context, index) {
@@ -52,7 +56,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                         width: 311,
                         decoration: BoxDecoration(
                           color: Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(20),
                         ),
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -64,42 +68,66 @@ class _SavedArticlesState extends State<SavedArticles> {
                                 width: 100,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.circular(8),
-
+                                  borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: Image.network(
-                                  flipProvider.mainArticlesData[index].imageUrl.url.toString(),
-                                  fit: BoxFit.fill,
-
+                                child: Stack(
+                                  children: [
+                                    Positioned.fill(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(13),
+                                        child: Image.network(
+                                          flipProvider.mainArticlesData[index].imageUrl.url.toString(),
+                                          fit: BoxFit.fill,
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      top: 4,
+                                      right: 1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(right: 3),
+                                        child: Container(
+                                          padding: EdgeInsets.all(7),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.bookmark,
+                                            color: Colors.lightBlue,
+                                            size: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
-
                               ),
                               width(width: 10),
-                              Expanded( 
+                              Expanded(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Padding(
-                                      padding:  EdgeInsets.only(bottom: 6),
+                                      padding: EdgeInsets.only(bottom: 6),
                                       child: InkWell(
                                         onTap: () {},
                                         child: Container(
-                                          padding:  EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                           decoration: BoxDecoration(
                                             color: Colors.white,
                                             borderRadius: BorderRadius.circular(8),
                                           ),
-                                          child:  Text(
+                                          child: Text(
                                             flipProvider.mainArticlesData[index].type.toString(),
-
                                             style: TextStyle(color: Colors.black),
                                           ),
                                         ),
                                       ),
                                     ),
                                     Text(
-                                        flipProvider.mainArticlesData[index].title.toString(),
+                                      flipProvider.mainArticlesData[index].title.toString(),
                                       // maxLines: 3,
                                       // overflow: TextOverflow.ellipsis,
                                       style: newAppFont(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),
@@ -107,7 +135,6 @@ class _SavedArticlesState extends State<SavedArticles> {
                                     height(height: 5),
                                     Row(
                                       children: [
-
                                         width(width: 7),
                                         Icon(Icons.circle, color: Colors.black, size: 8),
                                         width(width: 5),
@@ -126,7 +153,6 @@ class _SavedArticlesState extends State<SavedArticles> {
                       ),
                       height(height: 4),
                     ],
-
                   ),
                 );
               }),

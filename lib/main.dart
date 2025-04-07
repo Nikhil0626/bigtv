@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:app_links/app_links.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
@@ -25,8 +26,11 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import 'aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
+import 'aggricator_screens/feedback_screen/feedback_view.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
+import 'aggricator_screens/profile_screen/profile_view.dart';
 import 'aggricator_screens/settings_screen/settings_view.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
@@ -169,8 +173,10 @@ class _MyAppState extends State<MyApp> {
               create: (context) => EPapersProvider()),
           ChangeNotifierProvider<AuthProvider>(
               create: (context) => AuthProvider()),
-          ChangeNotifierProvider<HomeProvider>(
-              create: (context) => HomeProvider()),
+          ChangeNotifierProvider<HomeProvider>(create: (context) => HomeProvider()),
+          ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider()),
+
+
         ],
         child: MultiBlocProvider(
           providers: RegisterProviders.providers(context),
@@ -193,7 +199,7 @@ class _MyAppState extends State<MyApp> {
               return child!;
             },
             debugShowCheckedModeBanner: false,
-            home: SettingsView(),
+            home: FeedbackView(),
 
           ),
         ),
