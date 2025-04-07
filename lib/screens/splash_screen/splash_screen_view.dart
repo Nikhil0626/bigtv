@@ -83,6 +83,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    checkLastShownDate(context);
+
   }
 
   Future<void> checkLastShownDate(BuildContext context) async {
@@ -103,7 +105,6 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    checkLastShownDate(context);
 
     return Scaffold(
       body: Center(

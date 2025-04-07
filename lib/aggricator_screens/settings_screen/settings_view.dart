@@ -148,7 +148,7 @@ class _SettingsViewState extends State<SettingsView> {
 
               context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
               context.read<AuthenticationProvider>().saveLoginState();
-              context.read<AuthenticationProvider>().isPageNavigation(context);
+              // context.read<AuthenticationProvider>().isPageNavigation(context);
               // loginStatus == LoginStatus.skip ? 'Login' : 'Logout';
               Navigator.push(context, MaterialPageRoute(builder: (context) => LoginBackgroundView()));
             }),
