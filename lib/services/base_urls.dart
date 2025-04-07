@@ -66,8 +66,8 @@ class BaseUrls {
 
 
   ///Login login
-  static const String sendOtpPy = "/send-otp/";
-  static const String validateOtpPy = "/validate-otp/";
+  static const String sendOtpPy = "/send-otp";
+  static const String validateOtpPy = "/validate-otp";
 
   ///Categories Apis
   static const String getAllCategories = "/admin/categories";

@@ -270,11 +270,11 @@ class AuthenticationProvider extends ChangeNotifier {
       Response response = await AuthenticationRepo().sendSelectLocations(body);
       if (response.statusCode == 200) {
         if (context.mounted) {
-          Navigator.push(
+          Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
                 builder: (context) => HomeView(),
-              ));
+              ),(route) => false,);
           Future.delayed(
             Duration(seconds: 2),
             () {
@@ -299,11 +299,11 @@ class AuthenticationProvider extends ChangeNotifier {
     log("Page Name $status");
     switch (status) {
       case NewAppLoginStatus.skip:
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) => HomeView(),
-            ));
+            ),(route) => false,);
         break;
       case NewAppLoginStatus.home:
         Navigator.push(

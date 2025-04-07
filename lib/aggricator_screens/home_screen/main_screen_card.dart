@@ -204,14 +204,19 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                 Radius.circular(12),
                                                               ),
                                                               child: flipProvider.mainArticlesData[index].type == "Video"
-                                                                  ? VideoPreview(
-                                                                      imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
-                                                                      url: flipProvider.mainArticlesData[index].videoUrl?.url ?? "",
-                                                                      isFoldable: false,
-                                                                    )
+                                                                  ? SizedBox(
+                                                                height: MediaQuery.of(context).size.height*.35,
+                                                                width: MediaQuery.of(context).size.width,
+                                                                    child: VideoPreview(
+
+                                                                        imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
+                                                                        url: flipProvider.mainArticlesData[index].videoUrl?.url ?? "",
+                                                                        isFoldable: false,
+                                                                      ),
+                                                                  )
                                                                   : CachedNetworkImage(
                                                                       imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
-                                                                      height: MediaQuery.of(context).size.height*.40,
+                                                                      height: MediaQuery.of(context).size.height*.35,
                                                                       width: MediaQuery.of(context).size.width,
                                                                       fit: BoxFit.fill,
                                                                       placeholder: (context, url) => Container(
@@ -231,7 +236,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                           Padding(
                                                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 6),
                                                             child: Text(
-                                                              "మీరు అంటే దీర్ఘంగా ఉండే తెలుగు కంటెంట్ కోరుకుంటున్నారా? అంటే లేకపోతే మీరు అర్థం చేసుకోవాల0",
+                                                              flipProvider.mainArticlesData[index].title.toString(),
                                                               style: fontStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
                                                             ),
                                                           ),
@@ -363,7 +368,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                       ),
                                                       Positioned(
                                                         left: 30,
-                                                        top: MediaQuery.of(context).size.height*.395,
+                                                        top: MediaQuery.of(context).size.height*.345,
                                                         child: Container(
                                                           height: 30,
                                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
