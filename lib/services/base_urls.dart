@@ -7,10 +7,10 @@ class BaseUrls {
   static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
 
   static const String baseUrlAws = "https://prodchotanews.signitivessoft.com/api";
-  static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
+
+
 
   /// event states
-   static const String baseUrlAwsDev = "https://prodchotanews.signitivessoft.com/api";
    static const String eventUrl = "/logs";
 ///ENewsPapers
   static const String getMainEPapers = "/enewspaper/first_pages";
@@ -57,6 +57,24 @@ class BaseUrls {
 
 
 ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
+
+
+
+
+/// Python apis
+  static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
+  static const String baseUrlAwsDev = "http://13.203.77.182:8000";
+
+
+  ///Login login
+  static const String sendOtpPy = "/send-otp/";
+  static const String validateOtpPy = "/validate-otp/";
+
+  ///Categories Apis
+  static const String getAllCategories = "/admin/categories";
+
+  ///Location Apis
+  static const String getAllLocation= "/admin/locations";
 
 
 

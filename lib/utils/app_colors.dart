@@ -16,5 +16,6 @@ class AppColors {
   static const Color textColor = Color(0xFF1A1A1A);
   static const Color settingsPageTextColor = Color(0xFF374151);
   static const Color settingsPageIconColor = Color(0xFF6B7280);
+  static const Color loginBgColor = Color(0xFF2567E8);
 
 }

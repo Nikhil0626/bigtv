@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 
 import '../../utils/custom_switch.dart';
 import '../e_papers_screens/paper_view/papers_screen_list.dart';
+import '../settings_screen/settings_view.dart';
 import 'main_screen_card.dart';
 
 class HomeView extends StatefulWidget {
@@ -86,7 +87,7 @@ class _HomeViewState extends State<HomeView> {
             homeProvider.isSwitched ? MainScreenList() : MainScreenCard(),
             homeProvider.isSwitched ? PapersScreenList() : PapersScreenCard(),
             homeProvider.isSwitched ? ReelsScreenList() : ReelsScreen(),
-            Center(child: Text('Profile Page', style: TextStyle(fontSize: 24))),
+            SettingsView()
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
