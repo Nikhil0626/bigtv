@@ -43,7 +43,6 @@ class BaseUrls {
   static const String sendOtp = "/generateOtp";
   static const String sendCode= "/validateReferalCode";
   static const String validateOtp = "/validateOtp";
-  static const String updateProfile = "/";
 
 
   ///Web Pages
@@ -75,6 +74,12 @@ class BaseUrls {
 
   ///Location Apis
   static const String getAllLocation= "/admin/locations";
+
+  ///profile Apis
+  static const String updateProfile = "/";
+
+  ///Bookmarks Apis
+  static const String getAllBookMarks = "/bookmark";
 
 
 

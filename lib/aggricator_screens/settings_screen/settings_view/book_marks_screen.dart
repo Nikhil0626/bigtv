@@ -1,3 +1,4 @@
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -5,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/date_format.dart';
+import '../../../utils/date_format.dart';
 
 class SavedArticles extends StatefulWidget {
   const SavedArticles({super.key});
@@ -16,7 +17,7 @@ class SavedArticles extends StatefulWidget {
 
 class _SavedArticlesState extends State<SavedArticles> {
   void initState() {
-    context.read<FlipProvider>().getArticles();
+context.read<SettingsProvider>().bookMarks();
     super.initState();
   }
 

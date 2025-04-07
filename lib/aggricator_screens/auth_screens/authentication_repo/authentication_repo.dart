@@ -6,8 +6,8 @@ import 'package:chotanews/utils/app_enums.dart';
 import 'package:dio/dio.dart';
 
 class AuthenticationRepo extends BaseService {
-  Future sendOtp(Map<String, dynamic> body) async {
-    Response response = await makeRequest(url: BaseUrls.sendOtpPy, method: RequestType.post, body: body, baseUrl: BaseUrls.baseUrlAwsDev);
+  Future sendOtp( body) async {
+    Response response = await makeRequest( baseUrl: BaseUrls.baseUrlAwsDev,url: BaseUrls.sendOtpPy, method: RequestType.post, body: body,);
     return response;
   }
 

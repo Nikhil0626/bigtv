@@ -85,14 +85,10 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  Future verifyOtp(
-    context,
-  ) async {
+  Future verifyOtp(context,) async {
     errorMessage = '';
     notifyListeners();
-    log(
-      phoneController.text.toString(),
-    );
+    log(phoneController.text.toString(),);
 
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? deviceId = sp.getString("deviceId");
@@ -166,19 +162,13 @@ class AuthenticationProvider extends ChangeNotifier {
     selectedCategories = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
-    Map<String, dynamic> body = {
-      "device_id": deviceId,
-    };
+    Map<String, dynamic> body = {"device_id": deviceId,};
     try {
       log("response.data.toString123");
       Response response = await AuthenticationRepo().getAllCategories(body);
       if (response.statusCode == 200) {
         List data = response.data['categories']['categories'];
-        getAllCategoryList = data
-            .map(
-              (e) => CategoryModel.fromJson(e),
-            )
-            .toList();
+        getAllCategoryList = data.map((e) => CategoryModel.fromJson(e),).toList();
 
         selectedCategories = getAllCategoryList.where((item) => item.isFollowed == true).map((item) => item.categoryName.toString()).toList();
         log(getAllCategoryList.first.categoryName.toString());
