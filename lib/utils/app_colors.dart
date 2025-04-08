@@ -7,11 +7,13 @@ class AppColors {
   static const Color wColor = Color(0xFFffffff);
   static const Color bodyTextColor = Color(0xFF6B7280);
   static const Color appButtonColor = Color(0xFF00A8ff);
+  static const Color newAppButtonColor = Color(0xFFDBDDE1);
   static const Color settingsPageBackgroundColor = Color(0xFFF9F9F9);
 
   ///New App Colors
   static const Color iconColors = Color(0xFF6B7180);
   static const Color cardBackgroundColor = Color(0xFFF7F8F9);
   static const Color textColor = Color(0xFF1A1A1A);
+  static const Color loginBgColor = Color(0xFF2567E8);
 
 }

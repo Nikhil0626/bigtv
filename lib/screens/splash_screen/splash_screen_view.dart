@@ -1,4 +1,7 @@
 import 'dart:developer';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
@@ -80,10 +83,11 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    checkLastShownDate();
+    checkLastShownDate(context);
+
   }
 
-  Future<void> checkLastShownDate() async {
+  Future<void> checkLastShownDate(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? lastDate = prefs.getString('last_shown_date');
     String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD format
@@ -95,14 +99,13 @@ class _SplashScreenState extends State<SplashScreen> {
       await prefs.setString('last_shown_date', today);
     }
     Future.delayed( Duration(seconds:showGif? 5:2),() {
-
-      mainNavigatorKey.currentContext!.read<AuthProvider>().checkLoginStatus(mainNavigatorKey.currentContext!);
-
+      context.read<AuthenticationProvider>().isPageNavigation(context);
     },);
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       body: Center(
         child: showGif
@@ -117,7 +120,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
             )// Show GIF
             :  Container(
-          color: AppColors.appButtonColor,
+          color: AppColors.loginBgColor,
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
               child: Center(

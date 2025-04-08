@@ -1,0 +1,192 @@
+
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
+import '../../../utils/app_enums.dart';
+import '../../../utils/app_fonts.dart';
+import '../../../utils/app_spaces.dart';
+
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
+
+  @override
+  State<LoginView> createState() => _LoginViewState();
+}
+
+class _LoginViewState extends State<LoginView> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+   AuthenticationProvider? authenticationProvider;
+
+@override
+  void initState() {
+  authenticationProvider = Provider.of<AuthenticationProvider>(listen: false,context);
+    super.initState();
+  }
+
+
+  @override
+  Widget build(BuildContext context) {
+    return  Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child:  Container(
+        height: MediaQuery.of(context).size.height*.5,
+        width: 326.w,
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.r),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 10,
+              spreadRadius: 2,
+            ),
+          ],
+        ),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              height(height: 10.h),
+              Container(
+                height: 40.h,
+                width: 280.w,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: SizedBox(
+                  width: 68,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        height: 18.h,
+                        width: 24.w,
+                        child: SvgPicture.asset('assets/svg/indianFlag.svg', fit: BoxFit.cover),
+                      ),
+                      Icon(Icons.keyboard_arrow_down_outlined, size: 22.sp),
+                      Container(
+                        height: 32.h,
+                        width: 1.w,
+                        color: Colors.grey,
+                      ),
+                      Expanded(
+                        child: TextFormField(
+                          controller: authenticationProvider!.phoneController,
+                          keyboardType: TextInputType.number,
+                          maxLength: 10,
+                          style: newAppFont(fontSize: 16.sp, fontWeight: FontWeight.w400),
+                          decoration: const InputDecoration(
+                            hintText: "",
+                            border: InputBorder.none,
+                            counterText: "",
+                            contentPadding: EdgeInsets.only(left: 8),
+                          ),
+                          // inputFormatters: [
+                          //   FilteringTextInputFormatter.digitsOnly,
+                          //   LengthLimitingTextInputFormatter(10),
+                          // ],
+
+                          onChanged:(value) =>  authenticationProvider!.validationErrors(value),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              if (authenticationProvider!.errorMessage != null && !authenticationProvider!.isButtonEnabled)
+                Padding(
+                  padding: EdgeInsets.only(top: 4.h,right: 8.w),
+                  child: Container(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      textAlign: TextAlign.right,
+                      authenticationProvider!.errorMessage!,
+                      style: fontStyle(color: Colors.red, fontSize: 12.sp,),
+                    ),
+                  ),
+                ),
+              height(height: 10.h),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                child: RichText(
+                  textAlign: TextAlign.start,
+                  text: TextSpan(
+                    text: 'By clicking on Login/Signup you consent to our\n',
+                    style: newAppFont(fontSize: 12.sp, color: Colors.black54),
+                    children: [
+                      TextSpan(
+                        text: 'Terms of Service',
+                        style: newAppFont(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w700),
+                      ),
+                      TextSpan(
+                        text: ' and ',
+                        style: newAppFont(fontSize: 12.sp, color: Colors.black54),
+                      ),
+                      TextSpan(
+                        text: 'Privacy Policy.',
+                        style: newAppFont(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              height(height: 24.h),
+              InkWell(
+                onTap: authenticationProvider!.isButtonEnabled
+                    ? () {
+                  if (_formKey.currentState!.validate()) {
+                    authenticationProvider!.sendOtp(context);
+                  }
+                }
+                    : null,
+
+                child: Container(
+                  width: MediaQuery.of(context).size.width,
+                    height: 36.h,
+                    decoration: BoxDecoration(
+                        color: !authenticationProvider!.isButtonEnabled?AppColors.bodyTextColor.withOpacity(.2):AppColors.loginBgColor,
+                        borderRadius: BorderRadius.all(Radius.circular(8.r))),
+                    child: Center(child: Text('Log In / Signup', style: newAppFont(color: Colors.white,fontWeight: FontWeight.w500)))),
+              ),
+              height(height: 20.h),
+              Row(
+                children: [
+                  Expanded(child: Divider(color: Colors.black12, thickness: 1)),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Text('Or', style: newAppFont(color: Colors.black54)),
+                  ),
+                  Expanded(child: Divider(color: Colors.black12, thickness: 1)),
+                ],
+              ),
+              height(height: 20.h),
+
+              InkWell(
+                onTap:() {
+                  context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.home;
+                  context.read<AuthenticationProvider>().saveLoginState();
+                  context.read<AuthenticationProvider>().isPageNavigation(context);
+
+                },
+
+                child: Container(
+                    width: MediaQuery.of(context).size.width,
+                    height: 36.h,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: AppColors.borderColor,width: 1),
+                        borderRadius: BorderRadius.all(Radius.circular(8.r))),
+                    child: Center(child:Text('Continue as Guest', style: newAppFont(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600)))),
+              ),
+
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

@@ -7,10 +7,10 @@ class BaseUrls {
   static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
 
   static const String baseUrlAws = "https://prodchotanews.signitivessoft.com/api";
-  static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
+
+
 
   /// event states
-   static const String baseUrlAwsDev = "https://prodchotanews.signitivessoft.com/api";
    static const String eventUrl = "/logs";
 ///ENewsPapers
   static const String getMainEPapers = "/enewspaper/first_pages";
@@ -45,15 +45,33 @@ class BaseUrls {
   static const String validateOtp = "/validateOtp";
 
   ///Web Pages
-  // static const String aboutPage = "https://settingsfiles.s3.us-east-1.amazonaws.com/Terms.html";
-  static const String contactPage ="https://settingsfiles.s3.us-east-1.amazonaws.com/Contact.html";
-  static const String advertisePage =  "https://settingsfiles.s3.us-east-1.amazonaws.com/Advertise.html";
-  static const String termsPage =  "https://settingsfiles.s3.us-east-1.amazonaws.com/Terms.html";
-  static const String privacyPage = "https://settingsfiles.s3.us-east-1.amazonaws.com/Privacy.html";
+  static const String aboutPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/About+5.html";
+  static const String contactPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/ContactPage+2.html";
+  static const String advertisePage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/AdvertisePage+2.html";
+  static const String termsPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Terms%26Conditions+1.html";
+  static const String privacyPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Privacy+5.html";
 
 
 
 ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
+
+
+
+
+/// Python apis
+  static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
+  static const String baseUrlAwsDev = "http://13.203.77.182:8000";
+
+
+  ///Login login
+  static const String sendOtpPy = "/send-otp";
+  static const String validateOtpPy = "/validate-otp";
+
+  ///Categories Apis
+  static const String getAllCategories = "/admin/categories";
+
+  ///Location Apis
+  static const String getAllLocation= "/admin/locations";
 
 
 
