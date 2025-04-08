@@ -27,6 +27,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
+import 'aggricator_screens/home_screen/news_posts_provider.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 
@@ -169,6 +170,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider()),
           ChangeNotifierProvider<HomeProvider>(create: (context) => HomeProvider()),
           ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider()),
+          ChangeNotifierProvider<NewsPostsProvider>(create: (context) => NewsPostsProvider()),
         ],
         child: MultiBlocProvider(
           providers: RegisterProviders.providers(context),
