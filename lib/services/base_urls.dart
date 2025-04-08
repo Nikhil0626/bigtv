@@ -82,5 +82,7 @@ class BaseUrls {
   static const String getAllBookMarks = "/bookmark";
 
 
+  ///Comments Apis
+  static const String getAllComments= "/comments";
 
 }

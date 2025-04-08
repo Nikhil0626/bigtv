@@ -280,7 +280,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                         "postId": flipProvider.mainArticlesData[index].id.toString(),
                                                                       }
                                                                     });
-                                                                    log("Comment --- ${context.read<AuthProvider>().loginType}");
+                                                                    log("Comment --- ${context.read<AuthProvider>().loginType} -- ${flipProvider.mainArticlesData[index].id.toString()}");
                                                                     showComments(context, flipProvider.mainArticlesData[index]);
                                                                     EventRepo().sendEvent({
                                                                       "key": "comments",
