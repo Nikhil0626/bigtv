@@ -31,7 +31,6 @@ class _HomeViewState extends State<HomeView> {
     _pageController = PageController(initialPage: 0);
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {

@@ -193,7 +193,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  Future sendCategoriesToServer() async {
+  Future sendCategoriesToServer({bool isFilter=false}) async {
     List<int> selectedCategoryIds = getAllCategoryList.where((item) => selectedCategories.contains(item.categoryName.toString())).map((item) => item.categoryId as int).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");

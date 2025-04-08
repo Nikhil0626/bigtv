@@ -5,7 +5,6 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
 import '../../../utils/date_format.dart';
 
 class SavedArticles extends StatefulWidget {
@@ -16,9 +15,10 @@ class SavedArticles extends StatefulWidget {
 }
 
 class _SavedArticlesState extends State<SavedArticles> {
+  @override
   void initState() {
-context.read<SettingsProvider>().bookMarks();
     super.initState();
+    context.read<SettingsProvider>().getAllBookMarks();
   }
 
   @override
@@ -27,121 +27,97 @@ context.read<SettingsProvider>().bookMarks();
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
           icon: Icon(Icons.arrow_back, color: Colors.black, size: 24),
         ),
         centerTitle: false,
-        title: Padding(
-          padding: const EdgeInsets.only(right: 1),
-          child: Text(
-            "Bookmarks",
-            style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
-          ),
+        title: Text(
+          "Bookmarks",
+          style: TextStyle(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
-      body: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
-        return Padding(
-          padding: EdgeInsets.all(18.0),
-          child: ListView.builder(
-              itemCount: flipProvider.mainArticlesData.length,
+      body: Consumer<SettingsProvider>(
+        builder: (_, settingsProvider, __) {
+          return Padding(
+            padding: EdgeInsets.all(18.0),
+            child: ListView.builder(
+              itemCount: settingsProvider.getAllBookmarkList.length,
               itemBuilder: (context, index) {
-                return SizedBox(
-                  height: 140,
-                  width: MediaQuery.of(context).size.width,
-                  child: Column(
+                final article = settingsProvider.getAllBookmarkList[index];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Stack(
                     children: [
                       Container(
-                        height: 136,
-                        width: 311,
+                        width: double.infinity,
                         decoration: BoxDecoration(
                           color: Colors.grey.shade300,
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 15),
                           child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Container(
-                                height: 120,
-                                width: 100,
+                                height: 80,
+                                width: 80,
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: Stack(
-                                  children: [
-                                    Positioned.fill(
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(13),
-                                        child: Image.network(
-                                          flipProvider.mainArticlesData[index].imageUrl.url.toString(),
-                                          fit: BoxFit.fill,
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      top: 4,
-                                      right: 1,
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(right: 3),
-                                        child: Container(
-                                          padding: EdgeInsets.all(7),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black54,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Icon(
-                                            Icons.bookmark,
-                                            color: Colors.lightBlue,
-                                            size: 16,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(13),
+                                  child: Image.network(
+                                    article.imageUrl.toString(),
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Icon(Icons.broken_image, size: 40),
+                                  ),
                                 ),
                               ),
                               width(width: 10),
                               Expanded(
                                 child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Padding(
-                                      padding: EdgeInsets.only(bottom: 6),
-                                      child: InkWell(
-                                        onTap: () {},
-                                        child: Container(
-                                          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                          child: Text(
-                                            flipProvider.mainArticlesData[index].type.toString(),
-                                            style: TextStyle(color: Colors.black),
-                                          ),
-                                        ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Text(
+                                        article.type.toString(),
+                                        style: TextStyle(color: Colors.black),
                                       ),
                                     ),
+                                    SizedBox(height: 6),
                                     Text(
-                                      flipProvider.mainArticlesData[index].title.toString(),
-                                      // maxLines: 3,
-                                      // overflow: TextOverflow.ellipsis,
-                                      style: newAppFont(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w500),
+                                      article.title.toString(),
+                                      overflow: TextOverflow.ellipsis,
+                                      maxLines: 2,
+                                      style: newAppFont(
+                                        color: Colors.black,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
-                                    height(height: 5),
+                                    SizedBox(height: 6),
                                     Row(
                                       children: [
-                                        width(width: 7),
-                                        Icon(Icons.circle, color: Colors.black, size: 8),
-                                        width(width: 5),
+                                        Icon(Icons.access_time_outlined,
+                                            color: Colors.grey.shade700, size: 16),
+                                        width(width: 4.w),
                                         Text(
-                                          " ${formatTimeDifference(flipProvider.mainArticlesData[index].created.toString())}",
-                                          style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.black),
+                                          " ${formatTimeDifference(article.created.toString())}",
+
+                                          style: fontStyle(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w400,
+                                            color: Colors.black,
+                                          ),
                                         ),
                                       ],
                                     ),
@@ -152,13 +128,30 @@ context.read<SettingsProvider>().bookMarks();
                           ),
                         ),
                       ),
-                      height(height: 4),
+                      // Positioned(
+                      //   top: 10,
+                      //   right: 14,
+                      //   child: Container(
+                      //     padding: EdgeInsets.all(7),
+                      //     decoration: BoxDecoration(
+                      //       color: Colors.black54,
+                      //       shape: BoxShape.circle,
+                      //     ),
+                      //     child: Icon(
+                      //       Icons.bookmark,
+                      //       color: Colors.white,
+                      //       size: 15,
+                      //     ),
+                      //   ),
+                      // ),
                     ],
                   ),
                 );
-              }),
-        );
-      }),
+              },
+            ),
+          );
+        },
+      ),
     );
   }
 }

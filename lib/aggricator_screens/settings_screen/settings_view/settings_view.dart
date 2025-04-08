@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -38,7 +39,7 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   void initState() {
     getLogin();
-    context.read<AuthProvider>().sendEvent("SettingsView");
+    context.read<SettingsProvider>().getAllBookMarks();
     super.initState();
   }
 
@@ -49,23 +50,6 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(
-            Icons.arrow_back_outlined,
-            color: Colors.black,
-            size: 24,
-          ),
-        ),
-        centerTitle: false,
-        title: Text(
-          "Settings",
-          style: newAppFont(fontSize: 18.sp, fontWeight: FontWeight.w600),
-        ),
-      ),
       body: Padding(
         padding: EdgeInsets.all(20),
         child: Column(

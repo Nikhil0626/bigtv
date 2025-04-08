@@ -27,6 +27,7 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_and _source.dart';
+import '../settings_screen/settings_provider/settings_provider.dart';
 import 'main_screen_pageview.dart';
 
 class MainScreenList extends StatefulWidget {
@@ -143,27 +144,60 @@ class _MainScreenListState extends State<MainScreenList> {
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Padding(
-                                                  padding: const EdgeInsets.all(10.0),
-                                                  child: ClipRRect(
-                                                    borderRadius: BorderRadius.all(
-                                                      Radius.circular(16.r),
-                                                    ),
-                                                    child: CachedNetworkImage(
-                                                      imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
-                                                      height: 180,
-                                                      width: MediaQuery.of(context).size.width,
-                                                      fit: BoxFit.fill,
-                                                      placeholder: (context, url) => Container(
-                                                        color: AppColors.borderColor.withOpacity(.2),
-                                                      ),
-                                                      errorWidget: (context, url, error) => Center(
-                                                        child: Icon(
-                                                          Icons.image,
-                                                          size: 100,
-                                                          color: Colors.grey.shade300,
+                                                  padding:  EdgeInsets.all(10.0),
+                                                  child: Stack(
+                                                    children: [
+                                                      ClipRRect(
+                                                        borderRadius: BorderRadius.all(
+                                                          Radius.circular(16.r),
+                                                        ),
+                                                        child: CachedNetworkImage(
+                                                          imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
+                                                          height: 180,
+                                                          width: MediaQuery.of(context).size.width,
+                                                          fit: BoxFit.fill,
+                                                          placeholder: (context, url) => Container(
+                                                            height: 180,
+                                                            width: MediaQuery.of(context).size.width,
+                                                            color: AppColors.borderColor.withOpacity(.2),
+                                                          ),
+                                                          errorWidget: (context, url, error) => Container(
+                                                            height: 180,
+                                                            width: MediaQuery.of(context).size.width,
+                                                            color: Colors.grey.shade200,
+                                                            child: Center(
+                                                              child: Icon(
+                                                                Icons.image,
+                                                                size: 100,
+                                                                color: Colors.grey.shade300,
+                                                              ),
+                                                            ),
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
+                                                      Positioned(
+                                                        top: 10,
+                                                        right: 14,
+                                                        child: GestureDetector(
+                                                          onTap: () {
+                                                            context.read<SettingsProvider>().saveBookmarks(flipProvider.mainArticlesData[index].toString());
+                                                            print("");
+                                                          },
+                                                          child: Container(
+                                                            padding: EdgeInsets.all(7),
+                                                            decoration: BoxDecoration(
+                                                              color: Colors.black54,
+                                                              shape: BoxShape.circle,
+                                                            ),
+                                                            child: Icon(
+                                                              Icons.bookmark,
+                                                              color: Colors.white,
+                                                              size: 20,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                                 Padding(
@@ -342,6 +376,7 @@ class _MainScreenListState extends State<MainScreenList> {
                                                   ),
                                                 ),
                                               ),
+
                                             ),
                                           ),
                                         ],

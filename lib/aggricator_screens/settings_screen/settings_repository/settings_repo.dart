@@ -11,4 +11,9 @@ class SettingsRepo  extends BaseService{
     log(response.data.toString());
     return response;
   }
+  Future saveBookMarks(Map<String,dynamic>body) async {
+    Response response = await makeRequest(url: BaseUrls.getAllBookMarks,baseUrl: BaseUrls.baseUrlAwsDev,body: body,method:RequestType.post);
+    log(response.data.toString());
+    return response;
+  }
 }
