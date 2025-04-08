@@ -104,7 +104,7 @@ class _OnbordingScreen2State extends State<OnbordingScreen2> {
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(30),
                   border: Border.all(color: Colors.grey.shade300),
-                  color: AppColors.newAppButtonColor,
+                  color: AppColors.appButtonColor,
                 ),
                 child: Row(
                   children: [

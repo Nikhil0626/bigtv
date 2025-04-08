@@ -10,7 +10,13 @@ class ReelsRepo  extends BaseService{
 
   Future getMainReels() async {
     Response response = await makeRequest(baseUrl: BaseUrls.ePaperBaseUrlAws,
-      url: BaseUrls.getMainEPapers, method: RequestType.get,);
+      url: BaseUrls.getMainEPapers, method: RequestType.get);
+    return response;
+  }
+
+  Future postLikes(Map body) async{
+    Response response = await makeRequest(baseUrl: BaseUrls.likePost,
+      url: BaseUrls.likePost, method: RequestType.post,body: body);
     return response;
   }
 }

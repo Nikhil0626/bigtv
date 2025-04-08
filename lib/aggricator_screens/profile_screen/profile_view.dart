@@ -198,7 +198,7 @@ class _ProfileViewState extends State<ProfileView> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(10.r),
                     border: Border.all(color: Colors.grey.shade300),
-                    color: AppColors.newAppButtonColor,
+                    color: AppColors.appButtonColor,
                   ),
                   child: Row(
                     children: [
