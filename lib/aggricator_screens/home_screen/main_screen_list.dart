@@ -36,7 +36,6 @@ class MainScreenList extends StatefulWidget {
   @override
   State<MainScreenList> createState() => _MainScreenListState();
 }
-
 class _MainScreenListState extends State<MainScreenList> {
   final ScreenshotController screenshotController = ScreenshotController();
 
@@ -58,7 +57,8 @@ class _MainScreenListState extends State<MainScreenList> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => MainScreenPageView(startIndex: index,),
-                      ));
+                      )
+                  );
                 },
                 child: flipProvider.mainArticlesData[index].type == "Video"
                     ? Padding(
@@ -77,12 +77,7 @@ class _MainScreenListState extends State<MainScreenList> {
                           ),
                         ),
                       )
-                    : flipProvider.mainArticlesData[index].type == "WebView"
-                        ? Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: InAppWebViewScreen(webUrl: flipProvider.webUrl.toString(), title: '',),
-                          )
-                        : flipProvider.mainArticlesData[index].type == "GoogleAds"
+                    :  flipProvider.mainArticlesData[index].type == "GoogleAds"
                             ? Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: ClipRRect(
@@ -100,11 +95,36 @@ class _MainScreenListState extends State<MainScreenList> {
                             : flipProvider.mainArticlesData[index].type == "Image"
                                 ? Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Image.network(
-                                      width: MediaQuery.of(context).size.width,
-                                      height: MediaQuery.of(context).size.height,
-                                      fit: BoxFit.cover,
-                                      flipProvider.mainArticlesData[index].imageUrl.url ?? "",
+                                    child: SizedBox(
+                                      height: 330.h,
+                                      child:  ClipRRect(
+                                        borderRadius: BorderRadius.all(
+                                          Radius.circular(16.r),
+                                        ),
+                                        child: CachedNetworkImage(
+                                          imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
+                                          height: 180,
+                                          width: MediaQuery.of(context).size.width,
+                                          fit: BoxFit.fill,
+                                          placeholder: (context, url) => Container(
+                                            height: 180,
+                                            width: MediaQuery.of(context).size.width,
+                                            color: AppColors.borderColor.withOpacity(.2),
+                                          ),
+                                          errorWidget: (context, url, error) => Container(
+                                            height: 180,
+                                            width: MediaQuery.of(context).size.width,
+                                            color: Colors.grey.shade200,
+                                            child: Center(
+                                              child: Icon(
+                                                Icons.image,
+                                                size: 100,
+                                                color: Colors.grey.shade300,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   )
                                 : flipProvider.mainArticlesData[index].type == "Gallery"
@@ -180,7 +200,7 @@ class _MainScreenListState extends State<MainScreenList> {
                                                         right: 14,
                                                         child: GestureDetector(
                                                           onTap: () {
-                                                            context.read<SettingsProvider>().saveBookmarks(flipProvider.mainArticlesData[index].toString());
+                                                            context.read<SettingsProvider>().saveBookmarks(flipProvider.mainArticlesData[index].id.toString());
                                                             print("");
                                                           },
                                                           child: Container(
@@ -217,7 +237,8 @@ class _MainScreenListState extends State<MainScreenList> {
                                                   child: Row(
                                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                     children: [
-                                                      Consumer<FlipProvider>(builder: (_, flipProvider, __) {
+
+                                                      Consumer2<FlipProvider,SettingsProvider>(builder: (_, flipProvider,settingsProvider, __) {
                                                         return BottomActions(
                                                           iconColor: AppColors.iconColors,
                                                           postType: flipProvider.mainArticlesData[index].subType ?? "",
@@ -228,10 +249,13 @@ class _MainScreenListState extends State<MainScreenList> {
                                                           isLike: flipProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString()),
                                                           onTap: () {
                                                             log("Like");
-                                                            flipProvider.isLikePost(flipProvider.mainArticlesData[index]);
+                                                            context.read<SettingsProvider>().isLikePost(flipProvider.mainArticlesData[index]);
+
+                                                            // flipProvider.isLikePost(flipProvider.mainArticlesData[index]);
                                                           },
                                                         );
                                                       }),
+
                                                       BottomActions(
                                                         postType: flipProvider.mainArticlesData[index].subType ?? "",
                                                         icon: "assets/svg/comment.svg",

@@ -31,6 +31,7 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_and _source.dart';
+import '../settings_screen/settings_provider/settings_provider.dart';
 import 'main_screen_pageview.dart';
 
 class MainScreenCard extends StatefulWidget {
@@ -76,7 +77,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                       },
                       numberOfCardsDisplayed: 4,
                       cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-                        return ShimmerCard(); // ✅ Show shimmer card while loading
+                        return ShimmerCard();
                       },
                     ),
                   )
@@ -173,22 +174,81 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                         : flipProvider.mainArticlesData[index].type == "Image"
                                             ? Padding(
                                                 padding: const EdgeInsets.all(8.0),
-                                                child: Image.network(
-                                                  width: MediaQuery.of(context).size.width,
-                                                  height: MediaQuery.of(context).size.height,
-                                                  fit: BoxFit.cover,
-                                                  flipProvider.mainArticlesData[index].imageUrl.url ?? "",
+                                                child: Stack(
+                                                  children: [
+                                                    Image.network(
+                                                      flipProvider.mainArticlesData[index].imageUrl.url ?? "",
+                                                      width: MediaQuery.of(context).size.width,
+                                                      height: MediaQuery.of(context).size.height,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                    Positioned(
+                                                      top: 10,
+                                                      right: 14,
+                                                      child: GestureDetector(
+                                                        onTap: () {
+                                                          context.read<SettingsProvider>().saveBookmarks(
+                                                                flipProvider.mainArticlesData[index].id.toString(),
+                                                              );
+                                                          print("");
+                                                        },
+                                                        child: Container(
+                                                          padding: EdgeInsets.all(7),
+                                                          decoration: BoxDecoration(
+                                                            color: Colors.black54,
+                                                            shape: BoxShape.circle,
+                                                          ),
+                                                          child: Icon(
+                                                            Icons.bookmark,
+                                                            color: Colors.white,
+                                                            size: 20,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               )
                                             : flipProvider.mainArticlesData[index].type == "Gallery"
-                                                ? ClipRRect(
-                                                    borderRadius: BorderRadius.all(
-                                                      Radius.circular(12),
-                                                    ),
-                                                    child: FullPageCarousel(
-                                                      isHome: true,
-                                                      imageUrls: flipProvider.mainArticlesData[index].gallery ?? [],
-                                                      postDetails: flipProvider.mainArticlesData[index],
+                                                ? Padding(
+                                                    padding: const EdgeInsets.all(8.0),
+                                                    child: Stack(
+                                                      children: [
+                                                        ClipRRect(
+                                                          borderRadius: BorderRadius.all(
+                                                            Radius.circular(12),
+                                                          ),
+                                                          child: FullPageCarousel(
+                                                            isHome: true,
+                                                            imageUrls: flipProvider.mainArticlesData[index].gallery ?? [],
+                                                            postDetails: flipProvider.mainArticlesData[index],
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          top: 18,
+                                                          right: 22,
+                                                          child: GestureDetector(
+                                                            onTap: () {
+                                                              context.read<SettingsProvider>().saveBookmarks(
+                                                                    flipProvider.mainArticlesData[index].id.toString(),
+                                                                  );
+                                                              print("");
+                                                            },
+                                                            child: Container(
+                                                              padding: EdgeInsets.all(7),
+                                                              decoration: BoxDecoration(
+                                                                color: Colors.black54,
+                                                                shape: BoxShape.circle,
+                                                              ),
+                                                              child: Icon(
+                                                                Icons.bookmark,
+                                                                color: Colors.white,
+                                                                size: 20,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ],
                                                     ),
                                                   )
                                                 : Stack(
@@ -205,30 +265,87 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                               ),
                                                               child: flipProvider.mainArticlesData[index].type == "Video"
                                                                   ? SizedBox(
-                                                                height: MediaQuery.of(context).size.height*.35,
-                                                                width: MediaQuery.of(context).size.width,
-                                                                    child: VideoPreview(
-
-                                                                        imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
-                                                                        url: flipProvider.mainArticlesData[index].videoUrl?.url ?? "",
-                                                                        isFoldable: false,
-                                                                      ),
-                                                                  )
-                                                                  : CachedNetworkImage(
-                                                                      imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
-                                                                      height: MediaQuery.of(context).size.height*.35,
+                                                                      height: MediaQuery.of(context).size.height * .35,
                                                                       width: MediaQuery.of(context).size.width,
-                                                                      fit: BoxFit.fill,
-                                                                      placeholder: (context, url) => Container(
-                                                                        color: AppColors.borderColor.withOpacity(.2),
+                                                                      child: Stack(
+                                                                        children: [
+                                                                          VideoPreview(
+                                                                            imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
+                                                                            url: flipProvider.mainArticlesData[index].videoUrl?.url ?? "",
+                                                                            isFoldable: false,
+                                                                          ),
+                                                                          Positioned(
+                                                                            top: 10,
+                                                                            right: 14,
+                                                                            child: GestureDetector(
+                                                                              onTap: () {
+                                                                                context.read<SettingsProvider>().saveBookmarks(
+                                                                                      flipProvider.mainArticlesData[index].id.toString(),
+                                                                                    );
+                                                                                print("");
+                                                                              },
+                                                                              child: Container(
+                                                                                padding: EdgeInsets.all(7),
+                                                                                decoration: BoxDecoration(
+                                                                                  color: Colors.black54,
+                                                                                  shape: BoxShape.circle,
+                                                                                ),
+                                                                                child: Icon(
+                                                                                  Icons.bookmark,
+                                                                                  color: Colors.white,
+                                                                                  size: 20,
+                                                                                ),
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ],
                                                                       ),
-                                                                      errorWidget: (context, url, error) => Center(
-                                                                        child: Icon(
-                                                                          Icons.image,
-                                                                          size: 100,
-                                                                          color: Colors.grey.shade300,
+                                                                    )
+                                                                  : Stack(
+                                                                      children: [
+                                                                        CachedNetworkImage(
+                                                                          imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
+                                                                          height: MediaQuery.of(context).size.height * .35,
+                                                                          width: MediaQuery.of(context).size.width,
+                                                                          fit: BoxFit.fill,
+                                                                          placeholder: (context, url) => Container(
+                                                                            height: MediaQuery.of(context).size.height * .35,
+                                                                            width: MediaQuery.of(context).size.width,
+                                                                            color: AppColors.borderColor.withOpacity(.2),
+                                                                          ),
+                                                                          errorWidget: (context, url, error) => Center(
+                                                                            child: Icon(
+                                                                              Icons.image,
+                                                                              size: 100,
+                                                                              color: Colors.grey.shade300,
+                                                                            ),
+                                                                          ),
                                                                         ),
-                                                                      ),
+                                                                        Positioned(
+                                                                          top: 10,
+                                                                          right: 14,
+                                                                          child: GestureDetector(
+                                                                            onTap: () {
+                                                                              context.read<SettingsProvider>().saveBookmarks(
+                                                                                    flipProvider.mainArticlesData[index].id.toString(),
+                                                                                  );
+                                                                              print("");
+                                                                            },
+                                                                            child: Container(
+                                                                              padding: EdgeInsets.all(7),
+                                                                              decoration: BoxDecoration(
+                                                                                color: Colors.black54,
+                                                                                shape: BoxShape.circle,
+                                                                              ),
+                                                                              child: Icon(
+                                                                                Icons.bookmark,
+                                                                                color: Colors.white,
+                                                                                size: 20,
+                                                                              ),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
                                                                     ),
                                                             ),
                                                           ),
@@ -260,8 +377,9 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                     label: 'లైక్',
                                                                     isLike: flipProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString()),
                                                                     onTap: () {
+
                                                                       log("Like");
-                                                                      flipProvider.isLikePost(flipProvider.mainArticlesData[index]);
+                                                                      context.read<SettingsProvider>().isLikePost(flipProvider.mainArticlesData[index]);
                                                                     },
                                                                   );
                                                                 }),
@@ -368,7 +486,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                       ),
                                                       Positioned(
                                                         left: 30,
-                                                        top: MediaQuery.of(context).size.height*.345,
+                                                        top: MediaQuery.of(context).size.height * .345,
                                                         child: Container(
                                                           height: 30,
                                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),

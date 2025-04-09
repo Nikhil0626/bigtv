@@ -36,6 +36,7 @@ class _HomeViewState extends State<HomeView> {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
       return Scaffold(
         appBar: AppBar(
+          leading: Text(""),
           backgroundColor: Colors.white,
           elevation: 0,
           title: Row(

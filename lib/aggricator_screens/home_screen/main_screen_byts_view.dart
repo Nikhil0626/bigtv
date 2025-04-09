@@ -31,17 +31,18 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
+import '../settings_screen/settings_provider/settings_provider.dart';
 
 class MainScreenBytView extends StatefulWidget {
   final article;
-  const MainScreenBytView({super.key,required this.article});
+
+  const MainScreenBytView({super.key, required this.article});
 
   @override
   State<MainScreenBytView> createState() => _MainScreenBytViewState();
 }
 
 class _MainScreenBytViewState extends State<MainScreenBytView> {
-
   ScreenshotController adsScreenshotController = ScreenshotController();
 
   @override
@@ -56,276 +57,272 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
               Expanded(
                 child: Screenshot(
                   controller: adsScreenshotController,
-                  child:widget.article.type == "WebView"
+                  child: widget.article.type == "WebView"
                       ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: InAppWebViewScreen(webUrl: context.read<FlipProvider>().webUrl.toString(), title: '',),
-                  )
-                      : widget.article.type == "GoogleAds"
-                      ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: GoogleAdsView(
-                      article: widget.article,
-                      flipProvider: context.read<FlipProvider>(),
-                      screenshotController: adsScreenshotController,
-                      isFoldable: false,
-                    ),
-                  )
-                      : widget.article.type == "Image"
-                      ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.network(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      fit: BoxFit.cover,
-                      widget.article.imageUrl.url ?? "",
-                    ),
-                  )
-                      : widget.article.type == "Gallery"
-                      ? ClipRRect(
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(12),
-                    ),
-                    child: FullPageCarousel(
-                      isHome: true,
-                      imageUrls: widget.article.gallery ?? [],
-                      postDetails: widget.article,
-                    ),
-                  )
-                      : Stack(
-                    children: [
-                      Container(
-                        height:  widget.article.subType == "BigBlackStandard" ?MediaQuery.of(context).size.height*.65:MediaQuery.of(context).size.height*.4,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(16.r),
-                            topLeft: Radius.circular(16.r),
-                          ),
-                          color: Colors.black,
-                        ),
-                        child: widget.article.type == "Video"
-                            ? Align(
-                          alignment: Alignment.topCenter,
-                          child: VideoPreview(
-                            imageUrl: widget.article.imageUrl.url,
-                            url: widget.article.videoUrl?.url ?? "",
-                            isFoldable: false,
+                          padding: const EdgeInsets.all(8.0),
+                          child: InAppWebViewScreen(
+                            webUrl: context.read<FlipProvider>().webUrl.toString(),
+                            title: '',
                           ),
                         )
-                            : ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(16.r),
-                            topLeft: Radius.circular(16.r),
-                          ),
-                          child: CachedNetworkImage(
-                            imageUrl: widget.article.imageUrl.url,
-                            height: MediaQuery.of(context).size.height*.40,
-                            width: MediaQuery.of(context).size.width,
-                            fit: BoxFit.fill,
-                            placeholder: (context, url) => Container(
-                              color: AppColors.borderColor.withOpacity(.2),
-                            ),
-                            errorWidget: (context, url, error) => Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 100,
-                                color: Colors.grey.shade300,
+                      : widget.article.type == "GoogleAds"
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: GoogleAdsView(
+                                article: widget.article,
+                                flipProvider: context.read<FlipProvider>(),
+                                screenshotController: adsScreenshotController,
+                                isFoldable: false,
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                        bottom: 0,
-                        child: Container(
-                          height: widget.article.subType == "BigBlackStandard" ?MediaQuery.of(context).size.height*.3: MediaQuery.of(context).size.height*.55,
-                          width: MediaQuery.of(context).size.width,
-                          decoration: BoxDecoration(
-                            color:widget.article.subType == "BigBlackStandard" ? AppColors.textColor:AppColors.cardBackgroundColor,
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(10.sp),
-                              topLeft: Radius.circular(10.sp),
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                height(height: 8),
-                                Text(widget.article.title ?? "No Title",
-                                    style: homeScreenFontStyle(
-                                        color: widget.article.subType != "BigBlackStandard" ? AppColors.textColor:AppColors.cardBackgroundColor, fontSize: 18.sp, fontWeight: FontWeight.bold)),
-                                height(height: 8),
-                                Expanded(
-                                  child: widget.article.subType == "BulletPost"
-                                      ? Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      (widget.article.content != "")
-                                          ? Text(widget.article.content,
-                                          style: homeScreenFontStyle(
-                                            color: widget.article.subType == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5):AppColors.cardBackgroundColor,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 16.sp,
-                                          ))
-                                          : const SizedBox.shrink(),
-                                      height(height: 8.sp),
-                                      Expanded(
-                                        child: ListView(
-                                          physics: const NeverScrollableScrollPhysics(),
-                                          children: widget.article.bulletPoints!.map<Widget>((item) {
-                                            // Explicitly specify <Widget>
-                                            return Row(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              // Align items at the top
-                                              children: [
-                                                Text(
-                                                  "● ",
-                                                  style: TextStyle(
-                                                    fontSize: 14.sp,
-                                                    color: widget.article.subType == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5):AppColors.cardBackgroundColor,
-                                                    // Reduce bullet size for better alignment
-                                                    height: 1, // Ensures proper line height
-                                                  ),
-                                                ),
-                                                SizedBox(width: 5.sp),
-                                                // Space between bullet & text
-                                                Expanded(
-                                                  child: Text(
-                                                    item,
-                                                    strutStyle: StrutStyle(
-                                                      fontSize:  16.sp,
-                                                      // Match font size
-                                                      height: 1, // Ensures consistent line height
-                                                    ),
-                                                    style: homeScreenFontStyle(
-                                                      color: widget.article.subType == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5):AppColors.cardBackgroundColor,
-                                                      fontWeight: FontWeight.w400,
-                                                      fontSize: 16.sp,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            );
-                                          }).toList(), // Ensure it is converted to List<Widget>
-                                        ),
+                            )
+                          : widget.article.type == "Image"
+                              ? Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Image.network(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height,
+                                    fit: BoxFit.cover,
+                                    widget.article.imageUrl.url ?? "",
+                                  ),
+                                )
+                              : widget.article.type == "Gallery"
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.all(
+                                        Radius.circular(12),
                                       ),
-                                      RichText(
-                                        text: TextSpan(
-                                          children: [
-                                            TextSpan(text: "\n\n"),
-                                            WidgetSpan(
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  if (widget.article.isReporter == true) Icon(Icons.person, size: 14, color: Colors.grey),
-                                                  if (widget.article.isReporter == true)
-                                                    Text(
-                                                      ' ${widget.article.reportedBy} | ',
-                                                      style: fontStyle(fontSize:  12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                      child: FullPageCarousel(
+                                        isHome: true,
+                                        imageUrls: widget.article.gallery ?? [],
+                                        postDetails: widget.article,
+                                      ),
+                                    )
+                                  : Stack(
+                                      children: [
+                                        Container(
+                                          height: widget.article.subType == "BigBlackStandard" ? MediaQuery.of(context).size.height * .65 : MediaQuery.of(context).size.height * .4,
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(16.r),
+                                              topLeft: Radius.circular(16.r),
+                                            ),
+                                            color: Colors.black,
+                                          ),
+                                          child: widget.article.type == "Video"
+                                              ? Align(
+                                                  alignment: Alignment.topCenter,
+                                                  child: VideoPreview(
+                                                    imageUrl: widget.article.imageUrl.url,
+                                                    url: widget.article.videoUrl?.url ?? "",
+                                                    isFoldable: false,
+                                                  ),
+                                                )
+                                              : ClipRRect(
+                                                  borderRadius: BorderRadius.only(
+                                                    topRight: Radius.circular(16.r),
+                                                    topLeft: Radius.circular(16.r),
+                                                  ),
+                                                  child: CachedNetworkImage(
+                                                    imageUrl: widget.article.imageUrl.url,
+                                                    height: MediaQuery.of(context).size.height * .40,
+                                                    width: MediaQuery.of(context).size.width,
+                                                    fit: BoxFit.fill,
+                                                    placeholder: (context, url) => Container(
+                                                      color: AppColors.borderColor.withOpacity(.2),
                                                     ),
-                                                  Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                                  Text(
-                                                    " ${formatTimeDifference(widget.article.created)}",
-                                                    style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                    errorWidget: (context, url, error) => Center(
+                                                      child: Icon(
+                                                        Icons.image,
+                                                        size: 100,
+                                                        color: Colors.grey.shade300,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                        ),
+                                        Positioned(
+                                          bottom: 0,
+                                          child: Container(
+                                            height: widget.article.subType == "BigBlackStandard" ? MediaQuery.of(context).size.height * .3 : MediaQuery.of(context).size.height * .55,
+                                            width: MediaQuery.of(context).size.width,
+                                            decoration: BoxDecoration(
+                                              color: widget.article.subType == "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
+                                              borderRadius: BorderRadius.only(
+                                                topRight: Radius.circular(10.sp),
+                                                topLeft: Radius.circular(10.sp),
+                                              ),
+                                            ),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(16.0),
+                                              child: Column(
+                                                mainAxisAlignment: MainAxisAlignment.start,
+                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                children: [
+                                                  height(height: 8),
+                                                  Text(widget.article.title ?? "No Title",
+                                                      style: homeScreenFontStyle(
+                                                          color: widget.article.subType != "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
+                                                          fontSize: 18.sp,
+                                                          fontWeight: FontWeight.bold)),
+                                                  height(height: 8),
+                                                  Expanded(
+                                                    child: widget.article.subType == "BulletPost"
+                                                        ? Column(
+                                                            mainAxisAlignment: MainAxisAlignment.start,
+                                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                                            children: [
+                                                              (widget.article.content != "")
+                                                                  ? Text(widget.article.content,
+                                                                      style: homeScreenFontStyle(
+                                                                        color: widget.article.subType == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
+                                                                        fontWeight: FontWeight.w500,
+                                                                        fontSize: 16.sp,
+                                                                      ))
+                                                                  : const SizedBox.shrink(),
+                                                              height(height: 8.sp),
+                                                              Expanded(
+                                                                child: ListView(
+                                                                  physics: const NeverScrollableScrollPhysics(),
+                                                                  children: widget.article.bulletPoints!.map<Widget>((item) {
+                                                                    // Explicitly specify <Widget>
+                                                                    return Row(
+                                                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                                                      // Align items at the top
+                                                                      children: [
+                                                                        Text(
+                                                                          "● ",
+                                                                          style: TextStyle(
+                                                                            fontSize: 14.sp,
+                                                                            color: widget.article.subType == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
+                                                                            // Reduce bullet size for better alignment
+                                                                            height: 1, // Ensures proper line height
+                                                                          ),
+                                                                        ),
+                                                                        SizedBox(width: 5.sp),
+                                                                        // Space between bullet & text
+                                                                        Expanded(
+                                                                          child: Text(
+                                                                            item,
+                                                                            strutStyle: StrutStyle(
+                                                                              fontSize: 16.sp,
+                                                                              // Match font size
+                                                                              height: 1, // Ensures consistent line height
+                                                                            ),
+                                                                            style: homeScreenFontStyle(
+                                                                              color:
+                                                                                  widget.article.subType == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
+                                                                              fontWeight: FontWeight.w400,
+                                                                              fontSize: 16.sp,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    );
+                                                                  }).toList(), // Ensure it is converted to List<Widget>
+                                                                ),
+                                                              ),
+                                                              RichText(
+                                                                text: TextSpan(
+                                                                  children: [
+                                                                    TextSpan(text: "\n\n"),
+                                                                    WidgetSpan(
+                                                                      child: Row(
+                                                                        mainAxisSize: MainAxisSize.min,
+                                                                        children: [
+                                                                          if (widget.article.isReporter == true) Icon(Icons.person, size: 14, color: Colors.grey),
+                                                                          if (widget.article.isReporter == true)
+                                                                            Text(
+                                                                              ' ${widget.article.reportedBy} | ',
+                                                                              style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                            ),
+                                                                          Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                                          Text(
+                                                                            " ${formatTimeDifference(widget.article.created)}",
+                                                                            style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                          ),
+                                                                        ],
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              )
+                                                            ],
+                                                          )
+                                                        : RichText(
+                                                            text: TextSpan(
+                                                              text: '',
+                                                              children: [
+                                                                ..._parseText(context, widget.article.content, widget.article.links, widget.article),
+                                                                if (widget.article.isStickyPost != true)
+                                                                  TextSpan(
+                                                                    children: [
+                                                                      TextSpan(text: "\n\n"),
+                                                                      WidgetSpan(
+                                                                        child: Row(
+                                                                          mainAxisSize: MainAxisSize.min,
+                                                                          children: [
+                                                                            if (widget.article.isReporter == true) Icon(Icons.person, size: 14, color: Colors.grey),
+                                                                            if (widget.article.isReporter == true)
+                                                                              Text(
+                                                                                ' ${widget.article.reportedBy} | ',
+                                                                                style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                              ),
+                                                                            Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                                            Text(
+                                                                              " ${formatTimeDifference(widget.article.created)}",
+                                                                              style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                            ),
+                                                                          ],
+                                                                        ),
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                              ],
+                                                            ),
+                                                          ),
                                                   ),
                                                 ],
                                               ),
                                             ),
-                                          ],
+                                          ),
                                         ),
-                                      )
-                                    ],
-                                  )
-                                      : RichText(
-                                    text: TextSpan(
-                                      text: '',
-                                      children: [
-                                        ..._parseText(
-                                            context,
-                                            widget.article.content,
-                                            widget.article.links,
-                                            widget.article
-                                        ),
-                                        if ( widget.article.isStickyPost != true)
-                                          TextSpan(
-                                            children: [
-                                              TextSpan(text: "\n\n"),
-                                              WidgetSpan(
-                                                child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
+                                        Positioned(
+                                          left: 20,
+                                          bottom: widget.article.subType == "BigBlackStandard" ? MediaQuery.of(context).size.height * .30 - 15 : MediaQuery.of(context).size.height * .55 - 15,
+                                          child: Container(
+                                            height: 30,
+                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                                            decoration: BoxDecoration(
+                                              color: Colors.grey.shade50,
+                                              borderRadius: BorderRadius.circular(20),
+                                            ),
+                                            child: Center(
+                                              child: Text.rich(
+                                                TextSpan(
                                                   children: [
-                                                    if (widget.article.isReporter == true) Icon(Icons.person, size: 14, color: Colors.grey),
-                                                    if (widget.article.isReporter == true)
-                                                      Text(
-                                                        ' ${widget.article.reportedBy} | ',
-                                                        style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                    TextSpan(
+                                                      text: "Chota ",
+                                                      style: fontStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Colors.black,
                                                       ),
-                                                    Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                                    Text(
-                                                      " ${formatTimeDifference(widget.article.created)}",
-                                                      style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                    ),
+                                                    TextSpan(
+                                                      text: "News",
+                                                      style: fontStyle(
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: Color(0xff00A8FF),
+                                                      ),
                                                     ),
                                                   ],
                                                 ),
                                               ),
-                                            ],
+                                            ),
                                           ),
-
-
+                                        ),
                                       ],
                                     ),
-                                  ),
-                                ),
-
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      Positioned(
-                        left: 20,
-                        bottom:widget.article.subType == "BigBlackStandard"?MediaQuery.of(context).size.height*.30 -15: MediaQuery.of(context).size.height*.55-15,
-                        child: Container(
-                          height: 30,
-                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade50,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Center(
-                            child: Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Chota ",
-                                    style: fontStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: "News",
-                                    style: fontStyle(
-                                      fontSize:  16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xff00A8FF),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ),
               ),
               Container(
@@ -345,14 +342,17 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          Consumer<FlipProvider>(builder: (_, flipProvider, __) {
+                          Consumer2<FlipProvider, SettingsProvider>(builder: (_, flipProvider, settingsProvider, __) {
                             return BottomActions(
                               postType: widget.article.subType ?? "",
                               icon: flipProvider.isLikeList.contains(widget.article.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                               label: 'లైక్',
                               isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
+                              // isLike: flipProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString()),
                               onTap: () {
                                 log("Like");
+                                // context.read<SettingsProvider>().isLikePost(flipProvider.mainArticlesData[index]);
+
                                 flipProvider.isLikePost(widget.article);
                               },
                             );
@@ -416,7 +416,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 } catch (e) {
                                   CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                                 }
-
                               } else if (widget.article.type == "Gallery") {
                                 createAndSharePdf(context, widget.article);
                               }
@@ -438,11 +437,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                             child: context.read<FlipProvider>().isRefresh
                                 ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
                                 : SvgPicture.asset(
-                              "assets/svg/reload.svg",
-                              height: 22,
-                              width: 22,
-                              color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.grey,
-                            ),
+                                    "assets/svg/reload.svg",
+                                    height: 22,
+                                    width: 22,
+                                    color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                  ),
                           ),
                         ],
                       ),
@@ -461,64 +460,60 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     RegExp linkRegExp = RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
     List<TextSpan> spans = [];
 
-    text.splitMapJoin(
-      linkRegExp,
-      onMatch: (match) {
-        String link = match.group(0)!;
+    text.splitMapJoin(linkRegExp, onMatch: (match) {
+      String link = match.group(0)!;
 
-        if (link.contains('<link1>')) {
-          log("click linkss    ${links!.first.value.toString()}");
-          link = links.first.value.toString();
-        }
-
-        if (link.contains('<link1>') && links != null && links.isNotEmpty) {
-          link = links[0].value.toString();
-        } else if (link.contains('<link2>') && links != null && links.length > 1) {
-          link = links[1].value.toString();
-        } else if (link.contains('<link3>') && links != null && links.length > 2) {
-          link = links[2].value.toString();
-        } else {
-          link = link;
-        }
-        spans.add(TextSpan(
-          text: match
-              .group(0)
-              .toString()
-              .replaceFirst('<link1>', '')
-              .replaceFirst('</link1>', '')
-              .replaceFirst('<link2>', '')
-              .replaceFirst('</link2>', '')
-              .replaceFirst('<link3>', '')
-              .replaceFirst('</link3>', ''),
-          style: homeScreenFontStyle(
-            color: article.subType == "BigBlackStandard" ? Colors.white : Colors.blue,
-            fontWeight: FontWeight.w400,
-            fontSize:  16.sp,
-          ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              print(" $link");
-              if (await canLaunch(link)) {
-                await launch(link);
-              } else {
-                CustomToast.showErrorToast(msg: "Could not launch $link");
-              }
-            },
-        ));
-
-        return "";
-      },
-      onNonMatch: (nonMatch) {
-        spans.add(TextSpan(
-            text: nonMatch,
-            style: homeScreenFontStyle(
-              color: widget.article.subType == "BigBlackStandard" ? AppColors.cardBackgroundColor: AppColors.textColor.withOpacity(0.5),
-              fontWeight: FontWeight.w400,
-              fontSize: 17.sp,
-            )));
-        return "";
+      if (link.contains('<link1>')) {
+        log("click linkss    ${links!.first.value.toString()}");
+        link = links.first.value.toString();
       }
-    );
+
+      if (link.contains('<link1>') && links != null && links.isNotEmpty) {
+        link = links[0].value.toString();
+      } else if (link.contains('<link2>') && links != null && links.length > 1) {
+        link = links[1].value.toString();
+      } else if (link.contains('<link3>') && links != null && links.length > 2) {
+        link = links[2].value.toString();
+      } else {
+        link = link;
+      }
+      spans.add(TextSpan(
+        text: match
+            .group(0)
+            .toString()
+            .replaceFirst('<link1>', '')
+            .replaceFirst('</link1>', '')
+            .replaceFirst('<link2>', '')
+            .replaceFirst('</link2>', '')
+            .replaceFirst('<link3>', '')
+            .replaceFirst('</link3>', ''),
+        style: homeScreenFontStyle(
+          color: article.subType == "BigBlackStandard" ? Colors.white : Colors.blue,
+          fontWeight: FontWeight.w400,
+          fontSize: 16.sp,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            print(" $link");
+            if (await canLaunch(link)) {
+              await launch(link);
+            } else {
+              CustomToast.showErrorToast(msg: "Could not launch $link");
+            }
+          },
+      ));
+
+      return "";
+    }, onNonMatch: (nonMatch) {
+      spans.add(TextSpan(
+          text: nonMatch,
+          style: homeScreenFontStyle(
+            color: widget.article.subType == "BigBlackStandard" ? AppColors.cardBackgroundColor : AppColors.textColor.withOpacity(0.5),
+            fontWeight: FontWeight.w400,
+            fontSize: 17.sp,
+          )));
+      return "";
+    });
 
     return spans;
   }

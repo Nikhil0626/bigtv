@@ -1,57 +1,51 @@
-import 'dart:convert';
-
 class EPaperMainModel {
-  final int id;
+  final String id;
   final String source;
   final String sourceUrl;
+  final String logo;
   final String editionName;
   final String imageUrl;
   final int pageNumber;
   final String publishedDate;
+  final bool isTodays;
 
   EPaperMainModel({
     required this.id,
     required this.source,
     required this.sourceUrl,
+    required this.logo,
     required this.editionName,
     required this.imageUrl,
     required this.pageNumber,
     required this.publishedDate,
+    required this.isTodays,
   });
 
-  // Factory constructor for creating an instance from JSON
   factory EPaperMainModel.fromJson(Map<String, dynamic> json) {
     return EPaperMainModel(
-      id: json['id'] ?? 0,
-      source: json['source'] ?? '',
-      sourceUrl: json['source_url'] ?? '',
-      editionName: json['edition_name'] ?? '',
-      imageUrl: json['image_url'] ?? '',
-      pageNumber: json['page_number'] ?? 0,
-      publishedDate: json['published_date'] ?? '',
+      id: json['id'] as String,
+      source: json['source'] as String,
+      sourceUrl: json['source_url'] as String,
+      logo: json['logo'] as String,
+      editionName: json['edition_name'] as String,
+      imageUrl: json['image_url'] as String,
+      pageNumber: json['page_number'] as int,
+      publishedDate: json['published_date'] as String,
+      isTodays: json['is_todays'] as bool,
     );
   }
 
-  // Convert instance to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'source': source,
       'source_url': sourceUrl,
+      'logo': logo,
       'edition_name': editionName,
       'image_url': imageUrl,
       'page_number': pageNumber,
       'published_date': publishedDate,
+      'is_todays': isTodays,
     };
-  }
-
-  // Convert JSON string to HomeEPapersModel
-  static EPaperMainModel fromJsonString(String jsonString) {
-    return EPaperMainModel.fromJson(json.decode(jsonString));
-  }
-
-  // Convert HomeEPapersModel to JSON string
-  String toJsonString() {
-    return json.encode(toJson());
   }
 }

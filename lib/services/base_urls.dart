@@ -53,16 +53,11 @@ class BaseUrls {
   static const String privacyPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Privacy+5.html";
 
 
-
-
 ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
-
-
-
 /// Python apis
-  static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
-  static const String baseUrlAwsDev = "http://13.203.77.182:8000";
+  static const String ePaperBaseUrlAws = "http://3.108.235.31:8000";
+  static const String baseUrlAwsDev = "http://65.0.7.144:8000";
 
 
   ///Login login
@@ -70,10 +65,10 @@ class BaseUrls {
   static const String validateOtpPy = "/validate-otp";
 
   ///Categories Apis
-  static const String getAllCategories = "/admin/categories";
+  static const String getAllCategories = "/categories";
 
   ///Location Apis
-  static const String getAllLocation= "/admin/locations";
+  static const String getAllLocation= "/locations";
 
   ///profile Apis
   static const String updateProfile = "/";
@@ -84,5 +79,8 @@ class BaseUrls {
 
   ///Comments Apis
   static const String getAllComments= "/comments";
+
+  ///Like Apis
+  static const String like = "/like";
 
 }
