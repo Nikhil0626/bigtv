@@ -284,6 +284,7 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -292,12 +293,12 @@
             </intent-filter>
 
             <!-- App Link sample -->
+            <meta-data android:name="flutter-deeplink" android:value="true"/>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="apps.signitivessoft.com" android:pathPrefix="/homeScreen"/>
-          />
+                <data android:scheme="https" android:host="apps.signitivessoft.com" android:pathPrefix="/"/>
             </intent-filter>
 
             <!-- Deep Link sample -->

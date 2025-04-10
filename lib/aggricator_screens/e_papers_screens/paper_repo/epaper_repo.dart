@@ -13,6 +13,8 @@ class EPaperRepo extends BaseService {
         url: BaseUrls.getMainEPapers, method: RequestType.get,);
     return response;
   }
+
+
   Future getSingleEPapers(String paper) async {
     Response response = await makeRequest(baseUrl: BaseUrls.ePaperBaseUrlAws,
       url: "${BaseUrls.getSingleEPapers}/$paper/today", method: RequestType.get,);
