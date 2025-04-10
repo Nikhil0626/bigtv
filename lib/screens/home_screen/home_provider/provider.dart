@@ -457,7 +457,7 @@ class FlipProvider extends ChangeNotifier {
 
   void isLikePost(val) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("loginId");
+    String? userId = sp.getString("userId");
     log(val.id.toString());
     if (!isLikeList.contains(val.id.toString())) {
       EventRepo().sendEvent({

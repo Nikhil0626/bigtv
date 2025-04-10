@@ -74,5 +74,7 @@ class BaseUrls {
   static const String getAllLocation= "/admin/locations";
 
 
+  ///Comments Apis
+  static const String getAllComments= "/comments";
 
 }
