@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:chotanews/screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
@@ -21,7 +23,8 @@ import '../Auth_module/auth_provider/auth_provider.dart';
 import '../home_screen/home_repo/event_repo.dart';
 
 class SettingsScreen extends StatefulWidget {
-  const SettingsScreen({super.key});
+  final String userid;
+  const SettingsScreen({super.key, this.userid=""});
 
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
@@ -33,6 +36,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   void initState() {
+    log('widget.userid');
+    log(widget.userid);
     getLogin();
     context.read<AuthProvider>().sendEvent("SettingPage");
     super.initState();

@@ -20,7 +20,8 @@ import '../filters_screen/filter_view.dart';
 import '../profile_screen/profile_view.dart';
 
 class SettingsView extends StatefulWidget {
-  const SettingsView({super.key,});
+  final String id;
+  const SettingsView({super.key, required this.id});
 
   @override
   _SettingsViewState createState() => _SettingsViewState();

@@ -1,7 +1,9 @@
 import 'dart:developer';
+import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/globel_keys/app_router.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
@@ -15,9 +17,11 @@ import 'dart:async';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../aggricator_screens/settings_screen/settings_view.dart';
 import '../../main.dart';
 import '../../services/dynamic_link_service.dart';
 import '../Auth_module/auth_screens/welcome_screen.dart';
+import '../chota_info_screens/chota_info.dart';
 
 class SplashScreenView extends StatefulWidget {
   const SplashScreenView({super.key});
@@ -27,15 +31,23 @@ class SplashScreenView extends StatefulWidget {
 }
 
 class _SplashScreenView extends State<SplashScreenView> {
+
+
+
+  get id => null;
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(seconds: 5),() {
-      context.read<AuthProvider>().checkLoginStatus(context);
 
-    },);
+
   }
 
+
+
+  void openAppLink(Uri uri) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsView(id: id.toString(),),)
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -79,13 +91,38 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   bool showGif = false;
-
+  StreamSubscription<Uri>? linkSubscription;
   @override
   void initState() {
     super.initState();
-    checkLastShownDate(context);
+    initDeepLinks();
 
   }
+
+  Future<void> initDeepLinks() async {
+    linkSubscription = AppLinks().uriLinkStream.listen(
+          (uri) {
+        debugPrint('onAppLink: $uri');
+        openAppLink(uri);
+      },
+      onError: (error) {
+        debugPrint('Deep link error: $error');
+        Future.delayed(Duration(seconds: 5),() {
+          checkLastShownDate(context);
+
+        },);
+      },
+    );
+
+
+  }
+
+  void openAppLink(Uri uri) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => HomeView(),)
+    );
+  }
+
+
 
   Future<void> checkLastShownDate(BuildContext context) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
