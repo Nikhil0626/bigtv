@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/individual_paper.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
+import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,6 +15,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../screens/home_screen/home_provider/provider.dart';
+import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../../utils/app_colors.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 
@@ -42,24 +45,24 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
           width: MediaQuery.of(context).size.width.w,
           height: MediaQuery.of(context).size.height - 150.h,
           child: Center(
-            child: ePapersProvider.isMainPapers
-                ? Shimmer.fromColors(
-                    baseColor: Colors.grey[300]!,
-                    highlightColor: Colors.grey[100]!,
-                    child: CardSwiper(
-                      allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-                      controller: controller,
-                      cardsCount: 5,
-                      onSwipe: (previousIndex, currentIndex, direction) {
-                        print("Swiped from $previousIndex to $currentIndex");
-                        return true;
-                      },
-                      numberOfCardsDisplayed: 4,
-                      cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-                        return ShimmerCard(); // ✅ Show shimmer card while loading
-                      },
-                    ),
-                  )
+            child: ePapersProvider.isMainPapers?Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: CardSwiper(
+                allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+                controller: controller,
+                cardsCount: 5,
+                onSwipe: (previousIndex, currentIndex, direction) {
+                  print("Swiped from $previousIndex to $currentIndex");
+                  return true;
+                },
+                numberOfCardsDisplayed: 4,
+                cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+                  return ShimmerCard(); // ✅ Show shimmer card while loading
+                },
+              ),
+            ):
+                ePapersProvider.getAllMainPapersList.isEmpty?AppNoData( )
                 : CardSwiper(
                     allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
                     controller: controller,
@@ -117,7 +120,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
 
 
                               Positioned(
-                                top: 1,
+                                top: 14,
                                 right: 14,
                                 child: GestureDetector(
                                   onTap: () {
@@ -143,24 +146,31 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                 alignment: Alignment.bottomLeft,
                                 child: Container(
                                   color: Colors.white,
-                                  // padding: EdgeInsets.only(left: 10, bottom: 13),
                                   child: Row(
-                                    // mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Container(
-                                          height: 60,
-                                          width: 60,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
-                                            color: Colors.white,
+                                      InkWell(
+                                        onTap: (){Navigator.push(context, MaterialPageRoute(
+                                          builder: (context) => InAppWebViewScreen(
+                                            webUrl: ePapersProvider.getAllMainPapersList[index].sourceUrl.toString(),
+                                            title: "Advertise with us",
                                           ),
-                                          padding: const EdgeInsets.all(2),
-                                          child: Image.network(
-                                            ePapersProvider.getAllMainPapersList[index].logo,
-                                            height: 30,
-                                            width: 30,
-                                            fit: BoxFit.fill,
-                                          )
+                                        ));
+                                        },
+                                        child: Container(
+                                            height: 60,
+                                            width: 60,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8),
+                                              color: Colors.white,
+                                            ),
+                                            padding: const EdgeInsets.all(2),
+                                            child: Image.network(
+                                              ePapersProvider.getAllMainPapersList[index].logo,
+                                              height: 30,
+                                              width: 30,
+                                              fit: BoxFit.fill,
+                                            )
+                                        ),
                                       ),
                                       width(width: 6.h),
                                       Text(
@@ -171,12 +181,12 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
-                                      Spacer(),
-                                      Icon(
-                                        Icons.ios_share,
-                                        color: Colors.grey.shade600,
-                                        size: 20,
-                                      ),
+                                      // Spacer(),
+                                      // Icon(
+                                      //   Icons.ios_share,
+                                      //   color: Colors.grey.shade600,
+                                      //   size: 20,
+                                      // ),
                                       width(width: 15.w),
                                     ],
                                   ),

@@ -14,72 +14,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 
-import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-// import '../../aggricator_screens/settings_screen/settings_view.dart';
-import '../../aggricator_screens/settings_screen/settings_view/settings_view.dart';
-import '../../main.dart';
-import '../../services/dynamic_link_service.dart';
-import '../Auth_module/auth_screens/welcome_screen.dart';
-import '../chota_info_screens/chota_info.dart';
-
-class SplashScreenView extends StatefulWidget {
-  const SplashScreenView({super.key});
-
-  @override
-  State<SplashScreenView> createState() => _SplashScreenView();
-}
-
-class _SplashScreenView extends State<SplashScreenView> {
-
-
-
-  get id => null;
-  @override
-  void initState() {
-    super.initState();
-
-
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Image.asset(
-            "assets/svg/splash_video.gif",
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-          ),
-          Positioned(
-            bottom: 50,
-            right: 50,
-            child: InkWell(
-              onTap: () {
-                context.read<AuthProvider>().checkLoginStatus(context);
-              },
-              child: Text(
-                "Skip  >>>",
-                style: fontStyle(
-                    fontSize: 18,
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w400),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-
 
 
 class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
   @override
   _SplashScreenState createState() => _SplashScreenState();
 }
@@ -90,27 +30,34 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    initDeepLinks();
+    initDeepLinks(context);
 
   }
 
-  Future<void> initDeepLinks() async {
+  Future<void> initDeepLinks(BuildContext context) async {
+    bool didReceiveLink = false;
+
     linkSubscription = AppLinks().uriLinkStream.listen(
           (uri) {
         debugPrint('onAppLink: $uri');
+        didReceiveLink = true;
         openAppLink(uri);
       },
       onError: (error) {
         debugPrint('Deep link error: $error');
-        Future.delayed(Duration(seconds: 5),() {
-          checkLastShownDate(context);
-
-        },);
+        checkLastShownDate(context);
       },
     );
 
+    // Wait for a short time to check if a deep link was received
+    await Future.delayed(Duration(seconds: 2));
 
+    // If no link was received, navigate to the home screen
+    if (!didReceiveLink) {
+      checkLastShownDate(context);
+    }
   }
+
 
   void openAppLink(Uri uri) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => HomeView(),)

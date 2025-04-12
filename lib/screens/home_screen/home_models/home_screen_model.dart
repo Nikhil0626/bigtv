@@ -1,7 +1,7 @@
 
 class HomeScreenModel {
   final int id;
-  final String author;
+  final dynamic author;
   final String title;
   final String content;
   final String type;

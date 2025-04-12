@@ -1,10 +1,10 @@
 class BookmarksModel {
-  final int postId;
+  final String postId;
   final bool isBookmarked;
-  final DateTime created;
+  final String created;
   final String title;
   final String type;
-  final DateTime time;
+  final String time;
   final String imageUrl;
 
   BookmarksModel({
@@ -19,25 +19,25 @@ class BookmarksModel {
 
   factory BookmarksModel.fromJson(Map<String, dynamic> json) {
     return BookmarksModel(
-      postId: json['postid'] ?? 0,
-      isBookmarked: json['isbookmarked'] ?? false,
-      created: DateTime.tryParse(json['created'] ?? '') ?? DateTime.now(),
+      postId: json['postId'].toString() ?? "",
+      isBookmarked: json['isBookmarked'] ?? false,
+      created:json['created']??"" ,
       title: json['title'] ?? '',
       type: json['type'] ?? '',
-      time: DateTime.tryParse(json['time'] ?? '') ?? DateTime.now(),
-      imageUrl: json['image_url'] ?? '',
+      time:json['time']??"",
+      imageUrl: json['imageUrl'] ?? '',
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'postid': postId,
-      'isbookmarked': isBookmarked,
-      'created': created.toIso8601String(),
+      'postId': postId,
+      'isBookmarked': isBookmarked,
+      'created': created,
       'title': title,
       'type': type,
-      'time': time.toIso8601String(),
-      'image_url': imageUrl,
+      'time': time,
+      'imageUrl': imageUrl,
     };
   }
 }

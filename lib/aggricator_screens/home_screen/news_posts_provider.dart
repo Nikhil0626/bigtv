@@ -15,7 +15,7 @@ class NewsPostsProvider extends ChangeNotifier {
 
   Future getAllComments(postId) async {
     isLoadingComments = true;
-    Map<String, dynamic> body = {"postid": postId};
+    Map<String, dynamic> body = {"post_id": postId};
     try {
       Response response = await NewsPostRepo().getAllComments(body);
       if (response.statusCode == 200) {
@@ -44,9 +44,9 @@ class NewsPostsProvider extends ChangeNotifier {
 
     sendCommentLoading = true;
     Map<String, dynamic> body = {
-      "deviceid": deviceId.toString(),
-      "userid": userId.toString(),
-      "postid": postId.toString(),
+      "device_id": deviceId.toString(),
+      "user_id": userId.toString(),
+      "post_id": postId.toString(),
       "comment": text
     };
 

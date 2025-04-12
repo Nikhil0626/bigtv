@@ -1,3 +1,4 @@
+import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -35,16 +36,16 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<FlipProvider>(
-        builder: (_, flipProvider, __) {
-          if (flipProvider.mainArticlesData.isEmpty) {
+      body: Consumer<HomeProvider>(
+        builder: (_, homeProvider, __) {
+          if (homeProvider.getAllPostList.isEmpty) {
             return Center(child: CircularProgressIndicator());
           }
 
           return PageView.builder(
             controller: _pageController,
             scrollDirection: Axis.vertical,
-            itemCount: flipProvider.mainArticlesData.length,
+            itemCount: homeProvider.getAllPostList.length,
             itemBuilder: (context, index) {
               return AnimatedBuilder(
                 animation: _pageController,
@@ -62,7 +63,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                       offset: Offset(0, 50 * (1 - position)),
                       child: Container(
                         color: Colors.white,
-                        child: MainScreenBytView(article: flipProvider.mainArticlesData[index]),
+                        child: MainScreenBytView(article: homeProvider.getAllPostList[index]),
                       ),
                     ),
                   );

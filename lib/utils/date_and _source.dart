@@ -17,15 +17,15 @@ class DateAndSource extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (data.isReporter == true) Icon(Icons.person, size: 14, color: Colors.grey),
-                if (data.isReporter == true)
+                if (data['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
+                if (data['isReporter']  == true)
                   Text(
-                    ' ${data.reportedBy} | ',
+                    ' ${data['reportedBy'] } | ',
                     style: fontStyle(fontSize:  12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                   ),
                 Icon(Icons.access_time, size: 14, color: Colors.grey),
                 Text(
-                  " ${formatTimeDifference(data.created)}",
+                  " ${formatTimeDifference(data['created'])}",
                   style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                 ),
               ],

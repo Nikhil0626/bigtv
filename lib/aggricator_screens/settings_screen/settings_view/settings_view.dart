@@ -18,17 +18,7 @@ import '../../filters_screen/filter_view.dart';
 import '../../profile_screen/profile_view.dart';
 import '../feedback_view.dart';
 import 'book_marks_screen.dart';
-// import '../../screens/Auth_module/auth_provider/auth_provider.dart';
-// import '../../screens/home_screen/home_screens/in_app_web_view.dart';
-// import '../../utils/app_enums.dart';
-// import '../../utils/local_data.dart';
-// import '../auth_screens/authentication_view/login_background_view.dart';
-// import '../book_marks_view/book_marks_screen.dart';
-// import '../feedback_view.dart';
-// import '../filters_screen/filter_view.dart';
-// import '../profile_screen/profile_view.dart';
-// import 'book_marks_screen.dart';
-// import 'feedback_view.dart';
+
 
 class SettingsView extends StatefulWidget {
 
@@ -62,7 +52,7 @@ class _SettingsViewState extends State<SettingsView> {
         child: Column(
           children: [
             // if (loginStatus == LoginStatus.skip)
-            _buildSettingsRow(context, "Profile.svg", "Edit Profile", () {
+            _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
               if (loginStatus == NewAppLoginStatus.skip) {
                 CustomToast.showErrorToast(msg: 'Please login with mobile number');
               } else if (loginStatus == NewAppLoginStatus.login) {
@@ -158,11 +148,9 @@ class _SettingsViewState extends State<SettingsView> {
             height(height: 5.h),
             _buildSettingsRow(context, "Signout.svg", "Logout", () {
 
-              context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
-              context.read<AuthenticationProvider>().saveLoginState();
-              // context.read<AuthenticationProvider>().isPageNavigation(context);
-              // loginStatus == LoginStatus.skip ? 'Login' : 'Logout';
-              Navigator.push(context, MaterialPageRoute(builder: (context) => LoginBackgroundView()));
+
+              context.read<AuthenticationProvider>().setLogOutStatus(context);
+
             }),
           ],
         ),
@@ -185,30 +173,5 @@ class _SettingsViewState extends State<SettingsView> {
       ),
     );
   }
-//
-// Widget _buildNotificationRow() {
-//   return Padding(
-//     padding: EdgeInsets.symmetric(vertical: 8),
-//     child: Row(
-//       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//       children: [
-//         Row(
-//           children: [
-//             SvgPicture.asset('assets/svg/Notifications.svg', height: 20, width: 20),
-//             SizedBox(width: 15),
-//             Text("Notifications", style: TextStyle(fontSize: 16)),
-//           ],
-//         ),
-//         Switch(
-//           value: isNotificationsEnabled,
-//           onChanged: (value) {
-//             setState(() {
-//               isNotificationsEnabled = value;
-//             });
-//           },
-//         ),
-//       ],
-//     ),
-//   );
-// }
+
 }

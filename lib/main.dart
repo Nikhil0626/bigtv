@@ -167,7 +167,7 @@ class _MyAppState extends State<MyApp> {
         postId = id ?? "";
         log("Navigating to Individual Post screen  $postId");
         mainNavigatorKey.currentState?.pushNamed(
-          '/individualPost',
+          '/individualPage',
           arguments: {'postId': postId},
         );
         break;
@@ -223,8 +223,8 @@ class _MyAppState extends State<MyApp> {
             useMaterial3: true,
           ),
           routes: {
-            '/': (context) => LoginBackgroundView(),
-            '/individualPost': (context) => IndividualPostView(postId: postId,),
+            '/': (context) => SplashScreen(),
+            '/individualPage': (context) => IndividualPostView(postId: postId,),
             '/settings': (context) => SettingsView(),
             // Add other routes like '/settings', '/profile', etc.
           },

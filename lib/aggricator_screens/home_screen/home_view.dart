@@ -33,6 +33,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
+    context.read<HomeProvider>().selectedIndex = 0;
     _pageController = PageController(initialPage: 0);
     super.initState();
   }
@@ -73,10 +74,12 @@ class _HomeViewState extends State<HomeView> {
             // Shift actions closer to the title
             Row(
               children: [
+                if( context.read<HomeProvider>().selectedIndex != 3)
                 CustomSwitch(),
-                const SizedBox(width: 12),
-                Consumer<FlipProvider>(
-                  builder: (_, flipProvider, __) {
+                width(width: 12),
+                if( context.read<HomeProvider>().selectedIndex == 0)
+                Consumer<HomeProvider>(
+                  builder: (_, homeProvider, __) {
                     return InkWell(
                       onTap: () {
                         log("Refresh");
@@ -87,29 +90,34 @@ class _HomeViewState extends State<HomeView> {
                             "userId": GlobalVariables().userId ?? "",
                           }
                         });
-                        flipProvider.getArticles(refresh: true);
+                        homeProvider.getAllPostList = [];
+                        homeProvider.isReloadData();
+                        homeProvider.getAllPost();
                       },
-                      child: Center(
-                        child: flipProvider!.isRefresh
-                            ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.iconColors,
+                      child: Container(
+                        color: Colors.white,
+                        child: Center(
+                          child: homeProvider.isReload
+                              ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.iconColors,
+                            ),
+                          )
+                              : SvgPicture.asset(
+                            "assets/svg/new_refresh.svg",
+                            height: 20,
+                            width: 20,
+                            color: AppColors.textColor,
                           ),
-                        )
-                            : SvgPicture.asset(
-                          "assets/svg/new_refresh.svg",
-                          height: 24,
-                          width: 24,
-                          color: AppColors.textColor,
                         ),
                       ),
                     );
                   },
                 ),
-                const SizedBox(width: 16),
+               width(width: 20),
               ],
             ),
           ],

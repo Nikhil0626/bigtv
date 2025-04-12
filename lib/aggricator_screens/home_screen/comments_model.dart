@@ -15,7 +15,7 @@ class CommentsModel {
 
   factory CommentsModel.fromJson(Map<String, dynamic> json) {
     return CommentsModel(
-      id: json['_id'],
+      id: json['id'],
       postId: json['postId'],
       text: json['text'],
       createdAt: DateTime.parse(json['createdAt']),
@@ -25,7 +25,7 @@ class CommentsModel {
 
   Map<String, dynamic> toJson() {
     return {
-      '_id': id,
+      'id': id,
       'postId': postId,
       'text': text,
       'createdAt': createdAt.toIso8601String(),
@@ -37,7 +37,7 @@ class CommentsModel {
 class ChatUser {
   final int id;
   final String name;
-  final String avatar;
+  final dynamic avatar;
 
   ChatUser({
     required this.id,
@@ -47,7 +47,7 @@ class ChatUser {
 
   factory ChatUser.fromJson(Map<String, dynamic> json) {
     return ChatUser(
-      id: json['_id'],
+      id: json['id'],
       name: json['name'],
       avatar: json['avatar'],
     );
@@ -55,7 +55,7 @@ class ChatUser {
 
   Map<String, dynamic> toJson() {
     return {
-      '_id': id,
+      'id': id,
       'name': name,
       'avatar': avatar,
     };

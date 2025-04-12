@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -38,19 +39,32 @@ class MainScreenList extends StatefulWidget {
 }
 
 class _MainScreenListState extends State<MainScreenList> {
-  final ScreenshotController screenshotController = ScreenshotController();
+  // final ScreenshotController screenshotController = ScreenshotController();
+  final ScrollController _scrollController = ScrollController();
+
+
+  @override
+  void initState() {
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100 ) {
+        context.read<HomeProvider>().getAllPost(postId: context.read<HomeProvider>().getAllPostList.last['id'].toString()); // Fetch next page
+      }
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<FlipProvider>(builder: (_, flipProvider, __) {
+    return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
       return RefreshIndicator(
-        onRefresh: () => flipProvider.getArticles(refresh: true),
+        onRefresh: () => homeProvider.getAllPost(),
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
           child: ListView.builder(
+            controller: _scrollController,
             scrollDirection: Axis.vertical,
-            itemCount: flipProvider.mainArticlesData.length,
+            itemCount: homeProvider.getAllPostList.length,
             shrinkWrap: true,
             itemBuilder: (context, index) {
               return InkWell(
@@ -63,174 +77,177 @@ class _MainScreenListState extends State<MainScreenList> {
                         ),
                       ));
                 },
-                child: flipProvider.mainArticlesData[index].type == "Video"
-                    ? Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          child: SizedBox(
-                            height: 330,
-                            child: Stack(
-                              children: [
-                                VideoPreview(
-                                  imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
-                                  url: flipProvider.mainArticlesData[index].videoUrl?.url ?? "",
-                                  isFoldable: false,
-                                ),
-                                Positioned(
-                                  top: 10,
-                                  right: 14,
-                                  child: GestureDetector(
-                                    onTap: () {
-                                      context.read<SettingsProvider>().saveBookmarks(
-                                            flipProvider.mainArticlesData[index].id.toString(),
-                                          );
-                                      print("Bookmark saved");
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.all(7),
-                                      decoration: BoxDecoration(
-                                        color: Colors.black54,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.bookmark_outline,
-                                        color: Colors.white,
-                                        size: 20,
+                child: Container(
+                  height: 330.h,
+                  color: AppColors.ePaperCardColor,
+                  child: homeProvider.getAllPostList[index]['type'] == "Video"
+                      ? Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(12),
+                            ),
+                            child: SizedBox(
+                              height: 330,
+                              child: Stack(
+                                children: [
+                                  VideoPreview(
+                                    imageUrl: homeProvider.getAllPostList[index]['image_url'],
+                                    url: homeProvider.getAllPostList[index]['video_url'] ?? "",
+                                    isFoldable: false,
+                                  ),
+                                  Positioned(
+                                    top: 10,
+                                    right: 14,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        context.read<SettingsProvider>().saveBookmarks(
+                                              homeProvider.getAllPostList[index]['id'].toString(),
+                                            );
+                                        print("Bookmark saved");
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(7),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.bookmark_outline,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      )
-                    : flipProvider.mainArticlesData[index].type == "GoogleAds"
-                        ? Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                              child: SizedBox(
-                                height: 330.h,
-                                child: GoogleAdsView(
-                                  article: flipProvider.mainArticlesData[index],
-                                  flipProvider: flipProvider,
-                                  screenshotController: ScreenshotController(),
-                                  isFoldable: false,
+                        )
+                      : homeProvider.getAllPostList[index]['type'] == "GoogleAds"
+                          ? Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(12),
                                 ),
-                              ),
-                            ),
-                          )
-                        : flipProvider.mainArticlesData[index].type == "Image"
-                            ? Padding(
-                                padding: const EdgeInsets.all(16.0),
                                 child: SizedBox(
                                   height: 330.h,
-                                  child: Stack(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(16.r),
-                                        ),
-                                        child: CachedNetworkImage(
-                                          imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
-                                          height: 330.h,
-                                          width: MediaQuery.of(context).size.width,
-                                          fit: BoxFit.fill,
-                                          placeholder: (context, url) => Container(
-                                            height: 330.h,
-                                            width: MediaQuery.of(context).size.width,
-                                            color: AppColors.borderColor.withOpacity(.2),
-                                          ),
-                                          errorWidget: (context, url, error) => Container(
-                                            height: 330.h,
-                                            width: MediaQuery.of(context).size.width,
-                                            color: Colors.grey.shade200,
-                                            child: Center(
-                                              child: Icon(
-                                                Icons.image,
-                                                size: 100,
-                                                color: Colors.grey.shade300,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 10,
-                                        right: 14,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            context.read<SettingsProvider>().saveBookmarks(flipProvider.mainArticlesData[index].id.toString());
-                                            print("");
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.all(7),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black54,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.bookmark_outline,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                  child: GoogleAdsView(
+                                    article: homeProvider.getAllPostList[index],
+                                    flipProvider: homeProvider,
+                                    // screenshotController: ScreenshotController(),
+                                    isFoldable: false,
                                   ),
                                 ),
-                              )
-                            : flipProvider.mainArticlesData[index].type == "Gallery"
-                                ? Padding(
-                                    padding: const EdgeInsets.all(12.0),
-                                    child: SizedBox(
-                                      height: 330.h,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                                        child: Stack(
-                                          children: [
-                                            FullPageCarousel(
-                                              isHome: true,
-                                              imageUrls: flipProvider.mainArticlesData[index].gallery ?? [],
-                                              postDetails: flipProvider.mainArticlesData[index],
+                              ),
+                            )
+                          : homeProvider.getAllPostList[index]['type'] == "Image"
+                              ? Padding(
+                                  padding: const EdgeInsets.all(16.0),
+                                  child: SizedBox(
+                                    height: 330.h,
+                                    child: Stack(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.all(
+                                            Radius.circular(16.r),
+                                          ),
+                                          child: CachedNetworkImage(
+                                            imageUrl: homeProvider.getAllPostList[index]['image_url'],
+                                            height: 330.h,
+                                            width: MediaQuery.of(context).size.width,
+                                            fit: BoxFit.fill,
+                                            placeholder: (context, url) => Container(
+                                              height: 330.h,
+                                              width: MediaQuery.of(context).size.width,
+                                              color: AppColors.borderColor.withOpacity(.2),
                                             ),
-                                            Positioned(
-                                              top: 10,
-                                              right: 14,
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  context.read<SettingsProvider>().saveBookmarks(
-                                                        flipProvider.mainArticlesData[index].id.toString(),
-                                                      );
-                                                  print("");
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.all(7),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black54,
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.bookmark_outline,
-                                                    color: Colors.white,
-                                                    size: 20,
-                                                  ),
+                                            errorWidget: (context, url, error) => Container(
+                                              height: 330.h,
+                                              width: MediaQuery.of(context).size.width,
+                                              color: Colors.grey.shade200,
+                                              child: Center(
+                                                child: Icon(
+                                                  Icons.image,
+                                                  size: 100,
+                                                  color: Colors.grey.shade300,
                                                 ),
                                               ),
                                             ),
-                                          ],
+                                          ),
+                                        ),
+                                        Positioned(
+                                          top: 10,
+                                          right: 14,
+                                          child: GestureDetector(
+                                            onTap: () {
+                                              context.read<SettingsProvider>().saveBookmarks(homeProvider.getAllPostList[index]['id'].toString());
+                                              print("");
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(7),
+                                              decoration: BoxDecoration(
+                                                color: Colors.black54,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.bookmark_outline,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                )
+                              : homeProvider.getAllPostList[index]['type'] == "Gallery"
+                                  ? Padding(
+                                      padding: const EdgeInsets.all(12.0),
+                                      child: SizedBox(
+                                        height: 330.h,
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                                          child: Stack(
+                                            children: [
+                                              FullPageCarousel(
+                                                isHome: true,
+                                                imageUrls: homeProvider.getAllPostList[index]['gallery'] ?? [],
+                                                postDetails: homeProvider.getAllPostList[index],
+                                              ),
+                                              Positioned(
+                                                top: 10,
+                                                right: 14,
+                                                child: GestureDetector(
+                                                  onTap: () {
+                                                    context.read<SettingsProvider>().saveBookmarks(
+                                                          homeProvider.getAllPostList[index]['id'].toString(),
+                                                        );
+                                                    print("");
+                                                  },
+                                                  child: Container(
+                                                    padding: EdgeInsets.all(7),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.black54,
+                                                      shape: BoxShape.circle,
+                                                    ),
+                                                    child: Icon(
+                                                      Icons.bookmark_outline,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  )
-                                : Stack(
+                                    )
+                                  : Stack(
                                     children: [
                                       Container(
                                         height: 330.h,
@@ -261,7 +278,7 @@ class _MainScreenListState extends State<MainScreenList> {
                                                       Radius.circular(16.r),
                                                     ),
                                                     child: CachedNetworkImage(
-                                                      imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
+                                                      imageUrl: homeProvider.getAllPostList[index]['image_url'].toString(),
                                                       height: 180,
                                                       width: MediaQuery.of(context).size.width,
                                                       fit: BoxFit.fill,
@@ -289,7 +306,7 @@ class _MainScreenListState extends State<MainScreenList> {
                                                     right: 14,
                                                     child: GestureDetector(
                                                       onTap: () {
-                                                        context.read<SettingsProvider>().saveBookmarks(flipProvider.mainArticlesData[index].id.toString());
+                                                        context.read<SettingsProvider>().saveBookmarks(homeProvider.getAllPostList[index]['id'].toString());
                                                         print("");
                                                       },
                                                       child: Container(
@@ -312,14 +329,14 @@ class _MainScreenListState extends State<MainScreenList> {
                                             Padding(
                                               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 6),
                                               child: Text(
-                                                flipProvider.mainArticlesData[index].title,
+                                                homeProvider.getAllPostList[index]['title'],
                                                 style: fontStyle(fontSize: 18.sp, fontWeight: FontWeight.w600),
                                               ),
                                             ),
                                             Spacer(),
                                             Padding(
                                               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4),
-                                              child: DateAndSource(data: flipProvider.mainArticlesData[index]),
+                                              child: DateAndSource(data: homeProvider.getAllPostList[index]),
                                             ),
                                             Padding(
                                               padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
@@ -329,22 +346,23 @@ class _MainScreenListState extends State<MainScreenList> {
                                                   Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
                                                     return BottomActions(
                                                       iconColor: AppColors.iconColors,
-                                                      postType: flipProvider.mainArticlesData[index].subType ?? "",
-                                                      icon:
-                                                          settingsProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                                      postType: homeProvider.getAllPostList[index]['subType'] ?? "",
+                                                      icon: settingsProvider.isLikeList.contains(homeProvider.getAllPostList[index]['id'].toString())
+                                                          ? "assets/svg/like_full.svg"
+                                                          : "assets/svg/like.svg",
                                                       label: 'లైక్',
-                                                      isLike: settingsProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString()),
+                                                      isLike: settingsProvider.isLikeList.contains(homeProvider.getAllPostList[index]['id'].toString()),
                                                       onTap: () {
                                                         log("Like");
-                                                        settingsProvider.isLikePost(flipProvider.mainArticlesData[index]);
+                                                        settingsProvider.isLikePost(homeProvider.getAllPostList[index]);
 
-                                                        // flipProvider.isLikePost(flipProvider.mainArticlesData[index]);
+                                                        // flipProvider.isLikePost(homeProvider.getAllPostList[index]);
                                                       },
                                                     );
                                                   }),
 
                                                   BottomActions(
-                                                    postType: flipProvider.mainArticlesData[index].subType ?? "",
+                                                    postType: homeProvider.getAllPostList[index]['subType'] ?? "",
                                                     icon: "assets/svg/new_comment.svg",
                                                     label: 'కామెంట్',
                                                     iconColor: AppColors.iconColors,
@@ -355,11 +373,11 @@ class _MainScreenListState extends State<MainScreenList> {
                                                         "data": {
                                                           "device_id": "${GlobalVariables().deviceId}",
                                                           "userId": context.read<FlipProvider>().userId ?? "",
-                                                          "postId": flipProvider.mainArticlesData[index].id.toString(),
+                                                          "postId": homeProvider.getAllPostList[index]['id'].toString(),
                                                         }
                                                       });
                                                       log("Comment --- ${context.read<AuthProvider>().loginType}");
-                                                      showComments(context, flipProvider.mainArticlesData[index]);
+                                                      showComments(context, homeProvider.getAllPostList[index]);
                                                       EventRepo().sendEvent({
                                                         "key": "comments",
                                                         "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}
@@ -367,77 +385,49 @@ class _MainScreenListState extends State<MainScreenList> {
                                                     },
                                                   ),
                                                   Spacer(),
-                                                  BottomActions(
-                                                    postType: flipProvider.mainArticlesData[index].subType ?? "",
-                                                    icon: "assets/svg/share.svg",
-                                                    label: 'షేర్',
-                                                    iconColor: AppColors.iconColors,
-                                                    onTap: () async {
-                                                      EventRepo().sendEvent({
-                                                        "key": "share_via_articles",
-                                                        "data": {
-                                                          "device_id": "${GlobalVariables().deviceId}",
-                                                          "userId": context.read<FlipProvider>().userId ?? "",
-                                                          "postId": flipProvider.mainArticlesData[index].id.toString(),
-                                                          "isWhatAppShare": false,
-                                                        }
-                                                      });
-
-                                                      sendShareDetails(
-                                                          context.read<FlipProvider>().userId, flipProvider.mainArticlesData[index].id, flipProvider.mainArticlesData[index].content.toString());
-
-                                                      if (flipProvider.mainArticlesData[index].type == "Standard" || flipProvider.mainArticlesData[index].type == "Video") {
-                                                        try {
-                                                          final image = await screenshotController.capture(
-                                                            pixelRatio: 0.5,
-                                                          );
-                                                          if (image != null) {
-                                                            final directory = await getTemporaryDirectory();
-                                                            final imagePath = '${directory.path}/${flipProvider.mainArticlesData[index].id}.png';
-                                                            final imageFile = File(imagePath);
-                                                            await imageFile.writeAsBytes(image);
-
-                                                            Share.shareXFiles([XFile(imageFile.path)],
-                                                                text: Platform.isIOS
-                                                                    ? flipProvider.mainArticlesData[index].linkURLIos.toString()
-                                                                    : flipProvider.mainArticlesData[index].linkURLAndroid.toString());
-                                                          } else {
-                                                            CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                                          }
-                                                        } catch (e) {
-                                                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                                        }
-                                                      } else if (flipProvider.mainArticlesData[index].type == "Gallery") {
-                                                        createAndSharePdf(context, flipProvider.mainArticlesData[index]);
-                                                      }
-                                                    },
-                                                  ),
-                                                  // SizedBox(
-                                                  //   width: 40,
-                                                  //   child: InkWell(
-                                                  //     onTap: () {
-                                                  //       log("Refresh");
-                                                  //       EventRepo().sendEvent({
-                                                  //         "key": "reload",
-                                                  //         "data": {
-                                                  //           "device_id": "${GlobalVariables().deviceId}",
-                                                  //           "userId": GlobalVariables().userId ?? "",
-                                                  //         }
-                                                  //       });
-                                                  //       flipProvider.getArticles(refresh: true);
-                                                  //     },
-                                                  //     child: Center(
-                                                  //       child: flipProvider.isRefresh
-                                                  //           ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
-                                                  //           : SvgPicture.asset(
-                                                  //               "assets/svg/reload.svg",
-                                                  //               height: 20,
-                                                  //               width: 20,
-                                                  //               color: AppColors.iconColors,
-                                                  //             ),
-                                                  //     ),
-                                                  //   ),
+                                                  // BottomActions(
+                                                  //   postType: homeProvider.getAllPostList[index]['subType'] ?? "",
+                                                  //   icon: "assets/svg/share.svg",
+                                                  //   label: 'షేర్',
+                                                  //   iconColor: AppColors.iconColors,
+                                                  //   onTap: () async {
+                                                  //     EventRepo().sendEvent({
+                                                  //       "key": "share_via_articles",
+                                                  //       "data": {
+                                                  //         "device_id": "${GlobalVariables().deviceId}",
+                                                  //         "userId": context.read<FlipProvider>().userId ?? "",
+                                                  //         "postId": homeProvider.getAllPostList[index]['id'].toString(),
+                                                  //         "isWhatAppShare": false,
+                                                  //       }
+                                                  //     });
+                                                  //
+                                                  //     sendShareDetails(
+                                                  //         context.read<FlipProvider>().userId, homeProvider.getAllPostList[index]['id'], homeProvider.getAllPostList[index]['content'].toString());
+                                                  //
+                                                  //     if (homeProvider.getAllPostList[index]['type'] == "Standard" || homeProvider.getAllPostList[index]['type'] == "Video") {
+                                                  //       // try {
+                                                  //       //   final image = await screenshotController.capture(
+                                                  //       //     pixelRatio: 0.5,
+                                                  //       //   );
+                                                  //       //   if (image != null) {
+                                                  //       //     final directory = await getTemporaryDirectory();
+                                                  //       //     final imagePath = '${directory.path}/${homeProvider.getAllPostList[index]['id']}.png';
+                                                  //       //     final imageFile = File(imagePath);
+                                                  //       //     await imageFile.writeAsBytes(image);
+                                                  //       //
+                                                  //       //     Share.shareXFiles([XFile(imageFile.path)], text: homeProvider.getAllPostList[index]['linkURLAndroid'].toString());
+                                                  //       //   } else {
+                                                  //       //     CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                                  //       //   }
+                                                  //       // } catch (e) {
+                                                  //       //   CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                                  //       // }
+                                                  //     } else if (homeProvider.getAllPostList[index]['type'] == "Gallery") {
+                                                  //       createAndSharePdf(context, homeProvider.getAllPostList[index]);
+                                                  //     }
+                                                  //   },
                                                   // ),
+                                                  //
                                                 ],
                                               ),
                                             ),
@@ -491,6 +481,7 @@ class _MainScreenListState extends State<MainScreenList> {
                                       ),
                                     ],
                                   ),
+                ),
               );
             },
           ),

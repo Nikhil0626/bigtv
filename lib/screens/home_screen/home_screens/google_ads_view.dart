@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/home_screen/home_screens/standard_post_view.dart';
@@ -15,15 +16,15 @@ import 'package:screenshot/screenshot.dart';
 import '../../../utils/app_colors.dart';
 
 class GoogleAdsView extends StatefulWidget {
-  final HomeScreenModel article;
-  final ScreenshotController screenshotController;
-  final FlipProvider flipProvider;
+  final  article;
+  // final ScreenshotController screenshotController;
+  final HomeProvider flipProvider;
   final isFoldable;
 
   const GoogleAdsView(
       {super.key,
       required this.article,
-      required this.screenshotController,
+      // required this.screenshotController,
       required this.flipProvider,
       required this.isFoldable});
 

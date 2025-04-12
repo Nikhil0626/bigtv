@@ -1,4 +1,7 @@
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
+import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -33,7 +36,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
           body: Padding(
             padding: EdgeInsets.all(16.w),
             child: SingleChildScrollView(
-              child: Wrap(
+              child:authenticationProvider.isCatLoading?AppLoadingScreen():authenticationProvider.getAllCategoryList.isEmpty?AppNoData(): Wrap(
                 spacing: 10.w,
                 runSpacing: 10.h,
                 children: categories.map((category) {
@@ -72,7 +75,9 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                   ? () {
                 authenticationProvider.sendCategoriesToServer(
                   isFilter: true
-                );
+                ).then((value) {
+                  Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => HomeView(),), (route) => false,);
+                },);
 
               }
                   : null,
@@ -85,7 +90,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                       : AppColors.loginBgColor,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
-                child: Center(
+                child: authenticationProvider.isCatSaveLoading?AppLoadingScreen():Center(
                   child: Text(
                     'Update',
                     style: newAppFont(

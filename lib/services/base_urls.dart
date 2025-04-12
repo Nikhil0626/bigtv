@@ -56,7 +56,7 @@ class BaseUrls {
 ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
 /// Python apis
-  static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
+  static const String ePaperBaseUrlAws = "http://3.108.235.31:8000";
   static const String baseUrlAwsDev = "http://65.0.7.144:8000";
 
 
@@ -66,6 +66,9 @@ class BaseUrls {
 
   ///FeedBack
   static const String getFeedback = "/feedback";
+
+  ///FeedBack
+  static const String getAllPost = "/allposts";
 
   ///Categories Apis
   static const String getAllCategories = "/categories";

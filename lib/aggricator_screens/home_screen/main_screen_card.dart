@@ -3,8 +3,10 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -42,13 +44,14 @@ class MainScreenCard extends StatefulWidget {
 }
 
 class _MainScreenCardState extends State<MainScreenCard> {
-  int currentIndex = 0;
+  // int currentIndex = 0;
   final CardSwiperController controller = CardSwiperController();
   final ScreenshotController adsScreenshotController = ScreenshotController();
 
   @override
   void initState() {
-    context.read<FlipProvider>().getArticles();
+    context.read<HomeProvider>().getAllPostList =[];
+    context.read<HomeProvider>().getAllPost();
     context.read<AuthenticationProvider>().getAllCategories();
     super.initState();
   }
@@ -57,12 +60,12 @@ class _MainScreenCardState extends State<MainScreenCard> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Consumer2<FlipProvider,SettingsProvider>(builder: (_, flipProvider,settingsProvider, __) {
+      body: Consumer2<HomeProvider,SettingsProvider>(builder: (_, homeProvider,settingsProvider, __) {
         return SizedBox(
           width: MediaQuery.of(context).size.width.w,
           height: MediaQuery.of(context).size.height - 150.h,
           child: Center(
-            child: flipProvider.mainArticlesData.isEmpty
+            child: homeProvider.isHomeLoading
                 ? Shimmer.fromColors(
                     baseColor: Colors.grey[300]!,
                     highlightColor: Colors.grey[100]!,
@@ -81,7 +84,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                       },
                     ),
                   )
-                : Column(
+                : homeProvider.getAllPostList.isEmpty?AppNoData():Column(
                     children: [
                       Consumer<AuthenticationProvider>(builder: (_, authenticationProvider, __) {
                         return Container(
@@ -123,9 +126,12 @@ class _MainScreenCardState extends State<MainScreenCard> {
                           allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
                           controller: controller,
                           // Assign the controller
-                          cardsCount: flipProvider.mainArticlesData.length,
+                          cardsCount: homeProvider.getAllPostList.length,
                           onSwipe: (previousIndex, currentIndex, direction) {
-                            print("Swiped from $previousIndex to $currentIndex");
+                            if(homeProvider.getAllPostList.length-5 ==currentIndex){
+                              log("last post   ${homeProvider.getAllPostList.last["id"]}");
+                              context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList.last["id"].toString());
+                            }
                             return true;
                           },
 
@@ -156,31 +162,31 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                   //   ),
                                   // ],
                                 ),
-                                child: flipProvider.mainArticlesData[index].type == "WebView"
+                                child: homeProvider.getAllPostList[index]['type'].toString() == "WebView"
                                     ? Padding(
                                         padding: const EdgeInsets.all(8.0),
                                         child: InAppWebViewScreen(
-                                          webUrl: flipProvider.webUrl.toString(),
+                                          webUrl: homeProvider.webUrl.toString(),
                                           title: '',
                                         ),
                                       )
-                                    : flipProvider.mainArticlesData[index].type == "GoogleAds"
+                                    : homeProvider.getAllPostList[index]['type'].toString()== "GoogleAds"
                                         ? Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: GoogleAdsView(
-                                              article: flipProvider.mainArticlesData[index],
-                                              flipProvider: flipProvider,
-                                              screenshotController: adsScreenshotController,
+                                              article: homeProvider.getAllPostList[index],
+                                              flipProvider: homeProvider,
+                                              // screenshotController: adsScreenshotController,
                                               isFoldable: false,
                                             ),
                                           )
-                                        : flipProvider.mainArticlesData[index].type == "Image"
+                                        : homeProvider.getAllPostList[index]['type'].toString() == "Image"
                                             ? Padding(
                                                 padding: const EdgeInsets.all(8.0),
                                                 child: Stack(
                                                   children: [
                                                     Image.network(
-                                                      flipProvider.mainArticlesData[index].imageUrl.url ?? "",
+                                                      homeProvider.getAllPostList[index]['image_url'].toString()?? "",
                                                       width: MediaQuery.of(context).size.width,
                                                       height: MediaQuery.of(context).size.height,
                                                       fit: BoxFit.cover,
@@ -191,7 +197,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                       child: GestureDetector(
                                                         onTap: () {
                                                           context.read<SettingsProvider>().saveBookmarks(
-                                                                flipProvider.mainArticlesData[index].id.toString(),
+                                                            homeProvider.getAllPostList[index]['id'].toString(),
                                                               );
                                                           print("");
                                                         },
@@ -212,7 +218,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                   ],
                                                 ),
                                               )
-                                            : flipProvider.mainArticlesData[index].type == "Gallery"
+                                            : homeProvider.getAllPostList[index]['type'].toString() == "Gallery"
                                                 ? Padding(
                                                     padding: const EdgeInsets.all(8.0),
                                                     child: Stack(
@@ -223,8 +229,8 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                           ),
                                                           child: FullPageCarousel(
                                                             isHome: true,
-                                                            imageUrls: flipProvider.mainArticlesData[index].gallery ?? [],
-                                                            postDetails: flipProvider.mainArticlesData[index],
+                                                            imageUrls: homeProvider.getAllPostList[index]['gallery'] ?? [],
+                                                            postDetails: homeProvider.getAllPostList[index],
                                                           ),
                                                         ),
                                                         Positioned(
@@ -233,7 +239,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                           child: GestureDetector(
                                                             onTap: () {
                                                               context.read<SettingsProvider>().saveBookmarks(
-                                                                    flipProvider.mainArticlesData[index].id.toString(),
+                                                                homeProvider.getAllPostList[index]['id'].toString(),
                                                                   );
                                                               print("");
                                                             },
@@ -266,15 +272,15 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                               borderRadius: BorderRadius.all(
                                                                 Radius.circular(12),
                                                               ),
-                                                              child: flipProvider.mainArticlesData[index].type == "Video"
+                                                              child:homeProvider.getAllPostList[index]['type'].toString() == "Video"
                                                                   ? SizedBox(
                                                                       height: MediaQuery.of(context).size.height * .35,
                                                                       width: MediaQuery.of(context).size.width,
                                                                       child: Stack(
                                                                         children: [
                                                                           VideoPreview(
-                                                                            imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
-                                                                            url: flipProvider.mainArticlesData[index].videoUrl?.url ?? "",
+                                                                            imageUrl: homeProvider.getAllPostList[index]['image_url'].toString(),
+                                                                            url: homeProvider.getAllPostList[index]['video_url'].toString() ?? "",
                                                                             isFoldable: false,
                                                                           ),
                                                                           Positioned(
@@ -283,7 +289,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                             child: GestureDetector(
                                                                               onTap: () {
                                                                                 context.read<SettingsProvider>().saveBookmarks(
-                                                                                      flipProvider.mainArticlesData[index].id.toString(),
+                                                                                  homeProvider.getAllPostList[index]['id'].toString(),
                                                                                     );
                                                                                 print("");
                                                                               },
@@ -307,7 +313,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                   : Stack(
                                                                       children: [
                                                                         CachedNetworkImage(
-                                                                          imageUrl: flipProvider.mainArticlesData[index].imageUrl.url,
+                                                                          imageUrl: homeProvider.getAllPostList[index]['image_url'].toString(),
                                                                           height: MediaQuery.of(context).size.height * .35,
                                                                           width: MediaQuery.of(context).size.width,
                                                                           fit: BoxFit.fill,
@@ -330,7 +336,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                           child: GestureDetector(
                                                                             onTap: () {
                                                                               context.read<SettingsProvider>().saveBookmarks(
-                                                                                    flipProvider.mainArticlesData[index].id.toString(),
+                                                                                homeProvider.getAllPostList[index]['id'].toString(),
                                                                                   );
                                                                               print("");
                                                                             },
@@ -356,14 +362,14 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                           Padding(
                                                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 6),
                                                             child: Text(
-                                                              flipProvider.mainArticlesData[index].title.toString(),
+                                                              homeProvider.getAllPostList[index]['title'].toString(),
                                                               style: fontStyle(fontSize: 20.sp, fontWeight: FontWeight.w600),
                                                             ),
                                                           ),
                                                           Spacer(),
                                                           Padding(
                                                             padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4),
-                                                            child: DateAndSource(data: flipProvider.mainArticlesData[index]),
+                                                            child: DateAndSource(data: homeProvider.getAllPostList[index]),
                                                           ),
                                                           Padding(
                                                             padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
@@ -374,22 +380,22 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                 Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
                                                                   return BottomActions(
                                                                     iconColor: AppColors.iconColors,
-                                                                    postType: flipProvider.mainArticlesData[index].subType ?? "",
-                                                                    icon: settingsProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString())
+                                                                    postType: homeProvider.getAllPostList[index]['subType'].toString() ?? "",
+                                                                    icon: settingsProvider.isLikeList.contains(homeProvider.getAllPostList[index]['id'].toString())
                                                                         ? "assets/svg/like_full.svg"
                                                                         : "assets/svg/like.svg",
                                                                     label: 'లైక్',
-                                                                    isLike: settingsProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString()),
+                                                                    isLike: settingsProvider.isLikeList.contains(homeProvider.getAllPostList[index]['id'].toString()),
                                                                     onTap: () {
 
                                                                       log("Like");
-                                                                      settingsProvider.isLikePost(flipProvider.mainArticlesData[index]);
+                                                                      settingsProvider.isLikePost(homeProvider.getAllPostList[index]);
                                                                     },
                                                                   );
                                                                 }),
 
                                                                 BottomActions(
-                                                                  postType: flipProvider.mainArticlesData[index].subType ?? "",
+                                                                  postType: homeProvider.getAllPostList[index]['subType']  ?? "",
                                                                   icon: "assets/svg/new_comment.svg",
                                                                   label: 'కామెంట్',
                                                                   iconColor: AppColors.iconColors,
@@ -400,11 +406,10 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                       "data": {
                                                                         "device_id": "${GlobalVariables().deviceId}",
                                                                         "userId": context.read<FlipProvider>().userId ?? "",
-                                                                        "postId": flipProvider.mainArticlesData[index].id.toString(),
+                                                                        "postId":homeProvider.getAllPostList[index]['id'] .toString(),
                                                                       }
                                                                     });
-                                                                    log("Comment --- ${context.read<AuthProvider>().loginType} -- ${flipProvider.mainArticlesData[index].id.toString()}");
-                                                                    showComments(context, flipProvider.mainArticlesData[index]);
+                                                                    showComments(context,homeProvider.getAllPostList[index]);
                                                                     EventRepo().sendEvent({
                                                                       "key": "comments",
                                                                       "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}
@@ -413,7 +418,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                 ),
                                                                 Spacer(),
                                                                 BottomActions(
-                                                                  postType: flipProvider.mainArticlesData[index].subType ?? "",
+                                                                  postType: homeProvider.getAllPostList[index]['subType']  ?? "",
                                                                   icon: "assets/svg/share.svg",
                                                                   label: 'షేర్',
                                                                   iconColor: AppColors.iconColors,
@@ -423,37 +428,37 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                       "data": {
                                                                         "device_id": "${GlobalVariables().deviceId}",
                                                                         "userId": context.read<FlipProvider>().userId ?? "",
-                                                                        "postId": flipProvider.mainArticlesData[index].id.toString(),
+                                                                        "postId": homeProvider.getAllPostList[index]['id'] .toString(),
                                                                         "isWhatAppShare": false,
                                                                       }
                                                                     });
 
-                                                                    sendShareDetails(context.read<FlipProvider>().userId, flipProvider.mainArticlesData[index].id,
-                                                                        flipProvider.mainArticlesData[index].content.toString());
+                                                                    sendShareDetails(context.read<FlipProvider>().userId, homeProvider.getAllPostList[index]['id'] ,
+                                                                        homeProvider.getAllPostList[index]['content'] .toString());
 
-                                                                    if (flipProvider.mainArticlesData[index].type == "Standard" || flipProvider.mainArticlesData[index].type == "Video") {
+                                                                    if (homeProvider.getAllPostList[index]['type']  == "Standard" || homeProvider.getAllPostList[index]['type'] == "Video") {
                                                                       try {
                                                                         final image = await adsScreenshotController.capture(
                                                                           pixelRatio: 0.5,
                                                                         );
                                                                         if (image != null) {
                                                                           final directory = await getTemporaryDirectory();
-                                                                          final imagePath = '${directory.path}/${flipProvider.mainArticlesData[index].id}.png';
+                                                                          final imagePath = '${directory.path}/${homeProvider.getAllPostList[index]['id'] }.png';
                                                                           final imageFile = File(imagePath);
                                                                           await imageFile.writeAsBytes(image);
 
                                                                           Share.shareXFiles([XFile(imageFile.path)],
                                                                               text: Platform.isIOS
-                                                                                  ? flipProvider.mainArticlesData[index].linkURLIos.toString()
-                                                                                  : flipProvider.mainArticlesData[index].linkURLAndroid.toString());
+                                                                                  ? homeProvider.getAllPostList[index]['linkURLAndroid'] .toString()
+                                                                                  :  homeProvider.getAllPostList[index]['linkURLIos'] .toString());
                                                                         } else {
                                                                           CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                                                                         }
                                                                       } catch (e) {
                                                                         CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                                                                       }
-                                                                    } else if (flipProvider.mainArticlesData[index].type == "Gallery") {
-                                                                      createAndSharePdf(context, flipProvider.mainArticlesData[index]);
+                                                                    } else if (homeProvider.getAllPostList[index]['type'] == "Gallery") {
+                                                                      createAndSharePdf(context, homeProvider.getAllPostList[index]);
                                                                     }
                                                                   },
                                                                 ),

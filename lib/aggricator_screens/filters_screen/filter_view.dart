@@ -25,7 +25,6 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
     super.dispose();
   }
 
-
   Widget _buildBorderedItem(String title) {
     return Container(
       margin: const EdgeInsets.all(8.0),
@@ -45,7 +44,10 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Filter ',style: newAppFont(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
+        title: Text(
+          'Filter ',
+          style: newAppFont(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -57,12 +59,10 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
           indicatorColor: Colors.blue,
         ),
       ),
-body: TabBarView(
-    controller: _tabController,
-    children: [
-  UpdateCategoriesView(),
-  UpdateRegionsView(),
-]),    );
+      body: TabBarView(controller: _tabController, children: [
+        UpdateCategoriesView(),
+        UpdateRegionsView(),
+      ]),
+    );
   }
 }
-

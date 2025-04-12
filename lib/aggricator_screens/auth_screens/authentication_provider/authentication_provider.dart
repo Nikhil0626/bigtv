@@ -76,6 +76,7 @@ class AuthenticationProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         newAppLoginStatus = NewAppLoginStatus.otp;
         saveLoginState();
+        otpController.text = "";
       }
     } catch (e, st) {
       log(e.toString());
@@ -106,7 +107,7 @@ class AuthenticationProvider extends ChangeNotifier {
       Response response = await AuthenticationRepo().validateOtp(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
-        sp.setString("userId", response.data['user']['id'].toString());
+        sp.setString("userId", response.data['user_id'].toString());
         if (response.data['is_new_user'] == false) {
           Navigator.pushAndRemoveUntil(
               context,
@@ -161,8 +162,10 @@ class AuthenticationProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
+bool isCatLoading =false;
+bool isCatSaveLoading =false;
   Future getAllCategories() async {
+    isCatLoading =  true;
     selectedCategories = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -188,6 +191,7 @@ class AuthenticationProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
     } finally {
+      isCatLoading =false;
       notifyListeners();
     }
   }
@@ -204,6 +208,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future sendCategoriesToServer({bool isFilter = false}) async {
+    isCatSaveLoading = true;
     List<int> selectedCategoryIds = getAllCategoryList.where((item) => selectedCategories.contains(item.categoryName.toString())).map((item) => item.categoryId as int).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -223,6 +228,7 @@ class AuthenticationProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
     } finally {
+      isCatSaveLoading = false;
       notifyListeners();
     }
   }
@@ -327,11 +333,11 @@ class AuthenticationProvider extends ChangeNotifier {
             ));
         break;
       default:
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) => LoginBackgroundView(),
-            ));
+            ),(route) => false,);
     }
   }
 
@@ -350,5 +356,12 @@ class AuthenticationProvider extends ChangeNotifier {
       return NewAppLoginStatus.values.firstWhere((e) => e.toString() == status, orElse: () => NewAppLoginStatus.none);
     }
     return NewAppLoginStatus.none;
+  }
+
+  void setLogOutStatus(context) async {
+   newAppLoginStatus = NewAppLoginStatus.login;
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString("loginState", newAppLoginStatus.toString());
+   isPageNavigation( context);
   }
 }

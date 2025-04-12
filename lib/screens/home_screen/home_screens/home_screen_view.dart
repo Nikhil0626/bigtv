@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -74,6 +75,7 @@ class _HomeScreenView1State extends State<HomeScreenView1> {
     super.initState();
     context.read<FlipProvider>().isDeviceData();
     context.read<FlipProvider>().getArticles();
+
   }
 
   @override
