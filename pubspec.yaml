@@ -112,6 +112,8 @@ flutter:
     - assets/new_app_icon/
     - assets/svg/
     - assets/svg/Profile.svg
+    - assets/svg/new_refresh.svg
+    - assets/svg/new_comment.svg
     - shorebird.yaml
 
 
