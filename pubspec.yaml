@@ -58,6 +58,7 @@ dependencies:
   facebook_app_events: ^0.19.5
   package_info_plus: ^8.3.0
   app_links: ^6.4.0
+  image_picker: ^1.1.2
 
   easy_localization: ^3.0.7+1
 
@@ -112,6 +113,8 @@ flutter:
     - assets/new_app_icon/
     - assets/svg/
     - assets/svg/Profile.svg
+    - assets/svg/new_refresh.svg
+    - assets/svg/new_comment.svg
     - shorebird.yaml
 
 

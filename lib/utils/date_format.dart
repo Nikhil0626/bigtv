@@ -1,13 +1,17 @@
+import 'dart:developer';
+
 import 'package:intl/intl.dart';
 
 String formatTimeDifference(String inputTime,{bool isComment= false} ) {
 
 
-  final now = DateTime.now().add(const Duration(hours: -5, minutes: -30)); // Get current local time
+  final now = DateTime.now().add(const Duration(hours: -5, minutes: -30));
   // Define date formats
-  DateFormat inputFormat = DateFormat("MMM d, yyyy h:mm a"); // Format for tweets
-  DateFormat format = DateFormat('yyyy-MM-ddTHH:mm:ss'); // Generic ISO format
-  DateFormat format1 = DateFormat('yyyy-MM-dd HH:mm:ss'); // Generic ISO format
+  log(inputTime.toString());
+
+  DateFormat inputFormat = DateFormat("MMM d, yyyy h:mm a");
+  DateFormat format = DateFormat('yyyy-MM-ddTHH:mm:ss');
+  DateFormat format1 = DateFormat('yyyy-MM-dd HH:mm:ss');
 
   DateTime date;
   try {
@@ -20,7 +24,7 @@ String formatTimeDifference(String inputTime,{bool isComment= false} ) {
     }
   } catch (e) {
     print(e.toString());
-    return "Invalid date "; // Return an error string
+    return "Invalid date ";
   }
 
   final difference = now.difference(date);

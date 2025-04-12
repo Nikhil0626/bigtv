@@ -1,17 +1,13 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
-import 'individual_paper.dart';
-
-
-
-
+import '../../settings_screen/settings_provider/settings_provider.dart';
+import '../../../screens/home_screen/home_provider/provider.dart';
+import '../paper_provider/epapers_provider.dart';
 
 class PapersScreenList extends StatelessWidget {
   @override
@@ -19,91 +15,108 @@ class PapersScreenList extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Consumer<EPapersProvider>(
-        builder: (_,ePapersProvider,__) {
+        builder: (_, ePapersProvider, __) {
           return Padding(
-            padding: EdgeInsets.only(top: 0, left: 10, right: 10), // Adjusted for safe area
-            child: GridView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            child: ListView.builder(
               itemCount: ePapersProvider.getAllMainPapersList.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
               itemBuilder: (context, index) {
-                return InkWell(
-                  onTap: (){
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => IndividualPaper(paper: ePapersProvider.getAllMainPapersList[index].source,),
-                        ));
-                  },
-                  child: Card(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                final article = ePapersProvider.getAllMainPapersList[index];
+
+                return ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(10)),
+                  child: Container(
+                    height: 300,
+                    margin: EdgeInsets.all(16),
                     child: Stack(
                       children: [
-
                         ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(12.r)),
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
                           child: CachedNetworkImage(
                             imageUrl: ePapersProvider.getAllMainPapersList[index].imageUrl,
+                            width: MediaQuery.of(context).size.width,
+                            height: 300,
                             fit: BoxFit.fill,
-                            width: double.infinity,
-                            placeholder: (context, url) => Center(child: CircularProgressIndicator()), // Loading indicator
-                            errorWidget: (context, url, error) => Icon(Icons.error, color: Colors.red), // Error fallback
-                          ),
-                        ),
-
-                        Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: AppColors.cardBackgroundColor,
-                              borderRadius: BorderRadius.only(
-                                bottomLeft: Radius.circular(12.r),
-                                bottomRight: Radius.circular(12.r),
-                              ),
+                            placeholder: (context, url) => Container(
+                              color: AppColors.borderColor.withOpacity(.2),
                             ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min, // Ensures the container fits its content
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  ePapersProvider.getAllMainPapersList[index].editionName,
-                                  style: fontStyle(fontWeight: FontWeight.w600, color: AppColors.textColor,fontSize: 12.sp),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                SizedBox(height: 4), // Adding space
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      ePapersProvider.getAllMainPapersList[index].source,
-                                      style: TextStyle(fontSize: 12, color:AppColors.textColor,),
-                                    ),
-                                    Icon(Icons.more_vert, color: AppColors.textColor,),
-                                  ],
-                                ),
-                              ],
+                            errorWidget: (context, url, error) => Center(
+                              child: Icon(
+                                Icons.image,
+                                size: 100,
+                                color: Colors.grey.shade300,
+                              ),
                             ),
                           ),
                         ),
 
                         Positioned(
-                          top: 8,
-                          right: 8,
-                          child: Container(
-                            height: 24.w,
-                              width: 24.w,
+                          top: 1,
+                          right: 14,
+                          child: GestureDetector(
+                            onTap: () {
+                              context.read<SettingsProvider>().saveBookmarks(
+                                    ePapersProvider.getAllMainPapersList[index].id.toString(),
+                                  );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(7),
                               decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(.8),
-                                  borderRadius: BorderRadius.all(Radius.circular(12.r))),
-                              child: Icon(Icons.bookmark_border, color: Colors.white,size: 20.sp,)),
+                                color: Colors.black54,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.bookmark,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                          ),
                         ),
+                        Align(
+                          alignment: Alignment.bottomLeft,
+                          child: Container(
+                            color: Colors.white,
+                            // padding: EdgeInsets.only(left: 10, bottom: 13),
+                            child: Row(
+                              // mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                    height: 60,
+                                    width: 60,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.white,
+                                    ),
+                                    padding: const EdgeInsets.all(2),
+                                    child: Image.network(
+                                      ePapersProvider.getAllMainPapersList[index].logo,
+                                      height: 30,
+                                      width: 30,
+                                      fit: BoxFit.fill,
+                                    )
+                                ),
+                                width(width: 6.h),
+                                Text(
+                                  ePapersProvider.getAllMainPapersList[index].source,
+                                  style: newAppFont(
+                                    color: Colors.grey.shade700,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                Spacer(),
+                                Icon(
+                                  Icons.ios_share,
+                                  color: Colors.grey.shade600,
+                                  size: 20,
+                                ),
+                                width(width: 15.w),
+                              ],
+                            ),
+                          ),
+                        ),
+
                       ],
                     ),
                   ),
@@ -111,7 +124,7 @@ class PapersScreenList extends StatelessWidget {
               },
             ),
           );
-        }
+        },
       ),
     );
   }

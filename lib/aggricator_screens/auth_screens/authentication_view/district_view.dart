@@ -123,6 +123,7 @@ class _DistrictViewState extends State<DistrictView> {
 
   @override
   Widget build(BuildContext context) {
+
     return Consumer<AuthenticationProvider>(builder: (_, authenticationProvider, __) {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
@@ -206,12 +207,12 @@ class _DistrictViewState extends State<DistrictView> {
                           ],
                         ),
                         children: districts.map((district) {
-                          bool isSelected = authenticationProvider.selectedLocations.contains(district.name);
+                          bool isSelected = authenticationProvider.selectedLocations.contains(district.districtName);
                           return CheckboxListTile(
-                            title: Text(district.name, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                            title: Text(district.districtName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
                             value: isSelected,
                             onChanged: (bool? selected) {
-                              authenticationProvider.addToSelectedLocations(district.name);
+                              authenticationProvider.addToSelectedLocations(district.districtName);
                             },
                           );
                         }).toList(),
@@ -259,6 +260,7 @@ class _DistrictViewState extends State<DistrictView> {
           ),
         ),
       );
-    });
+    }
+    );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 
@@ -23,10 +24,10 @@ class _InAppWebViewScreenState extends State<InAppWebViewScreen> {
 
         },
             icon: Icon(Icons.arrow_back,color: Colors.black,size: 23,)),
-        centerTitle: true,
+        centerTitle: false,
         title: Text(
-          " ",
-          style: TextStyle(color: Colors.lightBlue, fontSize: 16, fontWeight: FontWeight.w500),
+          widget.title,
+          style: TextStyle(color: AppColors.textColor, fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
       body: InAppWebView(

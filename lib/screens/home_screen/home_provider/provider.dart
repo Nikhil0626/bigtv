@@ -477,7 +477,7 @@ class FlipProvider extends ChangeNotifier {
       log(isLikeList.toString());
     }
 
-    notifyListeners(); // Notify listeners if using ChangeNotifier
+    notifyListeners();
   }
 
   void isLocationChange(val) {
