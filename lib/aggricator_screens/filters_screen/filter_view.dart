@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/filters_screen/update_categories_view.dart';
+import 'package:chotanews/aggricator_screens/filters_screen/update_regions_view.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 
@@ -44,7 +45,7 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Filter View'),
+        title: Text('Filter ',style: newAppFont(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -60,7 +61,8 @@ body: TabBarView(
     controller: _tabController,
     children: [
   UpdateCategoriesView(),
-  UpdateCategoriesView(),
+  UpdateRegionsView(),
 ]),    );
   }
 }
+

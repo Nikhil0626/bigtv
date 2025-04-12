@@ -24,9 +24,10 @@ import 'book_marks_screen.dart';
 import '../../filters_screen/filter_view.dart';
 import '../../profile_screen/profile_view.dart';
 
-
 class SettingsView extends StatefulWidget {
-  const SettingsView({super.key,});
+  const SettingsView({
+    super.key,
+  });
 
   @override
   _SettingsViewState createState() => _SettingsViewState();
@@ -47,6 +48,7 @@ class _SettingsViewState extends State<SettingsView> {
     loginStatus = await getLoginStatus();
     setState(() {});
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +61,7 @@ class _SettingsViewState extends State<SettingsView> {
               context,
               "Profile.svg",
               "Edit Profile",
-                  () {
+              () {
                 // if (loginStatus == LoginStatus.skip) {
                 //   CustomToast.showErrorToast(msg: 'Please login with mobile number');
                 // } else if (loginStatus == LoginStatus.loggedIn) {
@@ -69,7 +71,6 @@ class _SettingsViewState extends State<SettingsView> {
                 );
                 // }
               },
-
             ),
             // else
             SizedBox.shrink(),
@@ -86,19 +87,17 @@ class _SettingsViewState extends State<SettingsView> {
               Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.example.yourapp");
             }),
 
-
-            _buildSettingsRow(context, "Help_support.svg", "Help & Support", () {
+            _buildSettingsRow(context, "Help_support.svg", "Contact Us", () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => InAppWebViewScreen(
                     webUrl: BaseUrls.aboutPage,
-                    title: "About Us", // Add a title here
+                    title: "Contact Us", // Add a title here
                   ),
                 ),
               );
             }),
-
             _buildSettingsRow(context, "Advertise_icon.svg", "Advertise With Us", () {
               Navigator.push(
                 context,
@@ -110,17 +109,19 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InAppWebViewScreen(
-                    webUrl: BaseUrls.contactPage,
-                    title: "Contact Us",
-                  ),
-                ),
-              );
-            }),
+
+            // _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => InAppWebViewScreen(
+            //         webUrl: BaseUrls.contactPage,
+            //         title: "Contact Us",
+            //       ),
+            //     ),
+            //   );
+            // }),
+
             _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
               Navigator.push(
                 context,
@@ -151,21 +152,23 @@ class _SettingsViewState extends State<SettingsView> {
               context,
               "Signout.svg",
               loginStatus == LoginStatus.skip ? "Login" : "Logout",
-                  () async {
-                context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+              () async {
+                context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.none;
                 context.read<AuthenticationProvider>().saveLoginState();
                 context.read<AuthenticationProvider>().isPageNavigation(context);
                 // loginStatus == LoginStatus.skip ? 'Login' : 'Logout';
-                Navigator.push(context, MaterialPageRoute(builder: (context) => LoginBackgroundView()));
-                logoutUser();context.read<AuthProvider>().loginStatus(LoginStatus.none, context);
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => LoginBackgroundView()));
+                // logoutUser();context.read<AuthProvider>().loginStatus(LoginStatus.none, context);
                 SharedPreferences sp = await SharedPreferences.getInstance();
-                String? userId =  sp.getString("loginId",);
+                String? userId = sp.getString(
+                  "loginId",
+                );
                 EventRepo().sendEvent({
                   "key": "logout",
                   "data": {
                     "device_id": "${GlobalVariables().deviceId}",
-                    "logout":true,
-                    "userId": userId??"",
+                    "logout": true,
+                    "userId": userId ?? "",
                   }
                 });
                 await sp.setString("loginId", "");
@@ -174,6 +177,15 @@ class _SettingsViewState extends State<SettingsView> {
                   context,
                   MaterialPageRoute(builder: (context) => LoginView()),
                 );
+
+                // Navigator.push(
+                //   context,
+                //   MaterialPageRoute(
+                //     builder: (context) => Material(
+                //       child: LoginView(),
+                //     ),
+                //   ),
+                // );
               },
             ),
           ],
@@ -189,9 +201,14 @@ class _SettingsViewState extends State<SettingsView> {
         padding: EdgeInsets.symmetric(vertical: 14),
         child: Row(
           children: [
-            SvgPicture.asset('assets/svg/$iconName', height: 20.h, width: 20.w,color: AppColors.settingsPageIconColor,),
+            SvgPicture.asset(
+              'assets/svg/$iconName',
+              height: 20.h,
+              width: 20.w,
+              color: AppColors.settingsPageIconColor,
+            ),
             width(width: 25.w),
-            Text(title, style: newAppFont(fontSize: 16.sp,fontWeight: FontWeight.w400,color: AppColors.settingsPageTextColor)),
+            Text(title, style: newAppFont(fontSize: 16.sp, fontWeight: FontWeight.w400, color: AppColors.settingsPageTextColor)),
           ],
         ),
       ),

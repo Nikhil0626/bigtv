@@ -52,8 +52,8 @@ class CustomSwitch extends StatelessWidget {
                         !homeProvider.isSwitched ? "Swipe" : "Scroll",
                         style: fontStyle(
                           fontSize: 10,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black87,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textColor,
                         ),
                       ),
                     ),
@@ -67,7 +67,7 @@ class CustomSwitch extends StatelessWidget {
                       width: 14, // Reduced size
                       height: 14,
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: Colors.lightBlue,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(

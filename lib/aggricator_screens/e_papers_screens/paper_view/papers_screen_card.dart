@@ -155,10 +155,10 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                             color: Colors.white,
                                           ),
                                           padding: const EdgeInsets.all(2),
-                                          child: SvgPicture.network(
+                                          child: Image.network(
                                             ePapersProvider.getAllMainPapersList[index].logo,
-                                            // height: 30,
-                                            // width: 30,
+                                            height: 30,
+                                            width: 30,
                                             fit: BoxFit.fill,
                                           )
                                       ),

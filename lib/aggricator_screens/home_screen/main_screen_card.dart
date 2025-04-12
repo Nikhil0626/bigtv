@@ -57,7 +57,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Consumer<FlipProvider>(builder: (_, flipProvider, __) {
+      body: Consumer2<FlipProvider,SettingsProvider>(builder: (_, flipProvider,settingsProvider, __) {
         return SizedBox(
           width: MediaQuery.of(context).size.width.w,
           height: MediaQuery.of(context).size.height - 150.h,
@@ -88,20 +88,21 @@ class _MainScreenCardState extends State<MainScreenCard> {
                           height: 50,
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                           // color: Colors.greenAccent,
-                          child: ListView.builder(
+                          child:ListView.builder(
                             scrollDirection: Axis.horizontal,
                             itemCount: authenticationProvider.getAllCategoryList.length,
                             itemBuilder: (context, index) {
-                              final isSelected = authenticationProvider.selectedCategories.contains(authenticationProvider.getAllCategoryList[index].categoryName.toString()) ?? false;
+                              final isSelected = authenticationProvider.selectedCategories
+                                  .contains(authenticationProvider.getAllCategoryList[index].categoryName.toString());
 
                               return Container(
-                                // height: 40,
-
-                                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+                                margin: EdgeInsets.symmetric(horizontal: 6.w),
+                                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
                                 decoration: BoxDecoration(
                                   color: isSelected ? AppColors.loginBgColor : Colors.grey.shade200,
-                                  borderRadius: BorderRadius.circular(20.r),
+                                  borderRadius: BorderRadius.circular(12.r),
                                 ),
+                                alignment: Alignment.center,
                                 child: Text(
                                   authenticationProvider.getAllCategoryList[index].categoryName.toString(),
                                   textAlign: TextAlign.center,
@@ -113,7 +114,8 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                 ),
                               );
                             },
-                          ),
+                          )
+
                         );
                       }),
                       Expanded(
@@ -142,16 +144,17 @@ class _MainScreenCardState extends State<MainScreenCard> {
                               child: Container(
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
-                                  color: AppColors.cardBackgroundColor, // Unique color per card
+                                  color: Colors.grey.shade200,
+                                  // color: AppColors.cardBackgroundColor, // Unique color per card
                                   borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.2), // Shadow color
-                                      blurRadius: 6, // Softness of the shadow
-                                      spreadRadius: 2, // How far the shadow spreads
-                                      offset: Offset(0, 3), // Offset (x, y)
-                                    ),
-                                  ],
+                                  // boxShadow: [
+                                  //   BoxShadow(
+                                  //     color: Colors.black.withOpacity(0.2), // Shadow color
+                                  //     blurRadius: 6, // Softness of the shadow
+                                  //     spreadRadius: 2, // How far the shadow spreads
+                                  //     offset: Offset(0, 3), // Offset (x, y)
+                                  //   ),
+                                  // ],
                                 ),
                                 child: flipProvider.mainArticlesData[index].type == "WebView"
                                     ? Padding(
@@ -199,7 +202,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                             shape: BoxShape.circle,
                                                           ),
                                                           child: Icon(
-                                                            Icons.bookmark,
+                                                            Icons.bookmark_outline,
                                                             color: Colors.white,
                                                             size: 20,
                                                           ),
@@ -241,7 +244,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                 shape: BoxShape.circle,
                                                               ),
                                                               child: Icon(
-                                                                Icons.bookmark,
+                                                                Icons.bookmark_outline,
                                                                 color: Colors.white,
                                                                 size: 20,
                                                               ),
@@ -291,7 +294,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                                   shape: BoxShape.circle,
                                                                                 ),
                                                                                 child: Icon(
-                                                                                  Icons.bookmark,
+                                                                                  Icons.bookmark_outline,
                                                                                   color: Colors.white,
                                                                                   size: 20,
                                                                                 ),
@@ -338,7 +341,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                                 shape: BoxShape.circle,
                                                                               ),
                                                                               child: Icon(
-                                                                                Icons.bookmark,
+                                                                                Icons.bookmark_outline,
                                                                                 color: Colors.white,
                                                                                 size: 20,
                                                                               ),
@@ -367,25 +370,27 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                             child: Row(
                                                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                                               children: [
-                                                                Consumer<FlipProvider>(builder: (_, flipProvider, __) {
+
+                                                                Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
                                                                   return BottomActions(
                                                                     iconColor: AppColors.iconColors,
                                                                     postType: flipProvider.mainArticlesData[index].subType ?? "",
-                                                                    icon: flipProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString())
+                                                                    icon: settingsProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString())
                                                                         ? "assets/svg/like_full.svg"
                                                                         : "assets/svg/like.svg",
                                                                     label: 'లైక్',
-                                                                    isLike: flipProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString()),
+                                                                    isLike: settingsProvider.isLikeList.contains(flipProvider.mainArticlesData[index].id.toString()),
                                                                     onTap: () {
 
                                                                       log("Like");
-                                                                      context.read<SettingsProvider>().isLikePost(flipProvider.mainArticlesData[index]);
+                                                                      settingsProvider.isLikePost(flipProvider.mainArticlesData[index]);
                                                                     },
                                                                   );
                                                                 }),
+
                                                                 BottomActions(
                                                                   postType: flipProvider.mainArticlesData[index].subType ?? "",
-                                                                  icon: "assets/svg/comment.svg",
+                                                                  icon: "assets/svg/new_comment.svg",
                                                                   label: 'కామెంట్',
                                                                   iconColor: AppColors.iconColors,
                                                                   onTap: () {
@@ -452,32 +457,32 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                     }
                                                                   },
                                                                 ),
-                                                                SizedBox(
-                                                                  width: 40,
-                                                                  child: InkWell(
-                                                                    onTap: () {
-                                                                      log("Refresh");
-                                                                      EventRepo().sendEvent({
-                                                                        "key": "reload",
-                                                                        "data": {
-                                                                          "device_id": "${GlobalVariables().deviceId}",
-                                                                          "userId": GlobalVariables().userId ?? "",
-                                                                        }
-                                                                      });
-                                                                      flipProvider.getArticles(refresh: true);
-                                                                    },
-                                                                    child: Center(
-                                                                      child: flipProvider.isRefresh
-                                                                          ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
-                                                                          : SvgPicture.asset(
-                                                                              "assets/svg/reload.svg",
-                                                                              height: 20,
-                                                                              width: 20,
-                                                                              color: AppColors.iconColors,
-                                                                            ),
-                                                                    ),
-                                                                  ),
-                                                                ),
+                                                                // SizedBox(
+                                                                //   width: 40,
+                                                                //   child: InkWell(
+                                                                //     onTap: () {
+                                                                //       log("Refresh");
+                                                                //       EventRepo().sendEvent({
+                                                                //         "key": "reload",
+                                                                //         "data": {
+                                                                //           "device_id": "${GlobalVariables().deviceId}",
+                                                                //           "userId": GlobalVariables().userId ?? "",
+                                                                //         }
+                                                                //       });
+                                                                //       flipProvider.getArticles(refresh: true);
+                                                                //     },
+                                                                //     child: Center(
+                                                                //       child: flipProvider.isRefresh
+                                                                //           ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
+                                                                //           : SvgPicture.asset(
+                                                                //               "assets/svg/reload.svg",
+                                                                //               height: 20,
+                                                                //               width: 20,
+                                                                //               color: AppColors.iconColors,
+                                                                //             ),
+                                                                //     ),
+                                                                //   ),
+                                                                // ),
                                                               ],
                                                             ),
                                                           ),
@@ -488,10 +493,10 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                         left: 30,
                                                         top: MediaQuery.of(context).size.height * .345,
                                                         child: Container(
-                                                          height: 30,
+                                                          height: 25,
                                                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
                                                           decoration: BoxDecoration(
-                                                            color: Colors.grey.shade50,
+                                                            color: Colors.grey.shade100,
                                                             borderRadius: BorderRadius.circular(20),
                                                             boxShadow: [
                                                               BoxShadow(
@@ -598,7 +603,7 @@ class ShimmerCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 20),
+          height(height: 20.h),
         ],
       ),
     );

@@ -53,15 +53,15 @@ class CategoryModel {
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      categoryId: json['categoryid'] as int?,
-      categoryName: json['categoryname'] as String?,
+      categoryId: json['categoryId'] as int?,
+      categoryName: json['categoryName'] as String?,
       isFollowed: json['isFollowed'] as bool?,
     );
   }
 
   Map<String, dynamic> toJson() => {
-    'categoryid': categoryId,
-    'categoryname': categoryName,
+    'categoryId': categoryId,
+    'categoryName': categoryName,
     'isFollowed': isFollowed,
   };
 }

@@ -35,6 +35,7 @@ class PapersScreenList extends StatelessWidget {
                           child: CachedNetworkImage(
                             imageUrl: ePapersProvider.getAllMainPapersList[index].imageUrl,
                             width: MediaQuery.of(context).size.width,
+                            height: 300,
                             fit: BoxFit.fill,
                             placeholder: (context, url) => Container(
                               color: AppColors.borderColor.withOpacity(.2),
@@ -49,7 +50,6 @@ class PapersScreenList extends StatelessWidget {
                           ),
                         ),
 
-                        // Bookmark Icon (Top Right)
                         Positioned(
                           top: 1,
                           right: 14,
@@ -77,27 +77,28 @@ class PapersScreenList extends StatelessWidget {
                           alignment: Alignment.bottomLeft,
                           child: Container(
                             color: Colors.white,
-                            padding:  EdgeInsets.only(left: 10, bottom: 13, right: 10),
+                            // padding: EdgeInsets.only(left: 10, bottom: 13),
                             child: Row(
+                              // mainAxisSize: MainAxisSize.min,
                               children: [
                                 Container(
-                                  height: 45,
-                                  width: 45,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(8),
-                                    color: Colors.white,
-                                  ),
-                                  padding:  EdgeInsets.all(2),
-                                  child: Image.network(
-                                    "https://images.jdmagicbox.com/comp/vijayawada/01/0866p866std3000001/catalogue/andhra-jyothi-office-gannavaram-vijayawada-newspaper-publishers-e1n33mt0bc.jpg",
-                                    height: 30,
-                                    width: 30,
-                                    fit: BoxFit.contain,
-                                  ),
+                                    height: 60,
+                                    width: 60,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      color: Colors.white,
+                                    ),
+                                    padding: const EdgeInsets.all(2),
+                                    child: Image.network(
+                                      ePapersProvider.getAllMainPapersList[index].logo,
+                                      height: 30,
+                                      width: 30,
+                                      fit: BoxFit.fill,
+                                    )
                                 ),
-                                width(width: 10.w),
+                                width(width: 6.h),
                                 Text(
-                                  "AndhraJyoti",
+                                  ePapersProvider.getAllMainPapersList[index].source,
                                   style: newAppFont(
                                     color: Colors.grey.shade700,
                                     fontSize: 16,
@@ -110,6 +111,7 @@ class PapersScreenList extends StatelessWidget {
                                   color: Colors.grey.shade600,
                                   size: 20,
                                 ),
+                                width(width: 15.w),
                               ],
                             ),
                           ),

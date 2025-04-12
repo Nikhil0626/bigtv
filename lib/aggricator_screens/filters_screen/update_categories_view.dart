@@ -30,7 +30,6 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
         final selectedCategories = authenticationProvider.selectedCategories;
 
         return Scaffold(
-
           body: Padding(
             padding: EdgeInsets.all(16.w),
             child: SingleChildScrollView(
