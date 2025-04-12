@@ -89,6 +89,6 @@ class BaseUrls {
   ///Like Apis
   static const String like = "/like";
 
-  // ///Reels Apis
-  // static const String reels = "/reels";
+  ///Update profile
+  static const String getProfile = "/profile";
 }

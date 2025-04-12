@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:chotanews/services/base_urls.dart';
@@ -41,6 +43,7 @@ class _SettingsViewState extends State<SettingsView> {
 
   Future getLogin() async {
     loginStatus = await context.read<AuthenticationProvider>().getLoginStatus();
+    log("kjdkjkjhwd ${loginStatus.toString()}");
     setState(() {});
   }
   @override
@@ -55,7 +58,7 @@ class _SettingsViewState extends State<SettingsView> {
             _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
               if (loginStatus == NewAppLoginStatus.skip) {
                 CustomToast.showErrorToast(msg: 'Please login with mobile number');
-              } else if (loginStatus == NewAppLoginStatus.login) {
+              } else if (loginStatus == NewAppLoginStatus.home) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ProfileView()),

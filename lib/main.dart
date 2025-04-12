@@ -36,6 +36,7 @@ import 'aggricator_screens/home_screen/news_posts_provider.dart';
 import 'aggricator_screens/individual_post_details/individual_post_view.dart';
 import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'aggricator_screens/settings_screen/settings_repository/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
@@ -212,6 +213,7 @@ class _MyAppState extends State<MyApp> {
               create: (context) => AuthenticationProvider()),
           ChangeNotifierProvider<ReelsProviders>(create: (context) => ReelsProviders()),
           ChangeNotifierProvider<SettingsProvider>(create: (context) => SettingsProvider()),
+          ChangeNotifierProvider<ProfileProvider>(create: (context) => ProfileProvider()),
         ],
         child: MaterialApp(
           navigatorKey: mainNavigatorKey,

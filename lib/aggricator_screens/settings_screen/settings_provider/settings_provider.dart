@@ -19,6 +19,10 @@ class SettingsProvider extends ChangeNotifier {
   List<String> selectedFeedbackList = [];
   TextEditingController feedbackController = TextEditingController();
 
+  List profileList = [];
+  List<String> selectedProfileList = [];
+  TextEditingController profileController = TextEditingController();
+
   bool isBookMarkLoading = false;
 
   Future getAllBookMarks() async {

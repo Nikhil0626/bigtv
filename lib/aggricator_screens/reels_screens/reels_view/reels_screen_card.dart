@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class ReelsScreen extends StatefulWidget {
@@ -44,30 +45,65 @@ class _ReelsScreenState extends State<ReelsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: YoutubePlayerBuilder(
-        player: YoutubePlayer(controller: _controller),
-        builder: (context, player) {
-          return PageView.builder(
-            scrollDirection: Axis.vertical,
-            itemCount: videoData.length,
-            onPageChanged: _onPageChanged,
-            itemBuilder: (context, index) {
-              return Stack(
-                children: [
-                  Positioned.fill(child: player),
-                  Positioned(
-                    bottom: 30,
-                    left: 20,
-                    child: Text(
-                      videoData[index]['text']!,
-                      style: TextStyle(color: Colors.white, fontSize: 20),
-                    ),
-                  ),
-                ],
-              );
-            },
-          );
-        },
+      body: Center(
+        child: CardSwiper(
+          allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+            cardsCount: videoData.length,
+          onSwipe: (previousIndex, currentIndex, direction) {
+            print("Swiped from $previousIndex to $currentIndex");
+            return true;
+          },
+          numberOfCardsDisplayed: 4,
+          cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+            final reel = videoData[index];
+            return ReelCard(
+              text: reel['text']!,
+              thumbnailUrl: 'https://img.youtube.com/vi/${reel['url']}/maxresdefault.jpg',
+            );
+          },
+        )
+      ),
+    );
+  }
+}
+
+class ReelCard extends StatelessWidget {
+  final String text;
+  final String thumbnailUrl;
+
+  const ReelCard({
+    required this.text,
+    required this.thumbnailUrl,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 5,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.network(
+                thumbnailUrl,
+                fit: BoxFit.cover,
+                width: double.infinity,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              text,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
       ),
     );
   }
