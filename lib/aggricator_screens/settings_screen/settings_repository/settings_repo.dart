@@ -24,5 +24,16 @@ class SettingsRepo  extends BaseService{
     log(response.data.toString());
     return response;
   }
+  Future postFeedBack(body) async{
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.getFeedback, method: RequestType.post, queryParameters: body);
+    return response;
+  }
+
+  Future getFeedBack(body) async{
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.getFeedback, method: RequestType.get, queryParameters: body);
+    return response;
+  }
 
 }

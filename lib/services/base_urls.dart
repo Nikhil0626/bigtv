@@ -56,13 +56,16 @@ class BaseUrls {
 ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
 /// Python apis
-  static const String ePaperBaseUrlAws = "http://3.108.235.31:8000";
+  static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
   static const String baseUrlAwsDev = "http://65.0.7.144:8000";
 
 
   ///Login login
   static const String sendOtpPy = "/send-otp";
   static const String validateOtpPy = "/validate-otp";
+
+  ///FeedBack
+  static const String getFeedback = "/feedback";
 
   ///Categories Apis
   static const String getAllCategories = "/categories";
@@ -83,4 +86,6 @@ class BaseUrls {
   ///Like Apis
   static const String like = "/like";
 
+  // ///Reels Apis
+  // static const String reels = "/reels";
 }

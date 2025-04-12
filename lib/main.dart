@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
-import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
@@ -33,9 +32,11 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
+import 'aggricator_screens/home_screen/news_posts_provider.dart';
 import 'aggricator_screens/individual_post_details/individual_post_view.dart';
 import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
-import 'aggricator_screens/settings_screen/settings_view.dart';
+import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 
@@ -205,12 +206,12 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<EPapersProvider>(create: (context) => EPapersProvider()),
           ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider()),
           ChangeNotifierProvider<HomeProvider>(create: (context) => HomeProvider()),
-          ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider()),
-          ChangeNotifierProvider<SettingsProvider>(create: (context) => SettingsProvider()),
+
           ChangeNotifierProvider<NewsPostsProvider>(create: (context) => NewsPostsProvider()),
           ChangeNotifierProvider<AuthenticationProvider>(
               create: (context) => AuthenticationProvider()),
           ChangeNotifierProvider<ReelsProviders>(create: (context) => ReelsProviders()),
+          ChangeNotifierProvider<SettingsProvider>(create: (context) => SettingsProvider()),
         ],
         child: MaterialApp(
           navigatorKey: mainNavigatorKey,
@@ -224,7 +225,7 @@ class _MyAppState extends State<MyApp> {
           routes: {
             '/': (context) => LoginBackgroundView(),
             '/individualPost': (context) => IndividualPostView(postId: postId,),
-            '/settings': (context) => SettingsView(id: "",),
+            '/settings': (context) => SettingsView(),
             // Add other routes like '/settings', '/profile', etc.
           },
           debugShowCheckedModeBanner: false,

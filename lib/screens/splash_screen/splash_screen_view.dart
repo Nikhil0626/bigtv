@@ -17,7 +17,8 @@ import 'dart:async';
 import 'package:lottie/lottie.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../aggricator_screens/settings_screen/settings_view.dart';
+// import '../../aggricator_screens/settings_screen/settings_view.dart';
+import '../../aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import '../../main.dart';
 import '../../services/dynamic_link_service.dart';
 import '../Auth_module/auth_screens/welcome_screen.dart';
@@ -42,12 +43,6 @@ class _SplashScreenView extends State<SplashScreenView> {
 
   }
 
-
-
-  void openAppLink(Uri uri) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsView(id: id.toString(),),)
-    );
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
