@@ -108,11 +108,11 @@ class AuthenticationProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         sp.setString("userId", response.data['user']['id'].toString());
         if (response.data['is_new_user'] == false) {
-          Navigator.push(
+          Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(
                 builder: (context) => HomeView(),
-              ));
+              ),(route) => false,);
           Future.delayed(
             Duration(seconds: 2),
             () {

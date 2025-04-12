@@ -60,12 +60,15 @@ class BaseUrls {
 
 /// Python apis
   static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
-  static const String baseUrlAwsDev = "http://13.203.77.182:8000";
+  static const String baseUrlAwsDev = "http://65.0.7.144:8000";
 
 
   ///Login login
   static const String sendOtpPy = "/send-otp";
   static const String validateOtpPy = "/validate-otp";
+
+  ///FeedBack
+  static const String getFeedback = "/feedback";
 
   ///Categories Apis
   static const String getAllCategories = "/admin/categories";
