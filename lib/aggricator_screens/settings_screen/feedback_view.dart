@@ -19,15 +19,15 @@ class _FeedbackFormState extends State<FeedbackForm> {
   String get feedbackMessage {
     switch (selectedStar) {
       case 1:
-        return "Didn't like it";
+        return "Poor experience";
       case 2:
-        return "It’s okay";
+        return "Not satisfied";
       case 3:
-        return "Liked it";
+        return "Okay, Needs some improvemnet";
       case 4:
-        return "Loved it";
+        return "Good, could be better";
       case 5:
-        return "Awesome, Liked it";
+        return "Amazing, love it";
       default:
         return "Rate us";
     }

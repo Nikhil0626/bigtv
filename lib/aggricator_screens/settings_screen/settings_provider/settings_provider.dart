@@ -19,6 +19,10 @@ class SettingsProvider extends ChangeNotifier {
   List<String> selectedFeedbackList = [];
   TextEditingController feedbackController = TextEditingController();
 
+  List profileList = [];
+  List<String> selectedProfileList = [];
+  TextEditingController profileController = TextEditingController();
+
   Future getAllBookMarks() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
