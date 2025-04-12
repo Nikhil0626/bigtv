@@ -14,6 +14,8 @@ class AppColors {
   static const Color iconColors = Color(0xFF6B7180);
   static const Color cardBackgroundColor = Color(0xFFF7F8F9);
   static const Color textColor = Color(0xFF1A1A1A);
+  static const Color settingsPageTextColor = Color(0xFF374151);
+  static const Color settingsPageIconColor = Color(0xFF6B7280);
   static const Color loginBgColor = Color(0xFF2567E8);
 
 }

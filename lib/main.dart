@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
@@ -204,6 +205,9 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<EPapersProvider>(create: (context) => EPapersProvider()),
           ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider()),
           ChangeNotifierProvider<HomeProvider>(create: (context) => HomeProvider()),
+          ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider()),
+          ChangeNotifierProvider<SettingsProvider>(create: (context) => SettingsProvider()),
+          ChangeNotifierProvider<NewsPostsProvider>(create: (context) => NewsPostsProvider()),
           ChangeNotifierProvider<AuthenticationProvider>(
               create: (context) => AuthenticationProvider()),
           ChangeNotifierProvider<ReelsProviders>(create: (context) => ReelsProviders()),

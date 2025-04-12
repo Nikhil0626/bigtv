@@ -6,7 +6,6 @@ import 'app_fonts.dart';
 
 class CustomToast {
   static Widget crossIcon = const Icon(Icons.close);
-
   static Future<dynamic> showSuccessToast({
     required String? msg,
     bool? isFavorite,
@@ -114,7 +113,6 @@ class CustomToast {
     );
     return await _showToast(flush);
   }
-
   static dynamic _showToast(Flushbar flush) async {
     return await flush.show(mainNavigatorKey.currentContext!);
   }

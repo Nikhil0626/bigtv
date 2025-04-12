@@ -170,10 +170,10 @@ class AuthenticationProvider extends ChangeNotifier {
       "device_id": deviceId,
     };
     try {
-      log("response.data.toString123");
+      log("get all catttt");
       Response response = await AuthenticationRepo().getAllCategories(body);
       if (response.statusCode == 200) {
-        List data = response.data['categories']['categories'];
+        List data = response.data['categories'];
         getAllCategoryList = data
             .map(
               (e) => CategoryModel.fromJson(e),
@@ -203,7 +203,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  Future sendCategoriesToServer() async {
+  Future sendCategoriesToServer({bool isFilter = false}) async {
     List<int> selectedCategoryIds = getAllCategoryList.where((item) => selectedCategories.contains(item.categoryName.toString())).map((item) => item.categoryId as int).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -245,8 +245,8 @@ class AuthenticationProvider extends ChangeNotifier {
             )
             .toList();
 
-        selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.name.toString()).toList();
-        log(getAllLocationList.first.name.toString());
+        selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.districtName.toString()).toList();
+        log(getAllLocationList.first.districtName.toString());
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
@@ -269,7 +269,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future sendLocationsToServer(BuildContext context) async {
-    List<int> selectedCategoryIds = getAllLocationList.where((item) => selectedLocations.contains(item.name.toString())).map((item) => item.id).toList();
+    List<int> selectedCategoryIds = getAllLocationList.where((item) => selectedLocations.contains(item.districtName.toString())).map((item) => item.districtId).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     Map<String, dynamic> body = {"device_id": deviceId, "location_ids": selectedCategoryIds};
@@ -281,10 +281,12 @@ class AuthenticationProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         if (context.mounted) {
           Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeView(),
-              ),(route) => false,);
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeView(),
+            ),
+            (route) => false,
+          );
           Future.delayed(
             Duration(seconds: 2),
             () {
@@ -310,10 +312,12 @@ class AuthenticationProvider extends ChangeNotifier {
     switch (status) {
       case NewAppLoginStatus.skip:
         Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeView(),
-            ),(route) => false,);
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeView(),
+          ),
+          (route) => false,
+        );
         break;
       case NewAppLoginStatus.home:
         Navigator.push(
@@ -332,6 +336,8 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   void saveLoginState() async {
+    log("loginState");
+    log(newAppLoginStatus.toString());
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginState", newAppLoginStatus.toString());
   }

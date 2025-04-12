@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/main_screen_list.dart';
@@ -11,9 +13,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
+import '../../globel_keys/global_variables_data.dart';
+import '../../screens/home_screen/home_provider/provider.dart';
+import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../utils/custom_switch.dart';
 import '../e_papers_screens/paper_view/papers_screen_list.dart';
-import '../settings_screen/settings_view.dart';
+import '../settings_screen/settings_view/settings_view.dart';
 import 'main_screen_card.dart';
 
 class HomeView extends StatefulWidget {
@@ -31,15 +36,15 @@ class _HomeViewState extends State<HomeView> {
     _pageController = PageController(initialPage: 0);
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
       return Scaffold(
         appBar: AppBar(
+          automaticallyImplyLeading: false, // Removes back arrow
           backgroundColor: Colors.white,
           elevation: 0,
-          title: Row(
+          title:Row(
             children: [
               Text(
                 "Chota",
@@ -50,33 +55,67 @@ class _HomeViewState extends State<HomeView> {
                 ),
               ),
               Container(
-                margin: EdgeInsets.all(6),
-                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                decoration: BoxDecoration(
-                  color: AppColors.appButtonColor,
-                  borderRadius: BorderRadius.only(
-                    topRight: Radius.circular(10),
-                    bottomLeft: Radius.circular(10),
-                  ),
-                ),
+                // margin: EdgeInsets.only(left: 1),
+                padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 child: Text(
                   "News",
                   style: fontStyle(
-                    fontSize: 14,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: Colors.lightBlue,
                   ),
                 ),
               ),
             ],
           ),
+
           actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 12.0),
-              child: CustomSwitch(),
+            // Shift actions closer to the title
+            Row(
+              children: [
+                CustomSwitch(),
+                const SizedBox(width: 12),
+                Consumer<FlipProvider>(
+                  builder: (_, flipProvider, __) {
+                    return InkWell(
+                      onTap: () {
+                        log("Refresh");
+                        EventRepo().sendEvent({
+                          "key": "reload",
+                          "data": {
+                            "device_id": "${GlobalVariables().deviceId}",
+                            "userId": GlobalVariables().userId ?? "",
+                          }
+                        });
+                        flipProvider.getArticles(refresh: true);
+                      },
+                      child: Center(
+                        child: flipProvider!.isRefresh
+                            ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: AppColors.iconColors,
+                          ),
+                        )
+                            : SvgPicture.asset(
+                          "assets/svg/new_refresh.svg",
+                          height: 24,
+                          width: 24,
+                          color: AppColors.textColor,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(width: 16),
+              ],
             ),
           ],
         ),
+
+
         body: PageView(
           controller: _pageController,
           physics: NeverScrollableScrollPhysics(),

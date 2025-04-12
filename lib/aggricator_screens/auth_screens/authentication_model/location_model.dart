@@ -1,51 +1,39 @@
-class  LocationModel{
-  final int id;
-  final String name;
-  final String value;
+class LocationModel {
+  final int districtId;
+  final String districtName;
   final int stateId;
+  final String stateName;
+  final String value;
   final bool isFollowed;
 
-  const LocationModel({
-    required this.id,
-    required this.name,
-    required this.value,
+  LocationModel({
+    required this.districtId,
+    required this.districtName,
     required this.stateId,
+    required this.stateName,
+    required this.value,
     required this.isFollowed,
   });
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     return LocationModel(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      value: json['value'] as String,
-      stateId: json['stateid'] as int,
-      isFollowed: json['isFollowed'] as bool,
+      districtId: json['districtId'] ?? 0,
+      districtName: json['districtName'] ?? '',
+      stateId: json['stateId'] ?? 0,
+      stateName: json['stateName'] ?? '',
+      value: json['value'] ?? '',
+      isFollowed: json['isFollowed'] ?? false,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'name': name,
+      'districtId': districtId,
+      'districtName': districtName,
+      'stateId': stateId,
+      'stateName': stateName,
       'value': value,
-      'stateid': stateId,
       'isFollowed': isFollowed,
     };
-  }
-
-  LocationModel copyWith({
-    int? id,
-    String? name,
-    String? value,
-    int? stateId,
-    bool? isFollowed,
-  }) {
-    return LocationModel(
-      id: id ?? this.id,
-      name: name ?? this.name,
-      value: value ?? this.value,
-      stateId: stateId ?? this.stateId,
-      isFollowed: isFollowed ?? this.isFollowed,
-    );
   }
 }
