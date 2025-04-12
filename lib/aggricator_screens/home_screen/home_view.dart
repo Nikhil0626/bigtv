@@ -126,7 +126,7 @@ class _HomeViewState extends State<HomeView> {
             homeProvider.isSwitched ? MainScreenList() : MainScreenCard(),
             homeProvider.isSwitched ? PapersScreenList() : PapersScreenCard(),
             homeProvider.isSwitched ? ReelsScreenList() : ReelsScreen(),
-            SettingsView(id: 'id',)
+            SettingsView()
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(

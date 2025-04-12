@@ -10,19 +10,29 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../screens/Auth_module/auth_provider/auth_provider.dart';
-import '../../screens/home_screen/home_screens/in_app_web_view.dart';
-import '../../utils/app_enums.dart';
-import '../../utils/local_data.dart';
-import '../auth_screens/authentication_view/login_background_view.dart';
-import '../book_marks_view/book_marks_screen.dart';
-import '../filters_screen/filter_view.dart';
-import '../profile_screen/profile_view.dart';
-import 'feedback_view.dart';
+import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
+import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
+import '../../../utils/app_enums.dart';
+import '../../auth_screens/authentication_view/login_background_view.dart';
+import '../../filters_screen/filter_view.dart';
+import '../../profile_screen/profile_view.dart';
+import '../feedback_view.dart';
+import 'book_marks_screen.dart';
+// import '../../screens/Auth_module/auth_provider/auth_provider.dart';
+// import '../../screens/home_screen/home_screens/in_app_web_view.dart';
+// import '../../utils/app_enums.dart';
+// import '../../utils/local_data.dart';
+// import '../auth_screens/authentication_view/login_background_view.dart';
+// import '../book_marks_view/book_marks_screen.dart';
+// import '../feedback_view.dart';
+// import '../filters_screen/filter_view.dart';
+// import '../profile_screen/profile_view.dart';
+// import 'book_marks_screen.dart';
+// import 'feedback_view.dart';
 
 class SettingsView extends StatefulWidget {
-  final String id;
-  const SettingsView({super.key, required this.id});
+
+  const SettingsView({super.key,});
 
   @override
   _SettingsViewState createState() => _SettingsViewState();

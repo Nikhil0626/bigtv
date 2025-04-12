@@ -58,8 +58,6 @@ class BaseUrls {
 /// Python apis
   static const String ePaperBaseUrlAws = "http://65.2.63.103:8000";
   static const String baseUrlAwsDev = "http://65.0.7.144:8000";
-  static const String ePaperBaseUrlAws = "http://3.108.235.31:8000";
-  static const String baseUrlAwsDev = "http://65.0.7.144:8000";
 
 
   ///Login login
@@ -88,4 +86,6 @@ class BaseUrls {
   ///Like Apis
   static const String like = "/like";
 
+  // ///Reels Apis
+  // static const String reels = "/reels";
 }
