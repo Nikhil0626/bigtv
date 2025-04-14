@@ -24,191 +24,209 @@ class LoginBackgroundView extends StatelessWidget {
     return Consumer<AuthenticationProvider>(
       builder: (_, authenticationProvider, __) {
         return Scaffold(
-          body: SingleChildScrollView(
-            child: SizedBox(
-              width: screenWidth,
-              height: screenHeight,
-              child: Stack(
-                children: [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                child: SizedBox(
+                  width: screenWidth,
+                  height: screenHeight,
+                  child: Stack(
                     children: [
-                      Container(
-                        height: screenHeight * 0.65,
-                        alignment: Alignment.center,
-                        color: AppColors.loginBgColor,
-                        padding: EdgeInsets.only(top: 100.sp),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: screenHeight * 0.65,
+                            alignment: Alignment.center,
+                            color: AppColors.loginBgColor,
+                            padding: EdgeInsets.only(top: 100.sp),
+                            child: Column(
                               children: [
-                                Text(
-                                  "Chota ",
-                                  style: fontStyle(
-                                    fontSize: 32.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                Container(
-                                  height: 30.h,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.appButtonColor,
-                                    borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(10.r),
-                                      bottomLeft: Radius.circular(10.r),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Chota ",
+                                      style: fontStyle(
+                                        fontSize: 32.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                  padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: Text(
-                                    "News",
-                                    textAlign: TextAlign.center,
-                                    style: fontStyle(
-                                      fontSize: 26.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
+                                    Container(
+                                      height: 30.h,
+                                      alignment: Alignment.center,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.appButtonColor,
+                                        borderRadius: BorderRadius.only(
+                                          topRight: Radius.circular(10.r),
+                                          bottomLeft: Radius.circular(10.r),
+                                        ),
+                                      ),
+                                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: Text(
+                                        "News",
+                                        textAlign: TextAlign.center,
+                                        style: fontStyle(
+                                          fontSize: 26.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ],
-                            ),
-                            height(height: 10.h),
-                           if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.login ||authenticationProvider.newAppLoginStatus == NewAppLoginStatus.none )
-                           Column(
-                             children: [
-                               Text(
-                                 'Get hyperlocal news',
-                                 style: newAppFont(
-                                   fontSize: 18.sp,
-                                   color: Colors.white,
-                                   fontWeight: FontWeight.w600,
-                                 ),
-                               ),
-                               Row(
+                                height(height: 10.h),
+                               if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.login ||authenticationProvider.newAppLoginStatus == NewAppLoginStatus.none )
+                               Column(
                                  children: [
+                                   Text(
+                                     'Get hyperlocal news',
+                                     style: newAppFont(
+                                       fontSize: 18.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w600,
+                                     ),
+                                   ),
+                                   Row(
+                                     children: [
+                                       Padding(
+                                         padding:  EdgeInsets.only(top: 10.0,left: MediaQuery.of(context).size.width/4),
+                                         child: Text(
+                                           'in your local language',
+                                           style: newAppFont(
+                                             fontSize: 12.sp,
+                                             color: Colors.white,
+                                             fontWeight: FontWeight.w600,
+                                           ),
+                                         ),
+                                       ),
+                                       SvgPicture.asset("assets/svg/mic.svg",height: 50,)
+                                     ],
+                                   ),
+                                 ],
+                               ),
+                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp)
+                               Column(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+                                 crossAxisAlignment: CrossAxisAlignment.center,
+                                 children: [
+                                   Text(
+                                     'OTP Verification',
+                                     style: newAppFont(
+                                       fontSize: 22.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w600,
+                                     ),
+                                   ),
+                                   height(height: 20),
+                                   Text(
+                                     'Please enter the 6-digit code sent to your phone number for verification',
+                                     textAlign: TextAlign.center,
+                                     style: newAppFont(
+                                       fontSize: 12.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w400,
+                                     ),
+                                   ),
+                                 ],
+                               ),
+                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.category)
+                               Column(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+                                 crossAxisAlignment: CrossAxisAlignment.center,
+                                 children: [
+                                   Text(
+                                     'Select Topics',
+                                     style: newAppFont(
+                                       fontSize: 24.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w600,
+                                     ),
+                                   ),
+                                   height(height: 20),
+                                   Text(
+                                     'Choose categories for personalised news updates and stories',
+                                     textAlign: TextAlign.center,
+                                     style: newAppFont(
+                                       fontSize: 12.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w400,
+                                     ),
+                                   ),
+                                 ],
+                               ),
+                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.location)
+                               Column(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+                                 crossAxisAlignment: CrossAxisAlignment.center,
+                                 children: [
+                                   Text(
+                                     'Select Region',
+                                     style: newAppFont(
+                                       fontSize: 24.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w600,
+                                     ),
+                                   ),
+                                   height(height: 20),
                                    Padding(
-                                     padding:  EdgeInsets.only(top: 10.0,left: MediaQuery.of(context).size.width/4),
+                                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                                      child: Text(
-                                       'in your local language',
+                                       'Select region to receive hyperlocal news and relevant local information tailored to your area.',
+                                       textAlign: TextAlign.center,
                                        style: newAppFont(
                                          fontSize: 12.sp,
                                          color: Colors.white,
-                                         fontWeight: FontWeight.w600,
+                                         fontWeight: FontWeight.w400,
                                        ),
                                      ),
                                    ),
-                                   SvgPicture.asset("assets/svg/mic.svg",height: 50,)
                                  ],
-                               ),
-                             ],
-                           ),
-                            if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp)
-                           Column(
-                             mainAxisAlignment: MainAxisAlignment.center,
-                             crossAxisAlignment: CrossAxisAlignment.center,
-                             children: [
-                               Text(
-                                 'OTP Verification',
-                                 style: newAppFont(
-                                   fontSize: 22.sp,
-                                   color: Colors.white,
-                                   fontWeight: FontWeight.w600,
-                                 ),
-                               ),
-                               height(height: 20),
-                               Text(
-                                 'Please enter the 6-digit code sent to your phone number for verification',
-                                 textAlign: TextAlign.center,
-                                 style: newAppFont(
-                                   fontSize: 12.sp,
-                                   color: Colors.white,
-                                   fontWeight: FontWeight.w400,
-                                 ),
-                               ),
-                             ],
-                           ),
-                            if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.category)
-                           Column(
-                             mainAxisAlignment: MainAxisAlignment.center,
-                             crossAxisAlignment: CrossAxisAlignment.center,
-                             children: [
-                               Text(
-                                 'Select Topics',
-                                 style: newAppFont(
-                                   fontSize: 24.sp,
-                                   color: Colors.white,
-                                   fontWeight: FontWeight.w600,
-                                 ),
-                               ),
-                               height(height: 20),
-                               Text(
-                                 'Choose categories for personalised news updates and stories',
-                                 textAlign: TextAlign.center,
-                                 style: newAppFont(
-                                   fontSize: 12.sp,
-                                   color: Colors.white,
-                                   fontWeight: FontWeight.w400,
-                                 ),
-                               ),
-                             ],
-                           ),
-                            if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.location)
-                           Column(
-                             mainAxisAlignment: MainAxisAlignment.center,
-                             crossAxisAlignment: CrossAxisAlignment.center,
-                             children: [
-                               Text(
-                                 'Select Region',
-                                 style: newAppFont(
-                                   fontSize: 24.sp,
-                                   color: Colors.white,
-                                   fontWeight: FontWeight.w600,
-                                 ),
-                               ),
-                               height(height: 20),
-                               Padding(
-                                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                 child: Text(
-                                   'Select region to receive hyperlocal news and relevant local information tailored to your area.',
-                                   textAlign: TextAlign.center,
-                                   style: newAppFont(
-                                     fontSize: 12.sp,
-                                     color: Colors.white,
-                                     fontWeight: FontWeight.w400,
-                                   ),
-                                 ),
-                               ),
-                             ],
-                           )
-                          ],
+                               )
+                              ],
+                            ),
+                          ),
+                          // White Section (Empty Placeholder)
+                          Expanded(
+                            child: Container(color: Colors.white),
+                          ),
+                        ],
+                      ),
+              
+                      // Login / OTP Verification Widget (Positioned)
+                      Positioned(
+                        bottom: screenHeight * 0.12,
+                        left: 0,
+                        right: 0,
+                        child: SizedBox(
+                          height: screenHeight * 0.5,
+                          child: AnimatedSwitcher(
+                            duration: Duration(milliseconds: 300),
+                            child: _getLoginContent(authenticationProvider.newAppLoginStatus),
+                          ),
                         ),
-                      ),
-                      // White Section (Empty Placeholder)
-                      Expanded(
-                        child: Container(color: Colors.white),
-                      ),
+                      )
                     ],
                   ),
-
-                  // Login / OTP Verification Widget (Positioned)
-                  Positioned(
-                    bottom: screenHeight * 0.12,
-                    left: 0,
-                    right: 0,
-                    child: SizedBox(
-                      height: screenHeight * 0.5,
-                      child: AnimatedSwitcher(
-                        duration: Duration(milliseconds: 300),
-                        child: _getLoginContent(authenticationProvider.newAppLoginStatus),
-                      ),
-                    ),
-                  )
-                ],
+                ),
               ),
-            ),
+              if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp )
+              Positioned(
+                  left: 20,
+                  top: 50,
+                  child:InkWell(
+                    onTap: (){
+                      Navigator.pop(context);
+                    },
+                    child: Container(width: 30,height: 30,decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(8))),
+                    child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                    ),
+                  ) )
+            ],
           ),
         );
       },

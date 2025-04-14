@@ -21,10 +21,12 @@ class AuthenticationProvider extends ChangeNotifier {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController otpController = TextEditingController();
   bool isLoginLoading = false;
+  bool isVerifyLoading = false;
   String? errorMessage;
   bool isButtonEnabled = false;
   bool isOtpButtonEnabled = false;
   NewAppLoginStatus newAppLoginStatus = NewAppLoginStatus.none;
+
 
   List<CategoryModel> getAllCategoryList = [];
   List<String> selectedCategories = [];
@@ -60,6 +62,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future sendOtp(BuildContext context) async {
+    isLoginLoading = true;
     log("ButtonClicked __${phoneController.text}");
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -82,6 +85,7 @@ class AuthenticationProvider extends ChangeNotifier {
       log(e.toString());
       log(st.toString());
     } finally {
+      isLoginLoading = true;
       notifyListeners();
     }
   }
@@ -90,6 +94,7 @@ class AuthenticationProvider extends ChangeNotifier {
     context,
   ) async {
     errorMessage = '';
+    isVerifyLoading  = true;
     notifyListeners();
     log(
       phoneController.text.toString(),
@@ -124,6 +129,7 @@ class AuthenticationProvider extends ChangeNotifier {
             },
           );
         } else {
+          isVerifyLoading = false;
           newAppLoginStatus = NewAppLoginStatus.category;
           saveLoginState();
           getAllCategories();
@@ -375,8 +381,8 @@ class AuthenticationProvider extends ChangeNotifier {
     return NewAppLoginStatus.none;
   }
 
-  void setLogOutStatus(context) async {
-    newAppLoginStatus = NewAppLoginStatus.login;
+  void setLogOutStatus(context, bool isLogout) async {
+    newAppLoginStatus =isLogout?NewAppLoginStatus.skip: NewAppLoginStatus.login;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginState", newAppLoginStatus.toString());
     isPageNavigation(context);

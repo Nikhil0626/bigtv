@@ -4,13 +4,17 @@ import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
+import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
+import '../../../services/base_urls.dart';
 import '../../../services/deviice_details.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
@@ -85,11 +89,11 @@ class _LoginViewState extends State<LoginView> {
                 width: 280.w,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
+                  border: Border.all(color: AppColors.borderColor),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: SizedBox(
-                  width: 68,
+                  width: 80,
                   child: Row(
                     children: [
                       SizedBox(
@@ -97,7 +101,8 @@ class _LoginViewState extends State<LoginView> {
                         width: 24.w,
                         child: SvgPicture.asset('assets/svg/indianFlag.svg', fit: BoxFit.cover),
                       ),
-                      Icon(Icons.keyboard_arrow_down_outlined, size: 22.sp),
+                      Text("+91",style: newAppFont(color: Colors.black),),
+                      width(width: 10),
                       Container(
                         height: 32.h,
                         width: 1.w,
@@ -145,12 +150,24 @@ class _LoginViewState extends State<LoginView> {
                 child: RichText(
                   textAlign: TextAlign.start,
                   text: TextSpan(
-                    text: 'By clicking on Login/Signup you consent to our\n',
+                    text: 'By clicking on Login/Signup you consent to our ',
                     style: newAppFont(fontSize: 12.sp, color: Colors.black54),
                     children: [
                       TextSpan(
                         text: 'Terms of Service',
                         style: newAppFont(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w700),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => InAppWebViewScreen(
+                                  webUrl: BaseUrls.termsPage,
+                                  title: "Terms & Conditions",
+                                ),
+                              ),
+                            );
+                          },
                       ),
                       TextSpan(
                         text: ' and ',
@@ -159,6 +176,18 @@ class _LoginViewState extends State<LoginView> {
                       TextSpan(
                         text: 'Privacy Policy.',
                         style: newAppFont(fontSize: 12.sp, color: Colors.black, fontWeight: FontWeight.w700),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => InAppWebViewScreen(
+                                  webUrl: BaseUrls.privacyPage,
+                                  title: "Privacy policy",
+                                ),
+                              ),
+                            );
+                          },
                       ),
                     ],
                   ),
@@ -180,7 +209,7 @@ class _LoginViewState extends State<LoginView> {
                     decoration: BoxDecoration(
                         color: !authenticationProvider!.isButtonEnabled?AppColors.bodyTextColor.withOpacity(.2):AppColors.loginBgColor,
                         borderRadius: BorderRadius.all(Radius.circular(8.r))),
-                    child: Center(child: Text('Log In / Signup', style: newAppFont(color: Colors.white,fontWeight: FontWeight.w500)))),
+                    child: Center(child:authenticationProvider!.isLoginLoading?AppLoadingScreen(loadingColor: Colors.white,): Text('Log In / Signup', style: newAppFont(color: Colors.white,fontWeight: FontWeight.w500)))),
               ),
               height(height: 20.h),
               Row(
@@ -197,9 +226,8 @@ class _LoginViewState extends State<LoginView> {
 
               InkWell(
                 onTap:() {
-                  context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.home;
-                  context.read<AuthenticationProvider>().saveLoginState();
-                  context.read<AuthenticationProvider>().isPageNavigation(context);
+                  context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.skip;
+                  context.read<AuthenticationProvider>().setLogOutStatus(context,true);
 
                 },
 

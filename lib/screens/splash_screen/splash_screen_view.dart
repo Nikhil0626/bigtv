@@ -1,15 +1,7 @@
-import 'dart:developer';
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
-import 'package:chotanews/globel_keys/app_router.dart';
-import 'package:chotanews/globel_keys/global_variables_data.dart';
-import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
-import 'package:chotanews/utils/app_fonts.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
@@ -99,7 +91,6 @@ class _SplashScreenState extends State<SplashScreen> {
                       ),
             )// Show GIF
             :  Container(
-          color: AppColors.loginBgColor,
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
               child: Center(

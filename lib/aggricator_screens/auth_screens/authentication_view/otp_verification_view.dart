@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -89,7 +90,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                       decoration: BoxDecoration(
                           color: authenticationProvider.isOtpButtonEnabled?AppColors.loginBgColor:AppColors.bodyTextColor.withOpacity(.2),
                           borderRadius: BorderRadius.all(Radius.circular(8.r))),
-                      child: Center(child: Text('Verify', style: newAppFont(color: Colors.white,fontWeight: FontWeight.w500)))),
+                      child: Center(child:authenticationProvider.isVerifyLoading?AppLoadingScreen(loadingColor: Colors.white,): Text('Verify', style: newAppFont(color: Colors.white,fontWeight: FontWeight.w500)))),
                 ),
 
                 height(height: 24.h),
@@ -97,7 +98,6 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                 height(height: 24.h),
                 InkWell(
                   onTap: () {
-
                     authenticationProvider.sendOtp(context);
                   },
                   child: SizedBox(

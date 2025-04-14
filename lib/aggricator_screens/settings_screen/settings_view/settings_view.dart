@@ -149,10 +149,8 @@ class _SettingsViewState extends State<SettingsView> {
                Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
             }),
             height(height: 5.h),
-            _buildSettingsRow(context, "Signout.svg", "Logout", () {
-
-
-              context.read<AuthenticationProvider>().setLogOutStatus(context);
+            _buildSettingsRow(context, "Signout.svg",loginStatus == NewAppLoginStatus.skip?"Login":"Logout", () {
+              context.read<AuthenticationProvider>().setLogOutStatus(context,false);
 
             }),
           ],
