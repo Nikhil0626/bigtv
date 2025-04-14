@@ -18,5 +18,6 @@ class AppColors {
   static const Color settingsPageIconColor = Color(0xFF6B7280);
   static const Color ePaperCardColor = Color(0xFFFFFEFE);
   static const Color loginBgColor = Color(0xFF2567E8);
+  static const Color loginNumberBg = Color(0xFFF3F4F6);
 
 }
