@@ -43,41 +43,9 @@ class LoginBackgroundView extends StatelessWidget {
                             padding: EdgeInsets.only(top: 100.sp),
                             child: Column(
                               children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Chota ",
-                                      style: fontStyle(
-                                        fontSize: 32.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                    Container(
-                                      height: 30.h,
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: AppColors.appButtonColor,
-                                        borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(10.r),
-                                          bottomLeft: Radius.circular(10.r),
-                                        ),
-                                      ),
-                                      padding: EdgeInsets.symmetric(horizontal: 8.0),
-                                      child: Text(
-                                        "News",
-                                        textAlign: TextAlign.center,
-                                        style: fontStyle(
-                                          fontSize: 26.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.black,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                height(height: 10.h),
+                                Image.asset("assets/svg/login.png"),
+
+                                height(height: 20.h),
                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.login ||authenticationProvider.newAppLoginStatus == NewAppLoginStatus.none )
                                Column(
                                  children: [

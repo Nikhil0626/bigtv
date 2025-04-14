@@ -85,7 +85,7 @@ class AuthenticationProvider extends ChangeNotifier {
       log(e.toString());
       log(st.toString());
     } finally {
-      isLoginLoading = true;
+      isLoginLoading = false;
       notifyListeners();
     }
   }
@@ -129,7 +129,7 @@ class AuthenticationProvider extends ChangeNotifier {
             },
           );
         } else {
-          isVerifyLoading = false;
+
           newAppLoginStatus = NewAppLoginStatus.category;
           saveLoginState();
           getAllCategories();
@@ -160,6 +160,7 @@ class AuthenticationProvider extends ChangeNotifier {
         errorMessage = response.data['message'];
       }
     } on DioException catch (e, st) {
+
       log("error dio ${e.toString()}");
       log("error dio  ${st.toString()}");
     } catch (e, st) {
@@ -167,6 +168,7 @@ class AuthenticationProvider extends ChangeNotifier {
       log("error  ${st.toString()}");
       CustomToast.showErrorToast(msg: "testing");
     } finally {
+      isVerifyLoading = false;
       notifyListeners();
     }
   }

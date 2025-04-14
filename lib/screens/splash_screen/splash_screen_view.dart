@@ -90,7 +90,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         width: MediaQuery.of(context).size.width,
                       ),
             )// Show GIF
-            :  Container(
+            :  SizedBox(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
               child: Center(

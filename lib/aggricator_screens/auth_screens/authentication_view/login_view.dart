@@ -87,8 +87,9 @@ class _LoginViewState extends State<LoginView> {
               Container(
                 height: 40.h,
                 width: 280.w,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
+                padding: const EdgeInsets.only(left: 10),
                 decoration: BoxDecoration(
+                  color:AppColors.loginNumberBg ,
                   border: Border.all(color: AppColors.borderColor),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
@@ -101,31 +102,38 @@ class _LoginViewState extends State<LoginView> {
                         width: 24.w,
                         child: SvgPicture.asset('assets/svg/indianFlag.svg', fit: BoxFit.cover),
                       ),
-                      Text("+91",style: newAppFont(color: Colors.black),),
+                      Text(" +91",style: newAppFont(color: AppColors.textColor,fontWeight: FontWeight.w600),),
                       width(width: 10),
                       Container(
-                        height: 32.h,
                         width: 1.w,
                         color: Colors.grey,
                       ),
                       Expanded(
-                        child: TextFormField(
-                          controller: authenticationProvider!.phoneController,
-                          keyboardType: TextInputType.number,
-                          maxLength: 10,
-                          style: newAppFont(fontSize: 16.sp, fontWeight: FontWeight.w400),
-                          decoration: const InputDecoration(
-                            hintText: "",
-                            border: InputBorder.none,
-                            counterText: "",
-                            contentPadding: EdgeInsets.only(left: 8),
+                        child: Container(
+                          color: Colors.white,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            border: Border.all(color: AppColors.borderColor),
+                            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(8.r),),
                           ),
-                          // inputFormatters: [
-                          //   FilteringTextInputFormatter.digitsOnly,
-                          //   LengthLimitingTextInputFormatter(10),
-                          // ],
+                          child: TextFormField(
+                            controller: authenticationProvider!.phoneController,
+                            keyboardType: TextInputType.number,
+                            maxLength: 10,
+                            style: newAppFont(fontSize: 16.sp, fontWeight: FontWeight.w400),
+                            decoration: const InputDecoration(
+                              hintText: "",
+                              border: InputBorder.none,
+                              counterText: "",
+                              contentPadding: EdgeInsets.only(left: 8),
+                            ),
+                            // inputFormatters: [
+                            //   FilteringTextInputFormatter.digitsOnly,
+                            //   LengthLimitingTextInputFormatter(10),
+                            // ],
 
-                          onChanged:(value) =>  authenticationProvider!.validationErrors(value),
+                            onChanged:(value) =>  authenticationProvider!.validationErrors(value),
+                          ),
                         ),
                       ),
                     ],
