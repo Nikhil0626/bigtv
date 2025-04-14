@@ -233,8 +233,7 @@ class _LoginViewState extends State<LoginView> {
 
               InkWell(
                 onTap:() {
-                  context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.skip;
-                  context.read<AuthenticationProvider>().setLogOutStatus(context,true);
+                  context.read<AuthenticationProvider>().continueAsGuest(context);
 
                 },
 
