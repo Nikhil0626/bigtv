@@ -65,4 +65,19 @@ class NewsPostsProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  bool isBottomIsShow = false;
+  String currentPaper = "";
+  int currentPaperIndex = 0;
+
+  void paperSet(paper,value){
+    currentPaperIndex = value;
+    currentPaper = paper;
+    notifyListeners();
+  }
+
+  void isPaperShowing() {
+    isBottomIsShow = !isBottomIsShow;
+    notifyListeners();
+  }
 }

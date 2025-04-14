@@ -63,6 +63,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future sendOtp(BuildContext context) async {
     isLoginLoading = true;
+
     log("ButtonClicked __${phoneController.text}");
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -80,11 +81,15 @@ class AuthenticationProvider extends ChangeNotifier {
         newAppLoginStatus = NewAppLoginStatus.otp;
         saveLoginState();
         otpController.text = "";
+      }else{
+        CustomToast.showErrorToast(msg: "Check your mobile number try again");
       }
     } catch (e, st) {
+      CustomToast.showErrorToast(msg: "Check your mobile number try again");
       log(e.toString());
       log(st.toString());
     } finally {
+
       isLoginLoading = false;
       notifyListeners();
     }
@@ -95,6 +100,7 @@ class AuthenticationProvider extends ChangeNotifier {
   ) async {
     errorMessage = '';
     isVerifyLoading  = true;
+    isButtonEnabled = false;
     notifyListeners();
     log(
       phoneController.text.toString(),
@@ -156,17 +162,18 @@ class AuthenticationProvider extends ChangeNotifier {
 
         phoneController.text = "";
         notifyListeners();
-      } else {
-        errorMessage = response.data['message'];
+      } if(response.statusCode == 400){
+        errorMessage = response.data['detail'].toString();
+        CustomToast.showErrorToast(msg: response.data['detail']);
       }
     } on DioException catch (e, st) {
-
+      CustomToast.showErrorToast(msg: e.message);
       log("error dio ${e.toString()}");
       log("error dio  ${st.toString()}");
     } catch (e, st) {
       log("error  ${e.toString()}");
       log("error  ${st.toString()}");
-      CustomToast.showErrorToast(msg: "testing");
+      CustomToast.showErrorToast(msg: "Something went wrong");
     } finally {
       isVerifyLoading = false;
       notifyListeners();
