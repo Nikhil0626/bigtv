@@ -107,13 +107,15 @@ class AuthenticationProvider extends ChangeNotifier {
       Response response = await AuthenticationRepo().validateOtp(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
-        sp.setString("userId", response.data['user_id'].toString());
+        sp.setString("userId", response.data['user']['id'].toString());
         if (response.data['is_new_user'] == false) {
           Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(
-                builder: (context) => HomeView(),
-              ),(route) => false,);
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeView(),
+            ),
+            (route) => false,
+          );
           Future.delayed(
             Duration(seconds: 2),
             () {
@@ -162,10 +164,12 @@ class AuthenticationProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-bool isCatLoading =false;
-bool isCatSaveLoading =false;
+
+  bool isCatLoading = false;
+  bool isCatSaveLoading = false;
+
   Future getAllCategories() async {
-    isCatLoading =  true;
+    isCatLoading = true;
     selectedCategories = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -185,13 +189,15 @@ bool isCatSaveLoading =false;
 
         selectedCategories = getAllCategoryList.where((item) => item.isFollowed == true).map((item) => item.categoryName.toString()).toList();
         log(getAllCategoryList.first.categoryName.toString());
+        String result = selectedLocations.toSet().join(',');
+        preferences.setString("categoriesId", result);
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
     } finally {
-      isCatLoading =false;
+      isCatLoading = false;
       notifyListeners();
     }
   }
@@ -211,6 +217,8 @@ bool isCatSaveLoading =false;
     isCatSaveLoading = true;
     List<int> selectedCategoryIds = getAllCategoryList.where((item) => selectedCategories.contains(item.categoryName.toString())).map((item) => item.categoryId as int).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    String result = selectedCategoryIds.toSet().join(',');
+    preferences.setString("categoriesId", result);
     String? deviceId = preferences.getString("deviceId");
     Map<String, dynamic> body = {"device_id": deviceId, "categoryids": selectedCategoryIds};
 
@@ -253,6 +261,10 @@ bool isCatSaveLoading =false;
 
         selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.districtName.toString()).toList();
         log(getAllLocationList.first.districtName.toString());
+
+
+        String result = selectedLocations.toSet().join(',');
+        preferences.setString("locationId", result);
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
@@ -278,6 +290,9 @@ bool isCatSaveLoading =false;
     List<int> selectedCategoryIds = getAllLocationList.where((item) => selectedLocations.contains(item.districtName.toString())).map((item) => item.districtId).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
+    String result = selectedCategoryIds.toSet().join(',');
+    preferences.setString("locationId", result);
+
     Map<String, dynamic> body = {"device_id": deviceId, "location_ids": selectedCategoryIds};
 
     log(body.toString());
@@ -334,10 +349,12 @@ bool isCatSaveLoading =false;
         break;
       default:
         Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => LoginBackgroundView(),
-            ),(route) => false,);
+          context,
+          MaterialPageRoute(
+            builder: (context) => LoginBackgroundView(),
+          ),
+          (route) => false,
+        );
     }
   }
 
@@ -359,9 +376,9 @@ bool isCatSaveLoading =false;
   }
 
   void setLogOutStatus(context) async {
-   newAppLoginStatus = NewAppLoginStatus.login;
+    newAppLoginStatus = NewAppLoginStatus.login;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginState", newAppLoginStatus.toString());
-   isPageNavigation( context);
+    isPageNavigation(context);
   }
 }

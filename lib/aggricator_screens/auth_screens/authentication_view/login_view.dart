@@ -36,7 +36,6 @@ class _LoginViewState extends State<LoginView> {
     super.initState();
   }
   getMobileNumber() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
     WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
     if (Platform.isIOS) {
       String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();

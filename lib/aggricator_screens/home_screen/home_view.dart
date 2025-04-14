@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
@@ -9,13 +10,16 @@ import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/home_screen/home_provider/provider.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
+import '../../services/deviice_details.dart';
 import '../../utils/custom_switch.dart';
 import '../e_papers_screens/paper_view/papers_screen_list.dart';
 import '../settings_screen/settings_view/settings_view.dart';
@@ -33,10 +37,35 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
+    getMobileNumber();
     context.read<HomeProvider>().selectedIndex = 0;
     _pageController = PageController(initialPage: 0);
+
     super.initState();
   }
+
+  getMobileNumber() async {
+    WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
+    if (Platform.isIOS) {
+      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      log('APNS Token: $apnsToken');
+      getUniqueDeviceId(apnsToken ?? "");
+    } else if (Platform.isAndroid) {
+      var token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        getUniqueDeviceId(token, );
+        log('FCM Token: $token');
+        _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
+        WebEngagePlugin.setPushToken(token);
+      }
+    }
+  }
+
+  void _onTokenInvalidated(Map<String, dynamic>? message) {
+    print("tokenInvalidated callback received $message");
+    WebEngagePlugin.setSecureToken("siva kumar", message.toString());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {

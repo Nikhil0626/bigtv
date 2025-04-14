@@ -79,7 +79,7 @@ class BaseService {
   Dio dio = Dio();
 
   BaseService() {
-    _initializeInterceptors();
+    // _initializeInterceptors();
   }
 
   void _initializeInterceptors() {

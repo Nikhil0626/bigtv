@@ -62,11 +62,24 @@ bool isPostLoading = false;
     isHomeLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
+    String locationId = preferences.getString("locationId") ?? "";
+    List<String> locationIds = locationId
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
+    log(locationIds.toString());
+    String categoriesId = preferences.getString("categoriesId") ?? "";
+    List<String> categoriesIds = categoriesId
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
+    log(categoriesIds.toString());
+
     Map<String, dynamic> body = {
       "device_id": deviceId,
       "postId": postId,
-      "locationIds": [],
-      "catgoriesId": [],
+      "locationIds": locationIds,
+      "catgoriesId":categoriesIds,
       // "ad": "true"
     };
     log(body.toString());

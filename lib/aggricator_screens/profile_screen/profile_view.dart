@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/profile_provider.dart';
 import 'package:chotanews/screens/profile_screen/profile_screen.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -69,21 +70,24 @@ class _ProfileViewState extends State<ProfileView> {
                     Center(
                       child: Stack(
                         children: [
-                          CircleAvatar(
-                            radius: 60,
-                            backgroundColor: Colors.white,
+                          SizedBox(
+                            height: 100,
+                            width: 100,
+                            child: ClipRRect(
+                             borderRadius: BorderRadius.all(Radius.circular(50)),
+                              child:profileProvider.isProfileLoading?AppLoadingScreen():profileProvider.uploadImageUrl == ""?Icon(Icons.person,size: 30,): Image.network(profileProvider.uploadImageUrl,fit: BoxFit.fill,),
+                            ),
                           ),
                           Positioned(
                             bottom: 0,
                             right: 0,
                             child: GestureDetector(
                               onTap: () {
-                                // Edit logic goes here
-                                print("Edit icon tapped");
+                               profileProvider.pickAndUploadFile();
                               },
                               child: CircleAvatar(
                                 radius: 15.r,
-                                backgroundColor: Colors.white,
+                                backgroundColor: Colors.grey.shade400,
                                 child:
                                     Icon(Icons.edit, size: 18, color: Colors.black),
                               ),
@@ -95,7 +99,7 @@ class _ProfileViewState extends State<ProfileView> {
                     height(height: 10.h),
                     Center(
                       child: Text(
-                        profileProvider.profileData['profile']['name']??"",
+                        profileProvider.profileData !=null? profileProvider.profileData['profile']['name']??"":"user",
                         style: newAppFont(
                             fontSize: 20.sp, fontWeight: FontWeight.w500),
                       ),

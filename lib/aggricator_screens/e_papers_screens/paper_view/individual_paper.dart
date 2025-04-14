@@ -104,7 +104,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                           InkWell(
                                             onTap: (){Navigator.push(context, MaterialPageRoute(
                                               builder: (context) => InAppWebViewScreen(
-                                                webUrl: ePapersProvider.getSinglePapersList[index].source.toString(),
+                                                webUrl: ePapersProvider.getSinglePapersList[index].sourceUrl.toString(),
                                                 title: "Advertise with us",
                                               ),
                                             ));

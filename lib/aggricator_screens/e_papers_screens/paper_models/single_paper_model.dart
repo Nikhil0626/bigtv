@@ -1,6 +1,7 @@
 class SinglePaperModel {
   final int? id;
   final String? source;
+  final String? sourceUrl;
   final String? logo;
   final String? editionName;
   final String? imageUrl;
@@ -12,6 +13,7 @@ class SinglePaperModel {
   SinglePaperModel({
     this.id,
     this.source,
+    this.sourceUrl,
     this.logo,
     this.editionName,
     this.imageUrl,
@@ -25,6 +27,7 @@ class SinglePaperModel {
     return SinglePaperModel(
       id: json['_id'] as int?,
       source: json['source'] as String?,
+      sourceUrl: json['source_url'] as String?,
       logo: json['logo'] as String?,
       editionName: json['edition_name'] as String?,
       imageUrl: json['image_url'] as String?,
@@ -41,6 +44,7 @@ class SinglePaperModel {
     return {
       '_id': id,
       'source': source,
+      'sourceUrl': sourceUrl,
       'logo': logo,
       'edition_name': editionName,
       'image_url': imageUrl,

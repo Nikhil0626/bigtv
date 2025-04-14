@@ -10,6 +10,7 @@ import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../../../screens/home_screen/home_provider/provider.dart';
 import '../paper_provider/epapers_provider.dart';
+import 'individual_paper.dart';
 
 class PapersScreenList extends StatelessWidget {
   @override
@@ -25,8 +26,7 @@ class PapersScreenList extends StatelessWidget {
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => PapersScreenPreview(imageUrl: ePapersProvider.getSinglePapersList[index].imageUrl.toString(),
-                            postId: ePapersProvider.getSinglePapersList[index].id.toString(),),));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => IndividualPaper(paper:ePapersProvider.getAllMainPapersList[index].source  ,),));
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 16.0),
