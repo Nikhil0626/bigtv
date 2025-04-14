@@ -72,16 +72,18 @@ class ProfileProvider extends ChangeNotifier {
 
     Map<String, dynamic> body = {
       "user_id":userId,
-      "name":nameController.text,
-      "dob":"${yearController.text}-${monthController.text}-${dayController.text}",
-      "photo_url":uploadImageUrl,
+      "name":nameController.text.toString(),
+      "dob":'${yearController.text}-${monthController.text}-${dayController.text}',
+      "photo_url":uploadImageUrl.toString(),
     };
+    log('body $body');
     try {
       Response response = await SettingsRepo().postProfile(body);
       if (response.statusCode == 200) {
         CustomToast.showSuccessToast(msg: "Profile data updated");
         log("Like posted successfully: ${response.data}");
       } else {
+        CustomToast.showErrorToast(msg: "${response.data['detail']}");
         log("Failed to post like: ${response.statusCode}");
       }
     } on DioException catch (e, st) {

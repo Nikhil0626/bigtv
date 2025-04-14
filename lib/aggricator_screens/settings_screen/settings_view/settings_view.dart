@@ -11,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
@@ -32,7 +33,7 @@ class SettingsView extends StatefulWidget {
 
 class _SettingsViewState extends State<SettingsView> {
   NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
-  bool isNotificationsEnabled = true;
+  bool isNotificationsEnabled = false;
 
   @override
   void initState() {
@@ -42,8 +43,8 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Future getLogin() async {
-    loginStatus = await context.read<AuthenticationProvider>().getLoginStatus();
-    log("kjdkjkjhwd ${loginStatus.toString()}");
+    SharedPreferences sp= await SharedPreferences.getInstance();
+    isNotificationsEnabled = sp.getString("loginType")=="login"?true:false;
     setState(() {});
   }
   @override
@@ -56,7 +57,7 @@ class _SettingsViewState extends State<SettingsView> {
           children: [
             // if (loginStatus == LoginStatus.skip)
             _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
-              if (loginStatus == NewAppLoginStatus.skip) {
+              if (!isNotificationsEnabled) {
                 CustomToast.showErrorToast(msg: 'Please login with mobile number');
               } else if (loginStatus == NewAppLoginStatus.home) {
                 Navigator.push(
@@ -149,7 +150,7 @@ class _SettingsViewState extends State<SettingsView> {
                Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
             }),
             height(height: 5.h),
-            _buildSettingsRow(context, "Signout.svg",loginStatus == NewAppLoginStatus.skip?"Login":"Logout", () {
+            _buildSettingsRow(context, "Signout.svg",!isNotificationsEnabled?"Login":"Logout", () {
               context.read<AuthenticationProvider>().setLogOutStatus(context,false);
 
             }),

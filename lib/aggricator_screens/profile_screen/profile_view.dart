@@ -23,6 +23,9 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
+  final FocusNode dayFocusNode = FocusNode();
+  final FocusNode monthFocusNode = FocusNode();
+  final FocusNode yearFocusNode = FocusNode();
   @override
   void initState() {
     context.read<ProfileProvider>().getProfile();
@@ -138,10 +141,12 @@ class _ProfileViewState extends State<ProfileView> {
                         Expanded(
                           child: TextField(
                             controller: profileProvider.dayController,
+                            focusNode: dayFocusNode,
                             keyboardType: TextInputType.number,
                             maxLength: 2,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              labelText: "DD",
                               counterText: "",
                               filled: true,
                               fillColor: Colors.white,
@@ -150,16 +155,23 @@ class _ProfileViewState extends State<ProfileView> {
                                 borderSide: BorderSide.none,
                               ),
                             ),
+                            onChanged: (value) {
+                              if (value.length == 2) {
+                                FocusScope.of(context).requestFocus(monthFocusNode);
+                              }
+                            },
                           ),
                         ),
                         width(width: 10.w),
                         Expanded(
                           child: TextField(
                             controller: profileProvider.monthController,
+                            focusNode: monthFocusNode,
                             keyboardType: TextInputType.number,
                             maxLength: 2,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              labelText: "MM",
                               counterText: "",
                               filled: true,
                               fillColor: Colors.white,
@@ -168,16 +180,23 @@ class _ProfileViewState extends State<ProfileView> {
                                 borderSide: BorderSide.none,
                               ),
                             ),
+                            onChanged: (value) {
+                              if (value.length == 2) {
+                                FocusScope.of(context).requestFocus(yearFocusNode);
+                              }
+                            },
                           ),
                         ),
                         width(width: 10.w),
                         Expanded(
                           child: TextField(
                             controller: profileProvider.yearController,
+                            focusNode: yearFocusNode,
                             keyboardType: TextInputType.number,
                             maxLength: 4,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              labelText: "YYYY",
                               counterText: "",
                               filled: true,
                               fillColor: Colors.white,

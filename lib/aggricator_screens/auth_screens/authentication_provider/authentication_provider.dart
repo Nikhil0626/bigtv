@@ -112,6 +112,7 @@ class AuthenticationProvider extends ChangeNotifier {
       Response response = await AuthenticationRepo().validateOtp(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
+        sp.setString("loginType", "login");
         sp.setString("userId", response.data['user']['id'].toString());
         if (response.data['is_new_user'] == false) {
           Navigator.pushAndRemoveUntil(
@@ -381,6 +382,15 @@ class AuthenticationProvider extends ChangeNotifier {
       return NewAppLoginStatus.values.firstWhere((e) => e.toString() == status, orElse: () => NewAppLoginStatus.none);
     }
     return NewAppLoginStatus.none;
+  }
+
+  void continueAsGuest(context,) async {
+    newAppLoginStatus = NewAppLoginStatus.category;
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString("loginState", newAppLoginStatus.toString());
+    preferences.setString("loginType", "skip");
+    notifyListeners();
+    // isPageNavigation(context);
   }
 
   void setLogOutStatus(context, bool isLogout) async {
