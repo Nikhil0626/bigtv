@@ -90,7 +90,7 @@ class LoginBackgroundView extends StatelessWidget {
                                    ),
                                    height(height: 20),
                                    Text(
-                                     'Please enter the 6-digit code sent to your phone number for verification',
+                                     'Please enter the 4-digit code sent to your phone number +91${authenticationProvider.phoneController.text}',
                                      textAlign: TextAlign.center,
                                      style: newAppFont(
                                        fontSize: 12.sp,
@@ -186,7 +186,7 @@ class LoginBackgroundView extends StatelessWidget {
                   top: 50,
                   child:InkWell(
                     onTap: (){
-                      Navigator.pop(context);
+                      authenticationProvider.setLogOutStatus(context, false);
                     },
                     child: Container(width: 30,height: 30,decoration: BoxDecoration(
                         color: Colors.white,

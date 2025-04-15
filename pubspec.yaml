@@ -63,8 +63,8 @@ dependencies:
   easy_localization: ^3.0.7+1
 
   flutter_inappwebview: ^6.1.5
-  swipeable_cards_stack:
-
+  swipeable_card_stack: ^0.0.5
+  appinio_swiper: ^2.1.1
   card_swiper: ^3.0.1
   app_tracking_transparency: ^2.0.6+1
   shimmer: ^3.0.0

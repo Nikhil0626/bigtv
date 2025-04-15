@@ -18,7 +18,7 @@ class DateAndSource extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (data['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
-                if (data['isReporter']  == true)
+                if (data['isReporter']  == 1)
                   Text(
                     ' ${data['reportedBy'] } | ',
                     style: fontStyle(fontSize:  12.sp, fontWeight: FontWeight.w400, color: Colors.grey),

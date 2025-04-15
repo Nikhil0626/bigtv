@@ -11,7 +11,7 @@ class HomeRepo extends BaseService{
   }
 
   Future getAllPosts(queryParams) async{
-    Response response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.getAllPost,method: RequestType.get,queryParameters: queryParams);
+    Response  response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.getAllPost,method: RequestType.get,queryParameters: queryParams);
     return response;
   }
 }

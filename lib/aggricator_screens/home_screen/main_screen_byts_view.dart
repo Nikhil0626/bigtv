@@ -583,26 +583,32 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                             },
                           ),
                           width(width: 15),
-                          InkWell(
-                            onTap: () {
-                              log("Refresh");
-                              EventRepo().sendEvent({
-                                "key": "reload",
-                                "data": {
-                                  "device_id": "${GlobalVariables().deviceId}",
-                                  "userId": GlobalVariables().userId ?? "",
-                                }
-                              });
-                              context.read<FlipProvider>().getArticles(refresh: true);
-                            },
-                            child: context.read<FlipProvider>().isRefresh
-                                ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                : SvgPicture.asset(
-                                    "assets/svg/new_refresh.svg",
-                                    height: 22,
-                                    width: 22,
-                                    color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                  ),
+                          Consumer<HomeProvider>(
+                            builder: (_,homeProvide,__) {
+                              return InkWell(
+                                onTap: () {
+                                  log("Refresh");
+                                  EventRepo().sendEvent({
+                                    "key": "reload",
+                                    "data": {
+                                      "device_id": "${GlobalVariables().deviceId}",
+                                      "userId": GlobalVariables().userId ?? "",
+                                    }
+                                  });
+                                  homeProvide.getAllPostList = [];
+                                  homeProvide.isReloadData();
+                                  homeProvide.getAllPost();
+                                },
+                                child: context.read<FlipProvider>().isRefresh
+                                    ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                    : SvgPicture.asset(
+                                        "assets/svg/new_refresh.svg",
+                                        height: 22,
+                                        width: 22,
+                                        color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                      ),
+                              );
+                            }
                           ),
                         ],
                       ),

@@ -64,7 +64,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                               padding: const EdgeInsets.only(bottom: 14),
                               child: Container(
                                 width: double.infinity,
-                                height: 110,
+                                height: 120,
                                 decoration: BoxDecoration(
                                   color: Colors.grey.shade300,
                                   borderRadius: BorderRadius.circular(10),

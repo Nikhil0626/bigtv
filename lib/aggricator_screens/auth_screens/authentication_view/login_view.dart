@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../../services/base_urls.dart';
@@ -35,6 +34,7 @@ class _LoginViewState extends State<LoginView> {
   void initState() {
   authenticationProvider = Provider.of<AuthenticationProvider>(listen: false,context);
   authenticationProvider!.phoneController.text = "";
+  authenticationProvider!.isButtonEnabled = false;
   getMobileNumber();
   // context.read<AuthProvider>().sendEvent("WellComePage");
     super.initState();
@@ -110,11 +110,10 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       Expanded(
                         child: Container(
-                          // color: Colors.white,
                           decoration: BoxDecoration(
                             color: Colors.white,
-                            border: Border.all(color: AppColors.borderColor),
-                            borderRadius: BorderRadius.only(bottomLeft: Radius.circular(8.r),),
+                            // border: Border.all(color: AppColors.borderColor),
+                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(8.r),topRight:  Radius.circular(8.r)),
                           ),
                           child: TextFormField(
                             controller: authenticationProvider!.phoneController,

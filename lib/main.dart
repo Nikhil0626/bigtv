@@ -38,6 +38,7 @@ import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'aggricator_screens/settings_screen/settings_repository/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
+import 'aggricator_screens/test_screens/language_screen.dart';
 import 'globel_keys/app_router.dart';
 import 'globel_keys/globel_keys.dart';
 
@@ -230,6 +231,8 @@ class _MyAppState extends State<MyApp> {
             '/settings': (context) => SettingsView(),
             // Add other routes like '/settings', '/profile', etc.
           },
+          // home: (),
+
           debugShowCheckedModeBanner: false,
         ),
       ),

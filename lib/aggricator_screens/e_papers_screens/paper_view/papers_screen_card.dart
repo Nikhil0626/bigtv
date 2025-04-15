@@ -135,7 +135,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
-                                      Icons.bookmark,
+                                      Icons.bookmark_border,
                                       color: Colors.white,
                                       size: 20,
                                     ),

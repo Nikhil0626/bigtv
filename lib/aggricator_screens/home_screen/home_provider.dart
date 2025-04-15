@@ -80,6 +80,7 @@ bool isPostLoading = false;
       "postId": postId,
       "locationIds": locationIds,
       "catgoriesId":categoriesIds,
+      "force_refresh":"false"
       // "ad": "true"
     };
     log(body.toString());

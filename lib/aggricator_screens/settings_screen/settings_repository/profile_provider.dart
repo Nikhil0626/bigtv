@@ -63,15 +63,16 @@ class ProfileProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  bool isProfileUpdate = false;
 
   Future postProfile() async {
-    bool isMainLoading = true;
+    isProfileUpdate = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
 
     String? userId = preferences.getString("userId");
 
     Map<String, dynamic> body = {
-      "user_id":userId,
+      "user_id":int.parse(userId!),
       "name":nameController.text.toString(),
       "dob":'${yearController.text}-${monthController.text}-${dayController.text}',
       "photo_url":uploadImageUrl.toString(),
@@ -93,7 +94,7 @@ class ProfileProvider extends ChangeNotifier {
       CustomToast.showSuccessToast(msg: "Profile data not updated");
       log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
     } finally {
-      isMainLoading = false;
+      isProfileUpdate = false;
       notifyListeners();
     }
   }
