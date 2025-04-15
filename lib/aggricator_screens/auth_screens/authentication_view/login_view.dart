@@ -110,7 +110,7 @@ class _LoginViewState extends State<LoginView> {
                       ),
                       Expanded(
                         child: Container(
-                          color: Colors.white,
+                          // color: Colors.white,
                           decoration: BoxDecoration(
                             color: Colors.white,
                             border: Border.all(color: AppColors.borderColor),
