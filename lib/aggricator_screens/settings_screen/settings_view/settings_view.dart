@@ -45,6 +45,7 @@ class _SettingsViewState extends State<SettingsView> {
   Future getLogin() async {
     SharedPreferences sp= await SharedPreferences.getInstance();
     isNotificationsEnabled = sp.getString("loginType")=="login"?true:false;
+    log(isNotificationsEnabled.toString());
     setState(() {});
   }
   @override
@@ -57,9 +58,9 @@ class _SettingsViewState extends State<SettingsView> {
           children: [
             // if (loginStatus == LoginStatus.skip)
             _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
-              if (!isNotificationsEnabled) {
+              if (isNotificationsEnabled == false) {
                 CustomToast.showErrorToast(msg: 'Please login with mobile number');
-              } else if (loginStatus == NewAppLoginStatus.home) {
+              } else if (isNotificationsEnabled == true) {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => ProfileView()),

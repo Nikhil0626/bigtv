@@ -205,7 +205,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
         selectedCategories = getAllCategoryList.where((item) => item.isFollowed == true).map((item) => item.categoryName.toString()).toList();
         log(getAllCategoryList.first.categoryName.toString());
-        String result = selectedLocations.toSet().join(',');
+        String result = selectedCategories.toSet().join(',');
         preferences.setString("categoriesId", result);
       }
     } on DioException catch (e, st) {
