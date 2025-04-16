@@ -9,9 +9,9 @@ class AdsScreen extends StatefulWidget {
   State<AdsScreen> createState() => _AdsScreenState();
 }
 
-class _AdsScreenState extends State<AdsScreen> {
+class _AdsScreenState extends State<AdsScreen>   {
   @override
-  Widget build(BuildContext context)     {
+  Widget build(BuildContext context){
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(16.0),
