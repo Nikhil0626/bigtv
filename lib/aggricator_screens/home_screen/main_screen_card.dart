@@ -15,6 +15,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
@@ -29,6 +30,7 @@ import '../../screens/videos_main/video_views/video_preview.dart';
 import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
+import '../../utils/app_enums.dart';
 import '../../utils/app_loading_screen.dart';
 import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
@@ -64,6 +66,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
     context.read<HomeProvider>().getAllPost();
     super.initState();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -369,6 +372,7 @@ class StandardCard extends StatefulWidget {
 
 class _StandardCardState extends State<StandardCard> {
   ScreenshotController sc = ScreenshotController();
+
   @override
   Widget build(BuildContext context) {
     return Screenshot(
@@ -532,6 +536,7 @@ class _StandardCardState extends State<StandardCard> {
                             "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}
                           });
                         },
+
                       ),
                       Spacer(),
                       BottomActions(

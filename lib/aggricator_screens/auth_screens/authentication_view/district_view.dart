@@ -92,6 +92,7 @@
 // }
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/home_screen/main_screen_card.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -128,7 +129,8 @@ class _DistrictViewState extends State<DistrictView> {
       return Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: Container(
-          height: MediaQuery.of(context).size.height * .46,
+          // height: MediaQuery.of(context).size.height * .46,
+          height:561,
           width: 326.w,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(

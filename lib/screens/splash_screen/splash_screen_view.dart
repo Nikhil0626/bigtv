@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
@@ -46,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen> {
     );
 
     // Wait for a short time to check if a deep link was received
-    await Future.delayed(Duration(seconds: 2));
+    await Future.delayed(Duration(seconds: 1));
 
     // If no link was received, navigate to the home screen
     if (!didReceiveLink) {
@@ -56,8 +58,19 @@ class _SplashScreenState extends State<SplashScreen> {
 
 
   void openAppLink(Uri uri) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => HomeView(),)
-    );
+    // print("Hai");
+    // Navigator.push(context, MaterialPageRoute(builder: (context) => HomeView(),)
+    // );
+    if (uri.path == '/individualPage') {
+
+      final postId = uri.queryParameters['id'] ?? "";
+      log("Navigating to Individual Post screen with postId: $postId");
+      Navigator.pushNamed(
+        context,
+        '/individualPage',
+        arguments: {'postId': postId},
+      );
+    }
   }
 
 
