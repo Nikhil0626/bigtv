@@ -63,6 +63,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future sendOtp(BuildContext context) async {
     isLoginLoading = true;
+
     log("ButtonClicked __${phoneController.text}");
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -80,19 +81,26 @@ class AuthenticationProvider extends ChangeNotifier {
         newAppLoginStatus = NewAppLoginStatus.otp;
         saveLoginState();
         otpController.text = "";
+      }else{
+        CustomToast.showErrorToast(msg: "Check your mobile number try again");
       }
     } catch (e, st) {
+      CustomToast.showErrorToast(msg: "Check your mobile number try again");
       log(e.toString());
       log(st.toString());
     } finally {
+
       isLoginLoading = false;
       notifyListeners();
     }
   }
 
-  Future verifyOtp(context,) async {
+  Future verifyOtp(
+    context,
+  ) async {
     errorMessage = '';
     isVerifyLoading  = true;
+    isButtonEnabled = false;
     notifyListeners();
     log(
       phoneController.text.toString(),
@@ -110,6 +118,7 @@ class AuthenticationProvider extends ChangeNotifier {
       Response response = await AuthenticationRepo().validateOtp(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
+        sp.setString("loginType", "login");
         sp.setString("userId", response.data['user']['id'].toString());
         if (response.data['is_new_user'] == false) {
           Navigator.pushAndRemoveUntil(
@@ -142,7 +151,7 @@ class AuthenticationProvider extends ChangeNotifier {
           "key": "login_skip",
           "data": {"device_id": "${deviceId}", "isLogin": true, "userId": ""}
         });
-        WebEngagePlugin.userLogin("");
+        WebEngagePlugin.userLogin(response.data['user']['id'].toString());
         WebEngagePlugin.setUserPhone(phoneController.text.toString());
         mobileVerificationDetails(phoneController.text.toString(), true);
 
@@ -154,20 +163,18 @@ class AuthenticationProvider extends ChangeNotifier {
 
         phoneController.text = "";
         notifyListeners();
-      } else {
-        errorMessage = response.data['message'];
-        // errorMessage = response.data['message'] ?? "Enter a valid OTP";
-        // CustomToast.showErrorToast(msg: errorMessage);
-
+      } if(response.statusCode == 400){
+        errorMessage = response.data['detail'].toString();
+        CustomToast.showErrorToast(msg: response.data['detail']);
       }
     } on DioException catch (e, st) {
-
+      CustomToast.showErrorToast(msg: e.message);
       log("error dio ${e.toString()}");
       log("error dio  ${st.toString()}");
     } catch (e, st) {
       log("error  ${e.toString()}");
       log("error  ${st.toString()}");
-      CustomToast.showErrorToast(msg: "testing");
+      CustomToast.showErrorToast(msg: "Something went wrong");
     } finally {
       isVerifyLoading = false;
       notifyListeners();
@@ -198,7 +205,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
         selectedCategories = getAllCategoryList.where((item) => item.isFollowed == true).map((item) => item.categoryName.toString()).toList();
         log(getAllCategoryList.first.categoryName.toString());
-        String result = selectedLocations.toSet().join(',');
+        String result = selectedCategories.toSet().join(',');
         preferences.setString("categoriesId", result);
       }
     } on DioException catch (e, st) {
@@ -382,6 +389,15 @@ class AuthenticationProvider extends ChangeNotifier {
       return NewAppLoginStatus.values.firstWhere((e) => e.toString() == status, orElse: () => NewAppLoginStatus.none);
     }
     return NewAppLoginStatus.none;
+  }
+
+  void continueAsGuest(context,) async {
+    newAppLoginStatus = NewAppLoginStatus.category;
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString("loginState", newAppLoginStatus.toString());
+    preferences.setString("loginType", "skip");
+    notifyListeners();
+    // isPageNavigation(context);
   }
 
   void setLogOutStatus(context, bool isLogout) async {

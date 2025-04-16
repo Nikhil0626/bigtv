@@ -23,6 +23,9 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
+  final FocusNode dayFocusNode = FocusNode();
+  final FocusNode monthFocusNode = FocusNode();
+  final FocusNode yearFocusNode = FocusNode();
   @override
   void initState() {
     context.read<ProfileProvider>().getProfile();
@@ -75,7 +78,7 @@ class _ProfileViewState extends State<ProfileView> {
                             width: 100,
                             child: ClipRRect(
                              borderRadius: BorderRadius.all(Radius.circular(50)),
-                              child:profileProvider.isProfileLoading?AppLoadingScreen():profileProvider.uploadImageUrl == ""?Icon(Icons.person,size: 30,): Image.network(profileProvider.uploadImageUrl,fit: BoxFit.fill,),
+                              child:profileProvider.isProfileLoading?AppLoadingScreen():profileProvider.uploadImageUrl == ""?Icon(Icons.person,size: 100,): Image.network(profileProvider.uploadImageUrl,fit: BoxFit.fill,),
                             ),
                           ),
                           Positioned(
@@ -138,10 +141,12 @@ class _ProfileViewState extends State<ProfileView> {
                         Expanded(
                           child: TextField(
                             controller: profileProvider.dayController,
+                            focusNode: dayFocusNode,
                             keyboardType: TextInputType.number,
                             maxLength: 2,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              labelText: "DD",
                               counterText: "",
                               filled: true,
                               fillColor: Colors.white,
@@ -150,16 +155,23 @@ class _ProfileViewState extends State<ProfileView> {
                                 borderSide: BorderSide.none,
                               ),
                             ),
+                            onChanged: (value) {
+                              if (value.length == 2) {
+                                FocusScope.of(context).requestFocus(monthFocusNode);
+                              }
+                            },
                           ),
                         ),
                         width(width: 10.w),
                         Expanded(
                           child: TextField(
                             controller: profileProvider.monthController,
+                            focusNode: monthFocusNode,
                             keyboardType: TextInputType.number,
                             maxLength: 2,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              labelText: "MM",
                               counterText: "",
                               filled: true,
                               fillColor: Colors.white,
@@ -168,16 +180,23 @@ class _ProfileViewState extends State<ProfileView> {
                                 borderSide: BorderSide.none,
                               ),
                             ),
+                            onChanged: (value) {
+                              if (value.length == 2) {
+                                FocusScope.of(context).requestFocus(yearFocusNode);
+                              }
+                            },
                           ),
                         ),
                         width(width: 10.w),
                         Expanded(
                           child: TextField(
                             controller: profileProvider.yearController,
+                            focusNode: yearFocusNode,
                             keyboardType: TextInputType.number,
                             maxLength: 4,
                             textAlign: TextAlign.center,
                             decoration: InputDecoration(
+                              labelText: "YYYY",
                               counterText: "",
                               filled: true,
                               fillColor: Colors.white,
@@ -265,16 +284,17 @@ class _ProfileViewState extends State<ProfileView> {
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor:
-                          Colors.blue ,
+                          profileProvider.isProfileLoading?Colors.grey: Colors.blue ,
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30.r)),
                           minimumSize: Size(double.infinity, 50),
                         ),
                         onPressed:(){
-                          profileProvider.postProfile();
-
+                          if(profileProvider.isProfileLoading){}else {
+                            profileProvider.postProfile();
+                          }
                         },
-                        child: Text('Update',
+                        child: profileProvider.isProfileLoading?AppLoadingScreen():Text('Update',
                             style: newAppFont(
                                 fontSize: 18.sp,
                                 color: Colors.white,

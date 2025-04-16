@@ -1,7 +1,7 @@
+
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/home_screen/home_repo.dart';
-import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,8 +36,11 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 bool isPostLoading = false;
+
   Future getIndividualPost(postId) async {
     isPostLoading = true;
+    log("sdknfksdfndskjfnkdsfndskj  ");
+
     getSinglePostList =[];
     try {
       Response response = await HomeRepo().getSinglePost(postId);
@@ -80,6 +83,7 @@ bool isPostLoading = false;
       "postId": postId,
       "locationIds": locationIds,
       "catgoriesId":categoriesIds,
+      "force_refresh":"false"
       // "ad": "true"
     };
     log(body.toString());

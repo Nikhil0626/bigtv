@@ -20,6 +20,7 @@ import '../../globel_keys/global_variables_data.dart';
 import '../../screens/home_screen/home_provider/provider.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../services/deviice_details.dart';
+import '../../services/permission_handler_services.dart';
 import '../../utils/custom_switch.dart';
 import '../e_papers_screens/paper_view/papers_screen_list.dart';
 import '../settings_screen/settings_view/settings_view.dart';
@@ -37,6 +38,8 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
+    requestLocationPermission();
+    requestNotificationPermission();
     getMobileNumber();
     context.read<HomeProvider>().selectedIndex = 0;
     _pageController = PageController(initialPage: 0);

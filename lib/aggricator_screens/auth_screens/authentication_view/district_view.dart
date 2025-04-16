@@ -175,7 +175,9 @@ class _DistrictViewState extends State<DistrictView> {
                         text: "0${authenticationProvider.selectedLocations.length}",
                         style: homeScreenFontStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                       ),
-                      TextSpan(text: "/03"),
+                      TextSpan(text: "/03\n"),
+                      if(authenticationProvider.selectedLocations.length>3)
+                      TextSpan(text: "You are select maximum number district ",style: newAppFont(fontSize: 12,color: Colors.red,fontWeight: FontWeight.w600)),
                     ],
                   ),
                 ),

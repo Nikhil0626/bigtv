@@ -2,36 +2,26 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:app_links/app_links.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
-import 'package:chotanews/screens/chota_info_screens/chota_info.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/screens/profile_screen/profile_screen.dart';
 import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
 import 'package:chotanews/services/analytics_service.dart';
-import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/services/kochava_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
-import 'package:chotanews/utils/register_providers.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
-import 'aggricator_screens/home_screen/ads_screen.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
 import 'aggricator_screens/home_screen/news_posts_provider.dart';
 import 'aggricator_screens/individual_post_details/individual_post_view.dart';
@@ -39,10 +29,10 @@ import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'aggricator_screens/settings_screen/settings_repository/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
-import 'globel_keys/app_router.dart';
-import 'globel_keys/globel_keys.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
+
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,6 +54,7 @@ Future<void> main() async {
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
 
+
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -72,29 +63,9 @@ Future<void> main() async {
     print(message.data);
     print("push data receive   &&& ${message.data}");
   });
+  // subscribeToPushCallbacks(_webEngagePlugin);
 
-  final PendingDynamicLinkData? initialLink =
-      await FirebaseDynamicLinks.instance.getInitialLink();
 
-  if (initialLink != null) {
-    final Uri deepLink = initialLink.link;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mainNavigatorKey.currentContext != null) {
-        DynamicLinkService.handleDeepLink(
-            mainNavigatorKey.currentContext!, deepLink);
-      }
-    });
-  }
-
-  FirebaseDynamicLinks.instance.onLink.listen(
-    (pendingDynamicLinkData) {
-      if (pendingDynamicLinkData != null) {
-        final Uri deepLink = pendingDynamicLinkData.link;
-        DynamicLinkService.handleDeepLink(
-            mainNavigatorKey.currentContext!, deepLink);
-      }
-    },
-  );
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -109,7 +80,7 @@ Future<void> main() async {
         fallbackLocale: Locale("en"),
         child: AppLifecycleManager(child: MyApp())));
   });
-  subscribeToPushCallbacks(_webEngagePlugin);
+
 }
 
 @pragma('vm:entry-point')
@@ -140,8 +111,49 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _initDeepLinks();
+
+    // Listen for notification after widget binding
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      handleNotificationIfPresent();
+    });
+
+    // Attach push stream listener
+    WebEngagePlugin().pushStream.listen((event) {
+      _handlePushNotification(event.payload!);
+    });
   }
 
+  void _handlePushNotification(Map<String, dynamic> messagePayload) async {
+    final context = mainNavigatorKey.currentContext;
+    if (context != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => IndividualPostView(
+            postId: messagePayload["postId"],
+          ),
+        ),
+      );
+    } else {
+      // Save it for later
+      // Store the payload temporarily in shared preferences or a static variable
+      NotificationHandler.pendingNotification = messagePayload;
+    }
+  }
+
+  void handleNotificationIfPresent() {
+    if (NotificationHandler.pendingNotification != null) {
+      final payload = NotificationHandler.pendingNotification!;
+      NotificationHandler.pendingNotification = null;
+
+      Navigator.push(
+        mainNavigatorKey.currentContext!,
+        MaterialPageRoute(
+          builder: (context) => IndividualPostView(postId: payload["postId"]),
+        ),
+      );
+    }
+  }
   Future<void> _initDeepLinks() async {
     log("Initializing deep link listener");
     linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
@@ -156,7 +168,7 @@ class _MyAppState extends State<MyApp> {
 
   void _handleDeepLink(Uri uri) {
     final String path = uri.path;
-    final String? id = uri.queryParameters['id'];
+    final String? id = uri.queryParameters['postId'];
     log("Path: $path, ID: $id");
 
     switch (path) {
@@ -164,7 +176,7 @@ class _MyAppState extends State<MyApp> {
         log("Navigating to Settings screen");
         mainNavigatorKey.currentState?.pushNamed('/settings');
         break;
-      case '/individualPost':
+      case '/individualPage':
 
         postId = id ?? "";
         log("Navigating to Individual Post screen  $postId");
@@ -229,9 +241,9 @@ class _MyAppState extends State<MyApp> {
             '/': (context) => SplashScreen(),
             '/individualPage': (context) => IndividualPostView(postId: postId,),
             '/settings': (context) => SettingsView(),
-            // Add other routes like '/settings', '/profile', etc.
+
           },
-          home: AdsScreen(),
+
           debugShowCheckedModeBanner: false,
         ),
       ),
@@ -239,7 +251,9 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-
+class NotificationHandler {
+  static Map<String, dynamic>? pendingNotification;
+}
 
 final mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver =

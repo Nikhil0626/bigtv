@@ -87,9 +87,10 @@ class _VideoPreview extends State<VideoPreview> {
               children: [
                 Image.network(
                   height: 330,
+                  width: MediaQuery.of(context).size.width,
                   widget.imageUrl,
                   // "https://img.youtube.com/vi/${widget.url}/hqdefault.jpg",
-                  fit: BoxFit.cover,
+                  fit: BoxFit.fill,
                 ),
                 IconButton(
                   icon: SvgPicture.asset(

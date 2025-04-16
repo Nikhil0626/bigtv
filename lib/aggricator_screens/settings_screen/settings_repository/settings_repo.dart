@@ -37,7 +37,12 @@ class SettingsRepo  extends BaseService{
   }
   Future postProfile(body) async{
     Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
-        url: BaseUrls.getProfile, method: RequestType.post, queryParameters: body);
+        options: Options(
+          headers: {
+            "accept": 'application/json'
+          }
+        ),
+        url: BaseUrls.getProfile, method: RequestType.post, body: body);
     return response;
   }
 

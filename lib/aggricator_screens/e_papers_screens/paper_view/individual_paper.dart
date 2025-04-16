@@ -65,7 +65,8 @@ class _IndividualPaperState extends State<IndividualPaper> {
                             context,
                             MaterialPageRoute(
                               builder: (context) =>
-                                  PapersScreenPreview(imageUrl: ePapersProvider.getSinglePapersList[index].imageUrl.toString(), postId: ePapersProvider.getSinglePapersList[index].id.toString()),
+                                  PapersScreenPreview(imageUrls: ePapersProvider.getSinglePapersList[index].data!,
+                                      postId: ePapersProvider.getSinglePapersList[index].id.toString(),),
                             ));
                       },
                       child: Padding(
@@ -175,7 +176,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
-                                        Icons.bookmark_outline,
+                                        Icons.bookmark_border,
                                         color: Colors.white,
                                         size: 20,
                                       ),
