@@ -10,14 +10,12 @@ import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
@@ -30,8 +28,6 @@ import '../../screens/videos_main/video_views/video_preview.dart';
 import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
-import '../../utils/app_enums.dart';
-import '../../utils/app_loading_screen.dart';
 import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
@@ -51,8 +47,6 @@ class _MainScreenCardState extends State<MainScreenCard> {
 
   double dragOffset = 0.0;
 
-
-
   @override
   void dispose() {
     super.dispose();
@@ -61,20 +55,16 @@ class _MainScreenCardState extends State<MainScreenCard> {
   @override
   void initState() {
     context.read<HomeProvider>().getAllPostList = [];
-    context.read<AuthenticationProvider>().getAllCategories();
 
     context.read<HomeProvider>().getAllPost();
     super.initState();
   }
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
-
-
         return SizedBox(
           width: MediaQuery.of(context).size.width.w,
           height: MediaQuery.of(context).size.height - 150.h,
@@ -136,7 +126,6 @@ class _MainScreenCardState extends State<MainScreenCard> {
                           }),
                           Expanded(
                             child: GestureDetector(
-
                               onVerticalDragUpdate: (details) {
                                 setState(() {
                                   dragOffset += details.delta.dy;
@@ -158,7 +147,6 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                 cardsCount: homeProvider.getAllPostList.length,
                                 numberOfCardsDisplayed: 4,
                                 cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-
                                   return InkWell(
                                     onTap: () {
                                       Navigator.push(
@@ -168,87 +156,72 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                               startIndex: index,
                                             ),
                                           ));
+                                      if (homeProvider.getAllPostList[index]['type'].toString() == "Video") {
+                                        homeProvider.youtubeDispose();
+                                      }
                                     },
                                     child: Container(
-                                      alignment: Alignment.center,
-                                      decoration: BoxDecoration(
-                                        color: Colors.grey.shade200,
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: homeProvider.getAllPostList[index]['type'].toString() == "WebView"
-                                          ? Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: InAppWebViewScreen(
-                                                webUrl: homeProvider.webUrl.toString(),
-                                                title: '',
-                                              ),
-                                            )
-                                          : homeProvider.getAllPostList[index]['type'].toString() == "GoogleAds"
-                                              ? Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: GoogleAdsView(
-                                                    article: homeProvider.getAllPostList[index],
-                                                    flipProvider: homeProvider,
-                                                    // screenshotController: adsScreenshotController,
-                                                    isFoldable: false,
-                                                  ),
-                                                )
-                                              : homeProvider.getAllPostList[index]['type'].toString() == "Image"
-                                                  ? Padding(
-                                                      padding: const EdgeInsets.all(8.0),
-                                                      child: Stack(
-                                                        children: [
-                                                          Image.network(
-                                                            homeProvider.getAllPostList[index]['image_url'].toString() ?? "",
-                                                            width: MediaQuery.of(context).size.width,
-                                                            height: MediaQuery.of(context).size.height,
-                                                            fit: BoxFit.cover,
-                                                          ),
-                                                          Positioned(
-                                                            top: 10,
-                                                            right: 14,
-                                                            child: GestureDetector(
-                                                              onTap: () {
-                                                                context.read<SettingsProvider>().saveBookmarks(
-                                                                      homeProvider.getAllPostList[index]['id'].toString(),
-                                                                    );
-                                                                print("");
-                                                              },
-                                                              child: Container(
-                                                                padding: EdgeInsets.all(7),
-                                                                decoration: BoxDecoration(
-                                                                  color: Colors.black54,
-                                                                  shape: BoxShape.circle,
-                                                                ),
-                                                                child: Icon(
-                                                                  Icons.bookmark_outline,
-                                                                  color: Colors.white,
-                                                                  size: 20,
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    )
-                                                  : homeProvider.getAllPostList[index]['type'].toString() == "Gallery"
-                                                      ? Padding(
-                                                          padding: const EdgeInsets.all(8.0),
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: AppColors.cardBackgroundColor,
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.grey.withOpacity(0.2),
+                                              blurRadius: 6,
+                                              spreadRadius: 2,
+                                              offset: Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        child: homeProvider.getAllPostList[index]['type'].toString() == "WebView"
+                                            ? Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: InAppWebViewScreen(
+                                                  webUrl: homeProvider.webUrl.toString(),
+                                                  title: '',
+                                                ),
+                                              )
+                                            : homeProvider.getAllPostList[index]['type'].toString() == "GoogleAds"
+                                                ? Padding(
+                                                    padding: const EdgeInsets.only(bottom: 20.0),
+                                                    child: GoogleAdsView(
+                                                      isList: true,
+                                                      article: homeProvider.getAllPostList[index],
+                                                      flipProvider: homeProvider,
+                                                      // screenshotController: adsScreenshotController,
+                                                      isFoldable: false,
+                                                    ),
+                                                  )
+                                                : homeProvider.getAllPostList[index]['type'].toString() == "Image"
+                                                    ? InkWell(
+                                                        onTap: () async {
+                                                          if (homeProvider.getAllPostList[index]['type'] == "Image") {
+                                                            if (await canLaunchUrl(Uri.parse(homeProvider.getAllPostList[index]['content'].toString()))) {
+                                                              await launchUrl(Uri.parse(homeProvider.getAllPostList[index]['content'].toString()));
+                                                            } else {
+                                                              throw 'Could not launch ${Uri.parse(homeProvider.getAllPostList[index]['content'].toString())}';
+                                                            }
+                                                          }
+                                                        },
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.only(bottom: 20.0),
                                                           child: Stack(
                                                             children: [
                                                               ClipRRect(
                                                                 borderRadius: BorderRadius.all(
                                                                   Radius.circular(12),
                                                                 ),
-                                                                child: FullPageCarousel(
-                                                                  isHome: true,
-                                                                  imageUrls: homeProvider.getAllPostList[index]['gallery'] ?? [],
-                                                                  postDetails: homeProvider.getAllPostList[index],
+                                                                child: Image.network(
+                                                                  homeProvider.getAllPostList[index]['image_url'].toString() ?? "",
+                                                                  width: MediaQuery.of(context).size.width,
+                                                                  height: MediaQuery.of(context).size.height,
+                                                                  fit: BoxFit.cover,
                                                                 ),
                                                               ),
                                                               Positioned(
-                                                                top: 18,
-                                                                right: 22,
+                                                                top: 10,
+                                                                right: 14,
                                                                 child: GestureDetector(
                                                                   onTap: () {
                                                                     context.read<SettingsProvider>().saveBookmarks(
@@ -272,9 +245,53 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                               ),
                                                             ],
                                                           ),
-                                                        )
-                                                      : StandardCard(getAllPostList: homeProvider.getAllPostList[index],)
-                                    ),
+                                                        ),
+                                                      )
+                                                    : homeProvider.getAllPostList[index]['type'].toString() == "Gallery"
+                                                        ? Padding(
+                                                            padding: const EdgeInsets.only(bottom: 20.0),
+                                                            child: Stack(
+                                                              children: [
+                                                                ClipRRect(
+                                                                  borderRadius: BorderRadius.all(
+                                                                    Radius.circular(12),
+                                                                  ),
+                                                                  child: FullPageCarousel(
+                                                                    isHome: true,
+                                                                    imageUrls: homeProvider.getAllPostList[index]['gallery'] ?? [],
+                                                                    postDetails: homeProvider.getAllPostList[index],
+                                                                  ),
+                                                                ),
+                                                                Positioned(
+                                                                  top: 18,
+                                                                  right: 22,
+                                                                  child: GestureDetector(
+                                                                    onTap: () {
+                                                                      context.read<SettingsProvider>().saveBookmarks(
+                                                                            homeProvider.getAllPostList[index]['id'].toString(),
+                                                                          );
+                                                                      print("");
+                                                                    },
+                                                                    child: Container(
+                                                                      padding: EdgeInsets.all(7),
+                                                                      decoration: BoxDecoration(
+                                                                        color: Colors.black54,
+                                                                        shape: BoxShape.circle,
+                                                                      ),
+                                                                      child: Icon(
+                                                                        Icons.bookmark_outline,
+                                                                        color: Colors.white,
+                                                                        size: 20,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          )
+                                                        : StandardCard(
+                                                            getAllPostList: homeProvider.getAllPostList[index],
+                                                          )),
                                   );
                                 },
                               ),
@@ -364,7 +381,11 @@ class ShimmerCard extends StatelessWidget {
 
 class StandardCard extends StatefulWidget {
   final getAllPostList;
-  const StandardCard({super.key, this.getAllPostList, });
+
+  const StandardCard({
+    super.key,
+    this.getAllPostList,
+  });
 
   @override
   State<StandardCard> createState() => _StandardCardState();
@@ -380,9 +401,10 @@ class _StandardCardState extends State<StandardCard> {
       child: Stack(
         children: [
           Container(
-            decoration: BoxDecoration(borderRadius:  BorderRadius.all(
-              Radius.circular(12),
-            ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.all(
+                Radius.circular(12),
+              ),
               color: AppColors.cardBackgroundColor,
             ),
             child: Column(
@@ -396,89 +418,90 @@ class _StandardCardState extends State<StandardCard> {
                       Radius.circular(12),
                     ),
                     child: widget.getAllPostList['type'].toString() == "Video"
-                        ? SizedBox(
-                      height: MediaQuery.of(context).size.height * .35,
-                      width: MediaQuery.of(context).size.width,
-                      child: Stack(
-                        children: [
-                          VideoPreview(
-                            imageUrl: widget.getAllPostList['image_url'].toString(),
-                            url: widget.getAllPostList['video_url'].toString() ?? "",
-                            isFoldable: false,
-                          ),
-                          Positioned(
-                            top: 10,
-                            right: 14,
-                            child: GestureDetector(
-                              onTap: () {
-                                context.read<SettingsProvider>().saveBookmarks(
-                                  widget.getAllPostList['id'].toString(),
-                                );
-                                print("");
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.bookmark_outline,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )
-                        : Stack(
-                      children: [
-                        CachedNetworkImage(
-                          imageUrl: widget.getAllPostList['image_url'].toString(),
-                          height: MediaQuery.of(context).size.height * .35,
-                          width: MediaQuery.of(context).size.width,
-                          fit: BoxFit.fill,
-                          placeholder: (context, url) => Container(
+                        ? Container(
+                            padding: EdgeInsets.only(bottom: 20),
                             height: MediaQuery.of(context).size.height * .35,
                             width: MediaQuery.of(context).size.width,
-                            color: AppColors.borderColor.withOpacity(.2),
-                          ),
-                          errorWidget: (context, url, error) => Center(
-                            child: Icon(
-                              Icons.image,
-                              size: 100,
-                              color: Colors.grey.shade300,
+                            child: Stack(
+                              children: [
+                                VideoPreview(
+                                  imageUrl: widget.getAllPostList['image_url'].toString(),
+                                  url: widget.getAllPostList['video_url'].toString() ?? "",
+                                  isFoldable: false,
+                                ),
+                                Positioned(
+                                  top: 10,
+                                  right: 14,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      context.read<SettingsProvider>().saveBookmarks(
+                                            widget.getAllPostList['id'].toString(),
+                                          );
+                                      print("");
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(7),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        Icons.bookmark_outline,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 10,
-                          right: 14,
-                          child: GestureDetector(
-                            onTap: () {
-                              context.read<SettingsProvider>().saveBookmarks(
-                                widget.getAllPostList['id'].toString(),
-                              );
-                              print("");
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
+                          )
+                        : Stack(
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: widget.getAllPostList['image_url'].toString(),
+                                height: MediaQuery.of(context).size.height * .35,
+                                width: MediaQuery.of(context).size.width,
+                                fit: BoxFit.fill,
+                                placeholder: (context, url) => Container(
+                                  height: MediaQuery.of(context).size.height * .35,
+                                  width: MediaQuery.of(context).size.width,
+                                  color: AppColors.borderColor.withOpacity(.2),
+                                ),
+                                errorWidget: (context, url, error) => Center(
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 100,
+                                    color: Colors.grey.shade300,
+                                  ),
+                                ),
                               ),
-                              child: Icon(
-                                Icons.bookmark_outline,
-                                color: Colors.white,
-                                size: 20,
+                              Positioned(
+                                top: 10,
+                                right: 14,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    context.read<SettingsProvider>().saveBookmarks(
+                                          widget.getAllPostList['id'].toString(),
+                                        );
+                                    print("");
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.bookmark_outline,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 height(height: 8),
@@ -503,9 +526,7 @@ class _StandardCardState extends State<StandardCard> {
                         return BottomActions(
                           iconColor: AppColors.iconColors,
                           postType: widget.getAllPostList['subType'].toString() ?? "",
-                          icon: settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString())
-                              ? "assets/svg/like_full.svg"
-                              : "assets/svg/like.svg",
+                          icon: settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                           label: 'లైక్',
                           isLike: settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()),
                           onTap: () {
@@ -514,7 +535,6 @@ class _StandardCardState extends State<StandardCard> {
                           },
                         );
                       }),
-
                       BottomActions(
                         postType: widget.getAllPostList['subType'] ?? "",
                         icon: "assets/svg/new_comment.svg",
@@ -536,11 +556,10 @@ class _StandardCardState extends State<StandardCard> {
                             "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}
                           });
                         },
-
                       ),
                       Spacer(),
                       BottomActions(
-                        postType:widget.getAllPostList['subType'] ?? "",
+                        postType: widget.getAllPostList['subType'] ?? "",
                         icon: "assets/svg/share.svg",
                         label: 'షేర్',
                         iconColor: AppColors.iconColors,
@@ -555,8 +574,7 @@ class _StandardCardState extends State<StandardCard> {
                             }
                           });
 
-                          sendShareDetails(context.read<FlipProvider>().userId, widget.getAllPostList['id'],
-                              widget.getAllPostList['content'].toString());
+                          sendShareDetails(context.read<FlipProvider>().userId, widget.getAllPostList['id'], widget.getAllPostList['content'].toString());
 
                           if (widget.getAllPostList['type'] == "Standard" || widget.getAllPostList['type'] == "Video") {
                             try {
@@ -569,10 +587,7 @@ class _StandardCardState extends State<StandardCard> {
                                 final imageFile = File(imagePath);
                                 await imageFile.writeAsBytes(image);
 
-                                Share.shareXFiles([XFile(imageFile.path)],
-                                    text: Platform.isIOS
-                                        ?widget.getAllPostList['linkURLAndroid'].toString()
-                                        : widget.getAllPostList['linkURLIos'].toString());
+                                Share.shareXFiles([XFile(imageFile.path)], text: Platform.isIOS ? widget.getAllPostList['linkURLAndroid'].toString() : widget.getAllPostList['linkURLIos'].toString());
                               } else {
                                 CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                               }
@@ -580,11 +595,10 @@ class _StandardCardState extends State<StandardCard> {
                               CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                             }
                           } else if (widget.getAllPostList['type'] == "Gallery") {
-                            createAndSharePdf(context,widget.getAllPostList);
+                            createAndSharePdf(context, widget.getAllPostList);
                           }
                         },
                       ),
-
                     ],
                   ),
                 ),
@@ -641,4 +655,3 @@ class _StandardCardState extends State<StandardCard> {
     );
   }
 }
-

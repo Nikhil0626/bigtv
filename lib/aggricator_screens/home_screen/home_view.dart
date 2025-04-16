@@ -17,7 +17,6 @@ import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/global_variables_data.dart';
-import '../../screens/home_screen/home_provider/provider.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../services/deviice_details.dart';
 import '../../services/permission_handler_services.dart';
@@ -149,6 +148,8 @@ class _HomeViewState extends State<HomeView> {
                     );
                   },
                 ),
+                if( context.read<HomeProvider>().selectedIndex == 3)
+                  Text("V5.0.0+31",style: fontStyle(fontWeight: FontWeight.w900),),
                width(width: 20),
               ],
             ),

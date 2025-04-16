@@ -269,13 +269,9 @@ class _CommentSectionState extends State<CommentSection> {
                       IconButton(
                         icon: const Icon(Icons.send, color: Colors.blue),
                         onPressed: () async {
-                          SharedPreferences sp= await SharedPreferences.getInstance();
-                        bool  isLogin = sp.getString("loginType")=="login"?true:false;
-                          if(!isLogin){
-                            CustomToast.showErrorToast(msg: 'Please login to continue');
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => LoginBackgroundView()));
-                          }
-                          else if (isLogin) {
+                          SharedPreferences sp = await SharedPreferences.getInstance();
+                          bool isLogin = sp.getString("loginType").toString() == "login"?true:false??false;
+                          if (isLogin) {
                             if (controller.text.isEmpty) {
                             } else {
                               newsPostsProvider
@@ -284,7 +280,7 @@ class _CommentSectionState extends State<CommentSection> {
                                   .then(
                                     (value) => controller.text = '',
                                   );
-                              }
+                            }
                           } else {
                             Navigator.pushAndRemoveUntil(
                                 context, MaterialPageRoute(builder: (context) => LoginBackgroundView(),),(route) => false,);

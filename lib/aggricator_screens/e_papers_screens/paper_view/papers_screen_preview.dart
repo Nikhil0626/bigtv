@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../globel_keys/global_variables_data.dart';
 import '../../../screens/home_screen/home_provider/provider.dart';
@@ -103,29 +104,32 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                 itemBuilder: (context, index) {
                                   final imageUrl = widget.imageUrls[index].imageUrl.toString();
 
-                                  return Center(
-                                    child: InteractiveViewer(
-                                      transformationController: _transformationController,
-                                      // boundaryMargin: const EdgeInsets.all(20),
-                                      minScale: 1.0,
-                                      maxScale: 10.0,
-                                      panEnabled: true,
-                                      // scaleEnabled: true,
-                                      child:  CachedNetworkImage(
-                                        imageUrl: imageUrl.toString(),
-                                        height: MediaQuery.of(context).size.height ,
-                                        width: MediaQuery.of(context).size.width,
-                                        fit: BoxFit.fill,
-                                        placeholder: (context, url) => Container(
+                                  return Screenshot(
+                                    controller: paperScreenShort,
+                                    child: Center(
+                                      child: InteractiveViewer(
+                                        transformationController: _transformationController,
+                                        // boundaryMargin: const EdgeInsets.all(20),
+                                        minScale: 1.0,
+                                        maxScale: 10.0,
+                                        panEnabled: true,
+                                        // scaleEnabled: true,
+                                        child:  CachedNetworkImage(
+                                          imageUrl: imageUrl.toString(),
                                           height: MediaQuery.of(context).size.height ,
                                           width: MediaQuery.of(context).size.width,
-                                          color: AppColors.borderColor.withOpacity(.2),
-                                        ),
-                                        errorWidget: (context, url, error) => Center(
-                                          child: Icon(
-                                            Icons.image,
-                                            size: 100,
-                                            color: Colors.grey.shade300,
+                                          fit: BoxFit.fill,
+                                          placeholder: (context, url) => Container(
+                                            height: MediaQuery.of(context).size.height ,
+                                            width: MediaQuery.of(context).size.width,
+                                            color: AppColors.borderColor.withOpacity(.2),
+                                          ),
+                                          errorWidget: (context, url, error) => Center(
+                                            child: Icon(
+                                              Icons.image,
+                                              size: 100,
+                                              color: Colors.grey.shade300,
+                                            ),
                                           ),
                                         ),
                                       ),
@@ -189,7 +193,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                             sendShareDetails(context.read<FlipProvider>().userId, widget.postId, widget.postId.toString());
                             try {
                               final image = await paperScreenShort.capture(
-                                pixelRatio: 0.5,
+                                pixelRatio: 2,
                               );
                               if (image != null) {
                                 final directory = await getTemporaryDirectory();
@@ -197,8 +201,8 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                 final imageFile = File(imagePath);
                                 await imageFile.writeAsBytes(image);
 
-                                // Share.shareXFiles([XFile(imageFile.path)],
-                                //     text:  widget.imageUrl);
+                                Share.shareXFiles([XFile(imageFile.path)],
+                                    text:  widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl.toString());
                               } else {
                                 CustomToast.showErrorToast(msg: "Failed to capture screenshot");
                               }

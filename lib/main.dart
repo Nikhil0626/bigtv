@@ -253,7 +253,36 @@ class _MyAppState extends State<MyApp> {
 
 class NotificationHandler {
   static Map<String, dynamic>? pendingNotification;
+
+  static void handle(Map<String, dynamic> payload) {
+    final context = mainNavigatorKey.currentContext;
+    if (context != null) {
+      _navigateToPost(context, payload);
+    } else {
+      pendingNotification = payload;
+    }
+  }
+
+  static void checkPending() {
+    final context = mainNavigatorKey.currentContext;
+    if (context != null && pendingNotification != null) {
+      _navigateToPost(context, pendingNotification!);
+      pendingNotification = null;
+    }
+  }
+
+  static void _navigateToPost(BuildContext context, Map<String, dynamic> payload) {
+    final postId = payload["postId"].toString();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => IndividualPostView(postId: postId),
+      ),
+    );
+  }
 }
+
+
 
 final mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver =

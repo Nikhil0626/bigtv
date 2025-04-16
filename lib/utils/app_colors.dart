@@ -19,5 +19,7 @@ class AppColors {
   static const Color ePaperCardColor = Color(0xFFFFFEFE);
   static const Color loginBgColor = Color(0xFF2567E8);
   static const Color loginNumberBg = Color(0xFFF3F4F6);
+  static const Color  adsBackgroundColor= Color(0xFFE0E0E0);
+  static const Color ratingColor = Color(0xFFFFD700);
 
 }
