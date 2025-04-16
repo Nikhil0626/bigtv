@@ -200,7 +200,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
 }
 
 class FullPageCarousel extends StatefulWidget {
-  final List<GalleryImage> imageUrls;
+  final List<dynamic> imageUrls;
   final String className;
   final postDetails;
   final bool isHome;
@@ -295,7 +295,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: NetworkImage(image.url,),
+                    image: NetworkImage(image['url'],),
                     fit: isFoldable?BoxFit.fill:BoxFit.cover,
                     filterQuality: FilterQuality.medium,
                     isAntiAlias: true,

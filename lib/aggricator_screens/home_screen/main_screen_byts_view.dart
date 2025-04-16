@@ -77,64 +77,61 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                               ),
                             )
                           :  widget.article['type'] == "Image"
-                              ? Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Stack(
-                                    children: [
-                                      Image.network(
-                                        widget.article['image_url'] ?? "",
-                                        width: MediaQuery.of(context).size.width,
-                                        height: MediaQuery.of(context).size.height,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      Positioned(
-                                        top: 10,
-                                        left: 14,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            Navigator.pop(context);
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.all(7),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black54,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.arrow_back,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Positioned(
-                                        top: 10,
-                                        right: 14,
-                                        child: GestureDetector(
-                                          onTap: () {
-                                            context.read<SettingsProvider>().saveBookmarks(
-                                                  widget.article['id'].toString(),
-                                                );
-                                            print("");
-                                          },
-                                          child: Container(
-                                            padding: EdgeInsets.all(7),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black54,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              Icons.bookmark_outline,
-                                              color: Colors.white,
-                                              size: 20,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                              ? Stack(
+                                children: [
+                                  Image.network(
+                                    widget.article['image_url'] ?? "",
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height,
+                                    fit: BoxFit.cover,
                                   ),
-                                )
+                                  Positioned(
+                                    top: 10,
+                                    left: 14,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(7),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.arrow_back,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    top: 10,
+                                    right: 14,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        context.read<SettingsProvider>().saveBookmarks(
+                                              widget.article['id'].toString(),
+                                            );
+                                        print("");
+                                      },
+                                      child: Container(
+                                        padding: EdgeInsets.all(7),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Icon(
+                                          Icons.bookmark_outline,
+                                          color: Colors.white,
+                                          size: 20,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
                               :  widget.article['type'] == "Gallery"
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.all(
@@ -562,7 +559,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                               if (widget.article['type'] == "Standard" || widget.article['type'] == "Video") {
                                 try {
                                   final image = await adsScreenshotController.capture(
-                                    pixelRatio: 0.5,
+                                    pixelRatio: 2.0,
                                   );
                                   if (image != null) {
                                     final directory = await getTemporaryDirectory();

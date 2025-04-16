@@ -142,123 +142,125 @@ class _DistrictViewState extends State<DistrictView> {
               ),
             ],
           ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    icon: Icon(Icons.search, color: Colors.grey),
-                    hintText: 'Search',
-                    border: InputBorder.none,
-                  ),
-                  onChanged: (value) {
-                    // setState(() => searchQuery = value);
-                  },
-                ),
-              ),
-              height(height: 12),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: RichText(
-                  text: TextSpan(
-                    text: "You have selected ",
-                    style: TextStyle(color: Colors.black87),
-                    children: [
-                      TextSpan(
-                        text: "0${authenticationProvider.selectedLocations.length}",
-                        style: homeScreenFontStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-                      ),
-                      TextSpan(text: "/03\n"),
-                      if(authenticationProvider.selectedLocations.length>3)
-                      TextSpan(text: "You are select maximum number district ",style: newAppFont(fontSize: 12,color: Colors.red,fontWeight: FontWeight.w600)),
-                    ],
-                  ),
-                ),
-              ),
-              height(height: 8),
-              Container(
-                height: 200, // Or remove if you want it to expand naturally
-                alignment: Alignment.topCenter,
-                child: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: states.entries.map((entry) {
-                      int stateId = entry.key;
-                      String stateName = entry.value;
-
-                      List<LocationModel> districts = authenticationProvider.getAllLocationList.where((loc) => loc.stateId.toString() == stateId.toString()).toList();
-
-                      return ExpansionTile(
-                        tilePadding: EdgeInsets.symmetric(horizontal: 16),
-                        collapsedBackgroundColor: Colors.transparent,
-                        backgroundColor: Colors.transparent,
-                        childrenPadding: EdgeInsets.zero,
-                        initiallyExpanded: false,
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(stateName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
-                            Text("(${districts.length})", style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
-                          ],
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Container(
+                //   padding: EdgeInsets.symmetric(horizontal: 10),
+                //   decoration: BoxDecoration(
+                //     color: Colors.grey[200],
+                //     borderRadius: BorderRadius.circular(6),
+                //   ),
+                //   child: TextField(
+                //     decoration: InputDecoration(
+                //       icon: Icon(Icons.search, color: Colors.grey),
+                //       hintText: 'Search',
+                //       border: InputBorder.none,
+                //     ),
+                //     onChanged: (value) {
+                //       // setState(() => searchQuery = value);
+                //     },
+                //   ),
+                // ),
+                // height(height: 12),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: RichText(
+                    text: TextSpan(
+                      text: "You have selected ",
+                      style: TextStyle(color: Colors.black87),
+                      children: [
+                        TextSpan(
+                          text: "0${authenticationProvider.selectedLocations.length}",
+                          style: homeScreenFontStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                         ),
-                        children: districts.map((district) {
-                          bool isSelected = authenticationProvider.selectedLocations.contains(district.districtName);
-                          return CheckboxListTile(
-                            title: Text(district.districtName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
-                            value: isSelected,
-                            onChanged: (bool? selected) {
-                              authenticationProvider.addToSelectedLocations(district.districtName);
-                            },
-                          );
-                        }).toList(),
-                      );
-                    }).toList(),
+                        TextSpan(text: "/03\n"),
+                        if(authenticationProvider.selectedLocations.length>3)
+                        TextSpan(text: "You are select maximum number district ",style: newAppFont(fontSize: 12,color: Colors.red,fontWeight: FontWeight.w600)),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-              InkWell(
-                onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3
-                    ? () {
-                        authenticationProvider.sendLocationsToServer(context);
-                      }
-                    : () {
-                        CustomToast.showErrorToast(msg: "Please Select only 3 District ");
-                      },
-                child: Container(
-                    width: MediaQuery.of(context).size.width,
-                    height: 36.h,
-                    decoration: BoxDecoration(
-                        color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3)
-                            ? AppColors.loginBgColor
-                            : AppColors.bodyTextColor.withOpacity(.2),
-                        borderRadius: BorderRadius.all(Radius.circular(8.r))),
-                    child: Center(child: Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
-              ),
-              SizedBox(height: 16.h),
-              LinearProgressIndicator(
-                value: 1,
-                backgroundColor: AppColors.borderColor,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.loginBgColor),
-              ),
-              SizedBox(height: 8.h),
-              Center(
-                child: Text(
-                  'Step 1/2',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.loginBgColor,
+                height(height: 8),
+                Container(
+                  height: 200, // Or remove if you want it to expand naturally
+                  alignment: Alignment.topCenter,
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: states.entries.map((entry) {
+                        int stateId = entry.key;
+                        String stateName = entry.value;
+
+                        List<LocationModel> districts = authenticationProvider.getAllLocationList.where((loc) => loc.stateId.toString() == stateId.toString()).toList();
+
+                        return ExpansionTile(
+                          tilePadding: EdgeInsets.symmetric(horizontal: 16),
+                          collapsedBackgroundColor: Colors.transparent,
+                          backgroundColor: Colors.transparent,
+                          childrenPadding: EdgeInsets.zero,
+                          initiallyExpanded: false,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(stateName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                              Text("(${districts.length})", style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          children: districts.map((district) {
+                            bool isSelected = authenticationProvider.selectedLocations.contains(district.districtName);
+                            return CheckboxListTile(
+                              title: Text(district.districtName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                              value: isSelected,
+                              onChanged: (bool? selected) {
+                                authenticationProvider.addToSelectedLocations(district.districtName);
+                              },
+                            );
+                          }).toList(),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 ),
-              ),
-            ],
+                InkWell(
+                  onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3
+                      ? () {
+                          authenticationProvider.sendLocationsToServer(context);
+                        }
+                      : () {
+                          CustomToast.showErrorToast(msg: "Please Select only 3 District ");
+                        },
+                  child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: 36.h,
+                      decoration: BoxDecoration(
+                          color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3)
+                              ? AppColors.loginBgColor
+                              : AppColors.bodyTextColor.withOpacity(.2),
+                          borderRadius: BorderRadius.all(Radius.circular(8.r))),
+                      child: Center(child: Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
+                ),
+                SizedBox(height: 16.h),
+                LinearProgressIndicator(
+                  value: 1,
+                  backgroundColor: AppColors.borderColor,
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.loginBgColor),
+                ),
+                SizedBox(height: 8.h),
+                Center(
+                  child: Text(
+                    'Step 1/2',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.loginBgColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );

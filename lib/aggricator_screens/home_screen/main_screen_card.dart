@@ -10,13 +10,11 @@ import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
@@ -29,7 +27,6 @@ import '../../screens/videos_main/video_views/video_preview.dart';
 import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
-import '../../utils/app_loading_screen.dart';
 import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
@@ -165,6 +162,8 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                               startIndex: index,
                                             ),
                                           ));
+                                      homeProvider.youtubeDispose();
+
                                     },
                                     child: Container(
                                       alignment: Alignment.center,
@@ -192,14 +191,19 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                 )
                                               : homeProvider.getAllPostList[index]['type'].toString() == "Image"
                                                   ? Padding(
-                                                      padding: const EdgeInsets.all(8.0),
+                                                      padding: const EdgeInsets.only(bottom: 20.0),
                                                       child: Stack(
                                                         children: [
-                                                          Image.network(
-                                                            homeProvider.getAllPostList[index]['image_url'].toString() ?? "",
-                                                            width: MediaQuery.of(context).size.width,
-                                                            height: MediaQuery.of(context).size.height,
-                                                            fit: BoxFit.cover,
+                                                          ClipRRect(
+                                                            borderRadius: BorderRadius.all(
+                                                              Radius.circular(12),
+                                                            ),
+                                                            child: Image.network(
+                                                              homeProvider.getAllPostList[index]['image_url'].toString() ?? "",
+                                                              width: MediaQuery.of(context).size.width,
+                                                              height: MediaQuery.of(context).size.height,
+                                                              fit: BoxFit.cover,
+                                                            ),
                                                           ),
                                                           Positioned(
                                                             top: 10,
@@ -239,7 +243,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                 ),
                                                                 child: FullPageCarousel(
                                                                   isHome: true,
-                                                                  imageUrls: homeProvider.getAllPostList[index]['gallery'] ?? [],
+                                                                  imageUrls: homeProvider.getAllPostList[index]['gallery']?? [],
                                                                   postDetails: homeProvider.getAllPostList[index],
                                                                 ),
                                                               ),

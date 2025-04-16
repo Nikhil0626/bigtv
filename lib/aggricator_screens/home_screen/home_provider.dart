@@ -1,10 +1,10 @@
-
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/home_screen/home_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
@@ -14,6 +14,9 @@ class HomeProvider extends ChangeNotifier {
   bool isWebView = false;
   String webUrl = '';
   bool isHomeLoading = false;
+  bool isPlaying = false;
+  bool isPostLoading = false;
+  late YoutubePlayerController controller;
 
   void onItemTapped(int index) {
     selectedIndex = index;
@@ -31,17 +34,43 @@ class HomeProvider extends ChangeNotifier {
   }
 
   bool isReload = false;
-  void isReloadData(){
-    isReload =true;
+
+  void isReloadData() {
+    isReload = true;
     notifyListeners();
   }
-bool isPostLoading = false;
+
+  void isPlayingYoutube(value) {
+    isPlaying = value;
+    notifyListeners();
+  }
+
+  void youtubeInitial(url){
+    controller = YoutubePlayerController(
+      initialVideoId: url, // Example YouTube video ID
+      flags: const YoutubePlayerFlags(
+        autoPlay: true,
+        enableCaption: false,
+        forceHD: false,
+        disableDragSeek: true,
+        isLive: false,
+
+        showLiveFullscreenButton: false,
+        // hideControls: true,
+      ),
+    );
+    notifyListeners();
+  }
+
+  void youtubeDispose(){
+    log("sbfjhsfnfdsfjsdbnf  ");
+    controller.dispose();
+    notifyListeners();
+  }
 
   Future getIndividualPost(postId) async {
     isPostLoading = true;
-    log("sdknfksdfndskjfnkdsfndskj  ");
-
-    getSinglePostList =[];
+    getSinglePostList = [];
     try {
       Response response = await HomeRepo().getSinglePost(postId);
       log(response.data.toString());
@@ -66,24 +95,18 @@ bool isPostLoading = false;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
-    List<String> locationIds = locationId
-        .split(',')
-        .map((e) => e.trim())
-        .toList();
+    List<String> locationIds = locationId.split(',').map((e) => e.trim()).toList();
     log(locationIds.toString());
     String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<String> categoriesIds = categoriesId
-        .split(',')
-        .map((e) => e.trim())
-        .toList();
+    List<String> categoriesIds = categoriesId.split(',').map((e) => e.trim()).toList();
     log(categoriesIds.toString());
 
     Map<String, dynamic> body = {
       "device_id": deviceId,
       "postId": postId,
       "locationIds": locationIds,
-      "catgoriesId":categoriesIds,
-      "force_refresh":"false"
+      "catgoriesId": categoriesIds,
+      "force_refresh": "false"
       // "ad": "true"
     };
     log(body.toString());

@@ -37,7 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
           (uri) {
         debugPrint('onAppLink: $uri');
         didReceiveLink = true;
-        openAppLink(uri);
+        // openAppLink(uri);
       },
       onError: (error) {
         debugPrint('Deep link error: $error');
