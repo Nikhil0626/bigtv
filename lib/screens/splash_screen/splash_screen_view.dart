@@ -7,6 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
+
+import '../../services/webengage_notification.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -19,6 +22,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   bool showGif = false;
   StreamSubscription<Uri>? linkSubscription;
+  WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   @override
   void initState() {
     super.initState();

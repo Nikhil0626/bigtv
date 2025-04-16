@@ -71,7 +71,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                       print("Swiped from $previousIndex to $currentIndex  direction $direction");
                       return true;
                     },
-                    numberOfCardsDisplayed: 4,
+                    // numberOfCardsDisplayed: 3,
                     cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
                       return InkWell(
                         onTap: () {

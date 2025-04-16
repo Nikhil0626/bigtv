@@ -332,9 +332,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: [
                                                               (widget.article['content']  != "")
-                                                                  ? Text(widget.article.content,
+                                                                  ? Text(widget.article['content'],
                                                                       style: homeScreenFontStyle(
-                                                                        color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
+                                                                        color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
                                                                         fontWeight: FontWeight.w500,
                                                                         fontSize: 16.sp,
                                                                       ))
@@ -343,7 +343,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                               Expanded(
                                                                 child: ListView(
                                                                   physics: const NeverScrollableScrollPhysics(),
-                                                                  children: widget.article.bulletPoints!.map<Widget>((item) {
+                                                                  children: widget.article['bulletPoints'].map<Widget>((item) {
                                                                     // Explicitly specify <Widget>
                                                                     return Row(
                                                                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,7 +353,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                           "● ",
                                                                           style: TextStyle(
                                                                             fontSize: 14.sp,
-                                                                            color: widget.article['subType']== "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
+                                                                            color: widget.article['subType']== "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
                                                                             // Reduce bullet size for better alignment
                                                                             height: 1, // Ensures proper line height
                                                                           ),
@@ -370,7 +370,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                             ),
                                                                             style: homeScreenFontStyle(
                                                                               color:
-                                                                                  widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
+                                                                                  widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
                                                                               fontWeight: FontWeight.w400,
                                                                               fontSize: 16.sp,
                                                                             ),

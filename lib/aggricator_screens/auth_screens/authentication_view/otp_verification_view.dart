@@ -42,7 +42,10 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
   }
 
   void startCountdown() {
+
+    log("its working");
     setState(() {
+      _remainingTime = 60;
       canResend = false;
     });
 
@@ -156,8 +159,9 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
                         recognizer: TapGestureRecognizer()
                           ..onTap = canResend
                               ? () {
+                            startCountdown();
                                   authenticationProvider.sendOtp(context);
-                                  startCountdown();
+
                                 }
                               : null,
                         text: "Resend Again",

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chotanews/services/base_service.dart';
 import 'package:dio/dio.dart';
 
@@ -6,7 +8,10 @@ import '../../utils/app_enums.dart';
 
 class HomeRepo extends BaseService{
   Future getSinglePost(queryParams) async{
-    Response response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: "${BaseUrls.getPostById}/$queryParams",method: RequestType.get);
+
+    Response response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: "${BaseUrls.getPostById}/$queryParams",method: RequestType.get,);
+   log(response.data.toString());
+
     return response;
   }
 
