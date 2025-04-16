@@ -72,11 +72,13 @@ class ProfileProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
 
     Map<String, dynamic> body = {
-      "user_id":int.parse(userId!),
+      "user_id":int.parse(userId!).toString(),
       "name":nameController.text.toString(),
       "dob":'${yearController.text}-${monthController.text}-${dayController.text}',
       "photo_url":uploadImageUrl.toString(),
     };
+    String jsonBody = jsonEncode(body);
+    print(jsonBody);
     log('body $body');
     try {
       Response response = await SettingsRepo().postProfile(body);

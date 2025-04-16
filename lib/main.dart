@@ -156,7 +156,7 @@ class _MyAppState extends State<MyApp> {
 
   void _handleDeepLink(Uri uri) {
     final String path = uri.path;
-    final String? id = uri.queryParameters['id'];
+    final String? id = uri.queryParameters['postId'];
     log("Path: $path, ID: $id");
 
     switch (path) {
@@ -164,8 +164,7 @@ class _MyAppState extends State<MyApp> {
         log("Navigating to Settings screen");
         mainNavigatorKey.currentState?.pushNamed('/settings');
         break;
-      case '/individualPost':
-
+      case '/individualPage':
         postId = id ?? "";
         log("Navigating to Individual Post screen  $postId");
         mainNavigatorKey.currentState?.pushNamed(
