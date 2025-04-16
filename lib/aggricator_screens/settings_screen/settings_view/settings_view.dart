@@ -110,18 +110,18 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InAppWebViewScreen(
-                    webUrl: BaseUrls.contactPage,
-                    title: "Contact Us",
-                  ),
-                ),
-              );
-            }),
+            // height(height: 5.h),
+            // _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => InAppWebViewScreen(
+            //         webUrl: BaseUrls.contactPage,
+            //         title: "Contact Us",
+            //       ),
+            //     ),
+            //   );
+            // }),
             height(height: 5.h),
             _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
               Navigator.push(

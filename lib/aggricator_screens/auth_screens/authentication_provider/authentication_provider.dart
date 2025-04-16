@@ -136,7 +136,8 @@ class AuthenticationProvider extends ChangeNotifier {
             },
           );
         } else {
-
+          getAllCategories();
+          getAllLocations();
           newAppLoginStatus = NewAppLoginStatus.category;
           saveLoginState();
           getAllCategories();
