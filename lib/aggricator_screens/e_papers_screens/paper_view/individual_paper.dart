@@ -60,8 +60,13 @@ class _IndividualPaperState extends State<IndividualPaper> {
                   itemCount: ePapersProvider.getSinglePapersList.length,
                   itemBuilder: (context, index) {
                     return InkWell(
-                      onTap: (){
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => PapersScreenPreview(imageUrl: ePapersProvider.getSinglePapersList[index].imageUrl.toString(), postId: ePapersProvider.getSinglePapersList[index].id.toString()),));
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  PapersScreenPreview(imageUrl: ePapersProvider.getSinglePapersList[index].imageUrl.toString(), postId: ePapersProvider.getSinglePapersList[index].id.toString()),
+                            ));
                       },
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
@@ -96,18 +101,21 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                       ),
                                     ),
                                     Container(
-                                      color:  AppColors.cardBackgroundColor,
+                                      color: AppColors.cardBackgroundColor,
                                       height: 50.w,
                                       child: Row(
                                         // mainAxisSize: MainAxisSize.min,
                                         children: [
                                           InkWell(
-                                            onTap: (){Navigator.push(context, MaterialPageRoute(
-                                              builder: (context) => InAppWebViewScreen(
-                                                webUrl: ePapersProvider.getSinglePapersList[index].sourceUrl.toString(),
-                                                title: "Advertise with us",
-                                              ),
-                                            ));
+                                            onTap: () {
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) => InAppWebViewScreen(
+                                                      webUrl: ePapersProvider.getSinglePapersList[index].sourceUrl.toString(),
+                                                      title: "Advertise with us",
+                                                    ),
+                                                  ));
                                             },
                                             child: Container(
                                                 height: 60.w,
@@ -167,14 +175,13 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
-                                        Icons.bookmark,
+                                        Icons.bookmark_outline,
                                         color: Colors.white,
                                         size: 20,
                                       ),
                                     ),
                                   ),
                                 ),
-
                               ],
                             ),
                           ),

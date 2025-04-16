@@ -31,6 +31,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
+import 'aggricator_screens/home_screen/ads_screen.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
 import 'aggricator_screens/home_screen/news_posts_provider.dart';
 import 'aggricator_screens/individual_post_details/individual_post_view.dart';
@@ -230,6 +231,7 @@ class _MyAppState extends State<MyApp> {
             '/settings': (context) => SettingsView(),
             // Add other routes like '/settings', '/profile', etc.
           },
+          home: AdsScreen(),
           debugShowCheckedModeBanner: false,
         ),
       ),

@@ -122,9 +122,9 @@ class PapersScreenList extends StatelessWidget {
                                     shape: BoxShape.circle,
                                   ),
                                   child: Icon(
-                                    Icons.bookmark,
+                                    Icons.bookmark_outline,
                                     color: Colors.white,
-                                    size: 20,
+                                    size: 18,
                                   ),
                                 ),
                               ),

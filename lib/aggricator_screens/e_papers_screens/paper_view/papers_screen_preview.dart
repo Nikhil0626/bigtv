@@ -132,7 +132,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                           shape: BoxShape.circle,
                         ),
                         child: Icon(
-                          Icons.bookmark,
+                          Icons.ios_share,
                           color: Colors.white,
                           size: 30,
                         ),

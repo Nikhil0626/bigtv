@@ -117,8 +117,6 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                   ),
                                 ),
                               ),
-
-
                               Positioned(
                                 top: 14,
                                 right: 14,
@@ -135,7 +133,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
-                                      Icons.bookmark,
+                                      Icons.bookmark_outline,
                                       color: Colors.white,
                                       size: 20,
                                     ),

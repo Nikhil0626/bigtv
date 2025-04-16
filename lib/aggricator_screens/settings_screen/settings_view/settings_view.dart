@@ -55,7 +55,7 @@ class _SettingsViewState extends State<SettingsView> {
         child: Column(
           children: [
             // if (loginStatus == LoginStatus.skip)
-            _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
+            _buildSettingsRow(context, "Profile.svg", "Edit Profile", () {
               if (loginStatus == NewAppLoginStatus.skip) {
                 CustomToast.showErrorToast(msg: 'Please login with mobile number');
               } else if (loginStatus == NewAppLoginStatus.home) {
@@ -84,13 +84,13 @@ class _SettingsViewState extends State<SettingsView> {
 
             height(height: 5.h),
 
-            _buildSettingsRow(context, "Help_support.svg", "Help & Support", () {
+            _buildSettingsRow(context, "Help_support.svg", "Contact Us", () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => InAppWebViewScreen(
                     webUrl: BaseUrls.aboutPage,
-                    title: "About Us", // Add a title here
+                    title: "Contact Us", // Add a title here
                   ),
                 ),
               );
@@ -108,18 +108,19 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InAppWebViewScreen(
-                    webUrl: BaseUrls.contactPage,
-                    title: "Contact Us",
-                  ),
-                ),
-              );
-            }),
+            // height(height: 5.h),
+            // _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => InAppWebViewScreen(
+            //         webUrl: BaseUrls.contactPage,
+            //         title: "Contact Us",
+            //       ),
+            //     ),
+            //   );
+            // }
+            // ),
             height(height: 5.h),
             _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
               Navigator.push(

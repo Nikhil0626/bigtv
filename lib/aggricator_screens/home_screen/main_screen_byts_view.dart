@@ -76,7 +76,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 isFoldable: false,
                               ),
                             )
-                          :  widget.article['type'] == "Image"
+                          : widget.article['type'] == "Image"
                               ? Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: Stack(
@@ -135,7 +135,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     ],
                                   ),
                                 )
-                              :  widget.article['type'] == "Gallery"
+                              : widget.article['type'] == "Gallery"
                                   ? ClipRRect(
                                       borderRadius: BorderRadius.all(
                                         Radius.circular(12),
@@ -144,7 +144,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                         children: [
                                           FullPageCarousel(
                                             isHome: true,
-                                            imageUrls:  widget.article['gallery'] ?? [],
+                                            imageUrls: widget.article['gallery'] ?? [],
                                             postDetails: widget.article,
                                           ),
                                           Positioned(
@@ -212,20 +212,19 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           child: Stack(
                                             children: [
                                               // Main Content (Image or Video)
-                                              widget.article['type']  == "Video"
-
+                                              widget.article['type'] == "Video"
                                                   ? SizedBox(
-                                                height: MediaQuery.of(context).size.height * .35,
-                                                width: MediaQuery.of(context).size.width,
-                                                child: Align(
+                                                      height: MediaQuery.of(context).size.height * .35,
+                                                      width: MediaQuery.of(context).size.width,
+                                                      child: Align(
                                                         alignment: Alignment.topCenter,
                                                         child: VideoPreview(
                                                           imageUrl: widget.article['image_url'],
-                                                          url: widget.article['video_url']?? "",
+                                                          url: widget.article['video_url'] ?? "",
                                                           isFoldable: false,
                                                         ),
                                                       ),
-                                              )
+                                                    )
                                                   : ClipRRect(
                                                       borderRadius: BorderRadius.only(
                                                         topRight: Radius.circular(16.r),
@@ -233,7 +232,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       ),
                                                       child: CachedNetworkImage(
                                                         imageUrl: widget.article['image_url'],
-                                                        height: MediaQuery.of(context).size.height * (widget.article['subType']== "BigBlackStandard" ? .65 : .4),
+                                                        height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .65 : .4),
                                                         width: MediaQuery.of(context).size.width,
                                                         fit: BoxFit.fill,
                                                         placeholder: (context, url) => Container(
@@ -306,7 +305,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                             height: widget.article['subType'] == "BigBlackStandard" ? MediaQuery.of(context).size.height * .3 : MediaQuery.of(context).size.height * .55,
                                             width: MediaQuery.of(context).size.width,
                                             decoration: BoxDecoration(
-                                              color: widget.article['subType']  == "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
+                                              color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
                                               borderRadius: BorderRadius.only(
                                                 topRight: Radius.circular(10.sp),
                                                 topLeft: Radius.circular(10.sp),
@@ -321,17 +320,17 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                   height(height: 8),
                                                   Text(widget.article['title'] ?? "No Title",
                                                       style: homeScreenFontStyle(
-                                                          color: widget.article['subType']  != "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
+                                                          color: widget.article['subType'] != "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
                                                           fontSize: 18.sp,
                                                           fontWeight: FontWeight.bold)),
                                                   height(height: 8),
                                                   Expanded(
-                                                    child: widget.article['subType']  == "BulletPost"
+                                                    child: widget.article['subType'] == "BulletPost"
                                                         ? Column(
                                                             mainAxisAlignment: MainAxisAlignment.start,
                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                             children: [
-                                                              (widget.article['content']  != "")
+                                                              (widget.article['content'] != "")
                                                                   ? Text(widget.article.content,
                                                                       style: homeScreenFontStyle(
                                                                         color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
@@ -353,7 +352,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                           "● ",
                                                                           style: TextStyle(
                                                                             fontSize: 14.sp,
-                                                                            color: widget.article['subType']== "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
+                                                                            color:
+                                                                                widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
                                                                             // Reduce bullet size for better alignment
                                                                             height: 1, // Ensures proper line height
                                                                           ),
@@ -369,8 +369,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                               height: 1, // Ensures consistent line height
                                                                             ),
                                                                             style: homeScreenFontStyle(
-                                                                              color:
-                                                                                  widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.cardBackgroundColor,
+                                                                              color: widget.article['subType'] == "BigBlackStandard"
+                                                                                  ? AppColors.textColor.withOpacity(0.5)
+                                                                                  : AppColors.cardBackgroundColor,
                                                                               fontWeight: FontWeight.w400,
                                                                               fontSize: 16.sp,
                                                                             ),
@@ -390,9 +391,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                         mainAxisSize: MainAxisSize.min,
                                                                         children: [
                                                                           if (widget.article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
-                                                                          if (widget.article['isReporter']  == 1)
+                                                                          if (widget.article['isReporter'] == 1)
                                                                             Text(
-                                                                              ' ${widget.article['reportedBy'] } | ',
+                                                                              ' ${widget.article['reportedBy']} | ',
                                                                               style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                                             ),
                                                                           Icon(Icons.access_time, size: 14, color: Colors.grey),
@@ -422,9 +423,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                           mainAxisSize: MainAxisSize.min,
                                                                           children: [
                                                                             if (widget.article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
-                                                                            if (widget.article['isReporter']  == 1)
+                                                                            if (widget.article['isReporter'] == 1)
                                                                               Text(
-                                                                                ' ${widget.article['reportedBy'] } | ',
+                                                                                ' ${widget.article['reportedBy']} | ',
                                                                                 style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                                               ),
                                                                             Icon(Icons.access_time, size: 14, color: Colors.grey),
@@ -508,6 +509,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                               postType: widget.article['subType'] ?? "",
                               icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                               label: 'లైక్',
+                              iconColor: AppColors.iconColors,
                               // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
                               isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
                               onTap: () {
@@ -570,7 +572,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     final imageFile = File(imagePath);
                                     await imageFile.writeAsBytes(image);
 
-                                    Share.shareXFiles([XFile(imageFile.path)], text:widget.article['linkURLAndroid'].toString());
+                                    Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
                                   } else {
                                     CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                                   }
@@ -617,7 +619,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     );
   }
 
-  List<TextSpan> _parseText(BuildContext context, String text, links,  article) {
+  List<TextSpan> _parseText(BuildContext context, String text, links, article) {
     RegExp linkRegExp = RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
     List<TextSpan> spans = [];
 

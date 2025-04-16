@@ -272,6 +272,7 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                         onPressed:(){
                           profileProvider.postProfile();
+
                         },
                         child: Text('Update',
                             style: newAppFont(

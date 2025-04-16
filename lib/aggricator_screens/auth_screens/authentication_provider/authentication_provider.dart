@@ -90,9 +90,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  Future verifyOtp(
-    context,
-  ) async {
+  Future verifyOtp(context,) async {
     errorMessage = '';
     isVerifyLoading  = true;
     notifyListeners();
@@ -158,6 +156,9 @@ class AuthenticationProvider extends ChangeNotifier {
         notifyListeners();
       } else {
         errorMessage = response.data['message'];
+        // errorMessage = response.data['message'] ?? "Enter a valid OTP";
+        // CustomToast.showErrorToast(msg: errorMessage);
+
       }
     } on DioException catch (e, st) {
 
