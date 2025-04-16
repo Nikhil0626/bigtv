@@ -31,11 +31,30 @@ class PapersScreenPreview extends StatefulWidget {
 
 class _PapersScreenPreviewState extends State<PapersScreenPreview> {
   final ScreenshotController paperScreenShort = ScreenshotController();
-@override
+
+  final PageController _pageController = PageController();
+  TransformationController _transformationController = TransformationController();
+  bool _isZoomed = false;
+
+  @override
   void initState() {
-  context.read<NewsPostsProvider>().paperSet(widget.imageUrls[0].imageUrl,0);
     super.initState();
+    context.read<NewsPostsProvider>().paperSet(widget.imageUrls[0].imageUrl,0);
+
+    _transformationController.addListener(() {
+      final scale = _transformationController.value.getMaxScaleOnAxis();
+      if (scale > 1.0 && !_isZoomed) {
+        setState(() {
+          _isZoomed = true;
+        });
+      } else if (scale <= 1.0 && _isZoomed) {
+        setState(() {
+          _isZoomed = false;
+        });
+      }
+    });
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,154 +66,164 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
         },
         child: Stack(
           children: [
-            Padding(
-              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10, left: 10, right: 10),
-              child: Column(
-                children: [
-                  InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.arrow_back_outlined,
-                          size: 24,
-                        ),
-                        width(width: 20),
-                        Text(
-                          widget.name,
-                          style: fontStyle(fontSize: 20),
-                        )
-                      ],
-                    ),
+            Column(
+              children: [
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.arrow_back_outlined,
+                        size: 24,
+                      ),
+                      width(width: 20),
+                      Text(
+                        widget.name,
+                        style: fontStyle(fontSize: 20),
+                      )
+                    ],
                   ),
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        Consumer<NewsPostsProvider>(
+                ),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Consumer<NewsPostsProvider>(
                           builder: (_,newsPostsProvider,__) {
-                            return Screenshot(
-                                controller: paperScreenShort,
-                                child: Center(
-                                  child: InteractiveViewer(
-                                    boundaryMargin: const EdgeInsets.all(6),
-                                    minScale: 1.0,
-                                    maxScale: 10.0, // Maximum zoom level
-                                    child: Image.network(
-                                      newsPostsProvider.currentPaper.toString()!=""?newsPostsProvider.currentPaper.toString(): widget.imageUrls[0].imageUrl.toString(),
-                                      fit: BoxFit.fill,
-                                      // Adjust for better fit
-                                      width: MediaQuery.of(context).size.width,
-                                      height: MediaQuery.of(context).size.height,
-                                      loadingBuilder: (context, child, loadingProgress) {
-                                        if (loadingProgress == null) return child;
-                                        return Center(
-                                          child: CircularProgressIndicator(
-                                            value: loadingProgress.expectedTotalBytes != null ? loadingProgress.cumulativeBytesLoaded / (loadingProgress.expectedTotalBytes ?? 1) : null,
+                            return Listener(
+                              onPointerMove: _isZoomed ? (_) {} : null, // Prevent swipe when zoomed
+                              child: PageView.builder(
+                                controller: _pageController,
+                                scrollDirection: Axis.horizontal,
+                                physics: _isZoomed
+                                    ? const NeverScrollableScrollPhysics()
+                                    : const BouncingScrollPhysics(),
+                                itemCount: widget.imageUrls.length,
+                                itemBuilder: (context, index) {
+                                  final imageUrl = widget.imageUrls[index].imageUrl.toString();
+
+                                  return Center(
+                                    child: InteractiveViewer(
+                                      transformationController: _transformationController,
+                                      // boundaryMargin: const EdgeInsets.all(20),
+                                      minScale: 1.0,
+                                      maxScale: 10.0,
+                                      panEnabled: true,
+                                      // scaleEnabled: true,
+                                      child:  CachedNetworkImage(
+                                        imageUrl: imageUrl.toString(),
+                                        height: MediaQuery.of(context).size.height ,
+                                        width: MediaQuery.of(context).size.width,
+                                        fit: BoxFit.fill,
+                                        placeholder: (context, url) => Container(
+                                          height: MediaQuery.of(context).size.height ,
+                                          width: MediaQuery.of(context).size.width,
+                                          color: AppColors.borderColor.withOpacity(.2),
+                                        ),
+                                        errorWidget: (context, url, error) => Center(
+                                          child: Icon(
+                                            Icons.image,
+                                            size: 100,
+                                            color: Colors.grey.shade300,
                                           ),
-                                        );
-                                      },
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return const Center(
-                                          child: Text(
-                                            'Failed to load image',
-                                            style: TextStyle(color: Colors.white),
-                                          ),
-                                        );
-                                      },
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ));
+                                  );
+                                },
+                              ),
+                            );
+
+                            ;
                           }
-                        ),
+                      ),
 
-                        Positioned(
-                          top: 20,
-                          right: 20,
-                          child: GestureDetector(
-                            onTap: () async {
-                              EventRepo().sendEvent({
-                                "key": "share_via_articles",
-                                "data": {
-                                  "device_id": "${GlobalVariables().deviceId}",
-                                  "userId": context.read<FlipProvider>().userId ?? "",
-                                  "postId": widget.postId.toString(),
-                                  "isWhatAppShare": false,
-                                }
-                              });
-                              context.read<SettingsProvider>().saveBookmarks(
-                                widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].id.toString(),
-                              );
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.bookmark_border,
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 20,
-                          right: 80,
-                          child: GestureDetector(
-                            onTap: () async {
-                              EventRepo().sendEvent({
-                                "key": "share_via_articles",
-                                "data": {
-                                  "device_id": "${GlobalVariables().deviceId}",
-                                  "userId": context.read<FlipProvider>().userId ?? "",
-                                  "postId": widget.postId.toString(),
-                                  "isWhatAppShare": false,
-                                }
-                              });
-
-                              sendShareDetails(context.read<FlipProvider>().userId, widget.postId, widget.postId.toString());
-                              try {
-                                final image = await paperScreenShort.capture(
-                                  pixelRatio: 0.5,
-                                );
-                                if (image != null) {
-                                  final directory = await getTemporaryDirectory();
-                                  final imagePath = '${directory.path}/${widget.postId}.png';
-                                  final imageFile = File(imagePath);
-                                  await imageFile.writeAsBytes(image);
-
-                                  // Share.shareXFiles([XFile(imageFile.path)],
-                                  //     text:  widget.imageUrl);
-                                } else {
-                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot");
-                                }
-                              } catch (e) {
-                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                      Positioned(
+                        top: 20,
+                        right: 20,
+                        child: GestureDetector(
+                          onTap: () async {
+                            EventRepo().sendEvent({
+                              "key": "share_via_articles",
+                              "data": {
+                                "device_id": "${GlobalVariables().deviceId}",
+                                "userId": context.read<FlipProvider>().userId ?? "",
+                                "postId": widget.postId.toString(),
+                                "isWhatAppShare": false,
                               }
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.ios_share_outlined,
-                                color: Colors.white,
-                                size: 24,
-                              ),
+                            });
+                            context.read<SettingsProvider>().saveBookmarks(
+                              widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].id.toString(),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.bookmark_border,
+                              color: Colors.white,
+                              size: 24,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                      Positioned(
+                        top: 20,
+                        right: 80,
+                        child: GestureDetector(
+                          onTap: () async {
+                            EventRepo().sendEvent({
+                              "key": "share_via_articles",
+                              "data": {
+                                "device_id": "${GlobalVariables().deviceId}",
+                                "userId": context.read<FlipProvider>().userId ?? "",
+                                "postId": widget.postId.toString(),
+                                "isWhatAppShare": false,
+                              }
+                            });
+
+                            sendShareDetails(context.read<FlipProvider>().userId, widget.postId, widget.postId.toString());
+                            try {
+                              final image = await paperScreenShort.capture(
+                                pixelRatio: 0.5,
+                              );
+                              if (image != null) {
+                                final directory = await getTemporaryDirectory();
+                                final imagePath = '${directory.path}/${widget.postId}.png';
+                                final imageFile = File(imagePath);
+                                await imageFile.writeAsBytes(image);
+
+                                // Share.shareXFiles([XFile(imageFile.path)],
+                                //     text:  widget.imageUrl);
+                              } else {
+                                CustomToast.showErrorToast(msg: "Failed to capture screenshot");
+                              }
+                            } catch (e) {
+                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                            }
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(7),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              Icons.ios_share_outlined,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
             if( context.watch<NewsPostsProvider>().isBottomIsShow)
             Positioned(

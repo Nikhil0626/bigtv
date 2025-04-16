@@ -151,7 +151,7 @@ class AuthenticationProvider extends ChangeNotifier {
           "key": "login_skip",
           "data": {"device_id": "${deviceId}", "isLogin": true, "userId": ""}
         });
-        WebEngagePlugin.userLogin("");
+        WebEngagePlugin.userLogin(response.data['user']['id'].toString());
         WebEngagePlugin.setUserPhone(phoneController.text.toString());
         mobileVerificationDetails(phoneController.text.toString(), true);
 
