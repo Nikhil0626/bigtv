@@ -21,49 +21,44 @@ class _AdsScreenState extends State<AdsScreen>   {
             Container(
               height: 250,
               width: 300,
+              padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 color: Colors.white,
               ),
-            ),
-            height(height: 20),
-            Text(
-              "Recommended News",
-              style: newAppFont(
-                fontSize: 18,
-                color: Colors.black,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            height(height: 10),
-            Expanded(
-              child: ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: Container(
-                      height: 120,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.grey[300],
-                      ),
-                      child: Center(
-                        child: Text(
-                          "News Item ${index + 1}",
-                          style: newAppFont(
-                            fontSize: 16,
-                            color: Colors.black87,
-                            fontWeight: FontWeight.w600,
-                          ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Rate your experience\nwith chota news',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Handle submit action
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.lightBlue, // Light blue background
+                        foregroundColor: Colors.white, // White text
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
+                      child: Text('Submit'),
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
-            ),
+            )
+
+
           ],
         ),
       ),

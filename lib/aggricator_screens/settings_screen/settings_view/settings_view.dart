@@ -57,7 +57,7 @@ class _SettingsViewState extends State<SettingsView> {
         child: Column(
           children: [
             // if (loginStatus == LoginStatus.skip)
-            _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
+            _buildSettingsRow(context, "Profile.svg", "Edit Profile", () {
               if (isNotificationsEnabled == false) {
                 CustomToast.showErrorToast(msg: 'Please login with mobile number');
               } else if (isNotificationsEnabled == true) {
@@ -92,7 +92,7 @@ class _SettingsViewState extends State<SettingsView> {
                 MaterialPageRoute(
                   builder: (context) => InAppWebViewScreen(
                     webUrl: BaseUrls.aboutPage,
-                    title: "About Us", // Add a title here
+                    title: "About Us",
                   ),
                 ),
               );
