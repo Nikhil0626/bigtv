@@ -16,6 +16,7 @@ class SettingsProvider extends ChangeNotifier {
   List<BookmarksModel> getAllBookmarkList = [];
   bool isMainLoading = false;
   bool isOthersSelected = false;
+  int selectedStar = 0;
 
   List feedbackList = [];
   List<String> selectedFeedbackList = [];
@@ -121,7 +122,18 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> saveSelectedStar(int star) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('selectedStar', star);
+    selectedStar = star;
+    notifyListeners();
+  }
 
+  Future<void> loadSelectedStar() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    selectedStar = prefs.getInt('selectedStar') ?? 0;
+    notifyListeners();
+  }
 
   Future getFeedBack() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();

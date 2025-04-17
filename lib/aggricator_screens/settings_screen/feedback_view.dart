@@ -1,7 +1,9 @@
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
@@ -37,11 +39,14 @@ class _FeedbackFormState extends State<FeedbackForm> {
   void initState() {
     context.read<SettingsProvider>().feedbackList = [];
     context.read<SettingsProvider>().getFeedBack();
+    context.read<SettingsProvider>().loadSelectedStar();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
+    final settingsProvider = context.watch<SettingsProvider>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -99,11 +104,12 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                   onTap: () {
                                     setState(() {
                                       selectedStar = index + 1;
+                                      settingsProvider.saveSelectedStar(index + 1);
                                     });
                                   },
                                   child: Icon(
                                     Icons.star,
-                                    color: index < selectedStar
+                                    color: index < settingsProvider.selectedStar
                                         ? Colors.yellow
                                         : Colors.grey,
                                     size: 40,
@@ -235,6 +241,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     child: ElevatedButton(
                       onPressed: () {
                        settingsProvider.postFeedBack(selectedStar, );
+                       Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
