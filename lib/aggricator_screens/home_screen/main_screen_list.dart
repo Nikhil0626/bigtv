@@ -407,7 +407,10 @@ class _MainScreenListState extends State<MainScreenList> {
                                                             sendShareDetails(
                                                                 context.read<FlipProvider>().userId, homeProvider.getAllPostList[index]['id'], homeProvider.getAllPostList[index]['content'].toString());
 
-                                                            if (homeProvider.getAllPostList[index]['type'] == "Standard" || homeProvider.getAllPostList[index]['type'] == "Video") {
+                                                            if (homeProvider.getAllPostList[index]['type'] == "Standard" ||
+                                                                homeProvider.getAllPostList[index]['type'] == "Video"  ||
+                                                                homeProvider.getAllPostList[index]['type'] == "Gallery"
+                                                                 ) {
                                                               try {
                                                                 final image = await _screenshotControllers[index].capture(
                                                                   pixelRatio: 2,

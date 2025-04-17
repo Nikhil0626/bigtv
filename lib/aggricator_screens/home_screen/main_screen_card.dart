@@ -80,7 +80,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                         children: [
                           Consumer<AuthenticationProvider>(builder: (_, authenticationProvider, __) {
                             return Container(
-                                height: 50,
+                                height: 50.h,
                                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                                 // color: Colors.greenAccent,
                                 child: ListView.builder(
@@ -90,19 +90,20 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                     final isSelected = authenticationProvider.selectedCategories.contains(authenticationProvider.getAllCategoryList[index].categoryName.toString());
 
                                     return InkWell(
-                                      onTap: (){
-                                        homeProvider.getAllPost().then((value) => {
-                                        Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                        builder: (context) => MainScreenPageView(
-                                        startIndex: index,
-                                          isAiTags: true,
-                                           tagName: authenticationProvider.getAllCategoryList[index].categoryName.toString(),
-                                        ),
-                                        ))
-                                        },);
-
+                                      onTap: () {
+                                        homeProvider.getAllPost().then(
+                                              (value) => {
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) => MainScreenPageView(
+                                                        startIndex: index,
+                                                        isAiTags: true,
+                                                        tagName: authenticationProvider.getAllCategoryList[index].categoryName.toString(),
+                                                      ),
+                                                    ))
+                                              },
+                                            );
                                       },
                                       child: Container(
                                         margin: EdgeInsets.symmetric(horizontal: 6.w),
@@ -149,7 +150,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                 cardsCount: homeProvider.getAllPostList.length,
                                 numberOfCardsDisplayed: 4,
                                 onSwipe: (previousIndex, currentIndex, direction) {
-                                  if(homeProvider.getAllPostList.length-5 ==currentIndex){
+                                  if (homeProvider.getAllPostList.length - 5 == currentIndex) {
                                     log("last post   ${homeProvider.getAllPostList[int.parse(currentIndex.toString())]["id"]}");
                                     context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList[int.parse(currentIndex.toString())]["id"]);
                                   }
@@ -263,7 +264,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                               children: [
                                                                 ClipRRect(
                                                                   borderRadius: BorderRadius.all(
-                                                                    Radius.circular(12),
+                                                                    Radius.circular(12.r),
                                                                   ),
                                                                   child: FullPageCarousel(
                                                                     isHome: true,
@@ -306,7 +307,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                               ),
                             ),
                           ),
-                          height(height: 20)
+                          height(height: 20.h)
                         ],
                       ),
           ),
@@ -337,25 +338,25 @@ class ShimmerCard extends StatelessWidget {
         children: [
           // ✅ Shimmer Image Placeholder
           Container(
-            height: 300,
+            height: 300.h,
             width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.grey[300],
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             ),
           ),
-          SizedBox(height: 10),
+          height(height: 10.h),
 
           // ✅ Shimmer Title Placeholder
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Container(
-              height: 20,
-              width: 200,
+              height: 20.h,
+              width: 200.w,
               color: Colors.grey[300],
             ),
           ),
-          SizedBox(height: 10),
+          height(height: 10.h),
 
           // ✅ Shimmer Buttons Placeholder
           Padding(
@@ -378,7 +379,7 @@ class ShimmerCard extends StatelessWidget {
   // ✅ Shimmer Icon Placeholder
   Widget shimmerIcon() {
     return Container(
-      height: 40,
+      height: 40.h,
       width: 40,
       decoration: BoxDecoration(
         color: Colors.grey[300],
@@ -387,5 +388,3 @@ class ShimmerCard extends StatelessWidget {
     );
   }
 }
-
-

@@ -22,10 +22,10 @@ import '../../profile_screen/profile_view.dart';
 import '../feedback_view.dart';
 import 'book_marks_screen.dart';
 
-
 class SettingsView extends StatefulWidget {
-
-  const SettingsView({super.key,});
+  const SettingsView({
+    super.key,
+  });
 
   @override
   _SettingsViewState createState() => _SettingsViewState();
@@ -43,15 +43,15 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Future getLogin() async {
-    SharedPreferences sp= await SharedPreferences.getInstance();
-    isNotificationsEnabled = sp.getString("loginType")=="login"?true:false;
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    isNotificationsEnabled = sp.getString("loginType") == "login" ? true : false;
     log(isNotificationsEnabled.toString());
     setState(() {});
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
@@ -60,6 +60,7 @@ class _SettingsViewState extends State<SettingsView> {
             _buildSettingsRow(context, "Profile.svg", "Edit Profile", () {
               if (isNotificationsEnabled == false) {
                 CustomToast.showErrorToast(msg: 'Please login with mobile number');
+
               } else if (isNotificationsEnabled == true) {
                 Navigator.push(
                   context,
@@ -104,7 +105,7 @@ class _SettingsViewState extends State<SettingsView> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => InAppWebViewScreen(
-                    webUrl: BaseUrls.advertisePage,
+                    webUrl: "http://ipllivescore.s3-website.ap-south-1.amazonaws.com",
                     title: "Advertise with us",
                   ),
                 ),
@@ -148,12 +149,11 @@ class _SettingsViewState extends State<SettingsView> {
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "Feedback.svg", "Feedback", () {
-               Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
             }),
             height(height: 5.h),
-            _buildSettingsRow(context, "Signout.svg",!isNotificationsEnabled?"Login":"Logout", () {
-              context.read<AuthenticationProvider>().setLogOutStatus(context,false);
-
+            _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () {
+              context.read<AuthenticationProvider>().setLogOutStatus(context, false);
             }),
           ],
         ),
@@ -179,5 +179,4 @@ class _SettingsViewState extends State<SettingsView> {
       ),
     );
   }
-
 }
