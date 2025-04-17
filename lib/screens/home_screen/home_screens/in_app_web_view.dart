@@ -18,7 +18,9 @@ class _InAppWebViewScreenState extends State<InAppWebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: IconButton(onPressed: () {
           Navigator.pop(context);
 

@@ -3,12 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/app_colors.dart';
-import '../../utils/app_fonts.dart';
-import '../../utils/app_spaces.dart';
-import '../../utils/app_toasts.dart';
-import '../auth_screens/authentication_model/location_model.dart';
-import '../auth_screens/authentication_provider/authentication_provider.dart';
+import '../../../../utils/app_colors.dart';
+import '../../../../utils/app_fonts.dart';
+import '../../../../utils/app_spaces.dart';
+import '../../../../utils/app_toasts.dart';
+import '../../../auth_screens/authentication_model/location_model.dart';
+import '../../../auth_screens/authentication_provider/authentication_provider.dart';
+
 
 class UpdateRegionsView extends StatefulWidget {
   const UpdateRegionsView({super.key});
@@ -129,7 +130,6 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
               child: Container(
                 width: double.infinity,
                 height: 35.h,
-                margin: EdgeInsets.only(bottom: 20.h),
                 decoration: BoxDecoration(
                   color: (authenticationProvider.selectedLocations.length > 1 &&
                       authenticationProvider.selectedLocations.length <= 3)

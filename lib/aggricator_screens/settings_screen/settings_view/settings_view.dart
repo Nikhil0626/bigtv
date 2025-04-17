@@ -1,9 +1,8 @@
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:chotanews/services/base_urls.dart';
-import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
@@ -16,16 +15,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../../utils/app_enums.dart';
-import '../../auth_screens/authentication_view/login_background_view.dart';
-import '../../filters_screen/filter_view.dart';
-import '../../profile_screen/profile_view.dart';
-import '../feedback_view.dart';
+import '../../../utils/app_fonts.dart';
+import 'filters_screen/filter_view.dart';
+import 'profile_view.dart';
+import 'feedback_view.dart';
 import 'book_marks_screen.dart';
 
-
 class SettingsView extends StatefulWidget {
-
-  const SettingsView({super.key,});
+  const SettingsView({
+    super.key,
+  });
 
   @override
   _SettingsViewState createState() => _SettingsViewState();
@@ -43,15 +42,16 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Future getLogin() async {
-    SharedPreferences sp= await SharedPreferences.getInstance();
-    isNotificationsEnabled = sp.getString("loginType")=="login"?true:false;
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    isNotificationsEnabled = sp.getString("loginType") == "login" ? true : false;
     log(isNotificationsEnabled.toString());
     setState(() {});
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
+      backgroundColor: Colors.white,
       body: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
@@ -148,12 +148,11 @@ class _SettingsViewState extends State<SettingsView> {
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "Feedback.svg", "Feedback", () {
-               Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
             }),
             height(height: 5.h),
-            _buildSettingsRow(context, "Signout.svg",!isNotificationsEnabled?"Login":"Logout", () {
-              context.read<AuthenticationProvider>().setLogOutStatus(context,false);
-
+            _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () {
+              context.read<AuthenticationProvider>().setLogOutStatus(context, false);
             }),
           ],
         ),
@@ -164,20 +163,19 @@ class _SettingsViewState extends State<SettingsView> {
   Widget _buildSettingsRow(BuildContext context, String iconName, String title, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 12),
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: Row(
-            children: [
-              SvgPicture.asset('assets/svg/$iconName', height: 20, width: 20),
-              SizedBox(width: 25),
-              Text(title, style: TextStyle(fontSize: 16)),
-            ],
-          ),
+      child: Container(
+        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.symmetric(vertical: 10,),
+        child: Row(
+          children: [
+            width(width: 10.w),
+            SvgPicture.asset('assets/svg/$iconName', height: 20.w, width: 20.w),
+            width(width: 20.w),
+            Text(title, style: newAppFont(fontSize: 14.sp,color:  AppColors.textColor)),
+          ],
         ),
       ),
     );
   }
-
 }

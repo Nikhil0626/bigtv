@@ -1,22 +1,21 @@
 import 'dart:io';
-import 'dart:typed_data';
-import 'dart:ui' as ui;
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../globel_keys/global_variables_data.dart';
-import '../../../main.dart';
 import '../../../screens/home_screen/home_provider/provider.dart';
 import '../../../screens/home_screen/home_repo/event_repo.dart';
+import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
+import '../../../utils/app_toasts.dart';
 import '../../home_screen/news_posts_provider.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/single_paper_model.dart';
@@ -26,312 +25,274 @@ class PapersScreenPreview extends StatefulWidget {
   final List<PageData> imageUrls;
   final String name;
 
-  PapersScreenPreview({super.key, required this.imageUrls, this.name = "Paper", required this.postId});
+  PapersScreenPreview({super.key, required this.imageUrls, this.name = "Back", required this.postId});
 
   @override
   State<PapersScreenPreview> createState() => _PapersScreenPreviewState();
 }
 
 class _PapersScreenPreviewState extends State<PapersScreenPreview> {
-  final ScreenshotController paperScreenShort = ScreenshotController();
-  GlobalKey previewContainer = GlobalKey();
+  final ScreenshotController adsScreenshotController = ScreenshotController();
   final PageController _pageController = PageController();
-  TransformationController _transformationController = TransformationController();
+  List<TransformationController> _controllers = [];
   bool _isZoomed = false;
 
   @override
   void initState() {
     super.initState();
-    context.read<NewsPostsProvider>().paperSet(widget.imageUrls[0].imageUrl,0);
+    context.read<NewsPostsProvider>().currentPaperIndex = 0;
+    context.read<NewsPostsProvider>().currentPaper = widget.imageUrls[0].imageUrl.toString();
 
-    _transformationController.addListener(() {
-      final scale = _transformationController.value.getMaxScaleOnAxis();
-      if (scale > 1.0 && !_isZoomed) {
-        setState(() {
-          _isZoomed = true;
-        });
-      } else if (scale <= 1.0 && _isZoomed) {
-        setState(() {
-          _isZoomed = false;
-        });
-      }
-    });
+    _controllers = List.generate(
+      widget.imageUrls.length,
+          (_) => TransformationController(),
+    );
+
+    _controllers[0].addListener(_zoomListener);
   }
 
+  void _zoomListener() {
+    final zoom = _controllers[context.read<NewsPostsProvider>().currentPaperIndex].value.getMaxScaleOnAxis();
+    if (zoom <= 1.0 && _isZoomed) {
+      setState(() => _isZoomed = false);
+    } else if (zoom > 1.0 && !_isZoomed) {
+      setState(() => _isZoomed = true);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Better visibility
-      body: InkWell(
-        onTap: () {
-        context.read<NewsPostsProvider>().isPaperShowing();
-        },
-        child: Stack(
-          children: [
-            Column(
+      backgroundColor: Colors.white,
+      body: Consumer<NewsPostsProvider>(
+        builder: (_, newsPostsProvider, __) {
+          return Padding(
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+            child: Stack(
               children: [
-                Padding(
-                  padding:  EdgeInsets.only(top: MediaQuery.of(context).padding.top+20),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Row(
-                      children: [
-                        width(width: 20),
-                        Icon(
-                          Icons.arrow_back_outlined,
-                          size: 24,
-                        ),
-                        width(width: 20),
-                        Text(
-                          widget.name,
-                          style: fontStyle(fontSize: 20,fontWeight: FontWeight.w600),
-                        )
-                      ],
+                Column(
+                  children: [
+                    // Header
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      child: Row(
+                        children: [
+                          width(width: 20),
+                          const Icon(Icons.arrow_back_outlined, size: 24),
+                          width(width: 20),
+                          Text(widget.name, style: fontStyle(fontSize: 20)),
+                        ],
+                      ),
+                    ),
+
+                    // PageView
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          GestureDetector(
+                            onTap: newsPostsProvider.isPaperShowing,
+                            onScaleStart: (details) {
+                              if (details.pointerCount == 2) {
+                                setState(() {
+                                  _isZoomed = true;
+                                });
+                              }
+                            },
+                            onScaleEnd: (details) {
+                              setState(() {
+                                _isZoomed = false;
+                              });
+                            },
+                            onHorizontalDragEnd: (details) {
+                              if (!_isZoomed) {
+                                if (details.primaryVelocity! < 0 && _pageController.page != widget.imageUrls.length - 1) {
+                                  _pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+                                } else if (details.primaryVelocity! > 0 && _pageController.page != 0) {
+                                  _pageController.previousPage(duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
+                                }
+                              }
+                            },
+                            child: PageView.builder(
+                              controller: _pageController,
+                              physics: _isZoomed
+                                  ? const NeverScrollableScrollPhysics()
+                                  : const BouncingScrollPhysics(),
+                              itemCount: widget.imageUrls.length,
+                              onPageChanged: (index) {
+                                _controllers[newsPostsProvider.currentPaperIndex].removeListener(_zoomListener);
+
+                                newsPostsProvider.currentPaperIndex = index;
+                                newsPostsProvider.currentPaper = widget.imageUrls[index].imageUrl.toString();
+
+                                _controllers[index].addListener(_zoomListener);
+                              },
+                              itemBuilder: (context, index) {
+                                final imageUrl = widget.imageUrls[index].imageUrl;
+                                return InteractiveViewer(
+                                  transformationController: _controllers[index],
+                                  minScale: 1.0,
+                                  maxScale: 10.0,
+                                  panEnabled: true,
+                                  child: SizedBox(
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height,
+                                    child: CachedNetworkImage(
+                                      imageUrl: imageUrl.toString(),
+                                      fit: BoxFit.fill,
+                                      placeholder: (context, url) => Container(
+                                        color: AppColors.borderColor.withOpacity(.2),
+                                      ),
+                                      errorWidget: (context, url, error) =>
+                                          Center(child: Icon(Icons.image, size: 100, color: Colors.grey.shade300)),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+
+                          // Bookmark
+                          Positioned(
+                            top: 20,
+                            right: 20,
+                            child: GestureDetector(
+                              onTap: () async {
+                                final prefs = await SharedPreferences.getInstance();
+                                final userId = prefs.getString("userId");
+                                final deviceId = prefs.getString("deviceId");
+                                EventRepo().sendEvent({
+                                  "key": "share_via_articles",
+                                  "data": {
+                                    "device_id": deviceId,
+                                    "userId": userId ?? "",
+                                    "postId": widget.postId,
+                                    "isWhatAppShare": false,
+                                  }
+                                });
+                                context.read<SettingsProvider>().saveBookmarks(
+                                  widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString(),
+                                );
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(7),
+                                decoration: const BoxDecoration(
+                                  color: Colors.black54,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.bookmark_border, color: Colors.white, size: 24),
+                              ),
+                            ),
+                          ),
+
+                          // Share
+                          Positioned(
+                            top: 20,
+                            right: 80,
+                            child: InkWell(
+                              onTap: () async {
+                                final prefs = await SharedPreferences.getInstance();
+                                final userId = prefs.getString("userId");
+                                final deviceId = prefs.getString("deviceId");
+
+                                EventRepo().sendEvent({
+                                  "key": "share_via_widget.articles",
+                                  "data": {
+                                    "device_id": deviceId,
+                                    "userId": userId ?? "",
+                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex].id,
+                                    "isWhatAppShare": false,
+                                  }
+                                });
+
+                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex].id, "");
+
+                                try {
+                                  final image = await adsScreenshotController.capture(pixelRatio: 2.0);
+                                  if (image != null) {
+                                    final dir = await getTemporaryDirectory();
+                                    final path = '${dir.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id}.png';
+                                    final file = File(path);
+                                    await file.writeAsBytes(image);
+                                    Share.shareXFiles([XFile(file.path)], text: "${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}");
+                                  } else {
+                                    CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                  }
+                                } catch (e) {
+                                  CustomToast.showErrorToast(msg: "Screenshot error.");
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: const BoxDecoration(
+                                  color: Colors.black54,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: SvgPicture.asset(
+                                  "assets/svg/share.svg",
+                                  height: 20,
+                                  width: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Bottom Thumbnails
+                if (newsPostsProvider.isBottomIsShow)
+                  Positioned(
+                    bottom: 0,
+                    child: Container(
+                      height: 170,
+                      width: MediaQuery.of(context).size.width,
+                      padding: const EdgeInsets.all(7),
+                      decoration: BoxDecoration(color: AppColors.ePaperCardColor),
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: widget.imageUrls.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () {
+                              newsPostsProvider.paperSet(widget.imageUrls[index].imageUrl, index);
+                              newsPostsProvider.isPaperShowing();
+                              _pageController.jumpToPage(index);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 5),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: CachedNetworkImage(
+                                  imageUrl: widget.imageUrls[index].imageUrl.toString(),
+                                  height: 150,
+                                  width: 100,
+                                  fit: BoxFit.fill,
+                                  placeholder: (context, url) => Container(color: Colors.grey.shade200),
+                                  errorWidget: (context, url, error) =>
+                                      Icon(Icons.image, size: 100, color: Colors.grey.shade300),
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
-                ),
-                width(width: 10),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Consumer<NewsPostsProvider>(
-                          builder: (_,newsPostsProvider,__) {
-                            return Listener(
-                              onPointerMove: _isZoomed ? (_) {} : null, // Prevent swipe when zoomed
-                              child: PageView.builder(
-                                controller: _pageController,
-                                scrollDirection: Axis.horizontal,
-                                physics: _isZoomed
-                                    ? const NeverScrollableScrollPhysics()
-                                    : const BouncingScrollPhysics(),
-                                itemCount: widget.imageUrls.length,
-                                itemBuilder: (context, index) {
-                                  final imageUrl = widget.imageUrls[index].imageUrl.toString();
-
-                                  return RepaintBoundary(
-                                    key: previewContainer,
-                                    child: Center(
-                                      child: InteractiveViewer(
-                                        transformationController: _transformationController,
-                                        // boundaryMargin: const EdgeInsets.all(20),
-                                        minScale: 1.0,
-                                        maxScale: 10.0,
-                                        panEnabled: true,
-                                        // scaleEnabled: true,
-                                        child:  CachedNetworkImage(
-                                          imageUrl: imageUrl.toString(),
-                                          height: MediaQuery.of(context).size.height ,
-                                          width: MediaQuery.of(context).size.width,
-                                          fit: BoxFit.fill,
-
-                                          placeholder: (context, url) => Container(
-                                            height: MediaQuery.of(context).size.height ,
-                                            width: MediaQuery.of(context).size.width,
-                                            color: AppColors.borderColor.withOpacity(.2),
-                                          ),
-                                          errorWidget: (context, url, error) => Center(
-                                            child: Icon(
-                                              Icons.image,
-                                              size: 100,
-                                              color: Colors.grey.shade300,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            );
-
-                            ;
-                          }
-                      ),
-
-                      Positioned(
-                        top: 20,
-                        right: 20,
-                        child: GestureDetector(
-                          onTap: () async {
-                            EventRepo().sendEvent({
-                              "key": "share_via_articles",
-                              "data": {
-                                "device_id": "${GlobalVariables().deviceId}",
-                                "userId": context.read<FlipProvider>().userId ?? "",
-                                "postId": widget.postId.toString(),
-                                "isWhatAppShare": false,
-                              }
-                            });
-                            context.read<SettingsProvider>().saveBookmarks(
-                              widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].id.toString(),
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.bookmark_border,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 20,
-                        right: 80,
-                        child: GestureDetector(
-                          onTap: () async {
-                            EventRepo().sendEvent({
-                              "key": "share_via_articles",
-                              "data": {
-                                "device_id": "${GlobalVariables().deviceId}",
-                                "userId": context.read<FlipProvider>().userId ?? "",
-                                "postId": widget.postId.toString(),
-                                "isWhatAppShare": false,
-                              }
-                            });
-                            try {
-                              RenderRepaintBoundary boundary =
-                              previewContainer.currentContext!.findRenderObject() as RenderRepaintBoundary;
-
-                              ui.Image image = await boundary.toImage(pixelRatio: .2);
-                              ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-                              Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-                              final directory = await getTemporaryDirectory();
-                              final filePath = '${directory.path}/screenshot.png';
-                              File imgFile = File(filePath);
-                              await imgFile.writeAsBytes(pngBytes);
-
-                              await Share.shareXFiles(
-                                [XFile(filePath)],
-                                text: 'Check this out!',
-                              );
-                            } catch (e) {
-                              print("Error while capturing screenshot: $e");
-                            }
-
-                            // try {
-                            //   // Download image
-                            //   final response = await http.get(Uri.parse(widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl.toString()));
-                            //   final bytes = response.bodyBytes;
-                            //
-                            //   // Get temporary directory
-                            //   final tempDir = await getTemporaryDirectory();
-                            //   final file = File('${tempDir.path}/shared_image.jpg');
-                            //
-                            //   // Save image
-                            //   await file.writeAsBytes(bytes);
-                            //
-                            //   // Share with text and image
-                            //   await Share.shareXFiles(
-                            //     [XFile(file.path)],
-                            //     text: "gxfcgfgfgcuh",
-                            //   );
-                            // } catch (e) {
-                            //   print('Sharing failed: $e');
-                            // }
-
-                            // sendShareDetails(context.read<FlipProvider>().userId, widget.postId, widget.postId.toString());
-
-                            // Share.share('${widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl}: ${widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl}');
-
-
-                            // try {
-                            //   final image = await paperScreenShort.capture(
-                            //     pixelRatio: 2,
-                            //   );
-                            //   if (image != null) {
-                            //     final directory = await getTemporaryDirectory();
-                            //     final imagePath = '${directory.path}/${widget.postId}.png';
-                            //     final imageFile = File(imagePath);
-                            //     await imageFile.writeAsBytes(image);
-                            //
-                            //     Share.shareXFiles([XFile(imageFile.path)],
-                            //         text:  widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl.toString());
-                            //   } else {
-                            //     CustomToast.showErrorToast(msg: "Failed to capture screenshot");
-                            //   }
-                            // } catch (e) {
-                            //   CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                            // }
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.ios_share_outlined,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
               ],
             ),
-            if( context.watch<NewsPostsProvider>().isBottomIsShow)
-            Positioned(
-              bottom: 0,
-
-              child: Container(
-                height: 170,
-                width: MediaQuery.of(context).size.width,
-                padding: EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: AppColors.ePaperCardColor,
-                ),
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: widget.imageUrls.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: (){
-                        context.read<NewsPostsProvider>().paperSet(widget.imageUrls[index].imageUrl,index);
-                        context.read<NewsPostsProvider>().isPaperShowing();
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 5),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                          child: CachedNetworkImage(
-
-                            imageUrl: widget.imageUrls[index].imageUrl.toString(),
-                            height: 150,
-                            width: 100,
-                            fit: BoxFit.fill,
-                            placeholder: (context, url) => Container(
-                              color: Colors.grey.shade200,
-                            ),
-                            errorWidget: (context, url, error) => Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 100,
-                                color: Colors.grey.shade300,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

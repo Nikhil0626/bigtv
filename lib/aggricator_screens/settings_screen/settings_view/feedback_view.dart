@@ -6,8 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../../utils/app_colors.dart';
-import '../../utils/app_fonts.dart';
+import '../../../../utils/app_colors.dart';
+import '../../../utils/app_fonts.dart';
 
 class FeedbackForm extends StatefulWidget {
   @override
@@ -46,6 +46,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           "Feedback Form",
@@ -72,11 +73,12 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 16),
+                  height(height: 16),
                   SizedBox(
                     height: 180,
                     width: double.infinity,
                     child: Card(
+                      color: AppColors.cardBackgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -134,6 +136,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   SizedBox(
                     width: double.infinity,
                     child: Card(
+                  color:     AppColors.cardBackgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),

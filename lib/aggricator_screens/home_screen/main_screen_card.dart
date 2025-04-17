@@ -171,7 +171,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                         alignment: Alignment.center,
                                         decoration: BoxDecoration(
                                           color: AppColors.cardBackgroundColor,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(20.r),
                                           boxShadow: [
                                             BoxShadow(
                                               color: Colors.grey.withOpacity(0.2),
