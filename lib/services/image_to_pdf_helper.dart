@@ -1,3 +1,4 @@
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:chotanews/utils/app_toasts.dart';
@@ -9,7 +10,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
 
-import '../screens/home_screen/home_models/home_screen_model.dart';
+
 
 
 /// Create A Pdf Single News Article
@@ -98,17 +99,19 @@ Future<void> takeScreenshotAndShare( article,screenshotController, ) async {
 }
 
 
+
+
 /// Create A Pdf Multiple News Article
 Future<void> createAndSharePdf(BuildContext context, article ) async {
 
-  print("snkvsnknv ${article.gallery}");
-  List<GalleryImage>? imageData = article.gallery;
+
+  List imageData = article['gallery'];
   try {
     final pdf = pw.Document();
 
-    for (var item in imageData!) {
-      String imageUrl = item.url.toString() ?? '';
-
+    for (var item in imageData) {
+      String imageUrl = item['Url'].toString() ?? '';
+      print("pdfff ${imageUrl}");
       if (imageUrl.isNotEmpty) {
         final response = await http.get(Uri.parse(imageUrl));
 
@@ -137,26 +140,13 @@ Future<void> createAndSharePdf(BuildContext context, article ) async {
     }
 
     final directory = await getApplicationDocumentsDirectory();
-    final filePath = "${directory.path}/${article.id}.pdf";
+    final filePath = "${directory.path}/${article['id']}.pdf";
     final file = File(filePath);
     await file.writeAsBytes(await pdf.save());
 
     print("PDF saved at: $filePath");
-    final DynamicLinkParameters parameters = DynamicLinkParameters(
-      uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
-      link: Uri.parse('https://chotanews.com/store?postId=${article.id}'), // Ensure this is a valid URL
-      androidParameters: const AndroidParameters(
-        packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
-      ),
-      iosParameters: const IOSParameters(
-        bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
-        appStoreId: '1631068092',
-      ),
-    );
-    final ShortDynamicLink shortLink =
-    await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-    print("Short Link Created: ${shortLink.shortUrl}");
-    await Share.shareXFiles([XFile(filePath)], text: Platform.isIOS?article.linkURLIos.toString(): article.linkURLAndroid.toString());
+
+    await Share.shareXFiles([XFile(filePath)], text: "https://apps.signitivessoft.com/individualPage");
 
   } catch (e) {
     print("Error: $e");

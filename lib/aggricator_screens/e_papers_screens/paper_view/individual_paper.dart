@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_preview.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +26,7 @@ class IndividualPaper extends StatefulWidget {
 class _IndividualPaperState extends State<IndividualPaper> {
   @override
   void initState() {
+
     context.read<EPapersProvider>().getSingleEPapers(widget.paper);
     super.initState();
   }

@@ -79,6 +79,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                     },
                     child: Row(
                       children: [
+                        width(width: 20),
                         Icon(
                           Icons.arrow_back_outlined,
                           size: 24,
@@ -86,7 +87,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                         width(width: 20),
                         Text(
                           widget.name,
-                          style: fontStyle(fontSize: 20),
+                          style: fontStyle(fontSize: 20,fontWeight: FontWeight.w600),
                         )
                       ],
                     ),
@@ -125,6 +126,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                           height: MediaQuery.of(context).size.height ,
                                           width: MediaQuery.of(context).size.width,
                                           fit: BoxFit.fill,
+
                                           placeholder: (context, url) => Container(
                                             height: MediaQuery.of(context).size.height ,
                                             width: MediaQuery.of(context).size.width,

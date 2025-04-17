@@ -49,20 +49,23 @@ class _VideoPreview extends State<VideoPreview> {
                   borderRadius: BorderRadius.circular(12),
                   child: YoutubePlayer(
                     controller: homeProvider.controller,
+
                     bottomActions: [
                       CurrentPosition(),
                       ProgressBar(isExpanded: true),
-                      RemainingDuration(), // ✅ Show remaining time
+                      RemainingDuration(),
                       IconButton(
-                        icon: Icon(homeProvider.controller.value.volume == 0 ? Icons.volume_off : Icons.volume_up),
+                        icon: Icon(homeProvider.isMuted ? Icons.volume_off : Icons.volume_up),
                         onPressed: () {
-                          if (homeProvider.controller.value.volume == 0) {
-                            homeProvider.controller.setVolume(100); // ✅ Unmute
+                          if (homeProvider.isMuted) {
+                            homeProvider.controller.unMute();
                           } else {
-                            homeProvider.controller.setVolume(0); // ✅ Mute
+                            homeProvider.controller.mute();
                           }
+                          homeProvider.toggleMute(); // Update your isMuted state
                         },
-                      ),
+                      ),// ✅ Show remaining time
+
                     ],
                     onEnded: (metaData) {
                       homeProvider.isPlayingYoutube(false);

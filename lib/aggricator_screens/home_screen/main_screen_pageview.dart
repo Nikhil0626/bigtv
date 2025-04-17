@@ -13,7 +13,8 @@ class MainScreenPageView extends StatefulWidget {
   final int startIndex; // 👈 Accept index to start from
 final bool isAiTags;
 final String tagName;
-  const MainScreenPageView({super.key, this.startIndex = 0, this.isAiTags = false,this.tagName =""});
+final String tagId;
+  const MainScreenPageView({super.key, this.startIndex = 0, this.isAiTags = false,this.tagName ="",this.tagId =""});
 
   @override
   _MainScreenPageViewState createState() => _MainScreenPageViewState();
