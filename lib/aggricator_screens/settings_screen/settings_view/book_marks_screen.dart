@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/e_papers_screens/paper_models/single_paper_model.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import '../../../utils/app_colors.dart';
+import '../../e_papers_screens/paper_view/papers_screen_preview.dart';
 import '../../individual_post_details/individual_post_view.dart';
 
 class SavedArticles extends StatefulWidget {
@@ -58,8 +60,13 @@ class _SavedArticlesState extends State<SavedArticles> {
 
                           return InkWell(
                             onTap: (){
-                              Navigator.push(context, MaterialPageRoute(builder: (context) => IndividualPostView(postId: article.postId.toString(),isComeFrom: true,),));
-                            },
+                              if(article.type.toString()=="Epapers"){
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => PapersScreenPreview(postId:article.postId.toString() ,name: "E-Paper",imageUrls: [PageData(id: "${article.postId}",  imageUrl: article.imageUrl.toString(),pageNumber: 1)],),));
+
+                              }else {
+                                Navigator.push(context, MaterialPageRoute(builder: (context) => IndividualPostView(postId: article.postId.toString(), isComeFrom: true,),));
+                              }
+                              },
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 14),
                               child: Container(
@@ -75,7 +82,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Container(
-                                        height: 80,
+                                        height: 100,
                                         width: 80,
                                         decoration: BoxDecoration(
                                           color: Colors.white,

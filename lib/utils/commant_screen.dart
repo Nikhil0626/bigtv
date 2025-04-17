@@ -13,6 +13,7 @@ import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../globel_keys/app_router.dart';
 import 'app_enums.dart';
@@ -268,9 +269,9 @@ class _CommentSectionState extends State<CommentSection> {
                       IconButton(
                         icon: const Icon(Icons.send, color: Colors.blue),
                         onPressed: () async {
-                          NewAppLoginStatus status =await context.read<AuthenticationProvider>().getLoginStatus();
-                          log("Current Screen --- ${status.toString()}");
-                          if (status == NewAppLoginStatus.home) {
+                          SharedPreferences sp = await SharedPreferences.getInstance();
+                          bool isLogin = sp.getString("loginType").toString() == "login"?true:false??false;
+                          if (isLogin) {
                             if (controller.text.isEmpty) {
                             } else {
                               newsPostsProvider

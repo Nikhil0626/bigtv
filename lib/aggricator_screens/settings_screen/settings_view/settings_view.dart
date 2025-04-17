@@ -110,18 +110,18 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => InAppWebViewScreen(
-                    webUrl: BaseUrls.contactPage,
-                    title: "Contact Us",
-                  ),
-                ),
-              );
-            }),
+            // height(height: 5.h),
+            // _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
+            //   Navigator.push(
+            //     context,
+            //     MaterialPageRoute(
+            //       builder: (context) => InAppWebViewScreen(
+            //         webUrl: BaseUrls.contactPage,
+            //         title: "Contact Us",
+            //       ),
+            //     ),
+            //   );
+            // }),
             height(height: 5.h),
             _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
               Navigator.push(
@@ -166,12 +166,15 @@ class _SettingsViewState extends State<SettingsView> {
       onTap: onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          children: [
-            SvgPicture.asset('assets/svg/$iconName', height: 20, width: 20),
-            SizedBox(width: 25),
-            Text(title, style: TextStyle(fontSize: 16)),
-          ],
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            children: [
+              SvgPicture.asset('assets/svg/$iconName', height: 20, width: 20),
+              SizedBox(width: 25),
+              Text(title, style: TextStyle(fontSize: 16)),
+            ],
+          ),
         ),
       ),
     );

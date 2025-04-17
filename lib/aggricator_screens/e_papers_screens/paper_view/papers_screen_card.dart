@@ -71,7 +71,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                       print("Swiped from $previousIndex to $currentIndex  direction $direction");
                       return true;
                     },
-                    // numberOfCardsDisplayed: 3,
+                    numberOfCardsDisplayed: ePapersProvider.getAllMainPapersList.length??4,
                     cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
                       return InkWell(
                         onTap: () {
@@ -90,7 +90,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                             borderRadius: BorderRadius.circular(12),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
+                                color: Colors.grey.withOpacity(0.2),
                                 blurRadius: 6,
                                 spreadRadius: 2,
                                 offset: Offset(0, 3),
@@ -145,14 +145,15 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                               Align(
                                 alignment: Alignment.bottomLeft,
                                 child: Container(
-                                  color: Colors.white,
+                                  decoration: BoxDecoration( color: AppColors.cardBackgroundColor,
+                                    borderRadius: BorderRadius.circular(12),),
                                   child: Row(
                                     children: [
                                       InkWell(
                                         onTap: (){Navigator.push(context, MaterialPageRoute(
                                           builder: (context) => InAppWebViewScreen(
                                             webUrl: ePapersProvider.getAllMainPapersList[index].sourceUrl.toString(),
-                                            title: "Advertise with us",
+                                            title: "E-Paper",
                                           ),
                                         ));
                                         },

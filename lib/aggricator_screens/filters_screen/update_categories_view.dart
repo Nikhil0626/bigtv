@@ -83,7 +83,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                   : null,
               child: Container(
                 width: double.infinity,
-                height: 48.h,
+                height: 35.h,
                 decoration: BoxDecoration(
                   color: authenticationProvider.selectedCategories.isEmpty
                       ? AppColors.bodyTextColor.withOpacity(.2)

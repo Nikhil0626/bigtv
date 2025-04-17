@@ -121,6 +121,8 @@ class AuthenticationProvider extends ChangeNotifier {
         sp.setString("loginType", "login");
         sp.setString("userId", response.data['user']['id'].toString());
         if (response.data['is_new_user'] == false) {
+          getAllCategories();
+          getAllLocations();
           Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
