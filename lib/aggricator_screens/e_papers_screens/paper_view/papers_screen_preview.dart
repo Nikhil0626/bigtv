@@ -1,20 +1,22 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../globel_keys/global_variables_data.dart';
+import '../../../main.dart';
 import '../../../screens/home_screen/home_provider/provider.dart';
 import '../../../screens/home_screen/home_repo/event_repo.dart';
-import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
-import '../../../utils/app_toasts.dart';
 import '../../home_screen/news_posts_provider.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/single_paper_model.dart';
@@ -32,7 +34,7 @@ class PapersScreenPreview extends StatefulWidget {
 
 class _PapersScreenPreviewState extends State<PapersScreenPreview> {
   final ScreenshotController paperScreenShort = ScreenshotController();
-
+  GlobalKey previewContainer = GlobalKey();
   final PageController _pageController = PageController();
   TransformationController _transformationController = TransformationController();
   bool _isZoomed = false;
@@ -69,24 +71,28 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
           children: [
             Column(
               children: [
-                InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.arrow_back_outlined,
-                        size: 24,
-                      ),
-                      width(width: 20),
-                      Text(
-                        widget.name,
-                        style: fontStyle(fontSize: 20),
-                      )
-                    ],
+                Padding(
+                  padding:  EdgeInsets.only(top: MediaQuery.of(context).padding.top+20),
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.arrow_back_outlined,
+                          size: 24,
+                        ),
+                        width(width: 20),
+                        Text(
+                          widget.name,
+                          style: fontStyle(fontSize: 20),
+                        )
+                      ],
+                    ),
                   ),
                 ),
+                width(width: 10),
                 Expanded(
                   child: Stack(
                     children: [
@@ -104,8 +110,8 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                 itemBuilder: (context, index) {
                                   final imageUrl = widget.imageUrls[index].imageUrl.toString();
 
-                                  return Screenshot(
-                                    controller: paperScreenShort,
+                                  return RepaintBoundary(
+                                    key: previewContainer,
                                     child: Center(
                                       child: InteractiveViewer(
                                         transformationController: _transformationController,
@@ -189,26 +195,71 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                 "isWhatAppShare": false,
                               }
                             });
-
-                            sendShareDetails(context.read<FlipProvider>().userId, widget.postId, widget.postId.toString());
                             try {
-                              final image = await paperScreenShort.capture(
-                                pixelRatio: 2,
-                              );
-                              if (image != null) {
-                                final directory = await getTemporaryDirectory();
-                                final imagePath = '${directory.path}/${widget.postId}.png';
-                                final imageFile = File(imagePath);
-                                await imageFile.writeAsBytes(image);
+                              RenderRepaintBoundary boundary =
+                              previewContainer.currentContext!.findRenderObject() as RenderRepaintBoundary;
 
-                                Share.shareXFiles([XFile(imageFile.path)],
-                                    text:  widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl.toString());
-                              } else {
-                                CustomToast.showErrorToast(msg: "Failed to capture screenshot");
-                              }
+                              ui.Image image = await boundary.toImage(pixelRatio: .2);
+                              ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+                              Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+                              final directory = await getTemporaryDirectory();
+                              final filePath = '${directory.path}/screenshot.png';
+                              File imgFile = File(filePath);
+                              await imgFile.writeAsBytes(pngBytes);
+
+                              await Share.shareXFiles(
+                                [XFile(filePath)],
+                                text: 'Check this out!',
+                              );
                             } catch (e) {
-                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                              print("Error while capturing screenshot: $e");
                             }
+
+                            // try {
+                            //   // Download image
+                            //   final response = await http.get(Uri.parse(widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl.toString()));
+                            //   final bytes = response.bodyBytes;
+                            //
+                            //   // Get temporary directory
+                            //   final tempDir = await getTemporaryDirectory();
+                            //   final file = File('${tempDir.path}/shared_image.jpg');
+                            //
+                            //   // Save image
+                            //   await file.writeAsBytes(bytes);
+                            //
+                            //   // Share with text and image
+                            //   await Share.shareXFiles(
+                            //     [XFile(file.path)],
+                            //     text: "gxfcgfgfgcuh",
+                            //   );
+                            // } catch (e) {
+                            //   print('Sharing failed: $e');
+                            // }
+
+                            // sendShareDetails(context.read<FlipProvider>().userId, widget.postId, widget.postId.toString());
+
+                            // Share.share('${widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl}: ${widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl}');
+
+
+                            // try {
+                            //   final image = await paperScreenShort.capture(
+                            //     pixelRatio: 2,
+                            //   );
+                            //   if (image != null) {
+                            //     final directory = await getTemporaryDirectory();
+                            //     final imagePath = '${directory.path}/${widget.postId}.png';
+                            //     final imageFile = File(imagePath);
+                            //     await imageFile.writeAsBytes(image);
+                            //
+                            //     Share.shareXFiles([XFile(imageFile.path)],
+                            //         text:  widget.imageUrls[context.read<NewsPostsProvider>().currentPaperIndex].imageUrl.toString());
+                            //   } else {
+                            //     CustomToast.showErrorToast(msg: "Failed to capture screenshot");
+                            //   }
+                            // } catch (e) {
+                            //   CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                            // }
                           },
                           child: Container(
                             padding: EdgeInsets.all(7),

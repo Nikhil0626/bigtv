@@ -166,12 +166,15 @@ class _SettingsViewState extends State<SettingsView> {
       onTap: onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: 12),
-        child: Row(
-          children: [
-            SvgPicture.asset('assets/svg/$iconName', height: 20, width: 20),
-            SizedBox(width: 25),
-            Text(title, style: TextStyle(fontSize: 16)),
-          ],
+        child: SizedBox(
+          width: MediaQuery.of(context).size.width,
+          child: Row(
+            children: [
+              SvgPicture.asset('assets/svg/$iconName', height: 20, width: 20),
+              SizedBox(width: 25),
+              Text(title, style: TextStyle(fontSize: 16)),
+            ],
+          ),
         ),
       ),
     );
