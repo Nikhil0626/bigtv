@@ -8,7 +8,11 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
+  List getAllAiTagsList = [];
+  List getAllAiTagsPostList = [];
+
   var getSinglePostList = {};
+  int aiCurrentPostId = 0;
   int selectedIndex = 0;
   bool isSwitched = false;
   bool isWebView = false;
@@ -16,6 +20,7 @@ class HomeProvider extends ChangeNotifier {
   bool isHomeLoading = false;
   bool isPlaying = false;
   bool isPostLoading = false;
+  bool isMuted = false;
   late YoutubePlayerController controller;
 
   void onItemTapped(int index) {
@@ -44,7 +49,16 @@ class HomeProvider extends ChangeNotifier {
     isPlaying = value;
     notifyListeners();
   }
+ void toggleMute() {
+    isMuted = !isMuted;
+    notifyListeners();
+  }
 
+
+  void currentAiPostId(value){
+    aiCurrentPostId = value;
+    notifyListeners();
+  }
   void youtubeInitial(url){
     controller = YoutubePlayerController(
       initialVideoId: url, // Example YouTube video ID
@@ -132,6 +146,56 @@ class HomeProvider extends ChangeNotifier {
     } finally {
       isReload = false;
       isHomeLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future getAllPostsByAiId(postId) async {
+    getAllAiTagsPostList=[];
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? deviceId = preferences.getString("deviceId");
+
+
+    Map<String, dynamic> body = {
+      "deviceid": deviceId,
+      "aitagid": postId,
+      "postid": "0",
+    };
+    log(body.toString());
+    try {
+      Response response = await HomeRepo().getAllAiTagsById(body);
+      log(response.data.toString());
+      List data = response.data;
+
+      getAllAiTagsPostList.addAll(data);
+
+    } on DioException catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api  catch ${st.toString()}");
+    } catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api catch ${st.toString()}");
+    } finally {
+      // isHomeLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future getAllAiTags() async {
+
+    // isHomeLoading = true;
+    try {
+      Response response = await HomeRepo().getAllAiTags();
+      getAllAiTagsList.addAll(response.data);
+      log(getAllAiTagsList.toString());
+    } on DioException catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api  catch ${st.toString()}");
+    } catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api catch ${st.toString()}");
+    } finally {
+      // isHomeLoading = false;
       notifyListeners();
     }
   }

@@ -19,6 +19,7 @@ import '../../screens/videos_main/video_views/gallery_screen.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_spaces.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
+import 'ai_tag_posts_pageview.dart';
 import 'main_screen_pageview.dart';
 
 class MainScreenCard extends StatefulWidget {
@@ -41,6 +42,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
   @override
   void initState() {
     context.read<HomeProvider>().getAllPostList = [];
+    context.read<HomeProvider>().getAllAiTags();
     context.read<HomeProvider>().getAllPost();
     context.read<AuthenticationProvider>().getAllCategories();
     super.initState();
@@ -78,54 +80,50 @@ class _MainScreenCardState extends State<MainScreenCard> {
                     ? AppNoData()
                     : Column(
                         children: [
-                          Consumer<AuthenticationProvider>(builder: (_, authenticationProvider, __) {
-                            return Container(
-                                height: 50,
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                // color: Colors.greenAccent,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: authenticationProvider.getAllCategoryList.length,
-                                  itemBuilder: (context, index) {
-                                    final isSelected = authenticationProvider.selectedCategories.contains(authenticationProvider.getAllCategoryList[index].categoryName.toString());
+                          Container(
+                              height: 50,
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              // color: Colors.greenAccent,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: homeProvider.getAllAiTagsList.length,
+                                itemBuilder: (context, index) {
 
-                                    return InkWell(
-                                      onTap: (){
-                                        homeProvider.getAllPost().then((value) => {
-                                        Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                        builder: (context) => MainScreenPageView(
-                                        startIndex: index,
-                                          isAiTags: true,
-                                           tagName: authenticationProvider.getAllCategoryList[index].categoryName.toString(),
-                                        ),
-                                        ))
-                                        },);
+                                  return InkWell(
+                                    onTap: (){
+                                      Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                      builder: (context) => AiTagPostsPageView(
+                                        isAiTags: true,
+                                         tagName: homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                          tagId: homeProvider.getAllAiTagsList[index]['aitagid'].toString(),
+                                      ),
+                                      ));
 
-                                      },
-                                      child: Container(
-                                        margin: EdgeInsets.symmetric(horizontal: 6.w),
-                                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                                        decoration: BoxDecoration(
-                                          color: isSelected ? AppColors.loginBgColor : Colors.grey.shade200,
-                                          borderRadius: BorderRadius.circular(12.r),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          authenticationProvider.getAllCategoryList[index].categoryName.toString(),
-                                          textAlign: TextAlign.center,
-                                          style: homeScreenFontStyle(
-                                            color: isSelected ? Colors.white : Colors.black87,
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                    },
+                                    child: Container(
+                                      height: 30.h,
+                                      margin: EdgeInsets.symmetric(horizontal: 6.w),
+                                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.cardBackgroundColor,
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                        textAlign: TextAlign.center,
+                                        style: homeScreenFontStyle(
+                                          color: AppColors.textColor,
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                    );
-                                  },
-                                ));
-                          }),
+                                    ),
+                                  );
+                                },
+                              )),
                           Expanded(
                             child: GestureDetector(
                               onVerticalDragUpdate: (details) {

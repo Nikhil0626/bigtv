@@ -59,14 +59,28 @@ class _SavedArticlesState extends State<SavedArticles> {
                           log(article.title);
 
                           return InkWell(
-                            onTap: (){
-                              if(article.type.toString()=="Epapers"){
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => PapersScreenPreview(postId:article.postId.toString() ,name: "E-Paper",imageUrls: [PageData(id: "${article.postId}",  imageUrl: article.imageUrl.toString(),pageNumber: 1)],),));
-
-                              }else {
-                                Navigator.push(context, MaterialPageRoute(builder: (context) => IndividualPostView(postId: article.postId.toString(), isComeFrom: true,),));
+                            onTap: () {
+                              if (article.type.toString() == "Epapers") {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PapersScreenPreview(
+                                        postId: article.postId.toString(),
+                                        name: "E-Paper",
+                                        imageUrls: [PageData(id: "${article.postId}", imageUrl: article.imageUrl.toString(), pageNumber: 1)],
+                                      ),
+                                    ));
+                              } else {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => IndividualPostView(
+                                        postId: article.postId.toString(),
+                                        isComeFrom: true,
+                                      ),
+                                    ));
                               }
-                              },
+                            },
                             child: Padding(
                               padding: const EdgeInsets.only(bottom: 14),
                               child: Container(

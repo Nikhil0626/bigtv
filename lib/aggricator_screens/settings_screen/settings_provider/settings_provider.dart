@@ -15,11 +15,9 @@ class SettingsProvider extends ChangeNotifier {
   List<BookmarksModel> getAllBookmarkList = [];
   bool isMainLoading = false;
   bool isOthersSelected = false;
-
   List feedbackList = [];
   List<String> selectedFeedbackList = [];
   TextEditingController feedbackController = TextEditingController();
-
   List profileList = [];
   List<String> selectedProfileList = [];
   TextEditingController profileController = TextEditingController();

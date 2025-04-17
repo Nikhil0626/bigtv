@@ -248,7 +248,7 @@ class _DistrictViewState extends State<DistrictView> {
                 LinearProgressIndicator(
                   value: 1,
                   backgroundColor: AppColors.borderColor,
-                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.loginBgColor),
+                  valueColor: AlwaysStoppedAnimation<Color>(AppColors.appButtonColor),
                 ),
                 SizedBox(height: 8.h),
                 Center(
@@ -257,7 +257,7 @@ class _DistrictViewState extends State<DistrictView> {
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
-                      color: AppColors.loginBgColor,
+                      color: AppColors.appButtonColor,
                     ),
                   ),
                 ),

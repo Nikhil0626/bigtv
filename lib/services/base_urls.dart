@@ -69,6 +69,8 @@ class BaseUrls {
 
   ///FeedBack
   static const String getAllPost = "/allposts";
+  static const String aiTags = "/aitags";
+  static const String aiTagsById = "/aitag/content";
 
   ///Categories Apis
   static const String getAllCategories = "/categories";
