@@ -1,8 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_preview.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
- // Import the preview screen
+import 'reels_screen_preview.dart'; // Import the preview screen
+import '../reels_provider/reels_providers.dart'; // Import the provider
 
 class ReelsScreenList extends StatefulWidget {
   const ReelsScreenList({super.key});
@@ -12,59 +13,28 @@ class ReelsScreenList extends StatefulWidget {
 }
 
 class _ReelsScreenListState extends State<ReelsScreenList> {
-  final List<Map<String, dynamic>> _cardData = [
-    {
-      'id': 1,
-      'text': 'Rohith Sharma',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/D7DYyHbDJE4/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/D7DYyHbDJE4'
-    },
-    {
-      'id': 2,
-      'text': 'Virat Kohli',
-      'subtext': 'V6 Telugu',
-      'thumbnail': 'https://img.youtube.com/vi/kjqKDjjLuc8/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/kjqKDjjLuc8?si=e-KfiWAwHEm0mXWY'
-    },
-    {
-      'id': 3,
-      'text': 'Sachin Tendulkar',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/tyC7zT5xWkE/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/tyC7zT5xWkE'
-    },
-    {
-      'id': 4,
-      'text': 'MS Dhoni',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/AsPdLV-e4Us/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/AsPdLV-e4Us'
-    },
-    {
-      'id': 5,
-      'text': 'AB de Villiers',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/kSeonA9eJi0/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/kSeonA9eJi0'
-    },
-    {
-      'id': 6,
-      'text': 'Chris Gayle',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/BM0htuPE5pU/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/BM0htuPE5pU'
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    // Fetch reels data when the widget is first created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ReelsProviders>().getReels();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Access the reels data from the provider
+    final reelsDataList = context.watch<ReelsProviders>().reelsDataList;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
+      body: reelsDataList.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
         padding: EdgeInsets.symmetric(horizontal: 10.w),
         child: GridView.builder(
-          itemCount: _cardData.length,
+          itemCount: reelsDataList.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             childAspectRatio: 0.7,
@@ -72,7 +42,7 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
             mainAxisSpacing: 10.h,
           ),
           itemBuilder: (context, index) {
-            final card = _cardData[index];
+            final card = reelsDataList[index];
             return GestureDetector(
               onTap: () {
                 // Navigate to ReelPreviewScreen with the selected index
@@ -91,7 +61,7 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
                   children: [
                     // Thumbnail Image with Rounded Corners
                     CachedNetworkImage(
-                      imageUrl: card['thumbnail'],
+                      imageUrl: card['thumbnailUrl'] ?? '',
                       fit: BoxFit.cover, // Ensure image fills the card
                       width: double.infinity,
                       height: double.infinity,
@@ -123,7 +93,7 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
                           children: [
                             // Title (Main Text)
                             Text(
-                              card['text'] ?? "No title",
+                              card['title'] ?? "No title",
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 color: Colors.white,
@@ -132,15 +102,22 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            SizedBox(height: 6.h),
+                            SizedBox(height: 1.h),
 
-                            // Movie Icon & "BIG TV" Text in One Line
+                            // Movie Icon & Publisher Text in One Line
                             Row(
                               children: [
-                                Icon(Icons.movie, color: Colors.white, size: 18.sp),
+                                // Icon(Icons.movie, color: Colors.white, size: 18.sp),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: CircleAvatar(
+                                    backgroundImage: NetworkImage(card['publisherImage']??''),
+                                    radius: 10, // Set the size of the image
+                                  ),
+                                ),
                                 SizedBox(width: 4.w),
                                 Text(
-                                  card['subtext'] ?? "No subtext",
+                                  card['publisher'] ?? "Unknown",
                                   style: TextStyle(
                                     fontWeight: FontWeight.w400,
                                     color: Colors.white70,

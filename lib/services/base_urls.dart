@@ -91,4 +91,7 @@ class BaseUrls {
 
   ///Update profile
   static const String getProfile = "/profile";
+
+  ///Reels
+  static const String getReels = '/reels';
 }

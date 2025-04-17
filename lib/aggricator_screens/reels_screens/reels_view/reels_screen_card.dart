@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../reels_provider/reels_providers.dart'; // Import your provider
 
 class ReelsScreen extends StatefulWidget {
   @override
@@ -8,15 +11,6 @@ class ReelsScreen extends StatefulWidget {
 }
 
 class _ReelsScreenState extends State<ReelsScreen> {
-  final List<Map<String, String>> videoData = [
-    {'text': 'Rohith Sharma', 'url': 'D7DYyHbDJE4'},
-    {'text': 'Virat Kohli', 'url': 'E8TtA-tg1Ps'},
-    {'text': 'Sachin Tendulkar', 'url': 'tyC7zT5xWkE'},
-    {'text': 'MS Dhoni', 'url': 'AsPdLV-e4Us'},
-    {'text': 'AB de Villiers', 'url': 'kSeonA9eJi0'},
-    {'text': 'Chris Gayle', 'url': 'BM0htuPE5pU'},
-  ];
-
   late YoutubePlayerController _controller;
   int _currentIndex = 0;
 
@@ -24,56 +18,68 @@ class _ReelsScreenState extends State<ReelsScreen> {
   void initState() {
     super.initState();
     _controller = YoutubePlayerController(
-      initialVideoId: videoData[_currentIndex]['url']!,
+      initialVideoId: '', // Initially empty, we'll load the video later
       flags: YoutubePlayerFlags(autoPlay: true, mute: false),
     );
   }
 
-  void _onPageChanged(int index) {
-    setState(() {
-      _currentIndex = index;
-      _controller.load(videoData[_currentIndex]['url']!);
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Access the reels data from the provider
+    final reelsDataList = context.watch<ReelsProviders>().reelsDataList;
+
+    // Check if reelsDataList is null or empty
+    if (reelsDataList == null || reelsDataList.isEmpty) {
+      return Scaffold(
+        body: Center(child: CircularProgressIndicator()), // Show loading indicator
+      );
+    }
+
     return Scaffold(
       body: Center(
         child: CardSwiper(
           allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-            cardsCount: videoData.length,
+          cardsCount: reelsDataList.length,
           onSwipe: (previousIndex, currentIndex, direction) {
-            print("Swiped from $previousIndex to $currentIndex");
+            if (currentIndex != null) {
+              setState(() {
+                _currentIndex = currentIndex;
+                final videoUrl = reelsDataList[_currentIndex]['videoUrl'] ?? '';
+                _controller.load(videoUrl);
+              });
+            }
             return true;
           },
           numberOfCardsDisplayed: 4,
           cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-            final reel = videoData[index];
+            final reel = reelsDataList[index];
+
+            // Extract data for ReelCard
+            final thumbnailUrl = reel['thumbnailUrl'] ?? '';
+            final publisherImage = reel['publisherImage'] ?? '';
+            final publisher = reel['publisher'] ?? 'Unknown';
+
             return ReelCard(
-              text: reel['text']!,
-              thumbnailUrl: 'https://img.youtube.com/vi/${reel['url']}/maxresdefault.jpg',
+              thumbnailUrl: thumbnailUrl,
+              publisherImage: publisherImage,
+              publisher: publisher,
             );
           },
-        )
+        ),
       ),
     );
   }
 }
 
 class ReelCard extends StatelessWidget {
-  final String text;
   final String thumbnailUrl;
+  final String publisherImage;
+  final String publisher;
 
   const ReelCard({
-    required this.text,
     required this.thumbnailUrl,
+    required this.publisherImage,
+    required this.publisher,
   });
 
   @override
@@ -81,26 +87,90 @@ class ReelCard extends StatelessWidget {
     return Card(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 5,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Stack(
         children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.network(
-                thumbnailUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
+          Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(10.0), // Add padding around the container
+                child: Container(
+                  width: double.infinity, // Full width
+                  height: 400.h, // Set a fixed height
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                    image: DecorationImage(
+                      image: NetworkImage(thumbnailUrl),
+                      fit: BoxFit.cover, // Cover the container
+                    ),
+                  ),
+                ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: NetworkImage(publisherImage),
+                      radius: 20, // Adjusted size of the CircleAvatar
+                    ),
+                    SizedBox(width: 8.w),
+                    Expanded(
+                      child: Text(
+                        publisher,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w400,
+                          color: Colors.black,
+                          fontSize: 13.sp,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 1.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.favorite, color: Colors.red, size: 24.sp),
+                        SizedBox(width: 8),
+                        Text("1.2K", style: TextStyle(fontSize: 12.sp)),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.comment, color: Colors.grey, size: 24.sp),
+                        SizedBox(width: 8),
+                        Text("345", style: TextStyle(fontSize: 12.sp)),
+                      ],
+                    ),
+                    Spacer(),
+                    Row(
+                      children: [
+                        Icon(Icons.share, color: Colors.grey, size: 24.sp),
+                        SizedBox(width: 8),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              text,
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
+          Positioned(
+            top: 20,
+            right: 20,
+            child: CircleAvatar(
+              backgroundColor: Colors.black.withOpacity(0.5),
+              radius: 20,
+              child: Icon(
+                Icons.bookmark,
+                color: Colors.white,
+                size: 24,
+              ),
             ),
           ),
         ],

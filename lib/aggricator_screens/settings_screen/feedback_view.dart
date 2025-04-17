@@ -1,9 +1,10 @@
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
@@ -15,8 +16,6 @@ class FeedbackForm extends StatefulWidget {
 
 class _FeedbackFormState extends State<FeedbackForm> {
   int selectedStar = 0;
-
-
 
   String get feedbackMessage {
     switch (selectedStar) {
@@ -39,14 +38,11 @@ class _FeedbackFormState extends State<FeedbackForm> {
   void initState() {
     context.read<SettingsProvider>().feedbackList = [];
     context.read<SettingsProvider>().getFeedBack();
-    context.read<SettingsProvider>().loadSelectedStar();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    final settingsProvider = context.watch<SettingsProvider>();
-
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -57,7 +53,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
       ),
       body: Consumer<SettingsProvider>(
         builder: (_, settingsProvider, __) {
-          return SingleChildScrollView(
+          return settingsProvider.isFeedbackLoading?AppLoadingScreen():SingleChildScrollView(
             padding: const EdgeInsets.all(8.0),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -104,12 +100,11 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                   onTap: () {
                                     setState(() {
                                       selectedStar = index + 1;
-                                      settingsProvider.saveSelectedStar(index + 1);
                                     });
                                   },
                                   child: Icon(
                                     Icons.star,
-                                    color: index < settingsProvider.selectedStar
+                                    color: index < selectedStar
                                         ? Colors.yellow
                                         : Colors.grey,
                                     size: 40,
@@ -152,10 +147,11 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                 fontSize: 16,
                               ),
                             ),
-                            SizedBox(height: 8),
+                            height(height: 8),
                             Wrap(
                               spacing: 10.w,
                               runSpacing: 10.w,
+                              crossAxisAlignment: WrapCrossAlignment.start,
                               children: settingsProvider.feedbackList.map((category) {
                                 final isSelected = settingsProvider.selectedFeedbackList
                                     .contains(category['optionText'].toString());
@@ -164,25 +160,20 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                   onTap: () {
                                     settingsProvider.addToSelectedEngagements(
                                         category['optionText'].toString());
-
                                   },
                                   child: Container(
-                                    // height: 40,
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 14.w, vertical: 6.h),
+                                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
                                     decoration: BoxDecoration(
                                       color: isSelected
                                           ? AppColors.appButtonColor
-                                          : Colors.grey.shade200,
-                                      borderRadius: BorderRadius.circular(20.r),
+                                          : AppColors.cardBackgroundColor,
+                                      borderRadius: BorderRadius.circular(15.r),
                                     ),
                                     child: Text(
                                       category['optionText'].toString(),
                                       textAlign: TextAlign.center,
                                       style: homeScreenFontStyle(
-                                        color: isSelected
-                                            ? Colors.white
-                                            : Colors.black87,
+                                        color: isSelected ? Colors.white : Colors.black87,
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.w500,
                                       ),
@@ -191,6 +182,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                 );
                               }).toList(),
                             ),
+
                           ],
                         ),
                       ),
@@ -235,31 +227,37 @@ class _FeedbackFormState extends State<FeedbackForm> {
                       ),
                     ),
                   SizedBox(height: 16),
-                  SizedBox(
-                    width: 183,
-                    height: 59,
-                    child: ElevatedButton(
-                      onPressed: () {
-                       settingsProvider.postFeedBack(selectedStar, );
-                       Navigator.pop(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+
+                  InkWell(
+                    onTap: (){
+                      if(settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0) {
+                        settingsProvider.postFeedBack(selectedStar,).then((value) {
+                          selectedStar = 0;setState(() {
+                          });
+                        },);
+                      }else{
+                        CustomToast.showErrorToast(msg: "Select at list one star and value field");
+                      }
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 35.h,
+                      // margin: EdgeInsets.only(bottom: 20.h),
+                      decoration: BoxDecoration(
+                        color: (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0)
+                            ? AppColors.loginBgColor
+                            : AppColors.bodyTextColor.withOpacity(.2),
+                        borderRadius: BorderRadius.all(Radius.circular(8.r)),
                       ),
-                      child: Text(
-                        "Submit",
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18,
-                          color: Colors.white,
+                      child: Center(
+                        child: Text(
+                          'Submit',
+                          style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
                   ),
+
                 ],
               ),
             ),

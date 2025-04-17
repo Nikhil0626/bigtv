@@ -11,12 +11,10 @@ import '../../../globel_keys/global_variables_data.dart';
 import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../services/webengage_event_tracks.dart';
 
-
 class SettingsProvider extends ChangeNotifier {
   List<BookmarksModel> getAllBookmarkList = [];
   bool isMainLoading = false;
   bool isOthersSelected = false;
-  int selectedStar = 0;
 
   List feedbackList = [];
   List<String> selectedFeedbackList = [];
@@ -29,7 +27,7 @@ class SettingsProvider extends ChangeNotifier {
   bool isBookMarkLoading = false;
 
   Future getAllBookMarks() async {
-    isBookMarkLoading =true;
+    isBookMarkLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {"user_id": userId};
@@ -46,14 +44,13 @@ class SettingsProvider extends ChangeNotifier {
             .toList();
         log(response.data.toString());
       }
-    } catch (e,st) {
+    } catch (e, st) {
       log("kjsbdcjksjksdhbcfk${e.toString()} -- ${st}");
     } finally {
       isBookMarkLoading = false;
       notifyListeners();
     }
   }
-
 
   Future<void> saveBookmarks(String postId) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -72,15 +69,11 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
-
   Future<void> postLike(String postId, isLike) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
-     Map<String, dynamic> body = {"deviceId": deviceId,
-      "postId": postId,
-      "userId": userId,
-      "isLiked": isLike};
+    Map<String, dynamic> body = {"deviceId": deviceId, "postId": postId, "userId": userId, "isLiked": isLike};
     try {
       log("body $body");
       Response response = await SettingsRepo().liked(body);
@@ -92,9 +85,8 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
-
-
   List<String> isLikeList = [];
+
   void isLikePost(val) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
@@ -105,11 +97,11 @@ class SettingsProvider extends ChangeNotifier {
         "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": true}
       });
       isLikeList.add(val['id'].toString());
-      postLike(val['id'].toString(),true);
+      postLike(val['id'].toString(), true);
       sendLikeDetails(userId, val, true, val['title'].toString());
       log(isLikeList.toString());
     } else {
-      postLike(val['id'].toString(),false);
+      postLike(val['id'].toString(), false);
       isLikeList.remove(val['id'].toString());
       EventRepo().sendEvent({
         "key": "liked_article",
@@ -122,37 +114,23 @@ class SettingsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> saveSelectedStar(int star) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt('selectedStar', star);
-    selectedStar = star;
-    notifyListeners();
-  }
-
-  Future<void> loadSelectedStar() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    selectedStar = prefs.getInt('selectedStar') ?? 0;
-    notifyListeners();
-  }
-
   Future getFeedBack() async {
+    feedbackController.text = '';
+    isFeedbackLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     // String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
       "user_id": userId,
     };
-    bool isMainLoading = true;
+
     try {
       Response response = await SettingsRepo().getFeedBack(body);
       if (response.statusCode == 200) {
-
         feedbackList.addAll(response.data['feedback_options']);
 
-        selectedFeedbackList = feedbackList.where((item) => item.isFollowed == true).map((item) => item['optionText'].toString()).toList();
 
         log("Like posted successfully: ${response.data}");
-
       } else {
         log("Failed to post like: ${response.statusCode}");
       }
@@ -161,46 +139,47 @@ class SettingsProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
     } finally {
-      isMainLoading = false;
+      isFeedbackLoading = false;
       notifyListeners();
     }
   }
 
-  Future postFeedBack(rating,) async {
-    bool isMainLoading = true;
+  bool isFeedbackLoading = false;
+
+  Future postFeedBack(
+      rating,
+      ) async {
+    isFeedbackLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? deviceId = preferences.getString("deviceId");
 
     String? userId = preferences.getString("userId");
-    List<int> selectedCategoryIds = feedbackList.where((item) => selectedFeedbackList.contains(item['optionText'].toString())).map((item) => item.id as int).toList();
+    List selectedCategoryIds = feedbackList.where((item) => selectedFeedbackList.contains(item['optionText'].toString())).map((item) => item['optionId'].toString()).toList();
 
+    Map<String, dynamic> body = {"device_id":deviceId,"user_id": userId, "user_rating": rating, "comment_ids": selectedCategoryIds, "custom_comment": feedbackController.text??""};
 
-    Map<String, dynamic> body = {
-      "user_id": userId,
-      "user_rating": rating,
-      "comment_ids": selectedCategoryIds,
-      "custom_comment": feedbackController.text
-    };
+    log(body.toString());
     try {
       Response response = await SettingsRepo().postFeedBack(body);
       if (response.statusCode == 200) {
+        CustomToast.showSuccessToast(msg: response.data['message']);
+        selectedFeedbackList = [];
         log("Like posted successfully: ${response.data}");
       } else {
         log("Failed to post like: ${response.statusCode}");
       }
-    } on DioException catch (e, st) {
-      log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
+    } on DioException catch (e, st) { CustomToast.showErrorToast(msg: " Feedback not submitted");
+    log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
       log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
     } finally {
-      isMainLoading = false;
+      isFeedbackLoading = false;
       notifyListeners();
     }
   }
 
   void addToSelectedEngagements(String profileName) {
-    isOthersSelected = profileName
-        .toString() ==
-        "Others"?true: false;
+    isOthersSelected = profileName.toString() == "Others" ? true : false;
     if (!selectedFeedbackList.contains(profileName)) {
       selectedFeedbackList.add(profileName);
       log(selectedFeedbackList.toString());
@@ -210,7 +189,4 @@ class SettingsProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-
-
 }
