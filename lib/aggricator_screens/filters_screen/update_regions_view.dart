@@ -128,7 +128,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
               },
               child: Container(
                 width: double.infinity,
-                height: 48.h,
+                height: 35.h,
                 margin: EdgeInsets.only(bottom: 20.h),
                 decoration: BoxDecoration(
                   color: (authenticationProvider.selectedLocations.length > 1 &&

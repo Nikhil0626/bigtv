@@ -61,7 +61,7 @@ class _IndividualPostViewState extends State<IndividualPostView> {
     return Scaffold(
       body: SafeArea(
         child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-          final article =  homeProvider.getSinglePostList.isEmpty?{}:homeProvider.getSinglePostList.first;
+          final article =  homeProvider.getSinglePostList.isEmpty?{}:homeProvider.getSinglePostList;
           return homeProvider.isPostLoading
               ? AppLoadingScreen()
               :  Stack(
@@ -96,15 +96,12 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                               ),
                                             )
                                           : article['type'] == "Image"
-                                              ? Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: Image.network(
-                                                    width: MediaQuery.of(context).size.width,
-                                                    height: MediaQuery.of(context).size.height,
-                                                    fit: BoxFit.cover,
-                                                    article['image_url'] ?? "",
-                                                  ),
-                                                )
+                                              ? Image.network(
+                                                width: MediaQuery.of(context).size.width,
+                                                height: MediaQuery.of(context).size.height,
+                                                fit: BoxFit.cover,
+                                                article['image_url'] ?? "",
+                                              )
                                               : article['type'] == "Gallery"
                                                   ? ClipRRect(
                                                       borderRadius: BorderRadius.all(
@@ -191,7 +188,7 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                                                             crossAxisAlignment: CrossAxisAlignment.start,
                                                                             children: [
                                                                               (article['content'] != "")
-                                                                                  ? Text(article.content,
+                                                                                  ? Text(article['content'],
                                                                                       style: homeScreenFontStyle(
                                                                                         color: article['subType'] == "BigBlackStandard"
                                                                                             ? AppColors.textColor.withOpacity(0.5)

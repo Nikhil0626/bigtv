@@ -8,7 +8,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
-  List getSinglePostList = [];
+  var getSinglePostList = {};
   int selectedIndex = 0;
   bool isSwitched = false;
   bool isWebView = false;
@@ -70,12 +70,11 @@ class HomeProvider extends ChangeNotifier {
 
   Future getIndividualPost(postId) async {
     isPostLoading = true;
-    getSinglePostList = [];
+    getSinglePostList ={};
     try {
       Response response = await HomeRepo().getSinglePost(postId);
       log(response.data.toString());
-      List data = response.data['data'];
-      getSinglePostList.addAll(data);
+      getSinglePostList =response.data['data'];
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");

@@ -167,6 +167,7 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
                       alignment: Alignment.center,
                       child: ListView.builder(
                         itemCount: 3,
+                        physics: NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
                           return InkWell(
                             onTap: () {

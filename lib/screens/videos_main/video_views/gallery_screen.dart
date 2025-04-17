@@ -295,7 +295,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                 width: MediaQuery.of(context).size.width,
                 decoration: BoxDecoration(
                   image: DecorationImage(
-                    image: NetworkImage(image['url'],),
+                    image: NetworkImage(image['Url'],),
                     fit: isFoldable?BoxFit.fill:BoxFit.cover,
                     filterQuality: FilterQuality.medium,
                     isAntiAlias: true,
