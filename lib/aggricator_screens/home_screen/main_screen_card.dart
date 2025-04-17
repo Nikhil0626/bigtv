@@ -19,6 +19,7 @@ import '../../screens/videos_main/video_views/gallery_screen.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_spaces.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
+import 'ai_tag_posts_pageview.dart';
 import 'main_screen_pageview.dart';
 
 class MainScreenCard extends StatefulWidget {
@@ -41,6 +42,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
   @override
   void initState() {
     context.read<HomeProvider>().getAllPostList = [];
+    context.read<HomeProvider>().getAllAiTags();
     context.read<HomeProvider>().getAllPost();
     context.read<AuthenticationProvider>().getAllCategories();
     super.initState();
@@ -78,55 +80,50 @@ class _MainScreenCardState extends State<MainScreenCard> {
                     ? AppNoData()
                     : Column(
                         children: [
-                          Consumer<AuthenticationProvider>(builder: (_, authenticationProvider, __) {
-                            return Container(
-                                height: 50.h,
-                                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                                // color: Colors.greenAccent,
-                                child: ListView.builder(
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: authenticationProvider.getAllCategoryList.length,
-                                  itemBuilder: (context, index) {
-                                    final isSelected = authenticationProvider.selectedCategories.contains(authenticationProvider.getAllCategoryList[index].categoryName.toString());
+                          Container(
+                              height: 50,
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              // color: Colors.greenAccent,
+                              child: ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: homeProvider.getAllAiTagsList.length,
+                                itemBuilder: (context, index) {
 
-                                    return InkWell(
-                                      onTap: () {
-                                        homeProvider.getAllPost().then(
-                                              (value) => {
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (context) => MainScreenPageView(
-                                                        startIndex: index,
-                                                        isAiTags: true,
-                                                        tagName: authenticationProvider.getAllCategoryList[index].categoryName.toString(),
-                                                      ),
-                                                    ))
-                                              },
-                                            );
-                                      },
-                                      child: Container(
-                                        margin: EdgeInsets.symmetric(horizontal: 6.w),
-                                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                                        decoration: BoxDecoration(
-                                          color: isSelected ? AppColors.loginBgColor : Colors.grey.shade200,
-                                          borderRadius: BorderRadius.circular(12.r),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          authenticationProvider.getAllCategoryList[index].categoryName.toString(),
-                                          textAlign: TextAlign.center,
-                                          style: homeScreenFontStyle(
-                                            color: isSelected ? Colors.white : Colors.black87,
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w500,
-                                          ),
+                                  return InkWell(
+                                    onTap: (){
+                                      Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                      builder: (context) => AiTagPostsPageView(
+                                        isAiTags: true,
+                                         tagName: homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                          tagId: homeProvider.getAllAiTagsList[index]['aitagid'].toString(),
+                                      ),
+                                      ));
+
+                                    },
+                                    child: Container(
+                                      height: 30.h,
+                                      margin: EdgeInsets.symmetric(horizontal: 6.w),
+                                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.cardBackgroundColor,
+                                        borderRadius: BorderRadius.circular(12.r),
+                                      ),
+                                      alignment: Alignment.center,
+                                      child: Text(
+                                        homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                        textAlign: TextAlign.center,
+                                        style: homeScreenFontStyle(
+                                          color: AppColors.textColor,
+                                          fontSize: 14.sp,
+                                          fontWeight: FontWeight.w500,
                                         ),
                                       ),
-                                    );
-                                  },
-                                ));
-                          }),
+                                    ),
+                                  );
+                                },
+                              )),
                           Expanded(
                             child: GestureDetector(
                               onVerticalDragUpdate: (details) {
@@ -150,7 +147,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                 cardsCount: homeProvider.getAllPostList.length,
                                 numberOfCardsDisplayed: 4,
                                 onSwipe: (previousIndex, currentIndex, direction) {
-                                  if (homeProvider.getAllPostList.length - 5 == currentIndex) {
+                                  if(homeProvider.getAllPostList.length-5 ==currentIndex){
                                     log("last post   ${homeProvider.getAllPostList[int.parse(currentIndex.toString())]["id"]}");
                                     context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList[int.parse(currentIndex.toString())]["id"]);
                                   }
@@ -264,7 +261,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                               children: [
                                                                 ClipRRect(
                                                                   borderRadius: BorderRadius.all(
-                                                                    Radius.circular(12.r),
+                                                                    Radius.circular(12),
                                                                   ),
                                                                   child: FullPageCarousel(
                                                                     isHome: true,
@@ -307,7 +304,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                               ),
                             ),
                           ),
-                          height(height: 20.h)
+                          height(height: 20)
                         ],
                       ),
           ),
@@ -338,25 +335,25 @@ class ShimmerCard extends StatelessWidget {
         children: [
           // ✅ Shimmer Image Placeholder
           Container(
-            height: 300.h,
+            height: 300,
             width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.grey[300],
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             ),
           ),
-          height(height: 10.h),
+          SizedBox(height: 10),
 
           // ✅ Shimmer Title Placeholder
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 15),
             child: Container(
-              height: 20.h,
-              width: 200.w,
+              height: 20,
+              width: 200,
               color: Colors.grey[300],
             ),
           ),
-          height(height: 10.h),
+          SizedBox(height: 10),
 
           // ✅ Shimmer Buttons Placeholder
           Padding(
@@ -379,7 +376,7 @@ class ShimmerCard extends StatelessWidget {
   // ✅ Shimmer Icon Placeholder
   Widget shimmerIcon() {
     return Container(
-      height: 40.h,
+      height: 40,
       width: 40,
       decoration: BoxDecoration(
         color: Colors.grey[300],
@@ -388,3 +385,5 @@ class ShimmerCard extends StatelessWidget {
     );
   }
 }
+
+

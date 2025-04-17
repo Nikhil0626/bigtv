@@ -41,7 +41,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Consumer<EPapersProvider>(builder: (_, ePapersProvider, __) {
-        return SizedBox(
+        return Container(color: Colors.white,
           width: MediaQuery.of(context).size.width.w,
           height: MediaQuery.of(context).size.height - 150.h,
           child: Center(
@@ -106,7 +106,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                   width: MediaQuery.of(context).size.width,
                                   fit: BoxFit.fill,
                                   placeholder: (context, url) => Container(
-                                    color: AppColors.borderColor.withOpacity(.2),
+                                    color: AppColors.cardBackgroundColor,
                                   ),
                                   errorWidget: (context, url, error) => Center(
                                     child: Icon(
