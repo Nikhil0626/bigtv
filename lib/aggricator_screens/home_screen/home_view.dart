@@ -147,6 +147,7 @@ class _HomeViewState extends State<HomeView> {
                         ),
                       ),
                     );
+
                   },
                 ),
                 if( context.read<HomeProvider>().selectedIndex == 3)

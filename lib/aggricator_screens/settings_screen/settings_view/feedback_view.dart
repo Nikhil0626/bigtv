@@ -69,7 +69,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                       fontFamily: 'Poppins',
                       fontWeight: FontWeight.bold,
                       fontSize: 24,
-                      color: Colors.blue,
+                      color: AppColors.appButtonColor
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -109,7 +109,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                   child: Icon(
                                     Icons.star,
                                     color: index < selectedStar
-                                        ? Colors.yellow
+                                        ? AppColors.ratingColor
                                         : Colors.grey,
                                     size: 40,
                                   ),
@@ -123,7 +123,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                 fontFamily: 'Poppins',
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.blue,
+                                  color: AppColors.appButtonColor,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -251,7 +251,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                       // margin: EdgeInsets.only(bottom: 20.h),
                       decoration: BoxDecoration(
                         color: (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0)
-                            ? AppColors.loginBgColor
+                            ? AppColors.appButtonColor
                             : AppColors.bodyTextColor.withOpacity(.2),
                         borderRadius: BorderRadius.all(Radius.circular(8.r)),
                       ),

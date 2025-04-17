@@ -62,7 +62,7 @@ class _CategoriesViewState extends State<CategoriesView> {
 
                           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
                           decoration: BoxDecoration(
-                            color: isSelected ? AppColors.loginBgColor : Colors.grey.shade200,
+                            color: isSelected ? AppColors.appButtonColor : Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(20.r),
                           ),
                           child: Text(
@@ -98,7 +98,7 @@ class _CategoriesViewState extends State<CategoriesView> {
               LinearProgressIndicator(
                 value: 0.5,
                 backgroundColor: AppColors.borderColor,
-                valueColor: AlwaysStoppedAnimation<Color>(AppColors.loginBgColor),
+                valueColor: AlwaysStoppedAnimation<Color>(AppColors.appButtonColor),
               ),
               SizedBox(height: 8.h),
               Center(
@@ -107,7 +107,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                   style: TextStyle(
                     fontSize: 14.sp,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.loginBgColor,
+                    color: AppColors.appButtonColor,
                   ),
                 ),
               ),

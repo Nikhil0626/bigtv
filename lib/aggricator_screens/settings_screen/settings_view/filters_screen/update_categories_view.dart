@@ -50,7 +50,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.loginBgColor : Colors.grey.shade200,
+                        color: isSelected ? AppColors.appButtonColor : Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Text(
