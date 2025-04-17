@@ -37,11 +37,9 @@ class MainScreenList extends StatefulWidget {
   @override
   State<MainScreenList> createState() => _MainScreenListState();
 }
-
 class _MainScreenListState extends State<MainScreenList> {
   final List<ScreenshotController> _screenshotControllers = [];
   final ScrollController _scrollController = ScrollController();
-
   @override
   void initState() {
     _scrollController.addListener(() {

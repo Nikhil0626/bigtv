@@ -13,7 +13,6 @@ class GoogleAdsView extends StatefulWidget {
   final article;
   final HomeProvider flipProvider;
   final isFoldable;
-
   const GoogleAdsView({
     super.key,
     required this.article,
@@ -26,7 +25,6 @@ class GoogleAdsView extends StatefulWidget {
 class _GoogleAdsViewState extends State<GoogleAdsView> {
   NativeAd? _nativeAd;
   bool _isAdLoaded = false;
-
   @override
   void initState() {
     super.initState();
