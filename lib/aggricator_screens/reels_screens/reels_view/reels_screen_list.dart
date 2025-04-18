@@ -1,8 +1,26 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/reels_screens/reels_models/reels_model.dart';
+import 'package:chotanews/aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
- // Import the preview screen
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../screens/home_screen/botton_actions.dart';
+import '../../../screens/home_screen/home_repo/event_repo.dart';
+import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
+import '../../../services/webengage_event_tracks.dart';
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_fonts.dart';
+import '../../../utils/app_spaces.dart';
+import '../../../utils/app_toasts.dart';
+import '../../settings_screen/settings_provider/settings_provider.dart';
 
 class ReelsScreenList extends StatefulWidget {
   const ReelsScreenList({super.key});
@@ -12,176 +30,236 @@ class ReelsScreenList extends StatefulWidget {
 }
 
 class _ReelsScreenListState extends State<ReelsScreenList> {
-  final List<Map<String, dynamic>> _cardData = [
-    {
-      'id': 1,
-      'text': 'Rohith Sharma',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/D7DYyHbDJE4/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/D7DYyHbDJE4'
-    },
-    {
-      'id': 2,
-      'text': 'Virat Kohli',
-      'subtext': 'V6 Telugu',
-      'thumbnail': 'https://img.youtube.com/vi/kjqKDjjLuc8/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/kjqKDjjLuc8?si=e-KfiWAwHEm0mXWY'
-    },
-    {
-      'id': 3,
-      'text': 'Sachin Tendulkar',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/tyC7zT5xWkE/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/tyC7zT5xWkE'
-    },
-    {
-      'id': 4,
-      'text': 'MS Dhoni',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/AsPdLV-e4Us/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/AsPdLV-e4Us'
-    },
-    {
-      'id': 5,
-      'text': 'AB de Villiers',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/kSeonA9eJi0/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/kSeonA9eJi0'
-    },
-    {
-      'id': 6,
-      'text': 'Chris Gayle',
-      'subtext': 'BIG TV',
-      'thumbnail': 'https://img.youtube.com/vi/BM0htuPE5pU/maxresdefault.jpg',
-      'url': 'https://youtube.com/shorts/BM0htuPE5pU'
-    },
-  ];
+
+  @override
+  void initState() {
+    if(context.read<ReelsProviders>().getAllReelsList.isEmpty){
+      context.read<ReelsProviders>().getAllReels();
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 10.w),
-        child: GridView.builder(
-          itemCount: _cardData.length,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 0.7,
-            crossAxisSpacing: 10.w,
-            mainAxisSpacing: 10.h,
-          ),
-          itemBuilder: (context, index) {
-            final card = _cardData[index];
-            return GestureDetector(
-              onTap: () {
-                // Navigate to ReelPreviewScreen with the selected index
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ReelPreviewScreen(
-                      initialIndex: index, // Pass the tapped index
+      body: Consumer<ReelsProviders>(
+        builder: (_,reelsProviders,__) {
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10.w),
+            child: GridView.builder(
+              itemCount: reelsProviders.getAllReelsList.length,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                childAspectRatio: 0.7,
+                crossAxisSpacing: 10.w,
+                mainAxisSpacing: 10.h,
+              ),
+              itemBuilder: (context, index) {
+                final card = reelsProviders.getAllReelsList[index];
+                return ReelsListViewCard(card: card, );
+              },
+            ),
+          );
+        }
+      ),
+    );
+  }
+}
+
+
+class ReelsListViewCard extends StatefulWidget {
+  final ReelsModel card;
+  const ReelsListViewCard({super.key,required this.card});
+
+  @override
+  State<ReelsListViewCard> createState() => _ReelsListViewCardState();
+}
+
+class _ReelsListViewCardState extends State<ReelsListViewCard> {
+  ScreenshotController screenshotController = ScreenshotController();
+
+  @override
+  Widget build(BuildContext context) {
+    return Screenshot(
+      controller: screenshotController,
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ReelPreviewScreen(
+                  initialIndex: 0,
+                ),
+              ));
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16.r), // Fully rounded card
+          child: Stack(
+            children: [
+              // Thumbnail Image with Rounded Corners
+              CachedNetworkImage(
+                imageUrl: widget.card.thumbnailUrl,
+                fit: BoxFit.cover, // Ensure image fills the card
+                width: double.infinity,
+                height: double.infinity,
+                placeholder: (context, url) =>
+                    Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) =>
+                    Icon(Icons.error, color: Colors.red),
+              ),
+              // Dark Gradient Overlay at Bottom for better text visibility
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.bottomCenter,
+                      end: Alignment.topCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.7),
+                        Colors.transparent,
+                      ],
                     ),
                   ),
-                );
-              },
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.r), // Fully rounded card
-                child: Stack(
-                  children: [
-                    // Thumbnail Image with Rounded Corners
-                    CachedNetworkImage(
-                      imageUrl: card['thumbnail'],
-                      fit: BoxFit.cover, // Ensure image fills the card
-                      width: double.infinity,
-                      height: double.infinity,
-                      placeholder: (context, url) =>
-                          Center(child: CircularProgressIndicator()),
-                      errorWidget: (context, url, error) =>
-                          Icon(Icons.error, color: Colors.red),
-                    ),
-                    // Dark Gradient Overlay at Bottom for better text visibility
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        padding: EdgeInsets.all(8.w),
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.bottomCenter,
-                            end: Alignment.topCenter,
-                            colors: [
-                              Colors.black.withOpacity(0.7),
-                              Colors.transparent,
-                            ],
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Title (Main Text)
+                      Text(
+                        widget.card.content ?? "No title",
+                        style: newAppFont(
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          fontSize: 14.sp,
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Title (Main Text)
-                            Text(
-                              card['text'] ?? "No title",
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                fontSize: 14.sp,
-                              ),
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            SizedBox(height: 6.h),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      height(height: 6.h),
 
-                            // Movie Icon & "BIG TV" Text in One Line
-                            Row(
-                              children: [
-                                Icon(Icons.movie, color: Colors.white, size: 18.sp),
-                                SizedBox(width: 4.w),
-                                Text(
-                                  card['subtext'] ?? "No subtext",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w400,
-                                    color: Colors.white70,
-                                    fontSize: 13.sp,
+                      Row(
+                        children: [
+                          width(width: 10),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => InAppWebViewScreen(
+                                      webUrl: "https://www.youtube.com",
+                                      title: "Videos",
+                                    ),
+                                  ));
+                            },
+                            child: SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                child: CachedNetworkImage(
+                                  imageUrl: widget.card.publisherImage,
+                                  fit: BoxFit.fill,
+                                  placeholder: (context, url) => Container(
+                                    color: AppColors.borderColor.withOpacity(.2),
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
+                                  errorWidget: (context, url, error) => Center(
+                                    child: Icon(
+                                      Icons.image,
+                                      size: 30,
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                    ),
+                          ),
+                          width(width: 6.h),
+                          Text(
+                            widget.card.publisher,
+                            style: fontStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Spacer(),
+                          BottomActions(
+                            postType: "",
+                            icon: "assets/svg/share.svg",
+                            label: 'షేర్',
+                            iconColor: Colors.white,
+                            onTap: () async {
+                              SharedPreferences sp = await SharedPreferences.getInstance();
+                              String? userId = sp.getString("userId");
+                              String? deviceId = sp.getString("deviceId");
+                              EventRepo().sendEvent({
+                                "key": "share_via_articles",
+                                "data": {
+                                  "device_id": "$deviceId",
+                                  "userId": userId ?? "",
+                                  "postId": widget.card.id.toString(),
+                                  "isWhatAppShare": false,
+                                }
+                              });
 
-                    // Bookmark Icon (Top-Right)
-                    Positioned(
-                      top: 8.w,
-                      right: 8.w,
-                      child: Container(
-                        height: 30.w,
-                        width: 30.w,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.8),
-                          borderRadius: BorderRadius.circular(15.r), // Fully curved
-                        ),
-                        child: Icon(Icons.bookmark_border, color: Colors.white, size: 20.sp),
-                      ),
-                    ),
+                              sendShareDetails(userId, widget.card.id, widget.card.content.toString());
 
-                    // More Icon (Bottom-Right)
-                    Positioned(
-                      bottom: 8.h,
-                      right: 8.w,
-                      child: Icon(Icons.more_vert, color: Colors.white),
-                    ),
-                  ],
+                              try {
+                                final image = await screenshotController.capture(
+                                  pixelRatio: 2,
+                                );
+                                if (image != null) {
+                                  final directory = await getTemporaryDirectory();
+                                  final imagePath = '${directory.path}/${widget.card.id}.png';
+                                  final imageFile = File(imagePath);
+                                  await imageFile.writeAsBytes(image);
+
+                                  Share.shareXFiles([XFile(imageFile.path)], text: widget.card.videoUrl);
+                                } else {
+                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                }
+                              } catch (e) {
+                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            );
-          },
+
+              // Bookmark Icon (Top-Right)
+              Positioned(
+                top: 8.w,
+                right: 8.w,
+                child: InkWell(
+                  onTap: () {
+                    context.read<SettingsProvider>().saveBookmarks(
+                      widget.card.id.toString(),
+                    );
+                  },
+                  child: Container(
+                    height: 30.w,
+                    width: 30.w,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(15.r), // Fully curved
+                    ),
+                    child: Icon(Icons.bookmark_border, color: Colors.white, size: 20.sp),
+                  ),
+                ),
+              ),
+
+
+            ],
+          ),
         ),
       ),
     );

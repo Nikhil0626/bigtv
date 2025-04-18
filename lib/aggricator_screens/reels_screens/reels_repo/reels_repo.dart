@@ -8,6 +8,12 @@ import '../../../utils/app_enums.dart';
 
 class ReelsRepo  extends BaseService{
 
+  Future getAllReels() async {
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.getAllReels, method: RequestType.get);
+    return response;
+  }
+
   Future getMainReels() async {
     Response response = await makeRequest(baseUrl: BaseUrls.ePaperBaseUrlAws,
       url: BaseUrls.getMainEPapers, method: RequestType.get);

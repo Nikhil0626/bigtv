@@ -396,7 +396,7 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                                 }
                                               });
                                               log("Comment --- ${context.read<AuthProvider>().loginType}");
-                                              showComments(context, article);
+                                              showComments(context, article['id']);
                                               EventRepo().sendEvent({
                                                 "key": "comments",
                                                 "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}

@@ -207,7 +207,7 @@ class ArticlePageState extends State<ArticlePage> {
                                     }
                                   });
                                   log("Comment --- ${context.read<AuthProvider>().loginType}");
-                                  showComments(context, widget.article);
+                                  showComments(context, widget.article['id']);
                                   EventRepo().sendEvent({
                                     "key": "comments",
                                     "data": {

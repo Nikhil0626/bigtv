@@ -174,7 +174,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                             }
                           });
                           log("Comment --- ${context.read<AuthProvider>().loginType}");
-                          showComments(context, widget.articalData);
+                          showComments(context, widget.articalData['id']);
                           EventRepo().sendEvent({
                             "key": "comments",
                             "data": {"deviceId": deviceId, "openTime": DateTime.now().toString()}

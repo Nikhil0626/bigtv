@@ -551,7 +551,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                             }
                           });
                           log("Comment --- ${context.read<AuthProvider>().loginType}");
-                          showComments(context, widget.article);
+                          showComments(context, widget.article['id']);
                           EventRepo().sendEvent({
                             "key": "comments",
                             "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}
