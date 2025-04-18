@@ -179,7 +179,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
         ),
         Positioned(
           right: 10,
-          bottom: 70,
+          bottom: 100,
           child: Column(
             children: [
               BottomActions(
@@ -268,84 +268,88 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           bottom: 60,
           left: 0,
           right: 0,
-          child: Container(
-            padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [
-                  Colors.black.withOpacity(0.7),
-                  Colors.transparent,
-                ],
+          child: Padding(
+            padding: const EdgeInsets.only(right: 60.0),
+            child: Container(
+              padding: EdgeInsets.only(right: 12.w,left: 12.w),
+              width: MediaQuery.of(context).size.width-100,
+              decoration: BoxDecoration(
+                // gradient: LinearGradient(
+                //   begin: Alignment.bottomCenter,
+                //   end: Alignment.topCenter,
+                //   colors: [
+                //     Colors.black.withOpacity(0.7),
+                //     Colors.transparent,
+                //   ],
+                // ),
               ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Title (Main Text)
-                Text(
-                  widget.reelCard.title ?? "No title",
-                  style: newAppFont(
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    fontSize: 14.sp,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Title (Main Text)
+                  Text(
+                    widget.reelCard.title ?? "No title",
+                    style: newAppFont(
+                      fontWeight: FontWeight.w400,
+                      color: Colors.white,
+                      fontSize: 12.sp,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                height(height: 20.h),
+                  height(height: 10.h),
 
-                Row(
-                  children: [
-                    width(width: 10),
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => InAppWebViewScreen(
-                                webUrl: "https://www.youtube.com",
-                                title: "Videos",
+                  Row(
+                    children: [
+                      width(width: 10),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => InAppWebViewScreen(
+                                  webUrl: "https://www.youtube.com",
+                                  title: "Videos",
+                                ),
+                              ));
+                        },
+                        child: SizedBox(
+                          height: 30,
+                          width: 30,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                            child: CachedNetworkImage(
+                              imageUrl: widget.reelCard.publisherImage,
+                              fit: BoxFit.fill,
+                              placeholder: (context, url) => Container(
+                                color: AppColors.borderColor.withOpacity(.2),
                               ),
-                            ));
-                      },
-                      child: SizedBox(
-                        height: 50,
-                        width: 50,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(8)),
-                          child: CachedNetworkImage(
-                            imageUrl: widget.reelCard.publisherImage,
-                            fit: BoxFit.fill,
-                            placeholder: (context, url) => Container(
-                              color: AppColors.borderColor.withOpacity(.2),
-                            ),
-                            errorWidget: (context, url, error) => Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 30,
-                                color: Colors.grey.shade300,
+                              errorWidget: (context, url, error) => Center(
+                                child: Icon(
+                                  Icons.image,
+                                  size: 30,
+                                  color: Colors.grey.shade300,
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    width(width: 6.h),
-                    Text(
-                      widget.reelCard.publisher,
-                      style: fontStyle(
-                        color: Colors.white,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
+                      width(width: 6.h),
+                      Text(
+                        widget.reelCard.publisher,
+                        style: fontStyle(
+                          color: Colors.white,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
-                    ),
-                    Spacer(),
-                  ],
-                ),
-              ],
+                      Spacer(),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
