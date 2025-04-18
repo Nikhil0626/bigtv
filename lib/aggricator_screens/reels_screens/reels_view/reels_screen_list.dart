@@ -16,7 +16,6 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
   @override
   void initState() {
     super.initState();
-    // Fetch reels data when the widget is first created
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ReelsProviders>().getReels();
     });
@@ -24,7 +23,6 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
 
   @override
   Widget build(BuildContext context) {
-    // Access the reels data from the provider
     final reelsDataList = context.watch<ReelsProviders>().reelsDataList;
 
     return Scaffold(
@@ -45,7 +43,6 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
             final card = reelsDataList[index];
             return GestureDetector(
               onTap: () {
-                // Navigate to ReelPreviewScreen with the selected index
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -56,10 +53,9 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
                 );
               },
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16.r), // Fully rounded card
+                borderRadius: BorderRadius.circular(16.r),
                 child: Stack(
                   children: [
-                    // Thumbnail Image with Rounded Corners
                     CachedNetworkImage(
                       imageUrl: card['thumbnailUrl'] ?? '',
                       fit: BoxFit.cover, // Ensure image fills the card
@@ -70,7 +66,7 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
                       errorWidget: (context, url, error) =>
                           Icon(Icons.error, color: Colors.red),
                     ),
-                    // Dark Gradient Overlay at Bottom for better text visibility
+
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -104,15 +100,14 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
                             ),
                             SizedBox(height: 1.h),
 
-                            // Movie Icon & Publisher Text in One Line
+
                             Row(
                               children: [
-                                // Icon(Icons.movie, color: Colors.white, size: 18.sp),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: CircleAvatar(
                                     backgroundImage: NetworkImage(card['publisherImage']??''),
-                                    radius: 10, // Set the size of the image
+                                    radius: 10,
                                   ),
                                 ),
                                 SizedBox(width: 4.w),
@@ -133,7 +128,6 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
                       ),
                     ),
 
-                    // Bookmark Icon (Top-Right)
                     Positioned(
                       top: 8.w,
                       right: 8.w,
@@ -148,7 +142,6 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
                       ),
                     ),
 
-                    // More Icon (Bottom-Right)
                     Positioned(
                       bottom: 8.h,
                       right: 8.w,

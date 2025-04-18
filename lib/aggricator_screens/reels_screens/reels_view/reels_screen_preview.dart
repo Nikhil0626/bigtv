@@ -22,31 +22,28 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
 
-    // Initialize ReelsProvider and fetch data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<ReelsProviders>().getReels();
     });
   }
 
-  /// Helper method to construct the full YouTube URL
   String _constructYoutubeUrl(String videoId) {
     return 'https://www.youtube.com/watch?v=$videoId';
   }
 
   @override
   Widget build(BuildContext context) {
-    // Access the reels data list
     final reelsDataList = context.watch<ReelsProviders>().reelsDataList;
 
-    // Initialize controllers when data is available
+
     if (reelsDataList.isNotEmpty && _controllers.length != reelsDataList.length) {
       _controllers = reelsDataList.map((reel) {
-        final videoId = reel['videoUrl']; // Get videoId from API
-        final fullUrl = _constructYoutubeUrl(videoId); // Construct full URL (optional)
-        print("Playing video: $fullUrl"); // Debug log full URL
+        final videoId = reel['videoUrl'];
+        final fullUrl = _constructYoutubeUrl(videoId);
+        print("Playing video: $fullUrl");
 
         return YoutubePlayerController(
-          initialVideoId: videoId, // Use videoId directly for the player
+          initialVideoId: videoId,
           flags: const YoutubePlayerFlags(
             autoPlay: true,
             mute: false,

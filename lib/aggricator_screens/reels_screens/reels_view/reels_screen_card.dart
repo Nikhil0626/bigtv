@@ -3,7 +3,7 @@ import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../reels_provider/reels_providers.dart'; // Import your provider
+import '../reels_provider/reels_providers.dart';
 
 class ReelsScreen extends StatefulWidget {
   @override
@@ -18,20 +18,18 @@ class _ReelsScreenState extends State<ReelsScreen> {
   void initState() {
     super.initState();
     _controller = YoutubePlayerController(
-      initialVideoId: '', // Initially empty, we'll load the video later
+      initialVideoId: '',
       flags: YoutubePlayerFlags(autoPlay: true, mute: false),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // Access the reels data from the provider
     final reelsDataList = context.watch<ReelsProviders>().reelsDataList;
 
-    // Check if reelsDataList is null or empty
     if (reelsDataList == null || reelsDataList.isEmpty) {
       return Scaffold(
-        body: Center(child: CircularProgressIndicator()), // Show loading indicator
+        body: Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -92,12 +90,12 @@ class ReelCard extends StatelessWidget {
           Column(
             children: [
               Padding(
-                padding: const EdgeInsets.all(10.0), // Add padding around the container
+                padding: const EdgeInsets.all(10.0),
                 child: Container(
                   width: double.infinity, // Full width
                   height: 400.h, // Set a fixed height
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12), // Rounded corners
+                    borderRadius: BorderRadius.circular(12),
                     image: DecorationImage(
                       image: NetworkImage(thumbnailUrl),
                       fit: BoxFit.cover, // Cover the container
@@ -111,7 +109,7 @@ class ReelCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       backgroundImage: NetworkImage(publisherImage),
-                      radius: 20, // Adjusted size of the CircleAvatar
+                      radius: 20, 
                     ),
                     SizedBox(width: 8.w),
                     Expanded(
