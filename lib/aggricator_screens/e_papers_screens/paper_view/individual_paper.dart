@@ -2,12 +2,12 @@ import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_preview.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
-import '../../../services/base_urls.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
@@ -27,6 +27,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
   @override
   void initState() {
 
+    context.read<EPapersProvider>().getSinglePapersList = [];
     context.read<EPapersProvider>().getSingleEPapers(widget.paper);
     super.initState();
   }
@@ -46,6 +47,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
                 },
                 child: Row(
                   children: [
+                    width(width: 20),
                     Icon(
                       Icons.arrow_back_outlined,
                       size: 24,
@@ -53,13 +55,13 @@ class _IndividualPaperState extends State<IndividualPaper> {
                     width(width: 20),
                     Text(
                       widget.paper,
-                      style: newAppFont(fontSize: 16),
+                      style: newAppFont(fontSize: 16,fontWeight: FontWeight.w600),
                     )
                   ],
                 ),
               ),
               Expanded(
-                child: ListView.builder(
+                child:ePapersProvider.isMainPapers?AppLoadingScreen(): ListView.builder(
                   itemCount: ePapersProvider.getSinglePapersList.length,
                   itemBuilder: (context, index) {
                     return InkWell(

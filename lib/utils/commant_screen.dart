@@ -52,7 +52,7 @@ class _CommentSectionState extends State<CommentSection> {
 
   @override
   void initState() {
-    context.read<NewsPostsProvider>().getAllComments(widget.postId['id'].toString());
+    context.read<NewsPostsProvider>().getAllComments(widget.postId.toString());
     super.initState();
   }
 
@@ -276,7 +276,7 @@ class _CommentSectionState extends State<CommentSection> {
                             } else {
                               newsPostsProvider
                                   .sendCommentsOnPost(
-                                      widget.postId['id'], controller.text)
+                                      widget.postId, controller.text)
                                   .then(
                                     (value) => controller.text = '',
                                   );

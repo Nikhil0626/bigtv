@@ -36,7 +36,7 @@ class EPapersProvider extends ChangeNotifier {
 
   Future getSingleEPapers(String paper) async {
     isMainPapers = true;
-
+    getSinglePapersList = [];
     try {
       Response response = await EPaperRepo().getSingleEPapers(paper);
       if (response.statusCode == 200) {

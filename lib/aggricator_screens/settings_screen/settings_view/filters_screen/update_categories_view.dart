@@ -7,8 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/app_colors.dart';
-import '../../utils/app_fonts.dart';
+import '../../../../utils/app_colors.dart';
+import '../../../../utils/app_fonts.dart';
+
 
 class UpdateCategoriesView extends StatefulWidget {
   const UpdateCategoriesView({super.key});

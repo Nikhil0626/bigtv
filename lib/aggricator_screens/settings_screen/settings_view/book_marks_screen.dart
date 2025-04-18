@@ -32,6 +32,7 @@ class _SavedArticlesState extends State<SavedArticles> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         leading: IconButton(
@@ -67,7 +68,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                       builder: (context) => PapersScreenPreview(
                                         postId: article.postId.toString(),
                                         name: "E-Paper",
-                                        imageUrls: [PageData(id: "${article.postId}", imageUrl: article.imageUrl.toString(), pageNumber: 1)],
+                                        imageUrls: [PageData(id: article.postId, imageUrl: article.imageUrl.toString(), pageNumber: 1)],
                                       ),
                                     ));
                               } else {
@@ -87,7 +88,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                 width: double.infinity,
                                 height: 120,
                                 decoration: BoxDecoration(
-                                  color: Colors.grey.shade300,
+                                  color:AppColors.cardBackgroundColor,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Padding(

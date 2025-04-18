@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/profile_provider.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'package:chotanews/screens/profile_screen/profile_screen.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
@@ -11,9 +11,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import '../../utils/app_colors.dart';
-import '../settings_screen/settings_provider/settings_provider.dart';
-import '../settings_screen/settings_view/settings_view.dart';
+import '../../../utils/app_colors.dart';
+import '../settings_provider/settings_provider.dart';
+import 'settings_view.dart';
 
 class ProfileView extends StatefulWidget {
   ProfileView({Key? key}) : super(key: key);
@@ -40,8 +40,10 @@ class _ProfileViewState extends State<ProfileView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
@@ -119,7 +121,7 @@ class _ProfileViewState extends State<ProfileView> {
                       controller: profileProvider.nameController,
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: AppColors.cardBackgroundColor,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10.r),
                           borderSide: BorderSide.none,
@@ -149,7 +151,7 @@ class _ProfileViewState extends State<ProfileView> {
                               labelText: "DD",
                               counterText: "",
                               filled: true,
-                              fillColor: Colors.white,
+                              fillColor: AppColors.cardBackgroundColor,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
                                 borderSide: BorderSide.none,
@@ -174,7 +176,7 @@ class _ProfileViewState extends State<ProfileView> {
                               labelText: "MM",
                               counterText: "",
                               filled: true,
-                              fillColor: Colors.white,
+                              fillColor: AppColors.cardBackgroundColor,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                                 borderSide: BorderSide.none,
@@ -199,7 +201,7 @@ class _ProfileViewState extends State<ProfileView> {
                               labelText: "YYYY",
                               counterText: "",
                               filled: true,
-                              fillColor: Colors.white,
+                              fillColor: AppColors.cardBackgroundColor,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10.r),
                                 borderSide: BorderSide.none,
@@ -219,43 +221,40 @@ class _ProfileViewState extends State<ProfileView> {
                             color: Colors.black87)),
                     height(height: 5.h),
                     Container(
-                      height: 50.h,
+                      height: 55.h,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(10.r),
                         // border: Border.all(color: Colors.grey.shade300),
-                        color: Colors.white,
+                        color:AppColors.cardBackgroundColor,
                       ),
                       child: Row(
                         children: [
-                          Padding(
-                            padding: EdgeInsets.all(2.0),
-                            child: Container(
-                              height: 38.h,
-                              width: 90.w,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(10.r),
-                                color: Colors.white,
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  SizedBox(
-                                    height: 18.h,
-                                    width: 24.w,
-                                    child: SvgPicture.asset(
-                                        'assets/svg/indianFlag.svg',
-                                        fit: BoxFit.contain),
-                                  ),
-                                  width(width: 4.w),
-                                  Text("+91",
-                                      style: newAppFont(
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.bold)),
-                                  width(width: 2),
-                                  Icon(Icons.keyboard_arrow_down_outlined,
-                                      size: 26),
-                                ],
-                              ),
+                          Container(
+                            height: 38.h,
+                            width: 90.w,
+                            margin: EdgeInsets.symmetric(horizontal: 10),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10.r),
+                              color: Colors.white,
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+
+                                SizedBox(
+                                  height: 18.h,
+                                  width: 24.w,
+                                  child: SvgPicture.asset(
+                                      'assets/svg/indianFlag.svg',
+                                      fit: BoxFit.contain),
+                                ),
+                                width(width: 4.w),
+                                Text("+91",
+                                    style: newAppFont(
+                                        fontSize: 16.sp,
+                                        fontWeight: FontWeight.bold)),
+
+                              ],
                             ),
                           ),
                           Expanded(
@@ -268,7 +267,7 @@ class _ProfileViewState extends State<ProfileView> {
                                 border: InputBorder.none,
                                 counterText: "",
                                 hintText: "",
-                                fillColor: Colors.white,
+                                fillColor: AppColors.cardBackgroundColor,
                                 contentPadding: EdgeInsets.symmetric(
                                     vertical: 18, horizontal: 10),
                               ),

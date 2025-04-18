@@ -1,36 +1,34 @@
 import 'dart:core';
 
 class BaseUrls {
-
   /// Dev Base Url
   //   static const String baseUrl = "https://chotanews-fdcscrezbfd4befm.z01.azurefd.net/api";
   static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
 
   static const String baseUrlAws = "https://prodchotanews.signitivessoft.com/api";
 
-
-
   /// event states
-   static const String eventUrl = "/logs";
-///ENewsPapers
+  static const String eventUrl = "/logs";
+
+  ///ENewsPapers
   static const String getMainEPapers = "/enewspaper/first_pages";
   static const String getSingleEPapers = "/enewspapers";
 
-/// all posts
+  /// Reels Apis
+  static const String getAllReels = "/reels";
+  /// all posts
   static const String getNews = "/allposts";
   static const String getPostById = "/post";
   static const String getAllDistricts = "/user";
 
-  static const String updateDistricts ="/upsert/location";
+  static const String updateDistricts = "/upsert/location";
 
   static const String getAllVideos = "/menuposts";
   static const String appMenu = "/app/menu";
 
-
   ///Add Comment
   static const String addComment = "/addcomment";
-  static const String commentGet ="/post/";
-
+  static const String commentGet = "/post/";
 
   ///getUserDetail
   static const String userInfo = "/userinfo";
@@ -41,9 +39,8 @@ class BaseUrls {
 
   ///Auth Apis
   static const String sendOtp = "/generateOtp";
-  static const String sendCode= "/validateReferalCode";
+  static const String sendCode = "/validateReferalCode";
   static const String validateOtp = "/validateOtp";
-
 
   ///Web Pages
   static const String aboutPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/About+5.html";
@@ -52,13 +49,11 @@ class BaseUrls {
   static const String termsPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Terms%26Conditions+1.html";
   static const String privacyPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Privacy+5.html";
 
+  ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
-///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
-
-/// Python apis
+  /// Python apis
   static const String ePaperBaseUrlAws = "http://3.108.235.31:8000";
   static const String baseUrlAwsDev = "http://13.232.241.147:8000";
-
 
   ///Login login
   static const String sendOtpPy = "/send-otp";
@@ -76,7 +71,7 @@ class BaseUrls {
   static const String getAllCategories = "/categories";
 
   ///Location Apis
-  static const String getAllLocation= "/locations";
+  static const String getAllLocation = "/locations";
 
   ///profile Apis
   static const String updateProfile = "/";
@@ -84,16 +79,12 @@ class BaseUrls {
   ///Bookmarks Apis
   static const String getAllBookMarks = "/bookmark";
 
-
   ///Comments Apis
-  static const String getAllComments= "/comments";
+  static const String getAllComments = "/comments";
 
   ///Like Apis
   static const String like = "/like";
 
   ///Update profile
   static const String getProfile = "/profile";
-
-  ///Reels
-  static const String getReels = '/reels';
 }

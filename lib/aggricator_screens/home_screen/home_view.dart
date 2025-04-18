@@ -72,6 +72,7 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
       return Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           automaticallyImplyLeading: false, // Removes back arrow
           backgroundColor: Colors.white,
@@ -172,6 +173,7 @@ class _HomeViewState extends State<HomeView> {
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
+          backgroundColor: Colors.white,
           type: BottomNavigationBarType.fixed,
           //
           currentIndex: homeProvider.selectedIndex,

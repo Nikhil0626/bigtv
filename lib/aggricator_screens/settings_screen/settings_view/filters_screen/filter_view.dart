@@ -1,5 +1,6 @@
-import 'package:chotanews/aggricator_screens/filters_screen/update_categories_view.dart';
-import 'package:chotanews/aggricator_screens/filters_screen/update_regions_view.dart';
+
+import 'package:chotanews/aggricator_screens/settings_screen/settings_view/filters_screen/update_categories_view.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_view/filters_screen/update_regions_view.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 

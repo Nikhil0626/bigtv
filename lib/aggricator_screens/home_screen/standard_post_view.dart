@@ -200,7 +200,7 @@ class _StandardCardState extends State<StandardCard> {
                               "postId": widget.getAllPostList['id'].toString(),
                             }
                           });
-                          showComments(context, widget.getAllPostList);
+                          showComments(context, widget.getAllPostList['id']);
                           EventRepo().sendEvent({
                             "key": "comments",
                             "data": {"deviceId": deviceId, "openTime": DateTime.now().toString()}
@@ -268,14 +268,6 @@ class _StandardCardState extends State<StandardCard> {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
-                // boxShadow: [
-                //   BoxShadow(
-                //     color: Colors.black.withOpacity(0.2), // Shadow color
-                //     blurRadius: 6, // Softness of the shadow
-                //     spreadRadius: 2, // How far the shadow spreads
-                //     offset: Offset(0, 1), // Offset (x, y)
-                //   ),
-                // ],
               ),
               child: Center(
                 child: Text.rich(

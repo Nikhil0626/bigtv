@@ -87,7 +87,6 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
                   padding: widget.isList ? const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16) : const EdgeInsets.all(0.0),
                   child: ClipRRect(
                     child: Container(
-
                       decoration: BoxDecoration(
                         color: widget.isList ? Colors.white : AppColors.cardBackgroundColor,
                         borderRadius: BorderRadius.circular(8),

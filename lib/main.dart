@@ -27,7 +27,7 @@ import 'aggricator_screens/home_screen/news_posts_provider.dart';
 import 'aggricator_screens/individual_post_details/individual_post_view.dart';
 import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
-import 'aggricator_screens/settings_screen/settings_repository/profile_provider.dart';
+import 'aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();

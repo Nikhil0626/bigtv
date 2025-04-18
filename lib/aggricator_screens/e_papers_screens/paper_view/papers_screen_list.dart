@@ -33,7 +33,7 @@ class PapersScreenList extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.all(Radius.circular(20)),
                       child: Container(
-                        color: AppColors.ePaperCardColor,
+                        color: AppColors.cardBackgroundColor,
                         height: 350.h,
                         child: Stack(
                           children: [
@@ -61,46 +61,59 @@ class PapersScreenList extends StatelessWidget {
                                   ),
                                 ),
                                 Container(
-                                  color:  AppColors.cardBackgroundColor,
-                                  height: 50.w,
+                                  padding: EdgeInsets.only(bottom: 6.h,top: 6.h),
+                                  decoration: BoxDecoration( color: AppColors.cardBackgroundColor,
+                                    borderRadius: BorderRadius.circular(12),),
                                   child: Row(
-                                    // mainAxisSize: MainAxisSize.min,
                                     children: [
+                                      width(width: 10),
                                       InkWell(
                                         onTap: (){Navigator.push(context, MaterialPageRoute(
                                           builder: (context) => InAppWebViewScreen(
                                             webUrl: ePapersProvider.getAllMainPapersList[index].sourceUrl.toString(),
-                                            title: "Advertise with us",
+                                            title: "E-Paper",
                                           ),
                                         ));
                                         },
-                                        child: Container(
-                                            height: 60.w,
-                                            width: 60.w,
-                                            decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(8),
-                                              color: AppColors.cardBackgroundColor,
-                                            ),
-                                            padding: const EdgeInsets.all(2),
-                                            child: Image.network(
-                                              ePapersProvider.getAllMainPapersList[index].logo.toString(),
-                                              height: 30,
-                                              width: 30,
+                                        child: SizedBox(
+                                            height: 50,
+                                            width: 50,
+
+                                            // padding: const EdgeInsets.all(2),
+                                            child: CachedNetworkImage(
+                                              imageUrl:  ePapersProvider.getAllMainPapersList[index].logo.toString(),
+                                              width: MediaQuery.of(context).size.width,
+                                              height: 300,
                                               fit: BoxFit.fill,
-                                            )),
-                                      ),
-                                      width(width: 10.w),
-                                      Expanded(
-                                        child: Text(
-                                          ePapersProvider.getAllMainPapersList[index].source.toString(),
-                                          style: newAppFont(
-                                            color: Colors.grey.shade700,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                              placeholder: (context, url) => Container(
+                                                color: AppColors.borderColor.withOpacity(.2),
+                                              ),
+                                              errorWidget: (context, url, error) => Center(
+                                                child: Icon(
+                                                  Icons.image,
+                                                  size: 100,
+                                                  color: Colors.grey.shade300,
+                                                ),
+                                              ),
+                                            ),
                                         ),
                                       ),
-                                      width(width: 16.w),
+                                      width(width: 6.h),
+                                      Text(
+                                        ePapersProvider.getAllMainPapersList[index].source,
+                                        style: newAppFont(
+                                          color: AppColors.bodyTextColor,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      // Spacer(),
+                                      // Icon(
+                                      //   Icons.ios_share,
+                                      //   color: Colors.grey.shade600,
+                                      //   size: 20,
+                                      // ),
+                                      width(width: 15.w),
                                     ],
                                   ),
                                 ),
