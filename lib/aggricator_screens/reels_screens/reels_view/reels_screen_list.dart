@@ -34,6 +34,7 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
   @override
   void initState() {
     if(context.read<ReelsProviders>().getAllReelsList.isEmpty){
+      context.read<ReelsProviders>().getAllReelsList = [];
       context.read<ReelsProviders>().getAllReels();
     }
     super.initState();
@@ -57,7 +58,7 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
               ),
               itemBuilder: (context, index) {
                 final card = reelsProviders.getAllReelsList[index];
-                return ReelsListViewCard(card: card, );
+                return ReelsListViewCard(card: card,index: index, );
               },
             ),
           );
@@ -70,7 +71,8 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
 
 class ReelsListViewCard extends StatefulWidget {
   final ReelsModel card;
-  const ReelsListViewCard({super.key,required this.card});
+  final int index;
+  const ReelsListViewCard({super.key,required this.card,required this.index});
 
   @override
   State<ReelsListViewCard> createState() => _ReelsListViewCardState();
@@ -89,7 +91,7 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
               context,
               MaterialPageRoute(
                 builder: (context) => ReelPreviewScreen(
-                  initialIndex: 0,
+                  initialIndex: widget.index,
                 ),
               ));
         },

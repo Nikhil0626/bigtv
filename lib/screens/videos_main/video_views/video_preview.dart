@@ -10,8 +10,9 @@ class VideoPreview extends StatefulWidget {
   final String imageUrl;
   final bool isVideoScreen;
   final bool isFoldable;
+  final String postId;
 
-  VideoPreview({super.key, required this.url, required this.imageUrl, this.isVideoScreen = false, this.isFoldable = false});
+  VideoPreview({super.key, required this.url, required this.imageUrl, this.isVideoScreen = false, this.isFoldable = false,this.postId = "0"});
 
   @override
   _VideoPreview createState() => _VideoPreview();
@@ -24,7 +25,8 @@ class _VideoPreview extends State<VideoPreview> {
   @override
   void initState() {
     super.initState();
-   context.read<HomeProvider>().youtubeInitial(widget.url);
+
+      context.read<HomeProvider>().youtubeInitial(widget.url);
 
   }
 

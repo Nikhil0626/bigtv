@@ -44,9 +44,6 @@ class _MainScreenCardState extends State<MainScreenCard> {
     context.read<HomeProvider>().getAllPostList = [];
     context.read<HomeProvider>().getAllAiTags();
     context.read<HomeProvider>().getAllPost();
-    context.read<AuthenticationProvider>().getAllCategories();
-    context.read<AuthenticationProvider>().getAllLocations();
-
     super.initState();
   }
 
@@ -183,7 +180,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                             ),
                                           ],
                                         ),
-                                        child: homeProvider.getAllPostList[index]['type'].toString() == "WebView"
+                                        child: homeProvider.isWebView==true
                                             ? Padding(
                                                 padding: const EdgeInsets.all(8.0),
                                                 child: InAppWebViewScreen(

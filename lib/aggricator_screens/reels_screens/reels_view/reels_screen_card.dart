@@ -41,6 +41,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
   @override
   void initState() {
     super.initState();
+    context.read<ReelsProviders>().getAllReelsList =[];
     context.read<ReelsProviders>().getAllReels();
   }
 
@@ -69,7 +70,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
                     numberOfCardsDisplayed: 4,
                     cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
                       final reel = reelsProvider.getAllReelsList[index];
-                      return EachReelCard(reel: reel, reelsProvider: reelsProvider);
+                      return EachReelCard(reel: reel, reelsProvider: reelsProvider,index:index);
                     },
                   );
       }),
@@ -80,8 +81,9 @@ class _ReelsScreenState extends State<ReelsScreen> {
 class EachReelCard extends StatefulWidget {
   final ReelsModel reel;
   final ReelsProviders reelsProvider;
+  final int index;
 
-  EachReelCard({super.key, required this.reel, required this.reelsProvider});
+  EachReelCard({super.key, required this.reel, required this.reelsProvider,required this.index});
 
   @override
   State<EachReelCard> createState() => _EachReelCardState();
@@ -97,7 +99,7 @@ class _EachReelCardState extends State<EachReelCard> {
     },
       child: InkWell(
         onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => ReelPreviewScreen(initialIndex: 0,),));
+          Navigator.push(context, MaterialPageRoute(builder: (context) => ReelPreviewScreen(initialIndex: widget.index,),));
         },
         child: Screenshot(
           controller: sc,

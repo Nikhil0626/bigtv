@@ -4,6 +4,7 @@ import 'package:chotanews/aggricator_screens/reels_screens/reels_repo/reels_repo
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../services/webengage_event_tracks.dart';
@@ -14,7 +15,13 @@ class ReelsProviders extends ChangeNotifier {
   bool reelsLoading = false;
   List<ReelsModel> getAllReelsList = [];
   List<String> isLikeList = [];
+  bool isMuted = false;
+  late YoutubePlayerController controller;
 
+  void toggleMute() {
+    isMuted = !isMuted;
+    notifyListeners();
+  }
 
   Future getAllReels() async {
     reelsLoading = true;
@@ -22,9 +29,13 @@ class ReelsProviders extends ChangeNotifier {
     try {
       Response response = await ReelsRepo().getAllReels();
 
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         List data = response.data['data'];
-        getAllReelsList = data.map((e) => ReelsModel.fromJson(e),).toList();
+        getAllReelsList = data
+            .map(
+              (e) => ReelsModel.fromJson(e),
+            )
+            .toList();
       }
     } on DioException catch (e, st) {
       log("dio error --- ${e.toString()} ---- ${st.toString()}");
@@ -35,7 +46,6 @@ class ReelsProviders extends ChangeNotifier {
       notifyListeners();
     }
   }
-
 
   void isLikePost(val) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -77,6 +87,41 @@ class ReelsProviders extends ChangeNotifier {
     } catch (e) {
       log("Error: $e");
     } finally {
+      notifyListeners();
+    }
+  }
+
+  late ReelsModel reelData;
+
+  bool isReelDataLoading = false;
+
+  Future getIndividualReelData(String postId) async {
+    isReelDataLoading = true;
+    try {
+      Map<String, dynamic> body = {"id": postId};
+      Response response = await ReelsRepo().getSingleReelData(body);
+      if (response.statusCode == 200) {
+        reelData = ReelsModel.fromJson(response.data['data']);
+        controller = YoutubePlayerController(
+          initialVideoId: YoutubePlayer.convertUrlToId(response.data['data']['videoUrl'])!,
+          flags: const YoutubePlayerFlags(
+            autoPlay: true,
+            mute: false,
+            forceHD: true,
+            loop: false,
+            disableDragSeek: true,
+            enableCaption: false,
+            controlsVisibleAtStart: true,
+          ),
+        );
+        notifyListeners();
+      }
+    } on DioException catch (e, st) {
+      log("Dio Exception -- ${e.toString()}/// ${st.toString()}");
+    } catch (e, st) {
+      log("Catch Exception -- ${e.toString()}/// ${st.toString()}");
+    } finally {
+    isReelDataLoading = false;
       notifyListeners();
     }
   }
