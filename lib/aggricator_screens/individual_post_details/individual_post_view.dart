@@ -40,7 +40,7 @@ import '../settings_screen/settings_provider/settings_provider.dart';
 class IndividualPostView extends StatefulWidget {
   final String postId;
 final bool isComeFrom;
-  const IndividualPostView({super.key, required this.postId,this.isComeFrom = false});
+  const IndividualPostView({super.key, required this.postId,this.isComeFrom = true});
 
   @override
   State<IndividualPostView> createState() => _IndividualPostViewState();
@@ -155,6 +155,29 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                                                     ),
                                                                   ),
                                                                 ),
+                                                        ),
+                                                        Positioned(
+                                                          top: 20,
+                                                          right: 20,
+                                                          child: GestureDetector(
+                                                            onTap: () {
+                                                              context.read<SettingsProvider>().saveBookmarks(
+                                                                widget.postId.toString(),
+                                                              );
+                                                            },
+                                                            child: Container(
+                                                              padding: EdgeInsets.all(7),
+                                                              decoration: BoxDecoration(
+                                                                color: Colors.black54,
+                                                                shape: BoxShape.circle,
+                                                              ),
+                                                              child: Icon(
+                                                                Icons.bookmark_outline,
+                                                                color: Colors.white,
+                                                                size: 25,
+                                                              ),
+                                                            ),
+                                                          ),
                                                         ),
                                                         Positioned(
                                                           bottom: 0,
