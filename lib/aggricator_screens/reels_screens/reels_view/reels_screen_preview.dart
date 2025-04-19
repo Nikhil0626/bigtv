@@ -7,6 +7,7 @@ import 'package:chotanews/aggricator_screens/reels_screens/reels_models/reels_mo
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -23,6 +24,7 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
+import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../reels_provider/reels_providers.dart';
 
 class ReelPreviewScreen extends StatefulWidget {
@@ -42,7 +44,7 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
 
-    final reelsList = context.read<ReelsProviders>().getAllReelsList;
+    final reelsList  = context.read<ReelsProviders>().getAllReelsList;
 
     _controllers = List.generate(
       reelsList.length,
@@ -136,6 +138,7 @@ class ReelsCardView extends StatefulWidget {
   final ReelsModel reelCard;
   const ReelsCardView({super.key,required this.youtubePlayerController,required this.reelCard});
 
+
   @override
   State<ReelsCardView> createState() => _ReelsCardViewState();
 }
@@ -170,10 +173,54 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                       homeProvider.toggleMute(); // Update your isMuted state
                       },
                     ),// ✅ Show remaining time
-
                   ],
                 );
               }
+            ),
+          ),
+        ),
+
+        Positioned(
+          top: 50,
+          right: 14,
+          child: GestureDetector(
+            onTap: () {
+              context.read<SettingsProvider>().saveBookmarks(
+                widget.reelCard.id.toString(),
+              );
+            },
+            child: Container(
+              padding: EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.bookmark_outline,
+                color: Colors.white,
+                size: 30,
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          top: 50,
+          left: 14,
+          child: GestureDetector(
+            onTap: (){
+              Navigator.pop(context);
+            },
+            child: Container(
+              padding: EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_back, // Back icon
+                color: Colors.white,
+                size: 24,
+              ),
             ),
           ),
         ),

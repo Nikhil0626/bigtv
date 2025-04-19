@@ -45,6 +45,8 @@ class _MainScreenCardState extends State<MainScreenCard> {
     context.read<HomeProvider>().getAllAiTags();
     context.read<HomeProvider>().getAllPost();
     context.read<AuthenticationProvider>().getAllCategories();
+    context.read<AuthenticationProvider>().getAllLocations();
+
     super.initState();
   }
 
