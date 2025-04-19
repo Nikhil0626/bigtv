@@ -33,6 +33,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
 
   @override
   void initState() {
+    context.read<EPapersProvider>().getAllMainPapersList=[];
     context.read<EPapersProvider>().getMainEPapers();
     super.initState();
   }

@@ -23,6 +23,7 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
+import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../reels_provider/reels_providers.dart';
 
 class ReelPreviewScreen extends StatefulWidget {
@@ -352,6 +353,51 @@ class _ReelsCardViewState extends State<ReelsCardView> {
               ),
             ),
           ),
+        ),
+        Positioned(
+          top: 50,
+          left: 20,
+          right: 20,
+          child: Row(children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Container(
+                padding: EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+            Spacer(),
+            GestureDetector(
+              onTap: () {
+                context.read<SettingsProvider>().saveBookmarks(
+                 widget.reelCard.id.toString(),
+                );
+                print("");
+              },
+              child: Container(
+                padding: EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.bookmark_outline,
+                  color: Colors.white,
+                  size: 20,
+                ),
+              ),
+            ),
+          ],),
         ),
       ],
     );

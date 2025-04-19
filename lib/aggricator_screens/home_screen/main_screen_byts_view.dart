@@ -61,7 +61,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           Expanded(
             child: Screenshot(
               controller: adsScreenshotController,
-              child: widget.article['type'] == "WebView"
+              child: context.read<HomeProvider>().isWebView==true
                   ? Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: InAppWebViewScreen(

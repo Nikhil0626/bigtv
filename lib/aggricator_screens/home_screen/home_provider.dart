@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/home_screen/home_repo.dart';
+import 'package:chotanews/aggricator_screens/reels_screens/reels_repo/reels_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -49,17 +50,18 @@ class HomeProvider extends ChangeNotifier {
     isPlaying = value;
     notifyListeners();
   }
- void toggleMute() {
+
+  void toggleMute() {
     isMuted = !isMuted;
     notifyListeners();
   }
 
-
-  void currentAiPostId(value){
+  void currentAiPostId(value) {
     aiCurrentPostId = value;
     notifyListeners();
   }
-  void youtubeInitial(url){
+
+  void youtubeInitial(url) {
     controller = YoutubePlayerController(
       initialVideoId: url, // Example YouTube video ID
       flags: const YoutubePlayerFlags(
@@ -76,7 +78,8 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void youtubeDispose(){
+
+  void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
     controller.dispose();
     notifyListeners();
@@ -84,11 +87,11 @@ class HomeProvider extends ChangeNotifier {
 
   Future getIndividualPost(postId) async {
     isPostLoading = true;
-    getSinglePostList ={};
+    getSinglePostList = {};
     try {
       Response response = await HomeRepo().getSinglePost(postId);
       log(response.data.toString());
-      getSinglePostList =response.data['data'];
+      getSinglePostList = response.data['data'];
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -151,10 +154,9 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPostsByAiId(postId) async {
-    getAllAiTagsPostList=[];
+    getAllAiTagsPostList = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
-
 
     Map<String, dynamic> body = {
       "deviceid": deviceId,
@@ -168,7 +170,6 @@ class HomeProvider extends ChangeNotifier {
       List data = response.data;
 
       getAllAiTagsPostList.addAll(data);
-
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -182,7 +183,6 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllAiTags() async {
-
     // isHomeLoading = true;
     try {
       Response response = await HomeRepo().getAllAiTags();

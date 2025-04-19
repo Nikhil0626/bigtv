@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_models/single_paper_model.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:chotanews/screens/videos_main/video_views/video_preview.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';
@@ -14,6 +15,7 @@ import 'package:provider/provider.dart';
 import '../../../utils/app_colors.dart';
 import '../../e_papers_screens/paper_view/papers_screen_preview.dart';
 import '../../individual_post_details/individual_post_view.dart';
+import '../../reels_screens/reels_view/individule_reel_post.dart';
 
 class SavedArticles extends StatefulWidget {
   const SavedArticles({super.key});
@@ -61,7 +63,13 @@ class _SavedArticlesState extends State<SavedArticles> {
 
                           return InkWell(
                             onTap: () {
-                              if (article.type.toString() == "Epapers") {
+                              if (article.type.toString() == "Reels") {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ReelsCardView(postId:article.postId.toString() ,)
+                                    ));
+                              }else if (article.type.toString() == "Epapers") {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(

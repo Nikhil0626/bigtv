@@ -1,21 +1,20 @@
 import 'dart:io';
+import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../globel_keys/global_variables_data.dart';
-import '../../../screens/home_screen/home_provider/provider.dart';
 import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
-import '../../../utils/app_toasts.dart';
 import '../../home_screen/news_posts_provider.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/single_paper_model.dart';
@@ -32,7 +31,7 @@ class PapersScreenPreview extends StatefulWidget {
 }
 
 class _PapersScreenPreviewState extends State<PapersScreenPreview> {
-  final ScreenshotController adsScreenshotController = ScreenshotController();
+  final GlobalKey _repaintKey = GlobalKey();
   final PageController _pageController = PageController();
   List<TransformationController> _controllers = [];
   bool _isZoomed = false;
@@ -141,17 +140,36 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                   minScale: 1.0,
                                   maxScale: 10.0,
                                   panEnabled: true,
-                                  child: SizedBox(
-                                    width: MediaQuery.of(context).size.width,
-                                    height: MediaQuery.of(context).size.height,
-                                    child: CachedNetworkImage(
-                                      imageUrl: imageUrl.toString(),
-                                      fit: BoxFit.fill,
-                                      placeholder: (context, url) => Container(
-                                        color: AppColors.borderColor.withOpacity(.2),
+                                  child: RepaintBoundary(
+                                    key: _repaintKey,
+                                    child: SizedBox(
+                                      width: MediaQuery.of(context).size.width,
+                                      height: MediaQuery.of(context).size.height,
+                                      child: Image.network(
+                                       imageUrl.toString(),
+                                        fit: BoxFit.fill, // Adjust for better fit
+                                        width: MediaQuery.of(context).size.width,
+                                        height: MediaQuery.of(context).size.height,
+                                        loadingBuilder: (context, child, loadingProgress) {
+                                          if (loadingProgress == null) return child;
+                                          return Center(
+                                            child: CircularProgressIndicator(
+                                              value: loadingProgress.expectedTotalBytes != null
+                                                  ? loadingProgress.cumulativeBytesLoaded /
+                                                  (loadingProgress.expectedTotalBytes ?? 1)
+                                                  : null,
+                                            ),
+                                          );
+                                        },
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return const Center(
+                                            child: Text(
+                                              'Failed to load image',
+                                              style: TextStyle(color: Colors.white),
+                                            ),
+                                          );
+                                        },
                                       ),
-                                      errorWidget: (context, url, error) =>
-                                          Center(child: Icon(Icons.image, size: 100, color: Colors.grey.shade300)),
                                     ),
                                   ),
                                 );
@@ -215,18 +233,21 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                 sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex].id, "");
 
                                 try {
-                                  final image = await adsScreenshotController.capture(pixelRatio: 2.0);
-                                  if (image != null) {
-                                    final dir = await getTemporaryDirectory();
-                                    final path = '${dir.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id}.png';
-                                    final file = File(path);
-                                    await file.writeAsBytes(image);
-                                    Share.shareXFiles([XFile(file.path)], text: "${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}");
-                                  } else {
-                                    CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                  }
+                                  RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+                                  var image = await boundary.toImage(pixelRatio: 2.0);
+                                  ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+                                  Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+                                  final directory = await getTemporaryDirectory();
+                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()}.png');
+                                  await imagePath.writeAsBytes(pngBytes);
+
+                                  await Share.shareXFiles(
+                                    [XFile(imagePath.path)],
+                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}',
+                                  );
                                 } catch (e) {
-                                  CustomToast.showErrorToast(msg: "Screenshot error.");
+                                  print("Error capturing image: $e");
                                 }
                               },
                               child: Container(
