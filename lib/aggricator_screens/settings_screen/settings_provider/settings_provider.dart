@@ -116,17 +116,18 @@ class SettingsProvider extends ChangeNotifier {
     feedbackController.text = '';
     isFeedbackLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    // String? deviceId = preferences.getString("deviceId");
+    String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
       "user_id": userId,
+      "device_id": deviceId,
+
     };
 
     try {
       Response response = await SettingsRepo().getFeedBack(body);
       if (response.statusCode == 200) {
         feedbackList.addAll(response.data['feedback_options']);
-
 
         log("Like posted successfully: ${response.data}");
       } else {
