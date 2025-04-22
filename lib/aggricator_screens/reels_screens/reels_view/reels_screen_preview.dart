@@ -379,9 +379,8 @@ class _ReelsCardViewState extends State<ReelsCardView> {
             Spacer(),
             GestureDetector(
               onTap: () {
-                context.read<SettingsProvider>().saveBookmarks(
-                 widget.reelCard.id.toString(),context
-                );
+                context.read<ReelsProviders>().isBookMarkPost(  widget.reelCard,context);
+
                 print("");
               },
               child: Container(

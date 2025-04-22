@@ -237,8 +237,9 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     onTap: (){
                       if(settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0) {
                         settingsProvider.postFeedBack(selectedStar,).then((value) {
-                          selectedStar = 0;setState(() {
-
+                          selectedStar = 0;
+                          setState(() {
+                            settingsProvider.feedbackController.clear();
                           });
                         },);
                       }else{

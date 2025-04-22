@@ -1,9 +1,8 @@
-
-
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -29,7 +28,8 @@ import 'main_screen_pageview.dart';
 
 class StandardCard extends StatefulWidget {
   final getAllPostList;
-final index;
+  final index;
+
   const StandardCard({
     super.key,
     this.getAllPostList,
@@ -68,85 +68,88 @@ class _StandardCardState extends State<StandardCard> {
                     ),
                     child: widget.getAllPostList['type'].toString() == "Video"
                         ? SizedBox(
-                   height:  MediaQuery.of(context).size.height * .35,
-                      width: MediaQuery.of(context).size.width,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(12),
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            Image.network(
-                              height: 330,
-                              width: MediaQuery.of(context).size.width,
-                              widget.getAllPostList['image_url'].toString(),
-                              fit: BoxFit.fill,
-                            ),
-                            IconButton(
-                              icon: SvgPicture.asset(
-                                "assets/svg/play_circle.svg",
-                                height: 58,
-                                width: 58,
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => MainScreenPageView(
-                                        startIndex: widget.index,
-                                      ),
-                                    ));
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    )
-                        : Stack(
-                      children: [
-                        CachedNetworkImage(
-                          imageUrl: widget.getAllPostList['image_url'].toString(),
-                          height: MediaQuery.of(context).size.height * .35,
-                          width: MediaQuery.of(context).size.width,
-                          fit: BoxFit.fill,
-                          placeholder: (context, url) => Container(
                             height: MediaQuery.of(context).size.height * .35,
                             width: MediaQuery.of(context).size.width,
-                            color: AppColors.borderColor.withOpacity(.2),
-                          ),
-                          errorWidget: (context, url, error) => Center(
-                            child: Icon(
-                              Icons.image,
-                              size: 100,
-                              color: Colors.grey.shade300,
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          top: 10,
-                          right: 14,
-                          child: GestureDetector(
-                            onTap: () {
-                              context.read<SettingsProvider>().saveBookmarks(
-                                widget.getAllPostList['id'].toString(),context
-                              );
-                              print("");
-                            },
-                            child: Container(
-                              padding: EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                widget.getAllPostList['isBookmarked']==1? Icons.bookmark: Icons.bookmark_outline,
-                                color: Colors.white,
-                                size: 20,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Image.network(
+                                    height: 330,
+                                    width: MediaQuery.of(context).size.width,
+                                    widget.getAllPostList['image_url'].toString(),
+                                    fit: BoxFit.fill,
+                                  ),
+                                  IconButton(
+                                    icon: SvgPicture.asset(
+                                      "assets/svg/play_circle.svg",
+                                      height: 58,
+                                      width: 58,
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => MainScreenPageView(
+                                              startIndex: widget.index,
+                                            ),
+                                          ));
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
+                          )
+                        : Stack(
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: widget.getAllPostList['image_url'].toString(),
+                                height: MediaQuery.of(context).size.height * .35,
+                                width: MediaQuery.of(context).size.width,
+                                fit: BoxFit.fill,
+                                placeholder: (context, url) => Container(
+                                  height: MediaQuery.of(context).size.height * .35,
+                                  width: MediaQuery.of(context).size.width,
+                                  color: AppColors.borderColor.withOpacity(.2),
+                                ),
+                                errorWidget: (context, url, error) => Center(
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 100,
+                                    color: Colors.grey.shade300,
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 10,
+                                right: 14,
+                                child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                  return GestureDetector(
+                                    onTap: () {
+                                      homeProvider.isBookMarkPost(widget.getAllPostList, context);
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.all(7),
+                                      decoration: BoxDecoration(
+                                        color: (homeProvider.isBookMark.contains(widget.getAllPostList['id'].toString()) || widget.getAllPostList['isBookmarked'] == 1)
+                                            ? AppColors.appButtonColor
+                                            : Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        (homeProvider.isBookMark.contains(widget.getAllPostList['id'].toString()) || widget.getAllPostList['isBookmarked'] == 1)
+                                            ? Icons.bookmark
+                                            : Icons.bookmark_outline,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
                   ),
                 ),
                 height(height: 8),
@@ -185,7 +188,7 @@ class _StandardCardState extends State<StandardCard> {
                         icon: "assets/svg/new_comment.svg",
                         label: 'కామెంట్',
                         iconColor: AppColors.iconColors,
-                        onTap: () async{
+                        onTap: () async {
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
@@ -194,7 +197,7 @@ class _StandardCardState extends State<StandardCard> {
                             "key": "comments",
                             "data": {
                               "device_id": "$deviceId",
-                              "userId":userId ?? "",
+                              "userId": userId ?? "",
                               "postId": widget.getAllPostList['id'].toString(),
                             }
                           });
@@ -219,7 +222,7 @@ class _StandardCardState extends State<StandardCard> {
                             "key": "share_via_articles",
                             "data": {
                               "device_id": "$deviceId",
-                              "userId": userId?? "",
+                              "userId": userId ?? "",
                               "postId": widget.getAllPostList['id'].toString(),
                               "isWhatAppShare": false,
                             }
@@ -259,7 +262,7 @@ class _StandardCardState extends State<StandardCard> {
           ),
           Positioned(
             left: 30,
-            top: widget.getAllPostList['type'].toString() == "Video"?MediaQuery.of(context).size.height * .35: MediaQuery.of(context).size.height * .345,
+            top: widget.getAllPostList['type'].toString() == "Video" ? MediaQuery.of(context).size.height * .35 : MediaQuery.of(context).size.height * .345,
             child: Container(
               height: 25,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),

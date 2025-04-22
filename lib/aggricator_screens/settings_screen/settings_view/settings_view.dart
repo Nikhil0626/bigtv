@@ -16,6 +16,7 @@ import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
+import '../settings_provider/settings_provider.dart';
 import 'filters_screen/filter_view.dart';
 import 'profile_view.dart';
 import 'feedback_view.dart';
@@ -76,6 +77,7 @@ class _SettingsViewState extends State<SettingsView> {
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "BookMarks.svg", "Bookmarks", () {
+              context.read<SettingsProvider>().getAllBookMarks();
               Navigator.push(context, MaterialPageRoute(builder: (context) => SavedArticles()));
             }),
             // _buildNotificationRow(),

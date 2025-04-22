@@ -7,6 +7,7 @@ class EPaperMainModel {
   final String imageUrl;
   final int pageNumber;
   final String publishedDate;
+  final String isBookmarked;
   final bool isTodays;
 
   EPaperMainModel({
@@ -18,6 +19,7 @@ class EPaperMainModel {
     required this.imageUrl,
     required this.pageNumber,
     required this.publishedDate,
+    required this.isBookmarked,
     required this.isTodays,
   });
 
@@ -31,6 +33,7 @@ class EPaperMainModel {
       imageUrl: json['image_url'] as String,
       pageNumber: json['page_number'] as int,
       publishedDate: json['published_date'] as String,
+      isBookmarked: json['isBookmarked'] as String,
       isTodays: json['is_todays'] as bool,
     );
   }
@@ -45,6 +48,7 @@ class EPaperMainModel {
       'image_url': imageUrl,
       'page_number': pageNumber,
       'published_date': publishedDate,
+      'isBookmarked': isBookmarked,
       'is_todays': isTodays,
     };
   }

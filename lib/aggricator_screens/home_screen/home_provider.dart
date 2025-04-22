@@ -3,12 +3,14 @@ import 'dart:developer';
 import 'package:chotanews/aggricator_screens/home_screen/home_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../services/webengage_event_tracks.dart';
+import '../settings_screen/settings_provider/settings_provider.dart';
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
@@ -109,6 +111,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postId = "0"}) async {
+    isBookMark = [];
     isWebView = false;
     webUrl = "";
     isHomeLoading = true;
@@ -140,11 +143,10 @@ class HomeProvider extends ChangeNotifier {
 
       getAllPostList.addAll(data);
       log(getAllPostList[0]['image_url'].toString());
-      // = data
-      //     .map(
-      //       (e) => HomeScreenModel.fromJson(e),
-      //     )
-      //     .toList();
+      isBookMark = getAllPostList
+          .where((e) => e['isBookmarked'] == 1)
+          .map((e) => e['id'].toString())
+          .toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -210,7 +212,7 @@ class HomeProvider extends ChangeNotifier {
 
     try {
       Response response = await HomeRepo().surveyApi();
-      getAllSurveyDataList.addAll(response.data);
+      getAllSurveyDataList.addAll(response.data['choices']);
       log(getAllSurveyDataList.toString());
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
@@ -225,10 +227,10 @@ class HomeProvider extends ChangeNotifier {
   }
 
 
-  List<String> isBookMark = [];
+  List isBookMark = [];
 
 
-  void isLikePost(val) async {
+  void isBookMarkPost(val,context) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
     log(val['id'].toString());
@@ -238,11 +240,15 @@ class HomeProvider extends ChangeNotifier {
         "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": true}
       });
       isBookMark.add(val['id'].toString());
-      // postLike(val['id'].toString(), true);
+   Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
+          val['id'].toString(), context,1
+      );
       sendLikeDetails(userId, val, true, val['title'].toString());
       log(isBookMark.toString());
     } else {
-      // postLike(val['id'].toString(), false);
+      Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
+          val['id'].toString(), context,0
+      );
       isBookMark.remove(val['id'].toString());
       EventRepo().sendEvent({
         "key": "liked_article",

@@ -171,16 +171,21 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                 cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
                                   return InkWell(
                                     onTap: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => MainScreenPageView(
-                                              startIndex: index,
-                                            ),
-                                          ));
-                                      if (homeProvider.getAllPostList[index]['type'].toString() == "Video") {
-                                        homeProvider.youtubeDispose();
+                                      if(homeProvider.getAllPostList[index]['type'].toString() == "GoogleAds"){
+
+                                      }else{
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => MainScreenPageView(
+                                                startIndex: index,
+                                              ),
+                                            ));
+                                        if (homeProvider.getAllPostList[index]['type'].toString() == "Video") {
+                                          homeProvider.youtubeDispose();
+                                        }
                                       }
+
                                     },
                                     child: Container(
                                         alignment: Alignment.center,
@@ -216,7 +221,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                     ),
                                                   )
                                                 : homeProvider.getAllPostList[index]['type'].toString() == "Image"
-                                                    ? ImageView(index: index,getAllPostList: homeProvider.getAllPostList,)
+                                                    ? ImageView(index: index,getAllPostList: homeProvider.getAllPostList[index],)
                                                     : homeProvider.getAllPostList[index]['type'].toString() == "Gallery"
                                                         ? Padding(
                                                             padding: const EdgeInsets.only(bottom: 5.0),
@@ -235,26 +240,32 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                 Positioned(
                                                                   top: 18,
                                                                   right: 22,
-                                                                  child: GestureDetector(
-                                                                    onTap: () {
-                                                                      context.read<SettingsProvider>().saveBookmarks(
-                                                                            homeProvider.getAllPostList[index]['id'].toString(),context
-                                                                          );
-                                                                      print("");
-                                                                    },
-                                                                    child: Container(
-                                                                      padding: EdgeInsets.all(7),
-                                                                      decoration: BoxDecoration(
-                                                                        color: Colors.black54,
-                                                                        shape: BoxShape.circle,
+                                                                  child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                                                    return  GestureDetector(
+                                                                      onTap: () {
+
+                                                                        homeProvider.isBookMarkPost(homeProvider.getAllPostList[index], context);
+
+                                                                        print("");
+                                                                      },
+                                                                      child: Container(
+                                                                        padding: EdgeInsets.all(7),
+                                                                        decoration: BoxDecoration(
+                                                                          color:  (homeProvider.isBookMark.contains(homeProvider.getAllPostList[index]['id'].toString()) || homeProvider.getAllPostList[index]['isBookmarked'] == 1)
+                                                                              ? AppColors.appButtonColor
+                                                                              : Colors.black54,
+                                                                          shape: BoxShape.circle,
+                                                                        ),
+                                                                        child: Icon(
+                                                                          (homeProvider.isBookMark.contains(homeProvider.getAllPostList[index]['id'].toString()) || homeProvider.getAllPostList[index]['isBookmarked'] == 1)
+                                                                              ? Icons.bookmark
+                                                                              : Icons.bookmark_outline,
+                                                                          color: Colors.white,
+                                                                          size: 20,
+                                                                        ),
                                                                       ),
-                                                                      child: Icon(
-                                                                        Icons.bookmark_outline,
-                                                                        color: Colors.white,
-                                                                        size: 20,
-                                                                      ),
-                                                                    ),
-                                                                  ),
+                                                                    );
+                                                                  })
                                                                 ),
 
                                                               ],

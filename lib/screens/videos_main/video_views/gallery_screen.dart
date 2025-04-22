@@ -325,6 +325,7 @@ ScreenshotController sc = ScreenshotController();
                   ),
                 ),
               ),
+              if(!widget.isHome)
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.0.sp, vertical: 10.sp),
                 child: Row(
