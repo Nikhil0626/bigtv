@@ -196,7 +196,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                   }
                                 });
                                 context.read<SettingsProvider>().saveBookmarks(
-                                  widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString(),
+                                  widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString(),context
                                 );
                               },
                               child: Container(

@@ -1,10 +1,15 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/settings_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_model/bookmarks_model.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../globel_keys/global_variables_data.dart';
@@ -27,8 +32,8 @@ class SettingsProvider extends ChangeNotifier {
   Future getAllBookMarks() async {
     isBookMarkLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {"user_id": userId};
+    String? userId = preferences.getString("deviceID");
+    Map<String, dynamic> body = {"device_id": userId};
     try {
       log("body $body");
       Response response = await SettingsRepo().bookMarks(body);
@@ -50,20 +55,26 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> saveBookmarks(String postId) async {
+  Future<void> saveBookmarks(String postId, context) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {"post_id": postId, "user_id": userId, "bookmark": 1};
-    try {
-      log("body $body");
-      Response response = await SettingsRepo().saveBookMarks(body);
-      if (response.statusCode == 200) {
-        CustomToast.showSuccessToast(msg: "Bookmark added successfully", duration: Duration(seconds: 3));
+    String? loginType = preferences.getString("loginType");
+
+    if (loginType == "login") {
+      Map<String, dynamic> body = {"post_id": postId, "user_id": userId, "bookmark": 1};
+      try {
+        log("body $body");
+        Response response = await SettingsRepo().saveBookMarks(body);
+        if (response.statusCode == 200) {
+          CustomToast.showSuccessToast(msg: "Bookmark added successfully", duration: Duration(seconds: 3));
+        }
+      } catch (e) {
+        log("Error: $e");
+      } finally {
+        notifyListeners();
       }
-    } catch (e) {
-      log("Error: $e");
-    } finally {
-      notifyListeners();
+    } else {
+     Provider.of<AuthenticationProvider>(context,listen: false).setLogOutStatus(context,false);
     }
   }
 
@@ -126,7 +137,6 @@ class SettingsProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         feedbackList.addAll(response.data['feedback_options']);
 
-
         log("Like posted successfully: ${response.data}");
       } else {
         log("Failed to post like: ${response.statusCode}");
@@ -153,7 +163,7 @@ class SettingsProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     List selectedCategoryIds = feedbackList.where((item) => selectedFeedbackList.contains(item['optionText'].toString())).map((item) => item['optionId'].toString()).toList();
 
-    Map<String, dynamic> body = {"device_id":deviceId,"user_id": userId, "user_rating": rating, "comment_ids": selectedCategoryIds, "custom_comment": feedbackController.text??""};
+    Map<String, dynamic> body = {"device_id": deviceId, "user_id": userId, "user_rating": rating, "comment_ids": selectedCategoryIds, "custom_comment": feedbackController.text ?? ""};
 
     log(body.toString());
     try {
@@ -165,7 +175,8 @@ class SettingsProvider extends ChangeNotifier {
       } else {
         log("Failed to post like: ${response.statusCode}");
       }
-    } on DioException catch (e, st) { CustomToast.showErrorToast(msg: " Feedback not submitted");
+    } on DioException catch (e, st) {
+      CustomToast.showErrorToast(msg: " Feedback not submitted");
       log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
       log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");

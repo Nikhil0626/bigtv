@@ -317,7 +317,7 @@ class _EachReelCardState extends State<EachReelCard> {
                   child: GestureDetector(
                     onTap: () {
                       context.read<SettingsProvider>().saveBookmarks(
-                            widget.reel.id.toString(),
+                            widget.reel.id.toString(),context
                           );
                     },
                     child: Container(

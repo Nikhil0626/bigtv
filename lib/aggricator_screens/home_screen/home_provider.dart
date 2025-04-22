@@ -1,16 +1,20 @@
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/home_screen/home_repo.dart';
-import 'package:chotanews/aggricator_screens/reels_screens/reels_repo/reels_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../globel_keys/global_variables_data.dart';
+import '../../screens/home_screen/home_repo/event_repo.dart';
+import '../../services/webengage_event_tracks.dart';
+
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
+  List getAllSurveyDataList = [];
 
   var getSinglePostList = {};
   int aiCurrentPostId = 0;
@@ -109,6 +113,7 @@ class HomeProvider extends ChangeNotifier {
     webUrl = "";
     isHomeLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
     List<String> locationIds = locationId.split(',').map((e) => e.trim()).toList();
@@ -122,8 +127,8 @@ class HomeProvider extends ChangeNotifier {
       "postId": postId,
       "locationIds": locationIds,
       "catgoriesId": categoriesIds,
-      "force_refresh": "false"
-      // "ad": "true"
+      "force_refresh": "false",
+      "userId":userId??0,
     };
     log(body.toString());
     try {
@@ -198,5 +203,55 @@ class HomeProvider extends ChangeNotifier {
       // isHomeLoading = false;
       notifyListeners();
     }
+  }
+
+
+  Future getSurveyData() async {
+
+    try {
+      Response response = await HomeRepo().surveyApi();
+      getAllSurveyDataList.addAll(response.data);
+      log(getAllSurveyDataList.toString());
+    } on DioException catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api  catch ${st.toString()}");
+    } catch (e, st) {
+      log("Get News Api catch error ${st.toString()}");
+      log("Get News Api catch ${st.toString()}");
+    } finally {
+
+      notifyListeners();
+    }
+  }
+
+
+  List<String> isBookMark = [];
+
+
+  void isLikePost(val) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? userId = sp.getString("userId");
+    log(val['id'].toString());
+    if (!isBookMark.contains(val['id'].toString())) {
+      EventRepo().sendEvent({
+        "key": "liked_article",
+        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": true}
+      });
+      isBookMark.add(val['id'].toString());
+      // postLike(val['id'].toString(), true);
+      sendLikeDetails(userId, val, true, val['title'].toString());
+      log(isBookMark.toString());
+    } else {
+      // postLike(val['id'].toString(), false);
+      isBookMark.remove(val['id'].toString());
+      EventRepo().sendEvent({
+        "key": "liked_article",
+        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": false}
+      });
+      sendLikeDetails(userId, val['id'].toString(), false, val['title'].toString());
+      log(isBookMark.toString());
+    }
+
+    notifyListeners();
   }
 }

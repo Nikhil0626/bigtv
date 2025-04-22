@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -23,11 +24,13 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_and _source.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
+import 'main_screen_pageview.dart';
 
 
 class ListStandardPostView extends StatefulWidget {
   final articalData;
-  const ListStandardPostView({super.key,required this.articalData});
+  final int index;
+  const ListStandardPostView({super.key,required this.articalData,required this.index});
 
   @override
   State<ListStandardPostView> createState() => _ListStandardPostViewState();
@@ -65,10 +68,35 @@ ScreenshotController screenshotControllers = ScreenshotController();
                             ? SizedBox(
                           height: 180,
                           width: MediaQuery.of(context).size.width,
-                          child: VideoPreview(
-                            imageUrl: widget.articalData['image_url'],
-                            url: widget.articalData['video_url'] ?? "",
-                            isFoldable: false,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Image.network(
+                                  height: 330,
+                                  width: MediaQuery.of(context).size.width,
+                                  widget.articalData['image_url'].toString(),
+                                  fit: BoxFit.fill,
+                                ),
+                                IconButton(
+                                  icon: SvgPicture.asset(
+                                    "assets/svg/play_circle.svg",
+                                    height: 58,
+                                    width: 58,
+                                  ),
+                                  onPressed: () {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MainScreenPageView(
+                                            startIndex: widget.index,
+                                          ),
+                                        ));
+                                  },
+                                ),
+                              ],
+                            ),
                           ),
                         )
                             : CachedNetworkImage(
@@ -100,7 +128,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                         right: 14,
                         child: GestureDetector(
                           onTap: () {
-                            context.read<SettingsProvider>().saveBookmarks(widget.articalData['id'].toString());
+                            context.read<SettingsProvider>().saveBookmarks(widget.articalData['id'].toString(),context);
                             print("");
                           },
                           child: Container(

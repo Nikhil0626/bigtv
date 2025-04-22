@@ -9,7 +9,6 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import '../../services/webengage_notification.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -45,10 +44,6 @@ class _SplashScreenState extends State<SplashScreen> {
       },
     );
 
-    // Wait for a short time to check if a deep link was received
-    await Future.delayed(Duration(seconds: 2));
-
-    // If no link was received, navigate to the home screen
     if (!didReceiveLink) {
       checkLastShownDate(context);
     }

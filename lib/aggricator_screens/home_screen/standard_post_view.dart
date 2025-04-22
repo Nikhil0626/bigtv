@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -15,7 +16,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../screens/home_screen/botton_actions.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../../screens/videos_main/video_views/video_preview.dart';
 import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
@@ -25,13 +25,15 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_and _source.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
+import 'main_screen_pageview.dart';
 
 class StandardCard extends StatefulWidget {
   final getAllPostList;
-
+final index;
   const StandardCard({
     super.key,
     this.getAllPostList,
+    required this.index,
   });
 
   @override
@@ -65,42 +67,38 @@ class _StandardCardState extends State<StandardCard> {
                       Radius.circular(12),
                     ),
                     child: widget.getAllPostList['type'].toString() == "Video"
-                        ? Container(
-                      padding: EdgeInsets.only(bottom: 20),
-                      height: MediaQuery.of(context).size.height * .35,
+                        ? SizedBox(
+                   height:  MediaQuery.of(context).size.height * .35,
                       width: MediaQuery.of(context).size.width,
-                      child: Stack(
-                        children: [
-                          VideoPreview(
-                            imageUrl: widget.getAllPostList['image_url'].toString(),
-                            url: widget.getAllPostList['video_url'].toString() ?? "",
-                            isFoldable: true,
-                          ),
-                          Positioned(
-                            top: 10,
-                            right: 14,
-                            child: GestureDetector(
-                              onTap: () {
-                                context.read<SettingsProvider>().saveBookmarks(
-                                  widget.getAllPostList['id'].toString(),
-                                );
-                                print("");
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(7),
-                                decoration: BoxDecoration(
-                                  color: Colors.black54,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.bookmark_outline,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                              ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Image.network(
+                              height: 330,
+                              width: MediaQuery.of(context).size.width,
+                              widget.getAllPostList['image_url'].toString(),
+                              fit: BoxFit.fill,
                             ),
-                          ),
-                        ],
+                            IconButton(
+                              icon: SvgPicture.asset(
+                                "assets/svg/play_circle.svg",
+                                height: 58,
+                                width: 58,
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => MainScreenPageView(
+                                        startIndex: widget.index,
+                                      ),
+                                    ));
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     )
                         : Stack(
@@ -129,7 +127,7 @@ class _StandardCardState extends State<StandardCard> {
                           child: GestureDetector(
                             onTap: () {
                               context.read<SettingsProvider>().saveBookmarks(
-                                widget.getAllPostList['id'].toString(),
+                                widget.getAllPostList['id'].toString(),context
                               );
                               print("");
                             },
@@ -140,7 +138,7 @@ class _StandardCardState extends State<StandardCard> {
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
-                                Icons.bookmark_outline,
+                                widget.getAllPostList['isBookmarked']==1? Icons.bookmark: Icons.bookmark_outline,
                                 color: Colors.white,
                                 size: 20,
                               ),
@@ -261,7 +259,7 @@ class _StandardCardState extends State<StandardCard> {
           ),
           Positioned(
             left: 30,
-            top: widget.getAllPostList['type'].toString() == "Video"?MediaQuery.of(context).size.height * .325: MediaQuery.of(context).size.height * .345,
+            top: widget.getAllPostList['type'].toString() == "Video"?MediaQuery.of(context).size.height * .35: MediaQuery.of(context).size.height * .345,
             child: Container(
               height: 25,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),

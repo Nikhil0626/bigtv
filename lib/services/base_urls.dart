@@ -16,6 +16,7 @@ class BaseUrls {
 
   /// Reels Apis
   static const String getAllReels = "/reels";
+
   /// all posts
   static const String getNews = "/allposts";
   static const String getPostById = "/post";
@@ -69,6 +70,9 @@ class BaseUrls {
 
   ///Categories Apis
   static const String getAllCategories = "/categories";
+
+  ///Categories Apis
+  static const String surveyApi = "/survey";
 
   ///Location Apis
   static const String getAllLocation = "/locations";

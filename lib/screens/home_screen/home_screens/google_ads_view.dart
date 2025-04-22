@@ -13,8 +13,11 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../../../aggricator_screens/settings_screen/settings_view/feedback_view.dart';
 import '../../../utils/app_colors.dart';
 
 class GoogleAdsView extends StatefulWidget {
@@ -42,10 +45,10 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
   @override
   void initState() {
     super.initState();
-    _loadAd();
+    loadAd();
   }
 
-  void _loadAd() {
+  void loadAd() {
     _nativeAd = NativeAd(
       adUnitId: Platform.isIOS ? "ca-app-pub-2405357352181832/7643871122" : 'ca-app-pub-2405357352181832/9820571770', // Your Ad Unit ID
       request: const AdRequest(),
@@ -63,13 +66,15 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
             setState(() {
               _isAdLoaded = false;
               _nativeAd = null;
+              context.read<HomeProvider>().getSurveyData();
             });
           }
           print('Ad failed to load: $error');
         },
       ),
       nativeTemplateStyle: NativeTemplateStyle(templateType: TemplateType.medium),
-    )..load();
+    )
+      ..load();
     if (_nativeAd != null) {
       AnalyticsService.logEvent2("ads_available");
     }
@@ -83,70 +88,11 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
         Expanded(
           flex: 1,
           child: !_isAdLoaded || _nativeAd == null
-              ? Padding(
-                  padding: widget.isList ? const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16) : const EdgeInsets.all(0.0),
-                  child: ClipRRect(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: widget.isList ? Colors.white : AppColors.cardBackgroundColor,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Rate your experience\nwith chota news?',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
-                              color: Colors.black,
-                            ),
-                          ),
-                          height(height: 6.h),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              5,
-                              (index) => Icon(
-                                Icons.star,
-                                color: AppColors.ratingColor,
-                                size: 40,
-                              ),
-                            ),
-                          ),
-                          height(height: 4.h),
-                          Text(
-                            'Awesome, liked it',
-                            style: TextStyle(
-                              color: Colors.lightBlue,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                          height(height: 6.h),
-                          ElevatedButton(
-                            onPressed: () {},
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.lightBlue,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                            ),
-                            child: Text('Submit'),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                )
+              ?widget.article['adType']=="rating card"?RateYourApp():widget.article['adType']=="share card"?ShareYourApp():ShareYourApp()
               : Padding(
-                padding:const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
-                child: AdWidget(ad: _nativeAd!),
-              ),
+            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+            child: AdWidget(ad: _nativeAd!),
+          ),
         ),
         if (widget.isList)
           Expanded(
@@ -173,12 +119,15 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => IndividualPostView(postId: widget.article["homepage"]![index]['id'].toString()),
+                                    builder: (context) => IndividualPostView(postId: widget.article["homepage"]![index]['id'].toString(),isComeFrom: true,),
                                   ));
                             },
                             child: Center(
                               child: Container(
-                                width: MediaQuery.of(context).size.width,
+                                width: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width,
                                 margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
                                 padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
                                 decoration: BoxDecoration(
@@ -195,29 +144,31 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
                                         height: 50,
                                         width: 50,
                                         fit: BoxFit.cover,
-                                        placeholder: (context, url) => Container(
-                                          height: 50,
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            color: AppColors.borderColor.withOpacity(.2),
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                        errorWidget: (context, url, error) => Container(
-                                          height: 40,
-                                          width: 40,
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.circular(8),
-                                            color: Colors.grey.shade300,
-                                          ),
-                                          child: Center(
-                                            child: Icon(
-                                              Icons.image,
-                                              size: 30,
-                                              color: Colors.white,
+                                        placeholder: (context, url) =>
+                                            Container(
+                                              height: 50,
+                                              width: 50,
+                                              decoration: BoxDecoration(
+                                                color: AppColors.borderColor.withOpacity(.2),
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
                                             ),
-                                          ),
-                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            Container(
+                                              height: 40,
+                                              width: 40,
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(8),
+                                                color: Colors.grey.shade300,
+                                              ),
+                                              child: Center(
+                                                child: Icon(
+                                                  Icons.image,
+                                                  size: 30,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                            ),
                                       ),
                                     ),
                                     width(width: 10),
@@ -278,5 +229,193 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
     log("hello siva ads close");
     _nativeAd?.dispose();
     super.dispose();
+  }
+}
+
+
+class RateYourApp extends StatelessWidget {
+  const RateYourApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Rate your experience\nwith chota news?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: Colors.black,
+              ),
+            ),
+            height(height: 6.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(
+                5,
+                    (index) =>
+                    Icon(
+                      Icons.star,
+                      color: AppColors.ratingColor,
+                      size: 40,
+                    ),
+              ),
+            ),
+            height(height: 4.h),
+            Text(
+              'Awesome, liked it',
+              style: TextStyle(
+                color: Colors.lightBlue,
+                fontSize: 13,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+            height(height: 6.h),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.lightBlue,
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: Text('Submit'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class SurveyCards extends StatefulWidget {
+  const SurveyCards({super.key});
+
+  @override
+  State<SurveyCards> createState() => _SurveyCardsState();
+}
+
+class _SurveyCardsState extends State<SurveyCards> {
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<HomeProvider>(
+      builder: (_,homeProvider,__) {
+        return Container(
+          height: 330.h,
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text(
+                  'Are liking our app?',
+                  textAlign: TextAlign.center,
+                  style: newAppFont(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Expanded(
+
+                  child: ListView.builder(
+                    itemCount: homeProvider.getAllSurveyDataList.length,
+                    itemBuilder: (context, index) {
+                return Container(height: 30,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5)), border: Border.all(width: 1, color: AppColors.borderColor)),
+                    child: Text(
+                        'Are liking our app?',
+                        textAlign: TextAlign.center,
+                        style: newAppFont(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black,
+                        )));
+              },))
+            ],
+          ),
+        );
+      }
+    );
+  }
+}
+
+
+class ShareYourApp extends StatelessWidget {
+  const ShareYourApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      child: Card(
+        color: AppColors.adsBackgroundColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Container(
+          width: 300.sp,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          padding: EdgeInsets.all(8),
+          child: Center(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: Text(
+                    'Are liking our app?',
+                    textAlign: TextAlign.center,
+                    style: newAppFont(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
+                height(height: 4.h),
+                Text(
+                  "Share the ChotaNewsApp_\nStay updated,with your \n friends & family!",
+                  style: newAppFont(fontSize: 16, fontWeight: FontWeight.w400),
+                  textAlign: TextAlign.center,
+                ),
+                height(height: 12.h),
+                ElevatedButton(
+                  onPressed: () {
+                    Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.example.yourapp");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.lightBlue,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(horizontal: 26, vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: Text('Share App'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
