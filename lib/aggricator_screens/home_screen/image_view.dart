@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
@@ -19,6 +20,7 @@ import '../../utils/app_colors.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
+import 'main_screen_pageview.dart';
 
 class ImageView extends StatefulWidget {
   final getAllPostList;
@@ -36,12 +38,16 @@ class _ImageViewState extends State<ImageView> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
-        if (widget.getAllPostList[widget.index]['type'] == "Image") {
-          if (await canLaunchUrl(Uri.parse(widget.getAllPostList[widget.index]['content'].toString()))) {
-            await launchUrl(Uri.parse(widget.getAllPostList[widget.index]['content'].toString()));
-          } else {
-            throw 'Could not launch ${Uri.parse(widget.getAllPostList[widget.index]['content'].toString())}';
-          }
+        if (widget.getAllPostList ['type'] == "Image") {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MainScreenPageView(
+                  startIndex: widget.index,
+                ),
+              ));
+        }else{
+          log("sdbsjbfsjbfjhsfbhjsdbfsmkfb");
         }
       },
       child: Padding(
@@ -58,7 +64,7 @@ class _ImageViewState extends State<ImageView> {
                         Radius.circular(12),
                       ),
                       child: Image.network(
-                        widget.getAllPostList[widget.index]['image_url'].toString() ?? "",
+                        widget.getAllPostList ['image_url'].toString() ?? "",
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
                         fit: BoxFit.cover,
@@ -74,18 +80,18 @@ class _ImageViewState extends State<ImageView> {
                       Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
                         return BottomActions(
                           iconColor: AppColors.iconColors,
-                          postType: widget.getAllPostList[widget.index]['subType'].toString() ?? "",
-                          icon: settingsProvider.isLikeList.contains(widget.getAllPostList[widget.index]['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                          postType: widget.getAllPostList ['subType'].toString() ?? "",
+                          icon: settingsProvider.isLikeList.contains(widget.getAllPostList ['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                           label: 'లైక్',
-                          isLike: settingsProvider.isLikeList.contains(widget.getAllPostList[widget.index]['id'].toString()),
+                          isLike: settingsProvider.isLikeList.contains(widget.getAllPostList ['id'].toString()),
                           onTap: () {
                             log("Like");
-                            settingsProvider.isLikePost(widget.getAllPostList[widget.index]);
+                            settingsProvider.isLikePost(widget.getAllPostList );
                           },
                         );
                       }),
                       BottomActions(
-                        postType: widget.getAllPostList[widget.index]['subType'] ?? "",
+                        postType: widget.getAllPostList ['subType'] ?? "",
                         icon: "assets/svg/new_comment.svg",
                         label: 'కామెంట్',
                         iconColor: AppColors.iconColors,
@@ -99,10 +105,10 @@ class _ImageViewState extends State<ImageView> {
                             "data": {
                               "device_id": "$deviceId",
                               "userId":userId ?? "",
-                              "postId": widget.getAllPostList[widget.index]['id'].toString(),
+                              "postId": widget.getAllPostList ['id'].toString(),
                             }
                           });
-                          showComments(context, widget.getAllPostList[widget.index]['id']);
+                          showComments(context, widget.getAllPostList ['id']);
                           EventRepo().sendEvent({
                             "key": "comments",
                             "data": {"deviceId": deviceId, "openTime": DateTime.now().toString()}
@@ -111,7 +117,7 @@ class _ImageViewState extends State<ImageView> {
                       ),
                       Spacer(),
                       BottomActions(
-                        postType: widget.getAllPostList[widget.index]['subType'] ?? "",
+                        postType: widget.getAllPostList ['subType'] ?? "",
                         icon: "assets/svg/share.svg",
                         label: 'షేర్',
                         iconColor: AppColors.iconColors,
@@ -124,32 +130,32 @@ class _ImageViewState extends State<ImageView> {
                             "data": {
                               "device_id": "$deviceId",
                               "userId": userId?? "",
-                              "postId": widget.getAllPostList[widget.index]['id'].toString(),
+                              "postId": widget.getAllPostList ['id'].toString(),
                               "isWhatAppShare": false,
                             }
                           });
 
-                          sendShareDetails(userId, widget.getAllPostList[widget.index]['id'], widget.getAllPostList[widget.index]['content'].toString());
+                          sendShareDetails(userId, widget.getAllPostList ['id'], widget.getAllPostList ['content'].toString());
 
-                          if (widget.getAllPostList[widget.index]['type'] == "Standard" || widget.getAllPostList[widget.index]['type'] == "Video") {
+                          if (widget.getAllPostList ['type'] == "Standard" || widget.getAllPostList ['type'] == "Video") {
                             try {
                               final image = await sc.capture(
                                 pixelRatio: 2,
                               );
                               if (image != null) {
                                 final directory = await getTemporaryDirectory();
-                                final imagePath = '${directory.path}/${widget.getAllPostList[widget.index]['id']}.png';
+                                final imagePath = '${directory.path}/${widget.getAllPostList ['id']}.png';
                                 final imageFile = File(imagePath);
                                 await imageFile.writeAsBytes(image);
 
-                                Share.shareXFiles([XFile(imageFile.path)], text: Platform.isIOS ? widget.getAllPostList[widget.index]['linkURLAndroid'].toString() : widget.getAllPostList[widget.index]['linkURLIos'].toString());
+                                Share.shareXFiles([XFile(imageFile.path)], text: Platform.isIOS ? widget.getAllPostList ['linkURLAndroid'].toString() : widget.getAllPostList ['linkURLIos'].toString());
                               } else {
                                 CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                               }
                             } catch (e) {
                               CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                             }
-                          } else if (widget.getAllPostList[widget.index]['type'] == "Gallery") {
+                          } else if (widget.getAllPostList ['type'] == "Gallery") {
                             createAndSharePdf(context, widget.getAllPostList);
                           }
                         },
@@ -162,25 +168,32 @@ class _ImageViewState extends State<ImageView> {
             Positioned(
               top: 10,
               right: 14,
-              child: GestureDetector(
-                onTap: () {
-                  context.read<SettingsProvider>().saveBookmarks(
-                    widget.getAllPostList[widget.index]['id'].toString(),context
+              child: Consumer<HomeProvider>(
+                builder: (_,homeProvider,__) {
+                  return GestureDetector(
+                    onTap: () {
+
+                      homeProvider.isBookMarkPost( widget.getAllPostList , context);
+                      print("");
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color:  (homeProvider.isBookMark.contains(widget.getAllPostList ['id'].toString()) || widget.getAllPostList ['isBookmarked'] == 1)
+                            ? AppColors.appButtonColor
+                            : Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        (homeProvider.isBookMark.contains(widget.getAllPostList ['id'].toString()) || widget.getAllPostList ['isBookmarked'] == 1)
+                            ? Icons.bookmark
+                            : Icons.bookmark_outline,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
                   );
-                  print("");
-                },
-                child: Container(
-                  padding: EdgeInsets.all(7),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.bookmark_outline,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
+                }
               ),
             ),
 

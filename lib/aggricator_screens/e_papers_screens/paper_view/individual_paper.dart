@@ -170,18 +170,21 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                   right: 14,
                                   child: GestureDetector(
                                     onTap: () {
-                                      context.read<SettingsProvider>().saveBookmarks(
-                                            ePapersProvider.getSinglePapersList[index].id.toString(),context
-                                          );
+                                      ePapersProvider.isBookMarkPost(   ePapersProvider.getSinglePapersList[index],context);
+
                                     },
                                     child: Container(
                                       padding: EdgeInsets.all(7),
                                       decoration: BoxDecoration(
-                                        color: Colors.black54,
+                                        color: (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) || ePapersProvider.getSinglePapersList[index].id== 1)
+                                            ? AppColors.appButtonColor
+                                            : Colors.black54,
                                         shape: BoxShape.circle,
                                       ),
                                       child: Icon(
-                                        Icons.bookmark_border,
+                                        (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) || ePapersProvider.getSinglePapersList[index].id == 1)
+                                            ? Icons.bookmark
+                                            : Icons.bookmark_outline,
                                         color: Colors.white,
                                         size: 20,
                                       ),

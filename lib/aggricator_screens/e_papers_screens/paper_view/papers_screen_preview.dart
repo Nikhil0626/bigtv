@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -181,32 +182,42 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                           Positioned(
                             top: 20,
                             right: 20,
-                            child: GestureDetector(
-                              onTap: () async {
-                                final prefs = await SharedPreferences.getInstance();
-                                final userId = prefs.getString("userId");
-                                final deviceId = prefs.getString("deviceId");
-                                EventRepo().sendEvent({
-                                  "key": "share_via_articles",
-                                  "data": {
-                                    "device_id": deviceId,
-                                    "userId": userId ?? "",
-                                    "postId": widget.postId,
-                                    "isWhatAppShare": false,
-                                  }
-                                });
-                                context.read<SettingsProvider>().saveBookmarks(
-                                  widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString(),context
+                            child: Consumer<EPapersProvider>(
+                                builder: (_, ePapersProvider, __) {
+                                  return GestureDetector(
+                                  onTap: () async {
+                                    final prefs = await SharedPreferences.getInstance();
+                                    final userId = prefs.getString("userId");
+                                    final deviceId = prefs.getString("deviceId");
+                                    EventRepo().sendEvent({
+                                      "key": "share_via_articles",
+                                      "data": {
+                                        "device_id": deviceId,
+                                        "userId": userId ?? "",
+                                        "postId": widget.postId,
+                                        "isWhatAppShare": false,
+                                      }
+                                    });
+                                    context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[newsPostsProvider.currentPaperIndex],context);
+                                  },
+                                  child:Container(
+                                    padding: EdgeInsets.all(7),
+                                    decoration: BoxDecoration(
+                                      color: (ePapersProvider.isBookMark.contains(widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()) || widget.imageUrls[newsPostsProvider.currentPaperIndex].id== 1)
+                                          ? AppColors.appButtonColor
+                                          : Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      (ePapersProvider.isBookMark.contains(widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()) || widget.imageUrls[newsPostsProvider.currentPaperIndex].id == 1)
+                                          ? Icons.bookmark
+                                          : Icons.bookmark_outline,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  ),
                                 );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(7),
-                                decoration: const BoxDecoration(
-                                  color: Colors.black54,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Icon(Icons.bookmark_border, color: Colors.white, size: 24),
-                              ),
+                              }
                             ),
                           ),
 

@@ -2,7 +2,12 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../screens/home_screen/home_repo/event_repo.dart';
+import '../../../services/webengage_event_tracks.dart';
+import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/ePaper_main_model.dart';
 import '../paper_models/single_paper_model.dart';
 import '../paper_repo/epaper_repo.dart';
@@ -13,6 +18,7 @@ class EPapersProvider extends ChangeNotifier {
   List<SinglePaperModel> getSinglePapersList = [];
 
   Future getMainEPapers() async {
+    isBookMark = [];
     isMainPapers = true;
 
     try {
@@ -21,6 +27,10 @@ class EPapersProvider extends ChangeNotifier {
         log(response.data.toString());
         List data = response.data;
         getAllMainPapersList = data.map((e) => EPaperMainModel.fromJson(e)).toList();
+        isBookMark = getAllMainPapersList
+            .where((e) => e.id == 1)
+            .map((e) => e.id.toString())
+            .toList();
       }
     } on DioException catch (e, st) {
       getAllMainPapersList = [];
@@ -54,5 +64,40 @@ class EPapersProvider extends ChangeNotifier {
       isMainPapers = false;
       notifyListeners();
     }
+  }
+
+
+  List isBookMark = [];
+
+  void isBookMarkPost(val,context) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? userId = sp.getString("userId");
+    String? deviceId = sp.getString("deviceId");
+    log(val.id.toString());
+    if (!isBookMark.contains(val.id.toString())) {
+      EventRepo().sendEvent({
+        "key": "liked_article",
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isLike": true}
+      });
+      isBookMark.add(val.id.toString());
+      Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
+          val['id'].toString(), context,1
+      );
+      sendLikeDetails(userId, val, true, val['title'].toString());
+      log(isBookMark.toString());
+    } else {
+      Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
+          val['id'].toString(), context,0
+      );
+      isBookMark.remove(val.id.toString());
+      EventRepo().sendEvent({
+        "key": "liked_article",
+        "data": {"device_id": "${deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": false}
+      });
+      sendLikeDetails(userId, val.id.toString(), false, val['title'].toString());
+      log(isBookMark.toString());
+    }
+
+    notifyListeners();
   }
 }

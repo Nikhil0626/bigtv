@@ -243,9 +243,7 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                 right: 8.w,
                 child: InkWell(
                   onTap: () {
-                    context.read<SettingsProvider>().saveBookmarks(
-                      widget.card.id.toString(),context
-                    );
+                    context.read<ReelsProviders>().isBookMarkPost(  widget.card,context);
                   },
                   child: Container(
                     height: 30.w,

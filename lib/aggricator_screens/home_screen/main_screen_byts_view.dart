@@ -61,7 +61,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           Expanded(
             child: Screenshot(
               controller: adsScreenshotController,
-              child: context.read<HomeProvider>().isWebView==true
+              child: context.read<HomeProvider>().isWebView == true
                   ? Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: InAppWebViewScreen(
@@ -83,13 +83,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                       : widget.article['type'] == "Image"
                           ? InkWell(
                               onTap: () async {
-                                if (widget.article['type'] == "Image") {
-                                  if (await canLaunchUrl(Uri.parse(widget.article['content'].toString()))) {
-                                    await launchUrl(Uri.parse(widget.article['content'].toString()));
-                                  } else {
-                                    throw 'Could not launch ${Uri.parse(widget.article['content'].toString())}';
-                                  }
-                                }
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => InAppWebViewScreen(webUrl: widget.article['content'].toString(), title: "Image View"),
+                                    ));
                               },
                               child: Stack(
                                 children: [
@@ -123,26 +121,28 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                   Positioned(
                                     top: 10,
                                     right: 14,
-                                    child: GestureDetector(
-                                      onTap: () {
-                                        context.read<SettingsProvider>().saveBookmarks(
-                                              widget.article['id'].toString(),context
-                                            );
-                                        print("");
-                                      },
-                                      child: Container(
-                                        padding: EdgeInsets.all(7),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black54,
-                                          shape: BoxShape.circle,
+                                    child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          homeProvider.isBookMarkPost(widget.article, context);
+
+                                          print("");
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.all(7),
+                                          decoration: BoxDecoration(
+                                            color:
+                                                (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1) ? AppColors.appButtonColor : Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1) ? Icons.bookmark : Icons.bookmark_outline,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
                                         ),
-                                        child: Icon(
-                                          Icons.bookmark_outline,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    ),
+                                      );
+                                    }),
                                   ),
                                 ],
                               ),
@@ -179,30 +179,30 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     Positioned(
                                       top: 10,
                                       right: 14,
-                                      child: GestureDetector(
-                                        onTap: () {
-                                          // context.read<SettingsProvider>().saveBookmarks(
-                                          //   flipProvider.mainArticlesData[index].id.toString(),
-                                          // );
-                                          context.read<SettingsProvider>().saveBookmarks(
-                                                widget.article['id'].toString(),context
-                                              );
-                                          print("");
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.all(7),
-                                          decoration: BoxDecoration(
-                                            color: Colors.black54,
-                                            shape: BoxShape.circle,
+                                      child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                        return GestureDetector(
+                                          onTap: () {
+                                            homeProvider.isBookMarkPost(widget.article, context);
+
+                                            print("");
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(7),
+                                            decoration: BoxDecoration(
+                                              color: (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
+                                                  ? AppColors.appButtonColor
+                                                  : Colors.black54,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1) ? Icons.bookmark : Icons.bookmark_outline,
+                                              color: Colors.white,
+                                              size: 20,
+                                            ),
                                           ),
-                                          child: Icon(
-                                            Icons.bookmark_outline,
-                                            color: Colors.white,
-                                            size: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                        );
+                                      }),
+                                    )
                                   ],
                                 )
                               : Stack(
@@ -284,29 +284,33 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
                                           if (widget.isaiTags == false)
                                             Positioned(
-                                              top: 12,
-                                              right: 14,
-                                              child: GestureDetector(
-                                                onTap: () {
-                                                  context.read<SettingsProvider>().saveBookmarks(
-                                                        widget.article['id'].toString(),context
-                                                      );
-                                                  print("");
-                                                },
-                                                child: Container(
-                                                  padding: EdgeInsets.all(7),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black54,
-                                                    shape: BoxShape.circle,
-                                                  ),
-                                                  child: Icon(
-                                                    Icons.bookmark_outline,
-                                                    color: Colors.white,
-                                                    size: 20,
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
+                                                top: 12,
+                                                right: 14,
+                                                child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                                  return GestureDetector(
+                                                    onTap: () {
+                                                      homeProvider.isBookMarkPost(widget.article, context);
+
+                                                      print("");
+                                                    },
+                                                    child: Container(
+                                                      padding: EdgeInsets.all(7),
+                                                      decoration: BoxDecoration(
+                                                        color: (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
+                                                            ? AppColors.appButtonColor
+                                                            : Colors.black54,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: Icon(
+                                                        (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
+                                                            ? Icons.bookmark
+                                                            : Icons.bookmark_outline,
+                                                        color: Colors.white,
+                                                        size: 20,
+                                                      ),
+                                                    ),
+                                                  );
+                                                })),
                                         ],
                                       ),
                                     ),
@@ -708,16 +712,16 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     text.splitMapJoin(linkRegExp, onMatch: (match) {
       String link = match.group(0)!;
 
-      if (link.contains('<link1>')) {
+      if (link.contains('link1')) {
         log("click linkss    ${links!.first.value.toString()}");
         link = links.first.value.toString();
       }
 
-      if (link.contains('<link1>') && links != null && links.isNotEmpty) {
+      if (link.contains('link1') && links != null && links.isNotEmpty) {
         link = links[0].value.toString();
-      } else if (link.contains('<link2>') && links != null && links.length > 1) {
+      } else if (link.contains('link2') && links != null && links.length > 1) {
         link = links[1].value.toString();
-      } else if (link.contains('<link3>') && links != null && links.length > 2) {
+      } else if (link.contains('link3') && links != null && links.length > 2) {
         link = links[2].value.toString();
       } else {
         link = link;

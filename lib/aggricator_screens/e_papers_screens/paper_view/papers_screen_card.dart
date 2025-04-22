@@ -68,7 +68,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                 : CardSwiper(
                     allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
                     controller: controller,
-                    cardsCount: ePapersProvider.getAllMainPapersList.length,
+                    cardsCount: ePapersProvider.getAllMainPapersList.length??1,
                     // onSwipe: (previousIndex, currentIndex, direction) {
                     //   print("Swiped from $previousIndex to $currentIndex  direction $direction");
                     //   return true;
@@ -183,18 +183,21 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                 right: 14,
                                 child: GestureDetector(
                                   onTap: () {
-                                    context.read<SettingsProvider>().saveBookmarks(
-                                          ePapersProvider.getAllMainPapersList[index].id.toString(),context
-                                        );
+                                    ePapersProvider.isBookMarkPost(   ePapersProvider.getAllMainPapersList[index],context);
+
                                   },
-                                  child: Container(
+                                  child:Container(
                                     padding: EdgeInsets.all(7),
                                     decoration: BoxDecoration(
-                                      color: Colors.black54,
+                                      color: (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) || ePapersProvider.getSinglePapersList[index].id== 1)
+                                          ? AppColors.appButtonColor
+                                          : Colors.black54,
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
-                                      Icons.bookmark_border,
+                                      (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) || ePapersProvider.getSinglePapersList[index].id == 1)
+                                          ? Icons.bookmark
+                                          : Icons.bookmark_outline,
                                       color: Colors.white,
                                       size: 20,
                                     ),

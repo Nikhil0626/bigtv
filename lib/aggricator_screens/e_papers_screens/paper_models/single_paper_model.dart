@@ -7,6 +7,7 @@ class SinglePaperModel {
   final String? imageUrl;
   final int? pageNumber;
   final String? publishedDate;
+  final String? isBookmarked;
   final List<PageData>? data;
   final bool? isTodays;
 
@@ -19,6 +20,7 @@ class SinglePaperModel {
     this.imageUrl,
     this.pageNumber,
     this.publishedDate,
+    this.isBookmarked,
     this.data,
     this.isTodays,
   });
@@ -33,6 +35,7 @@ class SinglePaperModel {
       imageUrl: json['image_url'] as String?,
       pageNumber: json['page_number'] as int?,
       publishedDate: json['published_date'] as String?,
+      isBookmarked: json['isBookmarked'] as String?,
       isTodays: json['is_todays'] as bool?,
       data: (json['data'] as List<dynamic>?)
           ?.map((e) => PageData.fromJson(e as Map<String, dynamic>))
@@ -50,6 +53,7 @@ class SinglePaperModel {
       'image_url': imageUrl,
       'page_number': pageNumber,
       'published_date': publishedDate,
+      'isBookmarked': isBookmarked,
       'is_todays': isTodays,
       'data': data?.map((e) => e.toJson()).toList(),
     };

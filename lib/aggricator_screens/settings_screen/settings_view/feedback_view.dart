@@ -17,6 +17,8 @@ class FeedbackForm extends StatefulWidget {
 class _FeedbackFormState extends State<FeedbackForm> {
   int selectedStar = 0;
 
+
+
   String get feedbackMessage {
     switch (selectedStar) {
       case 1:
@@ -235,7 +237,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     onTap: (){
                       if(settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0) {
                         settingsProvider.postFeedBack(selectedStar,).then((value) {
-                          selectedStar = 0;setState(() {
+                          selectedStar = 0;
+                          setState(() {
                             settingsProvider.feedbackController.clear();
                           });
                         },);

@@ -12,6 +12,7 @@ import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'ai_tag_posts_pageview.dart';
+import 'image_view.dart';
 import 'list_standerd_post_view.dart';
 import 'main_screen_pageview.dart';
 
@@ -140,60 +141,7 @@ class _MainScreenListState extends State<MainScreenList> {
                                   padding: const EdgeInsets.all(16.0),
                                   child: SizedBox(
                                     height: 330.h,
-                                    child: Stack(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(16.r),
-                                          ),
-                                          child: CachedNetworkImage(
-                                            imageUrl: homeProvider.getAllPostList[index]['image_url'],
-                                            height: 330.h,
-                                            width: MediaQuery.of(context).size.width,
-                                            fit: BoxFit.fill,
-                                            placeholder: (context, url) => Container(
-                                              height: 330.h,
-                                              width: MediaQuery.of(context).size.width,
-                                              color: AppColors.borderColor.withOpacity(.2),
-                                            ),
-                                            errorWidget: (context, url, error) => Container(
-                                              height: 330.h,
-                                              width: MediaQuery.of(context).size.width,
-                                              color: Colors.grey.shade200,
-                                              child: Center(
-                                                child: Icon(
-                                                  Icons.image,
-                                                  size: 100,
-                                                  color: Colors.grey.shade300,
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        Positioned(
-                                          top: 10,
-                                          right: 14,
-                                          child: GestureDetector(
-                                            onTap: () {
-                                              context.read<SettingsProvider>().saveBookmarks(homeProvider.getAllPostList[index]['id'].toString(),context);
-                                              print("");
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(7),
-                                              decoration: BoxDecoration(
-                                                color: Colors.black54,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                Icons.bookmark_outline,
-                                                color: Colors.white,
-                                                size: 20,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                    child: ImageView(index: index,getAllPostList: homeProvider.getAllPostList[index],)
                                   ),
                                 )
                               : homeProvider.getAllPostList[index]['type'] == "Gallery"
@@ -206,33 +154,39 @@ class _MainScreenListState extends State<MainScreenList> {
                                           child: Stack(
                                             children: [
                                               FullPageCarousel(
-                                                isHome: true,
+                                                isHome: false,
                                                 imageUrls: homeProvider.getAllPostList[index]['gallery'] ?? [],
                                                 postDetails: homeProvider.getAllPostList[index],
                                               ),
                                               Positioned(
                                                 top: 10,
                                                 right: 14,
-                                                child: GestureDetector(
-                                                  onTap: () {
-                                                    context.read<SettingsProvider>().saveBookmarks(
-                                                          homeProvider.getAllPostList[index]['id'].toString(),context
-                                                        );
-                                                    print("");
-                                                  },
-                                                  child: Container(
-                                                    padding: EdgeInsets.all(7),
-                                                    decoration: BoxDecoration(
-                                                      color: Colors.black54,
-                                                      shape: BoxShape.circle,
+                                                child:Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                                  return  GestureDetector(
+                                                    onTap: () {
+
+                                                      homeProvider.isBookMarkPost(homeProvider.getAllPostList[index], context);
+
+                                                      print("");
+                                                    },
+                                                    child: Container(
+                                                      padding: EdgeInsets.all(7),
+                                                      decoration: BoxDecoration(
+                                                        color:  (homeProvider.isBookMark.contains(homeProvider.getAllPostList[index]['id'].toString()) || homeProvider.getAllPostList[index]['isBookmarked'] == 1)
+                                                            ? AppColors.appButtonColor
+                                                            : Colors.black54,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: Icon(
+                                                        (homeProvider.isBookMark.contains(homeProvider.getAllPostList[index]['id'].toString()) || homeProvider.getAllPostList[index]['isBookmarked'] == 1)
+                                                            ? Icons.bookmark
+                                                            : Icons.bookmark_outline,
+                                                        color: Colors.white,
+                                                        size: 20,
+                                                      ),
                                                     ),
-                                                    child: Icon(
-                                                      Icons.bookmark_outline,
-                                                      color: Colors.white,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                ),
+                                                  );
+                                                })
                                               ),
                                             ],
                                           ),

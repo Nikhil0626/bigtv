@@ -12,6 +12,7 @@ import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -187,15 +188,13 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
                                               color: AppColors.textColor,
                                             ),
                                           ),
+                                          height(height: 2),
                                           Row(
                                             children: [
-                                              Icon(
-                                                Icons.shortcut_sharp,
-                                                color: Colors.greenAccent,
-                                              ),
+                                              index==0?SvgPicture.asset("assets/svg/like.svg",height: 16,width: 16,): index==2?SvgPicture.asset("assets/svg/share.svg",height: 16,width: 16,):SvgPicture.asset("assets/svg/eye.svg",height: 16,width: 16,),
                                               width(width: 6),
                                               Text(
-                                                "టాప్ స్టోరీస్",
+                                                index ==0?"టాప్ లైక్స్":index == 2?"టాప్ షేర్‌డ్": "టాప్ వ్యూడ్",
                                                 style: fontStyle(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w400,

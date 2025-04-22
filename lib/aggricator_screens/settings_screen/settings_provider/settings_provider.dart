@@ -29,11 +29,11 @@ class SettingsProvider extends ChangeNotifier {
 
   bool isBookMarkLoading = false;
 
-  Future getAllBookMarks() async {
+  Future getAllBookMarks({String id = "0"}) async {
     isBookMarkLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? userId = preferences.getString("deviceID");
-    Map<String, dynamic> body = {"device_id": userId};
+    String? userId = preferences.getString("userId");
+    Map<String, dynamic> body = {"user_id": userId,"last_bookmark_id":id};
     try {
       log("body $body");
       Response response = await SettingsRepo().bookMarks(body);
@@ -55,18 +55,24 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> saveBookmarks(String postId, context) async {
+  Future<void> saveBookmarks(String postId, context,isBookMark) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     String? loginType = preferences.getString("loginType");
 
     if (loginType == "login") {
-      Map<String, dynamic> body = {"post_id": postId, "user_id": userId, "bookmark": 1};
+      Map<String, dynamic> body = {"post_id": postId, "user_id": userId, "bookmark": isBookMark};
       try {
         log("body $body");
         Response response = await SettingsRepo().saveBookMarks(body);
         if (response.statusCode == 200) {
-          CustomToast.showSuccessToast(msg: "Bookmark added successfully", duration: Duration(seconds: 3));
+          if(isBookMark == 1){
+            CustomToast.showSuccessToast(msg: "Bookmark added",);
+
+          }else{
+            CustomToast.showErrorToast(msg: "Bookmark removed", );
+
+          }
         }
       } catch (e) {
         log("Error: $e");

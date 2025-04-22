@@ -24,6 +24,7 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_and _source.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
+import 'home_provider.dart';
 import 'main_screen_pageview.dart';
 
 
@@ -126,23 +127,30 @@ ScreenshotController screenshotControllers = ScreenshotController();
                       Positioned(
                         top: 10,
                         right: 14,
-                        child: GestureDetector(
-                          onTap: () {
-                            context.read<SettingsProvider>().saveBookmarks(widget.articalData['id'].toString(),context);
-                            print("");
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.bookmark_outline,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
+                        child:  Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                          return GestureDetector(
+                              onTap: () {
+                                homeProvider.isBookMarkPost(widget.articalData, context);
+                                print("");
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(7),
+                                decoration: BoxDecoration(
+                                  color: (homeProvider.isBookMark.contains(widget.articalData['id'].toString()) || widget.articalData['isBookmarked'] == 1)
+                                      ? AppColors.appButtonColor
+                                      : Colors.black54,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  (homeProvider.isBookMark.contains(widget.articalData['id'].toString()) || widget.articalData['isBookmarked'] == 1)
+                                      ? Icons.bookmark
+                                      : Icons.bookmark_outline,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                            );
+                          }
                         ),
                       ),
                     ],
