@@ -9,17 +9,28 @@ import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../screens/Auth_module/auth_provider/auth_provider.dart';
+import '../../screens/home_screen/botton_actions.dart';
+import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../screens/home_screen/home_screens/google_ads_view.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../screens/videos_main/video_views/gallery_screen.dart';
+import '../../services/image_to_pdf_helper.dart';
+import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_spaces.dart';
+import '../../utils/app_toasts.dart';
+import '../../utils/commant_screen.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'ai_tag_posts_pageview.dart';
+import 'image_view.dart';
 import 'main_screen_pageview.dart';
 
 class MainScreenCard extends StatefulWidget {
@@ -88,35 +99,40 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                 itemCount: homeProvider.getAllAiTagsList.length,
                                 itemBuilder: (context, index) {
 
-                                  return InkWell(
-                                    onTap: (){
-                                      Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                      builder: (context) => AiTagPostsPageView(
-                                        isAiTags: true,
-                                         tagName: homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
-                                          tagId: homeProvider.getAllAiTagsList[index]['aitagid'].toString(),
-                                      ),
-                                      ));
+                                  return Container(
+                                    color: Colors.white,
+                                    child: InkWell(
+                                      onTap: (){
+                                        Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                        builder: (context) => AiTagPostsPageView(
+                                          isAiTags: true,
+                                           tagName: homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                            tagId: homeProvider.getAllAiTagsList[index]['aitagid'].toString(),
+                                        ),
+                                        ));
 
-                                    },
-                                    child: Container(
-                                      height: 30.h,
-                                      margin: EdgeInsets.symmetric(horizontal: 6.w),
-                                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.cardBackgroundColor,
-                                        borderRadius: BorderRadius.circular(12.r),
-                                      ),
-                                      alignment: Alignment.center,
-                                      child: Text(
-                                        homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
-                                        textAlign: TextAlign.center,
-                                        style: homeScreenFontStyle(
-                                          color: AppColors.textColor,
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w500,
+                                      },
+                                      child: Container(
+                                        height: 30.h,
+                                        margin: EdgeInsets.symmetric(horizontal: 6.w,vertical: 4.h),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.cardBackgroundColor,
+                                          borderRadius: BorderRadius.circular(12.r),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+                                          child: Text(
+                                            homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                            textAlign: TextAlign.center,
+                                            style: homeScreenFontStyle(
+                                              color: AppColors.textColor,
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -125,21 +141,21 @@ class _MainScreenCardState extends State<MainScreenCard> {
                               )),
                           Expanded(
                             child: GestureDetector(
-                              onVerticalDragUpdate: (details) {
-                                setState(() {
-                                  dragOffset += details.delta.dy;
-                                });
-                              },
-                              onVerticalDragEnd: (details) {
-                                if (details.velocity.pixelsPerSecond.dy > 0) {
-                                  controller.undo();
-                                } else if (details.velocity.pixelsPerSecond.dy < 0) {
-                                  controller.swipe(CardSwiperDirection.top);
-                                }
-                                setState(() {
-                                  dragOffset = 0.0; // Reset after action
-                                });
-                              },
+                              // onVerticalDragUpdate: (details) {
+                              //   setState(() {
+                              //     dragOffset += details.delta.dy;
+                              //   });
+                              // },
+                              // onVerticalDragEnd: (details) {
+                              //   if (details.velocity.pixelsPerSecond.dy > 0) {
+                              //     controller.undo();
+                              //   } else if (details.velocity.pixelsPerSecond.dy < 0) {
+                              //     controller.swipe(CardSwiperDirection.top);
+                              //   }
+                              //   setState(() {
+                              //     dragOffset = 0.0; // Reset after action
+                              //   });
+                              // },
                               child: CardSwiper(
                                 allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
                                 controller: controller,
@@ -148,7 +164,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                 onSwipe: (previousIndex, currentIndex, direction) {
                                   if(homeProvider.getAllPostList.length-5 ==currentIndex){
                                     log("last post   ${homeProvider.getAllPostList[int.parse(currentIndex.toString())]["id"]}");
-                                    context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList[int.parse(currentIndex.toString())]["id"]);
+                                    context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList.last["id"].toString());
                                   }
                                   return true;
                                 },
@@ -200,62 +216,10 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                     ),
                                                   )
                                                 : homeProvider.getAllPostList[index]['type'].toString() == "Image"
-                                                    ? InkWell(
-                                                        onTap: () async {
-                                                          if (homeProvider.getAllPostList[index]['type'] == "Image") {
-                                                            if (await canLaunchUrl(Uri.parse(homeProvider.getAllPostList[index]['content'].toString()))) {
-                                                              await launchUrl(Uri.parse(homeProvider.getAllPostList[index]['content'].toString()));
-                                                            } else {
-                                                              throw 'Could not launch ${Uri.parse(homeProvider.getAllPostList[index]['content'].toString())}';
-                                                            }
-                                                          }
-                                                        },
-                                                        child: Padding(
-                                                          padding: const EdgeInsets.only(bottom: 20.0),
-                                                          child: Stack(
-                                                            children: [
-                                                              ClipRRect(
-                                                                borderRadius: BorderRadius.all(
-                                                                  Radius.circular(12),
-                                                                ),
-                                                                child: Image.network(
-                                                                  homeProvider.getAllPostList[index]['image_url'].toString() ?? "",
-                                                                  width: MediaQuery.of(context).size.width,
-                                                                  height: MediaQuery.of(context).size.height,
-                                                                  fit: BoxFit.cover,
-                                                                ),
-                                                              ),
-                                                              Positioned(
-                                                                top: 10,
-                                                                right: 14,
-                                                                child: GestureDetector(
-                                                                  onTap: () {
-                                                                    context.read<SettingsProvider>().saveBookmarks(
-                                                                          homeProvider.getAllPostList[index]['id'].toString(),
-                                                                        );
-                                                                    print("");
-                                                                  },
-                                                                  child: Container(
-                                                                    padding: EdgeInsets.all(7),
-                                                                    decoration: BoxDecoration(
-                                                                      color: Colors.black54,
-                                                                      shape: BoxShape.circle,
-                                                                    ),
-                                                                    child: Icon(
-                                                                      Icons.bookmark_outline,
-                                                                      color: Colors.white,
-                                                                      size: 20,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      )
+                                                    ? ImageView(index: index,getAllPostList: homeProvider.getAllPostList,)
                                                     : homeProvider.getAllPostList[index]['type'].toString() == "Gallery"
                                                         ? Padding(
-                                                            padding: const EdgeInsets.only(bottom: 20.0),
+                                                            padding: const EdgeInsets.only(bottom: 5.0),
                                                             child: Stack(
                                                               children: [
                                                                 ClipRRect(
@@ -263,7 +227,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                     Radius.circular(12),
                                                                   ),
                                                                   child: FullPageCarousel(
-                                                                    isHome: true,
+                                                                    isHome: false,
                                                                     imageUrls: homeProvider.getAllPostList[index]['gallery'] ?? [],
                                                                     postDetails: homeProvider.getAllPostList[index],
                                                                   ),
@@ -274,7 +238,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                   child: GestureDetector(
                                                                     onTap: () {
                                                                       context.read<SettingsProvider>().saveBookmarks(
-                                                                            homeProvider.getAllPostList[index]['id'].toString(),
+                                                                            homeProvider.getAllPostList[index]['id'].toString(),context
                                                                           );
                                                                       print("");
                                                                     },
@@ -292,11 +256,13 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                                                     ),
                                                                   ),
                                                                 ),
+
                                                               ],
                                                             ),
                                                           )
                                                         : StandardCard(
                                                             getAllPostList: homeProvider.getAllPostList[index],
+                                          index: index,
                                                           )),
                                   );
                                 },

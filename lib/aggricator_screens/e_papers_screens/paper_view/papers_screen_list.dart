@@ -125,7 +125,7 @@ class PapersScreenList extends StatelessWidget {
                               child: GestureDetector(
                                 onTap: () {
                                   context.read<SettingsProvider>().saveBookmarks(
-                                    ePapersProvider.getAllMainPapersList[index].id.toString(),
+                                    ePapersProvider.getAllMainPapersList[index].id.toString(),context
                                   );
                                 },
                                 child: Container(

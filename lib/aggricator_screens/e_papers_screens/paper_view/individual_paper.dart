@@ -171,7 +171,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                   child: GestureDetector(
                                     onTap: () {
                                       context.read<SettingsProvider>().saveBookmarks(
-                                            ePapersProvider.getSinglePapersList[index].id.toString(),
+                                            ePapersProvider.getSinglePapersList[index].id.toString(),context
                                           );
                                     },
                                     child: Container(

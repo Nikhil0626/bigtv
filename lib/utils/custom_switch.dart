@@ -18,18 +18,18 @@ class CustomSwitch extends StatelessWidget {
         return GestureDetector(
             onTap: () {
               homeProvider.switchChange(true);
-              Locale currentLocale = context.locale;
-              log("Current Locale: ${currentLocale.languageCode}");
-
-              if (currentLocale.languageCode == 'en') {
-                context.setLocale(Locale('te')); // Switch to Telugu
-              } else if (currentLocale.languageCode == 'te') {
-                context.setLocale(Locale('hi')); // Switch to Hindi
-              } else {
-                context.setLocale(Locale('en')); // Switch to English
-              }
-
-              log("New Locale: ${context.locale.languageCode}");
+              // Locale currentLocale = context.locale;
+              // log("Current Locale: ${currentLocale.languageCode}");
+              //
+              // if (currentLocale.languageCode == 'en') {
+              //   context.setLocale(Locale('te')); // Switch to Telugu
+              // } else if (currentLocale.languageCode == 'te') {
+              //   context.setLocale(Locale('hi')); // Switch to Hindi
+              // } else {
+              //   context.setLocale(Locale('en')); // Switch to English
+              // }
+              //
+              // log("New Locale: ${context.locale.languageCode}");
             },
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 300),

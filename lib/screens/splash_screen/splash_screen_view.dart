@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
@@ -11,7 +9,6 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import '../../services/webengage_notification.dart';
 
 
 class SplashScreen extends StatefulWidget {
@@ -47,10 +44,6 @@ class _SplashScreenState extends State<SplashScreen> {
       },
     );
 
-    // Wait for a short time to check if a deep link was received
-    await Future.delayed(Duration(seconds: 1));
-
-    // If no link was received, navigate to the home screen
     if (!didReceiveLink) {
       checkLastShownDate(context);
     }
@@ -58,19 +51,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
 
   void openAppLink(Uri uri) {
-    // print("Hai");
-    // Navigator.push(context, MaterialPageRoute(builder: (context) => HomeView(),)
-    // );
-    if (uri.path == '/individualPage') {
-
-      final postId = uri.queryParameters['id'] ?? "";
-      log("Navigating to Individual Post screen with postId: $postId");
-      Navigator.pushNamed(
-        context,
-        '/individualPage',
-        arguments: {'postId': postId},
-      );
-    }
+    Navigator.push(context, MaterialPageRoute(builder: (context) => HomeView(),)
+    );
   }
 
 

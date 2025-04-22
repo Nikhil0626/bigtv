@@ -357,11 +357,12 @@ class AuthenticationProvider extends ChangeNotifier {
         );
         break;
       case NewAppLoginStatus.home:
-        Navigator.push(
+        Navigator.pushAndRemoveUntil(
             context,
+
             MaterialPageRoute(
               builder: (context) => HomeView(),
-            ));
+            ),(route) => false,);
         break;
       default:
         Navigator.pushAndRemoveUntil(

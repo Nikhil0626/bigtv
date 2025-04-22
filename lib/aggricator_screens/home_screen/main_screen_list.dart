@@ -57,9 +57,10 @@ class _MainScreenListState extends State<MainScreenList> {
                     itemCount: homeProvider.getAllAiTagsList.length,
                     itemBuilder: (context, index) {
 
-                      return InkWell(
-                        onTap: (){
-
+                      return Container(
+                        color: Colors.white,
+                        child: InkWell(
+                          onTap: (){
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -70,24 +71,26 @@ class _MainScreenListState extends State<MainScreenList> {
                                   ),
                                 ));
 
-
-                        },
-                        child: Container(
-                          height: 30.h,
-                          margin: EdgeInsets.symmetric(horizontal: 6.w),
-                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                          decoration: BoxDecoration(
-                            color: AppColors.cardBackgroundColor,
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          alignment: Alignment.center,
-                          child: Text(
-                            homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
-                            textAlign: TextAlign.center,
-                            style: homeScreenFontStyle(
-                              color: AppColors.textColor,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
+                          },
+                          child: Container(
+                            height: 30.h,
+                            margin: EdgeInsets.symmetric(horizontal: 6.w,vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: AppColors.cardBackgroundColor,
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+                              child: Text(
+                                homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                textAlign: TextAlign.center,
+                                style: homeScreenFontStyle(
+                                  color: AppColors.textColor,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
                             ),
                           ),
                         ),
@@ -172,7 +175,7 @@ class _MainScreenListState extends State<MainScreenList> {
                                           right: 14,
                                           child: GestureDetector(
                                             onTap: () {
-                                              context.read<SettingsProvider>().saveBookmarks(homeProvider.getAllPostList[index]['id'].toString());
+                                              context.read<SettingsProvider>().saveBookmarks(homeProvider.getAllPostList[index]['id'].toString(),context);
                                               print("");
                                             },
                                             child: Container(
@@ -213,7 +216,7 @@ class _MainScreenListState extends State<MainScreenList> {
                                                 child: GestureDetector(
                                                   onTap: () {
                                                     context.read<SettingsProvider>().saveBookmarks(
-                                                          homeProvider.getAllPostList[index]['id'].toString(),
+                                                          homeProvider.getAllPostList[index]['id'].toString(),context
                                                         );
                                                     print("");
                                                   },
@@ -236,7 +239,7 @@ class _MainScreenListState extends State<MainScreenList> {
                                         ),
                                       ),
                                     )
-                                  :ListStandardPostView(articalData: homeProvider.getAllPostList[index],)
+                                  :ListStandardPostView(articalData: homeProvider.getAllPostList[index],index:index)
                     );
                   },
                 ),

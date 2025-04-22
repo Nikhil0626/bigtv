@@ -25,9 +25,7 @@ class _VideoPreview extends State<VideoPreview> {
   @override
   void initState() {
     super.initState();
-
       context.read<HomeProvider>().youtubeInitial(widget.url);
-
   }
 
   @override

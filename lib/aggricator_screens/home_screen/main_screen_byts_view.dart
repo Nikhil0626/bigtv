@@ -126,7 +126,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     child: GestureDetector(
                                       onTap: () {
                                         context.read<SettingsProvider>().saveBookmarks(
-                                              widget.article['id'].toString(),
+                                              widget.article['id'].toString(),context
                                             );
                                         print("");
                                       },
@@ -185,7 +185,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           //   flipProvider.mainArticlesData[index].id.toString(),
                                           // );
                                           context.read<SettingsProvider>().saveBookmarks(
-                                                widget.article['id'].toString(),
+                                                widget.article['id'].toString(),context
                                               );
                                           print("");
                                         },
@@ -289,7 +289,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                               child: GestureDetector(
                                                 onTap: () {
                                                   context.read<SettingsProvider>().saveBookmarks(
-                                                        widget.article['id'].toString(),
+                                                        widget.article['id'].toString(),context
                                                       );
                                                   print("");
                                                 },

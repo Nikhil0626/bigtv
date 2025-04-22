@@ -77,7 +77,7 @@ Future<void> main() async {
           Locale('hi'),
         ],
         path: 'assets/translations',
-        fallbackLocale: Locale("en"),
+        fallbackLocale: Locale("te"),
         child: AppLifecycleManager(child: MyApp())));
   });
 
