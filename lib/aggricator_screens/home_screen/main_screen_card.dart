@@ -90,7 +90,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                     ? AppNoData()
                     : Column(
                         children: [
-                          Container(
+                          homeProvider.getAllAiTagsList.isEmpty?SizedBox.shrink():   Container(
                               height: 50,
                               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                               // color: Colors.greenAccent,
@@ -162,7 +162,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                 cardsCount: homeProvider.getAllPostList.length,
                                 numberOfCardsDisplayed: 4,
                                 onSwipe: (previousIndex, currentIndex, direction) {
-                                  if(homeProvider.getAllPostList.length-5 ==currentIndex){
+                                  if(homeProvider.getAllPostList.length-5 == currentIndex){
                                     log("last post   ${homeProvider.getAllPostList[int.parse(currentIndex.toString())]["id"]}");
                                     context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList.last["id"].toString());
                                   }
@@ -201,14 +201,24 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                             ),
                                           ],
                                         ),
-                                        child: homeProvider.isWebView==true
+                                        child: homeProvider.getAllPostList[index]['type'].toString() == "WebUrl"
                                             ? Padding(
-                                                padding: const EdgeInsets.all(8.0),
-                                                child: InAppWebViewScreen(
-                                                  webUrl: homeProvider.webUrl.toString(),
-                                                  title: '',
-                                                ),
-                                              )
+                                          padding: const EdgeInsets.all(16.0),
+                                          child: InkWell(
+                                            onTap: (){
+                                              Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: homeProvider.webUrl.toString(), title: "IPL Update"),));
+                                            },
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.all(Radius.circular(10.r)),
+                                              child: Image.asset(
+                                                "assets/svg/ipl.png",
+                                                width: MediaQuery.of(context).size.width,
+                                                height: MediaQuery.of(context).size.height,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        )
                                             : homeProvider.getAllPostList[index]['type'].toString() == "GoogleAds"
                                                 ? Padding(
                                                     padding: const EdgeInsets.only(bottom: 20.0),

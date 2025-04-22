@@ -241,20 +241,29 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
               Positioned(
                 top: 8.w,
                 right: 8.w,
-                child: InkWell(
-                  onTap: () {
-                    context.read<ReelsProviders>().isBookMarkPost(  widget.card,context);
-                  },
-                  child: Container(
-                    height: 30.w,
-                    width: 30.w,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.8),
-                      borderRadius: BorderRadius.circular(15.r), // Fully curved
+                child: Consumer<ReelsProviders>(builder: (_, homeProvider, __) {
+                  return GestureDetector(
+                    onTap: () {
+                      context.read<ReelsProviders>().isBookMarkPost(  widget.card,context);
+
+                      print("");
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: (homeProvider.isBookMark.contains(widget.card.id.toString()) || widget.card.isBookmarked == 1)
+                            ? AppColors.appButtonColor
+                            : Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        (homeProvider.isBookMark.contains(widget.card.id.toString()) ||  widget.card.isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
+                        color: Colors.white,
+                        size: 20,
+                      ),
                     ),
-                    child: Icon(Icons.bookmark_border, color: Colors.white, size: 20.sp),
-                  ),
-                ),
+                  );
+                }),
               ),
 
 

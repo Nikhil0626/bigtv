@@ -203,7 +203,7 @@ class _HomeViewState extends State<HomeView> {
                       },
                     ),
                   if( context.read<HomeProvider>().selectedIndex == 3)
-                    Text("V5.0.0+32",style: fontStyle(fontWeight: FontWeight.w900),),
+                    Text("V5.0.1+3",style: fontStyle(fontWeight: FontWeight.w900),),
                  width(width: 20),
                 ],
               ),

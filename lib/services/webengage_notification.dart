@@ -11,7 +11,7 @@ import '../globel_keys/global_variables_data.dart';
 import '../screens/home_screen/home_repo/event_repo.dart';
 
 
-bool _isSubscribed = false; // Add a flag to track subscription
+ // Add a flag to track subscription
 
 void subscribeToPushCallbacks(WebEngagePlugin webEngagePlugin,) async{
 SharedPreferences sp = await SharedPreferences.getInstance();

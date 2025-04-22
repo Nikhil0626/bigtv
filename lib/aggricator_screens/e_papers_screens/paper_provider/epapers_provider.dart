@@ -18,7 +18,7 @@ class EPapersProvider extends ChangeNotifier {
   List<SinglePaperModel> getSinglePapersList = [];
 
   Future getMainEPapers() async {
-    isBookMark = [];
+
     isMainPapers = true;
 
     try {
@@ -28,7 +28,7 @@ class EPapersProvider extends ChangeNotifier {
         List data = response.data;
         getAllMainPapersList = data.map((e) => EPaperMainModel.fromJson(e)).toList();
         isBookMark = getAllMainPapersList
-            .where((e) => e.id == 1)
+            .where((e) => e.isBookmarked == 1)
             .map((e) => e.id.toString())
             .toList();
       }
@@ -47,18 +47,23 @@ class EPapersProvider extends ChangeNotifier {
   Future getSingleEPapers(String paper) async {
     isMainPapers = true;
     getSinglePapersList = [];
+
     try {
       Response response = await EPaperRepo().getSingleEPapers(paper);
       if (response.statusCode == 200) {
         log(response.data.toString());
         List data = response.data;
         getSinglePapersList = data.map((e) => SinglePaperModel.fromJson(e)).toList();
+        isBookMark = getSinglePapersList
+            .where((e) => e.isBookmarked == 1)
+            .map((e) => e.id.toString())
+            .toList();
       }
     } on DioException catch (e, st) {
-      getAllMainPapersList = [];
+      getSinglePapersList = [];
       log("Single paper dio error ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
-      getAllMainPapersList = [];
+      getSinglePapersList = [];
       log("Single paper error ${e.toString()} ---- ${st.toString()}");
     } finally {
       isMainPapers = false;
@@ -77,24 +82,22 @@ class EPapersProvider extends ChangeNotifier {
     if (!isBookMark.contains(val.id.toString())) {
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isLike": true}
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": true}
       });
       isBookMark.add(val.id.toString());
       Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val['id'].toString(), context,1
+          val.id.toString(), context,1
       );
-      sendLikeDetails(userId, val, true, val['title'].toString());
       log(isBookMark.toString());
     } else {
       Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val['id'].toString(), context,0
+          val.id.toString(), context,0
       );
       isBookMark.remove(val.id.toString());
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "${deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": false}
+        "data": {"device_id": "${deviceId}", "userId": userId, "postId": val.id.toString(), "isLike": false}
       });
-      sendLikeDetails(userId, val.id.toString(), false, val['title'].toString());
       log(isBookMark.toString());
     }
 

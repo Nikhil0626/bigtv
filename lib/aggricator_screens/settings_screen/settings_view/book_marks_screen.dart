@@ -29,12 +29,8 @@ class _SavedArticlesState extends State<SavedArticles> {
   @override
   void initState() {
     super.initState();
+    context.read<SettingsProvider>().getAllBookMarks();
 
-    _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 100) {
-        context.read<SettingsProvider>().getAllBookMarks(id: context.read<SettingsProvider>().getAllBookmarkList.last.postId.toString());
-       }
-    });
   }
 
   @override
@@ -81,6 +77,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => PapersScreenPreview(
+                                        isBookmarked: article.isBookmarked?1:0,
                                         postId: article.postId.toString(),
                                         name: "E-Paper",
                                         imageUrls: [PageData(id: article.postId, imageUrl: article.imageUrl.toString(), pageNumber: 1)],

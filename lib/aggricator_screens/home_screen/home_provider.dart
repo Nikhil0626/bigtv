@@ -111,6 +111,9 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postId = "0"}) async {
+    if(postId == 0){
+      getAllPostList = [];
+    }
     isBookMark = [];
     isWebView = false;
     webUrl = "";
@@ -142,6 +145,42 @@ class HomeProvider extends ChangeNotifier {
       webUrl = response.data['webUrl'];
 
       getAllPostList.addAll(data);
+      if(isWebView){
+        getAllPostList.insert(0, {
+          "id": 000000,
+          "postOrder": 00000,
+          "author": 9,
+          "title": "WebUrl",
+          "content": "Hello",
+          "created": "2025-04-22T08:36:04",
+          "guid": "",
+          "post_type": "post",
+          "post_name": "సివిల్స్-తుది-ఫలితాలు-వి",
+          "post_mime_type": "",
+          "totalLikes": 8,
+          "totalViews": 14104,
+          "totalComments": 0,
+          "image_url": "",
+          "video_url": "",
+          "downloadUrl": null,
+          "gallery": null,
+          "type": "WebUrl",
+          "totalShares": 0,
+          "isReporter": 0,
+          "reportedBy": "",
+          "categoryName": "నేషనల్",
+          "postUrl": "",
+          "subType": "",
+          "isStickyPost": 0,
+          "adPosition": null,
+          "linkURLAndroid": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+          "linkURLIos": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+          "links": [],
+          "categoryId": 2,
+          "isBookmarked": 0
+        });
+      }
+      log("sjdhvfbeaijrafhvjhijoerahubvbfijohuvhguihogvj");
       log(getAllPostList[0]['image_url'].toString());
       isBookMark = getAllPostList
           .where((e) => e['isBookmarked'] == 1)
@@ -160,8 +199,11 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
+
+  bool isAiTagsLoading = false;
   Future getAllPostsByAiId(postId) async {
     getAllAiTagsPostList = [];
+    isAiTagsLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
 
@@ -184,13 +226,13 @@ class HomeProvider extends ChangeNotifier {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api catch ${st.toString()}");
     } finally {
-      // isHomeLoading = false;
+      isAiTagsLoading = false;
       notifyListeners();
     }
   }
 
   Future getAllAiTags() async {
-    // isHomeLoading = true;
+    getAllAiTagsList = [];
     try {
       Response response = await HomeRepo().getAllAiTags();
       getAllAiTagsList.addAll(response.data);
