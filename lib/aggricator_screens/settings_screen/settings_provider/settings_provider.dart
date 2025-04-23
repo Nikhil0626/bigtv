@@ -28,32 +28,91 @@ class SettingsProvider extends ChangeNotifier {
   TextEditingController profileController = TextEditingController();
 
   bool isBookMarkLoading = false;
+  bool isNextPageLoading = false;
+  bool allBookmarksLoaded = false;
+  String lastFetchedBookmarkId = "0";
 
-  Future getAllBookMarks({String id = "0"}) async {
-    isBookMarkLoading = true;
+  // Future getAllBookMarks({String id = "0"}) async {
+  //   isBookMarkLoading = true;
+  //   SharedPreferences preferences = await SharedPreferences.getInstance();
+  //   String? userId = preferences.getString("userId");
+  //   Map<String, dynamic> body = {"user_id": userId,"last_bookmark_id":id};
+  //   try {
+  //     log("body $body");
+  //     Response response = await SettingsRepo().bookMarks(body);
+  //     log("body ${response.data}");
+  //     if (response.statusCode == 200) {
+  //       List data = response.data['bookMarks'];
+  //       getAllBookmarkList = data
+  //           .map(
+  //             (e) => BookmarksModel.fromJson(e),
+  //           )
+  //           .toList();
+  //       log(response.data.toString());
+  //     }
+  //   } catch (e, st) {
+  //     log("kjsbdcjksjksdhbcfk${e.toString()} -- ${st}");
+  //   } finally {
+  //     isBookMarkLoading = false;
+  //     notifyListeners();
+  //   }
+  // }
+
+  Future refreshBookmarks()  async{
+    getAllBookmarkList.clear();
+    await getAllBookMarks(id: "0");
+    isBookMarkLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> getAllBookMarks({String id = "0"}) async {
+    if (id == "0") {
+      isBookMarkLoading = true; // Initial load
+    } else {
+      isNextPageLoading = true; // Paginated load
+    }
+    notifyListeners();
+
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {"user_id": userId,"last_bookmark_id":id};
+    Map<String, dynamic> body = {"user_id": userId, "last_bookmark_id": id};
+
     try {
-      log("body $body");
+      log("Request body: $body");
       Response response = await SettingsRepo().bookMarks(body);
-      log("body ${response.data}");
+
       if (response.statusCode == 200) {
         List data = response.data['bookMarks'];
-        getAllBookmarkList = data
-            .map(
-              (e) => BookmarksModel.fromJson(e),
-            )
-            .toList();
-        log(response.data.toString());
+
+        if (id == "0") {
+          getAllBookmarkList = data
+              .map((e) => BookmarksModel.fromJson(e))
+              .toList(); // Initial load
+        } else {
+          getAllBookmarkList.addAll(data
+              .map((e) => BookmarksModel.fromJson(e))
+              .toList()); // Append for pagination
+        }
+
+        // Check if all bookmarks are loaded
+        if (data.isEmpty) {
+          allBookmarksLoaded = true;
+        } else {
+          lastFetchedBookmarkId = getAllBookmarkList.last.postId.toString();
+        }
+      } else {
+        log("Failed to fetch bookmarks: ${response.statusCode}");
       }
     } catch (e, st) {
-      log("kjsbdcjksjksdhbcfk${e.toString()} -- ${st}");
+      log("Error while fetching bookmarks: $e\n$st");
     } finally {
       isBookMarkLoading = false;
+      isNextPageLoading = false;
       notifyListeners();
     }
   }
+
+
 
   Future<void> saveBookmarks(String postId, context,isBookMark) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();

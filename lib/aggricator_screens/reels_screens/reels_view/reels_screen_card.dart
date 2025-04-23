@@ -104,6 +104,8 @@ class _EachReelCardState extends State<EachReelCard> {
         child: Screenshot(
           controller: sc,
           child: Container(
+            height: MediaQuery.of(context).size.height * 0.7,
+            width: MediaQuery.of(context).size.width * 0.9,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.cardBackgroundColor,
@@ -124,16 +126,16 @@ class _EachReelCardState extends State<EachReelCard> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0),
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4),
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(10.r)),
                           child: CachedNetworkImage(
                             imageUrl: widget.reel.thumbnailUrl.toString(),
-                            height: MediaQuery.of(context).size.height * .6,
+                            height: MediaQuery.of(context).size.height * .56,
                             width: MediaQuery.of(context).size.width,
                             fit: BoxFit.cover,
                             placeholder: (context, url) => Container(
-                              height: MediaQuery.of(context).size.height * .6,
+                              height: MediaQuery.of(context).size.height * .56,
                               width: MediaQuery.of(context).size.width,
                               color: AppColors.borderColor.withOpacity(.2),
                             ),
