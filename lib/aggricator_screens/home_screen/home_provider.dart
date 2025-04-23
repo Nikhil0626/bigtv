@@ -81,7 +81,7 @@ class HomeProvider extends ChangeNotifier {
         // hideControls: true,
       ),
     );
-    notifyListeners();
+    // notifyListeners();
   }
 
 
@@ -122,21 +122,32 @@ class HomeProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
-    List<String> locationIds = locationId.split(',').map((e) => e.trim()).toList();
-    log(locationIds.toString());
+    List<int> locationIds = locationId
+        .split(',')
+        .where((e) => e.trim().isNotEmpty)
+        .map((e) => int.tryParse(e.trim()))
+        .whereType<int>()
+        .toList();
+    log('Location IDs: $locationIds');
+
     String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<String> categoriesIds = categoriesId.split(',').map((e) => e.trim()).toList();
-    log(categoriesIds.toString());
+    List<int> categoriesIds = categoriesId
+        .split(',')
+        .where((e) => e.trim().isNotEmpty)
+        .map((e) => int.tryParse(e.trim()))
+        .whereType<int>()
+        .toList();
+    log('Category IDs: $categoriesIds');
+
 
     Map<String, dynamic> body = {
       "device_id": deviceId,
       "postId": postId,
       "locationIds": locationIds,
-      "catgoriesId": categoriesIds,
-      "force_refresh": "false",
+      "categoriesId": categoriesIds,
       "userId":userId??0,
     };
-    log(body.toString());
+    log("allpost body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
 
@@ -144,7 +155,7 @@ class HomeProvider extends ChangeNotifier {
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
 
-      getAllPostList.addAll(data);
+
       if(isWebView){
         getAllPostList.insert(0, {
           "id": 000000,
@@ -180,7 +191,7 @@ class HomeProvider extends ChangeNotifier {
           "isBookmarked": 0
         });
       }
-      log("sjdhvfbeaijrafhvjhijoerahubvbfijohuvhguihogvj");
+      getAllPostList.addAll(data);
       log(getAllPostList[0]['image_url'].toString());
       isBookMark = getAllPostList
           .where((e) => e['isBookmarked'] == 1)

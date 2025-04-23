@@ -10,7 +10,6 @@ import '../../../../utils/app_toasts.dart';
 import '../../../auth_screens/authentication_model/location_model.dart';
 import '../../../auth_screens/authentication_provider/authentication_provider.dart';
 
-
 class UpdateRegionsView extends StatefulWidget {
   const UpdateRegionsView({super.key});
 
@@ -33,119 +32,118 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthenticationProvider>(builder: (_, authenticationProvider, __) {
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                children: [
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(vertical: 20),
-                  //   child: Container(
-                  //     padding: EdgeInsets.symmetric(horizontal: 10),
-                  //     decoration: BoxDecoration(
-                  //       color: Colors.grey[200],
-                  //       borderRadius: BorderRadius.circular(6),
-                  //     ),
-                  //     child: TextField(
-                  //       decoration: InputDecoration(
-                  //         icon: Icon(Icons.search, color: Colors.grey),
-                  //         hintText: 'Search',
-                  //         border: InputBorder.none,
-                  //       ),
-                  //       onChanged: (value) {
-                  //         // Implement search functionality if needed
-                  //       },
-                  //     ),
-                  //   ),
-                  // ),
-                  height(height: 12.h),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: RichText(
-                      text: TextSpan(
-                        text: "You have selected ",
-                        style: TextStyle(color: Colors.black87),
-                        children: [
-                          TextSpan(
-                            text: "0${authenticationProvider.selectedLocations.length}",
-                            style: homeScreenFontStyle(color: Colors.blue, fontWeight: FontWeight.bold),
-                          ),
-                          TextSpan(text: "/03"),
-                        ],
-                      ),
-                    ),
-                  ),
-                  height(height: 8),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: states.entries.map((entry) {
-                      int stateId = entry.key;
-                      String stateName = entry.value;
-
-                      List<LocationModel> districts = authenticationProvider.getAllLocationList
-                          .where((loc) => loc.stateId.toString() == stateId.toString())
-                          .toList();
-
-                      return ExpansionTile(
-                        tilePadding: EdgeInsets.symmetric(horizontal: 16),
-                        collapsedBackgroundColor: Colors.transparent,
-                        backgroundColor: Colors.transparent,
-                        childrenPadding: EdgeInsets.zero,
-                        initiallyExpanded: false,
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      return Scaffold(
+        bottomNavigationBar: Padding(
+          padding: EdgeInsets.all(25.w),
+          child: InkWell(
+            onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3
+                ? () {
+                    authenticationProvider.sendLocationsToServer(context);
+                  }
+                : () {
+                    CustomToast.showErrorToast(msg: "Please Select only 3 District ");
+                  },
+            child: Container(
+              width: double.infinity,
+              height: 35.h,
+              decoration: BoxDecoration(
+                color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3) ? AppColors.loginBgColor : AppColors.bodyTextColor.withOpacity(.2),
+                borderRadius: BorderRadius.all(Radius.circular(8.r)),
+              ),
+              child: Center(
+                child: Text(
+                  'Update',
+                  style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                ),
+              ),
+            ),
+          ),
+        ),
+        body: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  children: [
+                    // Padding(
+                    //   padding: const EdgeInsets.symmetric(vertical: 20),
+                    //   child: Container(
+                    //     padding: EdgeInsets.symmetric(horizontal: 10),
+                    //     decoration: BoxDecoration(
+                    //       color: Colors.grey[200],
+                    //       borderRadius: BorderRadius.circular(6),
+                    //     ),
+                    //     child: TextField(
+                    //       decoration: InputDecoration(
+                    //         icon: Icon(Icons.search, color: Colors.grey),
+                    //         hintText: 'Search',
+                    //         border: InputBorder.none,
+                    //       ),
+                    //       onChanged: (value) {
+                    //         // Implement search functionality if needed
+                    //       },
+                    //     ),
+                    //   ),
+                    // ),
+                    height(height: 12.h),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: RichText(
+                        text: TextSpan(
+                          text: "You have selected ",
+                          style: TextStyle(color: Colors.black87),
                           children: [
-                            Text(stateName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
-                            Text("(${districts.length})", style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                            TextSpan(
+                              text: "0${authenticationProvider.selectedLocations.length}",
+                              style: homeScreenFontStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                            ),
+                            TextSpan(text: "/03"),
                           ],
                         ),
-                        children: districts.map((district) {
-                          bool isSelected = authenticationProvider.selectedLocations.contains(district.districtName);
-                          return CheckboxListTile(
-                            title: Text(district.districtName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
-                            value: isSelected,
-                            onChanged: (bool? selected) {
-                              authenticationProvider.addToSelectedLocations(district.districtName);
-                            },
-                          );
-                        }).toList(),
-                      );
-                    }).toList(),
-                  ),
-                  height(height: 20),
-                ],
-              ),
-            ),
-            InkWell(
-              onTap: authenticationProvider.selectedLocations.length > 1 &&
-                  authenticationProvider.selectedLocations.length <= 3
-                  ? () {
-                authenticationProvider.sendLocationsToServer(context);
-              }
-                  : () {
-                CustomToast.showErrorToast(msg: "Please Select only 3 District ");
-              },
-              child: Container(
-                width: double.infinity,
-                height: 35.h,
-                decoration: BoxDecoration(
-                  color: (authenticationProvider.selectedLocations.length > 1 &&
-                      authenticationProvider.selectedLocations.length <= 3)
-                      ? AppColors.loginBgColor
-                      : AppColors.bodyTextColor.withOpacity(.2),
-                  borderRadius: BorderRadius.all(Radius.circular(8.r)),
-                ),
-                child: Center(
-                  child: Text(
-                    'Update',
-                    style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
-                  ),
+                      ),
+                    ),
+                    height(height: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: states.entries.map((entry) {
+                        int stateId = entry.key;
+                        String stateName = entry.value;
+
+                        List<LocationModel> districts = authenticationProvider.getAllLocationList.where((loc) => loc.stateId.toString() == stateId.toString()).toList();
+
+                        return ExpansionTile(
+                          tilePadding: EdgeInsets.symmetric(horizontal: 16),
+                          collapsedBackgroundColor: Colors.transparent,
+                          backgroundColor: Colors.transparent,
+                          childrenPadding: EdgeInsets.zero,
+                          initiallyExpanded: false,
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(stateName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                              Text("(${districts.length})", style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                          children: districts.map((district) {
+                            bool isSelected = authenticationProvider.selectedLocations.contains(district.districtName);
+                            return CheckboxListTile(
+                              title: Text(district.districtName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                              value: isSelected,
+                              onChanged: (bool? selected) {
+                                authenticationProvider.addToSelectedLocations(district.districtName);
+                              },
+                            );
+                          }).toList(),
+                        );
+                      }).toList(),
+                    ),
+                    height(height: 20),
+                  ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     });

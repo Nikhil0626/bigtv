@@ -54,7 +54,7 @@ class EPapersProvider extends ChangeNotifier {
         log(response.data.toString());
         List data = response.data;
         getSinglePapersList = data.map((e) => SinglePaperModel.fromJson(e)).toList();
-        isBookMark = getSinglePapersList
+        isBookMark = getSinglePapersList.first.data!
             .where((e) => e.isBookmarked == 1)
             .map((e) => e.id.toString())
             .toList();
@@ -96,7 +96,7 @@ class EPapersProvider extends ChangeNotifier {
       isBookMark.remove(val.id.toString());
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "${deviceId}", "userId": userId, "postId": val.id.toString(), "isLike": false}
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": false}
       });
       log(isBookMark.toString());
     }

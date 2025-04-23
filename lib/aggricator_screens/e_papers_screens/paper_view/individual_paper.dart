@@ -26,7 +26,6 @@ class IndividualPaper extends StatefulWidget {
 class _IndividualPaperState extends State<IndividualPaper> {
   @override
   void initState() {
-
     context.read<EPapersProvider>().getSinglePapersList = [];
     context.read<EPapersProvider>().getSingleEPapers(widget.paper);
     super.initState();
@@ -55,156 +54,148 @@ class _IndividualPaperState extends State<IndividualPaper> {
                     width(width: 20),
                     Text(
                       widget.paper,
-                      style: newAppFont(fontSize: 16,fontWeight: FontWeight.w600),
+                      style: newAppFont(fontSize: 16, fontWeight: FontWeight.w600),
                     )
                   ],
                 ),
               ),
               Expanded(
-                child:ePapersProvider.isMainPapers?AppLoadingScreen(): ListView.builder(
-                  itemCount: ePapersProvider.getSinglePapersList.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  PapersScreenPreview(
-                                    isBookmarked: ePapersProvider.getSinglePapersList[index].isBookmarked,
-                                    imageUrls: ePapersProvider.getSinglePapersList[index].data!,
-                                      postId: ePapersProvider.getSinglePapersList[index].id.toString(),),
-                            ));
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                          child: Container(
-                            color: AppColors.ePaperCardColor,
-                            height: 350.h,
-                            child: Stack(
-                              children: [
-                                Column(
-                                  children: [
-                                    Expanded(
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.all(Radius.circular(12.sp)),
-                                        child: CachedNetworkImage(
-                                          imageUrl: ePapersProvider.getSinglePapersList[index].imageUrl.toString(),
-                                          width: MediaQuery.of(context).size.width,
-                                          height: 300,
-                                          fit: BoxFit.fill,
-                                          placeholder: (context, url) => Container(
-                                            color: AppColors.borderColor.withOpacity(.2),
-                                          ),
-                                          errorWidget: (context, url, error) => Center(
-                                            child: Icon(
-                                              Icons.image,
-                                              size: 100,
-                                              color: Colors.grey.shade300,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                child: ePapersProvider.isMainPapers
+                    ? AppLoadingScreen()
+                    : ListView.builder(
+                        itemCount: ePapersProvider.getSinglePapersList.length,
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PapersScreenPreview(
+                                      isBookmarked: ePapersProvider.getSinglePapersList[index]..data!.first.isBookmarked ,
+                                      imageUrls: ePapersProvider.getSinglePapersList[index].data!,
+                                      postId: ePapersProvider.getSinglePapersList[index].id.toString(),
                                     ),
-                                    Container(
-                                      color: AppColors.cardBackgroundColor,
-                                      height: 50.w,
-                                      child: Row(
-                                        // mainAxisSize: MainAxisSize.min,
+                                  ));
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 16.0),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(20)),
+                                child: Container(
+                                  color: AppColors.ePaperCardColor,
+                                  height: 350.h,
+                                  child: Stack(
+                                    children: [
+                                      Column(
                                         children: [
-                                          InkWell(
-                                            onTap: () {
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                    builder: (context) => InAppWebViewScreen(
-                                                      webUrl: ePapersProvider.getSinglePapersList[index].sourceUrl.toString(),
-                                                      title: "Advertise with us",
-                                                    ),
-                                                  ));
-                                            },
-                                            child: Container(
-                                                height: 60.w,
-                                                width: 60.w,
-                                                decoration: BoxDecoration(
-                                                  borderRadius: BorderRadius.circular(8),
-                                                  color: AppColors.cardBackgroundColor,
-                                                ),
-                                                padding: const EdgeInsets.all(2),
-                                                child: Image.network(
-                                                  ePapersProvider.getSinglePapersList[index].logo.toString(),
-                                                  height: 30,
-                                                  width: 30,
-                                                  fit: BoxFit.fill,
-                                                )),
-                                          ),
-                                          width(width: 10.w),
                                           Expanded(
-                                            child: Text(
-                                              ePapersProvider.getSinglePapersList[index].source.toString(),
-                                              style: newAppFont(
-                                                color: Colors.grey.shade700,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.w600,
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.all(Radius.circular(12.sp)),
+                                              child: CachedNetworkImage(
+                                                imageUrl: ePapersProvider.getSinglePapersList[index].imageUrl.toString(),
+                                                width: MediaQuery.of(context).size.width,
+                                                height: 300,
+                                                fit: BoxFit.fill,
+                                                placeholder: (context, url) => Container(
+                                                  color: AppColors.borderColor.withOpacity(.2),
+                                                ),
+                                                errorWidget: (context, url, error) => Center(
+                                                  child: Icon(
+                                                    Icons.image,
+                                                    size: 100,
+                                                    color: Colors.grey.shade300,
+                                                  ),
+                                                ),
                                               ),
                                             ),
                                           ),
-                                          // InkWell(
-                                          //   onTap: (){
-                                          //
-                                          //   },
-                                          //   child: Icon(
-                                          //     Icons.ios_share,
-                                          //     color: Colors.grey.shade600,
-                                          //     size: 20,
-                                          //   ),
-                                          // ),
-                                          width(width: 16.w),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Positioned(
-                                  top: 14,
-                                  right: 14,
-                                  child:Consumer<EPapersProvider>(
-                                      builder: (_,ePapersProvider,__) {
-                                        return GestureDetector(
-                                          onTap: () {
-                                            ePapersProvider.isBookMarkPost(   ePapersProvider.getSinglePapersList[index],context);
+                                          Container(
+                                            color: AppColors.cardBackgroundColor,
+                                            height: 50.w,
+                                            child: Row(
+                                              // mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                InkWell(
+                                                  onTap: () {
+                                                    Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (context) => InAppWebViewScreen(
+                                                            webUrl: ePapersProvider.getSinglePapersList[index].sourceUrl.toString(),
+                                                            title: "Advertise with us",
+                                                          ),
+                                                        ));
+                                                  },
+                                                  child: Container(
+                                                      height: 60.w,
+                                                      width: 60.w,
+                                                      decoration: BoxDecoration(
+                                                        borderRadius: BorderRadius.circular(8),
+                                                        color: AppColors.cardBackgroundColor,
+                                                      ),
+                                                      padding: const EdgeInsets.all(2),
+                                                      child: Image.network(
+                                                        ePapersProvider.getSinglePapersList[index].logo.toString(),
+                                                        height: 30,
+                                                        width: 30,
+                                                        fit: BoxFit.fill,
+                                                      )),
+                                                ),
+                                                width(width: 10.w),
+                                                Expanded(
+                                                  child: Text(
+                                                    ePapersProvider.getSinglePapersList[index].source.toString(),
+                                                    style: newAppFont(
+                                                      color: Colors.grey.shade700,
+                                                      fontSize: 16,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
 
-                                          },
-                                          child:Container(
-                                            padding: EdgeInsets.all(7),
-                                            decoration: BoxDecoration(
-                                              color: (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) || ePapersProvider.getSinglePapersList[index].isBookmarked== 1)
-                                                  ? AppColors.appButtonColor
-                                                  : Colors.black54,
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Icon(
-                                              (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) || ePapersProvider.getSinglePapersList[index].isBookmarked == 1)
-                                                  ? Icons.bookmark
-                                                  : Icons.bookmark_outline,
-                                              color: Colors.white,
-                                              size: 20,
+                                                width(width: 16.w),
+                                              ],
                                             ),
                                           ),
-                                        );
-                                      }
+                                        ],
+                                      ),
+                                      Positioned(
+                                        top: 14,
+                                        right: 14,
+                                        child: Consumer<EPapersProvider>(builder: (_, ePapersProvider, __) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              ePapersProvider.isBookMarkPost(ePapersProvider.getSinglePapersList[index], context);
+                                            },
+                                            child: Container(
+                                              padding: EdgeInsets.all(7),
+                                              decoration: BoxDecoration(
+                                                color: (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) ||
+                                                        ePapersProvider.getSinglePapersList[index].data!.first.isBookmarked == 1)
+                                                    ? AppColors.appButtonColor
+                                                    : Colors.black54,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) ||
+                                                        ePapersProvider.getSinglePapersList[index].data!.first.isBookmarked  == 1)
+                                                    ? Icons.bookmark
+                                                    : Icons.bookmark_outline,
+                                                color: Colors.white,
+                                                size: 20,
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
               ),
             ],
           ),
