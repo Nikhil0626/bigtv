@@ -17,15 +17,15 @@ import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
 import '../../home_screen/news_posts_provider.dart';
-import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/single_paper_model.dart';
 
 class PapersScreenPreview extends StatefulWidget {
   final String postId;
+  final  isBookmarked;
   final List<PageData> imageUrls;
   final String name;
 
-  PapersScreenPreview({super.key, required this.imageUrls, this.name = "Back", required this.postId});
+  PapersScreenPreview({super.key, required this.imageUrls, this.name = "Back", required this.postId, this.isBookmarked = 0});
 
   @override
   State<PapersScreenPreview> createState() => _PapersScreenPreviewState();
@@ -146,30 +146,131 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                     child: SizedBox(
                                       width: MediaQuery.of(context).size.width,
                                       height: MediaQuery.of(context).size.height,
-                                      child: Image.network(
-                                       imageUrl.toString(),
-                                        fit: BoxFit.fill, // Adjust for better fit
-                                        width: MediaQuery.of(context).size.width,
-                                        height: MediaQuery.of(context).size.height,
-                                        loadingBuilder: (context, child, loadingProgress) {
-                                          if (loadingProgress == null) return child;
-                                          return Center(
-                                            child: CircularProgressIndicator(
-                                              value: loadingProgress.expectedTotalBytes != null
-                                                  ? loadingProgress.cumulativeBytesLoaded /
-                                                  (loadingProgress.expectedTotalBytes ?? 1)
-                                                  : null,
+                                      child: Stack(
+                                        children: [
+                                          Image.network(
+                                           imageUrl.toString(),
+                                            fit: BoxFit.fill, // Adjust for better fit
+                                            width: MediaQuery.of(context).size.width,
+                                            height: MediaQuery.of(context).size.height,
+                                            loadingBuilder: (context, child, loadingProgress) {
+                                              if (loadingProgress == null) return child;
+                                              return Center(
+                                                child: CircularProgressIndicator(
+                                                  value: loadingProgress.expectedTotalBytes != null
+                                                      ? loadingProgress.cumulativeBytesLoaded /
+                                                      (loadingProgress.expectedTotalBytes ?? 1)
+                                                      : null,
+                                                ),
+                                              );
+                                            },
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return const Center(
+                                                child: Text(
+                                                  'Failed to load image',
+                                                  style: TextStyle(color: Colors.white),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                          Positioned(
+                                            top: 20,
+                                            right: 20,
+                                            child: Consumer<EPapersProvider>(
+                                                builder: (_, ePapersProvider, __) {
+                                                  return GestureDetector(
+                                                    onTap: () async {
+                                                      final prefs = await SharedPreferences.getInstance();
+                                                      final userId = prefs.getString("userId");
+                                                      final deviceId = prefs.getString("deviceId");
+                                                      EventRepo().sendEvent({
+                                                        "key": "share_via_articles",
+                                                        "data": {
+                                                          "device_id": deviceId,
+                                                          "userId": userId ?? "",
+                                                          "postId": widget.postId,
+                                                          "isWhatAppShare": false,
+                                                        }
+                                                      });
+                                                      context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[newsPostsProvider.currentPaperIndex],context);
+                                                    },
+                                                    child:Container(
+                                                      padding: EdgeInsets.all(7),
+                                                      decoration: BoxDecoration(
+                                                        color: (ePapersProvider.isBookMark.contains(widget.postId) || widget.isBookmarked == 1)
+                                                            ? AppColors.appButtonColor
+                                                            : Colors.black54,
+                                                        shape: BoxShape.circle,
+                                                      ),
+                                                      child: Icon(
+                                                        (ePapersProvider.isBookMark.contains(widget.postId) || widget.isBookmarked == 1)
+                                                            ? Icons.bookmark
+                                                            : Icons.bookmark_outline,
+                                                        color: Colors.white,
+                                                        size: 20,
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
                                             ),
-                                          );
-                                        },
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return const Center(
-                                            child: Text(
-                                              'Failed to load image',
-                                              style: TextStyle(color: Colors.white),
+                                          ),
+
+                                          // Share
+                                          Positioned(
+                                            top: 20,
+                                            right: 80,
+                                            child: InkWell(
+                                              onTap: () async {
+                                                final prefs = await SharedPreferences.getInstance();
+                                                final userId = prefs.getString("userId");
+                                                final deviceId = prefs.getString("deviceId");
+
+                                                EventRepo().sendEvent({
+                                                  "key": "share_via_widget.articles",
+                                                  "data": {
+                                                    "device_id": deviceId,
+                                                    "userId": userId ?? "",
+                                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex].id,
+                                                    "isWhatAppShare": false,
+                                                  }
+                                                });
+
+                                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex].id, "");
+
+                                                try {
+                                                  RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+                                                  var image = await boundary.toImage(pixelRatio: 2.0);
+                                                  ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+                                                  Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+                                                  final directory = await getTemporaryDirectory();
+                                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()}.png');
+                                                  await imagePath.writeAsBytes(pngBytes);
+
+                                                  await Share.shareXFiles(
+                                                    [XFile(imagePath.path)],
+                                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}',
+                                                  );
+                                                } catch (e) {
+                                                  print("Error capturing image: $e");
+                                                }
+                                              },
+                                              child: Container(
+                                                padding: const EdgeInsets.all(10),
+                                                decoration: const BoxDecoration(
+                                                  color: Colors.black54,
+                                                  shape: BoxShape.circle,
+                                                ),
+                                                child: SvgPicture.asset(
+                                                  "assets/svg/share.svg",
+                                                  height: 16,
+                                                  width: 16,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
                                             ),
-                                          );
-                                        },
+                                          ),
+                                        ],
                                       ),
                                     ),
                                   ),
@@ -179,103 +280,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                           ),
 
                           // Bookmark
-                          Positioned(
-                            top: 20,
-                            right: 20,
-                            child: Consumer<EPapersProvider>(
-                                builder: (_, ePapersProvider, __) {
-                                  return GestureDetector(
-                                  onTap: () async {
-                                    final prefs = await SharedPreferences.getInstance();
-                                    final userId = prefs.getString("userId");
-                                    final deviceId = prefs.getString("deviceId");
-                                    EventRepo().sendEvent({
-                                      "key": "share_via_articles",
-                                      "data": {
-                                        "device_id": deviceId,
-                                        "userId": userId ?? "",
-                                        "postId": widget.postId,
-                                        "isWhatAppShare": false,
-                                      }
-                                    });
-                                    context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[newsPostsProvider.currentPaperIndex],context);
-                                  },
-                                  child:Container(
-                                    padding: EdgeInsets.all(7),
-                                    decoration: BoxDecoration(
-                                      color: (ePapersProvider.isBookMark.contains(widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()) || widget.imageUrls[newsPostsProvider.currentPaperIndex].id== 1)
-                                          ? AppColors.appButtonColor
-                                          : Colors.black54,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      (ePapersProvider.isBookMark.contains(widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()) || widget.imageUrls[newsPostsProvider.currentPaperIndex].id == 1)
-                                          ? Icons.bookmark
-                                          : Icons.bookmark_outline,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                  ),
-                                );
-                              }
-                            ),
-                          ),
 
-                          // Share
-                          Positioned(
-                            top: 20,
-                            right: 80,
-                            child: InkWell(
-                              onTap: () async {
-                                final prefs = await SharedPreferences.getInstance();
-                                final userId = prefs.getString("userId");
-                                final deviceId = prefs.getString("deviceId");
-
-                                EventRepo().sendEvent({
-                                  "key": "share_via_widget.articles",
-                                  "data": {
-                                    "device_id": deviceId,
-                                    "userId": userId ?? "",
-                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex].id,
-                                    "isWhatAppShare": false,
-                                  }
-                                });
-
-                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex].id, "");
-
-                                try {
-                                  RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-                                  var image = await boundary.toImage(pixelRatio: 2.0);
-                                  ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
-                                  Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-                                  final directory = await getTemporaryDirectory();
-                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()}.png');
-                                  await imagePath.writeAsBytes(pngBytes);
-
-                                  await Share.shareXFiles(
-                                    [XFile(imagePath.path)],
-                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}',
-                                  );
-                                } catch (e) {
-                                  print("Error capturing image: $e");
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                decoration: const BoxDecoration(
-                                  color: Colors.black54,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: SvgPicture.asset(
-                                  "assets/svg/share.svg",
-                                  height: 20,
-                                  width: 20,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
                         ],
                       ),
                     ),

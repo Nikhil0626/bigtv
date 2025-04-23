@@ -126,10 +126,10 @@ class SettingsProvider extends ChangeNotifier {
         Response response = await SettingsRepo().saveBookMarks(body);
         if (response.statusCode == 200) {
           if(isBookMark == 1){
-            CustomToast.showSuccessToast(msg: "Bookmark added",);
+            // CustomToast.showSuccessToast(msg: "Bookmark added",);
 
           }else{
-            CustomToast.showErrorToast(msg: "Bookmark removed", );
+            // CustomToast.showErrorToast(msg: "Bookmark removed", );
 
           }
         }
@@ -191,10 +191,11 @@ class SettingsProvider extends ChangeNotifier {
   Future getFeedBack() async {
     isFeedbackLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    // String? deviceId = preferences.getString("deviceId");
+    String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
       "user_id": userId,
+      "device_id": deviceId,
     };
 
     try {

@@ -7,7 +7,7 @@ class EPaperMainModel {
   final String imageUrl;
   final int pageNumber;
   final String publishedDate;
-  final String isBookmarked;
+  final int isBookmarked;
   final bool isTodays;
 
   EPaperMainModel({
@@ -33,7 +33,7 @@ class EPaperMainModel {
       imageUrl: json['image_url'] as String,
       pageNumber: json['page_number'] as int,
       publishedDate: json['published_date'] as String,
-      isBookmarked: json['isBookmarked'] as String,
+      isBookmarked: json['isBookmarked'] as int,
       isTodays: json['is_todays'] as bool,
     );
   }

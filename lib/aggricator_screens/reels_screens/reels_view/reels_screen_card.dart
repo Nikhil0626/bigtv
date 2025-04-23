@@ -28,7 +28,6 @@ import '../../../utils/app_spaces.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
-import '../../settings_screen/settings_provider/settings_provider.dart';
 
 class ReelsScreen extends StatefulWidget {
   @override
@@ -104,8 +103,8 @@ class _EachReelCardState extends State<EachReelCard> {
         child: Screenshot(
           controller: sc,
           child: Container(
-            height: MediaQuery.of(context).size.height * 0.7,
-            width: MediaQuery.of(context).size.width * 0.9,
+            height: MediaQuery.of(context).size.height*0.7,
+            width: MediaQuery.of(context).size.height*0.9,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               color: AppColors.cardBackgroundColor,
@@ -126,7 +125,7 @@ class _EachReelCardState extends State<EachReelCard> {
                   child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 4),
+                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0),
                         child: ClipRRect(
                           borderRadius: BorderRadius.all(Radius.circular(10.r)),
                           child: CachedNetworkImage(
@@ -178,6 +177,7 @@ class _EachReelCardState extends State<EachReelCard> {
                                   borderRadius: BorderRadius.all(Radius.circular(8)),
                                   child: CachedNetworkImage(
                                     imageUrl: widget.reel.publisherImage,
+
                                     fit: BoxFit.fill,
                                     placeholder: (context, url) => Container(
                                       color: AppColors.borderColor.withOpacity(.2),
@@ -316,24 +316,30 @@ class _EachReelCardState extends State<EachReelCard> {
                 Positioned(
                   top: 10,
                   right: 14,
-                  child: GestureDetector(
-                    onTap: () {
-                      context.read<ReelsProviders>().isBookMarkPost(  widget.reel,context);
+                  child: Consumer<ReelsProviders>(builder: (_, homeProvider, __) {
+                    return GestureDetector(
+                      onTap: () {
+                        context.read<ReelsProviders>().isBookMarkPost(  widget.reel,context);
 
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: Colors.black54,
-                        shape: BoxShape.circle,
+                        print("");
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: (homeProvider.isBookMark.contains(widget.reel.id.toString()) || widget.reel.isBookmarked == 1)
+                              ? AppColors.appButtonColor
+                              : Colors.black54,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          (homeProvider.isBookMark.contains(widget.reel.id.toString()) ||  widget.reel.isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
+                          color: Colors.white,
+                          size: 20,
+                        ),
                       ),
-                      child: Icon(
-                        Icons.bookmark_outline,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  ),
+                    );
+                  }),
+
                 ),
               ],
             ),

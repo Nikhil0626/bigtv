@@ -26,14 +26,21 @@ class ReelsProviders extends ChangeNotifier {
   }
 
   Future getAllReels() async {
-    isBookMark = [];
     reelsLoading = true;
     getAllReelsList = [];
+    isBookMark = [];
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString('userId');
     try {
-      Response response = await ReelsRepo().getAllReels();
+      Map<String,dynamic> body =
+      {
+        "user_id":userId,
+      };
+      Response response = await ReelsRepo().getAllReels(body);
 
       if (response.statusCode == 200) {
         List data = response.data['data'];
+        log(data.toString());
         getAllReelsList = data
             .map(
               (e) => ReelsModel.fromJson(e),
@@ -41,7 +48,7 @@ class ReelsProviders extends ChangeNotifier {
             .toList();
       }
       isBookMark = getAllReelsList
-          .where((e) => e.id == 1)
+          .where((e) => e.isBookmarked == 1)
           .map((e) => e.id.toString())
           .toList();
     } on DioException catch (e, st) {
@@ -146,24 +153,24 @@ class ReelsProviders extends ChangeNotifier {
     if (!isBookMark.contains(val.id.toString())) {
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isLike": true}
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": true}
       });
       isBookMark.add(val.id.toString());
       Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val['id'].toString(), context,1
+          val.id.toString(), context,1
       );
-      sendLikeDetails(userId, val, true, val['title'].toString());
+      // sendLikeDetails(userId, val, true, val['title'].toString());
       log(isBookMark.toString());
     } else {
       Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val['id'].toString(), context,0
+          val.id.toString(), context,0
       );
       isBookMark.remove(val.id.toString());
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "${deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": false}
+        "data": {"device_id": "${deviceId}", "userId": userId, "postId": val.id.toString(), "isLike": false}
       });
-      sendLikeDetails(userId, val.id.toString(), false, val['title'].toString());
+      // sendLikeDetails(userId, val.id.toString(), false, val['title'].toString());
       log(isBookMark.toString());
     }
 

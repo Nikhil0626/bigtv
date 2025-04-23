@@ -23,7 +23,6 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
-import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../reels_provider/reels_providers.dart';
 
 class ReelPreviewScreen extends StatefulWidget {
@@ -77,6 +76,12 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
         return controller;
       },
     );
+  }
+
+  @override
+  void dispose() {
+    _controllers = [];
+    super.dispose();
   }
 
   // @override
@@ -143,6 +148,12 @@ class ReelsCardView extends StatefulWidget {
 
 class _ReelsCardViewState extends State<ReelsCardView> {
   ScreenshotController sc = ScreenshotController();
+
+  @override
+  void dispose() {
+    widget.youtubePlayerController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -361,7 +372,10 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           child: Row(children: [
             GestureDetector(
               onTap: () {
+                widget.youtubePlayerController.pause();
+                widget.youtubePlayerController.dispose();
                 Navigator.pop(context);
+
               },
               child: Container(
                 padding: EdgeInsets.all(7),
@@ -377,25 +391,30 @@ class _ReelsCardViewState extends State<ReelsCardView> {
               ),
             ),
             Spacer(),
-            GestureDetector(
-              onTap: () {
-                context.read<ReelsProviders>().isBookMarkPost(  widget.reelCard,context);
+            Consumer<ReelsProviders>(builder: (_, homeProvider, __) {
+              return GestureDetector(
+                onTap: () {
+                  context.read<ReelsProviders>().isBookMarkPost(  widget.reelCard,context);
 
-                print("");
-              },
-              child: Container(
-                padding: EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  shape: BoxShape.circle,
+                  print("");
+                },
+                child: Container(
+                  padding: EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: (homeProvider.isBookMark.contains(widget.reelCard.id.toString()) || widget.reelCard.isBookmarked == 1)
+                        ? AppColors.appButtonColor
+                        : Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    (homeProvider.isBookMark.contains(widget.reelCard.id.toString()) ||  widget.reelCard.isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
+                    color: Colors.white,
+                    size: 20,
+                  ),
                 ),
-                child: Icon(
-                  Icons.bookmark_outline,
-                  color: Colors.white,
-                  size: 20,
-                ),
-              ),
-            ),
+              );
+            }),
+
           ],),
         ),
       ],

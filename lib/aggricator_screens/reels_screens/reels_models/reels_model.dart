@@ -14,6 +14,7 @@ class ReelsModel {
   final String reportedBy;
   final List<String> links;
   final String content;
+  final int isBookmarked;
   final List<String>? gallery;
 
   ReelsModel({
@@ -32,6 +33,7 @@ class ReelsModel {
     required this.reportedBy,
     required this.links,
     required this.content,
+    required this.isBookmarked,
     this.gallery,
   });
 
@@ -52,6 +54,7 @@ class ReelsModel {
       reportedBy: json['reportedBy'] as String? ?? '',
       links: (json['links'] as List?)?.map((e) => e as String).toList() ?? [],
       content: json['content'] as String? ?? '',
+      isBookmarked: json['isBookmarked'] as int? ?? 0,
       gallery: (json['gallery'] as List?)?.map((e) => e as String).toList(),
     );
   }
@@ -73,6 +76,7 @@ class ReelsModel {
       'reportedBy': reportedBy,
       'links': links,
       'content': content,
+      'isBookmarked': isBookmarked,
       'gallery': gallery,
     };
   }

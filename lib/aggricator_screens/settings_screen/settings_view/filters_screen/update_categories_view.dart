@@ -2,7 +2,6 @@ import 'package:chotanews/aggricator_screens/auth_screens/authentication_provide
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';
-import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';

@@ -72,9 +72,7 @@ Future<void> main() async {
   ]).then((_) {
     runApp(EasyLocalization(
         supportedLocales: [
-          Locale('en'),
           Locale('te'),
-          Locale('hi'),
         ],
         path: 'assets/translations',
         fallbackLocale: Locale("te"),
@@ -85,6 +83,7 @@ Future<void> main() async {
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
   WebEngagePlugin.onPushMessageReceive(message.data);
 }
 
@@ -107,53 +106,36 @@ class _MyAppState extends State<MyApp> {
   StreamSubscription<Uri>? linkSubscription;
   String postId = "";
 
+
+  void subscribeToPushCallbacks(context) async {
+    //Push click stream listener
+    WebEngagePlugin().pushStream.listen((event) {
+      String? deepLink = event.deepLink;
+      Map<String, dynamic> messagePayload = event.payload!;
+      postId = messagePayload["postId"]  ?? "";
+
+      Navigator.push(mainNavigatorKey.currentState!.context, MaterialPageRoute(builder: (context) => IndividualPostView(postId:messagePayload["postId"] ),));
+return;
+    });
+
+    //Push action click listener
+    WebEngagePlugin().pushActionStream.listen((event) {
+      print("pushActionStream:" + event.toString());
+      String? deepLink = event.deepLink;
+      Map<String, dynamic>? messagePayload = event.payload;
+    });
+  }
+
+
+
   @override
   void initState() {
     super.initState();
     _initDeepLinks();
+    subscribeToPushCallbacks(context);
 
-    // Listen for notification after widget binding
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      handleNotificationIfPresent();
-    });
-
-    // Attach push stream listener
-    WebEngagePlugin().pushStream.listen((event) {
-      _handlePushNotification(event.payload!);
-    });
   }
 
-  void _handlePushNotification(Map<String, dynamic> messagePayload) async {
-    final context = mainNavigatorKey.currentContext;
-    if (context != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => IndividualPostView(
-            postId: messagePayload["postId"],
-          ),
-        ),
-      );
-    } else {
-      // Save it for later
-      // Store the payload temporarily in shared preferences or a static variable
-      NotificationHandler.pendingNotification = messagePayload;
-    }
-  }
-
-  void handleNotificationIfPresent() {
-    if (NotificationHandler.pendingNotification != null) {
-      final payload = NotificationHandler.pendingNotification!;
-      NotificationHandler.pendingNotification = null;
-
-      Navigator.push(
-        mainNavigatorKey.currentContext!,
-        MaterialPageRoute(
-          builder: (context) => IndividualPostView(postId: payload["postId"]),
-        ),
-      );
-    }
-  }
   Future<void> _initDeepLinks() async {
     log("Initializing deep link listener");
     linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
@@ -231,7 +213,7 @@ class _MyAppState extends State<MyApp> {
         child: MaterialApp(
           navigatorKey: mainNavigatorKey,
           localizationsDelegates: context.localizationDelegates,
-          supportedLocales: const [Locale('en', ''), Locale('es', '')], // Add your locales
+          supportedLocales: const [Locale('te', '')], // Add your locales
           locale: _locale,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),

@@ -81,7 +81,7 @@ class HomeProvider extends ChangeNotifier {
         // hideControls: true,
       ),
     );
-    notifyListeners();
+    // notifyListeners();
   }
 
 
@@ -111,6 +111,9 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postId = "0"}) async {
+    if(postId == 0){
+      getAllPostList = [];
+    }
     isBookMark = [];
     isWebView = false;
     webUrl = "";
@@ -119,21 +122,32 @@ class HomeProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
-    List<String> locationIds = locationId.split(',').map((e) => e.trim()).toList();
-    log(locationIds.toString());
+    List<int> locationIds = locationId
+        .split(',')
+        .where((e) => e.trim().isNotEmpty)
+        .map((e) => int.tryParse(e.trim()))
+        .whereType<int>()
+        .toList();
+    log('Location IDs: $locationIds');
+
     String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<String> categoriesIds = categoriesId.split(',').map((e) => e.trim()).toList();
-    log(categoriesIds.toString());
+    List<int> categoriesIds = categoriesId
+        .split(',')
+        .where((e) => e.trim().isNotEmpty)
+        .map((e) => int.tryParse(e.trim()))
+        .whereType<int>()
+        .toList();
+    log('Category IDs: $categoriesIds');
+
 
     Map<String, dynamic> body = {
       "device_id": deviceId,
       "postId": postId,
       "locationIds": locationIds,
-      "catgoriesId": categoriesIds,
-      "force_refresh": "false",
+      "categoriesId": categoriesIds,
       "userId":userId??0,
     };
-    log(body.toString());
+    log("allpost body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
 
@@ -141,6 +155,42 @@ class HomeProvider extends ChangeNotifier {
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
 
+
+      if(isWebView){
+        getAllPostList.insert(0, {
+          "id": 000000,
+          "postOrder": 00000,
+          "author": 9,
+          "title": "WebUrl",
+          "content": "Hello",
+          "created": "2025-04-22T08:36:04",
+          "guid": "",
+          "post_type": "post",
+          "post_name": "సివిల్స్-తుది-ఫలితాలు-వి",
+          "post_mime_type": "",
+          "totalLikes": 8,
+          "totalViews": 14104,
+          "totalComments": 0,
+          "image_url": "",
+          "video_url": "",
+          "downloadUrl": null,
+          "gallery": null,
+          "type": "WebUrl",
+          "totalShares": 0,
+          "isReporter": 0,
+          "reportedBy": "",
+          "categoryName": "నేషనల్",
+          "postUrl": "",
+          "subType": "",
+          "isStickyPost": 0,
+          "adPosition": null,
+          "linkURLAndroid": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+          "linkURLIos": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+          "links": [],
+          "categoryId": 2,
+          "isBookmarked": 0
+        });
+      }
       getAllPostList.addAll(data);
       log(getAllPostList[0]['image_url'].toString());
       isBookMark = getAllPostList
@@ -160,8 +210,11 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
+
+  bool isAiTagsLoading = false;
   Future getAllPostsByAiId(postId) async {
     getAllAiTagsPostList = [];
+    isAiTagsLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
 
@@ -184,13 +237,13 @@ class HomeProvider extends ChangeNotifier {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api catch ${st.toString()}");
     } finally {
-      // isHomeLoading = false;
+      isAiTagsLoading = false;
       notifyListeners();
     }
   }
 
   Future getAllAiTags() async {
-    // isHomeLoading = true;
+    getAllAiTagsList = [];
     try {
       Response response = await HomeRepo().getAllAiTags();
       getAllAiTagsList.addAll(response.data);

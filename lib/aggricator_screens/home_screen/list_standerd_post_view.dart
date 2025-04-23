@@ -239,7 +239,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
       
                           sendShareDetails(userId, widget.articalData['id'], widget.articalData['content'].toString());
       
-                          if (widget.articalData['type'] == "Standard" || widget.articalData['type'] == "Video") {
+                          if (widget.articalData['type'] == "Standard" || widget.articalData['type'] == "Video"|| widget.articalData['type'] == "Image" ) {
                             try {
                               final image = await screenshotControllers.capture(
                                 pixelRatio: 2,

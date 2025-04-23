@@ -77,7 +77,6 @@ class _SettingsViewState extends State<SettingsView> {
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "BookMarks.svg", "Bookmarks", () {
-              context.read<SettingsProvider>().getAllBookMarks();
               Navigator.push(context, MaterialPageRoute(builder: (context) => SavedArticles()));
             }),
             // _buildNotificationRow(),
