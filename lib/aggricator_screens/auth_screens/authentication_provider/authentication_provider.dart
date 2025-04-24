@@ -240,11 +240,13 @@ class AuthenticationProvider extends ChangeNotifier {
 
     log(body.toString());
     try {
-      log("response.data.toString123");
+
       Response response = await AuthenticationRepo().sendSelectCategories(body);
       if (response.statusCode == 200) {
-        newAppLoginStatus = NewAppLoginStatus.location;
-        saveLoginState();
+        if(!isFilter) {
+          saveLoginState();
+          newAppLoginStatus = NewAppLoginStatus.location;
+        }
         log(response.data.toString());
       }
     } on DioException catch (e, st) {
@@ -302,7 +304,7 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  Future sendLocationsToServer(BuildContext context) async {
+  Future sendLocationsToServer(BuildContext context,{bool isFilter=false}) async {
     List<int> selectedCategoryIds = getAllLocationList.where((item) => selectedLocations.contains(item.districtName.toString())).map((item) => item.districtId).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -316,22 +318,11 @@ class AuthenticationProvider extends ChangeNotifier {
       log("response.data.toString123");
       Response response = await AuthenticationRepo().sendSelectLocations(body);
       if (response.statusCode == 200) {
-        if (context.mounted) {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeView(),
-            ),
-            (route) => false,
-          );
-          Future.delayed(
-            Duration(seconds: 2),
-            () {
-              newAppLoginStatus = NewAppLoginStatus.home;
-              saveLoginState();
-            },
-          );
+        if(!isFilter) {
+          newAppLoginStatus = NewAppLoginStatus.home;
+          saveLoginState();
         }
+
         log(response.data.toString());
       }
     } on DioException catch (e, st) {
@@ -404,6 +395,7 @@ class AuthenticationProvider extends ChangeNotifier {
   void setLogOutStatus(context, bool isLogout) async {
     newAppLoginStatus =isLogout?NewAppLoginStatus.skip: NewAppLoginStatus.login;
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.clear();
     preferences.setString("loginState", newAppLoginStatus.toString());
     isPageNavigation(context);
   }

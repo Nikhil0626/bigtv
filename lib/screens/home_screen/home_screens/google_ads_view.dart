@@ -380,7 +380,7 @@ class ShareYourApp extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: Text(
-                    'Are liking our app?',
+                    'Are you liking our app?',
                     textAlign: TextAlign.center,
                     style: newAppFont(
                       fontSize: 16,
@@ -398,7 +398,7 @@ class ShareYourApp extends StatelessWidget {
                 height(height: 12.h),
                 ElevatedButton(
                   onPressed: () {
-                    Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.example.yourapp");
+                    Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.lightBlue,

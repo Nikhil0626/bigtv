@@ -9,6 +9,7 @@ import '../../../../utils/app_spaces.dart';
 import '../../../../utils/app_toasts.dart';
 import '../../../auth_screens/authentication_model/location_model.dart';
 import '../../../auth_screens/authentication_provider/authentication_provider.dart';
+import '../../../home_screen/home_view.dart';
 
 class UpdateRegionsView extends StatefulWidget {
   const UpdateRegionsView({super.key});
@@ -38,7 +39,17 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
           child: InkWell(
             onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3
                 ? () {
-                    authenticationProvider.sendLocationsToServer(context);
+                    authenticationProvider.sendLocationsToServer(context,).then((value) {
+                      if (context.mounted) {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomeView(),
+                          ),
+                              (route) => false,
+                        );
+                      }
+                    },);
                   }
                 : () {
                     CustomToast.showErrorToast(msg: "Please Select only 3 District ");
@@ -98,7 +109,10 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                               text: "0${authenticationProvider.selectedLocations.length}",
                               style: homeScreenFontStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                             ),
-                            TextSpan(text: "/03"),
+                            TextSpan(text: "/03\n"),
+                            if(authenticationProvider.selectedLocations.length>3)
+                              TextSpan(text: "You Have Selected Maximum Number of Districts",style: newAppFont(fontSize: 10,color: Colors.red,fontWeight: FontWeight.w400)),
+
                           ],
                         ),
                       ),

@@ -39,13 +39,13 @@ class BottomActions extends StatelessWidget {
             SvgPicture.asset(icon,
                 height: 20,
                 width: 20,
-                color: isLike ?Colors.lightBlue:postType=="BigBlackStandard"?Colors.white:iconColor
+                color: isLike ?Colors.lightBlue:iconColor
             ):
             label != "లైక్"?
             SvgPicture.asset(icon,
                 height: 20,
                 width: 20,
-                color: postType=="BigBlackStandard"?Colors.white:iconColor
+                color: iconColor
             ):
                 SizedBox.shrink(),
           ),

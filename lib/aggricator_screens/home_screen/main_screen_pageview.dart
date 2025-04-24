@@ -90,7 +90,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                     itemBuilder: (context, index) {
                       if(homeProvider.getAllPostList.length-5==index){
                         log("is come from lin----k${homeProvider.getAllPostList[index]['id']}");
-                        context.read<HomeProvider>().getAllPost(postId:homeProvider.getAllPostList[index]['id'].toString());
+                        context.read<HomeProvider>().getAllPost(postId:homeProvider.getAllPostList.last['id'].toString());
 
                       }
                       return AnimatedBuilder(

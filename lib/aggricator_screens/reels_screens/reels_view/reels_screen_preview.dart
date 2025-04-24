@@ -80,7 +80,7 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
 
   @override
   void dispose() {
-    _controllers = [];
+    // _controllers = [];
     super.dispose();
   }
 
@@ -151,7 +151,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
 
   @override
   void dispose() {
-    widget.youtubePlayerController.dispose();
+    // widget.youtubePlayerController.dispose();
     super.dispose();
   }
 

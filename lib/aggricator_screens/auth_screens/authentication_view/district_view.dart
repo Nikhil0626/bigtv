@@ -101,6 +101,7 @@ import 'package:provider/provider.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
+import '../../home_screen/home_view.dart';
 import '../authentication_model/location_model.dart';
 
 class DistrictView extends StatefulWidget {
@@ -180,7 +181,7 @@ class _DistrictViewState extends State<DistrictView> {
                         ),
                         TextSpan(text: "/03\n"),
                         if(authenticationProvider.selectedLocations.length>3)
-                        TextSpan(text: "You are select maximum number district ",style: newAppFont(fontSize: 12,color: Colors.red,fontWeight: FontWeight.w600)),
+                        TextSpan(text: "You Have Selected Maximum Number of Districts",style: newAppFont(fontSize: 12,color: Colors.red,fontWeight: FontWeight.w600)),
                       ],
                     ),
                   ),
@@ -229,7 +230,17 @@ class _DistrictViewState extends State<DistrictView> {
                 InkWell(
                   onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3
                       ? () {
-                          authenticationProvider.sendLocationsToServer(context);
+                          authenticationProvider.sendLocationsToServer(context).then((value) {
+                            if (context.mounted) {
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HomeView(),
+                                ),
+                                    (route) => false,
+                              );
+                            }
+                          },);
                         }
                       : () {
                           CustomToast.showErrorToast(msg: "Please Select only 3 District ");

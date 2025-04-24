@@ -16,15 +16,19 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:http/http.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/global_variables_data.dart';
+import '../../main.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../services/deviice_details.dart';
 import '../../services/permission_handler_services.dart';
 import '../../utils/custom_switch.dart';
 import '../e_papers_screens/paper_view/papers_screen_list.dart';
+import '../individual_post_details/individual_post_view.dart';
 import '../settings_screen/settings_view/settings_view.dart';
 import 'main_screen_card.dart';
 
@@ -40,6 +44,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
+    getWebNotification();
     requestLocationPermission();
     requestNotificationPermission();
     getMobileNumber();
@@ -48,6 +53,8 @@ class _HomeViewState extends State<HomeView> {
 
     super.initState();
   }
+
+
 
   getMobileNumber() async {
     WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
@@ -325,5 +332,19 @@ class _HomeViewState extends State<HomeView> {
         );
       }),
     );
+  }
+
+  void getWebNotification() async{
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String?  webPostId = preferences.getString("webPostId");
+    if( webPostId !='' &&webPostId !=null){
+      Navigator.push(
+          mainNavigatorKey.currentContext!,
+          MaterialPageRoute(
+            builder: (context) => IndividualPostView(postId: webPostId.toString()),
+          )
+      );
+    }
+
   }
 }

@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
@@ -28,6 +29,7 @@ import '../../../utils/app_spaces.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
+import '../../e_papers_screens/paper_view/papers_screen_card.dart';
 
 class ReelsScreen extends StatefulWidget {
   @override
@@ -36,13 +38,55 @@ class ReelsScreen extends StatefulWidget {
 
 class _ReelsScreenState extends State<ReelsScreen> {
   late YoutubePlayerController _controller;
+  List<ReelsModel> removedCards = [];
+  Offset slideOffset = Offset.zero;
+  bool isAnimating = false;
 
   @override
   void initState() {
     super.initState();
-    context.read<ReelsProviders>().getAllReelsList =[];
-    context.read<ReelsProviders>().getAllReels();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      context.read<ReelsProviders>().getAllReelsList = [];
+      context.read<ReelsProviders>().getAllReels();
+    });
   }
+
+  void animateRemoveTopCard() async {
+    if (context.read<ReelsProviders>().getAllReelsList.isEmpty || isAnimating) return;
+    setState(() {
+      isAnimating = true;
+      slideOffset = Offset(0, -1);
+    });
+    await Future.delayed(Duration(milliseconds: 600));
+    setState(() {
+      removedCards.add(context.read<ReelsProviders>().getAllReelsList.removeLast());
+      slideOffset = Offset.zero;
+      isAnimating = false;
+    });
+  }
+
+  void animateUndoCard() async {
+    if (removedCards.isEmpty || isAnimating) return;
+    setState(() {
+      isAnimating = true;
+      slideOffset = Offset(0, 1);
+      context.read<ReelsProviders>().getAllReelsList.add(removedCards.removeLast());
+    });
+
+    await Future.delayed(Duration(milliseconds: 50));
+    setState(() {
+      slideOffset = Offset.zero;
+    });
+
+    await Future.delayed(Duration(milliseconds: 600));
+    setState(() {
+      isAnimating = false;
+    });
+  }
+
+  final CardSwiperController controller = CardSwiperController();
+
+  double dragOffset = 0.0;
 
   @override
   void dispose() {
@@ -56,22 +100,142 @@ class _ReelsScreenState extends State<ReelsScreen> {
       backgroundColor: Colors.white,
       body: Consumer<ReelsProviders>(builder: (_, reelsProvider, __) {
         return reelsProvider.reelsLoading
-            ? AppLoadingScreen()
+            ? Shimmer.fromColors(
+          baseColor: Colors.grey[300]!,
+          highlightColor: Colors.grey[100]!,
+          child: CardSwiper(
+            allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+            controller: controller,
+            // Assign the controller
+            cardsCount: 5,
+            onSwipe: (previousIndex, currentIndex, direction) {
+              print("Swiped from $previousIndex to $currentIndex");
+              return true;
+            },
+            numberOfCardsDisplayed: 4,
+            cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+              return ShimmerCard();
+            },
+          ),
+        )
             : reelsProvider.getAllReelsList.isEmpty
                 ? AppNoData()
-                : CardSwiper(
-                    allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-                    cardsCount: reelsProvider.getAllReelsList.length,
-                    onSwipe: (previousIndex, currentIndex, direction) {
-                      print("Swiped from $previousIndex to $currentIndex");
-                      return true;
-                    },
-                    numberOfCardsDisplayed: 4,
-                    cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-                      final reel = reelsProvider.getAllReelsList[index];
-                      return EachReelCard(reel: reel, reelsProvider: reelsProvider,index:index);
-                    },
-                  );
+                : Padding(
+                  padding:  EdgeInsets.symmetric(horizontal: 16.sp),
+                  child: Stack(children: [
+                      Container(
+                        height: 620,
+                        width: MediaQuery.of(context).size.width,
+                        margin: EdgeInsets.symmetric(horizontal: 24.h),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.circular(12.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 600,
+                        width: MediaQuery.of(context).size.width,
+                        margin: EdgeInsets.symmetric(horizontal: 16.h),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.circular(12.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 580,
+                        width: MediaQuery.of(context).size.width,
+                        margin: EdgeInsets.symmetric(horizontal: 8.h),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.circular(12.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                          height: 560,
+                          width: MediaQuery.of(context).size.width,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: AppColors.cardBackgroundColor,
+                            borderRadius: BorderRadius.circular(12.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.2),
+                                blurRadius: 6,
+                                spreadRadius: 2,
+                                offset: Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: GestureDetector(
+                            onVerticalDragEnd: (details) {
+                              final velocity = details.velocity.pixelsPerSecond.dy;
+                              if (velocity < -500) {
+                                animateRemoveTopCard();
+                              } else if (velocity > 500) {
+                                animateUndoCard();
+                              }
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: List.generate(reelsProvider.getAllReelsList.reversed.toList().length, (index) {
+                                final isTopCard = index == reelsProvider.getAllReelsList.reversed.toList().length - 1;
+                                final post = reelsProvider.getAllReelsList.reversed.toList()[index];
+                                return AnimatedSlide(
+                                  offset: isTopCard && slideOffset.dy != 0 ? const Offset(0, -1) : Offset.zero,
+                                  duration: const Duration(milliseconds: 600),
+                                  curve: Curves.easeInOut,
+                                  child: AnimatedOpacity(
+                                      opacity: isTopCard && slideOffset.dy != 0 ? 0.9 : 1.0,
+                                      duration: Duration(milliseconds: 600),
+                                      curve: Curves.easeInOut,
+                                      child: EachReelCard(reel: post, reelsProvider: reelsProvider, index: index)),
+                                );
+                              }),
+                            ),
+                          ))
+                    ]),
+                );
+
+        // CardSwiper(
+        //             allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+        //             cardsCount: reelsProvider.getAllReelsList.length,
+        //             onSwipe: (previousIndex, currentIndex, direction) {
+        //               print("Swiped from $previousIndex to $currentIndex");
+        //               return true;
+        //             },
+        //             numberOfCardsDisplayed: 4,
+        //             cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+        //               final reel = reelsProvider.getAllReelsList[index];
+        //               return EachReelCard(reel: reel, reelsProvider: reelsProvider,index:index);
+        //             },
+        //           );
       }),
     );
   }
@@ -82,7 +246,7 @@ class EachReelCard extends StatefulWidget {
   final ReelsProviders reelsProvider;
   final int index;
 
-  EachReelCard({super.key, required this.reel, required this.reelsProvider,required this.index});
+  EachReelCard({super.key, required this.reel, required this.reelsProvider, required this.index});
 
   @override
   State<EachReelCard> createState() => _EachReelCardState();
@@ -93,256 +257,254 @@ class _EachReelCardState extends State<EachReelCard> {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(onTap: (){
-
-    },
-      child: InkWell(
-        onTap: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => ReelPreviewScreen(initialIndex: widget.index,),));
-        },
-        child: Screenshot(
-          controller: sc,
-          child: Container(
-            height: MediaQuery.of(context).size.height*0.7,
-            width: MediaQuery.of(context).size.height*0.9,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: AppColors.cardBackgroundColor,
-              borderRadius: BorderRadius.circular(20.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
-                  blurRadius: 6,
-                  spreadRadius: 2,
-                  offset: Offset(0, 3),
-                ),
-              ],
-            ),
-            child: Stack(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(20.r)),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(10.r)),
-                          child: CachedNetworkImage(
-                            imageUrl: widget.reel.thumbnailUrl.toString(),
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ReelPreviewScreen(
+                initialIndex: widget.index,
+              ),
+            ));
+      },
+      child: Screenshot(
+        controller: sc,
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          width: MediaQuery.of(context).size.height * 0.9,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: AppColors.cardBackgroundColor,
+            borderRadius: BorderRadius.circular(20.r),
+            // boxShadow: [
+            //   BoxShadow(
+            //     color: Colors.grey.withOpacity(0.2),
+            //     blurRadius: 6,
+            //     spreadRadius: 2,
+            //     offset: Offset(0, 3),
+            //   ),
+            // ],
+          ),
+          child: Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(20.r)),
+                child: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(10.r)),
+                        child: CachedNetworkImage(
+                          imageUrl: widget.reel.thumbnailUrl.toString(),
+                          height: MediaQuery.of(context).size.height * .56,
+                          width: MediaQuery.of(context).size.width,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
                             height: MediaQuery.of(context).size.height * .56,
                             width: MediaQuery.of(context).size.width,
-                            fit: BoxFit.cover,
-                            placeholder: (context, url) => Container(
-                              height: MediaQuery.of(context).size.height * .56,
-                              width: MediaQuery.of(context).size.width,
-                              color: AppColors.borderColor.withOpacity(.2),
-                            ),
-                            errorWidget: (context, url, error) => Center(
-                              child: Icon(
-                                Icons.image,
-                                size: 100,
-                                color: Colors.grey.shade300,
-                              ),
+                            color: AppColors.borderColor.withOpacity(.2),
+                          ),
+                          errorWidget: (context, url, error) => Center(
+                            child: Icon(
+                              Icons.image,
+                              size: 100,
+                              color: Colors.grey.shade300,
                             ),
                           ),
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.only(bottom: 10.h, top: 10.h),
-                        decoration: BoxDecoration(
-                            color: AppColors.cardBackgroundColor,
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(20),
-                              bottomRight: Radius.circular(20),
-                            )),
-                        child: Row(
-                          children: [
-                            width(width: 10),
-                            InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => InAppWebViewScreen(
-                                        webUrl: "https://www.youtube.com",
-                                        title: "Videos",
-                                      ),
-                                    ));
-                              },
-                              child: SizedBox(
-                                height: 30,
-                                width: 30,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.all(Radius.circular(8)),
-                                  child: CachedNetworkImage(
-                                    imageUrl: widget.reel.publisherImage,
-
-                                    fit: BoxFit.fill,
-                                    placeholder: (context, url) => Container(
-                                      color: AppColors.borderColor.withOpacity(.2),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 10.h, top: 10.h),
+                      decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(20),
+                            bottomRight: Radius.circular(20),
+                          )),
+                      child: Row(
+                        children: [
+                          width(width: 10),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => InAppWebViewScreen(
+                                      webUrl: "https://www.youtube.com",
+                                      title: "Videos",
                                     ),
-                                    errorWidget: (context, url, error) => Center(
-                                      child: Icon(
-                                        Icons.image,
-                                        size: 30,
-                                        color: Colors.grey.shade300,
-                                      ),
+                                  ));
+                            },
+                            child: SizedBox(
+                              height: 30,
+                              width: 30,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                child: CachedNetworkImage(
+                                  imageUrl: widget.reel.publisherImage,
+                                  fit: BoxFit.fill,
+                                  placeholder: (context, url) => Container(
+                                    color: AppColors.borderColor.withOpacity(.2),
+                                  ),
+                                  errorWidget: (context, url, error) => Center(
+                                    child: Icon(
+                                      Icons.image,
+                                      size: 30,
+                                      color: Colors.grey.shade300,
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                            width(width: 6.h),
-                            Text(
-                              widget.reel.publisher,
-                              style: fontStyle(
-                                color: AppColors.bodyTextColor,
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          ),
+                          width(width: 6.h),
+                          Text(
+                            widget.reel.publisher,
+                            style: fontStyle(
+                              color: AppColors.bodyTextColor,
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
                             ),
-                            Text(
-                              " ● ",
-                              style: fontStyle(
-                                color: AppColors.borderColor,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          ),
+                          Text(
+                            " ● ",
+                            style: fontStyle(
+                              color: AppColors.borderColor,
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w600,
                             ),
-                            Text(
-                              " ${formatTimeDifference(widget.reel.createdAt.toString())}",
-                              style: fontStyle(fontSize: 10.sp, fontWeight: FontWeight.w400, color: Colors.grey),
-                            ),
-                            width(width: 15.w),
-                          ],
-                        ),
+                          ),
+                          Text(
+                            " ${formatTimeDifference(widget.reel.createdAt.toString())}",
+                            style: fontStyle(fontSize: 10.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                          ),
+                          width(width: 15.w),
+                        ],
                       ),
-                      Container(
-                        padding: EdgeInsets.only(bottom: 16.h, top: 6.h, left: 10.sp, right: 10.sp),
-                        decoration: BoxDecoration(
-                            color: AppColors.cardBackgroundColor,
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(20),
-                              bottomRight: Radius.circular(20),
-                            )),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            BottomActions(
-                              iconColor: AppColors.iconColors,
-                              postType: widget.reel.postName ?? "",
-                              icon: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                              label: 'లైక్',
-                              isLike: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
-                              onTap: () {
-                                log("Like");
-                                widget.reelsProvider.isLikePost(widget.reel);
-                              },
-                            ),
-                            BottomActions(
-                              postType: "",
-                              icon: "assets/svg/new_comment.svg",
-                              label: 'కామెంట్',
-                              iconColor: AppColors.iconColors,
-                              onTap: () async {
-                                SharedPreferences sp = await SharedPreferences.getInstance();
-                                String? userId = sp.getString("userId");
-                                String? deviceId = sp.getString("deviceId");
-                                context.read<AuthProvider>().sendEvent("CommentPage");
-                                EventRepo().sendEvent({
-                                  "key": "comments",
-                                  "data": {
-                                    "device_id": "$deviceId",
-                                    "userId": userId ?? "",
-                                    "postId": widget.reel.id.toString(),
-                                  }
-                                });
-                                showComments(context, widget.reel.id.toString());
-                                EventRepo().sendEvent({
-                                  "key": "comments",
-                                  "data": {"deviceId": deviceId, "openTime": DateTime.now().toString()}
-                                });
-                              },
-                            ),
-                            Spacer(),
-                            BottomActions(
-                              postType: "",
-                              icon: "assets/svg/share.svg",
-                              label: 'షేర్',
-                              iconColor: AppColors.iconColors,
-                              onTap: () async {
-                                SharedPreferences sp = await SharedPreferences.getInstance();
-                                String? userId = sp.getString("userId");
-                                String? deviceId = sp.getString("deviceId");
-                                EventRepo().sendEvent({
-                                  "key": "share_via_articles",
-                                  "data": {
-                                    "device_id": "$deviceId",
-                                    "userId": userId ?? "",
-                                    "postId": widget.reel.id.toString(),
-                                    "isWhatAppShare": false,
-                                  }
-                                });
-
-                                sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
-
-                                try {
-                                  final image = await sc.capture(
-                                    pixelRatio: 2,
-                                  );
-                                  if (image != null) {
-                                    final directory = await getTemporaryDirectory();
-                                    final imagePath = '${directory.path}/${widget.reel.id}.png';
-                                    final imageFile = File(imagePath);
-                                    await imageFile.writeAsBytes(image);
-
-                                    Share.shareXFiles([XFile(imageFile.path)], text: widget.reel.videoUrl);
-                                  } else {
-                                    CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                  }
-                                } catch (e) {
-                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 16.h, top: 6.h, left: 10.sp, right: 10.sp),
+                      decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.only(
+                            bottomLeft: Radius.circular(20),
+                            bottomRight: Radius.circular(20),
+                          )),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          BottomActions(
+                            iconColor: AppColors.iconColors,
+                            postType: widget.reel.postName ?? "",
+                            icon: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                            label: 'లైక్',
+                            isLike: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
+                            onTap: () {
+                              log("Like");
+                              widget.reelsProvider.isLikePost(widget.reel);
+                            },
+                          ),
+                          BottomActions(
+                            postType: "",
+                            icon: "assets/svg/new_comment.svg",
+                            label: 'కామెంట్',
+                            iconColor: AppColors.iconColors,
+                            onTap: () async {
+                              SharedPreferences sp = await SharedPreferences.getInstance();
+                              String? userId = sp.getString("userId");
+                              String? deviceId = sp.getString("deviceId");
+                              context.read<AuthProvider>().sendEvent("CommentPage");
+                              EventRepo().sendEvent({
+                                "key": "comments",
+                                "data": {
+                                  "device_id": "$deviceId",
+                                  "userId": userId ?? "",
+                                  "postId": widget.reel.id.toString(),
                                 }
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                      // height(height: 20.sp)
-                    ],
-                  ),
-                ),
-                Positioned(
-                  top: 10,
-                  right: 14,
-                  child: Consumer<ReelsProviders>(builder: (_, homeProvider, __) {
-                    return GestureDetector(
-                      onTap: () {
-                        context.read<ReelsProviders>().isBookMarkPost(  widget.reel,context);
+                              });
+                              showComments(context, widget.reel.id.toString());
+                              EventRepo().sendEvent({
+                                "key": "comments",
+                                "data": {"deviceId": deviceId, "openTime": DateTime.now().toString()}
+                              });
+                            },
+                          ),
+                          Spacer(),
+                          BottomActions(
+                            postType: "",
+                            icon: "assets/svg/share.svg",
+                            label: 'షేర్',
+                            iconColor: AppColors.iconColors,
+                            onTap: () async {
+                              SharedPreferences sp = await SharedPreferences.getInstance();
+                              String? userId = sp.getString("userId");
+                              String? deviceId = sp.getString("deviceId");
+                              EventRepo().sendEvent({
+                                "key": "share_via_articles",
+                                "data": {
+                                  "device_id": "$deviceId",
+                                  "userId": userId ?? "",
+                                  "postId": widget.reel.id.toString(),
+                                  "isWhatAppShare": false,
+                                }
+                              });
 
-                        print("");
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: (homeProvider.isBookMark.contains(widget.reel.id.toString()) || widget.reel.isBookmarked == 1)
-                              ? AppColors.appButtonColor
-                              : Colors.black54,
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          (homeProvider.isBookMark.contains(widget.reel.id.toString()) ||  widget.reel.isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                    );
-                  }),
+                              sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
 
+                              try {
+                                final image = await sc.capture(
+                                  pixelRatio: 2,
+                                );
+                                if (image != null) {
+                                  final directory = await getTemporaryDirectory();
+                                  final imagePath = '${directory.path}/${widget.reel.id}.png';
+                                  final imageFile = File(imagePath);
+                                  await imageFile.writeAsBytes(image);
+
+                                  Share.shareXFiles([XFile(imageFile.path)], text: widget.reel.videoUrl);
+                                } else {
+                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                }
+                              } catch (e) {
+                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                    // height(height: 20.sp)
+                  ],
                 ),
-              ],
-            ),
+              ),
+              Positioned(
+                top: 10,
+                right: 14,
+                child: Consumer<ReelsProviders>(builder: (_, homeProvider, __) {
+                  return GestureDetector(
+                    onTap: () {
+                      context.read<ReelsProviders>().isBookMarkPost(widget.reel, context);
+
+                      print("");
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(7),
+                      decoration: BoxDecoration(
+                        color: (homeProvider.isBookMark.contains(widget.reel.id.toString()) || widget.reel.isBookmarked == 1) ? AppColors.appButtonColor : Colors.black54,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        (homeProvider.isBookMark.contains(widget.reel.id.toString()) || widget.reel.isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  );
+                }),
+              ),
+            ],
           ),
         ),
       ),

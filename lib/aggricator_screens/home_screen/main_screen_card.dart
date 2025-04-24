@@ -40,7 +40,56 @@ class MainScreenCard extends StatefulWidget {
   State<MainScreenCard> createState() => _MainScreenCardState();
 }
 
-class _MainScreenCardState extends State<MainScreenCard> {
+class _MainScreenCardState extends State<MainScreenCard>  with TickerProviderStateMixin {
+  // List<Map<String, dynamic>> displayedCards = [];
+  List<Map<String, dynamic>> removedCards = [];
+  Offset slideOffset = Offset.zero;
+  bool isAnimating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // WidgetsBinding.instance.addPostFrameCallback((_) async {
+      context.read<HomeProvider>().getAllPostList = [];
+      context.read<HomeProvider>().getAllAiTags();
+      context.read<HomeProvider>().getAllPost();
+      // final posts = context.read<HomeProvider>().getAllPostList;
+
+    // });
+  }
+
+  void animateRemoveTopCard() async {
+    if (context.read<HomeProvider>().getAllPostList.isEmpty || isAnimating) return;
+    setState(() {
+      isAnimating = true;
+      slideOffset = Offset(0, -1);
+    });
+    await Future.delayed(Duration(milliseconds: 600));
+    setState(() {
+      removedCards.add(context.read<HomeProvider>().getAllPostList.removeLast());
+      slideOffset = Offset.zero;
+      isAnimating = false;
+    });
+  }
+
+  void animateUndoCard() async {
+    if (removedCards.isEmpty || isAnimating) return;
+    setState(() {
+      isAnimating = true;
+      slideOffset = Offset(0, 1);
+      context.read<HomeProvider>().getAllPostList.add(removedCards.removeLast());
+    });
+
+    await Future.delayed(Duration(milliseconds: 50));
+    setState(() {
+      slideOffset = Offset.zero;
+    });
+
+    await Future.delayed(Duration(milliseconds: 600));
+    setState(() {
+      isAnimating = false;
+    });
+  }
   final CardSwiperController controller = CardSwiperController();
 
   double dragOffset = 0.0;
@@ -51,21 +100,13 @@ class _MainScreenCardState extends State<MainScreenCard> {
   }
 
   @override
-  void initState() {
-    context.read<HomeProvider>().getAllPostList = [];
-    context.read<HomeProvider>().getAllAiTags();
-    context.read<HomeProvider>().getAllPost();
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
         return SizedBox(
-          width: MediaQuery.of(context).size.width.w,
-          height: MediaQuery.of(context).size.height - 150.h,
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.height,
           child: Center(
             child: homeProvider.isHomeLoading
                 ? Shimmer.fromColors(
@@ -139,158 +180,276 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                   );
                                 },
                               )),
+
                           Expanded(
-                            child: GestureDetector(
-                              // onVerticalDragUpdate: (details) {
-                              //   setState(() {
-                              //     dragOffset += details.delta.dy;
-                              //   });
-                              // },
-                              // onVerticalDragEnd: (details) {
-                              //   if (details.velocity.pixelsPerSecond.dy > 0) {
-                              //     controller.undo();
-                              //   } else if (details.velocity.pixelsPerSecond.dy < 0) {
-                              //     controller.swipe(CardSwiperDirection.top);
-                              //   }
-                              //   setState(() {
-                              //     dragOffset = 0.0; // Reset after action
-                              //   });
-                              // },
-                              child: CardSwiper(
-                                allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-                                controller: controller,
-                                cardsCount: homeProvider.getAllPostList.length,
-                                numberOfCardsDisplayed: 4,
-                                onSwipe: (previousIndex, currentIndex, direction) {
-                                  if(homeProvider.getAllPostList.length-5 == currentIndex){
-                                    log("last post   ${homeProvider.getAllPostList[int.parse(currentIndex.toString())]["id"]}");
-                                    context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList.last["id"].toString());
-                                  }
-                                  return true;
-                                },
-                                cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-                                  return InkWell(
-                                    onTap: () {
-                                      if(homeProvider.getAllPostList[index]['type'].toString() == "GoogleAds"){
+                            child: Padding(
+                              padding:  EdgeInsets.symmetric(horizontal: 16.0.h),
+                              child: Stack(
+                                children: [
+                                Container(
+                                  height: 560,
+                                  width: MediaQuery.of(context).size.width,
+                                  margin: EdgeInsets.symmetric(horizontal: 24.h),
 
-                                      }else{
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => MainScreenPageView(
-                                                startIndex: index,
-                                              ),
-                                            ));
-                                        if (homeProvider.getAllPostList[index]['type'].toString() == "Video") {
-                                          homeProvider.youtubeDispose();
-                                        }
-                                      }
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color:AppColors.cardBackgroundColor,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      blurRadius: 6,
+                                      spreadRadius: 2,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                ),
+                                Container(
+                                  height: 540,
+                                  width: MediaQuery.of(context).size.width,
+                                  margin: EdgeInsets.symmetric(horizontal: 16.h),
 
-                                    },
-                                    child: Container(
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: AppColors.cardBackgroundColor,
-                                          borderRadius: BorderRadius.circular(20.r),
-                                          boxShadow: [
-                                            BoxShadow(
-                                              color: Colors.grey.withOpacity(0.2),
-                                              blurRadius: 6,
-                                              spreadRadius: 2,
-                                              offset: Offset(0, 3),
-                                            ),
-                                          ],
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color:AppColors.cardBackgroundColor,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      blurRadius: 6,
+                                      spreadRadius: 2,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                ),
+                                Container(
+                                  height: 520,
+                                  width: MediaQuery.of(context).size.width,
+                                  margin: EdgeInsets.symmetric(horizontal: 8.h),
+
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  color:AppColors.cardBackgroundColor,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.2),
+                                      blurRadius: 6,
+                                      spreadRadius: 2,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                ),
+                                  Container(
+                                    height: 500,
+                                    width: MediaQuery.of(context).size.width,
+                                    // padding: EdgeInsets.only(left: 25,right: 25,bottom: 12),
+
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color:AppColors.cardBackgroundColor,
+                                      borderRadius: BorderRadius.circular(20.r),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.2),
+                                          blurRadius: 6,
+                                          spreadRadius: 2,
+                                          offset: Offset(0, 3),
                                         ),
-                                        child: homeProvider.getAllPostList[index]['type'].toString() == "WebUrl"
-                                            ? Padding(
-                                          padding: const EdgeInsets.all(16.0),
-                                          child: InkWell(
-                                            onTap: (){
-                                              Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: homeProvider.webUrl.toString(), title: "IPL Update"),));
-                                            },
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.all(Radius.circular(10.r)),
-                                              child: Image.asset(
-                                                "assets/svg/ipl.png",
-                                                width: MediaQuery.of(context).size.width,
-                                                height: MediaQuery.of(context).size.height,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                        )
-                                            : homeProvider.getAllPostList[index]['type'].toString() == "GoogleAds"
-                                                ? Padding(
-                                                    padding: const EdgeInsets.only(bottom: 1.0),
+                                      ],
+                                    ),
+                                    child: GestureDetector(
+                                      onVerticalDragEnd: (details) {
+                                        final velocity = details.velocity.pixelsPerSecond.dy;
+                                        if (velocity < -500) {
+                                          animateRemoveTopCard();
+                                        } else if (velocity > 500) {
+                                          animateUndoCard();
+                                        }
+                                      },
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: List.generate(
+                                            homeProvider.getAllPostList.reversed.toList().length, (index) {
+                                          final isTopCard = index == homeProvider.getAllPostList.reversed.toList().length - 1;
+                                          final post = homeProvider.getAllPostList.reversed.toList()[index];
+                                          final type = post['type'].toString();
+                                          double height = 500;
+
+                                          return AnimatedSlide(
+                                            offset: isTopCard && slideOffset.dy != 0 ? const Offset(0, -1) : Offset.zero,
+                                            duration: const Duration(milliseconds: 600),
+                                            curve: Curves.easeInOut,
+                                            child: AnimatedOpacity(
+                                              opacity: isTopCard && slideOffset.dy != 0 ? 0.9 : 1.0,
+                                              duration: Duration(milliseconds: 600),
+                                              curve: Curves.easeInOut,
+                                              child: InkWell(
+                                                onTap: () {
+
+                                                  log("fmerngkjkglkg  ${index}");
+                                                  if (type != "GoogleAds") {
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            MainScreenPageView(startIndex: index),
+                                                      ),
+                                                    );
+                                                    if (type == "Video") {
+                                                      context.read<HomeProvider>().youtubeDispose();
+                                                    }
+                                                  }
+                                                },
+                                                child: Container(
+                                                  alignment: Alignment.center,
+                                                  decoration: BoxDecoration(
+                                                    color: AppColors.cardBackgroundColor,
+                                                    borderRadius: BorderRadius.circular(20.r),
+                                                  ),
+                                                  child: type == "WebUrl"
+                                                      ? Padding(
+                                                    padding: const EdgeInsets.all(16.0),
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                            builder: (context) =>
+                                                                InAppWebViewScreen(
+                                                                  webUrl: context
+                                                                      .read<HomeProvider>()
+                                                                      .webUrl
+                                                                      .toString(),
+                                                                  title: "IPL Update",
+                                                                ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: ClipRRect(
+                                                        borderRadius:
+                                                        BorderRadius.circular(10.r),
+                                                        child: Image.asset(
+                                                          "assets/svg/ipl.png",
+                                                          width:
+                                                          MediaQuery.of(context).size.width,
+                                                          height: MediaQuery.of(context)
+                                                              .size
+                                                              .height,
+                                                          fit: BoxFit.cover,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                                      : type == "GoogleAds"
+                                                      ? Padding(
+                                                    padding:
+                                                    const EdgeInsets.only(bottom: 20.0),
                                                     child: GoogleAdsView(
                                                       isList: true,
-                                                      article: homeProvider.getAllPostList[index],
-                                                      flipProvider: homeProvider,
-                                                      // screenshotController: adsScreenshotController,
+                                                      article: post,
+                                                      flipProvider:
+                                                      context.read<HomeProvider>(),
                                                       isFoldable: false,
                                                     ),
                                                   )
-                                                : homeProvider.getAllPostList[index]['type'].toString() == "Image"
-                                                    ? ImageView(index: index,getAllPostList: homeProvider.getAllPostList[index],)
-                                                    : homeProvider.getAllPostList[index]['type'].toString() == "Gallery"
-                                                        ? Padding(
-                                                            padding: const EdgeInsets.only(bottom: 5.0),
-                                                            child: Stack(
-                                                              children: [
-                                                                ClipRRect(
-                                                                  borderRadius: BorderRadius.all(
-                                                                    Radius.circular(12),
+                                                      : type == "Image"
+                                                      ? ImageView(
+                                                    index: index,
+                                                    getAllPostList: post,
+                                                  )
+                                                      : type == "Gallery"
+                                                      ? Padding(
+                                                    padding: const EdgeInsets.only(
+                                                        bottom: 5.0),
+                                                    child: Stack(
+                                                      children: [
+                                                        ClipRRect(
+                                                          borderRadius:
+                                                          BorderRadius.all(
+                                                              Radius.circular(
+                                                                  12)),
+                                                          child: FullPageCarousel(
+                                                            isHome: false,
+                                                            imageUrls:
+                                                            post['gallery'] ??
+                                                                [],
+                                                            postDetails: post,
+                                                          ),
+                                                        ),
+                                                        Positioned(
+                                                          top: 18,
+                                                          right: 22,
+                                                          child: Consumer<
+                                                              HomeProvider>(
+                                                              builder: (_,
+                                                                  homeProvider,
+                                                                  __) {
+                                                                final isBookmarked =
+                                                                    homeProvider
+                                                                        .isBookMark
+                                                                        .contains(
+                                                                        post['id']
+                                                                            .toString()) ||
+                                                                        post['isBookmarked'] ==
+                                                                            1;
+                                                                return GestureDetector(
+                                                                  onTap: () {
+                                                                    homeProvider
+                                                                        .isBookMarkPost(
+                                                                        post,
+                                                                        context);
+                                                                  },
+                                                                  child: Container(
+                                                                    padding:
+                                                                    EdgeInsets.all(
+                                                                        7),
+                                                                    decoration:
+                                                                    BoxDecoration(
+                                                                      color: isBookmarked
+                                                                          ? AppColors
+                                                                          .appButtonColor
+                                                                          : Colors
+                                                                          .black54,
+                                                                      shape: BoxShape
+                                                                          .circle,
+                                                                    ),
+                                                                    child: Icon(
+                                                                      isBookmarked
+                                                                          ? Icons
+                                                                          .bookmark
+                                                                          : Icons
+                                                                          .bookmark_outline,
+                                                                      color:
+                                                                      Colors.white,
+                                                                      size: 20,
+                                                                    ),
                                                                   ),
-                                                                  child: FullPageCarousel(
-                                                                    isHome: false,
-                                                                    imageUrls: homeProvider.getAllPostList[index]['gallery'] ?? [],
-                                                                    postDetails: homeProvider.getAllPostList[index],
-                                                                  ),
-                                                                ),
-                                                                Positioned(
-                                                                  top: 18,
-                                                                  right: 22,
-                                                                  child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-                                                                    return  GestureDetector(
-                                                                      onTap: () {
-
-                                                                        homeProvider.isBookMarkPost(homeProvider.getAllPostList[index], context);
-
-                                                                        print("");
-                                                                      },
-                                                                      child: Container(
-                                                                        padding: EdgeInsets.all(7),
-                                                                        decoration: BoxDecoration(
-                                                                          color:  (homeProvider.isBookMark.contains(homeProvider.getAllPostList[index]['id'].toString()) || homeProvider.getAllPostList[index]['isBookmarked'] == 1)
-                                                                              ? AppColors.appButtonColor
-                                                                              : Colors.black54,
-                                                                          shape: BoxShape.circle,
-                                                                        ),
-                                                                        child: Icon(
-                                                                          (homeProvider.isBookMark.contains(homeProvider.getAllPostList[index]['id'].toString()) || homeProvider.getAllPostList[index]['isBookmarked'] == 1)
-                                                                              ? Icons.bookmark
-                                                                              : Icons.bookmark_outline,
-                                                                          color: Colors.white,
-                                                                          size: 20,
-                                                                        ),
-                                                                      ),
-                                                                    );
-                                                                  })
-                                                                ),
-
-                                                              ],
-                                                            ),
-                                                          )
-                                                        : StandardCard(
-                                                            getAllPostList: homeProvider.getAllPostList[index],
-                                          index: index,
-                                                          )),
-                                  );
-                                },
+                                                                );
+                                                              }),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                      : StandardCard(index: index,
+                                                  getAllPostList: post,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          height(height: 20)
+
                         ],
                       ),
           ),

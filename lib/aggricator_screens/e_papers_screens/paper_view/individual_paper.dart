@@ -37,7 +37,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
       backgroundColor: Colors.white,
       body: Consumer<EPapersProvider>(builder: (_, ePapersProvider, __) {
         return Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10, left: 10, right: 10), // Adjusted for safe area
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10, right: 10), // Adjusted for safe area
           child: Column(
             children: [
               InkWell(
@@ -141,16 +141,28 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                                         fit: BoxFit.fill,
                                                       )),
                                                 ),
-                                                width(width: 10.w),
-                                                Expanded(
-                                                  child: Text(
-                                                    ePapersProvider.getSinglePapersList[index].source.toString(),
-                                                    style: newAppFont(
-                                                      color: Colors.grey.shade700,
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.w600,
+                                                width(width: 6.h),
+                                                Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      ePapersProvider.getAllMainPapersList[index].source,
+                                                      style: newAppFont(
+                                                        color: Colors.grey.shade800,
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
                                                     ),
-                                                  ),
+                                                    // height(height: 1.h),
+                                                    Text(
+                                                      ePapersProvider.getAllMainPapersList[index].editionName,
+                                                      style: newAppFont(
+                                                        color: Colors.grey.shade600,
+                                                        fontSize: 12,
+                                                        fontWeight: FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
 
                                                 width(width: 16.w),
@@ -159,35 +171,35 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                           ),
                                         ],
                                       ),
-                                      Positioned(
-                                        top: 14,
-                                        right: 14,
-                                        child: Consumer<EPapersProvider>(builder: (_, ePapersProvider, __) {
-                                          return GestureDetector(
-                                            onTap: () {
-                                              ePapersProvider.isBookMarkPost(ePapersProvider.getSinglePapersList[index], context);
-                                            },
-                                            child: Container(
-                                              padding: EdgeInsets.all(7),
-                                              decoration: BoxDecoration(
-                                                color: (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) ||
-                                                        ePapersProvider.getSinglePapersList[index].data!.first.isBookmarked == 1)
-                                                    ? AppColors.appButtonColor
-                                                    : Colors.black54,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) ||
-                                                        ePapersProvider.getSinglePapersList[index].data!.first.isBookmarked  == 1)
-                                                    ? Icons.bookmark
-                                                    : Icons.bookmark_outline,
-                                                color: Colors.white,
-                                                size: 20,
-                                              ),
-                                            ),
-                                          );
-                                        }),
-                                      ),
+                                      // Positioned(
+                                      //   top: 14,
+                                      //   right: 14,
+                                      //   child: Consumer<EPapersProvider>(builder: (_, ePapersProvider, __) {
+                                      //     return GestureDetector(
+                                      //       onTap: () {
+                                      //         ePapersProvider.isBookMarkPost(ePapersProvider.getSinglePapersList[index], context);
+                                      //       },
+                                      //       child: Container(
+                                      //         padding: EdgeInsets.all(7),
+                                      //         decoration: BoxDecoration(
+                                      //           color: (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) ||
+                                      //                   ePapersProvider.getSinglePapersList[index].data!.first.isBookmarked == 1)
+                                      //               ? AppColors.appButtonColor
+                                      //               : Colors.black54,
+                                      //           shape: BoxShape.circle,
+                                      //         ),
+                                      //         child: Icon(
+                                      //           (ePapersProvider.isBookMark.contains(ePapersProvider.getSinglePapersList[index].id.toString()) ||
+                                      //                   ePapersProvider.getSinglePapersList[index].data!.first.isBookmarked  == 1)
+                                      //               ? Icons.bookmark
+                                      //               : Icons.bookmark_outline,
+                                      //           color: Colors.white,
+                                      //           size: 20,
+                                      //         ),
+                                      //       ),
+                                      //     );
+                                      //   }),
+                                      // ),
                                     ],
                                   ),
                                 ),

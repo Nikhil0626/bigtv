@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -60,7 +61,10 @@ class _SettingsViewState extends State<SettingsView> {
             // if (loginStatus == LoginStatus.skip)
             _buildSettingsRow(context, "Profile.svg", "Edit Profile", () {
               if (isNotificationsEnabled == false) {
-                CustomToast.showErrorToast(msg: 'Please login with mobile number');
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginBackgroundView()),
+                );
               } else if (isNotificationsEnabled == true) {
                 Navigator.push(
                   context,
@@ -82,7 +86,7 @@ class _SettingsViewState extends State<SettingsView> {
             // _buildNotificationRow(),
 
             _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () {
-              Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.example.yourapp");
+              Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
             }),
 
             height(height: 5.h),
