@@ -162,13 +162,27 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                           ),
                                         ),
                                         width(width: 6.h),
-                                        Text(
-                                          ePapersProvider.getAllMainPapersList[index].source,
-                                          style: newAppFont(
-                                            color: AppColors.bodyTextColor,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w600,
-                                          ),
+                                        Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              ePapersProvider.getAllMainPapersList[index].source,
+                                              style: newAppFont(
+                                                color: Colors.grey.shade800,
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                            // height(height: 1.h),
+                                            Text(
+                                              ePapersProvider.getAllMainPapersList[index].editionName,
+                                              style: newAppFont(
+                                                color: Colors.grey.shade600,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w400,
+                                              ),
+                                            ),
+                                          ],
                                         ),
 
                                         width(width: 15.w),
@@ -179,36 +193,36 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                               ),
 
 
-                              Positioned(
-                                top: 14,
-                                right: 14,
-                                child: Consumer<EPapersProvider>(
-                                  builder: (_,ePapersProvider,__) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        ePapersProvider.isBookMarkPost(   ePapersProvider.getAllMainPapersList[index],context);
-
-                                      },
-                                      child:Container(
-                                        padding: EdgeInsets.all(7),
-                                        decoration: BoxDecoration(
-                                          color: (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked== 1)
-                                              ? AppColors.appButtonColor
-                                              : Colors.black54,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked == 1)
-                                              ? Icons.bookmark
-                                              : Icons.bookmark_outline,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                ),
-                              ),
+                              // Positioned(
+                              //   top: 14,
+                              //   right: 14,
+                              //   child: Consumer<EPapersProvider>(
+                              //     builder: (_,ePapersProvider,__) {
+                              //       return GestureDetector(
+                              //         onTap: () {
+                              //           ePapersProvider.isBookMarkPost(   ePapersProvider.getAllMainPapersList[index],context);
+                              //
+                              //         },
+                              //         child:Container(
+                              //           padding: EdgeInsets.all(7),
+                              //           decoration: BoxDecoration(
+                              //             color: (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked== 1)
+                              //                 ? AppColors.appButtonColor
+                              //                 : Colors.black54,
+                              //             shape: BoxShape.circle,
+                              //           ),
+                              //           child: Icon(
+                              //             (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked == 1)
+                              //                 ? Icons.bookmark
+                              //                 : Icons.bookmark_outline,
+                              //             color: Colors.white,
+                              //             size: 20,
+                              //           ),
+                              //         ),
+                              //       );
+                              //     }
+                              //   ),
+                              // ),
                             ],
                           ),
                         ),

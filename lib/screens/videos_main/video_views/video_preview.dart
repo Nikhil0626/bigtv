@@ -30,7 +30,7 @@ class _VideoPreview extends State<VideoPreview> {
 
   @override
   void dispose() {
-    context.read<HomeProvider>().youtubeDispose();
+    // context.read<HomeProvider>().youtubeDispose();
     super.dispose();
   }
 

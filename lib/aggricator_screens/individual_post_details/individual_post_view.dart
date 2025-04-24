@@ -14,6 +14,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../globel_keys/global_variables_data.dart';
@@ -53,6 +54,7 @@ class _IndividualPostViewState extends State<IndividualPostView> {
   @override
   void initState() {
     log("is come from lin----k${widget.postId}");
+    getWebData();
     context.read<HomeProvider>().getIndividualPost(widget.postId);
     super.initState();
   }
@@ -450,7 +452,7 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                                 if (article['type'] == "Standard" || article['type'] == "Video") {
                                                   try {
                                                     final image = await adsScreenshotController.capture(
-                                                      pixelRatio: 0.5,
+                                                      pixelRatio: 2.0,
                                                     );
                                                     if (image != null) {
                                                       final directory = await getTemporaryDirectory();
@@ -567,5 +569,10 @@ class _IndividualPostViewState extends State<IndividualPostView> {
     });
 
     return spans;
+  }
+
+  void getWebData() async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
+      sp.setString("webPostId","");
   }
 }

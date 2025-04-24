@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
-import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
@@ -24,7 +22,6 @@ import '../../screens/home_screen/home_screens/google_ads_view.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../screens/videos_main/video_views/gallery_screen.dart';
 import '../../screens/videos_main/video_views/video_preview.dart';
-import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
@@ -579,7 +576,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
                             sendShareDetails(context.read<FlipProvider>().userId, widget.article['id'], widget.article['content'].toString());
 
-                            if (widget.article['type'] == "Standard" || widget.article['type'] == "Video") {
+                            if (widget.article['type'] == "Standard" || widget.article['type'] == "Video"|| widget.article['type'] == "Image") {
                               try {
                                 final image = await adsScreenshotController.capture(
                                   pixelRatio: 2.0,

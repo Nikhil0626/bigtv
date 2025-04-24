@@ -194,7 +194,8 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   void addToSelectedEngagements(String profileName) {
-    isOthersSelected = profileName.toString() == "Others" ? true : false;
+    isOthersSelected =!isOthersSelected;
+    log(profileName);
     if (!selectedFeedbackList.contains(profileName)) {
       selectedFeedbackList.add(profileName);
       log(selectedFeedbackList.toString());

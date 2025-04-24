@@ -105,86 +105,112 @@ class _SavedArticlesState extends State<SavedArticles> {
                                 ),
                                 child: Padding(
                                   padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 15),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                  child: Stack(
                                     children: [
-                                      Container(
-                                        height: 100,
-                                        width: 80,
-                                        decoration: BoxDecoration(
-                                          color: Colors.white,
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
-                                          child: CachedNetworkImage(
-                                              imageUrl: article.imageUrl.toString(),
-                                              width: MediaQuery.of(context).size.width,
-                                              height: 80,
-                                              fit: BoxFit.fill,
-                                              placeholder: (context, url) => Container(
-                                                    color: AppColors.borderColor.withOpacity(.2),
-                                                  ),
-                                              errorWidget: (context, url, error) {
-                                                log(error.toString());
-                                                return Center(
-                                                  child: Icon(
-                                                    Icons.image,
-                                                    size: 80,
-                                                    color: Colors.grey.shade300,
-                                                  ),
-                                                );
-                                              }),
-                                        ),
-                                      ),
-                                      width(width: 20),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Container(
-                                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Text(
-                                                article.type.toString(),
-                                                maxLines: 2,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: TextStyle(color: Colors.black),
-                                              ),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                            height: 100,
+                                            width: 80,
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.circular(10),
                                             ),
-                                            SizedBox(height: 6),
-                                            Text(
-                                              article.title.toString(),
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 2,
-                                              style: newAppFont(
-                                                color: Colors.black,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                              ),
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(10),
+                                              child: CachedNetworkImage(
+                                                  imageUrl: article.imageUrl.toString(),
+                                                  width: MediaQuery.of(context).size.width,
+                                                  height: 80,
+                                                  fit: BoxFit.fill,
+                                                  placeholder: (context, url) => Container(
+                                                        color: AppColors.borderColor.withOpacity(.2),
+                                                      ),
+                                                  errorWidget: (context, url, error) {
+                                                    log(error.toString());
+                                                    return Center(
+                                                      child: Icon(
+                                                        Icons.image,
+                                                        size: 80,
+                                                        color: Colors.grey.shade300,
+                                                      ),
+                                                    );
+                                                  }),
                                             ),
-                                            SizedBox(height: 6),
-                                            Row(
+                                          ),
+                                          width(width: 20),
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              mainAxisSize: MainAxisSize.min,
                                               children: [
-                                                Icon(Icons.access_time_outlined, color: Colors.grey.shade700, size: 16),
-                                                width(width: 4.w),
-                                                Text(
-                                                  " ${formatTimeDifference(article.created.toString())}",
-                                                  style: fontStyle(
-                                                    fontSize: 12.sp,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Colors.black,
+                                                Container(
+                                                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.white,
+                                                    borderRadius: BorderRadius.circular(8),
                                                   ),
+                                                  child: Text(
+                                                    article.type.toString(),
+                                                    maxLines: 2,
+                                                    overflow: TextOverflow.ellipsis,
+                                                    style: TextStyle(color: Colors.black),
+                                                  ),
+                                                ),
+                                                SizedBox(height: 6),
+                                                Text(
+                                                  article.title.toString(),
+                                                  overflow: TextOverflow.ellipsis,
+                                                  maxLines: 2,
+                                                  style: newAppFont(
+                                                    color: Colors.black,
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                                SizedBox(height: 6),
+                                                Row(
+                                                  children: [
+                                                    Icon(Icons.access_time_outlined, color: Colors.grey.shade700, size: 16),
+                                                    width(width: 4.w),
+                                                    Text(
+                                                      " ${formatTimeDifference(article.created.toString())}",
+                                                      style: fontStyle(
+                                                        fontSize: 12.sp,
+                                                        fontWeight: FontWeight.w400,
+                                                        color: Colors.black,
+                                                      ),
+                                                    ),
+                                                  ],
                                                 ),
                                               ],
                                             ),
-                                          ],
+                                          ),
+                                        ],
+                                      ),
+                                      Positioned(top: 2,right: 2,child:   GestureDetector(
+                                        onTap: () {
+                                        settingsProvider.saveBookmarks(article.postId, context, 0).then((value) {
+                                          settingsProvider.getAllBookMarks();
+                                        },);
+
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color:
+                                            AppColors.appButtonColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.bookmark ,
+                                            color: Colors.white,
+                                            size: 16,
+                                          ),
                                         ),
                                       ),
+                                          )
                                     ],
                                   ),
                                 ),

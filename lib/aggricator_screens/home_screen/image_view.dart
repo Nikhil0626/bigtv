@@ -137,7 +137,7 @@ class _ImageViewState extends State<ImageView> {
 
                           sendShareDetails(userId, widget.getAllPostList ['id'], widget.getAllPostList ['content'].toString());
 
-                          if (widget.getAllPostList ['type'] == "Standard" || widget.getAllPostList ['type'] == "Video") {
+                          if (widget.getAllPostList ['type'] == "Standard" || widget.getAllPostList ['type'] == "Video" || widget.getAllPostList ['type'] == "Image") {
                             try {
                               final image = await sc.capture(
                                 pixelRatio: 2,

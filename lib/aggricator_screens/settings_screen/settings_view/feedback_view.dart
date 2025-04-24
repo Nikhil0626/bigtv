@@ -193,7 +193,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                       ),
                     ),
                   ),
-                  if (settingsProvider.isOthersSelected)
+                  settingsProvider.isOthersSelected ?
                     SizedBox(
                       width: double.infinity,
                       child: Card(
@@ -230,7 +230,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
                           ),
                         ),
                       ),
-                    ),
+                    ):
+                      SizedBox.shrink(),
                   SizedBox(height: 16),
 
                   InkWell(

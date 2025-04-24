@@ -34,7 +34,7 @@ class ReelsProviders extends ChangeNotifier {
     try {
       Map<String,dynamic> body =
       {
-        "user_id":userId,
+        "user_id":userId??"0",
       };
       Response response = await ReelsRepo().getAllReels(body);
 

@@ -127,36 +127,36 @@ class PapersScreenList extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            Positioned(
-                              top: 14,
-                              right: 14,
-                              child: Consumer<EPapersProvider>(
-                                  builder: (_,ePapersProvider,__) {
-                                    return GestureDetector(
-                                      onTap: () {
-                                        ePapersProvider.isBookMarkPost(   ePapersProvider.getAllMainPapersList[index],context);
-
-                                      },
-                                      child:Container(
-                                        padding: EdgeInsets.all(7),
-                                        decoration: BoxDecoration(
-                                          color: (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked== 1)
-                                              ? AppColors.appButtonColor
-                                              : Colors.black54,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked == 1)
-                                              ? Icons.bookmark
-                                              : Icons.bookmark_outline,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                              ),
-                            ),
+                            // Positioned(
+                            //   top: 14,
+                            //   right: 14,
+                            //   child: Consumer<EPapersProvider>(
+                            //       builder: (_,ePapersProvider,__) {
+                            //         return GestureDetector(
+                            //           onTap: () {
+                            //             ePapersProvider.isBookMarkPost(   ePapersProvider.getAllMainPapersList[index],context);
+                            //
+                            //           },
+                            //           child:Container(
+                            //             padding: EdgeInsets.all(7),
+                            //             decoration: BoxDecoration(
+                            //               color: (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked== 1)
+                            //                   ? AppColors.appButtonColor
+                            //                   : Colors.black54,
+                            //               shape: BoxShape.circle,
+                            //             ),
+                            //             child: Icon(
+                            //               (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked == 1)
+                            //                   ? Icons.bookmark
+                            //                   : Icons.bookmark_outline,
+                            //               color: Colors.white,
+                            //               size: 20,
+                            //             ),
+                            //           ),
+                            //         );
+                            //       }
+                            //   ),
+                            // ),
 
                           ],
                         ),

@@ -5,6 +5,7 @@ import 'package:app_links/app_links.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
+import 'package:chotanews/screens/testing_screen/test1.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/kochava_service.dart';
 import 'package:chotanews/services/webengage_notification.dart';
@@ -18,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
@@ -31,8 +33,6 @@ import 'aggricator_screens/settings_screen/settings_provider/profile_provider.da
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
-
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,7 +54,6 @@ Future<void> main() async {
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
 
-
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -65,20 +64,14 @@ Future<void> main() async {
   });
   // subscribeToPushCallbacks(_webEngagePlugin);
 
-
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) {
-    runApp(EasyLocalization(
-        supportedLocales: [
-          Locale('te'),
-        ],
-        path: 'assets/translations',
-        fallbackLocale: Locale("te"),
-        child: AppLifecycleManager(child: MyApp())));
+    runApp(EasyLocalization(supportedLocales: [
+      Locale('te'),
+    ], path: 'assets/translations', fallbackLocale: Locale("te"), child: AppLifecycleManager(child: MyApp())));
   });
-
 }
 
 @pragma('vm:entry-point')
@@ -105,42 +98,46 @@ class _MyAppState extends State<MyApp> {
   Locale? _locale;
   StreamSubscription<Uri>? linkSubscription;
   String postId = "";
-
-
-  void subscribeToPushCallbacks(context) async {
-    //Push click stream listener
-    WebEngagePlugin().pushStream.listen((event) {
-      String? deepLink = event.deepLink;
-      Map<String, dynamic> messagePayload = event.payload!;
-      postId = messagePayload["postId"]  ?? "";
-
-      Navigator.push(mainNavigatorKey.currentState!.context, MaterialPageRoute(builder: (context) => IndividualPostView(postId:messagePayload["postId"] ),));
-return;
-    });
-
-    //Push action click listener
-    WebEngagePlugin().pushActionStream.listen((event) {
-      print("pushActionStream:" + event.toString());
-      String? deepLink = event.deepLink;
-      Map<String, dynamic>? messagePayload = event.payload;
-    });
-  }
-
+  Map<String, dynamic>? _initialPushPayload;
 
 
   @override
   void initState() {
     super.initState();
     _initDeepLinks();
-    subscribeToPushCallbacks(context);
-
+    subscribeToPushCallbacks();
   }
 
+  Future subscribeToPushCallbacks() async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
+
+    WebEngagePlugin().pushStream.listen((event) {
+      print("🔔 pushStream: ${event.payload}");
+      Map<String, dynamic> messagePayload = event.payload!;
+
+      sp.setString("webPostId", messagePayload['postId'].toString()??"");
+      Navigator.push(
+        mainNavigatorKey.currentContext!,
+        MaterialPageRoute(
+          builder: (context) => IndividualPostView(postId: messagePayload["postId"]),
+        )
+      );
+    });
+
+    WebEngagePlugin().pushActionStream.listen((event) {
+      print("👉 pushActionStream (clicked): ${event.payload}");
+      _initialPushPayload = event.payload;
+
+    });
+  }
   Future<void> _initDeepLinks() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
     log("Initializing deep link listener");
     linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
       if (uri != null) {
         log("Deep link received: ${uri.toString()}");
+        final String? id = uri.queryParameters['postId'];
+        sp.setString("webPostId",id.toString());
         _handleDeepLink(uri);
       }
     }, onError: (err) {
@@ -159,7 +156,6 @@ return;
         mainNavigatorKey.currentState?.pushNamed('/settings');
         break;
       case '/individualPage':
-
         postId = id ?? "";
         log("Navigating to Individual Post screen  $postId");
         mainNavigatorKey.currentState?.pushNamed(
@@ -202,10 +198,8 @@ return;
           ChangeNotifierProvider<EPapersProvider>(create: (context) => EPapersProvider()),
           ChangeNotifierProvider<AuthProvider>(create: (context) => AuthProvider()),
           ChangeNotifierProvider<HomeProvider>(create: (context) => HomeProvider()),
-
           ChangeNotifierProvider<NewsPostsProvider>(create: (context) => NewsPostsProvider()),
-          ChangeNotifierProvider<AuthenticationProvider>(
-              create: (context) => AuthenticationProvider()),
+          ChangeNotifierProvider<AuthenticationProvider>(create: (context) => AuthenticationProvider()),
           ChangeNotifierProvider<ReelsProviders>(create: (context) => ReelsProviders()),
           ChangeNotifierProvider<SettingsProvider>(create: (context) => SettingsProvider()),
           ChangeNotifierProvider<ProfileProvider>(create: (context) => ProfileProvider()),
@@ -213,7 +207,8 @@ return;
         child: MaterialApp(
           navigatorKey: mainNavigatorKey,
           localizationsDelegates: context.localizationDelegates,
-          supportedLocales: const [Locale('te', '')], // Add your locales
+          supportedLocales: const [Locale('te', '')],
+          // Add your locales
           locale: _locale,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
@@ -221,9 +216,10 @@ return;
           ),
           routes: {
             '/': (context) => SplashScreen(),
-            '/individualPage': (context) => IndividualPostView(postId: postId,),
+            '/individualPage': (context) => IndividualPostView(
+                  postId: postId,
+                ),
             '/settings': (context) => SettingsView(),
-
           },
 
           debugShowCheckedModeBanner: false,
@@ -264,9 +260,6 @@ class NotificationHandler {
   }
 }
 
-
-
-final mainNavigatorKey = GlobalKey<NavigatorState>();
-final RouteObserver<ModalRoute<Object?>> routeObserver =
-    RouteObserver<ModalRoute<Object?>>();
+final GlobalKey<NavigatorState> mainNavigatorKey = GlobalKey<NavigatorState>();
+final RouteObserver<ModalRoute<Object?>> routeObserver = RouteObserver<ModalRoute<Object?>>();
 final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey();
