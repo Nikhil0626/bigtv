@@ -221,7 +221,7 @@ class _MainScreenCardState extends State<MainScreenCard> {
                                         )
                                             : homeProvider.getAllPostList[index]['type'].toString() == "GoogleAds"
                                                 ? Padding(
-                                                    padding: const EdgeInsets.only(bottom: 20.0),
+                                                    padding: const EdgeInsets.only(bottom: 1.0),
                                                     child: GoogleAdsView(
                                                       isList: true,
                                                       article: homeProvider.getAllPostList[index],

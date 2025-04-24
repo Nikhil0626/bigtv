@@ -187,13 +187,12 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                 );
                               }).toList(),
                             ),
-
                           ],
                         ),
                       ),
                     ),
                   ),
-                  if (settingsProvider.isOthersSelected)
+                  settingsProvider.isOthersSelected ?
                     SizedBox(
                       width: double.infinity,
                       child: Card(
@@ -230,9 +229,9 @@ class _FeedbackFormState extends State<FeedbackForm> {
                           ),
                         ),
                       ),
-                    ),
+                    ):
+                       SizedBox.shrink(),
                   SizedBox(height: 16),
-
                   InkWell(
                     onTap: (){
                       if(settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0) {
