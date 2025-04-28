@@ -423,7 +423,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:kochava_measurement/kochava_measurement.dart';
+// import 'package:kochava_measurement/kochava_measurement.dart';
 
 class BannerAdScreen extends StatefulWidget {
   const BannerAdScreen({super.key});
@@ -484,19 +484,19 @@ class _BannerAdScreenState extends State<BannerAdScreen> {
 
   Future<void> startSdk() async {
     // Start the Kochava SDK.
-    KochavaMeasurement.instance.registerAndroidAppGuid("kochotanews-i0dt55qy");
-    KochavaMeasurement.instance.registerIosAppGuid("kochotanews-4zrr8u7az");
-    KochavaMeasurement.instance.setLogLevel(KochavaMeasurementLogLevel.Trace);
-    KochavaMeasurement.instance.start();
-
-    // Retrieve the Kochava Device ID.
-    String deviceId = await KochavaMeasurement.instance.retrieveInstallId();
-
-    if (!mounted) return;
-
-    setState(() {
-      _deviceId = deviceId;
-    });
+    // KochavaMeasurement.instance.registerAndroidAppGuid("kochotanews-i0dt55qy");
+    // KochavaMeasurement.instance.registerIosAppGuid("kochotanews-4zrr8u7az");
+    // KochavaMeasurement.instance.setLogLevel(KochavaMeasurementLogLevel.Trace);
+    // KochavaMeasurement.instance.start();
+    //
+    // // Retrieve the Kochava Device ID.
+    // String deviceId = await KochavaMeasurement.instance.retrieveInstallId();
+    //
+    // if (!mounted) return;
+    //
+    // setState(() {
+    //   _deviceId = deviceId;
+    // });
   }
 
   void _loadBannerAd() {

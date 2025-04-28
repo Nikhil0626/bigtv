@@ -30,7 +30,7 @@ class _AdmobState extends State<Admob> {
   }
   void loadBannerAd() {
     _bannerAd = BannerAd(
-      adUnitId: 'ca-app-pub-3940256099942544/6300978111', // Dummy test Ad Unit ID (valid test ID from Google)
+      adUnitId: 'ca-app-pub-2405357352181832/9297875326', // Dummy test Ad Unit ID (valid test ID from Google)
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(

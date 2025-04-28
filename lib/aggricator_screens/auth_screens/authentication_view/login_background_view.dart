@@ -1,0 +1,220 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_fonts.dart';
+import '../../../utils/app_spaces.dart';
+import '../../../utils/app_enums.dart';
+import 'district_view.dart';
+import 'categories_view.dart';
+import 'otp_verification_view.dart';
+import '../authentication_provider/authentication_provider.dart';
+import 'login_view.dart';
+
+class LoginBackgroundView extends StatelessWidget {
+  const LoginBackgroundView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    return Consumer<AuthenticationProvider>(
+      builder: (_, authenticationProvider, __) {
+        return Scaffold(
+          body: Stack(
+            children: [
+              SingleChildScrollView(
+                child: SizedBox(
+                  width: screenWidth,
+                  height: screenHeight,
+                  child: Stack(
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: screenHeight * 0.65,
+                            alignment: Alignment.center,
+                            color: AppColors.loginBgColor,
+                            padding: EdgeInsets.only(top: 100.sp),
+                            child: Column(
+                              children: [
+                                Image.asset("assets/svg/login.png"),
+
+                                height(height: 20.h),
+                               if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.login ||authenticationProvider.newAppLoginStatus == NewAppLoginStatus.none )
+                               Column(
+                                 children: [
+                                   Text(
+                                     'Get hyperlocal news',
+                                     style: newAppFont(
+                                       fontSize: 18.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w600,
+                                     ),
+                                   ),
+                                   Row(
+                                     children: [
+                                       Padding(
+                                         padding:  EdgeInsets.only(top: 10.0,left: MediaQuery.of(context).size.width/4),
+                                         child: Text(
+                                           'in your local language',
+                                           style: newAppFont(
+                                             fontSize: 12.sp,
+                                             color: Colors.white,
+                                             fontWeight: FontWeight.w600,
+                                           ),
+                                         ),
+                                       ),
+                                       SvgPicture.asset("assets/svg/mic.svg",height: 50,)
+                                     ],
+                                   ),
+                                 ],
+                               ),
+                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp)
+                               Column(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+                                 crossAxisAlignment: CrossAxisAlignment.center,
+                                 children: [
+                                   Text(
+                                     'OTP Verification',
+                                     style: newAppFont(
+                                       fontSize: 22.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w600,
+                                     ),
+                                   ),
+                                   height(height: 20),
+                                   Text(
+                                     'Please enter the 4-digit code sent to your phone number +91${authenticationProvider.phoneController.text}',
+                                     textAlign: TextAlign.center,
+                                     style: newAppFont(
+                                       fontSize: 12.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w400,
+                                     ),
+                                   ),
+                                 ],
+                               ),
+                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.category)
+                               Column(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+                                 crossAxisAlignment: CrossAxisAlignment.center,
+                                 children: [
+                                   Text(
+                                     'Select Topics',
+                                     style: newAppFont(
+                                       fontSize: 24.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w600,
+                                     ),
+                                   ),
+                                   height(height: 20),
+                                   Text(
+                                     'Choose categories for personalised news updates and stories',
+                                     textAlign: TextAlign.center,
+                                     style: newAppFont(
+                                       fontSize: 12.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w400,
+                                     ),
+                                   ),
+                                 ],
+                               ),
+                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.location)
+                               Column(
+                                 mainAxisAlignment: MainAxisAlignment.center,
+                                 crossAxisAlignment: CrossAxisAlignment.center,
+                                 children: [
+                                   Text(
+                                     'Select Region',
+                                     style: newAppFont(
+                                       fontSize: 24.sp,
+                                       color: Colors.white,
+                                       fontWeight: FontWeight.w600,
+                                     ),
+                                   ),
+                                   height(height: 20),
+                                   Padding(
+                                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                     child: Text(
+                                       'Select region to receive hyperlocal news and relevant local information tailored to your area.',
+                                       textAlign: TextAlign.center,
+                                       style: newAppFont(
+                                         fontSize: 12.sp,
+                                         color: Colors.white,
+                                         fontWeight: FontWeight.w400,
+                                       ),
+                                     ),
+                                   ),
+                                 ],
+                               )
+                              ],
+                            ),
+                          ),
+                          // White Section (Empty Placeholder)
+                          Expanded(
+                            child: Container(color: Colors.white),
+                          ),
+                        ],
+                      ),
+              
+                      // Login / OTP Verification Widget (Positioned)
+                      Positioned(
+                        bottom: screenHeight * 0.12,
+                        left: 0,
+                        right: 0,
+                        child: SizedBox(
+                          height: screenHeight * 0.5,
+                          child: AnimatedSwitcher(
+                            duration: Duration(milliseconds: 300),
+                            child: _getLoginContent(authenticationProvider.newAppLoginStatus),
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
+              if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp )
+              Positioned(
+                  left: 20,
+                  top: 50,
+                  child:InkWell(
+                    onTap: (){
+                      authenticationProvider.setLogOutStatus(context, false);
+                    },
+                    child: Container(width: 30,height: 30,decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.all(Radius.circular(8))),
+                    child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
+                    ),
+                  ) )
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+
+
+Widget _getLoginContent(NewAppLoginStatus status) {
+  switch (status) {
+    case NewAppLoginStatus.location:
+      return const DistrictView(key: ValueKey('location'));
+    case NewAppLoginStatus.category:
+      return CategoriesView(key: ValueKey('category'));
+    case NewAppLoginStatus.otp:
+      return OtpVerificationView(key: ValueKey('otp'));
+    case NewAppLoginStatus.login:
+    case NewAppLoginStatus.none:
+    default:
+      return LoginView(key: ValueKey('login'));
+  }
+}

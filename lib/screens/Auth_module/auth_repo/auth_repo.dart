@@ -10,11 +10,13 @@ class AuthRepo extends BaseService {
     return response;
   }
 
+
   Future addDeviceDetails(body) async {
     Response response = await makeRequest(
         url: BaseUrls.addDevice, method: RequestType.post, body: body);
     return response;
   }
+
 
   Future sendOtp(body) async {
     Response response = await makeRequest(
@@ -25,6 +27,7 @@ class AuthRepo extends BaseService {
     return response;
   }
 
+
   Future sendCode(body) async {
     Response response = await makeRequest(
         baseUrl: BaseUrls.baseUrlAws,
@@ -33,6 +36,7 @@ class AuthRepo extends BaseService {
         body: body);
     return response;
   }
+
 
   Future validateOtp(body) async {
     Response response = await makeRequest(

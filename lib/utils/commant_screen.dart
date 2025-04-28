@@ -1,6 +1,9 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
+import 'package:chotanews/aggricator_screens/home_screen/news_posts_provider.dart';
 import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/utils/app_toasts.dart';
@@ -10,6 +13,7 @@ import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../globel_keys/app_router.dart';
 import 'app_enums.dart';
@@ -48,7 +52,7 @@ class _CommentSectionState extends State<CommentSection> {
 
   @override
   void initState() {
-    context.read<FlipProvider>().getAllPostById(widget.postId.id.toString());
+    context.read<NewsPostsProvider>().getAllComments(widget.postId.toString());
     super.initState();
   }
 
@@ -57,8 +61,8 @@ class _CommentSectionState extends State<CommentSection> {
     EdgeInsets gestureInsets = MediaQuery.of(context).systemGestureInsets;
 
     String navigationMode = (gestureInsets.bottom > 0) ? "Gesture" : "Button";
-    return Consumer<FlipProvider>(
-      builder: (_, flipProvider, __) {
+    return Consumer<NewsPostsProvider>(
+      builder: (_, newsPostsProvider, __) {
         return FractionallySizedBox(
           heightFactor: 0.9, // Ensures it doesn't take full screen
           child: Container(
@@ -111,9 +115,9 @@ class _CommentSectionState extends State<CommentSection> {
 
                 // Comment List with Keyboard Scroll Fix
                 Expanded(
-                  child: flipProvider.isSendComment
+                  child: newsPostsProvider.isLoadingComments
                       ? const AppLoadingScreen()
-                      : flipProvider.allPostCommentModelList.isEmpty
+                      : newsPostsProvider.getAllCommentsList.isEmpty
                           ? Center(
                               child: Text(
                                 "No comments yet... ",
@@ -126,11 +130,11 @@ class _CommentSectionState extends State<CommentSection> {
                             )
                           : ListView.builder(
                               shrinkWrap: true,
-                              itemCount: flipProvider.allPostCommentModelList
+                              itemCount: newsPostsProvider.getAllCommentsList
                                   .length,
                               itemBuilder: (context, index) {
-                                var filteredComments = flipProvider
-                                    .allPostCommentModelList.toList();
+                                var filteredComments = newsPostsProvider
+                                    .getAllCommentsList.toList();
 
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(
@@ -265,21 +269,21 @@ class _CommentSectionState extends State<CommentSection> {
                       IconButton(
                         icon: const Icon(Icons.send, color: Colors.blue),
                         onPressed: () async {
-                          LoginStatus status = await getLoginStatus();
-                          log(status.toString());
-                          if (status == LoginStatus.login) {
+                          SharedPreferences sp = await SharedPreferences.getInstance();
+                          bool isLogin = sp.getString("loginType").toString() == "login"?true:false??false;
+                          if (isLogin) {
                             if (controller.text.isEmpty) {
                             } else {
-                              flipProvider
-                                  .addCommentPostById(
+                              newsPostsProvider
+                                  .sendCommentsOnPost(
                                       widget.postId, controller.text)
                                   .then(
                                     (value) => controller.text = '',
                                   );
                             }
                           } else {
-                            Navigator.pushNamed(
-                                context, RoutesManager.signInScreen);
+                            Navigator.pushAndRemoveUntil(
+                                context, MaterialPageRoute(builder: (context) => LoginBackgroundView(),),(route) => false,);
                           }
                         },
                       ),

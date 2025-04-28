@@ -115,11 +115,13 @@ class ArticlePageState extends State<ArticlePage> {
                               ?SizedBox(
                               height: MediaQuery.of(context).size.height,
                               width: MediaQuery.of(context).size.width,
-                              child: InAppWebViewScreen(webUrl: flipProvider.webUrl.toString())):
-                          widget.article.type == "GoogleAds"
-                              ? GoogleAdsView( article: widget.article, flipProvider: flipProvider,
-                            screenshotController: screenshotController, isFoldable: isFoldable,)
-                              : widget.article.type == "Image"
+                              child: InAppWebViewScreen(webUrl: flipProvider.webUrl.toString(), title: '',)):
+                          // widget.article.type == "GoogleAds"
+                          //     ? GoogleAdsView( article: widget.article, flipProvider: flipProvider,
+                          //   screenshotController: screenshotController, isFoldable: isFoldable,)
+                          //     :
+
+                          widget.article.type == "Image"
                               ? Image.network(
                             width:
                             MediaQuery.of(context).size.width,
@@ -205,7 +207,7 @@ class ArticlePageState extends State<ArticlePage> {
                                     }
                                   });
                                   log("Comment --- ${context.read<AuthProvider>().loginType}");
-                                  showComments(context, widget.article);
+                                  showComments(context, widget.article['id']);
                                   EventRepo().sendEvent({
                                     "key": "comments",
                                     "data": {

@@ -28,6 +28,7 @@ import '../../videos_main/video_views/video_preview.dart';
 import '../botton_actions.dart';
 import '../home_provider/provider.dart';
 import '../home_repo/event_repo.dart';
+import 'in_app_web_view.dart';
 
 class StandardPostView extends StatefulWidget {
   final article;
@@ -36,7 +37,10 @@ class StandardPostView extends StatefulWidget {
   final ScreenshotController screenshotController;
   final isAds;
 
-  const StandardPostView({super.key, required this.article, required this.isFoldable, required this.flipProvider, required this.screenshotController, this.isAds = false});
+  const StandardPostView({super.key, required this.article,
+    required this.isFoldable,
+    required this.flipProvider,
+    required this.screenshotController, this.isAds = false});
 
   @override
   _StandardPostViewState createState() => _StandardPostViewState();
@@ -484,17 +488,13 @@ class _StandardPostViewState extends State<StandardPostView> {
       onMatch: (match) {
         String link = match.group(0)!;
 
-        if (link.contains('<link1>')) {
-          log("click linkss    ${links!.first.value.toString()}");
-          link = links.first.value.toString();
-        }
 
         if (link.contains('<link1>') && links != null && links.isNotEmpty) {
-          link = links[0].value.toString();
+          link = links[0]["value"].toString();
         } else if (link.contains('<link2>') && links != null && links.length > 1) {
-          link = links[1].value.toString();
+          link = links[1]["value"].toString();
         } else if (link.contains('<link3>') && links != null && links.length > 2) {
-          link = links[2].value.toString();
+          link = links[2]["value"].toString();
         } else {
           link = link;
         }
@@ -516,11 +516,7 @@ class _StandardPostViewState extends State<StandardPostView> {
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               print(" $link");
-              if (await canLaunch(link)) {
-                await launch(link);
-              } else {
-                CustomToast.showErrorToast(msg: "Could not launch $link");
-              }
+              Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: link.toString(), title: "Standard Links"),));
             },
         ));
 
