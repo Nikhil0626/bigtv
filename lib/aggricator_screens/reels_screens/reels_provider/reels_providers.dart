@@ -25,9 +25,9 @@ class ReelsProviders extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future getAllReels() async {
+  Future getAllReels({String postId = "0"}) async {
     reelsLoading = true;
-    getAllReelsList = [];
+    // getAllReelsList = [];
     isBookMark = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString('userId');

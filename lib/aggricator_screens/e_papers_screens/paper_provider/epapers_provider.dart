@@ -54,10 +54,10 @@ class EPapersProvider extends ChangeNotifier {
         log(response.data.toString());
         List data = response.data;
         getSinglePapersList = data.map((e) => SinglePaperModel.fromJson(e)).toList();
-        isBookMark = getSinglePapersList.first.data!
-            .where((e) => e.isBookmarked == 1)
-            .map((e) => e.id.toString())
-            .toList();
+        // isBookMark = getSinglePapersList.first.data!
+        //     .where((e) => e.isBookmarked == 1)
+        //     .map((e) => e.id.toString())
+        //     .toList();
       }
     } on DioException catch (e, st) {
       getSinglePapersList = [];

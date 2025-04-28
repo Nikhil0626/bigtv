@@ -135,7 +135,7 @@ class SettingsProvider extends ChangeNotifier {
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
-      "user_id": userId,
+      "user_id": userId??"0",
       "device_id": deviceId,
     };
 
@@ -188,13 +188,17 @@ class SettingsProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
     } finally {
+      isOthersSelected=false;
+
       isFeedbackLoading = false;
       notifyListeners();
     }
   }
 
   void addToSelectedEngagements(String profileName) {
-    isOthersSelected =!isOthersSelected;
+    if(profileName == "Others") {
+      isOthersSelected = !isOthersSelected;
+    }
     log(profileName);
     if (!selectedFeedbackList.contains(profileName)) {
       selectedFeedbackList.add(profileName);

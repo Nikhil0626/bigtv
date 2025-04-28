@@ -40,23 +40,25 @@ class MainScreenCard extends StatefulWidget {
   State<MainScreenCard> createState() => _MainScreenCardState();
 }
 
-class _MainScreenCardState extends State<MainScreenCard>  with TickerProviderStateMixin {
+class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStateMixin {
   // List<Map<String, dynamic>> displayedCards = [];
   List<Map<String, dynamic>> removedCards = [];
   Offset slideOffset = Offset.zero;
   bool isAnimating = false;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
     // WidgetsBinding.instance.addPostFrameCallback((_) async {
-      context.read<HomeProvider>().getAllPostList = [];
-      context.read<HomeProvider>().getAllAiTags();
-      context.read<HomeProvider>().getAllPost();
-      // final posts = context.read<HomeProvider>().getAllPostList;
+    context.read<HomeProvider>().getAllPostList = [];
+    context.read<HomeProvider>().getAllAiTags();
+    context.read<HomeProvider>().getAllPost();
+    _pageController = PageController(viewportFraction: 1.0);
 
-    // });
   }
+
+
 
   void animateRemoveTopCard() async {
     if (context.read<HomeProvider>().getAllPostList.isEmpty || isAnimating) return;
@@ -90,6 +92,7 @@ class _MainScreenCardState extends State<MainScreenCard>  with TickerProviderSta
       isAnimating = false;
     });
   }
+
   final CardSwiperController controller = CardSwiperController();
 
   double dragOffset = 0.0;
@@ -131,127 +134,68 @@ class _MainScreenCardState extends State<MainScreenCard>  with TickerProviderSta
                     ? AppNoData()
                     : Column(
                         children: [
-                          homeProvider.getAllAiTagsList.isEmpty?SizedBox.shrink():   Container(
-                              height: 50,
-                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                              // color: Colors.greenAccent,
-                              child: ListView.builder(
-                                scrollDirection: Axis.horizontal,
-                                itemCount: homeProvider.getAllAiTagsList.length,
-                                itemBuilder: (context, index) {
-
-                                  return Container(
-                                    color: Colors.white,
-                                    child: InkWell(
-                                      onTap: (){
-                                        Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                        builder: (context) => AiTagPostsPageView(
-                                          isAiTags: true,
-                                           tagName: homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
-                                            tagId: homeProvider.getAllAiTagsList[index]['aitagid'].toString(),
-                                        ),
-                                        ));
-
-                                      },
-                                      child: Container(
-                                        height: 30.h,
-                                        margin: EdgeInsets.symmetric(horizontal: 6.w,vertical: 4.h),
-                                        decoration: BoxDecoration(
-                                          color: AppColors.cardBackgroundColor,
-                                          borderRadius: BorderRadius.circular(12.r),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                                          child: Text(
-                                            homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
-                                            textAlign: TextAlign.center,
-                                            style: homeScreenFontStyle(
-                                              color: AppColors.textColor,
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.w500,
+                          homeProvider.getAllAiTagsList.isEmpty
+                              ? SizedBox.shrink()
+                              : Container(
+                                  height: 50,
+                                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                                  // color: Colors.greenAccent,
+                                  child: ListView.builder(
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: homeProvider.getAllAiTagsList.length,
+                                    itemBuilder: (context, index) {
+                                      return Container(
+                                        color: Colors.white,
+                                        child: InkWell(
+                                          onTap: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => AiTagPostsPageView(
+                                                    isAiTags: true,
+                                                    tagName: homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                                    tagId: homeProvider.getAllAiTagsList[index]['aitagid'].toString(),
+                                                  ),
+                                                ));
+                                          },
+                                          child: Container(
+                                            height: 30.h,
+                                            margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 4.h),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.cardBackgroundColor,
+                                              borderRadius: BorderRadius.circular(12.r),
+                                            ),
+                                            alignment: Alignment.center,
+                                            child: Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+                                              child: Text(
+                                                homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                                textAlign: TextAlign.center,
+                                                style: homeScreenFontStyle(
+                                                  color: AppColors.textColor,
+                                                  fontSize: 14.sp,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              )),
-
+                                      );
+                                    },
+                                  )),
                           Expanded(
                             child: Padding(
-                              padding:  EdgeInsets.symmetric(horizontal: 16.0.h),
+                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
                               child: Stack(
                                 children: [
-                                Container(
-                                  height: 560,
-                                  width: MediaQuery.of(context).size.width,
-                                  margin: EdgeInsets.symmetric(horizontal: 24.h),
-
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color:AppColors.cardBackgroundColor,
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      blurRadius: 6,
-                                      spreadRadius: 2,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                ),
-                                Container(
-                                  height: 540,
-                                  width: MediaQuery.of(context).size.width,
-                                  margin: EdgeInsets.symmetric(horizontal: 16.h),
-
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color:AppColors.cardBackgroundColor,
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      blurRadius: 6,
-                                      spreadRadius: 2,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                ),
-                                Container(
-                                  height: 520,
-                                  width: MediaQuery.of(context).size.width,
-                                  margin: EdgeInsets.symmetric(horizontal: 8.h),
-
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color:AppColors.cardBackgroundColor,
-                                  borderRadius: BorderRadius.circular(12.r),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      blurRadius: 6,
-                                      spreadRadius: 2,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                ),
                                   Container(
-                                    height: 500,
+                                    height: 580,
                                     width: MediaQuery.of(context).size.width,
-                                    // padding: EdgeInsets.only(left: 25,right: 25,bottom: 12),
-
+                                    margin: EdgeInsets.symmetric(horizontal: 24.h),
                                     alignment: Alignment.center,
                                     decoration: BoxDecoration(
-                                      color:AppColors.cardBackgroundColor,
-                                      borderRadius: BorderRadius.circular(20.r),
+                                      color: AppColors.cardBackgroundColor,
+                                      borderRadius: BorderRadius.circular(12.r),
                                       boxShadow: [
                                         BoxShadow(
                                           color: Colors.grey.withOpacity(0.2),
@@ -261,7 +205,57 @@ class _MainScreenCardState extends State<MainScreenCard>  with TickerProviderSta
                                         ),
                                       ],
                                     ),
-                                    child: GestureDetector(
+                                  ),
+                                  Container(
+                                    height: 560,
+                                    width: MediaQuery.of(context).size.width,
+                                    margin: EdgeInsets.symmetric(horizontal: 16.h),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.cardBackgroundColor,
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.2),
+                                          blurRadius: 6,
+                                          spreadRadius: 2,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Container(
+                                    height: 540,
+                                    width: MediaQuery.of(context).size.width,
+                                    margin: EdgeInsets.symmetric(horizontal: 8.h),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.cardBackgroundColor,
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.grey.withOpacity(0.2),
+                                          blurRadius: 6,
+                                          spreadRadius: 2,
+                                          offset: Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+
+                                  ),
+                                  Container(
+                                    height: 520,
+                                    width: MediaQuery.of(context).size.width,
+                                    // margin: EdgeInsets.symmetric(horizontal: 8.h),
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: AppColors.cardBackgroundColor,
+                                      borderRadius: BorderRadius.circular(12.r),
+
+                                    ),
+
+                                  ),
+                                  GestureDetector(
                                       onVerticalDragEnd: (details) {
                                         final velocity = details.velocity.pixelsPerSecond.dy;
                                         if (velocity < -500) {
@@ -270,186 +264,169 @@ class _MainScreenCardState extends State<MainScreenCard>  with TickerProviderSta
                                           animateUndoCard();
                                         }
                                       },
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: List.generate(
-                                            homeProvider.getAllPostList.reversed.toList().length, (index) {
-                                          final isTopCard = index == homeProvider.getAllPostList.reversed.toList().length - 1;
-                                          final post = homeProvider.getAllPostList.reversed.toList()[index];
+                                      child: PageView.builder(
+                                        scrollDirection: Axis.vertical,
+                                        itemCount: homeProvider.getAllPostList.length,
+                                        itemBuilder: (context, index) {
+
+                                          final post = homeProvider.getAllPostList[index];
                                           final type = post['type'].toString();
-                                          double height = 500;
+                                          return AnimatedBuilder(
+                                            animation: _pageController,
+                                            builder: (context, child) {
+                                              double value = 1.0;
+                                              if (_pageController.hasClients && _pageController.position.haveDimensions) {
+                                                double page = _pageController.page ?? _pageController.initialPage.toDouble();
+                                                value = (1 - (page - index).abs()).clamp(0.0, 1.0).toDouble();
+                                              }
 
-                                          return AnimatedSlide(
-                                            offset: isTopCard && slideOffset.dy != 0 ? const Offset(0, -1) : Offset.zero,
-                                            duration: const Duration(milliseconds: 600),
-                                            curve: Curves.easeInOut,
-                                            child: AnimatedOpacity(
-                                              opacity: isTopCard && slideOffset.dy != 0 ? 0.9 : 1.0,
-                                              duration: Duration(milliseconds: 600),
-                                              curve: Curves.easeInOut,
-                                              child: InkWell(
-                                                onTap: () {
-
-                                                  log("fmerngkjkglkg  ${index}");
-                                                  if (type != "GoogleAds") {
-                                                    Navigator.push(
-                                                      context,
-                                                      MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            MainScreenPageView(startIndex: index),
-                                                      ),
-                                                    );
-                                                    if (type == "Video") {
-                                                      context.read<HomeProvider>().youtubeDispose();
-                                                    }
-                                                  }
-                                                },
-                                                child: Container(
-                                                  alignment: Alignment.center,
-                                                  decoration: BoxDecoration(
-                                                    color: AppColors.cardBackgroundColor,
-                                                    borderRadius: BorderRadius.circular(20.r),
-                                                  ),
-                                                  child: type == "WebUrl"
-                                                      ? Padding(
-                                                    padding: const EdgeInsets.all(16.0),
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                            builder: (context) =>
-                                                                InAppWebViewScreen(
-                                                                  webUrl: context
-                                                                      .read<HomeProvider>()
-                                                                      .webUrl
-                                                                      .toString(),
-                                                                  title: "IPL Update",
+                                              if(homeProvider.getAllPostList.length-5 ==index){
+                                                homeProvider.getAllPost(postId:homeProvider.getAllPostList[index]['id'].toString() );
+                                              }
+                                              return Opacity(
+                                                opacity: value,
+                                                child: Transform.translate(
+                                                  offset: Offset(0, 100 * (1.0 - value)),
+                                                  child: Stack(
+                                                    children: [
+                                                      Container(
+                                                        height: 520,
+                                                        alignment: Alignment.center,
+                                                        decoration: BoxDecoration(
+                                                          color: AppColors.cardBackgroundColor,
+                                                          borderRadius: BorderRadius.circular(12.r),
+                                                          boxShadow: [
+                                                            BoxShadow(
+                                                              color: Colors.grey.withOpacity(0.2),
+                                                              blurRadius: 6,
+                                                              spreadRadius: 2,
+                                                              offset: Offset(0, 3),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        child: InkWell(
+                                                          onTap: () {
+                                                            log("fmerngkjkglkg  ${index}");
+                                                            if (type != "GoogleAds") {
+                                                              Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder: (context) => MainScreenPageView(startIndex: index),
                                                                 ),
-                                                          ),
-                                                        );
-                                                      },
-                                                      child: ClipRRect(
-                                                        borderRadius:
-                                                        BorderRadius.circular(10.r),
-                                                        child: Image.asset(
-                                                          "assets/svg/ipl.png",
-                                                          width:
-                                                          MediaQuery.of(context).size.width,
-                                                          height: MediaQuery.of(context)
-                                                              .size
-                                                              .height,
-                                                          fit: BoxFit.cover,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  )
-                                                      : type == "GoogleAds"
-                                                      ? Padding(
-                                                    padding:
-                                                    const EdgeInsets.only(bottom: 20.0),
-                                                    child: GoogleAdsView(
-                                                      isList: true,
-                                                      article: post,
-                                                      flipProvider:
-                                                      context.read<HomeProvider>(),
-                                                      isFoldable: false,
-                                                    ),
-                                                  )
-                                                      : type == "Image"
-                                                      ? ImageView(
-                                                    index: index,
-                                                    getAllPostList: post,
-                                                  )
-                                                      : type == "Gallery"
-                                                      ? Padding(
-                                                    padding: const EdgeInsets.only(
-                                                        bottom: 5.0),
-                                                    child: Stack(
-                                                      children: [
-                                                        ClipRRect(
-                                                          borderRadius:
-                                                          BorderRadius.all(
-                                                              Radius.circular(
-                                                                  12)),
-                                                          child: FullPageCarousel(
-                                                            isHome: false,
-                                                            imageUrls:
-                                                            post['gallery'] ??
-                                                                [],
-                                                            postDetails: post,
-                                                          ),
-                                                        ),
-                                                        Positioned(
-                                                          top: 18,
-                                                          right: 22,
-                                                          child: Consumer<
-                                                              HomeProvider>(
-                                                              builder: (_,
-                                                                  homeProvider,
-                                                                  __) {
-                                                                final isBookmarked =
-                                                                    homeProvider
-                                                                        .isBookMark
-                                                                        .contains(
-                                                                        post['id']
-                                                                            .toString()) ||
-                                                                        post['isBookmarked'] ==
-                                                                            1;
-                                                                return GestureDetector(
-                                                                  onTap: () {
-                                                                    homeProvider
-                                                                        .isBookMarkPost(
-                                                                        post,
-                                                                        context);
-                                                                  },
-                                                                  child: Container(
-                                                                    padding:
-                                                                    EdgeInsets.all(
-                                                                        7),
-                                                                    decoration:
-                                                                    BoxDecoration(
-                                                                      color: isBookmarked
-                                                                          ? AppColors
-                                                                          .appButtonColor
-                                                                          : Colors
-                                                                          .black54,
-                                                                      shape: BoxShape
-                                                                          .circle,
+                                                              );
+                                                              if (type == "Video") {
+                                                                context.read<HomeProvider>().youtubeDispose();
+                                                              }
+                                                            }
+                                                          },
+                                                          child: Container(
+                                                            alignment: Alignment.center,
+                                                            decoration: BoxDecoration(
+                                                              color: AppColors.cardBackgroundColor,
+                                                              borderRadius: BorderRadius.circular(20.r),
+                                                            ),
+                                                            child: type == "WebUrl"
+                                                                ? Padding(
+                                                              padding: const EdgeInsets.all(16.0),
+                                                              child: InkWell(
+                                                                onTap: () {
+                                                                  Navigator.push(
+                                                                    context,
+                                                                    MaterialPageRoute(
+                                                                      builder: (context) => InAppWebViewScreen(
+                                                                        webUrl: context.read<HomeProvider>().webUrl.toString(),
+                                                                        title: "IPL Update",
+                                                                      ),
                                                                     ),
-                                                                    child: Icon(
-                                                                      isBookmarked
-                                                                          ? Icons
-                                                                          .bookmark
-                                                                          : Icons
-                                                                          .bookmark_outline,
-                                                                      color:
-                                                                      Colors.white,
-                                                                      size: 20,
+                                                                  );
+                                                                },
+                                                                child: ClipRRect(
+                                                                  borderRadius: BorderRadius.circular(10.r),
+                                                                  child: Image.asset(
+                                                                    "assets/svg/ipl.png",
+                                                                    width: MediaQuery.of(context).size.width,
+                                                                    height: MediaQuery.of(context).size.height,
+                                                                    fit: BoxFit.cover,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            )
+                                                                : type == "GoogleAds"
+                                                                ? Padding(
+                                                              padding: const EdgeInsets.only(bottom: 20.0),
+                                                              child: GoogleAdsView(
+                                                                isList: true,
+                                                                article: post,
+                                                                flipProvider: context.read<HomeProvider>(),
+                                                                isFoldable: false,
+                                                              ),
+                                                            )
+                                                                : type == "Image"
+                                                                ? ImageView(
+                                                              index: index,
+                                                              getAllPostList: post,
+                                                            )
+                                                                : type == "Gallery"
+                                                                ? Padding(
+                                                              padding: const EdgeInsets.only(bottom: 5.0),
+                                                              child: Stack(
+                                                                children: [
+                                                                  ClipRRect(
+                                                                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                                                                    child: FullPageCarousel(
+                                                                      isHome: false,
+                                                                      imageUrls: post['gallery'] ?? [],
+                                                                      postDetails: post,
                                                                     ),
                                                                   ),
-                                                                );
-                                                              }),
+                                                                  Positioned(
+                                                                    top: 18,
+                                                                    right: 22,
+                                                                    child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                                                      final isBookmarked = homeProvider.isBookMark.contains(post['id'].toString()) || post['isBookmarked'] == 1;
+                                                                      return GestureDetector(
+                                                                        onTap: () {
+                                                                          homeProvider.isBookMarkPost(post, context);
+                                                                        },
+                                                                        child: Container(
+                                                                          padding: EdgeInsets.all(7),
+                                                                          decoration: BoxDecoration(
+                                                                            color: isBookmarked ? AppColors.appButtonColor : Colors.black54,
+                                                                            shape: BoxShape.circle,
+                                                                          ),
+                                                                          child: Icon(
+                                                                            isBookmarked ? Icons.bookmark : Icons.bookmark_outline,
+                                                                            color: Colors.white,
+                                                                            size: 20,
+                                                                          ),
+                                                                        ),
+                                                                      );
+                                                                    }),
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            )
+                                                                : StandardCard(
+                                                              index: index,
+                                                              getAllPostList: post,
+                                                            ),
+                                                          ),
                                                         ),
-                                                      ],
-                                                    ),
-                                                  )
-                                                      : StandardCard(index: index,
-                                                  getAllPostList: post,
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
-                                              ),
-                                            ),
+                                              );
+                                            },
                                           );
-                                        }),
-                                      ),
-                                    ),
-                                  ),
+
+
+                                        },
+                                      )),
                                 ],
                               ),
                             ),
                           ),
-
                         ],
                       ),
           ),
@@ -530,5 +507,3 @@ class ShimmerCard extends StatelessWidget {
     );
   }
 }
-
-

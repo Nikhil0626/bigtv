@@ -54,7 +54,7 @@ class BaseUrls {
 
   /// Python apis
   static const String ePaperBaseUrlAws = "http://3.108.235.31:8000";
-  static const String baseUrlAwsDev = "http://13.201.100.59:8000";
+  static const String baseUrlAwsDev = "https://api.chotanews.com";
 
   ///Login login
   static const String sendOtpPy = "/send-otp";

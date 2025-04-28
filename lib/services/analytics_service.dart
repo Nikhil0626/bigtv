@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:kochava_measurement/kochava_measurement.dart';
+// import 'package:kochava_measurement/kochava_measurement.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AnalyticsService {
@@ -14,7 +14,7 @@ class AnalyticsService {
   static Future<void> logEvent2(String name) async {
     try {
       await _analytics.logEvent(name: name, );
-      KochavaMeasurement.instance.sendEvent(name,);
+      // KochavaMeasurement.instance.sendEvent(name,);
       await FacebookAppEvents().logEvent(name: name);
 
       log("Event sent successfully.  $name");

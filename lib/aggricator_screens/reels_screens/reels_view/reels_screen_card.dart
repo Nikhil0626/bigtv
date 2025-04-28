@@ -41,14 +41,14 @@ class _ReelsScreenState extends State<ReelsScreen> {
   List<ReelsModel> removedCards = [];
   Offset slideOffset = Offset.zero;
   bool isAnimating = false;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<ReelsProviders>().getAllReelsList = [];
       context.read<ReelsProviders>().getAllReels();
-    });
+    _pageController = PageController(viewportFraction: 1.0);
   }
 
   void animateRemoveTopCard() async {
@@ -120,7 +120,146 @@ class _ReelsScreenState extends State<ReelsScreen> {
         )
             : reelsProvider.getAllReelsList.isEmpty
                 ? AppNoData()
-                : Padding(
+                :   Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Stack(
+                    children: [
+                      Container(
+                        height:620,
+                        width: MediaQuery.of(context).size.width,
+                        margin: EdgeInsets.symmetric(horizontal: 24.h),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.circular(12.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 600,
+                        width: MediaQuery.of(context).size.width,
+                        margin: EdgeInsets.symmetric(horizontal: 16.h),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.circular(12.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Container(
+                        height: 580,
+                        width: MediaQuery.of(context).size.width,
+                        margin: EdgeInsets.symmetric(horizontal: 8.h),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.circular(12.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.2),
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        // child: StandardCard(
+                        //   index: 1,
+                        //   getAllPostList: homeProvider.getAllPostList[1],
+                        // ),
+                      ),
+                      Container(
+                        height: 560,
+                        width: MediaQuery.of(context).size.width,
+                        // margin: EdgeInsets.symmetric(horizontal: 8.h),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.circular(12.r),
+
+                        ),
+
+                      ),
+                      GestureDetector(
+                          onVerticalDragEnd: (details) {
+                            final velocity = details.velocity.pixelsPerSecond.dy;
+                            if (velocity < -500) {
+                              animateRemoveTopCard();
+                            } else if (velocity > 500) {
+                              animateUndoCard();
+                            }
+                          },
+                          child: PageView.builder(
+                            scrollDirection: Axis.vertical,
+                            itemCount: reelsProvider.getAllReelsList.length,
+                            itemBuilder: (context, index) {
+
+                              final post = reelsProvider.getAllReelsList[index];
+
+                              return AnimatedBuilder(
+                                animation: _pageController,
+                                builder: (context, child) {
+                                  double value = 1.0;
+                                  if (_pageController.hasClients && _pageController.position.haveDimensions) {
+                                    double page = _pageController.page ?? _pageController.initialPage.toDouble();
+                                    value = (1 - (page - index).abs()).clamp(0.0, 1.0).toDouble();
+                                  }
+                                  // if(reelsProvider.getAllReelsList.length-5 ==index){
+                                  //   reelsProvider.getAllReels(postId:reelsProvider.getAllReelsList[index].id.toString() );
+                                  // }
+                                  return Opacity(
+                                    opacity: value,
+                                    child: Transform.translate(
+                                      offset: Offset(0, 100 * (1.0 - value)),
+                                      child: Stack(
+                                        children: [
+                                          Container(
+                                            height: 560,
+
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.cardBackgroundColor,
+                                              borderRadius: BorderRadius.circular(12.r),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.2),
+                                                  blurRadius: 6,
+                                                  spreadRadius: 2,
+                                                  offset: Offset(0, 3),
+                                                ),
+                                              ],
+                                            ),
+                                            child: EachReelCard(reel: post, reelsProvider: reelsProvider, index: index)
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+
+
+                            },
+                          )),
+                    ],
+                  ),
+                );
+
+       /* Padding(
                   padding:  EdgeInsets.symmetric(horizontal: 16.sp),
                   child: Stack(children: [
                       Container(
@@ -204,9 +343,9 @@ class _ReelsScreenState extends State<ReelsScreen> {
                             },
                             child: Stack(
                               alignment: Alignment.center,
-                              children: List.generate(reelsProvider.getAllReelsList.reversed.toList().length, (index) {
-                                final isTopCard = index == reelsProvider.getAllReelsList.reversed.toList().length - 1;
-                                final post = reelsProvider.getAllReelsList.reversed.toList()[index];
+                              children: List.generate(reelsProvider.getAllReelsList.length, (index) {
+                                final isTopCard = index == reelsProvider.getAllReelsList.length - 1;
+                                final post = reelsProvider.getAllReelsList[index];
                                 return AnimatedSlide(
                                   offset: isTopCard && slideOffset.dy != 0 ? const Offset(0, -1) : Offset.zero,
                                   duration: const Duration(milliseconds: 600),
@@ -221,7 +360,7 @@ class _ReelsScreenState extends State<ReelsScreen> {
                             ),
                           ))
                     ]),
-                );
+                );*/
 
         // CardSwiper(
         //             allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
@@ -271,7 +410,7 @@ class _EachReelCardState extends State<EachReelCard> {
         controller: sc,
         child: Container(
           height: MediaQuery.of(context).size.height * 0.7,
-          width: MediaQuery.of(context).size.height * 0.9,
+          width: MediaQuery.of(context).size.width * 0.9,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: AppColors.cardBackgroundColor,
@@ -297,7 +436,7 @@ class _EachReelCardState extends State<EachReelCard> {
                         borderRadius: BorderRadius.all(Radius.circular(10.r)),
                         child: CachedNetworkImage(
                           imageUrl: widget.reel.thumbnailUrl.toString(),
-                          height: MediaQuery.of(context).size.height * .56,
+                          height: MediaQuery.of(context).size.height * .52,
                           width: MediaQuery.of(context).size.width,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(

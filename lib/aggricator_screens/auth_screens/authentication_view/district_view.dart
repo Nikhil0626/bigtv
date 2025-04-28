@@ -186,7 +186,7 @@ class _DistrictViewState extends State<DistrictView> {
                 ),
                 height(height: 8),
                 Container(
-                  height: 200, // Or remove if you want it to expand naturally
+                  height: 190, // Or remove if you want it to expand naturally
                   alignment: Alignment.topCenter,
                   child: SingleChildScrollView(
                     child: Column(
@@ -253,7 +253,7 @@ class _DistrictViewState extends State<DistrictView> {
                           borderRadius: BorderRadius.all(Radius.circular(8.r))),
                       child: Center(child: Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 6.h),
                 LinearProgressIndicator(
                   value: 1,
                   backgroundColor: AppColors.borderColor,
@@ -262,7 +262,7 @@ class _DistrictViewState extends State<DistrictView> {
                 SizedBox(height: 8.h),
                 Center(
                   child: Text(
-                    'Step 1/2',
+                    'Step 2/2',
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,

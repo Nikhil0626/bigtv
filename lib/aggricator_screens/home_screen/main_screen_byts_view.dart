@@ -346,15 +346,16 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                         mainAxisAlignment: MainAxisAlignment.start,
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
-                                                          (widget.article['content'] != "")
+                                                          (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
                                                               ? Text(widget.article['content'],
                                                                   style: homeScreenFontStyle(
-                                                                    color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
+                                                                    color:  AppColors.textColor,
                                                                     fontWeight: FontWeight.w500,
                                                                     fontSize: 16.sp,
                                                                   ))
                                                               : const SizedBox.shrink(),
-                                                          height(height: 8.sp),
+                                                          if(widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
+                                                          height(height: 8),
                                                           Expanded(
                                                             child: ListView(
                                                               physics: const NeverScrollableScrollPhysics(),
@@ -538,7 +539,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                             },
                           );
                         }),
-                        width(width: 20),
+                        width(width: 6),
                         BottomActions(
                           postType: widget.article['subType'].toString() ?? "",
                           icon: "assets/svg/new_comment.svg",

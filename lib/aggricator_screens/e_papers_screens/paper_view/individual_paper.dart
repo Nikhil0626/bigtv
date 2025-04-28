@@ -71,7 +71,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => PapersScreenPreview(
-                                      isBookmarked: ePapersProvider.getSinglePapersList[index]..data!.first.isBookmarked ,
+                                      isBookmarked: ePapersProvider.getSinglePapersList[index].data!.first.isBookmarked==0?0:1 ,
                                       imageUrls: ePapersProvider.getSinglePapersList[index].data!,
                                       postId: ePapersProvider.getSinglePapersList[index].id.toString(),
                                     ),
@@ -146,7 +146,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                                   crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
                                                     Text(
-                                                      ePapersProvider.getAllMainPapersList[index].source,
+                                                      ePapersProvider.getSinglePapersList[index].source.toString()??"",
                                                       style: newAppFont(
                                                         color: Colors.grey.shade800,
                                                         fontSize: 16,
@@ -155,7 +155,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
                                                     ),
                                                     // height(height: 1.h),
                                                     Text(
-                                                      ePapersProvider.getAllMainPapersList[index].editionName,
+                                                      ePapersProvider.getSinglePapersList[index].editionName.toString()??"",
                                                       style: newAppFont(
                                                         color: Colors.grey.shade600,
                                                         fontSize: 12,

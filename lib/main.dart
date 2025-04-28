@@ -46,7 +46,7 @@ Future<void> main() async {
   WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   MobileAds.instance.initialize();
   await Firebase.initializeApp();
-  KochavaService.initKochava();
+  // KochavaService.initKochava();
 
   /// app Events firebase
   AnalyticsService.logAppOpen();
@@ -116,12 +116,12 @@ class _MyAppState extends State<MyApp> {
       Map<String, dynamic> messagePayload = event.payload!;
 
       sp.setString("webPostId", messagePayload['postId'].toString()??"");
-      Navigator.push(
-        mainNavigatorKey.currentContext!,
-        MaterialPageRoute(
-          builder: (context) => IndividualPostView(postId: messagePayload["postId"]),
-        )
-      );
+      // Navigator.push(
+      //   mainNavigatorKey.currentContext!,
+      //   MaterialPageRoute(
+      //     builder: (context) => IndividualPostView(postId: messagePayload["postId"]),
+      //   )
+      // );
     });
 
     WebEngagePlugin().pushActionStream.listen((event) {

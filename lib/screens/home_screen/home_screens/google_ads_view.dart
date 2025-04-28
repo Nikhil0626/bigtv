@@ -120,7 +120,7 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => IndividualPostView(postId: widget.article["homepage"]![index]['id'].toString(),isComeFrom: true,),
+                                    builder: (context) => IndividualPostView1(postId: widget.article["homepage"]![index]['id'].toString(),isComeFrom: true,),
                                   ));
                             },
                             child: Center(

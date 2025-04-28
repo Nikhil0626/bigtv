@@ -91,13 +91,19 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future getIndividualPost(postId) async {
+  Future getIndividualPost(postId,{bool isAds=false}) async {
+
     isPostLoading = true;
-    getSinglePostList = {};
     try {
       Response response = await HomeRepo().getSinglePost(postId);
       log(response.data.toString());
       getSinglePostList = response.data['data'];
+      if(isAds==false) {
+        getAllPostList.add(response.data['data']);
+        Future.delayed(Duration(milliseconds: 300), () {
+          getAllPost(postId: "0");
+        },);
+      }
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");

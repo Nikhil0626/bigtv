@@ -39,7 +39,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
   @override
   void initState() {
     context.read<SettingsProvider>().feedbackList = [];
+
+    context.read<SettingsProvider>().isOthersSelected=false;
     context.read<SettingsProvider>().getFeedBack();
+
     super.initState();
   }
 
@@ -66,10 +69,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   Text(
                     "Tell us what you think",
                     style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                      color: AppColors.appButtonColor
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                        color: AppColors.appButtonColor
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -123,7 +126,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                 fontFamily: 'Poppins',
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                  color: AppColors.appButtonColor,
+                                color: AppColors.appButtonColor,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -136,7 +139,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   SizedBox(
                     width: double.infinity,
                     child: Card(
-                  color:     AppColors.cardBackgroundColor,
+                      color:     AppColors.cardBackgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -187,53 +190,51 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                 );
                               }).toList(),
                             ),
-
                           ],
                         ),
                       ),
                     ),
                   ),
                   settingsProvider.isOthersSelected ?
-                    SizedBox(
-                      width: double.infinity,
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Please tell us more about it?",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                ),
-                                textAlign: TextAlign.center,
+                  SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Please tell us more about it?",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
                               ),
-                              SizedBox(height: 8),
-                              TextField(
-                                controller: settingsProvider.feedbackController,
-                                maxLines: 3,
-                                decoration: InputDecoration(
-                                  fillColor: Colors.white,
-                                  filled: true,
-                                  border: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.grey),
-                                  ),
-                                  hintText: "Text",
+                              textAlign: TextAlign.center,
+                            ),
+                            SizedBox(height: 8),
+                            TextField(
+                              controller: settingsProvider.feedbackController,
+                              maxLines: 3,
+                              decoration: InputDecoration(
+                                fillColor: Colors.white,
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.grey),
                                 ),
+                                hintText: "Text",
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    ):
-                      SizedBox.shrink(),
+                    ),
+                  ):
+                  SizedBox.shrink(),
                   SizedBox(height: 16),
-
                   InkWell(
                     onTap: (){
                       if(settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0) {
@@ -241,6 +242,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                           selectedStar = 0;
                           setState(() {
                             settingsProvider.feedbackController.clear();
+                            settingsProvider.selectedFeedbackList.clear();
                           });
                         },);
                       }else{

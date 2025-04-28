@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -21,11 +22,17 @@ import '../paper_models/single_paper_model.dart';
 
 class PapersScreenPreview extends StatefulWidget {
   final String postId;
-  final  isBookmarked;
+  final int isBookmarked;
   final List<PageData> imageUrls;
   final String name;
 
-  PapersScreenPreview({super.key, required this.imageUrls, this.name = "Back", required this.postId, this.isBookmarked = 0});
+  PapersScreenPreview({
+    super.key,
+    required this.imageUrls,
+    this.name = "Back",
+    required this.postId,
+    this.isBookmarked = 0,
+  });
 
   @override
   State<PapersScreenPreview> createState() => _PapersScreenPreviewState();
@@ -36,6 +43,9 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
   final PageController _pageController = PageController();
   List<TransformationController> _controllers = [];
   bool _isZoomed = false;
+  String postId = '0';
+  int isBookmarked = 0;
+  List<bool> _isImageLoaded = [];
 
   @override
   void initState() {
@@ -43,12 +53,12 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
     context.read<NewsPostsProvider>().currentPaperIndex = 0;
     context.read<NewsPostsProvider>().currentPaper = widget.imageUrls[0].imageUrl.toString();
 
-    _controllers = List.generate(
-      widget.imageUrls.length,
-          (_) => TransformationController(),
-    );
+    _controllers = List.generate(widget.imageUrls.length, (_) => TransformationController());
+    _isImageLoaded = List.generate(widget.imageUrls.length, (_) => false);
 
     _controllers[0].addListener(_zoomListener);
+    postId = widget.postId;
+    isBookmarked = widget.isBookmarked;
   }
 
   void _zoomListener() {
@@ -80,7 +90,6 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
               children: [
                 Column(
                   children: [
-                    // Header
                     InkWell(
                       onTap: () => Navigator.pop(context),
                       child: Row(
@@ -92,8 +101,6 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                         ],
                       ),
                     ),
-
-                    // PageView
                     Expanded(
                       child: Stack(
                         children: [
@@ -101,15 +108,11 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                             onTap: newsPostsProvider.isPaperShowing,
                             onScaleStart: (details) {
                               if (details.pointerCount == 2) {
-                                setState(() {
-                                  _isZoomed = true;
-                                });
+                                setState(() => _isZoomed = true);
                               }
                             },
                             onScaleEnd: (details) {
-                              setState(() {
-                                _isZoomed = false;
-                              });
+                              setState(() => _isZoomed = false);
                             },
                             onHorizontalDragEnd: (details) {
                               if (!_isZoomed) {
@@ -122,16 +125,12 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                             },
                             child: PageView.builder(
                               controller: _pageController,
-                              physics: _isZoomed
-                                  ? const NeverScrollableScrollPhysics()
-                                  : const BouncingScrollPhysics(),
+                              physics: _isZoomed ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
                               itemCount: widget.imageUrls.length,
                               onPageChanged: (index) {
                                 _controllers[newsPostsProvider.currentPaperIndex].removeListener(_zoomListener);
-
                                 newsPostsProvider.currentPaperIndex = index;
                                 newsPostsProvider.currentPaper = widget.imageUrls[index].imageUrl.toString();
-
                                 _controllers[index].addListener(_zoomListener);
                               },
                               itemBuilder: (context, index) {
@@ -148,74 +147,65 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                       height: MediaQuery.of(context).size.height,
                                       child: Stack(
                                         children: [
-                                          Image.network(
-                                           imageUrl.toString(),
-                                            fit: BoxFit.fill, // Adjust for better fit
+                                          ExtendedImage.network(
+                                            imageUrl.toString(),
+                                            fit: BoxFit.fill,
                                             width: MediaQuery.of(context).size.width,
                                             height: MediaQuery.of(context).size.height,
-                                            loadingBuilder: (context, child, loadingProgress) {
-                                              if (loadingProgress == null) return child;
-                                              return Center(
-                                                child: CircularProgressIndicator(
-                                                  value: loadingProgress.expectedTotalBytes != null
-                                                      ? loadingProgress.cumulativeBytesLoaded /
-                                                      (loadingProgress.expectedTotalBytes ?? 1)
-                                                      : null,
-                                                ),
-                                              );
-                                            },
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return const Center(
-                                                child: Text(
-                                                  'Failed to load image',
-                                                  style: TextStyle(color: Colors.white),
-                                                ),
-                                              );
+                                            loadStateChanged: (state) {
+                                              switch (state.extendedImageLoadState) {
+                                                case LoadState.loading:
+                                                  return const Center(child: CircularProgressIndicator());
+                                                case LoadState.completed:
+                                                  return state.completedWidget;
+                                                case LoadState.failed:
+                                                  return const Center(
+                                                    child: Text(
+                                                      'Failed to load image',
+                                                      style: TextStyle(color: Colors.white),
+                                                    ),
+                                                  );
+                                              }
                                             },
                                           ),
+
                                           Positioned(
                                             top: 20,
                                             right: 20,
                                             child: Consumer<EPapersProvider>(
-                                                builder: (_, ePapersProvider, __) {
-                                                  return GestureDetector(
-                                                    onTap: () async {
-                                                      final prefs = await SharedPreferences.getInstance();
-                                                      final userId = prefs.getString("userId");
-                                                      final deviceId = prefs.getString("deviceId");
-                                                      EventRepo().sendEvent({
-                                                        "key": "share_via_articles",
-                                                        "data": {
-                                                          "device_id": deviceId,
-                                                          "userId": userId ?? "",
-                                                          "postId": widget.postId,
-                                                          "isWhatAppShare": false,
-                                                        }
-                                                      });
-                                                      context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[newsPostsProvider.currentPaperIndex],context);
-                                                    },
-                                                    child:Container(
-                                                      padding: EdgeInsets.all(7),
-                                                      decoration: BoxDecoration(
-                                                        color: (ePapersProvider.isBookMark.contains(widget.postId) || widget.isBookmarked == 1)
-                                                            ? AppColors.appButtonColor
-                                                            : Colors.black54,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Icon(
-                                                        (ePapersProvider.isBookMark.contains(widget.postId) || widget.isBookmarked == 1)
-                                                            ? Icons.bookmark
-                                                            : Icons.bookmark_outline,
-                                                        color: Colors.white,
-                                                        size: 20,
-                                                      ),
+                                              builder: (_, ePapersProvider, __) {
+                                                return GestureDetector(
+                                                  onTap: () async {
+                                                    final prefs = await SharedPreferences.getInstance();
+                                                    final userId = prefs.getString("userId");
+                                                    final deviceId = prefs.getString("deviceId");
+                                                    EventRepo().sendEvent({
+                                                      "key": "share_via_articles",
+                                                      "data": {
+                                                        "device_id": deviceId,
+                                                        "userId": userId ?? "",
+                                                        "postId": widget.postId,
+                                                        "isWhatAppShare": false,
+                                                      }
+                                                    });
+                                                    context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[index], context);
+                                                  },
+                                                  child: Container(
+                                                    padding: EdgeInsets.all(7),
+                                                    decoration: BoxDecoration(
+                                                      color: (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1) ? AppColors.appButtonColor : Colors.black54,
+                                                      shape: BoxShape.circle,
                                                     ),
-                                                  );
-                                                }
+                                                    child: Icon(
+                                                      (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ),
-
-                                          // Share
                                           Positioned(
                                             top: 20,
                                             right: 80,
@@ -278,16 +268,11 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                               },
                             ),
                           ),
-
-                          // Bookmark
-
                         ],
                       ),
                     ),
                   ],
                 ),
-
-                // Bottom Thumbnails
                 if (newsPostsProvider.isBottomIsShow)
                   Positioned(
                     bottom: 0,
@@ -302,6 +287,8 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                         itemBuilder: (context, index) {
                           return InkWell(
                             onTap: () {
+                              postId = widget.imageUrls[index].id.toString();
+                              isBookmarked = widget.imageUrls[index].isBookmarked == 0 ? 0 : 1;
                               newsPostsProvider.paperSet(widget.imageUrls[index].imageUrl, index);
                               newsPostsProvider.isPaperShowing();
                               _pageController.jumpToPage(index);
@@ -316,8 +303,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                   width: 100,
                                   fit: BoxFit.fill,
                                   placeholder: (context, url) => Container(color: Colors.grey.shade200),
-                                  errorWidget: (context, url, error) =>
-                                      Icon(Icons.image, size: 100, color: Colors.grey.shade300),
+                                  errorWidget: (context, url, error) => Icon(Icons.image, size: 100, color: Colors.grey.shade300),
                                 ),
                               ),
                             ),
