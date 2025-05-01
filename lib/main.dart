@@ -4,12 +4,10 @@ import 'dart:developer';
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
-import 'package:chotanews/screens/testing_screen/test1.dart';
 import 'package:chotanews/services/analytics_service.dart';
-import 'package:chotanews/services/kochava_service.dart';
-import 'package:chotanews/services/webengage_notification.dart';
+import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -31,11 +29,19 @@ import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
+import 'aggricator_screens/test_screens/language_screen.dart';
+import 'aggricator_screens/test_screens/test1.dart';
+import 'aggricator_screens/test_screens/test2.dart';
+import 'aggricator_screens/test_screens/test3.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initPlugin();
+
+
   await EasyLocalization.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -115,13 +121,15 @@ class _MyAppState extends State<MyApp> {
       print("🔔 pushStream: ${event.payload}");
       Map<String, dynamic> messagePayload = event.payload!;
 
-      sp.setString("webPostId", messagePayload['postId'].toString()??"");
       // Navigator.push(
       //   mainNavigatorKey.currentContext!,
       //   MaterialPageRoute(
       //     builder: (context) => IndividualPostView(postId: messagePayload["postId"]),
       //   )
       // );
+
+      sp.setString("webPostId", messagePayload['postId'].toString()??"");
+
     });
 
     WebEngagePlugin().pushActionStream.listen((event) {
@@ -215,7 +223,7 @@ class _MyAppState extends State<MyApp> {
             useMaterial3: true,
           ),
           routes: {
-            '/': (context) => SplashScreen(),
+            '/': (context) => MyApp11(),
             '/individualPage': (context) => IndividualPostView(
                   postId: postId,
                 ),

@@ -514,10 +514,15 @@ class _StandardPostViewState extends State<StandardPostView> {
             fontSize:  widget.isFoldable?20:16.sp,
           ),
           recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              print(" $link");
-              Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: link.toString(), title: "Standard Links"),));
-            },
+            ..onTap = () async {   print("sbhjhfjksdfnsdknf1111 $link");
+
+              if(link=="https://play.google.com/store/apps/details?id=com.chotanews" && Platform.isIOS){
+                print("sbhjhfjksdfnsdknf $link");
+                launchURL(Uri.parse("https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092"));
+              }else {
+                launchURL(Uri.parse(link.toString()));
+              }
+             },
         ));
 
         return "";
@@ -535,5 +540,12 @@ class _StandardPostViewState extends State<StandardPostView> {
     );
 
     return spans;
+  }
+  Future<void> launchURL(Uri uri) async {
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch ${uri.path}';
+    }
   }
 }

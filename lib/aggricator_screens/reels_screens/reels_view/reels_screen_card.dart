@@ -120,7 +120,35 @@ class _ReelsScreenState extends State<ReelsScreen> {
         )
             : reelsProvider.getAllReelsList.isEmpty
                 ? AppNoData()
-                :   Padding(
+                :     Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: CardSwiper(
+                    controller: controller,
+                    cardsCount:  reelsProvider.getAllReelsList.length,
+                    onSwipe: _onSwipe,
+                    // onSwipeDirectionChange:  ,
+                    // onUndo: _onUndo,
+                    allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+                    // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
+                    numberOfCardsDisplayed: 4,
+                    duration: const Duration(milliseconds: 100),
+                    backCardOffset: const Offset(0, 40),
+                    padding: const EdgeInsets.only(left: 20.0,right: 20.0,bottom: 40.0,),
+                    // alignment: Alignment.topCenter,
+                    cardBuilder: (
+                        context,
+                        index,
+                        horizontalThresholdPercentage,
+                        verticalThresholdPercentage,
+                        ) {
+                      final post =  reelsProvider.getAllReelsList[index];
+
+                      return  EachReelCard(reel: post, reelsProvider: reelsProvider, index: index);
+                    },
+                  ),
+                );
+
+       /* Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Stack(
                     children: [
@@ -257,109 +285,6 @@ class _ReelsScreenState extends State<ReelsScreen> {
                           )),
                     ],
                   ),
-                );
-
-       /* Padding(
-                  padding:  EdgeInsets.symmetric(horizontal: 16.sp),
-                  child: Stack(children: [
-                      Container(
-                        height: 620,
-                        width: MediaQuery.of(context).size.width,
-                        margin: EdgeInsets.symmetric(horizontal: 24.h),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundColor,
-                          borderRadius: BorderRadius.circular(12.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              blurRadius: 6,
-                              spreadRadius: 2,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        height: 600,
-                        width: MediaQuery.of(context).size.width,
-                        margin: EdgeInsets.symmetric(horizontal: 16.h),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundColor,
-                          borderRadius: BorderRadius.circular(12.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              blurRadius: 6,
-                              spreadRadius: 2,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        height: 580,
-                        width: MediaQuery.of(context).size.width,
-                        margin: EdgeInsets.symmetric(horizontal: 8.h),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundColor,
-                          borderRadius: BorderRadius.circular(12.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              blurRadius: 6,
-                              spreadRadius: 2,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                          height: 560,
-                          width: MediaQuery.of(context).size.width,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: AppColors.cardBackgroundColor,
-                            borderRadius: BorderRadius.circular(12.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                blurRadius: 6,
-                                spreadRadius: 2,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: GestureDetector(
-                            onVerticalDragEnd: (details) {
-                              final velocity = details.velocity.pixelsPerSecond.dy;
-                              if (velocity < -500) {
-                                animateRemoveTopCard();
-                              } else if (velocity > 500) {
-                                animateUndoCard();
-                              }
-                            },
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: List.generate(reelsProvider.getAllReelsList.length, (index) {
-                                final isTopCard = index == reelsProvider.getAllReelsList.length - 1;
-                                final post = reelsProvider.getAllReelsList[index];
-                                return AnimatedSlide(
-                                  offset: isTopCard && slideOffset.dy != 0 ? const Offset(0, -1) : Offset.zero,
-                                  duration: const Duration(milliseconds: 600),
-                                  curve: Curves.easeInOut,
-                                  child: AnimatedOpacity(
-                                      opacity: isTopCard && slideOffset.dy != 0 ? 0.9 : 1.0,
-                                      duration: Duration(milliseconds: 600),
-                                      curve: Curves.easeInOut,
-                                      child: EachReelCard(reel: post, reelsProvider: reelsProvider, index: index)),
-                                );
-                              }),
-                            ),
-                          ))
-                    ]),
                 );*/
 
         // CardSwiper(
@@ -377,6 +302,38 @@ class _ReelsScreenState extends State<ReelsScreen> {
         //           );
       }),
     );
+  }
+
+  int currentIndex = 0;
+
+  bool _onSwipe(
+      int previousIndex,
+      int? newIndex,
+      CardSwiperDirection direction,
+      ) {
+    if (direction == CardSwiperDirection.bottom) {
+      _undo();
+
+      return false;
+    }
+
+    if (newIndex != null) {
+      currentIndex = newIndex;
+    }
+    debugPrint(
+      'The card $previousIndex was swiped to the ${direction.name}. Now the card $newIndex is on top',
+    );
+    return true;
+  }
+
+
+  void _undo() {
+    if (currentIndex > 0) {
+      setState(() {
+        currentIndex--;
+      });
+      controller.undo();
+    }
   }
 }
 
@@ -409,20 +366,20 @@ class _EachReelCardState extends State<EachReelCard> {
       child: Screenshot(
         controller: sc,
         child: Container(
-          height: MediaQuery.of(context).size.height * 0.7,
+          height: MediaQuery.of(context).size.height * 0.8,
           width: MediaQuery.of(context).size.width * 0.9,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: AppColors.cardBackgroundColor,
             borderRadius: BorderRadius.circular(20.r),
-            // boxShadow: [
-            //   BoxShadow(
-            //     color: Colors.grey.withOpacity(0.2),
-            //     blurRadius: 6,
-            //     spreadRadius: 2,
-            //     offset: Offset(0, 3),
-            //   ),
-            // ],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 6,
+                spreadRadius: 2,
+                offset: Offset(0, 3),
+              ),
+            ],
           ),
           child: Stack(
             children: [
@@ -431,12 +388,12 @@ class _EachReelCardState extends State<EachReelCard> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0),
+                      padding:  EdgeInsets.symmetric(horizontal: 10.0.sp, vertical: 10.sp),
                       child: ClipRRect(
                         borderRadius: BorderRadius.all(Radius.circular(10.r)),
                         child: CachedNetworkImage(
                           imageUrl: widget.reel.thumbnailUrl.toString(),
-                          height: MediaQuery.of(context).size.height * .52,
+                          height: MediaQuery.of(context).size.height * .56,
                           width: MediaQuery.of(context).size.width,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
@@ -447,7 +404,7 @@ class _EachReelCardState extends State<EachReelCard> {
                           errorWidget: (context, url, error) => Center(
                             child: Icon(
                               Icons.image,
-                              size: 100,
+                              size: 100.sp,
                               color: Colors.grey.shade300,
                             ),
                           ),

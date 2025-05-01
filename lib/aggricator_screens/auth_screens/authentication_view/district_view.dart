@@ -177,9 +177,9 @@ class _DistrictViewState extends State<DistrictView> {
                           text: "0${authenticationProvider.selectedLocations.length}",
                           style: homeScreenFontStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                         ),
-                        TextSpan(text: "/03\n"),
-                        if(authenticationProvider.selectedLocations.length>3)
-                        TextSpan(text: "You Have Selected Maximum Number of Districts",style: newAppFont(fontSize: 12,color: Colors.red,fontWeight: FontWeight.w600)),
+                        TextSpan(text: "/05\n"),
+                        if(authenticationProvider.selectedLocations.length>5)
+                        TextSpan(text: "You Have Selected Maximum Number of Districts",style: newAppFont(fontSize: 10,color: Colors.red,fontWeight: FontWeight.normal)),
                       ],
                     ),
                   ),
@@ -226,7 +226,7 @@ class _DistrictViewState extends State<DistrictView> {
                   ),
                 ),
                 InkWell(
-                  onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3
+                  onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5
                       ? () {
                           authenticationProvider.sendLocationsToServer(context).then((value) {
                             if (context.mounted) {
@@ -241,13 +241,13 @@ class _DistrictViewState extends State<DistrictView> {
                           },);
                         }
                       : () {
-                          CustomToast.showErrorToast(msg: "Please Select only 3 District ");
+                          CustomToast.showErrorToast(msg: "Please Select only 5 District ");
                         },
                   child: Container(
                       width: MediaQuery.of(context).size.width,
                       height: 36.h,
                       decoration: BoxDecoration(
-                          color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3)
+                          color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5)
                               ? AppColors.loginBgColor
                               : AppColors.bodyTextColor.withOpacity(.2),
                           borderRadius: BorderRadius.all(Radius.circular(8.r))),

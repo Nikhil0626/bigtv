@@ -115,71 +115,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                         padding: const EdgeInsets.symmetric(horizontal: 16.0),
                         child: Stack(
                           children: [
-                            Container(
-                              height: 620,
-                              width: MediaQuery.of(context).size.width,
-                              margin: EdgeInsets.symmetric(horizontal: 24.h),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: AppColors.cardBackgroundColor,
-                                borderRadius: BorderRadius.circular(12.r),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    blurRadius: 6,
-                                    spreadRadius: 2,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              height: 600,
-                              width: MediaQuery.of(context).size.width,
-                              margin: EdgeInsets.symmetric(horizontal: 16.h),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: AppColors.cardBackgroundColor,
-                                borderRadius: BorderRadius.circular(12.r),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    blurRadius: 6,
-                                    spreadRadius: 2,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              height: 580,
-                              width: MediaQuery.of(context).size.width,
-                              margin: EdgeInsets.symmetric(horizontal: 8.h),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: AppColors.cardBackgroundColor,
-                                borderRadius: BorderRadius.circular(12.r),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.2),
-                                    blurRadius: 6,
-                                    spreadRadius: 2,
-                                    offset: Offset(0, 3),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Container(
-                              height: 560,
-                              width: MediaQuery.of(context).size.width,
-                              // margin: EdgeInsets.symmetric(horizontal: 8.h),
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: AppColors.cardBackgroundColor,
-                                borderRadius: BorderRadius.circular(12.r),
 
-                              ),
-                            ),
                             ePapersProvider.getAllMainPapersList.length==1?InkWell(
                               onTap: () {
                                 Navigator.push(
@@ -335,230 +271,227 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                 ),
                               ),
                             ):
-                            GestureDetector(
-                                onVerticalDragEnd: (details) {
-                                  final velocity = details.velocity.pixelsPerSecond.dy;
-                                  if (velocity < -500) {
-                                    animateRemoveTopCard();
-                                  } else if (velocity > 500) {
-                                    animateUndoCard();
-                                  }
-                                },
-                                child: PageView.builder(
-                                  scrollDirection: Axis.vertical,
-                                  itemCount: ePapersProvider.getAllMainPapersList.length,
-                                  itemBuilder: (context, index) {
-                                    return AnimatedBuilder(
-                                      animation: _pageController,
-                                      builder: (context, child) {
-                                        double value = 1.0;
+                            Padding(
+                                  padding: const EdgeInsets.only(bottom: 20.0),
+                                  child: CardSwiper(
+                                    controller: controller,
+                                    cardsCount:  ePapersProvider.getAllMainPapersList.length,
+                                    onSwipe: _onSwipe,
+                                    // onSwipeDirectionChange:  ,
+                                    // onUndo: _onUndo,
+                                    allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+                                    // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
+                                    numberOfCardsDisplayed: 4,
+                                    duration: const Duration(milliseconds: 100),
+                                    backCardOffset: const Offset(0, 40),
+                                    padding: const EdgeInsets.only(left: 20.0,right: 20.0,bottom: 40.0,),
+                                    // alignment: Alignment.topCenter,
+                                    cardBuilder: (
+                                        context,
+                                        index,
+                                        horizontalThresholdPercentage,
+                                        verticalThresholdPercentage,
+                                        ) {
 
-                                        return Opacity(
-                                          opacity: value,
-                                          child: Transform.translate(
-                                            offset: Offset(0, 100 * (1.0 - value)),
-                                            child: Stack(
-                                              children: [
-                                                Container(
-                                                    height: 560,
-                                                    alignment: Alignment.center,
-                                                    decoration: BoxDecoration(
-                                                      color: AppColors.cardBackgroundColor,
-                                                      borderRadius: BorderRadius.circular(12.r),
-                                                      boxShadow: [
-                                                        BoxShadow(
-                                                          color: Colors.grey.withOpacity(0.2),
-                                                          blurRadius: 6,
-                                                          spreadRadius: 2,
-                                                          offset: Offset(0, 3),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        Navigator.push(
-                                                            context,
-                                                            MaterialPageRoute(
-                                                              builder: (context) => IndividualPaper(
-                                                                paper: ePapersProvider.getAllMainPapersList[index].source,
-                                                              ),
-                                                            ));
-                                                      },
-                                                      child: Container(
-                                                        alignment: Alignment.center,
-                                                        decoration: BoxDecoration(
+                                      return  InkWell(
+                                        onTap: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => IndividualPaper(
+                                                  paper: ePapersProvider.getAllMainPapersList[index].source,
+                                                ),
+                                              ));
+                                        },
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          decoration: BoxDecoration(
+                                            color: AppColors.cardBackgroundColor,
+                                            borderRadius: BorderRadius.all(Radius.circular(20)),
+                                            boxShadow: [
+                                              BoxShadow(
+                                                color: Colors.grey.withOpacity(0.2),
+                                                blurRadius: 6,
+                                                spreadRadius: 2,
+                                                offset: Offset(0, 3),
+                                              ),
+                                            ],
+                                          ),
+                                          child: Stack(
+                                            children: [
+                                              Column(
+                                                children: [
+                                                  Expanded(
+                                                    child: Padding(
+                                                      padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
+                                                      child: CachedNetworkImage(
+                                                        imageUrl: ePapersProvider.getAllMainPapersList[index].imageUrl,
+                                                        width: MediaQuery.of(context).size.width,
+                                                        fit: BoxFit.fill,
+                                                        placeholder: (context, url) => Container(
                                                           color: AppColors.cardBackgroundColor,
-                                                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                                                          boxShadow: [
-                                                            BoxShadow(
-                                                              color: Colors.grey.withOpacity(0.2),
-                                                              blurRadius: 6,
-                                                              spreadRadius: 2,
-                                                              offset: Offset(0, 3),
-                                                            ),
-                                                          ],
                                                         ),
-                                                        child: Stack(
-                                                          children: [
-                                                            Column(
-                                                              children: [
-                                                                Expanded(
-                                                                  child: Padding(
-                                                                    padding: const EdgeInsets.only(top: 10.0, right: 10.0, left: 10.0),
-                                                                    child: CachedNetworkImage(
-                                                                      imageUrl: ePapersProvider.getAllMainPapersList[index].imageUrl,
-                                                                      width: MediaQuery.of(context).size.width,
-                                                                      fit: BoxFit.fill,
-                                                                      placeholder: (context, url) => Container(
-                                                                        color: AppColors.cardBackgroundColor,
-                                                                      ),
-                                                                      errorWidget: (context, url, error) => Center(
-                                                                        child: Icon(
-                                                                          Icons.image,
-                                                                          size: 100,
-                                                                          color: Colors.grey.shade300,
-                                                                        ),
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Container(
-                                                                  padding: EdgeInsets.only(bottom: 6.h, top: 6.h),
-                                                                  decoration: BoxDecoration(
-                                                                      color: AppColors.cardBackgroundColor,
-                                                                      borderRadius: BorderRadius.only(
-                                                                        bottomLeft: Radius.circular(20),
-                                                                        bottomRight: Radius.circular(20),
-                                                                      )),
-                                                                  child: Row(
-                                                                    children: [
-                                                                      width(width: 10),
-                                                                      InkWell(
-                                                                        onTap: () {
-                                                                          Navigator.push(
-                                                                              context,
-                                                                              MaterialPageRoute(
-                                                                                builder: (context) => InAppWebViewScreen(
-                                                                                  webUrl: ePapersProvider.getAllMainPapersList[index].sourceUrl.toString(),
-                                                                                  title: "E-Paper",
-                                                                                ),
-                                                                              ));
-                                                                        },
-                                                                        child: SizedBox(
-                                                                          height: 50,
-                                                                          width: 50,
-                                                                          child: CachedNetworkImage(
-                                                                            imageUrl: ePapersProvider.getAllMainPapersList[index].logo.toString(),
-                                                                            width: MediaQuery.of(context).size.width,
-                                                                            height: 300,
-                                                                            fit: BoxFit.fill,
-                                                                            placeholder: (context, url) => Container(
-                                                                              color: AppColors.borderColor.withOpacity(.2),
-                                                                            ),
-                                                                            errorWidget: (context, url, error) => Center(
-                                                                              child: Icon(
-                                                                                Icons.image,
-                                                                                size: 100,
-                                                                                color: Colors.grey.shade300,
-                                                                              ),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                      ),
-                                                                      width(width: 6.h),
-                                                                      Column(
-                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                        children: [
-                                                                          Text(
-                                                                            ePapersProvider.getAllMainPapersList[index].source,
-                                                                            style: newAppFont(
-                                                                              color: Colors.grey.shade800,
-                                                                              fontSize: 16,
-                                                                              fontWeight: FontWeight.w600,
-                                                                            ),
-                                                                          ),
-                                                                          // height(height: 1.h),
-                                                                          Text(
-                                                                            ePapersProvider.getAllMainPapersList[index].editionName,
-                                                                            style: newAppFont(
-                                                                              color: Colors.grey.shade600,
-                                                                              fontSize: 12,
-                                                                              fontWeight: FontWeight.w400,
-                                                                            ),
-                                                                          ),
-                                                                        ],
-                                                                      ),
-                                                                      width(width: 15.w),
-                                                                    ],
-                                                                  ),
-                                                                ),
-                                                              ],
-                                                            ),
-
-                                                            // Positioned(
-                                                            //   top: 14,
-                                                            //   right: 14,
-                                                            //   child: Consumer<EPapersProvider>(
-                                                            //     builder: (_,ePapersProvider,__) {
-                                                            //       return GestureDetector(
-                                                            //         onTap: () {
-                                                            //           ePapersProvider.isBookMarkPost(   ePapersProvider.getAllMainPapersList[index],context);
-                                                            //
-                                                            //         },
-                                                            //         child:Container(
-                                                            //           padding: EdgeInsets.all(7),
-                                                            //           decoration: BoxDecoration(
-                                                            //             color: (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked== 1)
-                                                            //                 ? AppColors.appButtonColor
-                                                            //                 : Colors.black54,
-                                                            //             shape: BoxShape.circle,
-                                                            //           ),
-                                                            //           child: Icon(
-                                                            //             (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked == 1)
-                                                            //                 ? Icons.bookmark
-                                                            //                 : Icons.bookmark_outline,
-                                                            //             color: Colors.white,
-                                                            //             size: 20,
-                                                            //           ),
-                                                            //         ),
-                                                            //       );
-                                                            //     }
-                                                            //   ),
-                                                            // ),
-                                                          ],
+                                                        errorWidget: (context, url, error) => Center(
+                                                          child: Icon(
+                                                            Icons.image,
+                                                            size: 100,
+                                                            color: Colors.grey.shade300,
+                                                          ),
                                                         ),
                                                       ),
-                                                    )),
-                                              ],
-                                            ),
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    padding: EdgeInsets.only(bottom: 6.h, top: 6.h),
+                                                    decoration: BoxDecoration(
+                                                        color: AppColors.cardBackgroundColor,
+                                                        borderRadius: BorderRadius.only(
+                                                          bottomLeft: Radius.circular(20),
+                                                          bottomRight: Radius.circular(20),
+                                                        )),
+                                                    child: Row(
+                                                      children: [
+                                                        width(width: 10),
+                                                        InkWell(
+                                                          onTap: () {
+                                                            Navigator.push(
+                                                                context,
+                                                                MaterialPageRoute(
+                                                                  builder: (context) => InAppWebViewScreen(
+                                                                    webUrl: ePapersProvider.getAllMainPapersList[index].sourceUrl.toString(),
+                                                                    title: "E-Paper",
+                                                                  ),
+                                                                ));
+                                                          },
+                                                          child: SizedBox(
+                                                            height: 50,
+                                                            width: 50,
+                                                            child: CachedNetworkImage(
+                                                              imageUrl: ePapersProvider.getAllMainPapersList[index].logo.toString(),
+                                                              width: MediaQuery.of(context).size.width,
+                                                              height: 300,
+                                                              fit: BoxFit.fill,
+                                                              placeholder: (context, url) => Container(
+                                                                color: AppColors.borderColor.withOpacity(.2),
+                                                              ),
+                                                              errorWidget: (context, url, error) => Center(
+                                                                child: Icon(
+                                                                  Icons.image,
+                                                                  size: 100,
+                                                                  color: Colors.grey.shade300,
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        width(width: 6.h),
+                                                        Column(
+                                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                                          children: [
+                                                            Text(
+                                                              ePapersProvider.getAllMainPapersList[index].source,
+                                                              style: newAppFont(
+                                                                color: Colors.grey.shade800,
+                                                                fontSize: 16,
+                                                                fontWeight: FontWeight.w600,
+                                                              ),
+                                                            ),
+                                                            // height(height: 1.h),
+                                                            Text(
+                                                              ePapersProvider.getAllMainPapersList[index].editionName,
+                                                              style: newAppFont(
+                                                                color: Colors.grey.shade600,
+                                                                fontSize: 12,
+                                                                fontWeight: FontWeight.w400,
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        ),
+                                                        width(width: 15.w),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+
+                                              // Positioned(
+                                              //   top: 14,
+                                              //   right: 14,
+                                              //   child: Consumer<EPapersProvider>(
+                                              //     builder: (_,ePapersProvider,__) {
+                                              //       return GestureDetector(
+                                              //         onTap: () {
+                                              //           ePapersProvider.isBookMarkPost(   ePapersProvider.getAllMainPapersList[index],context);
+                                              //
+                                              //         },
+                                              //         child:Container(
+                                              //           padding: EdgeInsets.all(7),
+                                              //           decoration: BoxDecoration(
+                                              //             color: (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked== 1)
+                                              //                 ? AppColors.appButtonColor
+                                              //                 : Colors.black54,
+                                              //             shape: BoxShape.circle,
+                                              //           ),
+                                              //           child: Icon(
+                                              //             (ePapersProvider.isBookMark.contains(ePapersProvider.getAllMainPapersList[index].id.toString()) || ePapersProvider.getAllMainPapersList[index].isBookmarked == 1)
+                                              //                 ? Icons.bookmark
+                                              //                 : Icons.bookmark_outline,
+                                              //             color: Colors.white,
+                                              //             size: 20,
+                                              //           ),
+                                              //         ),
+                                              //       );
+                                              //     }
+                                              //   ),
+                                              // ),
+                                            ],
                                           ),
-                                        );
-                                      },
-                                    );
-                                  },
-                                )),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                )
+
+
                           ],
                         ),
                       ),
 
-            // CardSwiper(
-            //     allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-            //     controller: controller,
-            //     cardsCount: ePapersProvider.getAllMainPapersList.length??1,
-            //     // onSwipe: (previousIndex, currentIndex, direction) {
-            //     //   print("Swiped from $previousIndex to $currentIndex  direction $direction");
-            //     //   return true;
-            //     // },
-            //   isLoop: false,
-            //     numberOfCardsDisplayed: ePapersProvider.getAllMainPapersList.length??4,
-            //     cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-            //       return
-            //     },
-            //   ),
           ),
         );
       }),
     );
+  }
+
+
+  bool _onSwipe(
+      int previousIndex,
+      int? newIndex,
+      CardSwiperDirection direction,
+      ) {
+    if (direction == CardSwiperDirection.bottom) {
+      _undo();
+
+      return false;
+    }
+
+    if (newIndex != null) {
+      currentIndex = newIndex;
+    }
+    debugPrint(
+      'The card $previousIndex was swiped to the ${direction.name}. Now the card $newIndex is on top',
+    );
+    return true;
+  }
+
+
+  void _undo() {
+    if (currentIndex > 0) {
+      setState(() {
+        currentIndex--;
+      });
+      controller.undo();
+    }
   }
 }
 

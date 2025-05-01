@@ -15,7 +15,10 @@ Future<String?> getUniqueDeviceId(
     ) async {
   SharedPreferences sp = await SharedPreferences.getInstance();
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  log("app latest version ${packageInfo.version}");
+
+  // String? deviceId = await PlatformDeviceId.getDeviceId;
+  // log("Device ID: $androidId");
+  log("app latest version ${packageInfo.toString()}");
   log("app latest version ${packageInfo.buildNumber}");
 
   String? storedVersion = sp.getString("app_version");

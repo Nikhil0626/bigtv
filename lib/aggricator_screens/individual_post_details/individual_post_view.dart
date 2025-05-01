@@ -642,9 +642,14 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
         ),
         recognizer: TapGestureRecognizer()
           ..onTap = () async {
-            print(" $link");
-            Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: link.toString(), title: "Standard Links"),));
-          },
+            print("sbhjhfjksdfnsdknf1111 $link");
+
+            if(link=="https://play.google.com/store/apps/details?id=com.chotanews" && Platform.isIOS){
+              print("sbhjhfjksdfnsdknf $link");
+              launchURL(Uri.parse("https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092"));
+            }else {
+              launchURL(Uri.parse(link.toString()));
+            }}
       ));
 
       return "";
@@ -665,5 +670,12 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
   void getWebData() async{
     SharedPreferences sp = await SharedPreferences.getInstance();
     sp.setString("webPostId","");
+  }
+  Future<void> launchURL(Uri uri) async {
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch ${uri.path}';
+    }
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -7,6 +8,7 @@ import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -45,6 +47,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
   bool _isZoomed = false;
   String postId = '0';
   int isBookmarked = 0;
+  int currentIndex = 0;
   List<bool> _isImageLoaded = [];
 
   @override
@@ -106,33 +109,12 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                         children: [
                           GestureDetector(
                             onTap: newsPostsProvider.isPaperShowing,
-                            onScaleStart: (details) {
-                              if (details.pointerCount == 2) {
-                                setState(() => _isZoomed = true);
-                              }
-                            },
-                            onScaleEnd: (details) {
-                              setState(() => _isZoomed = false);
-                            },
-                            onHorizontalDragEnd: (details) {
-                              if (!_isZoomed) {
-                                if (details.primaryVelocity! < 0 && _pageController.page != widget.imageUrls.length - 1) {
-                                  _pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-                                } else if (details.primaryVelocity! > 0 && _pageController.page != 0) {
-                                  _pageController.previousPage(duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-                                }
-                              }
-                            },
+
                             child: PageView.builder(
                               controller: _pageController,
-                              physics: _isZoomed ? const NeverScrollableScrollPhysics() : const BouncingScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               itemCount: widget.imageUrls.length,
-                              onPageChanged: (index) {
-                                _controllers[newsPostsProvider.currentPaperIndex].removeListener(_zoomListener);
-                                newsPostsProvider.currentPaperIndex = index;
-                                newsPostsProvider.currentPaper = widget.imageUrls[index].imageUrl.toString();
-                                _controllers[index].addListener(_zoomListener);
-                              },
+
                               itemBuilder: (context, index) {
                                 final imageUrl = widget.imageUrls[index].imageUrl;
                                 return InteractiveViewer(
@@ -193,11 +175,15 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                                   child: Container(
                                                     padding: EdgeInsets.all(7),
                                                     decoration: BoxDecoration(
-                                                      color: (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1) ? AppColors.appButtonColor : Colors.black54,
+                                                      color: (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1)
+                                                          ? AppColors.appButtonColor
+                                                          : Colors.black54,
                                                       shape: BoxShape.circle,
                                                     ),
                                                     child: Icon(
-                                                      (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
+                                                      (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1)
+                                                          ? Icons.bookmark
+                                                          : Icons.bookmark_outline,
                                                       color: Colors.white,
                                                       size: 20,
                                                     ),
@@ -268,6 +254,82 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                               },
                             ),
                           ),
+                          if(currentIndex!=0)
+                            Positioned(
+                              left: 10.sp,
+                              top: MediaQuery.of(context).size.height / 2 - 50.sp,
+                              child: Consumer<EPapersProvider>(
+                                builder: (_, ePapersProvider, __) {
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      // currentIndex=currentIndex-1;
+                                      log("current ++= $currentIndex ---- lase    ${widget.imageUrls.length}");
+                                      postId = widget.imageUrls[currentIndex].id.toString();
+                                      isBookmarked = widget.imageUrls[currentIndex].isBookmarked == 0 ? 0 : 1;
+                                      newsPostsProvider.paperSet(widget.imageUrls[currentIndex].imageUrl, currentIndex);
+                                      currentIndex=currentIndex-1;
+                                      _pageController.jumpToPage(currentIndex);
+                                      setState(() {
+
+                                      });
+                                    },
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.all(Radius.circular(20.r)),
+                                      child: Container(
+                                        height: 40.sp,
+                                        width: 40.sp,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                        ),
+                                        child: Center(
+                                            child: Icon(
+                                              Icons.arrow_back_ios_outlined,
+                                              size: 20.sp,
+                                              color: Colors.white,
+                                            )),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          if(currentIndex!=widget.imageUrls.length-1)
+                            Positioned(
+                              right: 10.sp,
+                              top: MediaQuery.of(context).size.height / 2 - 50.sp,
+                              child: InkWell(
+                                onTap: () async {
+
+                                  log("current ++= $currentIndex ---- lase    ${widget.imageUrls.length}");
+                                  postId = widget.imageUrls[currentIndex].id.toString();
+                                  isBookmarked = widget.imageUrls[currentIndex].isBookmarked == 0 ? 0 : 1;
+                                  newsPostsProvider.paperSet(widget.imageUrls[currentIndex].imageUrl, currentIndex);
+                                  currentIndex=currentIndex+1;
+                                  _pageController.jumpToPage(currentIndex);
+                                  setState(() {
+
+                                  });
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.all(Radius.circular(20.r)),
+                                  child: Container(
+                                    height: 40.sp,
+                                    width: 40.sp,
+                                    alignment: Alignment.center,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                    ),
+                                    child: Center(
+                                        child: Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 20.sp,
+                                          color: Colors.white,
+                                        )),
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),

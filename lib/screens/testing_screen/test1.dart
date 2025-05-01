@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter/material.dart';
 
-class NewsSwipeStackView extends StatefulWidget {
-  const NewsSwipeStackView({super.key});
+class NewsSwipeStackView1 extends StatefulWidget {
+  const NewsSwipeStackView1({super.key});
 
   @override
-  State<NewsSwipeStackView> createState() => _NewsSwipeStackViewState();
+  State<NewsSwipeStackView1> createState() => _NewsSwipeStackView1State();
 }
 
-class _NewsSwipeStackViewState extends State<NewsSwipeStackView> {
+class _NewsSwipeStackView1State extends State<NewsSwipeStackView1> {
   int currentIndex = 0;
   final List<Map<String, dynamic>> posts = [
     {
@@ -185,93 +185,95 @@ class _NewsSwipeStackViewState extends State<NewsSwipeStackView> {
 
     return Scaffold(
       backgroundColor: Colors.grey[200],
-      body: SafeArea(
-        child: Stack(
-          alignment: Alignment.center,
-          children: posts
-              .asMap()
-              .entries
-              .map((entry) {
-                final index = entry.key;
-                final post = entry.value;
+      body: Center(
+        child: SafeArea(
+          child: Stack(
+            alignment: Alignment.center,
+            children: posts
+                .asMap()
+                .entries
+                .map((entry) {
+                  final index = entry.key;
+                  final post = entry.value;
 
-                // Step position & scale
-                final verticalOffset = index * 12.0;
-                final scaleFactor = 1 - index * 0.02;
-                final opacity = (1 - index * 0.08).clamp(0.5, 1.0);
+                  // Step position & scale
+                  final verticalOffset = index * 12.0;
+                  final scaleFactor = 1 - index * 0.02;
+                  final opacity = (1 - index * 0.08).clamp(0.5, 1.0);
 
-                // Only top card gets swipe interaction
-                final isTopCard = index == 0;
+                  // Only top card gets swipe interaction
+                  final isTopCard = index == 0;
 
-                return AnimatedPositioned(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOut,
-                  top: isTopCard ? _dragOffset.dy : verticalOffset,
-                  left: 0,
-                  right: 0,
-                  child: Transform.scale(
-                    scale: scaleFactor.clamp(1, 2),
-                    child: Opacity(
-                      opacity: opacity,
-                      child: GestureDetector(
-                        onVerticalDragUpdate: isTopCard ? _onVerticalDragUpdate : null,
-                        onVerticalDragEnd: isTopCard ? _onVerticalDragEnd : null,
-                        child: Card(
-                          elevation: 10,
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Container(
-                            height: cardHeight,
-                            decoration: BoxDecoration(
+                  return AnimatedPositioned(
+                    duration: const Duration(milliseconds: 300),
+                    curve: Curves.easeOut,
+                    top: isTopCard ? _dragOffset.dy : verticalOffset,
+                    left: 0,
+                    right: 0,
+                    child: Transform.scale(
+                      scale: scaleFactor.clamp(1, 2),
+                      child: Opacity(
+                        opacity: opacity,
+                        child: GestureDetector(
+                          onVerticalDragUpdate: isTopCard ? _onVerticalDragUpdate : null,
+                          onVerticalDragEnd: isTopCard ? _onVerticalDragEnd : null,
+                          child: Card(
+                            elevation: 10,
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(20),
-                              color: Colors.white,
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                if (post["image_url"] != null && post["image_url"].toString().isNotEmpty)
-                                  ClipRRect(
-                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-                                    child: Image.network(
-                                      post["image_url"],
-                                      height: 200,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
+                            child: Container(
+                              height: cardHeight,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.white,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (post["image_url"] != null && post["image_url"].toString().isNotEmpty)
+                                    ClipRRect(
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                                      child: Image.network(
+                                        post["image_url"],
+                                        height: 200,
+                                        width: double.infinity,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          post["title"] ?? '',
+                                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Text(
+                                          post["content"] ?? '',
+                                          style: Theme.of(context).textTheme.bodyMedium,
+                                          maxLines: 5,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        post["title"] ?? '',
-                                        style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        post["content"] ?? '',
-                                        style: Theme.of(context).textTheme.bodyMedium,
-                                        maxLines: 5,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              })
-              .toList()
-              .reversed
-              .toList(),
+                  );
+                })
+                .toList()
+                .reversed
+                .toList(),
+          ),
         ),
       ),
     );

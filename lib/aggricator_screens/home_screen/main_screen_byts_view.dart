@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
@@ -318,7 +319,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                             ? MediaQuery.of(context).size.height * .3
                                             : widget.isaiTags
                                                 ? MediaQuery.of(context).size.height * .50
-                                                : MediaQuery.of(context).size.height * .55,
+                                                :(widget.article['type'] == "Video"&&Platform.isIOS)?MediaQuery.of(context).size.height * .50:  MediaQuery.of(context).size.height * .55,
                                         width: MediaQuery.of(context).size.width,
                                         decoration: BoxDecoration(
                                           color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor : Colors.white,
@@ -467,7 +468,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           ? MediaQuery.of(context).size.height * .30 - 15
                                           : widget.isaiTags
                                               ? MediaQuery.of(context).size.height * .50 - 15
-                                              : MediaQuery.of(context).size.height * .55 - 15,
+                                              :(widget.article['type'] == "Video"&&Platform.isIOS)?MediaQuery.of(context).size.height * .50-15: MediaQuery.of(context).size.height * .55 - 15,
                                       child: Container(
                                         height: 30,
                                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
@@ -742,9 +743,15 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         ),
         recognizer: TapGestureRecognizer()
           ..onTap = () async {
-            print(" $link");
-            Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: link.toString(), title: "Standard Links"),));
-          },
+            print("sbhjhfjksdfnsdknf1111 $link");
+
+            if(link=="https://play.google.com/store/apps/details?id=com.chotanews" && Platform.isIOS){
+              print("sbhjhfjksdfnsdknf $link");
+              launchURL(Uri.parse("https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092"));
+            }else {
+              launchURL(Uri.parse(link.toString()));
+            }
+              },
       ));
 
       return "";
@@ -760,5 +767,13 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     });
 
     return spans;
+  }
+
+  Future<void> launchURL(Uri uri) async {
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch ${uri.path}';
+    }
   }
 }
