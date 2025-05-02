@@ -1,11 +1,11 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
-import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -17,7 +17,6 @@ import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
-import '../settings_provider/settings_provider.dart';
 import 'filters_screen/filter_view.dart';
 import 'profile_view.dart';
 import 'feedback_view.dart';
@@ -35,6 +34,7 @@ class SettingsView extends StatefulWidget {
 class _SettingsViewState extends State<SettingsView> {
   NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
   bool isNotificationsEnabled = false;
+  String appVersion= "";
 
   @override
   void initState() {
@@ -45,6 +45,7 @@ class _SettingsViewState extends State<SettingsView> {
 
   Future getLogin() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
+    appVersion =sp.getString("app_version")??"";
     isNotificationsEnabled = sp.getString("loginType") == "login" ? true : false;
     log(isNotificationsEnabled.toString());
     setState(() {});
@@ -58,7 +59,6 @@ class _SettingsViewState extends State<SettingsView> {
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
-            // if (loginStatus == LoginStatus.skip)
             _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
               if (isNotificationsEnabled == false) {
                 Navigator.push(
@@ -86,7 +86,12 @@ class _SettingsViewState extends State<SettingsView> {
             // _buildNotificationRow(),
 
             _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () {
-              Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
+              if(Platform.isIOS){
+                Share.share("Check out this app: https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092");
+
+              }else {
+                Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
+              }
             }),
 
             height(height: 5.h),
@@ -159,6 +164,8 @@ class _SettingsViewState extends State<SettingsView> {
             _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () {
               context.read<AuthenticationProvider>().setLogOutStatus(context, false);
             }),
+           Spacer(),
+            Text("V$appVersion",style: fontStyle(fontWeight: FontWeight.normal),),
           ],
         ),
       ),

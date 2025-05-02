@@ -33,6 +33,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
         final selectedCategories = authenticationProvider.selectedCategories;
 
         return Scaffold(
+          backgroundColor: Colors.white,
           body: Padding(
             padding: EdgeInsets.all(16.w),
             child: SingleChildScrollView(
@@ -49,7 +50,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                     child: Container(
                       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.appButtonColor : Colors.grey.shade200,
+                        color: isSelected ? AppColors.appButtonColor : AppColors.cardBackgroundColor,
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Text(
@@ -87,7 +88,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                 decoration: BoxDecoration(
                   color: authenticationProvider.selectedCategories.isEmpty
                       ? AppColors.bodyTextColor.withOpacity(.2)
-                      : AppColors.loginBgColor,
+                      :AppColors.appButtonColor,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: authenticationProvider.isCatSaveLoading?AppLoadingScreen():Center(

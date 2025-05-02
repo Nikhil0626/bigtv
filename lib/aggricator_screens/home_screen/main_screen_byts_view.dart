@@ -280,7 +280,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                               ),
                                             ),
 
-                                          if (widget.isaiTags == false)
                                             Positioned(
                                                 top: 12,
                                                 right: 14,

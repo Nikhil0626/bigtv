@@ -219,6 +219,7 @@ class HomeProvider extends ChangeNotifier {
 
   bool isAiTagsLoading = false;
   Future getAllPostsByAiId(postId) async {
+    isBookMark = [];
     getAllAiTagsPostList = [];
     isAiTagsLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -236,6 +237,11 @@ class HomeProvider extends ChangeNotifier {
       List data = response.data;
 
       getAllAiTagsPostList.addAll(data);
+
+      isBookMark = getAllAiTagsPostList
+          .where((e) => e['isBookmarked'] == 1)
+          .map((e) => e['id'].toString())
+          .toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");

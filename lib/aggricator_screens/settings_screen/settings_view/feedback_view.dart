@@ -51,6 +51,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text(
           "Feedback Form",
           style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold),
@@ -68,10 +69,9 @@ class _FeedbackFormState extends State<FeedbackForm> {
                 children: [
                   Text(
                     "Tell us what you think",
-                    style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
+                    style: newAppFont(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 20,
                         color: AppColors.appButtonColor
                     ),
                     textAlign: TextAlign.center,
@@ -93,8 +93,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
                           children: [
                             Text(
                               "Rate your experience with ChotaNews?",
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
+                              style: newAppFont(
+
                                 fontSize: 16,
                               ),
                               textAlign: TextAlign.center,
@@ -122,8 +122,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
                             SizedBox(height: 3),
                             Text(
                               feedbackMessage,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
+                              style: newAppFont(
+
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.appButtonColor,
@@ -150,8 +150,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                           children: [
                             Text(
                               "What should we improve?",
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
+                              style: newAppFont(
                                 fontSize: 16,
                               ),
                             ),
@@ -180,7 +179,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                     child: Text(
                                       category['optionText'].toString(),
                                       textAlign: TextAlign.center,
-                                      style: homeScreenFontStyle(
+                                      style: newAppFont(
                                         color: isSelected ? Colors.white : Colors.black87,
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.w500,
@@ -201,6 +200,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     child: Card(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
+
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -215,7 +215,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                               ),
                               textAlign: TextAlign.center,
                             ),
-                            SizedBox(height: 8),
+                            height(height: 8),
                             TextField(
                               controller: settingsProvider.feedbackController,
                               maxLines: 3,
@@ -223,9 +223,15 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                 fillColor: Colors.white,
                                 filled: true,
                                 border: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey),
+                                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
                                 ),
-                                hintText: "Text",
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: AppColors.appButtonColor, width: 2.0),
+                                ),
+                                hintText: "Enter your comment...",
                               ),
                             ),
                           ],
@@ -234,7 +240,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     ),
                   ):
                   SizedBox.shrink(),
-                  SizedBox(height: 16),
+                  height(height: 16),
                   InkWell(
                     onTap: (){
                       if(settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0) {

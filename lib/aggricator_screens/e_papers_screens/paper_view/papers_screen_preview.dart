@@ -88,7 +88,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
       body: Consumer<NewsPostsProvider>(
         builder: (_, newsPostsProvider, __) {
           return Padding(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top+6),
             child: Stack(
               children: [
                 Column(
@@ -98,9 +98,9 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                       child: Row(
                         children: [
                           width(width: 20),
-                          const Icon(Icons.arrow_back_outlined, size: 24),
+                          const Icon(Icons.arrow_back_outlined, size: 20),
                           width(width: 20),
-                          Text(widget.name, style: fontStyle(fontSize: 20)),
+                          Text(widget.name, style: newAppFont(fontSize: 16,fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -120,7 +120,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                 return InteractiveViewer(
                                   transformationController: _controllers[index],
                                   minScale: 1.0,
-                                  maxScale: 10.0,
+                                  maxScale: 6.0,
                                   panEnabled: true,
                                   child: RepaintBoundary(
                                     key: _repaintKey,

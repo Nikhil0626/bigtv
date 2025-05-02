@@ -14,9 +14,7 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:http/http.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
@@ -26,6 +24,7 @@ import '../../main.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../services/deviice_details.dart';
 import '../../services/permission_handler_services.dart';
+import '../../services/webengage_notification.dart';
 import '../../utils/custom_switch.dart';
 import '../e_papers_screens/paper_view/papers_screen_list.dart';
 import '../individual_post_details/individual_post_view.dart';
@@ -40,20 +39,33 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+
+  late WebEngagePlugin _webEngagePlugin;
   late PageController _pageController;
 
   @override
   void initState() {
-    getWebNotification();
     requestLocationPermission();
     requestNotificationPermission();
     getMobileNumber();
+    _webEngagePlugin = new WebEngagePlugin();
+    _webEngagePlugin.setUpPushCallbacks(onPushClick, onPushActionClick);
+    _webEngagePlugin.setUpInAppCallbacks(
+        onInAppClick, onInAppShown, onInAppDismiss, onInAppPrepared);
+    _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
+    subscribeToPushCallbacks();
+    subscribeToTrackDeeplink();
+    subscribeToAnonymousIDCallback();
+    listenToAnonymousID();
     context.read<HomeProvider>().selectedIndex = 0;
     _pageController = PageController(initialPage: 0);
 
     super.initState();
   }
-
+@override
+  void dispose() {
+    super.dispose();
+  }
 
 
   getMobileNumber() async {
@@ -124,7 +136,6 @@ class _HomeViewState extends State<HomeView> {
             ),
 
             actions: [
-              // Shift actions closer to the title
               Row(
                 children: [
                   if( context.read<HomeProvider>().selectedIndex != 3)
@@ -210,7 +221,7 @@ class _HomeViewState extends State<HomeView> {
                       },
                     ),
                   if( context.read<HomeProvider>().selectedIndex == 3)
-                    Text("V5.0.1+3",style: fontStyle(fontWeight: FontWeight.w900),),
+                    Text("",style: fontStyle(fontWeight: FontWeight.w900),),
                  width(width: 20),
                 ],
               ),
@@ -234,20 +245,17 @@ class _HomeViewState extends State<HomeView> {
           bottomNavigationBar: BottomNavigationBar(
             backgroundColor: Colors.white,
             type: BottomNavigationBarType.fixed,
-            //
             currentIndex: homeProvider.selectedIndex,
             onTap: (index) {
               homeProvider.isTabChange();
               _pageController.jumpToPage(index); // Change the page when tapping the bottom bar
             },
             selectedItemColor: AppColors.appButtonColor,
-            // Highlight color
             unselectedItemColor: AppColors.bodyTextColor,
             showSelectedLabels: true,
             showUnselectedLabels: true,
             unselectedLabelStyle: fontStyle(fontWeight: FontWeight.normal, fontSize: 14),
             selectedLabelStyle: fontStyle(fontWeight: FontWeight.w600, fontSize: 14),
-            // Emphasized label
             items: [
               BottomNavigationBarItem(
                 icon: Column(

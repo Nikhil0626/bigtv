@@ -4,7 +4,9 @@ import 'dart:developer';
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
+import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
 import 'package:chotanews/services/analytics_service.dart';
+import 'package:chotanews/services/kochava_service.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 
@@ -29,18 +31,12 @@ import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
-import 'aggricator_screens/test_screens/language_screen.dart';
-import 'aggricator_screens/test_screens/test1.dart';
-import 'aggricator_screens/test_screens/test2.dart';
-import 'aggricator_screens/test_screens/test3.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   initPlugin();
-
 
   await EasyLocalization.ensureInitialized();
 
@@ -49,10 +45,9 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.dark,
   ));
   await facebookAppEvents.setAdvertiserTracking(enabled: true);
-  WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   MobileAds.instance.initialize();
   await Firebase.initializeApp();
-  // KochavaService.initKochava();
+  KochavaService.initKochava();
 
   /// app Events firebase
   AnalyticsService.logAppOpen();
@@ -68,7 +63,6 @@ Future<void> main() async {
     print(message.data);
     print("push data receive   &&& ${message.data}");
   });
-  // subscribeToPushCallbacks(_webEngagePlugin);
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -106,38 +100,12 @@ class _MyAppState extends State<MyApp> {
   String postId = "";
   Map<String, dynamic>? _initialPushPayload;
 
-
   @override
   void initState() {
     super.initState();
     _initDeepLinks();
-    subscribeToPushCallbacks();
   }
 
-  Future subscribeToPushCallbacks() async{
-    SharedPreferences sp = await SharedPreferences.getInstance();
-
-    WebEngagePlugin().pushStream.listen((event) {
-      print("🔔 pushStream: ${event.payload}");
-      Map<String, dynamic> messagePayload = event.payload!;
-
-      // Navigator.push(
-      //   mainNavigatorKey.currentContext!,
-      //   MaterialPageRoute(
-      //     builder: (context) => IndividualPostView(postId: messagePayload["postId"]),
-      //   )
-      // );
-
-      sp.setString("webPostId", messagePayload['postId'].toString()??"");
-
-    });
-
-    WebEngagePlugin().pushActionStream.listen((event) {
-      print("👉 pushActionStream (clicked): ${event.payload}");
-      _initialPushPayload = event.payload;
-
-    });
-  }
   Future<void> _initDeepLinks() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     log("Initializing deep link listener");
@@ -145,7 +113,7 @@ class _MyAppState extends State<MyApp> {
       if (uri != null) {
         log("Deep link received: ${uri.toString()}");
         final String? id = uri.queryParameters['postId'];
-        sp.setString("webPostId",id.toString());
+        sp.setString("webPostId", id.toString());
         _handleDeepLink(uri);
       }
     }, onError: (err) {
@@ -223,7 +191,7 @@ class _MyAppState extends State<MyApp> {
             useMaterial3: true,
           ),
           routes: {
-            '/': (context) => MyApp11(),
+            '/': (context) => SplashScreen(),
             '/individualPage': (context) => IndividualPostView(
                   postId: postId,
                 ),

@@ -4,12 +4,10 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
-import 'package:chotanews/screens/home_screen/home_screens/home_screen_view.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -20,7 +18,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../screens/home_screen/botton_actions.dart';
-import '../../screens/home_screen/home_models/home_screen_model.dart';
 import '../../screens/home_screen/home_provider/provider.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../screens/home_screen/home_screens/google_ads_view.dart';
@@ -65,11 +62,7 @@ class _IndividualPostViewState extends State<IndividualPostView> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => HomeView()),
-              (route) => false,
-        );
+        Navigator.pop(context);
         return false; // Prevent default pop behavior
       },
       child: Scaffold(

@@ -1,7 +1,5 @@
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/standard_post_view.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -9,18 +7,13 @@ import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import '../../screens/home_screen/home_screens/google_ads_view.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../screens/videos_main/video_views/gallery_screen.dart';
-import '../../services/image_to_pdf_helper.dart';
-import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_spaces.dart';
-import '../../utils/app_toasts.dart';
-import '../../utils/commant_screen.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'ai_tag_posts_pageview.dart';
 import 'image_view.dart';
@@ -34,7 +27,6 @@ class MainScreenCard extends StatefulWidget {
 }
 
 class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStateMixin {
-  // List<Map<String, dynamic>> displayedCards = [];
   List<Map<String, dynamic>> removedCards = [];
   Offset slideOffset = Offset.zero;
   bool isAnimating = false;
@@ -43,7 +35,6 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    // WidgetsBinding.instance.addPostFrameCallback((_) async {
     context.read<HomeProvider>().getAllPostList = [];
     context.read<HomeProvider>().getAllAiTags();
     context.read<HomeProvider>().getAllPost();
@@ -182,7 +173,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                               // onUndo: _onUndo,
                               allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
                               // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
-                              numberOfCardsDisplayed: 4,
+                              numberOfCardsDisplayed: homeProvider.getAllPostList.length > 3 ? 4 : homeProvider.getAllPostList.length,
                               duration: const Duration(milliseconds: 100),
                               backCardOffset: const Offset(0, 40),
                               padding: const EdgeInsets.only(
@@ -409,7 +400,7 @@ class ShimmerCard extends StatelessWidget {
               color: Colors.grey[300],
             ),
           ),
-          SizedBox(height: 10),
+          height(height: 10.h),
 
           // ✅ Shimmer Buttons Placeholder
           Padding(
