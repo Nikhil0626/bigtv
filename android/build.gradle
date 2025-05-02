@@ -1,3 +1,4 @@
+
 // ✅ Keep buildscript at the top
 buildscript {
     ext.kotlin_version = '1.9.0'
@@ -12,19 +13,10 @@ buildscript {
     }
 }
 
-// ✅ Move plugins AFTER buildscript
-plugins {
-    id 'com.android.application' version '8.2.1' apply false
-    id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
-}
-
-
-
 allprojects {
     repositories {
         google()
         mavenCentral()
-        maven { url 'https://webengage.bintray.com/android' }
     }
 }
 
@@ -32,7 +24,38 @@ rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
+subprojects {
+    project.evaluationDependsOn(":app")
+}
 
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
+
+
+
+//// ✅ Move plugins AFTER buildscript
+//plugins {
+//    id 'com.android.application' version '8.2.1' apply false
+//    id 'org.jetbrains.kotlin.android' version '1.9.0' apply false
+//}
+//
+//
+//
+//allprojects {
+//    repositories {
+//        google()
+//        mavenCentral()
+//        maven { url 'https://webengage.bintray.com/android' }
+//    }
+//}
+//
+//rootProject.buildDir = "../build"
+//subprojects {
+//    project.buildDir = "${rootProject.buildDir}/${project.name}"
+//}
+//
+//tasks.register("clean", Delete) {
+//    delete rootProject.buildDir
+//}

@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 5.0.2+2087
+version: 5.0.2+2088
 environment:
   sdk: ^3.5.4
 dependencies:
@@ -51,7 +51,7 @@ dependencies:
   geocoding: ^3.0.0
   social_sharing_plus: ^1.2.3
   image_gallery_saver_plus: ^4.0.0
-#  kochava_measurement: ^3.2.0
+  kochava_measurement: ^3.2.0
   google_mobile_ads: ^5.3.1
   firebase_analytics: ^11.4.4
   facebook_app_events: ^0.19.5
@@ -73,14 +73,8 @@ dependencies:
   infinite_scroll_pagination: ^5.0.0
   extended_image: ^9.1.0
   flutter_swiper_view: ^1.1.8
-#  device_information: ^0.0.4
   platform_device_id_plus: ^1.0.7
-#  platform_device_id: ^1.0.1
   device_info_plus: ^11.3.0
-#  ios_tracking_sage_permission: ^0.0.1
-#  appinio_swiper: ^2.1.1
-
-#  android_play_install_referrer: ^0.4.0
 
 
 
