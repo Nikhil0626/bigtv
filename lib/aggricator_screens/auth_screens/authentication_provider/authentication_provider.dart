@@ -144,12 +144,12 @@ class AuthenticationProvider extends ChangeNotifier {
 
         EventRepo().sendEvent({
           "key": "otp_verify",
-          "data": {"device_id": "${deviceId}", "isVerify": true, "mobileNumber": phoneController.text, "otp": otpController.text, "userId": ""}
+          "data": {"device_id": "$deviceId", "isVerify": true, "mobileNumber": phoneController.text, "otp": otpController.text, "userId":response.data['user']['id'].toString()}
         });
 
         EventRepo().sendEvent({
           "key": "login_skip",
-          "data": {"device_id": "${deviceId}", "isLogin": true, "userId": ""}
+          "data": {"device_id": "$deviceId", "isLogin": true, "userId": response.data['user']['id'].toString()}
         });
         WebEngagePlugin.userLogin(response.data['user']['id'].toString());
         WebEngagePlugin.setUserPhone(phoneController.text.toString());
@@ -234,8 +234,21 @@ class AuthenticationProvider extends ChangeNotifier {
     List<int> selectedCategoryIds = getAllCategoryList.where((item) => selectedCategories.contains(item.categoryName.toString())).map((item) => item.categoryId as int).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String result = selectedCategoryIds.toSet().join(',');
+    String catNames = selectedCategories.toSet().join(',');
     preferences.setString("categoriesId", result);
     String? deviceId = preferences.getString("deviceId");
+    String? userId = preferences.getString("userId");
+    preferences.setString("locationId", result);
+
+    EventRepo().sendEvent({
+      "key": "selected_categories",
+      "data": {
+        "device_id": "$deviceId",
+        "categories_name": catNames??"",
+        "categories_id": result??"",
+        "userId": userId??"",
+      }
+    });
     Map<String, dynamic> body = {"device_id": deviceId, "categoryids": selectedCategoryIds};
 
     log(body.toString());
@@ -406,6 +419,11 @@ class AuthenticationProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginState", newAppLoginStatus.toString());
     preferences.setString("loginType", "skip");
+    String? deviceId = await preferences.getString("deviceId");
+    EventRepo().sendEvent({
+      "key": "login_skip",
+      "data": {"device_id": "$deviceId", "isLogin": true, "userId": ""}
+    });
     notifyListeners();
     // isPageNavigation(context);
   }
@@ -415,6 +433,12 @@ class AuthenticationProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.clear();
     preferences.setString("loginState", newAppLoginStatus.toString());
+    String? deviceId = await preferences.getString("deviceId");
+    String? userId = await preferences.getString("userId");
+    EventRepo().sendEvent({
+      "key": "login_skip",
+      "data": {"device_id": "$deviceId", "isLogin": true, "userId": userId}
+    });
     isPageNavigation(context);
   }
 }

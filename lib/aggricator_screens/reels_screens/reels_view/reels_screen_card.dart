@@ -30,6 +30,7 @@ import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
 import '../../e_papers_screens/paper_view/papers_screen_card.dart';
+import '../../home_screen/home_provider.dart';
 
 class ReelsScreen extends StatefulWidget {
   @override
@@ -125,7 +126,25 @@ class _ReelsScreenState extends State<ReelsScreen> {
                   child: CardSwiper(
                     controller: controller,
                     cardsCount:  reelsProvider.getAllReelsList.length,
-                    onSwipe: _onSwipe,
+                    onSwipe: (previousIndex, currentIndex, direction) {
+                      if (direction == CardSwiperDirection.bottom) {
+                        context.read<HomeProvider>().flipEvent('reel',reelsProvider.getAllReelsList[currentIndex!].id,false);
+                        _undo();
+
+                        return false;
+                      }else{
+                        context.read<HomeProvider>().flipEvent('reel',reelsProvider.getAllReelsList[currentIndex!].id,true);
+
+                      }
+
+                      if (currentIndex != null) {
+                        currentIndexs = currentIndex;
+                      }
+                      debugPrint(
+                        'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
+                      );
+                      return true;
+                    },
                     // onSwipeDirectionChange:  ,
                     // onUndo: _onUndo,
                     allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
@@ -304,33 +323,14 @@ class _ReelsScreenState extends State<ReelsScreen> {
     );
   }
 
-  int currentIndex = 0;
+  int currentIndexs = 0;
 
-  bool _onSwipe(
-      int previousIndex,
-      int? newIndex,
-      CardSwiperDirection direction,
-      ) {
-    if (direction == CardSwiperDirection.bottom) {
-      _undo();
-
-      return false;
-    }
-
-    if (newIndex != null) {
-      currentIndex = newIndex;
-    }
-    debugPrint(
-      'The card $previousIndex was swiped to the ${direction.name}. Now the card $newIndex is on top',
-    );
-    return true;
-  }
 
 
   void _undo() {
-    if (currentIndex > 0) {
+    if (currentIndexs > 0) {
       setState(() {
-        currentIndex--;
+        currentIndexs--;
       });
       controller.undo();
     }
@@ -544,6 +544,7 @@ class _EachReelCardState extends State<EachReelCard> {
                                   "userId": userId ?? "",
                                   "postId": widget.reel.id.toString(),
                                   "isWhatAppShare": false,
+                                  "source_from":"reel"
                                 }
                               });
 

@@ -7,6 +7,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:mobile_number/mobile_number.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../globel_keys/global_variables_data.dart';
 import '../screens/home_screen/home_repo/event_repo.dart';
@@ -87,12 +88,13 @@ Future<void> getAddressFromLatLng(double latitude, double longitude) async {
   try {
     List<Placemark> placemarks =
         await placemarkFromCoordinates(latitude, longitude);
+    SharedPreferences sp = await SharedPreferences.getInstance();
     print("location ------ $placemarks");
     Placemark place = placemarks[0];
 
     EventRepo().sendEvent({"key":"live_location",
       "data":{
-        "device_id": "${GlobalVariables().deviceId}",
+        "device_id": sp.getString("deviceId")??"",
         "country": "${place.country}",
         "state": "${place.administrativeArea}",
         "district": place.locality.toString(),

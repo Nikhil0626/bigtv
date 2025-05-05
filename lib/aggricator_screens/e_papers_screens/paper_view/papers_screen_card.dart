@@ -17,6 +17,7 @@ import 'package:shimmer/shimmer.dart';
 import '../../../screens/home_screen/home_provider/provider.dart';
 import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../../utils/app_colors.dart';
+import '../../home_screen/home_provider.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/ePaper_main_model.dart';
 
@@ -28,7 +29,7 @@ class PapersScreenCard extends StatefulWidget {
 }
 
 class _PapersScreenCardState extends State<PapersScreenCard> {
-  int currentIndex = 0;
+  int currentIndexs = 0;
 
   // final CardSwiperController controller = CardSwiperController();
   final ScreenshotController adsScreenshotController = ScreenshotController();
@@ -276,7 +277,25 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                   child: CardSwiper(
                                     controller: controller,
                                     cardsCount:  ePapersProvider.getAllMainPapersList.length,
-                                    onSwipe: _onSwipe,
+                                    onSwipe: (previousIndex, currentIndex, direction) {
+                                      if (direction == CardSwiperDirection.bottom) {
+                                        context.read<HomeProvider>().flipEvent('paper',ePapersProvider.getAllMainPapersList[currentIndex!].id,false);
+                                        _undo();
+
+                                        return false;
+                                      }else{
+                                        context.read<HomeProvider>().flipEvent('paper',ePapersProvider.getAllMainPapersList[currentIndex!].id,true);
+
+                                      }
+
+                                      if (currentIndex != null) {
+                                        currentIndexs = currentIndex;
+                                      }
+                                      debugPrint(
+                                        'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
+                                      );
+                                      return true;
+                                    },
                                     // onSwipeDirectionChange:  ,
                                     // onUndo: _onUndo,
                                     allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
@@ -464,31 +483,13 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
   }
 
 
-  bool _onSwipe(
-      int previousIndex,
-      int? newIndex,
-      CardSwiperDirection direction,
-      ) {
-    if (direction == CardSwiperDirection.bottom) {
-      _undo();
 
-      return false;
-    }
-
-    if (newIndex != null) {
-      currentIndex = newIndex;
-    }
-    debugPrint(
-      'The card $previousIndex was swiped to the ${direction.name}. Now the card $newIndex is on top',
-    );
-    return true;
-  }
 
 
   void _undo() {
-    if (currentIndex > 0) {
+    if (currentIndexs > 0) {
       setState(() {
-        currentIndex--;
+        currentIndexs--;
       });
       controller.undo();
     }

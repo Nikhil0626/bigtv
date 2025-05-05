@@ -69,7 +69,7 @@ class ReelsProviders extends ChangeNotifier {
     if (!isLikeList.contains(val.id.toString())) {
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": true}
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": true,"source_from":"reel"}
       });
       isLikeList.add(val.id.toString());
       postLike(val.id.toString(), true);
@@ -152,8 +152,8 @@ class ReelsProviders extends ChangeNotifier {
     log(val.id.toString());
     if (!isBookMark.contains(val.id.toString())) {
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": true}
+        "key": "bookmark_article",
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isBookMark": true,"source_from":"reel"}
       });
       isBookMark.add(val.id.toString());
       Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
@@ -167,8 +167,8 @@ class ReelsProviders extends ChangeNotifier {
       );
       isBookMark.remove(val.id.toString());
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "${deviceId}", "userId": userId, "postId": val.id.toString(), "isLike": false}
+        "key": "bookmark_article",
+        "data": {"device_id": "${deviceId}", "userId": userId, "postId": val.id.toString(), "isBookMark": false,"source_from":"reel"}
       });
       // sendLikeDetails(userId, val.id.toString(), false, val['title'].toString());
       log(isBookMark.toString());

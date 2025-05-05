@@ -52,7 +52,7 @@ void subscribeToPushCallbacks() async {
   WebEngagePlugin().pushStream.listen((event) {
     String? deepLink = event.deepLink;
     Map<String, dynamic> messagePayload = event.payload!;
-    sendEventToServer(messagePayload?["postId"]??"0");
+    sendEventToServer(messagePayload["postId"]??"0");
   });
 
   //Push action click listener
@@ -71,7 +71,7 @@ void sendEventToServer(msg) async{
     "key": "openapp_via_notification",
     "data": {
       "device_id": sp.getString("deviceId")??"1234",
-      "userId": sp.getString('loginId') ?? "",
+      "userId": sp.getString('userId') ?? "",
       "postId": msg,
     }
   });

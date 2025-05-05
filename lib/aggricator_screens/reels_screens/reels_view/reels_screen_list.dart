@@ -206,6 +206,7 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                                   "userId": userId ?? "",
                                   "postId": widget.card.id.toString(),
                                   "isWhatAppShare": false,
+                                  "source_from":"reel"
                                 }
                               });
 

@@ -8,7 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../screens/home_screen/home_screens/google_ads_view.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../screens/videos_main/video_views/gallery_screen.dart';
@@ -128,7 +130,16 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                       return Container(
                                         color: Colors.white,
                                         child: InkWell(
-                                          onTap: () {
+                                          onTap: () async{
+
+                                            SharedPreferences preferences = await SharedPreferences.getInstance();
+                                            String? userId = preferences.getString("userId");
+                                            String? deviceId = preferences.getString("deviceId");
+
+                                            EventRepo().sendEvent({
+                                              "key": "ai_articles_opened",
+                                              "data": {"device_id": "$deviceId", "userId": userId, "aiTagName":homeProvider.getAllAiTagsList[index]['aitagname'].toString(),"aiTagId": homeProvider.getAllAiTagsList[index]['aitagid'].toString()}
+                                            });
                                             Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
@@ -168,7 +179,25 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                             child: CardSwiper(
                               controller: controller,
                               cardsCount: homeProvider.getAllPostList.length,
-                              onSwipe: _onSwipe,
+                              onSwipe: (previousIndex, currentIndex, direction) {
+                                if (direction == CardSwiperDirection.bottom) {
+                                  context.read<HomeProvider>().flipEvent('news',homeProvider.getAllPostList[currentIndex!]['id'],false);
+                                  _undo();
+
+                                  return false;
+                                }else{
+                                  context.read<HomeProvider>().flipEvent('news',homeProvider.getAllPostList[currentIndex!]['id'],true);
+
+                                }
+
+                                if (currentIndex != null) {
+                                  currentIndexs = currentIndex;
+                                }
+                                debugPrint(
+                                  'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
+                                );
+                                return true;
+                              },
                               // onSwipeDirectionChange:  ,
                               // onUndo: _onUndo,
                               allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
@@ -329,32 +358,13 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
     );
   }
 
-  int currentIndex = 0;
+  int currentIndexs = 0;
 
-  bool _onSwipe(
-    int previousIndex,
-    int? newIndex,
-    CardSwiperDirection direction,
-  ) {
-    if (direction == CardSwiperDirection.bottom) {
-      _undo();
-
-      return false;
-    }
-
-    if (newIndex != null) {
-      currentIndex = newIndex;
-    }
-    debugPrint(
-      'The card $previousIndex was swiped to the ${direction.name}. Now the card $newIndex is on top',
-    );
-    return true;
-  }
 
   void _undo() {
-    if (currentIndex > 0) {
+    if (currentIndexs > 0) {
       setState(() {
-        currentIndex--;
+        currentIndexs--;
       });
       controller.undo();
     }

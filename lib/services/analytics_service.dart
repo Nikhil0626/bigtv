@@ -127,7 +127,7 @@ class AnalyticsService {
     }
 
     if (openDays.length >= 3) {
-      logEvent2(  "user_consecutive_app_open_3_days");
+      logEvent2(  " user_consecutive_app_open_3_days");
     }
     if (openDays.length >= 7) {
       logEvent2( "user_consecutive_app_open_7_days");

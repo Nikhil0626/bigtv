@@ -81,8 +81,8 @@ class EPapersProvider extends ChangeNotifier {
     log(val.id.toString());
     if (!isBookMark.contains(val.id.toString())) {
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": true}
+        "key": "bookmark_article",
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isBookMark": true,"source_from":"paper"}
       });
       isBookMark.add(val.id.toString());
       Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
@@ -95,8 +95,8 @@ class EPapersProvider extends ChangeNotifier {
       );
       isBookMark.remove(val.id.toString());
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": false}
+        "key": "bookmark_article",
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isBookMark": false,"source_from":"paper"}
       });
       log(isBookMark.toString());
     }

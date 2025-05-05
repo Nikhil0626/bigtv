@@ -1,4 +1,6 @@
 
+import 'dart:developer';
+
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -24,10 +26,12 @@ class AiTagPostsPageView extends StatefulWidget {
 class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
   late PageController _pageController;
   int currentIndex = 0;
+  int autoIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    autoIndex = 0;
     context.read<HomeProvider>().getAllPostsByAiId(widget.tagId);
     _pageController = PageController(viewportFraction: 1.0);
     _pageController.addListener(() {
@@ -114,6 +118,15 @@ class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
                             controller: _pageController,
                             scrollDirection: Axis.vertical,
                             itemCount: homeProvider.getAllAiTagsPostList.length,
+                            onPageChanged: (value) {
+                              log("AiTagPostsPageView.  ${currentIndex}--- $value");
+                              context.read<HomeProvider>().flipEvent('news',homeProvider.getAllAiTagsPostList[value]['id'],value>autoIndex?true:false);
+
+                              autoIndex=value;
+                              setState(() {
+
+                              });
+                              },
                             itemBuilder: (context, index) {
                               return AnimatedBuilder(
                                 animation: _pageController,

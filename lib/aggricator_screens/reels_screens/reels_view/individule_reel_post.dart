@@ -139,6 +139,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                             "userId": userId ?? "",
                             "postId": reelsProviders.reelData.id.toString(),
                             "isWhatAppShare": false,
+                            "source_from":"reel"
                           }
                         });
 

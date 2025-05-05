@@ -225,6 +225,7 @@ class _StandardCardState extends State<StandardCard> {
                               "userId": userId ?? "",
                               "postId": widget.getAllPostList['id'].toString(),
                               "isWhatAppShare": false,
+                              "source_from":"news"
                             }
                           });
 

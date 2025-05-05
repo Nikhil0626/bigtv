@@ -12,8 +12,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
+import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
@@ -161,8 +163,22 @@ class _SettingsViewState extends State<SettingsView> {
               Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
             }),
             height(height: 5.h),
-            _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () {
+            _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", ()async {
+              SharedPreferences preferences = await SharedPreferences.getInstance();
+              String? deviceId =  preferences.getString("deviceId");
+              String? userId =  preferences.getString("userId");
+              EventRepo().sendEvent({
+                "key": "logout",
+                "data": {"device_id": "$deviceId", "isLogin":  isNotificationsEnabled ?false:true, "userId": userId}
+              });
+              WebEngagePlugin.trackEvent('logout_user', {
+                "device_id": "${deviceId}",
+                "date_time": DateTime.now().toString(),
+                "user_id": userId??"",
+              });
+              WebEngagePlugin.userLogout();
               context.read<AuthenticationProvider>().setLogOutStatus(context, false);
+
             }),
            Spacer(),
             Text("V$appVersion",style: fontStyle(fontWeight: FontWeight.normal),),

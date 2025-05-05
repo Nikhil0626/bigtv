@@ -9,6 +9,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
+import '../../services/analytics_service.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 
@@ -276,11 +277,12 @@ class HomeProvider extends ChangeNotifier {
   void isBookMarkPost(val, context) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
+    String? deviceId = sp.getString("deviceId");
     log(val['id'].toString());
     if (!isBookMark.contains(val['id'].toString())) {
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": true}
+        "key": "bookmark_article",
+        "data": {"device_id": deviceId??"", "userId": userId, "postId": val['id'].toString(), "isBookMark": true,"source_from":"news"}
       });
       isBookMark.add(val['id'].toString());
       Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 1);
@@ -290,13 +292,32 @@ class HomeProvider extends ChangeNotifier {
       Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 0);
       isBookMark.remove(val['id'].toString());
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": false}
+        "key": "bookmark_article",
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isBookMark": false,"source_from":"news"}
       });
       sendLikeDetails(userId, val['id'].toString(), false, val['title'].toString());
       log(isBookMark.toString());
     }
 
+    notifyListeners();
+  }
+
+  void flipEvent(pageName,id,val)async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? userId = sp.getString("userId");
+    String? deviceId = sp.getString("deviceId");
+    print("set change value $val");
+    EventRepo().sendEvent({
+      "key": "flip_count",
+      "data": {
+        "device_id": deviceId,
+        "userId": userId,
+        "isFlip": val,
+        "source_name": pageName,
+        "postId": id,
+      }
+    });
+    AnalyticsService().trackArticlesRead();
     notifyListeners();
   }
 }

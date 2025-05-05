@@ -105,11 +105,12 @@ class SettingsProvider extends ChangeNotifier {
   void isLikePost(val) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
+    String? deviceId = sp.getString("deviceId");
     log(val['id'].toString());
     if (!isLikeList.contains(val['id'].toString())) {
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": true}
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString (), "isLike": true,"source_from":"news"}
       });
       isLikeList.add(val['id'].toString());
       postLike(val['id'].toString(), true);
@@ -120,7 +121,7 @@ class SettingsProvider extends ChangeNotifier {
       isLikeList.remove(val['id'].toString());
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": false}
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isLike": false,"source_from":"news"}
       });
       sendLikeDetails(userId, val['id'].toString(), false, val['title'].toString());
       log(isLikeList.toString());

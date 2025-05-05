@@ -4,9 +4,10 @@ import 'dart:developer';
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
+import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
 import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
 import 'package:chotanews/services/analytics_service.dart';
-import 'package:chotanews/services/kochava_service.dart';
+// import 'package:chotanews/services/kochava_service.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 
@@ -47,7 +48,7 @@ Future<void> main() async {
   await facebookAppEvents.setAdvertiserTracking(enabled: true);
   MobileAds.instance.initialize();
   await Firebase.initializeApp();
-  KochavaService.initKochava();
+  // KochavaService.initKochava();
 
   /// app Events firebase
   AnalyticsService.logAppOpen();
@@ -115,17 +116,27 @@ class _MyAppState extends State<MyApp> {
         final String? id = uri.queryParameters['postId'];
         sp.setString("webPostId", id.toString());
         _handleDeepLink(uri);
+
+
       }
     }, onError: (err) {
       log("Error in deep link handling: $err");
     });
   }
 
-  void _handleDeepLink(Uri uri) {
+  void _handleDeepLink(Uri uri) async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
     final String path = uri.path;
     final String? id = uri.queryParameters['postId'];
     log("Path: $path, ID: $id");
-
+    EventRepo().sendEvent({
+      "key": "dynamic_link_app_open",
+      "data": {
+        "device_id": sp.getString("deviceId")??"1234",
+        "userId": sp.getString('userId') ?? "",
+        "postId": id,
+      }
+    });
     switch (path) {
       case '/settings':
         log("Navigating to Settings screen");

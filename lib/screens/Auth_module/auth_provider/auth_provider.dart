@@ -31,7 +31,7 @@ class AuthProvider extends ChangeNotifier {
     EventRepo().sendEvent({"key":"visited_page",
       "data":{
       "device_id": GlobalVariables().deviceId,
-        "userId":sp.getString("loginId")??"",
+        "userId":sp.getString("userId")??"",
         "visitedPage":pageName,
         }});
   }

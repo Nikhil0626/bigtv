@@ -132,6 +132,7 @@ class _ImageViewState extends State<ImageView> {
                               "userId": userId?? "",
                               "postId": widget.getAllPostList ['id'].toString(),
                               "isWhatAppShare": false,
+                              "source_from":"news"
                             }
                           });
 

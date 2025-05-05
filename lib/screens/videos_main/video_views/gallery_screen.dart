@@ -386,6 +386,7 @@ ScreenshotController sc = ScreenshotController();
                             "userId": userId?? "",
                             "postId": widget.postDetails['id'].toString(),
                             "isWhatAppShare": false,
+                            "source_from":"news"
                           }
                         });
 

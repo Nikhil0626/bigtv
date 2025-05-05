@@ -40,8 +40,8 @@ Future<String?> getUniqueDeviceId(
       EventRepo().sendEvent({
         "key": "opened_app",
         "data": {
-          "device_id": androidInfo.id.toString(),
-          "userId": sp.getString("loginId") ?? "",
+          "device_id": deviceId,
+          "userId": sp.getString("userId") ?? "",
           "isOpen": false
         }
       });
@@ -55,7 +55,7 @@ Future<String?> getUniqueDeviceId(
       EventRepo().sendEvent({
         "key": "device_details",
         "data": {
-          "device_id": androidInfo.id.toString(),
+          "device_id": deviceId,
           "device_brand": androidInfo.brand.toString(),
           "device_model": androidInfo.model.toString(),
           "device_sdk": androidInfo.version.sdkInt.toString(),
@@ -65,12 +65,12 @@ Future<String?> getUniqueDeviceId(
 
       sp.setString("deviceName", "true");
     }
-    String? userId = sp.getString('loginId');
+    String? userId = sp.getString('userId');
 
     EventRepo().sendEvent({
       "key": "opened_app",
       "data": {
-        "device_id": androidInfo.id.toString(),
+        "device_id":deviceId,
         "userId": userId,
         "isOpen": true
       }
@@ -83,8 +83,8 @@ Future<String?> getUniqueDeviceId(
       EventRepo().sendEvent({
         "key": "opened_app",
         "data": {
-          "device_id": iosInfo.identifierForVendor.toString(),
-          "userId": sp.getString("loginId") ?? "",
+          "device_id": deviceId,
+          "userId": sp.getString("userId") ?? "",
           "isOpen": false
         }
       });
@@ -100,7 +100,7 @@ Future<String?> getUniqueDeviceId(
       EventRepo().sendEvent({
         "key": "device_details",
         "data": {
-          "device_id": iosInfo.identifierForVendor.toString(),
+          "device_id": deviceId,
           "device_brand": iosInfo.model.toString(), // iPhone/iPad
           "device_model": iosInfo.utsname.machine.toString(), // Corrected field
           "device_sdk": iosInfo.systemVersion.toString(),
@@ -109,12 +109,12 @@ Future<String?> getUniqueDeviceId(
       });
       sp.setString("deviceName", "true");
     }
-    String? userId = sp.getString('loginId');
+    String? userId = sp.getString('userId');
 
     EventRepo().sendEvent({
       "key": "opened_app",
       "data": {
-        "device_id": iosInfo.identifierForVendor.toString(),
+        "device_id": deviceId,
         "userId": userId,
         "isOpen": true
       }

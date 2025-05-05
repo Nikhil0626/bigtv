@@ -8,7 +8,7 @@ class BaseUrls {
   static const String baseUrlAws = "https://prodchotanews.signitivessoft.com/api";
 
   /// event states
-  static const String eventUrl = "/logs";
+  static const String eventUrl = "/events";
 
   ///ENewsPapers
   static const String getMainEPapers = "/enewspaper/first_pages";

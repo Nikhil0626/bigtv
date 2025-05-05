@@ -143,13 +143,17 @@ class _HomeViewState extends State<HomeView> {
                   width(width: 12),
                   if( context.read<HomeProvider>().selectedIndex == 0)
                   InkWell(
-                    onTap: () {
+                    onTap: () async{
                       log("Refresh");
+
+                      SharedPreferences preferences = await SharedPreferences.getInstance();
+                      String? deviceId = preferences.getString("deviceId");
+                      String? userId = preferences.getString("userId");
                       EventRepo().sendEvent({
                         "key": "reload",
                         "data": {
-                          "device_id": "${GlobalVariables().deviceId}",
-                          "userId": GlobalVariables().userId ?? "",
+                          "device_id": "$deviceId",
+                          "userId": userId ?? "",
                         }
                       });
                       homeProvider.getAllPostList = [];
@@ -342,17 +346,4 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  void getWebNotification() async{
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String?  webPostId = preferences.getString("webPostId");
-    if( webPostId !='' &&webPostId !=null){
-      Navigator.push(
-          mainNavigatorKey.currentContext!,
-          MaterialPageRoute(
-            builder: (context) => IndividualPostView(postId: webPostId.toString()),
-          )
-      );
-    }
-
-  }
 }

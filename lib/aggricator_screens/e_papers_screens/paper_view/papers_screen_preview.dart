@@ -19,6 +19,7 @@ import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
+import '../../home_screen/home_provider.dart';
 import '../../home_screen/news_posts_provider.dart';
 import '../paper_models/single_paper_model.dart';
 
@@ -120,6 +121,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: widget.imageUrls.length,
 
+
                               itemBuilder: (context, index) {
                                 final imageUrl = widget.imageUrls[index].imageUrl;
                                 return InteractiveViewer(
@@ -173,6 +175,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                                         "userId": userId ?? "",
                                                         "postId": widget.postId,
                                                         "isWhatAppShare": false,
+                                                        "source_from":"paper"
                                                       }
                                                     });
                                                     context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[index], context);
@@ -202,58 +205,59 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                             right: 80,
                                             child: InkWell(
                                               onTap: () async {
-                                                final url = 'https://enewspapers.s3.amazonaws.com/swetcha/2025-05-03/telangana/page_001.webp';
-                                                final filename = 'page_001.webp';
-
-                                                final dir = await getTemporaryDirectory();
-                                                final filePath = '${dir.path}/$filename';
-                                                final file = File(filePath);
-
-                                                // Download only if not cached
-                                                if (!await file.exists()) {
-                                                  final response = await http.get(Uri.parse(url));
-                                                  await file.writeAsBytes(response.bodyBytes);
-                                                }
-
-                                                // Share the cached or newly downloaded file
-                                                Share.shareXFiles(
-                                                  [XFile(file.path)],
-                                                  text: 'Check out today’s front page!${url}',
-                                                );
-
-                                                // final prefs = await SharedPreferences.getInstance();
-                                                // final userId = prefs.getString("userId");
-                                                // final deviceId = prefs.getString("deviceId");
+                                                // final url = 'https://enewspapers.s3.amazonaws.com/swetcha/2025-05-03/telangana/page_001.webp';
+                                                // final filename = 'page_001.webp';
                                                 //
-                                                // EventRepo().sendEvent({
-                                                //   "key": "share_via_widget.articles",
-                                                //   "data": {
-                                                //     "device_id": deviceId,
-                                                //     "userId": userId ?? "",
-                                                //     "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex].id,
-                                                //     "isWhatAppShare": false,
-                                                //   }
-                                                // });
+                                                // final dir = await getTemporaryDirectory();
+                                                // final filePath = '${dir.path}/$filename';
+                                                // final file = File(filePath);
                                                 //
-                                                // sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex].id, "");
-                                                //
-                                                // try {
-                                                //   RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-                                                //   var image = await boundary.toImage(pixelRatio: 2.0);
-                                                //   ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
-                                                //   Uint8List pngBytes = byteData!.buffer.asUint8List();
-                                                //
-                                                //   final directory = await getTemporaryDirectory();
-                                                //   final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()}.png');
-                                                //   await imagePath.writeAsBytes(pngBytes);
-                                                //
-                                                //   await Share.shareXFiles(
-                                                //     [XFile(imagePath.path)],
-                                                //     text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}',
-                                                //   );
-                                                // } catch (e) {
-                                                //   print("Error capturing image: $e");
+                                                // // Download only if not cached
+                                                // if (!await file.exists()) {
+                                                //   final response = await http.get(Uri.parse(url));
+                                                //   await file.writeAsBytes(response.bodyBytes);
                                                 // }
+                                                //
+                                                // // Share the cached or newly downloaded file
+                                                // Share.shareXFiles(
+                                                //   [XFile(file.path)],
+                                                //   text: 'Check out today’s front page!${url}',
+                                                // );
+
+                                                final prefs = await SharedPreferences.getInstance();
+                                                final userId = prefs.getString("userId");
+                                                final deviceId = prefs.getString("deviceId");
+
+                                                EventRepo().sendEvent({
+                                                  "key": "share_via_articles",
+                                                  "data": {
+                                                    "device_id": deviceId,
+                                                    "userId": userId ?? "",
+                                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex].id,
+                                                    "isWhatAppShare": false,
+                                                    "source_from":"paper"
+                                                  }
+                                                });
+
+                                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex].id, "");
+
+                                                try {
+                                                  RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+                                                  var image = await boundary.toImage(pixelRatio: 3.0);
+                                                  ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+                                                  Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+                                                  final directory = await getTemporaryDirectory();
+                                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()}.png');
+                                                  await imagePath.writeAsBytes(pngBytes);
+
+                                                  await Share.shareXFiles(
+                                                    [XFile(imagePath.path)],
+                                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}',
+                                                  );
+                                                } catch (e) {
+                                                  print("Error capturing image: $e");
+                                                }
                                               },
                                               child: Container(
                                                 padding: const EdgeInsets.all(10),
@@ -287,6 +291,8 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                   return GestureDetector(
                                     onTap: () async {
                                       // currentIndex=currentIndex-1;
+                                      context.read<HomeProvider>().flipEvent('paper',widget.imageUrls[currentIndex].id,false);
+
                                       log("current ++= $currentIndex ---- lase    ${widget.imageUrls.length}");
                                       postId = widget.imageUrls[currentIndex].id.toString();
                                       isBookmarked = widget.imageUrls[currentIndex].isBookmarked == 0 ? 0 : 1;
@@ -324,7 +330,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                               top: MediaQuery.of(context).size.height / 2 - 50.sp,
                               child: InkWell(
                                 onTap: () async {
-
+                                  context.read<HomeProvider>().flipEvent('paper',widget.imageUrls[currentIndex].id,true);
                                   log("current ++= $currentIndex ---- lase    ${widget.imageUrls.length}");
                                   postId = widget.imageUrls[currentIndex].id.toString();
                                   isBookmarked = widget.imageUrls[currentIndex].isBookmarked == 0 ? 0 : 1;

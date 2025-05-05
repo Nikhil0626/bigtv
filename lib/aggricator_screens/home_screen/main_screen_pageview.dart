@@ -22,9 +22,11 @@ final String tagId;
 
 class _MainScreenPageViewState extends State<MainScreenPageView> {
   late PageController _pageController;
+  int autoIndex = 0;
 
   @override
   void initState() {
+    autoIndex = 0;
     super.initState();
     _pageController = PageController(viewportFraction: 1.0);
 
@@ -86,7 +88,13 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                     controller: _pageController,
                     scrollDirection: Axis.vertical,
                     itemCount: homeProvider.getAllPostList.length,
+onPageChanged: (value) {
+  log("IndividualPostView  ${autoIndex}--- $value");
+  context.read<HomeProvider>().flipEvent('news', homeProvider.getAllAiTagsPostList[value]['id'], value > autoIndex ? true : false);
 
+  autoIndex = value;
+  setState(() {});
+},
                     itemBuilder: (context, index) {
                       if(homeProvider.getAllPostList.length-5==index){
                         log("is come from lin----k${homeProvider.getAllPostList[index]['id']}");
