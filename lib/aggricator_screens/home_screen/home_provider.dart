@@ -84,25 +84,26 @@ class HomeProvider extends ChangeNotifier {
     // notifyListeners();
   }
 
-
   void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
     controller.dispose();
     notifyListeners();
   }
 
-  Future getIndividualPost(postId,{bool isAds=false}) async {
-
+  Future getIndividualPost(postId, {bool isAds = false}) async {
     isPostLoading = true;
     try {
       Response response = await HomeRepo().getSinglePost(postId);
       log(response.data.toString());
       getSinglePostList = response.data['data'];
-      if(isAds==false) {
+      if (isAds == false) {
         getAllPostList.add(response.data['data']);
-        Future.delayed(Duration(milliseconds: 300), () {
-          getAllPost(postId: "0");
-        },);
+        Future.delayed(
+          Duration(milliseconds: 300),
+          () {
+            getAllPost(postId: "0");
+          },
+        );
       }
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
@@ -117,7 +118,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postId = "0"}) async {
-    if(postId == 0){
+    if (postId == 0) {
       getAllPostList = [];
     }
     isBookMark = [];
@@ -128,30 +129,19 @@ class HomeProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
-    List<int> locationIds = locationId
-        .split(',')
-        .where((e) => e.trim().isNotEmpty)
-        .map((e) => int.tryParse(e.trim()))
-        .whereType<int>()
-        .toList();
+    List<int> locationIds = locationId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Location IDs: $locationIds');
 
     String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<int> categoriesIds = categoriesId
-        .split(',')
-        .where((e) => e.trim().isNotEmpty)
-        .map((e) => int.tryParse(e.trim()))
-        .whereType<int>()
-        .toList();
+    List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
-
 
     Map<String, dynamic> body = {
       "device_id": deviceId,
       "postId": postId,
       "locationIds": locationIds,
       "categoriesId": categoriesIds,
-      "userId":userId??0,
+      "userId": userId ?? 0,
     };
     log("allpost body ${body.toString()}");
     try {
@@ -161,8 +151,7 @@ class HomeProvider extends ChangeNotifier {
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
 
-
-      if(isWebView){
+      if (isWebView) {
         getAllPostList.insert(0, {
           "id": 000000,
           "postOrder": 00000,
@@ -199,10 +188,7 @@ class HomeProvider extends ChangeNotifier {
       }
       getAllPostList.addAll(data);
       log(getAllPostList[0]['image_url'].toString());
-      isBookMark = getAllPostList
-          .where((e) => e['isBookmarked'] == 1)
-          .map((e) => e['id'].toString())
-          .toList();
+      isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -216,8 +202,8 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-
   bool isAiTagsLoading = false;
+
   Future getAllPostsByAiId(postId) async {
     isBookMark = [];
     getAllAiTagsPostList = [];
@@ -238,10 +224,7 @@ class HomeProvider extends ChangeNotifier {
 
       getAllAiTagsPostList.addAll(data);
 
-      isBookMark = getAllAiTagsPostList
-          .where((e) => e['isBookmarked'] == 1)
-          .map((e) => e['id'].toString())
-          .toList();
+      isBookMark = getAllAiTagsPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -272,9 +255,7 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-
   Future getSurveyData() async {
-
     try {
       Response response = await HomeRepo().surveyApi();
       getAllSurveyDataList.addAll(response.data['choices']);
@@ -286,16 +267,13 @@ class HomeProvider extends ChangeNotifier {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api catch ${st.toString()}");
     } finally {
-
       notifyListeners();
     }
   }
 
-
   List isBookMark = [];
 
-
-  void isBookMarkPost(val,context) async {
+  void isBookMarkPost(val, context) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
     log(val['id'].toString());
@@ -305,15 +283,11 @@ class HomeProvider extends ChangeNotifier {
         "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": true}
       });
       isBookMark.add(val['id'].toString());
-   Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val['id'].toString(), context,1
-      );
+      Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 1);
       sendLikeDetails(userId, val, true, val['title'].toString());
       log(isBookMark.toString());
     } else {
-      Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val['id'].toString(), context,0
-      );
+      Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 0);
       isBookMark.remove(val['id'].toString());
       EventRepo().sendEvent({
         "key": "liked_article",

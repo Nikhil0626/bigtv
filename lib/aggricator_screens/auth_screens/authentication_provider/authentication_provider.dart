@@ -306,10 +306,28 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future sendLocationsToServer(BuildContext context,{bool isFilter=false}) async {
     List<int> selectedCategoryIds = getAllLocationList.where((item) => selectedLocations.contains(item.districtName.toString())).map((item) => item.districtId).toList();
+    log("selkhvgbkjegjke ${selectedCategoryIds}");
+
+
+    log("Selected District Names: $selectedLocations");
+    String nameOfDistrict = selectedLocations.toSet().join(',');
+    sendUserAttribute(nameOfDistrict);
+
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
+    String? userId = preferences.getString("userId");
     String result = selectedCategoryIds.toSet().join(',');
     preferences.setString("locationId", result);
+
+    EventRepo().sendEvent({
+      "key": "selected_districts",
+      "data": {
+        "device_id": "$deviceId",
+        "location_name": nameOfDistrict??"",
+        "location_id": result??"",
+        "userId": userId??"",
+      }
+    });
 
     Map<String, dynamic> body = {"device_id": deviceId, "location_ids": selectedCategoryIds};
 

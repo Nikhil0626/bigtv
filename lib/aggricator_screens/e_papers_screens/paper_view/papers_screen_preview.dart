@@ -22,6 +22,11 @@ import '../../../utils/app_spaces.dart';
 import '../../home_screen/news_posts_provider.dart';
 import '../paper_models/single_paper_model.dart';
 
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
 class PapersScreenPreview extends StatefulWidget {
   final String postId;
   final int isBookmarked;
@@ -197,39 +202,58 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                             right: 80,
                                             child: InkWell(
                                               onTap: () async {
-                                                final prefs = await SharedPreferences.getInstance();
-                                                final userId = prefs.getString("userId");
-                                                final deviceId = prefs.getString("deviceId");
+                                                final url = 'https://enewspapers.s3.amazonaws.com/swetcha/2025-05-03/telangana/page_001.webp';
+                                                final filename = 'page_001.webp';
 
-                                                EventRepo().sendEvent({
-                                                  "key": "share_via_widget.articles",
-                                                  "data": {
-                                                    "device_id": deviceId,
-                                                    "userId": userId ?? "",
-                                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex].id,
-                                                    "isWhatAppShare": false,
-                                                  }
-                                                });
+                                                final dir = await getTemporaryDirectory();
+                                                final filePath = '${dir.path}/$filename';
+                                                final file = File(filePath);
 
-                                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex].id, "");
-
-                                                try {
-                                                  RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-                                                  var image = await boundary.toImage(pixelRatio: 2.0);
-                                                  ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
-                                                  Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-                                                  final directory = await getTemporaryDirectory();
-                                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()}.png');
-                                                  await imagePath.writeAsBytes(pngBytes);
-
-                                                  await Share.shareXFiles(
-                                                    [XFile(imagePath.path)],
-                                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}',
-                                                  );
-                                                } catch (e) {
-                                                  print("Error capturing image: $e");
+                                                // Download only if not cached
+                                                if (!await file.exists()) {
+                                                  final response = await http.get(Uri.parse(url));
+                                                  await file.writeAsBytes(response.bodyBytes);
                                                 }
+
+                                                // Share the cached or newly downloaded file
+                                                Share.shareXFiles(
+                                                  [XFile(file.path)],
+                                                  text: 'Check out today’s front page!${url}',
+                                                );
+
+                                                // final prefs = await SharedPreferences.getInstance();
+                                                // final userId = prefs.getString("userId");
+                                                // final deviceId = prefs.getString("deviceId");
+                                                //
+                                                // EventRepo().sendEvent({
+                                                //   "key": "share_via_widget.articles",
+                                                //   "data": {
+                                                //     "device_id": deviceId,
+                                                //     "userId": userId ?? "",
+                                                //     "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex].id,
+                                                //     "isWhatAppShare": false,
+                                                //   }
+                                                // });
+                                                //
+                                                // sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex].id, "");
+                                                //
+                                                // try {
+                                                //   RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+                                                //   var image = await boundary.toImage(pixelRatio: 2.0);
+                                                //   ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+                                                //   Uint8List pngBytes = byteData!.buffer.asUint8List();
+                                                //
+                                                //   final directory = await getTemporaryDirectory();
+                                                //   final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()}.png');
+                                                //   await imagePath.writeAsBytes(pngBytes);
+                                                //
+                                                //   await Share.shareXFiles(
+                                                //     [XFile(imagePath.path)],
+                                                //     text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}',
+                                                //   );
+                                                // } catch (e) {
+                                                //   print("Error capturing image: $e");
+                                                // }
                                               },
                                               child: Container(
                                                 padding: const EdgeInsets.all(10),

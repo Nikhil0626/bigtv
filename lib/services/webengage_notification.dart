@@ -80,9 +80,9 @@ void sendEventToServer(msg) async{
 
 }
 void subscribeToTrackDeeplink() {
-  WebEngagePlugin().trackDeeplinkStream.listen((location) {
-    //Location URL
-  });
+  // WebEngagePlugin().trackDeeplinkStream.listen((location) {
+  //   //Location URL
+  // });
 }
 
 void subscribeToAnonymousIDCallback() {
@@ -120,7 +120,7 @@ void showDialogWithMessage(String msg) {
 }
 
 void listenToAnonymousID() {
-  WebEngagePlugin().anonymousActionStream.listen((event) {
-    log("listenToAnonymousID ${event}");
-  });
+  // WebEngagePlugin().anonymousActionStream.listen((event) {
+  //   log("listenToAnonymousID ${event}");
+  // });
 }
