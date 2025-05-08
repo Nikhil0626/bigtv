@@ -15,6 +15,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
+import '../../../screens/chota_info_screens/about_us.dart';
+import '../../../screens/chota_info_screens/advertise_with_us.dart';
+import '../../../screens/chota_info_screens/privacy_policy.dart';
+import '../../../screens/chota_info_screens/terms_conditions.dart';
 import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../../utils/app_enums.dart';
@@ -28,16 +32,13 @@ class SettingsView extends StatefulWidget {
   const SettingsView({
     super.key,
   });
-
   @override
   _SettingsViewState createState() => _SettingsViewState();
 }
-
 class _SettingsViewState extends State<SettingsView> {
   NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
   bool isNotificationsEnabled = false;
-  String appVersion= "";
-
+  String appVersion = "";
   @override
   void initState() {
     getLogin();
@@ -47,7 +48,7 @@ class _SettingsViewState extends State<SettingsView> {
 
   Future getLogin() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    appVersion =sp.getString("app_version")??"";
+    appVersion = sp.getString("app_version") ?? "";
     isNotificationsEnabled = sp.getString("loginType") == "login" ? true : false;
     log(isNotificationsEnabled.toString());
     setState(() {});
@@ -88,10 +89,9 @@ class _SettingsViewState extends State<SettingsView> {
             // _buildNotificationRow(),
 
             _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () {
-              if(Platform.isIOS){
+              if (Platform.isIOS) {
                 Share.share("Check out this app: https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092");
-
-              }else {
+              } else {
                 Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
               }
             }),
@@ -102,10 +102,7 @@ class _SettingsViewState extends State<SettingsView> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => InAppWebViewScreen(
-                    webUrl: BaseUrls.aboutPage,
-                    title: "About Us", // Add a title here
-                  ),
+                  builder: (context) => AboutUs(),
                 ),
               );
             }),
@@ -115,10 +112,7 @@ class _SettingsViewState extends State<SettingsView> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => InAppWebViewScreen(
-                    webUrl: BaseUrls.advertisePage,
-                    title: "Advertise with us",
-                  ),
+                  builder: (context) => AdvertiseWithUs(),
                 ),
               );
             }),
@@ -139,10 +133,7 @@ class _SettingsViewState extends State<SettingsView> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => InAppWebViewScreen(
-                    webUrl: BaseUrls.termsPage,
-                    title: "Terms & Conditions",
-                  ),
+                  builder: (context) => TermsConditions(),
                 ),
               );
             }),
@@ -151,10 +142,7 @@ class _SettingsViewState extends State<SettingsView> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => InAppWebViewScreen(
-                    webUrl: BaseUrls.privacyPage,
-                    title: "Privacy policy",
-                  ),
+                  builder: (context) => PrivacyPolicy(),
                 ),
               );
             }),
@@ -163,25 +151,27 @@ class _SettingsViewState extends State<SettingsView> {
               Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
             }),
             height(height: 5.h),
-            _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", ()async {
+            _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () async {
               SharedPreferences preferences = await SharedPreferences.getInstance();
-              String? deviceId =  preferences.getString("deviceId");
-              String? userId =  preferences.getString("userId");
+              String? deviceId = preferences.getString("deviceId");
+              String? userId = preferences.getString("userId");
               EventRepo().sendEvent({
                 "key": "logout",
-                "data": {"device_id": "$deviceId", "isLogin":  isNotificationsEnabled ?false:true, "userId": userId}
+                "data": {"device_id": "$deviceId", "isLogin": isNotificationsEnabled ? false : true, "userId": userId}
               });
               WebEngagePlugin.trackEvent('logout_user', {
                 "device_id": "${deviceId}",
                 "date_time": DateTime.now().toString(),
-                "user_id": userId??"",
+                "user_id": userId ?? "",
               });
               WebEngagePlugin.userLogout();
               context.read<AuthenticationProvider>().setLogOutStatus(context, false);
-
             }),
-           Spacer(),
-            Text("V$appVersion",style: fontStyle(fontWeight: FontWeight.normal),),
+            Spacer(),
+            Text(
+              "V$appVersion",
+              style: fontStyle(fontWeight: FontWeight.normal),
+            ),
           ],
         ),
       ),
@@ -194,13 +184,15 @@ class _SettingsViewState extends State<SettingsView> {
       child: Container(
         decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
         width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 10,),
+        padding: EdgeInsets.symmetric(
+          vertical: 10,
+        ),
         child: Row(
           children: [
             width(width: 10.w),
             SvgPicture.asset('assets/svg/$iconName', height: 20.w, width: 20.w),
             width(width: 20.w),
-            Text(title, style: newAppFont(fontSize: 14.sp,color:  AppColors.textColor)),
+            Text(title, style: newAppFont(fontSize: 14.sp, color: AppColors.textColor)),
           ],
         ),
       ),

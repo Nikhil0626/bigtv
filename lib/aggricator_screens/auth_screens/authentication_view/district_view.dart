@@ -99,6 +99,7 @@ import 'package:provider/provider.dart';
 
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
+import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
 import '../../home_screen/home_view.dart';
 import '../authentication_model/location_model.dart';
@@ -189,7 +190,7 @@ class _DistrictViewState extends State<DistrictView> {
                   height: 190, // Or remove if you want it to expand naturally
                   alignment: Alignment.topCenter,
                   child: SingleChildScrollView(
-                    child: Column(
+                    child:authenticationProvider.isLocationLoading?AppLoadingScreen(): Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: states.entries.map((entry) {
                         int stateId = entry.key;

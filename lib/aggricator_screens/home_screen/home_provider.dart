@@ -92,6 +92,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getIndividualPost(postId, {bool isAds = false}) async {
+    getAllPostList = [];
     isPostLoading = true;
     try {
       Response response = await HomeRepo().getSinglePost(postId);

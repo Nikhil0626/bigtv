@@ -251,7 +251,7 @@
             android:value="in" />
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-2405357352181832~7892348790" />
+            android:value="ca-app-pub-3940256099942544~1458002511" />
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id" />
@@ -298,11 +298,11 @@
 
             <!-- App Link sample -->
             <meta-data android:name="flutter-deeplink" android:value="true"/>
-            <intent-filter android:autoVerify="true">
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="apps.signitivessoft.com" android:pathPrefix="/"/>
+                <data  android:host="app.chotanews.com" android:scheme="https" />
             </intent-filter>
 
             <!-- Deep Link sample -->

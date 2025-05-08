@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
@@ -49,7 +50,7 @@ class _CategoriesViewState extends State<CategoriesView> {
               height(height: 10),
               Expanded(
                 child: SingleChildScrollView(
-                  child: Wrap(
+                  child:authenticationProvider.isCatLoading?AppLoadingScreen(): Wrap(
                     spacing: 10.w,
                     runSpacing: 10.h,
                     children: authenticationProvider.getAllCategoryList.map((category) {

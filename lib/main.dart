@@ -5,6 +5,7 @@ import 'package:app_links/app_links.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
+import 'package:chotanews/screens/home_screen/home_screens/google_ads_view.dart';
 import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
 import 'package:chotanews/services/analytics_service.dart';
 // import 'package:chotanews/services/kochava_service.dart';
@@ -32,6 +33,7 @@ import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
+import 'aggricator_screens/test_screens/test3.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 

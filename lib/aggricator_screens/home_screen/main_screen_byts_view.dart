@@ -82,11 +82,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                       : widget.article['type'] == "Image"
                           ? InkWell(
                               onTap: () async {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => InAppWebViewScreen(webUrl: widget.article['content'].toString(), title: "Image View"),
-                                    ));
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //       builder: (context) => InAppWebViewScreen(webUrl: widget.article['content'].toString(), title: "Image View"),
+                                //     ));
                               },
                               child: Stack(
                                 children: [
