@@ -161,6 +161,7 @@ class _StandardCardState extends State<StandardCard> {
                   ),
                 ),
                 Spacer(),
+                if(widget.getAllPostList['isStickyPost']==0)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4),
                   child: DateAndSource(data: widget.getAllPostList),
@@ -225,6 +226,7 @@ class _StandardCardState extends State<StandardCard> {
                               "userId": userId ?? "",
                               "postId": widget.getAllPostList['id'].toString(),
                               "isWhatAppShare": false,
+                              "source_from":"news"
                             }
                           });
 

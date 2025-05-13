@@ -100,6 +100,7 @@ import 'package:provider/provider.dart';
 
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
+import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
 import '../../home_screen/home_view.dart';
 import '../authentication_model/location_model.dart';
@@ -179,19 +180,19 @@ class _DistrictViewState extends State<DistrictView> {
                           text: "0${authenticationProvider.selectedLocations.length}",
                           style: homeScreenFontStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                         ),
-                        TextSpan(text: "/03\n"),
-                        if(authenticationProvider.selectedLocations.length>3)
-                        TextSpan(text: "You Have Selected Maximum Number of Districts",style: newAppFont(fontSize: 12,color: Colors.red,fontWeight: FontWeight.w600)),
+                        TextSpan(text: "/05\n"),
+                        if(authenticationProvider.selectedLocations.length>5)
+                        TextSpan(text: "You Have Selected Maximum Number of Districts",style: newAppFont(fontSize: 10,color: Colors.red,fontWeight: FontWeight.normal)),
                       ],
                     ),
                   ),
                 ),
                 height(height: 8),
                 Container(
-                  height: 200, // Or remove if you want it to expand naturally
+                  height: 190, // Or remove if you want it to expand naturally
                   alignment: Alignment.topCenter,
-                  child: SingleChildScrollView(
-                    child: Column(
+                  child:authenticationProvider.isLocationLoading?Center(child: AppLoadingScreen()):  SingleChildScrollView(
+                    child:Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: states.entries.map((entry) {
                         int stateId = entry.key;
@@ -228,7 +229,7 @@ class _DistrictViewState extends State<DistrictView> {
                   ),
                 ),
                 InkWell(
-                  onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3
+                  onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5
                       ? () {
                           authenticationProvider.sendLocationsToServer(context).then((value) {
                             if (context.mounted) {
@@ -243,19 +244,19 @@ class _DistrictViewState extends State<DistrictView> {
                           },);
                         }
                       : () {
-                          CustomToast.showErrorToast(msg: "Please Select only 3 District ");
+                          CustomToast.showErrorToast(msg: "Please select at least 2 district ");
                         },
                   child: Container(
                       width: MediaQuery.of(context).size.width,
                       height: 36.h,
                       decoration: BoxDecoration(
-                          color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3)
+                          color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5)
                               ? AppColors.loginBgColor
                               : AppColors.bodyTextColor.withOpacity(.2),
                           borderRadius: BorderRadius.all(Radius.circular(8.r))),
-                      child: Center(child: Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
+                      child: Center(child:authenticationProvider.isLocationSendingLoading?AppLoadingScreen(): Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
                 ),
-                SizedBox(height: 16.h),
+                SizedBox(height: 6.h),
                 LinearProgressIndicator(
                   value: 1,
                   backgroundColor: AppColors.borderColor,
@@ -264,7 +265,7 @@ class _DistrictViewState extends State<DistrictView> {
                 SizedBox(height: 8.h),
                 Center(
                   child: Text(
-                    'Step 1/2',
+                    'Step 2/2',
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,

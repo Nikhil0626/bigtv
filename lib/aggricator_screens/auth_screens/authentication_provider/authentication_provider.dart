@@ -26,8 +26,6 @@ class AuthenticationProvider extends ChangeNotifier {
   bool isButtonEnabled = false;
   bool isOtpButtonEnabled = false;
   NewAppLoginStatus newAppLoginStatus = NewAppLoginStatus.none;
-
-
   List<CategoryModel> getAllCategoryList = [];
   List<String> selectedCategories = [];
   List<LocationModel> getAllLocationList = [];
@@ -81,7 +79,7 @@ class AuthenticationProvider extends ChangeNotifier {
         newAppLoginStatus = NewAppLoginStatus.otp;
         saveLoginState();
         otpController.text = "";
-      }else{
+      } else {
         CustomToast.showErrorToast(msg: "Check your mobile number try again");
       }
     } catch (e, st) {
@@ -89,15 +87,16 @@ class AuthenticationProvider extends ChangeNotifier {
       log(e.toString());
       log(st.toString());
     } finally {
-
       isLoginLoading = false;
       notifyListeners();
     }
   }
 
-  Future verifyOtp(context,) async {
+  Future verifyOtp(
+      context,
+      ) async {
     errorMessage = '';
-    isVerifyLoading  = true;
+    isVerifyLoading = true;
     isButtonEnabled = false;
     notifyListeners();
     log(
@@ -137,19 +136,19 @@ class AuthenticationProvider extends ChangeNotifier {
         //   );
         // } else {
 
-          newAppLoginStatus = NewAppLoginStatus.category;
-          saveLoginState();
-          getAllCategories();
+        newAppLoginStatus = NewAppLoginStatus.category;
+        saveLoginState();
+        getAllCategories();
         // }
 
         EventRepo().sendEvent({
           "key": "otp_verify",
-          "data": {"device_id": "${deviceId}", "isVerify": true, "mobileNumber": phoneController.text, "otp": otpController.text, "userId": ""}
+          "data": {"device_id": "$deviceId", "isVerify": true, "mobileNumber": phoneController.text, "otp": otpController.text, "userId": response.data['user']['id'].toString()}
         });
 
         EventRepo().sendEvent({
           "key": "login_skip",
-          "data": {"device_id": "${deviceId}", "isLogin": true, "userId": ""}
+          "data": {"device_id": "$deviceId", "isLogin": true, "userId": response.data['user']['id'].toString()}
         });
         WebEngagePlugin.userLogin(response.data['user']['id'].toString());
         WebEngagePlugin.setUserPhone(phoneController.text.toString());
@@ -163,7 +162,8 @@ class AuthenticationProvider extends ChangeNotifier {
 
         phoneController.text = "";
         notifyListeners();
-      } if(response.statusCode == 400){
+      }
+      if (response.statusCode == 400) {
         errorMessage = response.data['detail'].toString();
         CustomToast.showErrorToast(msg: response.data['detail']);
       }
@@ -183,14 +183,15 @@ class AuthenticationProvider extends ChangeNotifier {
 
   bool isCatLoading = false;
   bool isCatSaveLoading = false;
-
   Future getAllCategories() async {
     isCatLoading = true;
     selectedCategories = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
+    String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
-      "device_id": deviceId,
+      "device_id": deviceId ?? "",
+      "user_id": userId ?? "",
     };
     try {
       log("get all catttt");
@@ -200,7 +201,7 @@ class AuthenticationProvider extends ChangeNotifier {
         getAllCategoryList = data
             .map(
               (e) => CategoryModel.fromJson(e),
-            )
+        )
             .toList();
 
         selectedCategories = getAllCategoryList.where((item) => item.isFollowed == true).map((item) => item.categoryName.toString()).toList();
@@ -234,16 +235,28 @@ class AuthenticationProvider extends ChangeNotifier {
     List<int> selectedCategoryIds = getAllCategoryList.where((item) => selectedCategories.contains(item.categoryName.toString())).map((item) => item.categoryId as int).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String result = selectedCategoryIds.toSet().join(',');
+    String catNames = selectedCategories.toSet().join(',');
     preferences.setString("categoriesId", result);
     String? deviceId = preferences.getString("deviceId");
-    Map<String, dynamic> body = {"device_id": deviceId, "categoryids": selectedCategoryIds};
+    String? userId = preferences.getString("userId");
+    preferences.setString("locationId", result);
+
+    EventRepo().sendEvent({
+      "key": "selected_categories",
+      "data": {
+        "device_id": "$deviceId",
+        "categories_name": catNames ?? "",
+        "categories_id": result ?? "",
+        "userId": userId ?? "",
+      }
+    });
+    Map<String, dynamic> body = {"device_id": deviceId, "categoryids": selectedCategoryIds,"user_id": userId ?? "",};
 
     log(body.toString());
     try {
-
       Response response = await AuthenticationRepo().sendSelectCategories(body);
       if (response.statusCode == 200) {
-        if(!isFilter) {
+        if (!isFilter) {
           saveLoginState();
           newAppLoginStatus = NewAppLoginStatus.location;
         }
@@ -259,12 +272,17 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
+
+  bool isLocationLoading = false;
   Future getAllLocations() async {
+    isLocationLoading = true;
     selectedLocations = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
+    String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
       "device_id": deviceId,
+      "user_id": userId ?? "",
     };
     try {
       log("response.data.toString123");
@@ -274,12 +292,11 @@ class AuthenticationProvider extends ChangeNotifier {
         getAllLocationList = data
             .map(
               (e) => LocationModel.fromJson(e),
-            )
+        )
             .toList();
 
         selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.districtName.toString()).toList();
         log(getAllLocationList.first.districtName.toString());
-
 
         String result = selectedLocations.toSet().join(',');
         preferences.setString("locationId", result);
@@ -289,11 +306,14 @@ class AuthenticationProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
     } finally {
+      isLocationLoading = false;
       notifyListeners();
     }
   }
 
+  bool isLocationSendingLoading = false;
   void addToSelectedLocations(String profileName) {
+
     if (!selectedLocations.contains(profileName)) {
       selectedLocations.add(profileName);
       log(selectedLocations.toString());
@@ -304,21 +324,38 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  Future sendLocationsToServer(BuildContext context,{bool isFilter=false}) async {
+  Future sendLocationsToServer(BuildContext context, {bool isFilter = false}) async {
+    isLocationSendingLoading = true;
     List<int> selectedCategoryIds = getAllLocationList.where((item) => selectedLocations.contains(item.districtName.toString())).map((item) => item.districtId).toList();
+    log("selkhvgbkjegjke ${selectedCategoryIds}");
+    log("Selected District Names: $selectedLocations");
+    String nameOfDistrict = selectedLocations.toSet().join(',');
+    sendUserAttribute(nameOfDistrict);
+
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
+    String? userId = preferences.getString("userId");
     String result = selectedCategoryIds.toSet().join(',');
     preferences.setString("locationId", result);
 
-    Map<String, dynamic> body = {"device_id": deviceId, "location_ids": selectedCategoryIds};
+    EventRepo().sendEvent({
+      "key": "selected_districts",
+      "data": {
+        "device_id": "$deviceId",
+        "location_name": nameOfDistrict ?? "",
+        "location_id": result ?? "",
+        "userId": userId ?? "",
+      }
+    });
+
+    Map<String, dynamic> body = {"device_id": deviceId, "location_ids": selectedCategoryIds,"user_id": userId ?? "",};
 
     log(body.toString());
     try {
       log("response.data.toString123");
       Response response = await AuthenticationRepo().sendSelectLocations(body);
       if (response.statusCode == 200) {
-        if(!isFilter) {
+        if (!isFilter) {
           newAppLoginStatus = NewAppLoginStatus.home;
           saveLoginState();
         }
@@ -330,6 +367,7 @@ class AuthenticationProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
     } finally {
+      isLocationSendingLoading = false;
       notifyListeners();
     }
   }
@@ -344,16 +382,17 @@ class AuthenticationProvider extends ChangeNotifier {
           MaterialPageRoute(
             builder: (context) => HomeView(),
           ),
-          (route) => false,
+              (route) => false,
         );
         break;
       case NewAppLoginStatus.home:
         Navigator.pushAndRemoveUntil(
-            context,
-
-            MaterialPageRoute(
-              builder: (context) => HomeView(),
-            ),(route) => false,);
+          context,
+          MaterialPageRoute(
+            builder: (context) => HomeView(),
+          ),
+              (route) => false,
+        );
         break;
       default:
         Navigator.pushAndRemoveUntil(
@@ -361,7 +400,7 @@ class AuthenticationProvider extends ChangeNotifier {
           MaterialPageRoute(
             builder: (context) => LoginBackgroundView(),
           ),
-          (route) => false,
+              (route) => false,
         );
     }
   }
@@ -383,20 +422,33 @@ class AuthenticationProvider extends ChangeNotifier {
     return NewAppLoginStatus.none;
   }
 
-  void continueAsGuest(context,) async {
+  void continueAsGuest(
+      context,
+      ) async {
     newAppLoginStatus = NewAppLoginStatus.category;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginState", newAppLoginStatus.toString());
     preferences.setString("loginType", "skip");
+    String? deviceId = await preferences.getString("deviceId");
+    EventRepo().sendEvent({
+      "key": "login_skip",
+      "data": {"device_id": "$deviceId", "isLogin": true, "userId": ""}
+    });
     notifyListeners();
     // isPageNavigation(context);
   }
 
   void setLogOutStatus(context, bool isLogout) async {
-    newAppLoginStatus =isLogout?NewAppLoginStatus.skip: NewAppLoginStatus.login;
+    newAppLoginStatus = isLogout ? NewAppLoginStatus.skip : NewAppLoginStatus.login;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.clear();
     preferences.setString("loginState", newAppLoginStatus.toString());
+    String? deviceId = await preferences.getString("deviceId");
+    String? userId = await preferences.getString("userId");
+    EventRepo().sendEvent({
+      "key": "login_skip",
+      "data": {"device_id": "$deviceId", "isLogin": true, "userId": userId}
+    });
     isPageNavigation(context);
   }
 }

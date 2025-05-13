@@ -13,12 +13,14 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../screens/home_screen/botton_actions.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../../screens/home_screen/home_screens/google_ads_view.dart';
+import '../ad_manager_screen/google_ads_view.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../screens/videos_main/video_views/gallery_screen.dart';
 import '../../screens/videos_main/video_views/video_preview.dart';
@@ -30,6 +32,7 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
+import '../ad_manager_screen/test_ads.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -58,7 +61,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           Expanded(
             child: Screenshot(
               controller: adsScreenshotController,
-              child:   widget.article['type'].toString() == "WebUrl"
+              child: widget.article['type'].toString() == "WebUrl"
                   ? Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: InAppWebViewScreen(
@@ -69,6 +72,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   : widget.article['type'] == "GoogleAds"
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
+                          // child: FullScreenNativeAd(article: widget.article,),
                           child: GoogleAdsView(
                             isList: true,
                             article: widget.article,
@@ -80,11 +84,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                       : widget.article['type'] == "Image"
                           ? InkWell(
                               onTap: () async {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => InAppWebViewScreen(webUrl: widget.article['content'].toString(), title: "Image View"),
-                                    ));
+                                // Navigator.push(
+                                //     context,
+                                //     MaterialPageRoute(
+                                //       builder: (context) => InAppWebViewScreen(webUrl: widget.article['content'].toString(), title: "Image View"),
+                                //     ));
                               },
                               child: Stack(
                                 children: [
@@ -279,35 +283,34 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                               ),
                                             ),
 
-                                          if (widget.isaiTags == false)
-                                            Positioned(
-                                                top: 12,
-                                                right: 14,
-                                                child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-                                                  return GestureDetector(
-                                                    onTap: () {
-                                                      homeProvider.isBookMarkPost(widget.article, context);
+                                          Positioned(
+                                              top: 12,
+                                              right: 14,
+                                              child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                                return GestureDetector(
+                                                  onTap: () {
+                                                    homeProvider.isBookMarkPost(widget.article, context);
 
-                                                      print("");
-                                                    },
-                                                    child: Container(
-                                                      padding: EdgeInsets.all(7),
-                                                      decoration: BoxDecoration(
-                                                        color: (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
-                                                            ? AppColors.appButtonColor
-                                                            : Colors.black54,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Icon(
-                                                        (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
-                                                            ? Icons.bookmark
-                                                            : Icons.bookmark_outline,
-                                                        color: Colors.white,
-                                                        size: 20,
-                                                      ),
+                                                    print("");
+                                                  },
+                                                  child: Container(
+                                                    padding: EdgeInsets.all(7),
+                                                    decoration: BoxDecoration(
+                                                      color: (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
+                                                          ? AppColors.appButtonColor
+                                                          : Colors.black54,
+                                                      shape: BoxShape.circle,
                                                     ),
-                                                  );
-                                                })),
+                                                    child: Icon(
+                                                      (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
+                                                          ? Icons.bookmark
+                                                          : Icons.bookmark_outline,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                );
+                                              })),
                                         ],
                                       ),
                                     ),
@@ -318,7 +321,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                             ? MediaQuery.of(context).size.height * .3
                                             : widget.isaiTags
                                                 ? MediaQuery.of(context).size.height * .50
-                                                : MediaQuery.of(context).size.height * .55,
+                                                : (widget.article['type'] == "Video" && Platform.isIOS)
+                                                    ? MediaQuery.of(context).size.height * .50
+                                                    : MediaQuery.of(context).size.height * .55,
                                         width: MediaQuery.of(context).size.width,
                                         decoration: BoxDecoration(
                                           color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor : Colors.white,
@@ -346,15 +351,16 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                         mainAxisAlignment: MainAxisAlignment.start,
                                                         crossAxisAlignment: CrossAxisAlignment.start,
                                                         children: [
-                                                          (widget.article['content'] != "")
+                                                          (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
                                                               ? Text(widget.article['content'],
                                                                   style: homeScreenFontStyle(
-                                                                    color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
+                                                                    color: AppColors.textColor,
                                                                     fontWeight: FontWeight.w500,
                                                                     fontSize: 16.sp,
                                                                   ))
                                                               : const SizedBox.shrink(),
-                                                          height(height: 8.sp),
+                                                          if (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
+                                                            height(height: 8),
                                                           Expanded(
                                                             child: ListView(
                                                               physics: const NeverScrollableScrollPhysics(),
@@ -466,7 +472,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           ? MediaQuery.of(context).size.height * .30 - 15
                                           : widget.isaiTags
                                               ? MediaQuery.of(context).size.height * .50 - 15
-                                              : MediaQuery.of(context).size.height * .55 - 15,
+                                              : (widget.article['type'] == "Video" && Platform.isIOS)
+                                                  ? MediaQuery.of(context).size.height * .50 - 15
+                                                  : MediaQuery.of(context).size.height * .55 - 15,
                                       child: Container(
                                         height: 30,
                                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
@@ -504,142 +512,154 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 ),
             ),
           ),
-         ( widget.article['type'] == "GoogleAds" || widget.article['type'] == "WebUrl" )?SizedBox.shrink():   Padding(
-            padding:  EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom+6),
-            child: Container(
-              color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
-              height: 45.sp,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Container(
-                    color: AppColors.borderColor,
-                    width: MediaQuery.of(context).size.width,
-                    height: 1,
-                  ),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          (widget.article['type'] == "GoogleAds" || widget.article['type'] == "WebUrl")
+              ? SizedBox.shrink()
+              : Padding(
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 6),
+                  child: Container(
+                    color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
+                    height: 45.sp,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                          return BottomActions(
-                            postType: widget.article['subType'] ?? "",
-                            icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                            label: 'లైక్',
-                            // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
-                            isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                            onTap: () {
-                              log("Like");
-                              settingsProvider.isLikePost(widget.article);
-
-                              // settingsProvider.isLikePost(widget.article);
-                            },
-                          );
-                        }),
-                        width(width: 20),
-                        BottomActions(
-                          postType: widget.article['subType'].toString() ?? "",
-                          icon: "assets/svg/new_comment.svg",
-                          label: 'కామెంట్',
-                          onTap: () {
-                            context.read<AuthProvider>().sendEvent("CommentPage");
-                            EventRepo().sendEvent({
-                              "key": "comments",
-                              "data": {
-                                "device_id": "${GlobalVariables().deviceId}",
-                                "userId": context.read<FlipProvider>().userId ?? "",
-                                "postId": widget.article['id'].toString(),
-                              }
-                            });
-                            log("Comment --- ${context.read<AuthProvider>().loginType}");
-                            showComments(context, widget.article['id']);
-                            EventRepo().sendEvent({
-                              "key": "comments",
-                              "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}
-                            });
-                          },
+                        Container(
+                          color: AppColors.borderColor,
+                          width: MediaQuery.of(context).size.width,
+                          height: 1,
                         ),
-                        Spacer(),
-                        InkWell(
-                          onTap: () async {
-                            EventRepo().sendEvent({
-                              "key": "share_via_widget.articles",
-                              "data": {
-                                "device_id": "${GlobalVariables().deviceId}",
-                                "userId": context.read<FlipProvider>().userId ?? "",
-                                "postId": widget.article['id'].toString(),
-                                "isWhatAppShare": false,
-                              }
-                            });
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                return BottomActions(
+                                  postType: widget.article['subType'] ?? "",
+                                  icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                  label: 'లైక్',
+                                  // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
+                                  isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                  onTap: () {
+                                    log("Like");
+                                    settingsProvider.isLikePost(widget.article);
 
-                            sendShareDetails(context.read<FlipProvider>().userId, widget.article['id'], widget.article['content'].toString());
-
-                            if (widget.article['type'] == "Standard" || widget.article['type'] == "Video"|| widget.article['type'] == "Image") {
-                              try {
-                                final image = await adsScreenshotController.capture(
-                                  pixelRatio: 2.0,
+                                    // settingsProvider.isLikePost(widget.article);
+                                  },
                                 );
-                                if (image != null) {
-                                  final directory = await getTemporaryDirectory();
-                                  final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                  final imageFile = File(imagePath);
-                                  await imageFile.writeAsBytes(image);
+                              }),
+                              width(width: 6),
+                              BottomActions(
+                                postType: widget.article['subType'].toString() ?? "",
+                                icon: "assets/svg/new_comment.svg",
+                                label: 'కామెంట్',
+                                onTap: () async {
+                                  SharedPreferences sp = await SharedPreferences.getInstance();
+                                  String? userId = sp.getString("userId");
+                                  String? deviceId = sp.getString("deviceId");
+                                  context.read<AuthProvider>().sendEvent("CommentPage");
+                                  EventRepo().sendEvent({
+                                    "key": "comments",
+                                    "data": {
+                                      "device_id": "$deviceId",
+                                      "userId": userId ?? "1234",
+                                      "postId": widget.article['id'].toString(),
+                                    }
+                                  });
+                                  log("Comment --- ${context.read<AuthProvider>().loginType}");
+                                  showComments(context, widget.article['id']);
+                                  EventRepo().sendEvent({
+                                    "key": "comments",
+                                    "data": {"deviceId": deviceId ?? "", "openTime": DateTime.now().toString()}
+                                  });
+                                },
+                              ),
+                              Spacer(),
+                              InkWell(
+                                onTap: () async {
+                                  SharedPreferences sp = await SharedPreferences.getInstance();
+                                  String? userId = sp.getString("userId");
+                                  String? deviceId = sp.getString("deviceId");
+                                  EventRepo().sendEvent({
+                                    "key": "share_via_articles",
+                                    "data": {"device_id": "$deviceId", "userId": userId ?? "", "postId": widget.article['id'].toString(), "isWhatAppShare": false, "source_from": "news"}
+                                  });
 
-                                  Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
-                                } else {
-                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                }
-                              } catch (e) {
-                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                              }
-                            } else if (widget.article['type'] == "Gallery") {
-                              createAndSharePdfs(context, widget.article);
-                            }
-                          },
-                          child: isSending
-                              ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                              : SvgPicture.asset(
-                                  "assets/svg/share.svg",
-                                  height: 20,
-                                  width: 20,
-                                  color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                ),
+                                  sendShareDetails(context.read<FlipProvider>().userId, widget.article['id'], widget.article['content'].toString());
+
+                                  if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                                    try {
+                                      final image = await adsScreenshotController.capture(
+                                        pixelRatio: 2.0,
+                                      );
+                                      if (image != null) {
+                                        final directory = await getTemporaryDirectory();
+                                        final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                        final imageFile = File(imagePath);
+                                        await imageFile.writeAsBytes(image);
+
+                                        Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                                      } else {
+                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                      }
+                                    } catch (e) {
+                                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                    }
+                                  } else if (widget.article['type'] == "Gallery") {
+                                    createAndSharePdfs(context, widget.article);
+                                  }
+                                },
+                                child: isSending
+                                    ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                    : SvgPicture.asset(
+                                        "assets/svg/share.svg",
+                                        height: 20,
+                                        width: 20,
+                                        color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                      ),
+                              ),
+                              width(width: 20),
+                              Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                return InkWell(
+                                  onTap: () async{
+                                    log("Refresh");
+
+                                    SharedPreferences preferences = await SharedPreferences.getInstance();
+                                    String? deviceId = preferences.getString("deviceId");
+                                    String? userId = preferences.getString("userId");
+                                    EventRepo().sendEvent({
+                                      "key": "reload",
+                                      "data": {
+                                        "device_id": "$deviceId",
+                                        "userId": userId ?? "",
+                                      }
+                                    });
+                                    homeProvide.getAllPostList = [];
+                                    homeProvide.isReloadData();
+                                    if(widget.isaiTags){
+                                      homeProvide.getAllPostsByAiId(widget.article['id']);
+                                    }else{
+                                      homeProvide.getAllPost();
+
+                                    }
+                                  },
+                                  child: context.read<FlipProvider>().isRefresh
+                                      ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                      : SvgPicture.asset(
+                                          "assets/svg/new_refresh.svg",
+                                          height: 22,
+                                          width: 22,
+                                          color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                        ),
+                                );
+                              }),
+                            ],
+                          ),
                         ),
-                        width(width: 20),
-                        Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                          return InkWell(
-                            onTap: () {
-                              log("Refresh");
-                              EventRepo().sendEvent({
-                                "key": "reload",
-                                "data": {
-                                  "device_id": "${GlobalVariables().deviceId}",
-                                  "userId": GlobalVariables().userId ?? "",
-                                }
-                              });
-                              homeProvide.getAllPostList = [];
-                              homeProvide.isReloadData();
-                              homeProvide.getAllPost();
-                            },
-                            child: context.read<FlipProvider>().isRefresh
-                                ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                : SvgPicture.asset(
-                                    "assets/svg/new_refresh.svg",
-                                    height: 22,
-                                    width: 22,
-                                    color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                  ),
-                          );
-                        }),
                       ],
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
+                ),
         ],
       ),
     );
@@ -706,13 +726,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
   }
 
   List<TextSpan> _parseText(BuildContext context, String text, links, article) {
-
     RegExp linkRegExp = RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
     List<TextSpan> spans = [];
 
     text.splitMapJoin(linkRegExp, onMatch: (match) {
       String link = match.group(0)!;
-
 
       if (link.contains('link1') && links != null && links.isNotEmpty) {
         link = links[0]['value'].toString();
@@ -741,8 +759,14 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         ),
         recognizer: TapGestureRecognizer()
           ..onTap = () async {
-            print(" $link");
-            Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: link.toString(), title: "Standard Links"),));
+            print("sbhjhfjksdfnsdknf1111 $link");
+
+            if (link == "https://play.google.com/store/apps/details?id=com.chotanews" && Platform.isIOS) {
+              print("sbhjhfjksdfnsdknf $link");
+              launchURL(Uri.parse("https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092"));
+            } else {
+              launchURL(Uri.parse(link.toString()));
+            }
           },
       ));
 
@@ -759,5 +783,13 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     });
 
     return spans;
+  }
+
+  Future<void> launchURL(Uri uri) async {
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch ${uri.path}';
+    }
   }
 }

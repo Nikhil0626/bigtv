@@ -3,6 +3,10 @@ import 'package:chotanews/aggricator_screens/settings_screen/settings_view/filte
 import 'package:chotanews/aggricator_screens/settings_screen/settings_view/filters_screen/update_regions_view.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+import '../../../../utils/app_colors.dart';
 
 class FilterView extends StatefulWidget {
   const FilterView({super.key});
@@ -26,25 +30,18 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
     super.dispose();
   }
 
-  Widget _buildBorderedItem(String title) {
-    return Container(
-      margin: const EdgeInsets.all(8.0),
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.lightBlue, width: 2),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        title,
-        style: newAppFont(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: InkWell(onTap: () {
+          Navigator.pop(context);
+        },
+          child: Padding(
+            padding:  EdgeInsets.symmetric(horizontal: 16.0.sp),
+            child: Icon(Icons.arrow_back_outlined,size: 24.sp,)
+          ),
+        ),
         title: Text(
           'Filter ',
           style: newAppFont(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w500),
@@ -52,12 +49,16 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
         bottom: TabBar(
           controller: _tabController,
           tabs: [
-            Tab(text: 'Topics'),
+            Tab(text: 'Topics',),
             Tab(text: 'Regions'),
           ],
-          unselectedLabelColor: Colors.black,
-          labelColor: Colors.blue,
-          indicatorColor: Colors.blue,
+
+          unselectedLabelStyle: newAppFont(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w400),
+          labelStyle: newAppFont(color:AppColors.appButtonColor, fontSize: 14, fontWeight: FontWeight.w600),
+          unselectedLabelColor: AppColors.bodyTextColor,
+          labelColor: AppColors.appButtonColor,
+          indicatorColor: AppColors.appButtonColor,
+
         ),
       ),
       body: TabBarView(controller: _tabController, children: [

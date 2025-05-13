@@ -26,7 +26,18 @@ class PapersScreenList extends StatelessWidget {
               itemBuilder: (context, index) {
                 return InkWell(
                   onTap: (){
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => IndividualPaper(paper:ePapersProvider.getAllMainPapersList[index].source  ,),));
+                    context.read<EPapersProvider>().getSingleEPapers(ePapersProvider.getAllMainPapersList[index].source,ePapersProvider.getAllMainPapersList[index].id).then((value) {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PapersScreenPreview(
+                              isBookmarked: 0 ,
+                              imageUrls: value.data??[],
+                              postId: value.id??"",
+                            ),
+                          ));
+                    },);
+                    // Navigator.push(context, MaterialPageRoute(builder: (context) => IndividualPaper(paper:ePapersProvider.getAllMainPapersList[index].source  ,),));
                   },
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 16.0),

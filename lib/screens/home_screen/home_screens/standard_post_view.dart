@@ -222,13 +222,13 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                           child: Row(
                                                             mainAxisSize: MainAxisSize.min,
                                                             children: [
-                                                              if (widget.article.isReporter == true) Icon(Icons.person, size: 14, color: Colors.grey),
+                                                              if (widget.article.isReporter == true) Icon(Icons.person, size: 14.sp, color: Colors.grey),
                                                               if (widget.article.isReporter == true)
                                                                 Text(
                                                                   ' ${widget.article.reportedBy} | ',
                                                                   style: fontStyle(fontSize:  widget.isFoldable?14:12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                                 ),
-                                                              Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                              Icon(Icons.access_time, size: 14.sp, color: Colors.grey),
                                                               Text(
                                                                 " ${formatTimeDifference(widget.article.created)}",
                                                                 style: fontStyle(fontSize: widget.isFoldable?14:12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
@@ -258,13 +258,13 @@ class _StandardPostViewState extends State<StandardPostView> {
                                                           child: Row(
                                                             mainAxisSize: MainAxisSize.min,
                                                             children: [
-                                                              if (widget.article.isReporter == true) Icon(Icons.person, size: 14, color: Colors.grey),
+                                                              if (widget.article.isReporter == true) Icon(Icons.person, size: 14.sp, color: Colors.grey),
                                                               if (widget.article.isReporter == true)
                                                                 Text(
                                                                   ' ${widget.article.reportedBy} | ',
                                                                   style: fontStyle(fontSize: widget.isFoldable?14:12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                                 ),
-                                                              Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                              Icon(Icons.access_time, size: 14.sp, color: Colors.grey),
                                                               Text(
                                                                 " ${formatTimeDifference(widget.article.created)}",
                                                                 style: fontStyle(fontSize: widget.isFoldable?14:12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
@@ -297,10 +297,10 @@ class _StandardPostViewState extends State<StandardPostView> {
 
                           Positioned(
                             bottom: widget.article.subType != "BigBlackStandard" ? bigData.toDouble() - 16 : data.toDouble() - 16, // Half in image, half in news
-                            left: 20,
+                            left: 20.w,
                             // right: MediaQuery.of(context).size.width * 0.3,
                             child: Container(
-                              height: 30,
+                              height: 30.sp,
                               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
                               decoration: BoxDecoration(
                                 color: Colors.grey.shade50,
@@ -320,7 +320,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                       TextSpan(
                                         text: "Chota ",
                                         style: fontStyle(
-                                          fontSize:  widget.isFoldable?16:16,
+                                          fontSize:  widget.isFoldable?16:16.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.black,
                                         ),
@@ -328,7 +328,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                       TextSpan(
                                         text: "News",
                                         style: fontStyle(
-                                          fontSize:  widget.isFoldable?16:16,
+                                          fontSize:  widget.isFoldable?16:16.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Color(0xff00A8FF),
                                         ),
@@ -458,8 +458,8 @@ class _StandardPostViewState extends State<StandardPostView> {
                                       ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
                                       : SvgPicture.asset(
                                     "assets/svg/reload.svg",
-                                    height: 22,
-                                    width: 22,
+                                    height: 22.w,
+                                    width: 22.w,
                                     color: widget.article.subType == "BigBlackStandard" ? Colors.white : Colors.grey,
                                   ),
                                 ),
@@ -514,10 +514,15 @@ class _StandardPostViewState extends State<StandardPostView> {
             fontSize:  widget.isFoldable?20:16.sp,
           ),
           recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              print(" $link");
-              Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: link.toString(), title: "Standard Links"),));
-            },
+            ..onTap = () async {   print("sbhjhfjksdfnsdknf1111 $link");
+
+              if(link=="https://play.google.com/store/apps/details?id=com.chotanews" && Platform.isIOS){
+                print("sbhjhfjksdfnsdknf $link");
+                launchURL(Uri.parse("https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092"));
+              }else {
+                launchURL(Uri.parse(link.toString()));
+              }
+             },
         ));
 
         return "";
@@ -535,5 +540,12 @@ class _StandardPostViewState extends State<StandardPostView> {
     );
 
     return spans;
+  }
+  Future<void> launchURL(Uri uri) async {
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch ${uri.path}';
+    }
   }
 }

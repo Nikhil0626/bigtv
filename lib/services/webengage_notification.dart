@@ -1,48 +1,126 @@
 import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/individual_post_details/individual_post_view.dart';
-import 'package:chotanews/globel_keys/app_router.dart';
-import 'package:chotanews/main.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import '../globel_keys/global_variables_data.dart';
+import '../aggricator_screens/individual_post_details/individual_post_view.dart';
+import '../main.dart';
 import '../screens/home_screen/home_repo/event_repo.dart';
 
 
- // Add a flag to track subscription
 
-void subscribeToPushCallbacks(WebEngagePlugin webEngagePlugin,) async{
-SharedPreferences sp = await SharedPreferences.getInstance();
+void onPushClick(Map<String, dynamic>? message, String? s) {
+  print("This is a push click callback from native to flutter. Payload " +
+      message.toString());
+}
+
+void onPushActionClick(Map<String, dynamic>? message, String? s) {
+  print(
+      "This is a Push action click callback from native to flutter. Payload " +
+          message.toString());
+  print(
+      "This is a Push action click callback from native to flutter. SelectedId " +
+          s.toString());
+}
+
+void onInAppPrepared(Map<String, dynamic>? message) {
+  print("This is a inapp prepared callback from native to flutter. Payload " +
+      message.toString());
+}
+
+void onInAppClick(Map<String, dynamic>? message, String? s) {
+  print("This is a inapp click callback from native to flutter. Payload " +
+      message.toString());
+}
+
+void onInAppShown(Map<String, dynamic>? message) {
+  print("This is a callback on inapp shown from native to flutter. Payload " +
+      message.toString());
+}
+
+void onInAppDismiss(Map<String, dynamic>? message) {
+  print(
+      "This is a callback on inapp dismiss from native to flutter. Payload " +
+          message.toString());
+}
 
 
-
-
-  webEngagePlugin.pushStream.listen((event) {
+void subscribeToPushCallbacks() async {
+  //Push click stream listener
+  WebEngagePlugin().pushStream.listen((event) {
+    String? deepLink = event.deepLink;
     Map<String, dynamic> messagePayload = event.payload!;
-    log("Push Notification Received: ${messagePayload["postId"]}");
-
-    EventRepo().sendEvent({"key":"openapp_via_notification",
-      "data":{
-        "device_id": GlobalVariables().deviceId,
-        "userId":sp.getString('loginId')??"",
-        "postId":messagePayload["postId"].toString(),
-      }});
-    Navigator.push(mainNavigatorKey.currentContext!, MaterialPageRoute(builder: (context) => IndividualPostView(postId:messagePayload["postId"] ),));
+    sendEventToServer(messagePayload["postId"]??"0");
   });
 
- webEngagePlugin.pushActionStream.listen((event) {
+  //Push action click listener
+  WebEngagePlugin().pushActionStream.listen((event) {
+    print("pushActionStream:" + event.toString());
+    String? deepLink = event.deepLink;
     Map<String, dynamic>? messagePayload = event.payload;
-    log("Push Action Clicked: ${messagePayload!["postId"]}");
-    EventRepo().sendEvent({"key":"openapp_via_notification",
+  sendEventToServer(messagePayload?["postId"]??"0");
+    // showDialogWithMessage("PushAction click callback: " + event.toString());
+  });
+}
 
-      "data":{
-        "device_id": GlobalVariables().deviceId,
-        "userId":sp.getString('loginId')??"",
-        "postId":messagePayload["postId"].toString(),
-      }});
-    Navigator.pushNamed(mainNavigatorKey.currentContext!, RoutesManager.homeScreen,arguments: {"postId":"${messagePayload["postId"]}","tab":"0"});
+void sendEventToServer(msg) async{
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  EventRepo().sendEvent({
+    "key": "openapp_via_notification",
+    "data": {
+      "device_id": sp.getString("deviceId")??"1234",
+      "userId": sp.getString('userId') ?? "",
+      "postId": msg,
+    }
+  });
 
- });
+  Navigator.push(mainNavigatorKey.currentContext!, MaterialPageRoute(builder: (context) => IndividualPostView(postId:msg ),));
+
+}
+void subscribeToTrackDeeplink() {
+  // WebEngagePlugin().trackDeeplinkStream.listen((location) {
+  //   //Location URL
+  // });
+}
+
+void subscribeToAnonymousIDCallback() {
+  // _webEngagePlugin.anonymousActionStream.listen((event) {
+  //   //  var message = event as Map<String,dynamic>;
+  //   this.setState(() {
+  //     anonymousId  =  "${event}";
+  //   });
+  // });
+}
+
+
+void showDialogWithMessage(String msg) {
+  showDialog(
+      context: mainNavigatorKey.currentState!.overlay!.context,
+      builder: (BuildContext context) {
+        return Dialog(
+            insetPadding: EdgeInsets.all(5.0),
+            child: new Container(
+              // padding: new EdgeInsets.all(10.0),
+              decoration: new BoxDecoration(
+                color: Colors.white,
+              ),
+              child: new Text(
+                msg,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontSize: 18.0,
+                  fontFamily: 'helvetica_neue_light',
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ));
+      });
+}
+
+void listenToAnonymousID() {
+  // WebEngagePlugin().anonymousActionStream.listen((event) {
+  //   log("listenToAnonymousID ${event}");
+  // });
 }

@@ -5,12 +5,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../screens/home_screen/home_screens/google_ads_view.dart';
+import '../../screens/home_screen/home_repo/event_repo.dart';
+import '../ad_manager_screen/google_ads_view.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../screens/videos_main/video_views/gallery_screen.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
+import '../ad_manager_screen/test_ads.dart';
 import 'ai_tag_posts_pageview.dart';
 import 'image_view.dart';
 import 'list_standerd_post_view.dart';
@@ -56,7 +59,15 @@ class _MainScreenListState extends State<MainScreenList> {
                       return Container(
                         color: Colors.white,
                         child: InkWell(
-                          onTap: () {
+                          onTap: () async{
+                            SharedPreferences preferences = await SharedPreferences.getInstance();
+                            String? userId = preferences.getString("userId");
+                            String? deviceId = preferences.getString("deviceId");
+
+                            EventRepo().sendEvent({
+                              "key": "ai_articles_opened",
+                              "data": {"device_id": "$deviceId", "userId": userId, "aiTagName":homeProvider.getAllAiTagsList[index]['aitagname'].toString(),"aiTagId": homeProvider.getAllAiTagsList[index]['aitagid'].toString()}
+                            });
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(
@@ -143,7 +154,8 @@ class _MainScreenListState extends State<MainScreenList> {
                                         Radius.circular(12),
                                       ),
                                       child: SizedBox(
-                                        height: 330.h,
+                                        height: 270.h,
+                                        // child: banner(),
                                         child: GoogleAdsView(
                                           article: homeProvider.getAllPostList[index],
                                           flipProvider: homeProvider,
@@ -223,3 +235,6 @@ class _MainScreenListState extends State<MainScreenList> {
     });
   }
 }
+
+
+// isStickyPost

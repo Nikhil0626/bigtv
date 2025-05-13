@@ -4,12 +4,10 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
-import 'package:chotanews/screens/home_screen/home_screens/home_screen_view.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -17,13 +15,11 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../globel_keys/global_variables_data.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../screens/home_screen/botton_actions.dart';
-import '../../screens/home_screen/home_models/home_screen_model.dart';
 import '../../screens/home_screen/home_provider/provider.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../../screens/home_screen/home_screens/google_ads_view.dart';
+import '../ad_manager_screen/google_ads_view.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../screens/videos_main/video_views/gallery_screen.dart';
 import '../../screens/videos_main/video_views/video_preview.dart';
@@ -36,6 +32,7 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
+import '../home_screen/main_screen_byts_view.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 
 class IndividualPostView extends StatefulWidget {
@@ -49,13 +46,106 @@ class IndividualPostView extends StatefulWidget {
 }
 
 class _IndividualPostViewState extends State<IndividualPostView> {
+  late PageController _pageController;
+  int autoIndex = 0;
+
+  @override
+  void initState() {
+    autoIndex = 0;
+    super.initState();
+    getWebData();
+    _pageController = PageController(viewportFraction: 1.0);
+    context.read<HomeProvider>().getAllPostList = [];
+    context.read<HomeProvider>().getIndividualPost(widget.postId.toString());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context);
+        return false; // Prevent default pop behavior
+      },
+      child: Scaffold(
+        body: Consumer<HomeProvider>(
+          builder: (_, homeProvider, __) {
+            if (homeProvider.getAllPostList.isEmpty) {
+              return Center(child: CircularProgressIndicator());
+            }
+
+            return Padding(
+              padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+              child: PageView.builder(
+                controller: _pageController,
+                scrollDirection: Axis.vertical,
+                itemCount: homeProvider.getAllPostList.length,
+                onPageChanged: (value) {
+                  log("IndividualPostView  ${autoIndex}--- $value");
+                  context.read<HomeProvider>().flipEvent('news', homeProvider.getAllAiTagsPostList[value]['id'], value > autoIndex ? true : false);
+
+                  autoIndex = value;
+                  setState(() {});
+                },
+                itemBuilder: (context, index) {
+                  if (homeProvider.getAllPostList.length - 5 == index) {
+                    log("is come from lin----k${homeProvider.getAllPostList[index]['id']}");
+                    context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList.last['id'].toString());
+                  }
+                  return AnimatedBuilder(
+                    animation: _pageController,
+                    builder: (context, child) {
+                      double position = 1.0;
+
+                      if (_pageController.hasClients && _pageController.position.haveDimensions) {
+                        double? page = _pageController.page ?? 0;
+                        position = (1 - (page - index).abs()).clamp(0.0, 1.0);
+                      }
+
+                      return Opacity(
+                        opacity: position,
+                        child: Transform.translate(
+                          offset: Offset(0, 50 * (1 - position)),
+                          child: Container(
+                            color: Colors.white,
+                            child: MainScreenBytView(article: homeProvider.getAllPostList[index]),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void getWebData() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sp.setString("webPostId", "");
+  }
+}
+
+class IndividualPostView1 extends StatefulWidget {
+  final String postId;
+  final bool isComeFrom;
+
+  const IndividualPostView1({super.key, required this.postId, this.isComeFrom = false});
+
+  @override
+  State<IndividualPostView1> createState() => _IndividualPostView1State();
+}
+
+class _IndividualPostView1State extends State<IndividualPostView1> {
   ScreenshotController adsScreenshotController = ScreenshotController();
 
   @override
   void initState() {
     log("is come from lin----k${widget.postId}");
     getWebData();
-    context.read<HomeProvider>().getIndividualPost(widget.postId);
+    context.read<HomeProvider>().getIndividualPost(widget.postId, isAds: true);
     super.initState();
   }
 
@@ -160,35 +250,33 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                                                   ),
                                                           ),
                                                           Positioned(
-                                                            top: 20,
-                                                            right: 20,
-                                                            child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-                                                              return  GestureDetector(
-                                                                onTap: () {
+                                                              top: 20,
+                                                              right: 20,
+                                                              child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                                                return GestureDetector(
+                                                                  onTap: () {
+                                                                    homeProvider.isBookMarkPost(article, context);
 
-                                                                  homeProvider.isBookMarkPost(article, context);
-
-                                                                  print("");
-                                                                },
-                                                                child: Container(
-                                                                  padding: EdgeInsets.all(7),
-                                                                  decoration: BoxDecoration(
-                                                                    color:  (homeProvider.isBookMark.contains(article['id'].toString()) ||article['isBookmarked'] == 1)
-                                                                        ? AppColors.appButtonColor
-                                                                        : Colors.black54,
-                                                                    shape: BoxShape.circle,
+                                                                    print("");
+                                                                  },
+                                                                  child: Container(
+                                                                    padding: EdgeInsets.all(7),
+                                                                    decoration: BoxDecoration(
+                                                                      color: (homeProvider.isBookMark.contains(article['id'].toString()) || article['isBookmarked'] == 1) || widget.isComeFrom
+                                                                          ? AppColors.appButtonColor
+                                                                          : Colors.black54,
+                                                                      shape: BoxShape.circle,
+                                                                    ),
+                                                                    child: Icon(
+                                                                      (homeProvider.isBookMark.contains(article['id'].toString()) || article['isBookmarked'] == 1) || widget.isComeFrom
+                                                                          ? Icons.bookmark
+                                                                          : Icons.bookmark_outline,
+                                                                      color: Colors.white,
+                                                                      size: 20,
+                                                                    ),
                                                                   ),
-                                                                  child: Icon(
-                                                                    (homeProvider.isBookMark.contains(article['id'].toString()) || article['isBookmarked'] == 1)
-                                                                        ? Icons.bookmark
-                                                                        : Icons.bookmark_outline,
-                                                                    color: Colors.white,
-                                                                    size: 20,
-                                                                  ),
-                                                                ),
-                                                              );
-                                                            })
-                                                          ),
+                                                                );
+                                                              })),
                                                           Positioned(
                                                             bottom: 0,
                                                             child: Container(
@@ -217,117 +305,120 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                                                     Expanded(
                                                                       child: article['subType'] == "BulletPost"
                                                                           ? Column(
-                                                                        mainAxisAlignment: MainAxisAlignment.start,
-                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                        children: [
-                                                                          (article['content'] != "")
-                                                                              ? Text(article['content'],
-                                                                              style: homeScreenFontStyle(
-                                                                                color:article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
-                                                                                fontWeight: FontWeight.w500,
-                                                                                fontSize: 16.sp,
-                                                                              ))
-                                                                              : const SizedBox.shrink(),
-                                                                          height(height: 8.sp),
-                                                                          Expanded(
-                                                                            child: ListView(
-                                                                              physics: const NeverScrollableScrollPhysics(),
-                                                                              children: article['bulletPoints'].map<Widget>((item) {
-                                                                                // Explicitly specify <Widget>
-                                                                                return Row(
-                                                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                  // Align items at the top
-                                                                                  children: [
-                                                                                    Text(
-                                                                                      "● ",
-                                                                                      style: TextStyle(
-                                                                                        fontSize: 14.sp,
-                                                                                        color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
-                                                                                        // Reduce bullet size for better alignment
-                                                                                        height: 1, // Ensures proper line height
-                                                                                      ),
-                                                                                    ),
-                                                                                    SizedBox(width: 5.sp),
-                                                                                    // Space between bullet & text
-                                                                                    Expanded(
-                                                                                      child: Text(
-                                                                                        item,
-                                                                                        strutStyle: StrutStyle(
-                                                                                          fontSize: 16.sp,
-                                                                                          // Match font size
-                                                                                          height: 1, // Ensures consistent line height
-                                                                                        ),
+                                                                              mainAxisAlignment: MainAxisAlignment.start,
+                                                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                                                              children: [
+                                                                                (article['content'] != "")
+                                                                                    ? Text(article['content'],
                                                                                         style: homeScreenFontStyle(
                                                                                           color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
-                                                                                          fontWeight: FontWeight.w400,
+                                                                                          fontWeight: FontWeight.w500,
                                                                                           fontSize: 16.sp,
-                                                                                        ),
-                                                                                      ),
-                                                                                    ),
-                                                                                  ],
-                                                                                );
-                                                                              }).toList(), // Ensure it is converted to List<Widget>
-                                                                            ),
-                                                                          ),
-                                                                          RichText(
-                                                                            text: TextSpan(
-                                                                              children: [
-                                                                                TextSpan(text: "\n\n"),
-                                                                                WidgetSpan(
-                                                                                  child: Row(
-                                                                                    mainAxisSize: MainAxisSize.min,
+                                                                                        ))
+                                                                                    : const SizedBox.shrink(),
+                                                                                height(height: 8.sp),
+                                                                                Expanded(
+                                                                                  child: ListView(
+                                                                                    physics: const NeverScrollableScrollPhysics(),
+                                                                                    children: article['bulletPoints'].map<Widget>((item) {
+                                                                                      // Explicitly specify <Widget>
+                                                                                      return Row(
+                                                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                        // Align items at the top
+                                                                                        children: [
+                                                                                          Text(
+                                                                                            "● ",
+                                                                                            style: TextStyle(
+                                                                                              fontSize: 14.sp,
+                                                                                              color:
+                                                                                                  article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
+                                                                                              // Reduce bullet size for better alignment
+                                                                                              height: 1, // Ensures proper line height
+                                                                                            ),
+                                                                                          ),
+                                                                                          SizedBox(width: 5.sp),
+                                                                                          // Space between bullet & text
+                                                                                          Expanded(
+                                                                                            child: Text(
+                                                                                              item,
+                                                                                              strutStyle: StrutStyle(
+                                                                                                fontSize: 16.sp,
+                                                                                                // Match font size
+                                                                                                height: 1, // Ensures consistent line height
+                                                                                              ),
+                                                                                              style: homeScreenFontStyle(
+                                                                                                color: article['subType'] == "BigBlackStandard"
+                                                                                                    ? AppColors.textColor.withOpacity(0.5)
+                                                                                                    : AppColors.textColor,
+                                                                                                fontWeight: FontWeight.w400,
+                                                                                                fontSize: 16.sp,
+                                                                                              ),
+                                                                                            ),
+                                                                                          ),
+                                                                                        ],
+                                                                                      );
+                                                                                    }).toList(), // Ensure it is converted to List<Widget>
+                                                                                  ),
+                                                                                ),
+                                                                                RichText(
+                                                                                  text: TextSpan(
                                                                                     children: [
-                                                                                      if (article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
-                                                                                      if (article['isReporter'] == 1)
-                                                                                        Text(
-                                                                                          ' ${article['reportedBy']} | ',
-                                                                                          style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                                      TextSpan(text: "\n\n"),
+                                                                                      WidgetSpan(
+                                                                                        child: Row(
+                                                                                          mainAxisSize: MainAxisSize.min,
+                                                                                          children: [
+                                                                                            if (article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
+                                                                                            if (article['isReporter'] == 1)
+                                                                                              Text(
+                                                                                                ' ${article['reportedBy']} | ',
+                                                                                                style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                                              ),
+                                                                                            Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                                                            Text(
+                                                                                              " ${formatTimeDifference(article['created'])}",
+                                                                                              style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                                            ),
+                                                                                          ],
                                                                                         ),
-                                                                                      Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                                                                      Text(
-                                                                                        " ${formatTimeDifference(article['created'])}",
-                                                                                        style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                                                       ),
                                                                                     ],
                                                                                   ),
-                                                                                ),
+                                                                                )
                                                                               ],
-                                                                            ),
-                                                                          )
-                                                                        ],
-                                                                      )
+                                                                            )
                                                                           : RichText(
-                                                                        text: TextSpan(
-                                                                          text: '',
-                                                                          children: [
-                                                                            ..._parseText(context, article['content'],article['links'], article),
-                                                                            if (article['isStickyPost'] != 1)
-                                                                              TextSpan(
+                                                                              text: TextSpan(
+                                                                                text: '',
                                                                                 children: [
-                                                                                  TextSpan(text: "\n\n"),
-                                                                                  WidgetSpan(
-                                                                                    child: Row(
-                                                                                      mainAxisSize: MainAxisSize.min,
+                                                                                  ..._parseText(context, article['content'], article['links'], article),
+                                                                                  if (article['isStickyPost'] != 1)
+                                                                                    TextSpan(
                                                                                       children: [
-                                                                                        if (article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
-                                                                                        if (article['isReporter'] == 1)
-                                                                                          Text(
-                                                                                            ' ${article['reportedBy']} | ',
-                                                                                            style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                                        TextSpan(text: "\n\n"),
+                                                                                        WidgetSpan(
+                                                                                          child: Row(
+                                                                                            mainAxisSize: MainAxisSize.min,
+                                                                                            children: [
+                                                                                              if (article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
+                                                                                              if (article['isReporter'] == 1)
+                                                                                                Text(
+                                                                                                  ' ${article['reportedBy']} | ',
+                                                                                                  style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                                                ),
+                                                                                              Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                                                              Text(
+                                                                                                " ${formatTimeDifference(article['created'])}",
+                                                                                                style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                                              ),
+                                                                                            ],
                                                                                           ),
-                                                                                        Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                                                                        Text(
-                                                                                          " ${formatTimeDifference(article['created'])}",
-                                                                                          style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                                                         ),
                                                                                       ],
                                                                                     ),
-                                                                                  ),
                                                                                 ],
                                                                               ),
-                                                                          ],
-                                                                        ),
-                                                                      ),
+                                                                            ),
                                                                     ),
                                                                   ],
                                                                 ),
@@ -413,13 +504,16 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                               postType: article['subType'] ?? "",
                                               icon: "assets/svg/new_comment.svg",
                                               label: 'కామెంట్',
-                                              onTap: () {
+                                              onTap: () async {
+                                                SharedPreferences sp = await SharedPreferences.getInstance();
+                                                String? userId = sp.getString("userId");
+                                                String? deviceId = sp.getString("deviceId");
                                                 context.read<AuthProvider>().sendEvent("CommentPage");
                                                 EventRepo().sendEvent({
                                                   "key": "comments",
                                                   "data": {
-                                                    "device_id": "${GlobalVariables().deviceId}",
-                                                    "userId": context.read<FlipProvider>().userId ?? "",
+                                                    "device_id": "$deviceId",
+                                                    "userId": userId ?? "",
                                                     "postId": article['id'].toString(),
                                                   }
                                                 });
@@ -427,7 +521,7 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                                 showComments(context, article['id']);
                                                 EventRepo().sendEvent({
                                                   "key": "comments",
-                                                  "data": {"deviceId": GlobalVariables().deviceId.toString(), "openTime": DateTime.now().toString()}
+                                                  "data": {"deviceId": deviceId.toString(), "openTime": DateTime.now().toString()}
                                                 });
                                               },
                                             ),
@@ -437,14 +531,12 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                                               icon: "assets/svg/share.svg",
                                               label: 'షేర్',
                                               onTap: () async {
+                                                SharedPreferences sp = await SharedPreferences.getInstance();
+                                                String? userId = sp.getString("userId");
+                                                String? deviceId = sp.getString("deviceId");
                                                 EventRepo().sendEvent({
-                                                  "key": "share_via_widget.articles",
-                                                  "data": {
-                                                    "device_id": "${GlobalVariables().deviceId}",
-                                                    "userId": context.read<FlipProvider>().userId ?? "",
-                                                    "postId": article['id'].toString(),
-                                                    "isWhatAppShare": false,
-                                                  }
+                                                  "key": "share_via_articles",
+                                                  "data": {"device_id": "$deviceId", "userId": userId ?? "", "postId": article['id'].toString(), "isWhatAppShare": false, "source_from": "news"}
                                                 });
 
                                                 sendShareDetails(context.read<FlipProvider>().userId, article['id'], article['content'].toString());
@@ -488,8 +580,11 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                           child: Container(
                               // height: ,
                               // width: 40,
-                            padding: EdgeInsets.all(7),
-                              decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(20)), color: Colors.black54,),
+                              padding: EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.all(Radius.circular(20)),
+                                color: Colors.black54,
+                              ),
                               child: Icon(
                                 Icons.keyboard_backspace,
                                 size: 20,
@@ -523,8 +618,6 @@ class _IndividualPostViewState extends State<IndividualPostView> {
     text.splitMapJoin(linkRegExp, onMatch: (match) {
       String link = match.group(0)!;
 
-
-
       if (link.contains('<link1>') && links != null && links.isNotEmpty) {
         link = links[0]['value'].toString();
       } else if (link.contains('<link2>') && links != null && links.length > 1) {
@@ -535,26 +628,31 @@ class _IndividualPostViewState extends State<IndividualPostView> {
         link = link;
       }
       spans.add(TextSpan(
-        text: match
-            .group(0)
-            .toString()
-            .replaceFirst('<link1>', '')
-            .replaceFirst('</link1>', '')
-            .replaceFirst('<link2>', '')
-            .replaceFirst('</link2>', '')
-            .replaceFirst('<link3>', '')
-            .replaceFirst('</link3>', ''),
-        style: homeScreenFontStyle(
-          color: article['subType'] == "BigBlackStandard" ? Colors.white : Colors.blue,
-          fontWeight: FontWeight.w400,
-          fontSize: 16.sp,
-        ),
-        recognizer: TapGestureRecognizer()
-          ..onTap = () async {
-            print(" $link");
-            Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: link.toString(), title: "Standard Links"),));
-          },
-      ));
+          text: match
+              .group(0)
+              .toString()
+              .replaceFirst('<link1>', '')
+              .replaceFirst('</link1>', '')
+              .replaceFirst('<link2>', '')
+              .replaceFirst('</link2>', '')
+              .replaceFirst('<link3>', '')
+              .replaceFirst('</link3>', ''),
+          style: homeScreenFontStyle(
+            color: article['subType'] == "BigBlackStandard" ? Colors.white : Colors.blue,
+            fontWeight: FontWeight.w400,
+            fontSize: 16.sp,
+          ),
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              print("sbhjhfjksdfnsdknf1111 $link");
+
+              if (link == "https://play.google.com/store/apps/details?id=com.chotanews" && Platform.isIOS) {
+                print("sbhjhfjksdfnsdknf $link");
+                launchURL(Uri.parse("https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092"));
+              } else {
+                launchURL(Uri.parse(link.toString()));
+              }
+            }));
 
       return "";
     }, onNonMatch: (nonMatch) {
@@ -571,8 +669,16 @@ class _IndividualPostViewState extends State<IndividualPostView> {
     return spans;
   }
 
-  void getWebData() async{
+  void getWebData() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-      sp.setString("webPostId","");
+    sp.setString("webPostId", "");
+  }
+
+  Future<void> launchURL(Uri uri) async {
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch ${uri.path}';
+    }
   }
 }

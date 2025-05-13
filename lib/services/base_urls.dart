@@ -8,7 +8,7 @@ class BaseUrls {
   static const String baseUrlAws = "https://prodchotanews.signitivessoft.com/api";
 
   /// event states
-  static const String eventUrl = "/logs";
+  static const String eventUrl = "/events";
 
   ///ENewsPapers
   static const String getMainEPapers = "/enewspaper/first_pages";
@@ -54,7 +54,7 @@ class BaseUrls {
 
   /// Python apis
   static const String ePaperBaseUrlAws = "http://3.108.235.31:8000";
-  static const String baseUrlAwsDev = "http://13.201.100.59:8000";
+  static const String baseUrlAwsDev = "https://api.chotanews.com";
 
   ///Login login
   static const String sendOtpPy = "/send-otp";

@@ -105,11 +105,12 @@ class SettingsProvider extends ChangeNotifier {
   void isLikePost(val) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
+    String? deviceId = sp.getString("deviceId");
     log(val['id'].toString());
     if (!isLikeList.contains(val['id'].toString())) {
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": true}
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString (), "isLike": true,"source_from":"news"}
       });
       isLikeList.add(val['id'].toString());
       postLike(val['id'].toString(), true);
@@ -120,7 +121,7 @@ class SettingsProvider extends ChangeNotifier {
       isLikeList.remove(val['id'].toString());
       EventRepo().sendEvent({
         "key": "liked_article",
-        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": false}
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isLike": false,"source_from":"news"}
       });
       sendLikeDetails(userId, val['id'].toString(), false, val['title'].toString());
       log(isLikeList.toString());
@@ -135,7 +136,7 @@ class SettingsProvider extends ChangeNotifier {
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
-      "user_id": userId,
+      "user_id": userId??"0",
       "device_id": deviceId,
     };
 
@@ -188,13 +189,17 @@ class SettingsProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
     } finally {
+      isOthersSelected=false;
+
       isFeedbackLoading = false;
       notifyListeners();
     }
   }
 
   void addToSelectedEngagements(String profileName) {
-    isOthersSelected =!isOthersSelected;
+    if(profileName == "Others") {
+      isOthersSelected = !isOthersSelected;
+    }
     log(profileName);
     if (!selectedFeedbackList.contains(profileName)) {
       selectedFeedbackList.add(profileName);

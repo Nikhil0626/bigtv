@@ -164,6 +164,8 @@ ScreenshotController screenshotControllers = ScreenshotController();
                   ),
                 ),
                 Spacer(),
+
+                if(widget.articalData['isStickyPost']==0)
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4),
                   child: DateAndSource(data: widget.articalData),
@@ -234,6 +236,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                               "userId": userId ?? "",
                               "postId": widget.articalData['id'].toString(),
                               "isWhatAppShare": false,
+                              "source_from":"news"
                             }
                           });
       

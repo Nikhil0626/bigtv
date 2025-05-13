@@ -11,10 +11,11 @@ import 'main_screen_byts_view.dart';
 
 class MainScreenPageView extends StatefulWidget {
   final int startIndex; // 👈 Accept index to start from
-final bool isAiTags;
-final String tagName;
-final String tagId;
-  const MainScreenPageView({super.key, this.startIndex = 0, this.isAiTags = false,this.tagName ="",this.tagId =""});
+  final bool isAiTags;
+  final String tagName;
+  final String tagId;
+
+  const MainScreenPageView({super.key, this.startIndex = 0, this.isAiTags = false, this.tagName = "", this.tagId = ""});
 
   @override
   _MainScreenPageViewState createState() => _MainScreenPageViewState();
@@ -22,9 +23,11 @@ final String tagId;
 
 class _MainScreenPageViewState extends State<MainScreenPageView> {
   late PageController _pageController;
+  int autoIndex = 0;
 
   @override
   void initState() {
+    autoIndex = 0;
     super.initState();
     _pageController = PageController(viewportFraction: 1.0);
 
@@ -51,47 +54,57 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
           return Column(
             children: [
-              if(widget.isAiTags)
-              Padding(
-                padding:  EdgeInsets.only(top: MediaQuery.of(context).padding.top+20,bottom: 10),
-                child: Row(
-                  children: [
-                    width(width: 10),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Icon(
-                        Icons.arrow_back,
-                        color: Colors.black,
-                        size: 24,
+              if (widget.isAiTags)
+                Padding(
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 20, bottom: 10),
+                  child: Row(
+                    children: [
+                      width(width: 10),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Icon(
+                          Icons.arrow_back,
+                          color: Colors.black,
+                          size: 24,
+                        ),
                       ),
-                    ),
-                    width(width: 10),
-                    Expanded(child: Text("${widget.tagName}",style: fontStyle(fontWeight: FontWeight.w900,fontSize: 16,color: AppColors.textColor),)),
-                    Container(
-                      padding: EdgeInsets.all(2.sp),
-                        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(2)),color: AppColors.loginNumberBg),
-                        child: Text("3/${ homeProvider.getAllPostList.length}",style: fontStyle(fontWeight: FontWeight.w600,fontSize: 12,color: AppColors.textColor),)),
-                    width(
-                      width: 10
-                    )
-                  ],
+                      width(width: 10),
+                      Expanded(
+                          child: Text(
+                        "${widget.tagName}",
+                        style: fontStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.textColor),
+                      )),
+                      Container(
+                          padding: EdgeInsets.all(2.sp),
+                          decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(2)), color: AppColors.loginNumberBg),
+                          child: Text(
+                            "3/${homeProvider.getAllPostList.length}",
+                            style: fontStyle(fontWeight: FontWeight.w600, fontSize: 12, color: AppColors.textColor),
+                          )),
+                      width(width: 10)
+                    ],
+                  ),
                 ),
-              ),
               Expanded(
                 child: Padding(
-                  padding:  EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                   child: PageView.builder(
                     controller: _pageController,
                     scrollDirection: Axis.vertical,
                     itemCount: homeProvider.getAllPostList.length,
+                    onPageChanged: (value) {
+                      log("IndividualPostView  $autoIndex--- $value");
+                      context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
 
+                      autoIndex = value;
+                      setState(() {});
+                    },
                     itemBuilder: (context, index) {
-                      if(homeProvider.getAllPostList.length-5==index){
+                      if (homeProvider.getAllPostList.length - 5 == index) {
                         log("is come from lin----k${homeProvider.getAllPostList[index]['id']}");
-                        context.read<HomeProvider>().getAllPost(postId:homeProvider.getAllPostList.last['id'].toString());
-
+                        context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList.last['id'].toString());
                       }
                       return AnimatedBuilder(
                         animation: _pageController,

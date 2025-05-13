@@ -37,6 +37,7 @@ class ReelPreviewScreen extends StatefulWidget {
 class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
   late PageController _pageController;
   late List<YoutubePlayerController> _controllers;
+  int currentIndex = 0;
   @override
   void initState() {
     super.initState();
@@ -76,6 +77,7 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
         return controller;
       },
     );
+    currentIndex = 0;
   }
 
   @override
@@ -115,8 +117,10 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
           controller: _pageController,
           scrollDirection: Axis.vertical,
           itemCount: reelsProviders.getAllReelsList.length,
-          onPageChanged: (value) {
-            // Pause all except current
+          onPageChanged: (value) async{
+              context.read<HomeProvider>().flipEvent('reel',reelsProviders.getAllReelsList[value].id,value>currentIndex?false:true);
+            currentIndex = value;
+              log(currentIndex.toString());
             for (var i = 0; i < _controllers.length; i++) {
               if (i == value) {
                 _controllers[i].play();
@@ -248,6 +252,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                       "userId": userId ?? "",
                       "postId": widget.reelCard.id.toString(),
                       "isWhatAppShare": false,
+                      "source_from":"reel"
                     }
                   });
 

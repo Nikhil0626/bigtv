@@ -1,8 +1,10 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../screens/home_screen/home_repo/event_repo.dart';
 import '../services/deviice_details.dart';
+import '../services/webengage_notification.dart';
 
 class AppLifecycleManager extends StatefulWidget {
   final Widget child;
@@ -14,6 +16,7 @@ class AppLifecycleManager extends StatefulWidget {
 }
 
 class _AppLifecycleManagerState extends State<AppLifecycleManager> with WidgetsBindingObserver {
+  final WebEngagePlugin webEngage = WebEngagePlugin();
   @override
   void initState() {
     super.initState();
@@ -29,14 +32,16 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager> with WidgetsB
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-
-    if (state == AppLifecycleState.paused) {
+    if (state == AppLifecycleState.inactive) {
+      // disposePushCallbacks();
+      print('Notification shade may have been opened');
+    }else if (state == AppLifecycleState.paused) {
       getUniqueDeviceId("close",);
       print('App is in the background.');
-      // Handle background tasks here.
+
     } else if (state == AppLifecycleState.resumed) {
       print('App is in the foreground.');
-      // Handle foreground tasks here.
+    getNotifications();
     }
     if (state == AppLifecycleState.detached) {
       print('app_removes');
@@ -48,5 +53,10 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager> with WidgetsB
   @override
   Widget build(BuildContext context) {
     return widget.child;
+  }
+
+  void getNotifications() async{
+
+    // subscribeToPushCallbacks(webEngage);
   }
 }

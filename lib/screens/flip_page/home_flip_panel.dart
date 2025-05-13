@@ -90,6 +90,8 @@ class _FlipPanelState<T> extends State<FlipPanel>
     _running = false;
     _direction = FlipDirection.none;
 
+
+
     newHeight = (((MediaQuery.of(mainNavigatorKey.currentContext!).padding.top + MediaQuery.of(mainNavigatorKey.currentContext!).padding.bottom).round().toInt())/2).round().toInt();
     newHeight = newHeight.round();
     print("New height   $newHeight");

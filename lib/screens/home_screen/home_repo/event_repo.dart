@@ -11,7 +11,7 @@ class EventRepo extends BaseService {
   Future sendEvent(body) async {
     log("event body --- ${body}");
     Response response = await makeRequest(url: BaseUrls.eventUrl,
-        baseUrl:BaseUrls.baseUrlAws,
+        baseUrl:BaseUrls.baseUrlAwsDev,
         method: RequestType.post,
         body: body);
     log(response.data.toString());

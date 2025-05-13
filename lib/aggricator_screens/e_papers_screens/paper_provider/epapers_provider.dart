@@ -43,31 +43,37 @@ class EPapersProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  Future getSingleEPapers(String paper) async {
+  SinglePaperModel? singlePaperModel;
+  Future getSingleEPapers(String paper,id) async {
     isMainPapers = true;
     getSinglePapersList = [];
-
+    print("sdfjsfjgjkhsahid adiuaidhwd");
     try {
-      Response response = await EPaperRepo().getSingleEPapers(paper);
+      Response response = await EPaperRepo().getSingleEPapers(paper,id);
       if (response.statusCode == 200) {
         log(response.data.toString());
-        List data = response.data;
-        getSinglePapersList = data.map((e) => SinglePaperModel.fromJson(e)).toList();
-        isBookMark = getSinglePapersList.first.data!
-            .where((e) => e.isBookmarked == 1)
-            .map((e) => e.id.toString())
-            .toList();
+        singlePaperModel =   SinglePaperModel.fromJson(response.data);
+
+        // isBookMark = getSinglePapersList.first.data!
+        //     .where((e) => e.isBookmarked == 1)
+        //     .map((e) => e.id.toString())
+        //     .toList();
+        isMainPapers = false;
+
+        notifyListeners();
+return singlePaperModel;
       }
     } on DioException catch (e, st) {
-      getSinglePapersList = [];
+      singlePaperModel = SinglePaperModel.fromJson({});
       log("Single paper dio error ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
-      getSinglePapersList = [];
+      singlePaperModel = SinglePaperModel.fromJson({});
       log("Single paper error ${e.toString()} ---- ${st.toString()}");
     } finally {
       isMainPapers = false;
+
       notifyListeners();
+      return singlePaperModel;
     }
   }
 
@@ -81,8 +87,8 @@ class EPapersProvider extends ChangeNotifier {
     log(val.id.toString());
     if (!isBookMark.contains(val.id.toString())) {
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": true}
+        "key": "bookmark_article",
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isBookMark": true,"source_from":"paper"}
       });
       isBookMark.add(val.id.toString());
       Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
@@ -95,8 +101,8 @@ class EPapersProvider extends ChangeNotifier {
       );
       isBookMark.remove(val.id.toString());
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isLike": false}
+        "key": "bookmark_article",
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isBookMark": false,"source_from":"paper"}
       });
       log(isBookMark.toString());
     }

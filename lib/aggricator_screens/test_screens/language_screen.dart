@@ -1,479 +1,480 @@
-import 'dart:developer';
+import 'dart:io';
 
-import 'package:appinio_swiper/appinio_swiper.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
+import 'package:intl/intl.dart';
 
+class _MyApp11State extends State<MyApp11> {
+  late WebEngagePlugin _webEngagePlugin;
+  late String os;
 
-class Example extends StatefulWidget {
-  const Example({
-    Key? key,
-  }) : super(key: key);
+  void _onPushClick(Map<String, dynamic>? message, String? s) {
+    print("This is a push click callback from native to flutter. Payload " +
+        message.toString());
+  }
 
-  @override
-  State<Example> createState() => _ExamplePageState();
-}
+  void _onPushActionClick(Map<String, dynamic>? message, String? s) {
+    print(
+        "This is a Push action click callback from native to flutter. Payload " +
+            message.toString());
+    print(
+        "This is a Push action click callback from native to flutter. SelectedId " +
+            s.toString());
+  }
 
-class _ExamplePageState extends State<Example> {
-  final AppinioSwiperController controller = AppinioSwiperController();
+  void _onInAppPrepared(Map<String, dynamic>? message) {
+    print("This is a inapp prepared callback from native to flutter. Payload " +
+        message.toString());
+  }
+
+  void _onInAppClick(Map<String, dynamic>? message, String? s) {
+    print("This is a inapp click callback from native to flutter. Payload " +
+        message.toString());
+  }
+
+  void _onInAppShown(Map<String, dynamic>? message) {
+    print("This is a callback on inapp shown from native to flutter. Payload " +
+        message.toString());
+  }
+
+  void _onInAppDismiss(Map<String, dynamic>? message) {
+    print(
+        "This is a callback on inapp dismiss from native to flutter. Payload " +
+            message.toString());
+  }
 
   @override
   void initState() {
-    Future.delayed(const Duration(seconds: 1)).then((_) {
-      _shakeCard();
-    });
     super.initState();
+    initPlatformState();
+    initWebEngage();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      child: CupertinoPageScaffold(
-        child: Column(
-          children: [
-            const SizedBox(
-              height: 50,
-            ),
-            SizedBox(
-              height: MediaQuery.of(context).size.height * .75,
-              child: Padding(
-                padding: const EdgeInsets.only(
-                  left: 25,
-                  right: 25,
-                  top: 50,
-                  bottom: 40,
-                ),
-                child: AppinioSwiper(
-                  invertAngleOnBottomDrag: true,
-                  backgroundCardCount: 3,
-                  swipeOptions: const SwipeOptions.all(),
-                  controller: controller,
-                  onCardPositionChanged: (
-                      SwiperPosition position,
-                      ) {
-                    //debugPrint('${position.offset.toAxisDirection()}, '
-                    //    '${position.offset}, '
-                    //    '${position.angle}');
-                  },
-                  onSwipeEnd: _swipeEnd,
-                  onEnd: _onEnd,
-                  cardCount: candidates.length,
-                  cardBuilder: (BuildContext context, int index) {
-                    return ExampleCard(candidate: candidates[index]);
-                  },
-                ),
-              ),
-            ),
-            IconTheme.merge(
-              data: const IconThemeData(size: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  TutorialAnimationButton(_shakeCard),
-                  const SizedBox(
-                    width: 20,
-                  ),
-                  swipeLeftButton(controller),
-                  const SizedBox(
-                    width: 20,
-                  ),
-                  swipeRightButton(controller),
-                  const SizedBox(
-                    width: 20,
-                  ),
-                  unswipeButton(controller),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
+  void initWebEngage() {
+    _webEngagePlugin = new WebEngagePlugin();
+    _webEngagePlugin.setUpPushCallbacks(_onPushClick, _onPushActionClick);
+    _webEngagePlugin.setUpInAppCallbacks(
+        _onInAppClick, _onInAppShown, _onInAppDismiss, _onInAppPrepared);
+    _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
+    subscribeToPushCallbacks();
+    subscribeToTrackDeeplink();
+    subscribeToAnonymousIDCallback();
+    _listenToAnonymousID();
   }
 
-  void _swipeEnd(int previousIndex, int targetIndex, SwiperActivity activity) {
-    switch (activity) {
-      case Swipe():
-        log('The card was swiped to the : ${activity.direction}');
-        log('previous index: $previousIndex, target index: $targetIndex');
-        break;
-      case Unswipe():
-        log('A ${activity.direction.name} swipe was undone.');
-        log('previous index: $previousIndex, target index: $targetIndex');
-        break;
-      case CancelSwipe():
-        log('A swipe was cancelled');
-        break;
-      case DrivenActivity():
-        log('Driven Activity');
-        break;
+  var data = "";
+
+  void _onTokenInvalidated(Map<String, dynamic>? message) {
+    print("tokenInvalidated callback received " + message.toString());
+    // Reset with new Security Token in the callback
+    WebEngagePlugin.setSecureToken("USER_NAME", "REPLACE_JWT_TOKEN_HERE");
+  }
+
+  void _listenToAnonymousID() {
+    _webEngagePlugin.anonymousActionStream.listen((event) {
+      setState(() {
+        data = "${event}";
+      });
+    });
+  }
+
+  // Platform messages are asynchronous, so we initialize in an async method.
+  Future<void> initPlatformState() async {
+    if (Platform.isAndroid) {
+      if (await Permission.notification.request().isGranted) {
+        // Either the permission was already granted before or the user just granted it.
+        print("notification Permission is granted");
+        WebEngagePlugin.setUserDevicePushOptIn(true);
+      } else {
+        print("notification Permission is denied.");
+        WebEngagePlugin.setUserDevicePushOptIn(false);
+      }
     }
   }
 
-  void _onEnd() {
-    log('end reached!');
-  }
+  var anonymousId = "null";
 
-  // Animates the card back and forth to teach the user that it is swipable.
-  Future<void> _shakeCard() async {
-    const double distance = 30;
-    // We can animate back and forth by chaining different animations.
-    await controller.animateTo(
-      const Offset(-distance, 0),
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-    );
-    await controller.animateTo(
-      const Offset(distance, 0),
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeInOut,
-    );
-    // We need to animate back to the center because `animateTo` does not center
-    // the card for us.
-    await controller.animateTo(
-      const Offset(0, 0),
-      duration: const Duration(milliseconds: 200),
-      curve: Curves.easeInOut,
-    );
-  }
-}
+  void _openLoginModal() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        String username = "";
+        String secureToken = "";
 
-Widget swipeRightButton(AppinioSwiperController controller) {
-  // We can listen to the controller to get updated as the card shifts position!
-  return ListenableBuilder(
-    listenable: controller,
-    builder: (context, child) {
-      final SwiperPosition? position = controller.position;
-      final SwiperActivity? activity = controller.swipeActivity;
-      // Lets measure the progress of the swipe iff it is a horizontal swipe.
-      final double progress = (activity is Swipe || activity == null) &&
-          position != null &&
-          position.offset.toAxisDirection().isHorizontal
-          ? position.progressRelativeToThreshold.clamp(-1, 1)
-          : 0;
-      // Lets animate the button according to the
-      // progress. Here we'll color the button more grey as we swipe away from
-      // it.
-      final Color color = Color.lerp(
-        CupertinoColors.activeGreen,
-        CupertinoColors.systemGrey2,
-        (-1 * progress).clamp(0, 1),
-      )!;
-      return GestureDetector(
-        onTap: () => controller.swipeRight(),
-        child: Transform.scale(
-          scale: 1 + .1 * progress.clamp(0, 1),
-          child: Container(
-            height: 60,
-            width: 60,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.9),
-                  spreadRadius: -10,
-                  blurRadius: 20,
-                  offset: const Offset(0, 20), // changes position of shadow
-                ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.check,
-              color: CupertinoColors.white,
-              size: 40,
-            ),
+        return AlertDialog(
+          title: Text("Login"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                onChanged: (value) {
+                  username = value;
+                },
+                decoration: InputDecoration(labelText: "Username"),
+              ),
+              TextField(
+                onChanged: (value) {
+                  secureToken = value;
+                },
+                decoration: InputDecoration(labelText: "Token"),
+                obscureText: true,
+              ),
+            ],
           ),
-        ),
-      );
-    },
-  );
-}
-
-//swipe card to the left side
-Widget swipeLeftButton(AppinioSwiperController controller) {
-  return ListenableBuilder(
-    listenable: controller,
-    builder: (context, child) {
-      final SwiperPosition? position = controller.position;
-      final SwiperActivity? activity = controller.swipeActivity;
-      final double horizontalProgress =
-      (activity is Swipe || activity == null) &&
-          position != null &&
-          position.offset.toAxisDirection().isHorizontal
-          ? -1 * position.progressRelativeToThreshold.clamp(-1, 1)
-          : 0;
-      final Color color = Color.lerp(
-        const Color(0xFFFF3868),
-        CupertinoColors.systemGrey2,
-        (-1 * horizontalProgress).clamp(0, 1),
-      )!;
-      return GestureDetector(
-        onTap: () => controller.swipeLeft(),
-        child: Transform.scale(
-          // Increase the button size as we swipe towards it.
-          scale: 1 + .1 * horizontalProgress.clamp(0, 1),
-          child: Container(
-            height: 60,
-            width: 60,
-            decoration: BoxDecoration(
-              color: color,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: color.withOpacity(0.9),
-                  spreadRadius: -10,
-                  blurRadius: 20,
-                  offset: const Offset(0, 20), // changes position of shadow
-                ),
-              ],
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                if (username.isEmpty) {
+                  print("Please Enter valid UserName");
+                } else {
+                  if (secureToken.isEmpty) {
+                    // login
+                    print("WebEngage: Login");
+                    WebEngagePlugin.userLogin(username);
+                  } else {
+                    // loginWithsecureToken
+                    print("WebEngage: Login with secureToken");
+                    WebEngagePlugin.userLogin(username, secureToken);
+                  }
+                }
+                Navigator.of(context).pop();
+              },
+              child: Text("Login"),
             ),
-            alignment: Alignment.center,
-            child: const Icon(
-              Icons.close,
-              color: CupertinoColors.white,
-            ),
-          ),
-        ),
-      );
-    },
-  );
-}
-
-//unswipe card
-Widget unswipeButton(AppinioSwiperController controller) {
-  return GestureDetector(
-    onTap: () => controller.unswipe(),
-    child: Container(
-      height: 60,
-      width: 60,
-      alignment: Alignment.center,
-      child: const Icon(
-        Icons.rotate_left_rounded,
-        color: CupertinoColors.systemGrey2,
-      ),
-    ),
-  );
-}
-
-class TutorialAnimationButton extends StatelessWidget {
-  const TutorialAnimationButton(this.onTap, {super.key});
-
-  final VoidCallback onTap;
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: const Icon(
-        Icons.question_mark,
-        color: CupertinoColors.systemGrey2,
-      ),
+    data = data;
+    print("build");
+    return MaterialApp(
+      navigatorKey: navigatorKey,
+      home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Plugin example app'),
+          ),
+          body: ListView(
+            children: <Widget>[
+              new ListTile(
+                title: Text("$data"),
+                onTap: () {
+                  setState(() {
+                    data = data;
+                  });
+                },
+              ),
+              new ListTile(
+                title: Text("Login "),
+                onTap: () {
+                  String userName = "REPLACE_YOUR_USERNAME";
+                  WebEngagePlugin.userLogin(userName);
+                  showToast("Login-" + userName);
+                },
+              ),
+              new ListTile(title: Text("Login Modal"), onTap: _openLoginModal),
+              new ListTile(
+                title: Text("Login With secureToken "),
+                onTap: () {
+                  String userName = "REPLACE_YOUR_USERNAME";
+                  String secureToken = "REPLACE_YOUR_TOKEN_HERE";
+                  WebEngagePlugin.userLogin(userName, secureToken);
+                },
+              ),
+              new ListTile(
+                title: Text("Logout"),
+                onTap: () {
+                  WebEngagePlugin.userLogout();
+                  showToast("Logout");
+                },
+              ),
+              new ListTile(
+                title: Text("Set FirstName"),
+                onTap: () {
+                  WebEngagePlugin.setUserFirstName('Sourabh');
+                  showToast("User FirstName- Sourabh");
+                },
+              ),
+              new ListTile(
+                title: Text("Set LastName"),
+                onTap: () {
+                  WebEngagePlugin.setUserLastName('Gupta');
+                  showToast("LastName Gupta");
+                },
+              ),
+              new ListTile(
+                title: Text("Set UserEmail"),
+                onTap: () {
+                  WebEngagePlugin.setUserEmail('ram@gmail.com');
+                  showToast("Email - ram@gmail.com");
+                },
+              ),
+              new ListTile(
+                title: Text("Set UserHashedEmail"),
+                onTap: () {
+                  WebEngagePlugin.setUserHashedEmail(
+                      '144e0424883546e07dcd727057fd3b62');
+                  showToast("HashedEmail - 144e0424883546e07dcd727057fd3b62");
+                },
+              ),
+              new ListTile(
+                title: Text("Set UserPhone"),
+                onTap: () {
+                  WebEngagePlugin.setUserPhone('+919999900000');
+                  showToast("Phone - +919999900000");
+                },
+              ),
+              new ListTile(
+                title: Text("Set UserHashedPhone"),
+                onTap: () {
+                  WebEngagePlugin.setUserHashedPhone(
+                      'e0ec043b3f9e198ec09041687e4d4e8d');
+                  showToast("HashedPhone - e0ec043b3f9e198ec09041687e4d4e8d");
+                },
+              ),
+              new ListTile(
+                title: Text("Set UserCompany"),
+                onTap: () {
+                  WebEngagePlugin.setUserCompany('WebEngage');
+                  showToast("Company - WebEngage");
+                },
+              ),
+              new ListTile(
+                title: Text("Set UserBirthDate"),
+                onTap: () {
+                  WebEngagePlugin.setUserBirthDate('1994-05-24');
+                  showToast("BirthDate - 1994-05-24");
+                },
+              ),
+              new ListTile(
+                title: Text("Set User Gender"),
+                onTap: () {
+                  WebEngagePlugin.setUserGender('male');
+                  showToast("Gender - Male");
+                },
+              ),
+              new ListTile(
+                title: Text("Set User Location"),
+                onTap: () {
+                  WebEngagePlugin.setUserLocation(19.25, 72.45);
+                  showToast("Location - 19.25, 72.45");
+                },
+              ),
+              new ListTile(
+                title: Text("Track Event with no attributes"),
+                onTap: () {
+                  WebEngagePlugin.trackEvent('Added to Cart');
+                  showToast("Added to Cart tracked ");
+                },
+              ),
+              new ListTile(
+                title: Text("Opt-In  Push, InApp,email,sms, whatsapp, viber"),
+                onTap: () {
+                  WebEngagePlugin.setUserOptIn('in_app', true);
+                  WebEngagePlugin.setUserOptIn('sms', true);
+                  WebEngagePlugin.setUserOptIn('push', true);
+                  WebEngagePlugin.setUserOptIn('email', true);
+                  WebEngagePlugin.setUserOptIn('whatsapp', true);
+                  WebEngagePlugin.setUserOptIn('viber', true);
+                  showToast("Opt-In  Push, InApp,email,sms, whatsapp, viber ");
+                },
+              ),
+              new ListTile(
+                title: Text("Opt-Out  Push, InApp,email,sms, whatsapp, viber"),
+                onTap: () {
+                  WebEngagePlugin.setUserOptIn('in_app', false);
+                  WebEngagePlugin.setUserOptIn('sms', false);
+                  WebEngagePlugin.setUserOptIn('push', false);
+                  WebEngagePlugin.setUserOptIn('email', false);
+                  WebEngagePlugin.setUserOptIn('whatsapp', false);
+                  WebEngagePlugin.setUserOptIn('viber', false);
+
+                  showToast("Opt-Out  Push, InApp,email,sms, whatsapp, viber ");
+                },
+              ),
+              new ListTile(
+                title: Text("Track event with attributes"),
+                onTap: () {
+                  WebEngagePlugin.trackEvent(
+                      'Order Placed', {'Amount': 808.48});
+                  showToast("Order Placed tracked Amount: 808.48");
+                },
+              ),
+              new ListTile(
+                title: Text("Track Screen"),
+                onTap: () {
+                  WebEngagePlugin.trackScreen('Home Page');
+                  showToast("Track Screen :Home Page");
+                },
+              ),
+              new ListTile(
+                title: Text("Track Screen with data"),
+                onTap: () {
+                  WebEngagePlugin.trackScreen(
+                      'Product Page', {'Product Id': 'UHUH799'});
+                  showToast(
+                      "Track Screen :Product Page', {'Product Id': 'UHUH799'}");
+                },
+              ),
+              new ListTile(
+                title: Text("Set User attribute with string value "),
+                onTap: () {
+                  WebEngagePlugin.setUserAttribute(
+                      "twitterusename", "saurav12994");
+                  showToast("twitterusename:saurav12994");
+                },
+              ),
+              // WebEngagePlugin.setUserAttribute("twitterusename", "saurav12994");
+              // WebEngagePlugin.setUserAttribute("Subscribed to email", true);
+              // WebEngagePlugin.setUserAttribute("Points earned", 2626);
+              // WebEngagePlugin.setUserAttribute("Dollar Spent", 123.44);
+              new ListTile(
+                title: Text("Set User attribute with Double value "),
+                onTap: () {
+                  WebEngagePlugin.setUserAttribute("Dollar Spent", 123.44);
+                  showToast("Dollar Spent:123.44");
+                },
+              ),
+              new ListTile(
+                title: Text("Set User attribute with Boolean value "),
+                onTap: () {
+                  WebEngagePlugin.setUserAttribute("Subscribed to email", true);
+                  showToast("Subscribed to email:true");
+                },
+              ),
+              new ListTile(
+                title: Text("Set User attribute with Integer value "),
+                onTap: () {
+                  WebEngagePlugin.setUserAttribute("Points earned", 2626);
+                  showToast("Points earned:2626");
+                },
+              ),
+              new ListTile(
+                title: Text("Set User attribute with Map value "),
+                onTap: () {
+                  var details = {'Username': 'tom', 'Password': 'pass@123'};
+
+                  WebEngagePlugin.setUserAttributes(details);
+                  showToast("Username':'tom','Password':'pass@123");
+                },
+              ),
+              new ListTile(
+                title: Text("Track Date"),
+                onTap: () {
+                  final DateTime now = DateTime.now();
+                  final DateFormat formatter =
+                  DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                  WebEngagePlugin.trackEvent(
+                      'Register', {'Registered On': formatter.format(now)});
+                  showToast("Track ${formatter.format(now)}");
+                },
+              ),
+              new ListTile(
+                title: Text("Set User Device Push Opt in"),
+                onTap: () {
+                  WebEngagePlugin.setUserDevicePushOptIn(true);
+                  showToast("UserDevice Push OptIn set to true");
+                },
+              ),
+              new ListTile(
+                title: Text("Start GAID Tracking"),
+                onTap: () {
+                  WebEngagePlugin.startGAIDTracking();
+                  showToast("Started GAID Tracking");
+                },
+              ),
+            ],
+          )),
     );
   }
-}
 
-
-class ExampleCandidateModel {
-  String? name;
-  String? job;
-  String? city;
-  LinearGradient? color;
-
-  ExampleCandidateModel({
-    this.name,
-    this.job,
-    this.city,
-    this.color,
-  });
-}
-
-List<ExampleCandidateModel> candidates = [
-  ExampleCandidateModel(
-    name: 'Eight, 8',
-    job: 'Manager',
-    city: 'Town',
-    color: gradientPink,
-  ),
-  ExampleCandidateModel(
-    name: 'Seven, 7',
-    job: 'Manager',
-    city: 'Town',
-    color: gradientBlue,
-  ),
-  ExampleCandidateModel(
-    name: 'Six, 6',
-    job: 'Manager',
-    city: 'Town',
-    color: gradientPurple,
-  ),
-  ExampleCandidateModel(
-    name: 'Five, 5',
-    job: 'Manager',
-    city: 'Town',
-    color: gradientRed,
-  ),
-  ExampleCandidateModel(
-    name: 'Four, 4',
-    job: 'Manager',
-    city: 'Town',
-    color: gradientPink,
-  ),
-  ExampleCandidateModel(
-    name: 'Three, 3',
-    job: 'Manager',
-    city: 'Town',
-    color: gradientBlue,
-  ),
-  ExampleCandidateModel(
-    name: 'Two, 2',
-    job: 'Manager',
-    city: 'Town',
-    color: gradientPurple,
-  ),
-  ExampleCandidateModel(
-    name: 'One, 1',
-    job: 'Manager',
-    city: 'Town',
-    color: gradientRed,
-  ),
-];
-
-const LinearGradient gradientRed = LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  colors: [
-    Color(0xFFFF3868),
-    Color(0xFFFFB49A),
-  ],
-);
-
-const LinearGradient gradientPurple = LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  colors: [
-    Color(0xFF736EFE),
-    Color(0xFF62E4EC),
-  ],
-);
-
-const LinearGradient gradientBlue = LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  colors: [
-    Color(0xFF0BA4E0),
-    Color(0xFFA9E4BD),
-  ],
-);
-
-const LinearGradient gradientPink = LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  colors: [
-    Color(0xFFFF6864),
-    Color(0xFFFFB92F),
-  ],
-);
-
-const LinearGradient kNewFeedCardColorsIdentityGradient = LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  colors: [
-    Color(0xFF7960F1),
-    Color(0xFFE1A5C9),
-  ],
-);
-
-
-class ExampleCard extends StatelessWidget {
-  final ExampleCandidateModel candidate;
-
-  const ExampleCard({
-    Key? key,
-    required this.candidate,
-  }) : super(key: key);
+  void showToast(String msg) {
+    // Fluttertoast.showToast(
+    //     msg: msg,
+    //     toastLength: Toast.LENGTH_SHORT,
+    //     gravity: ToastGravity.CENTER,
+    //     timeInSecForIosWeb: 1,
+    //     backgroundColor: Colors.red,
+    //     textColor: Colors.white,
+    //     fontSize: 16.0);
+  }
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        color: CupertinoColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: CupertinoColors.systemGrey.withOpacity(0.2),
-            spreadRadius: 3,
-            blurRadius: 7,
-            offset: const Offset(0, 3),
-          )
-        ],
-      ),
-      alignment: Alignment.center,
-      child: Column(
-        children: [
-          Flexible(
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: candidate.color,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(10),
-                  topRight: Radius.circular(10),
-                ),
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(15),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(10),
-                bottomRight: Radius.circular(10),
-              ),
-            ),
-            child: Row(
-              children: [
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      candidate.name!,
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      candidate.job!,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 15,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      candidate.city!,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 15,
-                      ),
-                    )
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
+  void dispose() {
+    _webEngagePlugin.pushSink.close();
+    _webEngagePlugin.pushActionSink.close();
+    _webEngagePlugin.trackDeeplinkURLStreamSink.close();
+    super.dispose();
   }
+
+  void subscribeToPushCallbacks() async {
+    //Push click stream listener
+    _webEngagePlugin.pushStream.listen((event) {
+      String? deepLink = event.deepLink;
+      Map<String, dynamic> messagePayload = event.payload!;
+      showDialogWithMessage("Push click callback: " + event.toString());
+    });
+
+    //Push action click listener
+    _webEngagePlugin.pushActionStream.listen((event) {
+      print("pushActionStream:" + event.toString());
+      String? deepLink = event.deepLink;
+      Map<String, dynamic>? messagePayload = event.payload;
+      showDialogWithMessage("PushAction click callback: " + event.toString());
+    });
+  }
+
+  void subscribeToTrackDeeplink() {
+    _webEngagePlugin.trackDeeplinkStream.listen((location) {
+      //Location URL
+    });
+  }
+
+  void subscribeToAnonymousIDCallback() {
+    // _webEngagePlugin.anonymousActionStream.listen((event) {
+    //   //  var message = event as Map<String,dynamic>;
+    //   this.setState(() {
+    //     anonymousId  =  "${event}";
+    //   });
+    // });
+  }
+
+  final navigatorKey = GlobalKey<NavigatorState>();
+
+  void showDialogWithMessage(String msg) {
+    showDialog(
+        context: navigatorKey.currentState!.overlay!.context,
+        builder: (BuildContext context) {
+          return Dialog(
+              insetPadding: EdgeInsets.all(5.0),
+              child: new Container(
+                // padding: new EdgeInsets.all(10.0),
+                decoration: new BoxDecoration(
+                  color: Colors.white,
+                ),
+                child: new Text(
+                  msg,
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18.0,
+                    fontFamily: 'helvetica_neue_light',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ));
+        });
+  }
+}
+
+
+
+class MyApp11 extends StatefulWidget {
+  @override
+  _MyApp11State createState() => _MyApp11State();
 }

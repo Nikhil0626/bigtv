@@ -1,11 +1,14 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
+import 'package:extended_image/extended_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -16,16 +19,28 @@ import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
+import '../../home_screen/home_provider.dart';
 import '../../home_screen/news_posts_provider.dart';
 import '../paper_models/single_paper_model.dart';
 
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+
 class PapersScreenPreview extends StatefulWidget {
   final String postId;
-  final  isBookmarked;
-  final List<PageData> imageUrls;
+  final int isBookmarked;
+  final List imageUrls;
   final String name;
 
-  PapersScreenPreview({super.key, required this.imageUrls, this.name = "Back", required this.postId, this.isBookmarked = 0});
+  PapersScreenPreview({
+    super.key,
+    required this.imageUrls,
+    this.name = "Back",
+    required this.postId,
+    this.isBookmarked = 0,
+  });
 
   @override
   State<PapersScreenPreview> createState() => _PapersScreenPreviewState();
@@ -36,19 +51,24 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
   final PageController _pageController = PageController();
   List<TransformationController> _controllers = [];
   bool _isZoomed = false;
+  String postId = '0';
+  int isBookmarked = 0;
+  int currentIndex = 0;
+  List<bool> _isImageLoaded = [];
 
   @override
   void initState() {
     super.initState();
+
     context.read<NewsPostsProvider>().currentPaperIndex = 0;
     context.read<NewsPostsProvider>().currentPaper = widget.imageUrls[0].imageUrl.toString();
 
-    _controllers = List.generate(
-      widget.imageUrls.length,
-          (_) => TransformationController(),
-    );
+    _controllers = List.generate(widget.imageUrls.length, (_) => TransformationController());
+    _isImageLoaded = List.generate(widget.imageUrls.length, (_) => false);
 
     _controllers[0].addListener(_zoomListener);
+    postId = widget.postId;
+    isBookmarked = widget.isBookmarked;
   }
 
   void _zoomListener() {
@@ -75,71 +95,40 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
       body: Consumer<NewsPostsProvider>(
         builder: (_, newsPostsProvider, __) {
           return Padding(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top+6),
             child: Stack(
               children: [
                 Column(
                   children: [
-                    // Header
                     InkWell(
                       onTap: () => Navigator.pop(context),
                       child: Row(
                         children: [
                           width(width: 20),
-                          const Icon(Icons.arrow_back_outlined, size: 24),
+                          const Icon(Icons.arrow_back_outlined, size: 20),
                           width(width: 20),
-                          Text(widget.name, style: fontStyle(fontSize: 20)),
+                          Text(widget.name, style: newAppFont(fontSize: 16,fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
-
-                    // PageView
                     Expanded(
                       child: Stack(
                         children: [
                           GestureDetector(
                             onTap: newsPostsProvider.isPaperShowing,
-                            onScaleStart: (details) {
-                              if (details.pointerCount == 2) {
-                                setState(() {
-                                  _isZoomed = true;
-                                });
-                              }
-                            },
-                            onScaleEnd: (details) {
-                              setState(() {
-                                _isZoomed = false;
-                              });
-                            },
-                            onHorizontalDragEnd: (details) {
-                              if (!_isZoomed) {
-                                if (details.primaryVelocity! < 0 && _pageController.page != widget.imageUrls.length - 1) {
-                                  _pageController.nextPage(duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-                                } else if (details.primaryVelocity! > 0 && _pageController.page != 0) {
-                                  _pageController.previousPage(duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
-                                }
-                              }
-                            },
+
                             child: PageView.builder(
                               controller: _pageController,
-                              physics: _isZoomed
-                                  ? const NeverScrollableScrollPhysics()
-                                  : const BouncingScrollPhysics(),
+                              physics: const NeverScrollableScrollPhysics(),
                               itemCount: widget.imageUrls.length,
-                              onPageChanged: (index) {
-                                _controllers[newsPostsProvider.currentPaperIndex].removeListener(_zoomListener);
 
-                                newsPostsProvider.currentPaperIndex = index;
-                                newsPostsProvider.currentPaper = widget.imageUrls[index].imageUrl.toString();
 
-                                _controllers[index].addListener(_zoomListener);
-                              },
                               itemBuilder: (context, index) {
                                 final imageUrl = widget.imageUrls[index].imageUrl;
                                 return InteractiveViewer(
                                   transformationController: _controllers[index],
                                   minScale: 1.0,
-                                  maxScale: 10.0,
+                                  maxScale: 6.0,
                                   panEnabled: true,
                                   child: RepaintBoundary(
                                     key: _repaintKey,
@@ -148,90 +137,106 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                       height: MediaQuery.of(context).size.height,
                                       child: Stack(
                                         children: [
-                                          Image.network(
-                                           imageUrl.toString(),
-                                            fit: BoxFit.fill, // Adjust for better fit
+                                          ExtendedImage.network(
+                                            imageUrl.toString(),
+                                            fit: BoxFit.fill,
                                             width: MediaQuery.of(context).size.width,
                                             height: MediaQuery.of(context).size.height,
-                                            loadingBuilder: (context, child, loadingProgress) {
-                                              if (loadingProgress == null) return child;
-                                              return Center(
-                                                child: CircularProgressIndicator(
-                                                  value: loadingProgress.expectedTotalBytes != null
-                                                      ? loadingProgress.cumulativeBytesLoaded /
-                                                      (loadingProgress.expectedTotalBytes ?? 1)
-                                                      : null,
-                                                ),
-                                              );
-                                            },
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return const Center(
-                                                child: Text(
-                                                  'Failed to load image',
-                                                  style: TextStyle(color: Colors.white),
-                                                ),
-                                              );
+                                            loadStateChanged: (state) {
+                                              switch (state.extendedImageLoadState) {
+                                                case LoadState.loading:
+                                                  return const Center(child: CircularProgressIndicator());
+                                                case LoadState.completed:
+                                                  return state.completedWidget;
+                                                case LoadState.failed:
+                                                  return const Center(
+                                                    child: Text(
+                                                      'Failed to load image',
+                                                      style: TextStyle(color: Colors.white),
+                                                    ),
+                                                  );
+                                              }
                                             },
                                           ),
+
                                           Positioned(
                                             top: 20,
                                             right: 20,
                                             child: Consumer<EPapersProvider>(
-                                                builder: (_, ePapersProvider, __) {
-                                                  return GestureDetector(
-                                                    onTap: () async {
-                                                      final prefs = await SharedPreferences.getInstance();
-                                                      final userId = prefs.getString("userId");
-                                                      final deviceId = prefs.getString("deviceId");
-                                                      EventRepo().sendEvent({
-                                                        "key": "share_via_articles",
-                                                        "data": {
-                                                          "device_id": deviceId,
-                                                          "userId": userId ?? "",
-                                                          "postId": widget.postId,
-                                                          "isWhatAppShare": false,
-                                                        }
-                                                      });
-                                                      context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[newsPostsProvider.currentPaperIndex],context);
-                                                    },
-                                                    child:Container(
-                                                      padding: EdgeInsets.all(7),
-                                                      decoration: BoxDecoration(
-                                                        color: (ePapersProvider.isBookMark.contains(widget.postId) || widget.isBookmarked == 1)
-                                                            ? AppColors.appButtonColor
-                                                            : Colors.black54,
-                                                        shape: BoxShape.circle,
-                                                      ),
-                                                      child: Icon(
-                                                        (ePapersProvider.isBookMark.contains(widget.postId) || widget.isBookmarked == 1)
-                                                            ? Icons.bookmark
-                                                            : Icons.bookmark_outline,
-                                                        color: Colors.white,
-                                                        size: 20,
-                                                      ),
+                                              builder: (_, ePapersProvider, __) {
+                                                return GestureDetector(
+                                                  onTap: () async {
+                                                    final prefs = await SharedPreferences.getInstance();
+                                                    final userId = prefs.getString("userId");
+                                                    final deviceId = prefs.getString("deviceId");
+                                                    EventRepo().sendEvent({
+                                                      "key": "share_via_articles",
+                                                      "data": {
+                                                        "device_id": deviceId,
+                                                        "userId": userId ?? "",
+                                                        "postId": widget.postId,
+                                                        "isWhatAppShare": false,
+                                                        "source_from":"paper"
+                                                      }
+                                                    });
+                                                    context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[index], context);
+                                                  },
+                                                  child: Container(
+                                                    padding: EdgeInsets.all(7),
+                                                    decoration: BoxDecoration(
+                                                      color: (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1)
+                                                          ? AppColors.appButtonColor
+                                                          : Colors.black54,
+                                                      shape: BoxShape.circle,
                                                     ),
-                                                  );
-                                                }
+                                                    child: Icon(
+                                                      (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1)
+                                                          ? Icons.bookmark
+                                                          : Icons.bookmark_outline,
+                                                      color: Colors.white,
+                                                      size: 20,
+                                                    ),
+                                                  ),
+                                                );
+                                              },
                                             ),
                                           ),
-
-                                          // Share
                                           Positioned(
                                             top: 20,
                                             right: 80,
                                             child: InkWell(
                                               onTap: () async {
+                                                // final url = 'https://enewspapers.s3.amazonaws.com/swetcha/2025-05-03/telangana/page_001.webp';
+                                                // final filename = 'page_001.webp';
+                                                //
+                                                // final dir = await getTemporaryDirectory();
+                                                // final filePath = '${dir.path}/$filename';
+                                                // final file = File(filePath);
+                                                //
+                                                // // Download only if not cached
+                                                // if (!await file.exists()) {
+                                                //   final response = await http.get(Uri.parse(url));
+                                                //   await file.writeAsBytes(response.bodyBytes);
+                                                // }
+                                                //
+                                                // // Share the cached or newly downloaded file
+                                                // Share.shareXFiles(
+                                                //   [XFile(file.path)],
+                                                //   text: 'Check out today’s front page!${url}',
+                                                // );
+
                                                 final prefs = await SharedPreferences.getInstance();
                                                 final userId = prefs.getString("userId");
                                                 final deviceId = prefs.getString("deviceId");
 
                                                 EventRepo().sendEvent({
-                                                  "key": "share_via_widget.articles",
+                                                  "key": "share_via_articles",
                                                   "data": {
                                                     "device_id": deviceId,
                                                     "userId": userId ?? "",
                                                     "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex].id,
                                                     "isWhatAppShare": false,
+                                                    "source_from":"paper"
                                                   }
                                                 });
 
@@ -239,7 +244,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
 
                                                 try {
                                                   RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-                                                  var image = await boundary.toImage(pixelRatio: 2.0);
+                                                  var image = await boundary.toImage(pixelRatio: 3.0);
                                                   ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
                                                   Uint8List pngBytes = byteData!.buffer.asUint8List();
 
@@ -278,16 +283,89 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                               },
                             ),
                           ),
+                          if(currentIndex!=0)
+                            Positioned(
+                              left: 10.sp,
+                              top: MediaQuery.of(context).size.height / 2 - 50.sp,
+                              child: Consumer<EPapersProvider>(
+                                builder: (_, ePapersProvider, __) {
+                                  return GestureDetector(
+                                    onTap: () async {
+                                      // currentIndex=currentIndex-1;
+                                      context.read<HomeProvider>().flipEvent('paper',widget.imageUrls[currentIndex].id,false);
 
-                          // Bookmark
+                                      log("current ++= $currentIndex ---- lase    ${widget.imageUrls.length}");
+                                      postId = widget.imageUrls[currentIndex].id.toString();
+                                      isBookmarked = widget.imageUrls[currentIndex].isBookmarked == 0 ? 0 : 1;
+                                      newsPostsProvider.paperSet(widget.imageUrls[currentIndex].imageUrl, currentIndex);
+                                      currentIndex=currentIndex-1;
+                                      _pageController.jumpToPage(currentIndex);
+                                      setState(() {
 
+                                      });
+                                    },
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.all(Radius.circular(20.r)),
+                                      child: Container(
+                                        height: 40.sp,
+                                        width: 40.sp,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black54,
+                                        ),
+                                        child: Center(
+                                            child: Icon(
+                                              Icons.arrow_back_ios_outlined,
+                                              size: 20.sp,
+                                              color: Colors.white,
+                                            )),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          if(currentIndex!=widget.imageUrls.length-1)
+                            Positioned(
+                              right: 10.sp,
+                              top: MediaQuery.of(context).size.height / 2 - 50.sp,
+                              child: InkWell(
+                                onTap: () async {
+                                  context.read<HomeProvider>().flipEvent('paper',widget.imageUrls[currentIndex].id,true);
+                                  log("current ++= $currentIndex ---- lase    ${widget.imageUrls.length}");
+                                  postId = widget.imageUrls[currentIndex].id.toString();
+                                  isBookmarked = widget.imageUrls[currentIndex].isBookmarked == 0 ? 0 : 1;
+                                  newsPostsProvider.paperSet(widget.imageUrls[currentIndex].imageUrl, currentIndex);
+                                  currentIndex=currentIndex+1;
+                                  _pageController.jumpToPage(currentIndex);
+                                  setState(() {
+
+                                  });
+                                },
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.all(Radius.circular(20.r)),
+                                  child: Container(
+                                    height: 40.sp,
+                                    width: 40.sp,
+                                    alignment: Alignment.center,
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                    ),
+                                    child: Center(
+                                        child: Icon(
+                                          Icons.arrow_forward_ios_rounded,
+                                          size: 20.sp,
+                                          color: Colors.white,
+                                        )),
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
                       ),
                     ),
                   ],
                 ),
-
-                // Bottom Thumbnails
                 if (newsPostsProvider.isBottomIsShow)
                   Positioned(
                     bottom: 0,
@@ -302,6 +380,8 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                         itemBuilder: (context, index) {
                           return InkWell(
                             onTap: () {
+                              postId = widget.imageUrls[index].id.toString();
+                              isBookmarked = widget.imageUrls[index].isBookmarked == 0 ? 0 : 1;
                               newsPostsProvider.paperSet(widget.imageUrls[index].imageUrl, index);
                               newsPostsProvider.isPaperShowing();
                               _pageController.jumpToPage(index);
@@ -316,8 +396,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                   width: 100,
                                   fit: BoxFit.fill,
                                   placeholder: (context, url) => Container(color: Colors.grey.shade200),
-                                  errorWidget: (context, url, error) =>
-                                      Icon(Icons.image, size: 100, color: Colors.grey.shade300),
+                                  errorWidget: (context, url, error) => Icon(Icons.image, size: 100, color: Colors.grey.shade300),
                                 ),
                               ),
                             ),

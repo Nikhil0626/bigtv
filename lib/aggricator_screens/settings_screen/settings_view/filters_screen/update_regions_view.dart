@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
@@ -34,10 +33,11 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
   Widget build(BuildContext context) {
     return Consumer<AuthenticationProvider>(builder: (_, authenticationProvider, __) {
       return Scaffold(
+        backgroundColor: Colors.white,
         bottomNavigationBar: Padding(
           padding: EdgeInsets.all(25.w),
           child: InkWell(
-            onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3
+            onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5
                 ? () {
                     authenticationProvider.sendLocationsToServer(context,).then((value) {
                       if (context.mounted) {
@@ -52,14 +52,15 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                     },);
                   }
                 : () {
-                    CustomToast.showErrorToast(msg: "Please Select only 3 District ");
+                    CustomToast.showErrorToast(msg: "Please Select only 5 District ");
                   },
             child: Container(
               width: double.infinity,
               height: 35.h,
               decoration: BoxDecoration(
-                color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 3) ? AppColors.loginBgColor : AppColors.bodyTextColor.withOpacity(.2),
+                color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5) ?AppColors.appButtonColor : AppColors.bodyTextColor.withOpacity(.2),
                 borderRadius: BorderRadius.all(Radius.circular(8.r)),
+
               ),
               child: Center(
                 child: Text(
@@ -103,14 +104,14 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                       child: RichText(
                         text: TextSpan(
                           text: "You have selected ",
-                          style: TextStyle(color: Colors.black87),
+                          style: newAppFont(color: Colors.grey.shade500),
                           children: [
                             TextSpan(
                               text: "0${authenticationProvider.selectedLocations.length}",
-                              style: homeScreenFontStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                              style: newAppFont(color:AppColors.appButtonColor, fontWeight: FontWeight.w500),
                             ),
-                            TextSpan(text: "/03\n"),
-                            if(authenticationProvider.selectedLocations.length>3)
+                            TextSpan(text: "/05\n",            style: newAppFont(color:Colors.grey.shade500, fontWeight: FontWeight.w600,),),
+                            if(authenticationProvider.selectedLocations.length>5)
                               TextSpan(text: "You Have Selected Maximum Number of Districts",style: newAppFont(fontSize: 10,color: Colors.red,fontWeight: FontWeight.w400)),
 
                           ],
@@ -132,18 +133,21 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                           backgroundColor: Colors.transparent,
                           childrenPadding: EdgeInsets.zero,
                           initiallyExpanded: false,
+                           iconColor: AppColors.iconColors,
                           title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Text(stateName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
-                              Text("(${districts.length})", style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                              Text(stateName, style: newAppFont(fontWeight: FontWeight.w600,)),
+                              width(width: 10),
+                              Text("(${districts.length})", style: newAppFont(fontWeight: FontWeight.w300,color: AppColors.iconColors)),
                             ],
                           ),
                           children: districts.map((district) {
                             bool isSelected = authenticationProvider.selectedLocations.contains(district.districtName);
                             return CheckboxListTile(
-                              title: Text(district.districtName, style: homeScreenFontStyle(fontWeight: FontWeight.bold)),
+                              title: Text(district.districtName, style: newAppFont(fontWeight: FontWeight.bold)),
                               value: isSelected,
+                              activeColor: AppColors.appButtonColor,
                               onChanged: (bool? selected) {
                                 authenticationProvider.addToSelectedLocations(district.districtName);
                               },

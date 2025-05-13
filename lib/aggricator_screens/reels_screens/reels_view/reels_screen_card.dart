@@ -30,6 +30,7 @@ import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
 import '../../e_papers_screens/paper_view/papers_screen_card.dart';
+import '../../home_screen/home_provider.dart';
 
 class ReelsScreen extends StatefulWidget {
   @override
@@ -41,14 +42,14 @@ class _ReelsScreenState extends State<ReelsScreen> {
   List<ReelsModel> removedCards = [];
   Offset slideOffset = Offset.zero;
   bool isAnimating = false;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
       context.read<ReelsProviders>().getAllReelsList = [];
       context.read<ReelsProviders>().getAllReels();
-    });
+    _pageController = PageController(viewportFraction: 1.0);
   }
 
   void animateRemoveTopCard() async {
@@ -120,11 +121,58 @@ class _ReelsScreenState extends State<ReelsScreen> {
         )
             : reelsProvider.getAllReelsList.isEmpty
                 ? AppNoData()
-                : Padding(
-                  padding:  EdgeInsets.symmetric(horizontal: 16.sp),
-                  child: Stack(children: [
+                :     Padding(
+                  padding: const EdgeInsets.only(bottom: 20.0),
+                  child: CardSwiper(
+                    controller: controller,
+                    cardsCount:  reelsProvider.getAllReelsList.length,
+                    onSwipe: (previousIndex, currentIndex, direction) {
+                      if (direction == CardSwiperDirection.bottom) {
+                        context.read<HomeProvider>().flipEvent('reel',reelsProvider.getAllReelsList[currentIndex!].id,false);
+                        _undo();
+
+                        return false;
+                      }else{
+                        context.read<HomeProvider>().flipEvent('reel',reelsProvider.getAllReelsList[currentIndex!].id,true);
+
+                      }
+
+                      if (currentIndex != null) {
+                        currentIndexs = currentIndex;
+                      }
+                      debugPrint(
+                        'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
+                      );
+                      return true;
+                    },
+                    // onSwipeDirectionChange:  ,
+                    // onUndo: _onUndo,
+                    allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+                    // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
+                    numberOfCardsDisplayed: 4,
+                    duration: const Duration(milliseconds: 100),
+                    backCardOffset: const Offset(0, 40),
+                    padding: const EdgeInsets.only(left: 20.0,right: 20.0,bottom: 40.0,),
+                    // alignment: Alignment.topCenter,
+                    cardBuilder: (
+                        context,
+                        index,
+                        horizontalThresholdPercentage,
+                        verticalThresholdPercentage,
+                        ) {
+                      final post =  reelsProvider.getAllReelsList[index];
+
+                      return  EachReelCard(reel: post, reelsProvider: reelsProvider, index: index);
+                    },
+                  ),
+                );
+
+       /* Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Stack(
+                    children: [
                       Container(
-                        height: 620,
+                        height:620,
                         width: MediaQuery.of(context).size.width,
                         margin: EdgeInsets.symmetric(horizontal: 24.h),
                         alignment: Alignment.center,
@@ -176,52 +224,87 @@ class _ReelsScreenState extends State<ReelsScreen> {
                             ),
                           ],
                         ),
+                        // child: StandardCard(
+                        //   index: 1,
+                        //   getAllPostList: homeProvider.getAllPostList[1],
+                        // ),
                       ),
                       Container(
-                          height: 560,
-                          width: MediaQuery.of(context).size.width,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: AppColors.cardBackgroundColor,
-                            borderRadius: BorderRadius.circular(12.r),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.2),
-                                blurRadius: 6,
-                                spreadRadius: 2,
-                                offset: Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: GestureDetector(
-                            onVerticalDragEnd: (details) {
-                              final velocity = details.velocity.pixelsPerSecond.dy;
-                              if (velocity < -500) {
-                                animateRemoveTopCard();
-                              } else if (velocity > 500) {
-                                animateUndoCard();
-                              }
+                        height: 560,
+                        width: MediaQuery.of(context).size.width,
+                        // margin: EdgeInsets.symmetric(horizontal: 8.h),
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: AppColors.cardBackgroundColor,
+                          borderRadius: BorderRadius.circular(12.r),
+
+                        ),
+
+                      ),
+                      GestureDetector(
+                          onVerticalDragEnd: (details) {
+                            final velocity = details.velocity.pixelsPerSecond.dy;
+                            if (velocity < -500) {
+                              animateRemoveTopCard();
+                            } else if (velocity > 500) {
+                              animateUndoCard();
+                            }
+                          },
+                          child: PageView.builder(
+                            scrollDirection: Axis.vertical,
+                            itemCount: reelsProvider.getAllReelsList.length,
+                            itemBuilder: (context, index) {
+
+                              final post = reelsProvider.getAllReelsList[index];
+
+                              return AnimatedBuilder(
+                                animation: _pageController,
+                                builder: (context, child) {
+                                  double value = 1.0;
+                                  if (_pageController.hasClients && _pageController.position.haveDimensions) {
+                                    double page = _pageController.page ?? _pageController.initialPage.toDouble();
+                                    value = (1 - (page - index).abs()).clamp(0.0, 1.0).toDouble();
+                                  }
+                                  // if(reelsProvider.getAllReelsList.length-5 ==index){
+                                  //   reelsProvider.getAllReels(postId:reelsProvider.getAllReelsList[index].id.toString() );
+                                  // }
+                                  return Opacity(
+                                    opacity: value,
+                                    child: Transform.translate(
+                                      offset: Offset(0, 100 * (1.0 - value)),
+                                      child: Stack(
+                                        children: [
+                                          Container(
+                                            height: 560,
+
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                              color: AppColors.cardBackgroundColor,
+                                              borderRadius: BorderRadius.circular(12.r),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                  color: Colors.grey.withOpacity(0.2),
+                                                  blurRadius: 6,
+                                                  spreadRadius: 2,
+                                                  offset: Offset(0, 3),
+                                                ),
+                                              ],
+                                            ),
+                                            child: EachReelCard(reel: post, reelsProvider: reelsProvider, index: index)
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+
+
                             },
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: List.generate(reelsProvider.getAllReelsList.reversed.toList().length, (index) {
-                                final isTopCard = index == reelsProvider.getAllReelsList.reversed.toList().length - 1;
-                                final post = reelsProvider.getAllReelsList.reversed.toList()[index];
-                                return AnimatedSlide(
-                                  offset: isTopCard && slideOffset.dy != 0 ? const Offset(0, -1) : Offset.zero,
-                                  duration: const Duration(milliseconds: 600),
-                                  curve: Curves.easeInOut,
-                                  child: AnimatedOpacity(
-                                      opacity: isTopCard && slideOffset.dy != 0 ? 0.9 : 1.0,
-                                      duration: Duration(milliseconds: 600),
-                                      curve: Curves.easeInOut,
-                                      child: EachReelCard(reel: post, reelsProvider: reelsProvider, index: index)),
-                                );
-                              }),
-                            ),
-                          ))
-                    ]),
-                );
+                          )),
+                    ],
+                  ),
+                );*/
 
         // CardSwiper(
         //             allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
@@ -238,6 +321,19 @@ class _ReelsScreenState extends State<ReelsScreen> {
         //           );
       }),
     );
+  }
+
+  int currentIndexs = 0;
+
+
+
+  void _undo() {
+    if (currentIndexs > 0) {
+      setState(() {
+        currentIndexs--;
+      });
+      controller.undo();
+    }
   }
 }
 
@@ -270,20 +366,20 @@ class _EachReelCardState extends State<EachReelCard> {
       child: Screenshot(
         controller: sc,
         child: Container(
-          height: MediaQuery.of(context).size.height * 0.7,
-          width: MediaQuery.of(context).size.height * 0.9,
+          height: MediaQuery.of(context).size.height * 0.8,
+          width: MediaQuery.of(context).size.width * 0.9,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: AppColors.cardBackgroundColor,
             borderRadius: BorderRadius.circular(20.r),
-            // boxShadow: [
-            //   BoxShadow(
-            //     color: Colors.grey.withOpacity(0.2),
-            //     blurRadius: 6,
-            //     spreadRadius: 2,
-            //     offset: Offset(0, 3),
-            //   ),
-            // ],
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 6,
+                spreadRadius: 2,
+                offset: Offset(0, 3),
+              ),
+            ],
           ),
           child: Stack(
             children: [
@@ -292,7 +388,7 @@ class _EachReelCardState extends State<EachReelCard> {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 0),
+                      padding:  EdgeInsets.symmetric(horizontal: 10.0.sp, vertical: 10.sp),
                       child: ClipRRect(
                         borderRadius: BorderRadius.all(Radius.circular(10.r)),
                         child: CachedNetworkImage(
@@ -308,7 +404,7 @@ class _EachReelCardState extends State<EachReelCard> {
                           errorWidget: (context, url, error) => Center(
                             child: Icon(
                               Icons.image,
-                              size: 100,
+                              size: 100.sp,
                               color: Colors.grey.shade300,
                             ),
                           ),
@@ -448,6 +544,7 @@ class _EachReelCardState extends State<EachReelCard> {
                                   "userId": userId ?? "",
                                   "postId": widget.reel.id.toString(),
                                   "isWhatAppShare": false,
+                                  "source_from":"reel"
                                 }
                               });
 

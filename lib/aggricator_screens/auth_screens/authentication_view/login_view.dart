@@ -231,7 +231,8 @@ class _LoginViewState extends State<LoginView> {
               height(height: 20.h),
 
               InkWell(
-                onTap:() {
+                onTap:() async{
+
                   context.read<AuthenticationProvider>().continueAsGuest(context);
 
                 },

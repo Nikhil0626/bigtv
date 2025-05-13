@@ -39,7 +39,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
   @override
   void initState() {
     context.read<SettingsProvider>().feedbackList = [];
+
+    context.read<SettingsProvider>().isOthersSelected=false;
     context.read<SettingsProvider>().getFeedBack();
+
     super.initState();
   }
 
@@ -48,6 +51,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: Text(
           "Feedback Form",
           style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold),
@@ -65,11 +69,10 @@ class _FeedbackFormState extends State<FeedbackForm> {
                 children: [
                   Text(
                     "Tell us what you think",
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontWeight: FontWeight.bold,
-                      fontSize: 24,
-                      color: AppColors.appButtonColor
+                    style: newAppFont(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 20,
+                        color: AppColors.appButtonColor
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -90,8 +93,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
                           children: [
                             Text(
                               "Rate your experience with ChotaNews?",
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
+                              style: newAppFont(
+
                                 fontSize: 16,
                               ),
                               textAlign: TextAlign.center,
@@ -119,11 +122,11 @@ class _FeedbackFormState extends State<FeedbackForm> {
                             SizedBox(height: 3),
                             Text(
                               feedbackMessage,
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
+                              style: newAppFont(
+
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                  color: AppColors.appButtonColor,
+                                color: AppColors.appButtonColor,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -136,7 +139,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                   SizedBox(
                     width: double.infinity,
                     child: Card(
-                  color:     AppColors.cardBackgroundColor,
+                      color:     AppColors.cardBackgroundColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -147,8 +150,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                           children: [
                             Text(
                               "What should we improve?",
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
+                              style: newAppFont(
                                 fontSize: 16,
                               ),
                             ),
@@ -177,7 +179,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                     child: Text(
                                       category['optionText'].toString(),
                                       textAlign: TextAlign.center,
-                                      style: homeScreenFontStyle(
+                                      style: newAppFont(
                                         color: isSelected ? Colors.white : Colors.black87,
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.w500,
@@ -193,45 +195,52 @@ class _FeedbackFormState extends State<FeedbackForm> {
                     ),
                   ),
                   settingsProvider.isOthersSelected ?
-                    SizedBox(
-                      width: double.infinity,
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Please tell us more about it?",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                ),
-                                textAlign: TextAlign.center,
+                  SizedBox(
+                    width: double.infinity,
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              "Please tell us more about it?",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
                               ),
-                              SizedBox(height: 8),
-                              TextField(
-                                controller: settingsProvider.feedbackController,
-                                maxLines: 3,
-                                decoration: InputDecoration(
-                                  fillColor: Colors.white,
-                                  filled: true,
-                                  border: OutlineInputBorder(
-                                    borderSide: BorderSide(color: Colors.grey),
-                                  ),
-                                  hintText: "Text",
+                              textAlign: TextAlign.center,
+                            ),
+                            height(height: 8),
+                            TextField(
+                              controller: settingsProvider.feedbackController,
+                              maxLines: 3,
+                              decoration: InputDecoration(
+                                fillColor: Colors.white,
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
                                 ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(color: AppColors.appButtonColor, width: 2.0),
+                                ),
+                                hintText: "Enter your comment...",
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
                       ),
-                    ):
-                       SizedBox.shrink(),
-                  SizedBox(height: 16),
+                    ),
+                  ):
+                  SizedBox.shrink(),
+                  height(height: 16),
                   InkWell(
                     onTap: (){
                       if(settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0) {
@@ -239,6 +248,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                           selectedStar = 0;
                           setState(() {
                             settingsProvider.feedbackController.clear();
+                            settingsProvider.selectedFeedbackList.clear();
                           });
                         },);
                       }else{

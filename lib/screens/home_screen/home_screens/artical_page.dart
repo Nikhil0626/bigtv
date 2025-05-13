@@ -25,7 +25,7 @@ import '../../Auth_module/auth_provider/auth_provider.dart';
 import '../../videos_main/video_views/gallery_screen.dart';
 import '../botton_actions.dart';
 import '../home_repo/event_repo.dart';
-import 'google_ads_view.dart';
+import '../../../aggricator_screens/ad_manager_screen/google_ads_view.dart';
 
 typedef FlipBack = void Function({bool backToTop});
 

@@ -9,6 +9,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../globel_keys/global_variables_data.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
+import '../../services/analytics_service.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 
@@ -84,20 +85,31 @@ class HomeProvider extends ChangeNotifier {
     // notifyListeners();
   }
 
-
   void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
     controller.dispose();
     notifyListeners();
   }
 
-  Future getIndividualPost(postId) async {
+  Future getIndividualPost(postId, {bool isAds = false}) async {
+    getAllPostList = [];
     isPostLoading = true;
-    getSinglePostList = {};
     try {
       Response response = await HomeRepo().getSinglePost(postId);
       log(response.data.toString());
       getSinglePostList = response.data['data'];
+
+      log("fbnskjfnskjfnksfkjs");
+      log(getSinglePostList.toString());
+      if (isAds == false) {
+        getAllPostList.add(response.data['data']);
+        Future.delayed(
+          Duration(milliseconds: 300),
+          () {
+            getAllPost(postId: "0");
+          },
+        );
+      }
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -111,7 +123,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postId = "0"}) async {
-    if(postId == 0){
+    if (postId == 0) {
       getAllPostList = [];
     }
     isBookMark = [];
@@ -122,30 +134,19 @@ class HomeProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
-    List<int> locationIds = locationId
-        .split(',')
-        .where((e) => e.trim().isNotEmpty)
-        .map((e) => int.tryParse(e.trim()))
-        .whereType<int>()
-        .toList();
+    List<int> locationIds = locationId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Location IDs: $locationIds');
 
     String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<int> categoriesIds = categoriesId
-        .split(',')
-        .where((e) => e.trim().isNotEmpty)
-        .map((e) => int.tryParse(e.trim()))
-        .whereType<int>()
-        .toList();
+    List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
-
 
     Map<String, dynamic> body = {
       "device_id": deviceId,
       "postId": postId,
       "locationIds": locationIds,
       "categoriesId": categoriesIds,
-      "userId":userId??0,
+      "userId": userId ?? 0,
     };
     log("allpost body ${body.toString()}");
     try {
@@ -155,8 +156,159 @@ class HomeProvider extends ChangeNotifier {
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
 
+      // if (isWebView) {
+        // Create the custom map once
+        /*Map<String, dynamic> webUrlPost = {
+          "id": 000000,
+          "postOrder": 00000,
+          "author": 9,
+          "title": "GoogleAds",
+          "content": "Hello",
+          "created": "2025-04-22T08:36:04",
+          "guid": "",
+          "post_type": "post",
+          "post_name": "సివిల్స్-తుది-ఫలితాలు-వి",
+          "post_mime_type": "",
+          "totalLikes": 8,
+          "totalViews": 14104,
+          "totalComments": 0,
+          "image_url": "",
+          "video_url": "",
+          "downloadUrl": null,
+          "gallery": null,
+          "type": "GoogleAds",
+          "totalShares": 0,
+          "isReporter": 0,
+          "reportedBy": "",
+          "categoryName": "నేషనల్",
+          "postUrl": "",
+          "subType": "",
+          "isStickyPost": 0,
+          "isHomeScreen": [
+            {
+              "id": 4067654,
+              "postOrder": 852068,
+              "author": 24,
+              "title": "కొత్త రేషన్‌కార్డులపై మరో అప్డేట్",
+              "content": "AP: కొత్త రేషన్‌‌కార్డుల దరఖాస్తులపై ప్రభుత్వం కీలక ప్రకటన చేసింది. గత ప్రభుత్వ హయాంలో రేషన్‌ కార్డుల కోసం దరఖాస్తు చేసుకున్న వారు మళ్లీ దరఖాస్తు చేసుకోవాల్సిన అవసరం లేదని ప్రభుత్వ వర్గాలు తెలిపాయి. వైసీపీ హయాంలో వచ్చిన దరఖాస్తుల్లో 3.36 లక్షల దరఖాస్తులు పెండింగ్‌లో ఉన్నాయని, అవి ప్రస్తుతం ప్రభుత్వ పరిశీలనలో ఉన్నట్టు పేర్కొన్నాయి.",
+              "created": "2025-05-11T06:40:44",
+              "guid": "https://chotanews.azurewebsites.net/?p=4067654",
+              "post_type": "post",
+              "post_name": "కొత్త-రేషన్‌కార్డులపై-మర",
+              "post_mime_type": "",
+              "totalLikes": 5,
+              "totalViews": 1787,
+              "totalComments": 0,
+              "image_url": "https://chotanews.azureedge.net/media/2025/03/RATION-CARDS.jpg",
+              "video_url": null,
+              "downloadUrl": null,
+              "gallery": null,
+              "type": "Standard",
+              "totalShares": 0,
+              "isReporter": 0,
+              "reportedBy": "",
+              "categoryName": "నేషనల్",
+              "postUrl": null,
+              "subType": "",
+              "isStickyPost": 0,
+              "adPosition": null,
+              "linkURLAndroid": "https://app.chotanews.com/individualPage?postId=4067654",
+              "linkURLIos": "https://app.chotanews.com/individualPage?postId=4067654",
+              "links": [],
+              "categoryId": 2,
+              "isBookmarked": 0
+            },
+            {
+              "id": 4067186,
+              "postOrder": 851931,
+              "author": 9,
+              "title": "‘ఛోటా న్యూస్’ యాప్ న్యూ అప్‌డేట్",
+              "content": "గ్లోబల్ టు లోకల్ వార్తలను అందరికంటే ముందుగా క్లుప్తంగా 45 పదాల్లో మీకు అందిస్తోంది ‘ఛోటా న్యూస్’యాప్. అందుకే ఇప్పుడు తెలుగువారి కొత్త అలవాటుగా ‘ఛోటా న్యూస్’ యాప్ సరికొత్తగా మారింది. ఈ యాప్‌ న్యూ అప్‌డేట్ కోసం మీరు వెంటనే ఈ లింక్ <link1>క్లిక్</link1> చేయండి.",
+              "created": "2025-05-11T04:46:23",
+              "guid": "https://chotanews.azurewebsites.net/?p=4067186",
+              "post_type": "post",
+              "post_name": "ఛోటా-న్యూస్-యాప్-న్యూ-అ-15",
+              "post_mime_type": "",
+              "totalLikes": 6,
+              "totalViews": 14192,
+              "totalComments": 0,
+              "image_url": "https://chotanews.azureedge.net/media/2025/05/wed-68202b896f8f2.jpeg",
+              "video_url": "",
+              "downloadUrl": null,
+              "gallery": null,
+              "type": "Standard",
+              "totalShares": 0,
+              "isReporter": 0,
+              "reportedBy": "",
+              "categoryName": "చోటా స్పెషల్",
+              "postUrl": "",
+              "subType": "StandardLink",
+              "isStickyPost": 1,
+              "adPosition": null,
+              "linkURLAndroid": "https://app.chotanews.com/individualPage?postId=4067186",
+              "linkURLIos": "https://app.chotanews.com/individualPage?postId=4067186",
+              "links": [
+                {
+                  "id": "link1",
+                  "value": "https://play.google.com/store/apps/details?id=com.chotanews"
+                }
+              ],
+              "categoryId": 18,
+              "isBookmarked": 0
+            },
+            {
+              "id": 4067634,
+              "postOrder": 852065,
+              "author": 24,
+              "title": "సూర్యకు గిఫ్ట్‌ ఇచ్చిన 'రెట్రో' డిస్ట్రిబ్యూటర్‌",
+              "content": "నటుడు సూర్య కథానాయకుడిగా నటించిన తాజా చిత్రం రెట్రో. ఇటీవల విడుదలైన ఈ మూవీ సక్సెస్‌ ఫుల్‌గా రన్‌ అవుతున్న విషయం తెలిసిందే. ఈ మూవీని శక్తి ఫిలిమ్‌ ఫ్యాక్టరీ సంస్థ అధినేత శక్తి వేలన్‌ తమిళనాడులో డిస్ట్రిబ్యూట్ చేశారు. మూవీ లాభాలు తెచ్చిపెట్టడంతో సూర్యకు కానుకగా వజ్రపు ఉంగరాన్ని శక్తి వేలన్‌ అందించారు. ఆ ఉంగరాన్ని సూర్య తిరిగి వేలన్‌కే ఇచ్చేశారు.",
+              "created": "2025-05-11T06:37:25",
+              "guid": "https://chotanews.azurewebsites.net/?p=4067634",
+              "post_type": "post",
+              "post_name": "సూర్యకు-గిఫ్ట్‌-ఇచ్చిన-ర",
+              "post_mime_type": "",
+              "totalLikes": 6,
+              "totalViews": 1602,
+              "totalComments": 0,
+              "image_url": "https://chotanews.azureedge.net/media/2025/05/fdbfbfhbthb.jpg",
+              "video_url": "",
+              "downloadUrl": null,
+              "gallery": null,
+              "type": "Standard",
+              "totalShares": 0,
+              "isReporter": 0,
+              "reportedBy": "",
+              "categoryName": "ఎంటర్‌టైన్‌మెంట్",
+              "postUrl": "",
+              "subType": "",
+              "isStickyPost": 0,
+              "adPosition": null,
+              "linkURLAndroid": "https://app.chotanews.com/individualPage?postId=4067634",
+              "linkURLIos": "https://app.chotanews.com/individualPage?postId=4067634",
+              "links": [],
+              "categoryId": 10,
+              "isBookmarked": 0
+            }
+          ],
+          "adPosition": null,
+          "linkURLAndroid": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+          "linkURLIos": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+          "links": [],
+          "categoryId": 2,
+          "isBookmarked": 0
+        };
 
-      if(isWebView){
+        // Create a new list and insert the webUrlPost after every 4 items
+        List modifiedList = [];
+        for (int i = 0; i < data.length; i++) {
+          modifiedList.add(data[i]);
+          if ((i + 1) % 4 == 0) {
+            modifiedList.add(Map<String, dynamic>.from(webUrlPost));
+          }
+        }*/
+
+
+        if (isWebView) {
         getAllPostList.insert(0, {
           "id": 000000,
           "postOrder": 00000,
@@ -193,10 +345,7 @@ class HomeProvider extends ChangeNotifier {
       }
       getAllPostList.addAll(data);
       log(getAllPostList[0]['image_url'].toString());
-      isBookMark = getAllPostList
-          .where((e) => e['isBookmarked'] == 1)
-          .map((e) => e['id'].toString())
-          .toList();
+      isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -210,18 +359,20 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-
   bool isAiTagsLoading = false;
+
   Future getAllPostsByAiId(postId) async {
+    isBookMark = [];
     getAllAiTagsPostList = [];
     isAiTagsLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
+    String? userId = preferences.getString("userId");
 
     Map<String, dynamic> body = {
-      "deviceid": deviceId,
+      "deviceid": deviceId??"",
       "aitagid": postId,
-      "postid": "0",
+      "user_id":userId??0,
     };
     log(body.toString());
     try {
@@ -230,6 +381,8 @@ class HomeProvider extends ChangeNotifier {
       List data = response.data;
 
       getAllAiTagsPostList.addAll(data);
+
+      isBookMark = getAllAiTagsPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -260,9 +413,7 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-
   Future getSurveyData() async {
-
     try {
       Response response = await HomeRepo().surveyApi();
       getAllSurveyDataList.addAll(response.data['choices']);
@@ -274,43 +425,56 @@ class HomeProvider extends ChangeNotifier {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api catch ${st.toString()}");
     } finally {
-
       notifyListeners();
     }
   }
 
-
   List isBookMark = [];
 
-
-  void isBookMarkPost(val,context) async {
+  void isBookMarkPost(val, context) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
+    String? deviceId = sp.getString("deviceId");
     log(val['id'].toString());
     if (!isBookMark.contains(val['id'].toString())) {
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": true}
+        "key": "bookmark_article",
+        "data": {"device_id": deviceId??"", "userId": userId, "postId": val['id'].toString(), "isBookMark": true,"source_from":"news"}
       });
       isBookMark.add(val['id'].toString());
-   Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val['id'].toString(), context,1
-      );
+      Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 1);
       sendLikeDetails(userId, val, true, val['title'].toString());
       log(isBookMark.toString());
     } else {
-      Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val['id'].toString(), context,0
-      );
+      Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 0);
       isBookMark.remove(val['id'].toString());
       EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "${GlobalVariables().deviceId}", "userId": userId, "postId": val['id'].toString(), "isLike": false}
+        "key": "bookmark_article",
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isBookMark": false,"source_from":"news"}
       });
       sendLikeDetails(userId, val['id'].toString(), false, val['title'].toString());
       log(isBookMark.toString());
     }
 
+    notifyListeners();
+  }
+
+  void flipEvent(pageName,id,val)async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    String? userId = sp.getString("userId");
+    String? deviceId = sp.getString("deviceId");
+    print("set change value $val");
+    EventRepo().sendEvent({
+      "key": "flip_count",
+      "data": {
+        "device_id": deviceId,
+        "userId": userId,
+        "isFlip": val,
+        "source_name": pageName,
+        "postId": id,
+      }
+    });
+    AnalyticsService().trackArticlesRead();
     notifyListeners();
   }
 }

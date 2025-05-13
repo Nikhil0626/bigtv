@@ -24,9 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // subscribeToPushCallbacks();
 
-    // Allow push listener to trigger before navigating
     Future.delayed(Duration(milliseconds: 300), () {
       checkLastShownDate();
     });
@@ -45,10 +43,8 @@ class _SplashScreenState extends State<SplashScreen> {
       await prefs.setString('last_shown_date', today);
     }
 
-    // Wait before navigating
     await Future.delayed(Duration(seconds: showGif ? 5 : 2));
 
-    // 🔥 Navigate if app was opened from push
     if (_initialPushPayload != null &&
         _initialPushPayload!['postId'] != null &&
         (_initialPushPayload!['postId'] as String).isNotEmpty) {

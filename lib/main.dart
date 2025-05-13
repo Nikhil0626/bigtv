@@ -4,12 +4,14 @@ import 'dart:developer';
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
+import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/google_ads_view.dart';
 import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
-import 'package:chotanews/screens/testing_screen/test1.dart';
 import 'package:chotanews/services/analytics_service.dart';
-import 'package:chotanews/services/kochava_service.dart';
-import 'package:chotanews/services/webengage_notification.dart';
+// import 'package:chotanews/services/kochava_service.dart';
+import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -18,10 +20,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:platform_device_id_plus/platform_device_id.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import 'aggricator_screens/ad_manager_screen/ad_manager_screen.dart';
+import 'aggricator_screens/ad_manager_screen/test_ads.dart';
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
@@ -31,11 +36,14 @@ import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
+import 'aggricator_screens/test_screens/test3.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initPlugin();
+
   await EasyLocalization.ensureInitialized();
 
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -43,10 +51,15 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.dark,
   ));
   await facebookAppEvents.setAdvertiserTracking(enabled: true);
-  WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
-  MobileAds.instance.initialize();
+
+  String? deviceId = await PlatformDeviceId.getDeviceId;
+  log("Device ID: $deviceId");
+  MobileAds.instance.updateRequestConfiguration(
+    RequestConfiguration(testDeviceIds: [deviceId??""]),
+  );
+  unawaited(MobileAds.instance.initialize());
   await Firebase.initializeApp();
-  KochavaService.initKochava();
+  // KochavaService.initKochava();
 
   /// app Events firebase
   AnalyticsService.logAppOpen();
@@ -62,7 +75,6 @@ Future<void> main() async {
     print(message.data);
     print("push data receive   &&& ${message.data}");
   });
-  // subscribeToPushCallbacks(_webEngagePlugin);
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -100,36 +112,12 @@ class _MyAppState extends State<MyApp> {
   String postId = "";
   Map<String, dynamic>? _initialPushPayload;
 
-
   @override
   void initState() {
     super.initState();
     _initDeepLinks();
-    subscribeToPushCallbacks();
   }
 
-  Future subscribeToPushCallbacks() async{
-    SharedPreferences sp = await SharedPreferences.getInstance();
-
-    WebEngagePlugin().pushStream.listen((event) {
-      print("🔔 pushStream: ${event.payload}");
-      Map<String, dynamic> messagePayload = event.payload!;
-
-      sp.setString("webPostId", messagePayload['postId'].toString()??"");
-      Navigator.push(
-        mainNavigatorKey.currentContext!,
-        MaterialPageRoute(
-          builder: (context) => IndividualPostView(postId: messagePayload["postId"]),
-        )
-      );
-    });
-
-    WebEngagePlugin().pushActionStream.listen((event) {
-      print("👉 pushActionStream (clicked): ${event.payload}");
-      _initialPushPayload = event.payload;
-
-    });
-  }
   Future<void> _initDeepLinks() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     log("Initializing deep link listener");
@@ -137,19 +125,29 @@ class _MyAppState extends State<MyApp> {
       if (uri != null) {
         log("Deep link received: ${uri.toString()}");
         final String? id = uri.queryParameters['postId'];
-        sp.setString("webPostId",id.toString());
+        sp.setString("webPostId", id.toString());
         _handleDeepLink(uri);
+
+
       }
     }, onError: (err) {
       log("Error in deep link handling: $err");
     });
   }
 
-  void _handleDeepLink(Uri uri) {
+  void _handleDeepLink(Uri uri) async{
+    SharedPreferences sp = await SharedPreferences.getInstance();
     final String path = uri.path;
     final String? id = uri.queryParameters['postId'];
     log("Path: $path, ID: $id");
-
+    EventRepo().sendEvent({
+      "key": "dynamic_link_app_open",
+      "data": {
+        "device_id": sp.getString("deviceId")??"1234",
+        "userId": sp.getString('userId') ?? "",
+        "postId": id,
+      }
+    });
     switch (path) {
       case '/settings':
         log("Navigating to Settings screen");
@@ -263,3 +261,42 @@ class NotificationHandler {
 final GlobalKey<NavigatorState> mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver = RouteObserver<ModalRoute<Object?>>();
 final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey();
+
+
+
+// <?xml version="1.0" encoding="UTF-8"?>
+// <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+// <plist version="1.0">
+// <dict>
+// <key>aps-environment</key>
+// <string>development</string>
+// <key>com.apple.developer.applesignin</key>
+// <array>
+// <string>Default</string>
+// </array>
+// <key>com.apple.developer.associated-domains</key>
+// <array>
+// <string>applinks:app.chotanews.com</string>
+// </array>
+// </dict>
+// </plist>
+
+
+///debug
+///
+// <?xml version="1.0" encoding="UTF-8"?>
+// <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+// <plist version="1.0">
+// <dict>
+// <key>aps-environment</key>
+// <string>development</string>
+// <key>com.apple.developer.applesignin</key>
+// <array>
+// <string>Default</string>
+// </array>
+// <key>com.apple.developer.associated-domains</key>
+// <array>
+// <string>applinks:app.chotanews.com</string>
+// </array>
+// </dict>
+// </plist>

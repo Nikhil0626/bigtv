@@ -5,7 +5,9 @@ import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:platform_device_id_plus/platform_device_id.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../globel_keys/global_variables_data.dart';
@@ -15,7 +17,11 @@ Future<String?> getUniqueDeviceId(
     ) async {
   SharedPreferences sp = await SharedPreferences.getInstance();
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-  log("app latest version ${packageInfo.version}");
+
+  String? deviceId = await PlatformDeviceId.getDeviceId;
+  log("Device ID: $deviceId");
+
+  log("app latest version ${packageInfo.toString()}");
   log("app latest version ${packageInfo.buildNumber}");
 
   String? storedVersion = sp.getString("app_version");
@@ -31,13 +37,13 @@ Future<String?> getUniqueDeviceId(
 
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    sp.setString("deviceId", androidInfo.id.toString());
+    sp.setString("deviceId", deviceId.toString());
     if (token == "close") {
       EventRepo().sendEvent({
         "key": "opened_app",
         "data": {
-          "device_id": androidInfo.id.toString(),
-          "userId": sp.getString("loginId") ?? "",
+          "device_id": deviceId,
+          "userId": sp.getString("userId") ?? "",
           "isOpen": false
         }
       });
@@ -51,7 +57,7 @@ Future<String?> getUniqueDeviceId(
       EventRepo().sendEvent({
         "key": "device_details",
         "data": {
-          "device_id": androidInfo.id.toString(),
+          "device_id": deviceId,
           "device_brand": androidInfo.brand.toString(),
           "device_model": androidInfo.model.toString(),
           "device_sdk": androidInfo.version.sdkInt.toString(),
@@ -61,12 +67,12 @@ Future<String?> getUniqueDeviceId(
 
       sp.setString("deviceName", "true");
     }
-    String? userId = sp.getString('loginId');
+    String? userId = sp.getString('userId');
 
     EventRepo().sendEvent({
       "key": "opened_app",
       "data": {
-        "device_id": androidInfo.id.toString(),
+        "device_id":deviceId,
         "userId": userId,
         "isOpen": true
       }
@@ -79,8 +85,8 @@ Future<String?> getUniqueDeviceId(
       EventRepo().sendEvent({
         "key": "opened_app",
         "data": {
-          "device_id": iosInfo.identifierForVendor.toString(),
-          "userId": sp.getString("loginId") ?? "",
+          "device_id": deviceId,
+          "userId": sp.getString("userId") ?? "",
           "isOpen": false
         }
       });
@@ -96,7 +102,7 @@ Future<String?> getUniqueDeviceId(
       EventRepo().sendEvent({
         "key": "device_details",
         "data": {
-          "device_id": iosInfo.identifierForVendor.toString(),
+          "device_id": deviceId,
           "device_brand": iosInfo.model.toString(), // iPhone/iPad
           "device_model": iosInfo.utsname.machine.toString(), // Corrected field
           "device_sdk": iosInfo.systemVersion.toString(),
@@ -105,12 +111,12 @@ Future<String?> getUniqueDeviceId(
       });
       sp.setString("deviceName", "true");
     }
-    String? userId = sp.getString('loginId');
+    String? userId = sp.getString('userId');
 
     EventRepo().sendEvent({
       "key": "opened_app",
       "data": {
-        "device_id": iosInfo.identifierForVendor.toString(),
+        "device_id": deviceId,
         "userId": userId,
         "isOpen": true
       }
