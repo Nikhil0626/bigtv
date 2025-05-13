@@ -26,11 +26,11 @@ class SavedArticles extends StatefulWidget {
 
 class _SavedArticlesState extends State<SavedArticles> {
   final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     context.read<SettingsProvider>().getAllBookMarks();
-
   }
 
   @override
@@ -58,7 +58,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                 : settingsProvider.getAllBookmarkList.isEmpty
                     ? AppNoData()
                     : ListView.builder(
-              controller: _scrollController,
+                        controller: _scrollController,
                         itemCount: settingsProvider.getAllBookmarkList.length,
                         itemBuilder: (context, index) {
                           final article = settingsProvider.getAllBookmarkList[index];
@@ -70,14 +70,15 @@ class _SavedArticlesState extends State<SavedArticles> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => ReelsCardView(postId:article.postId.toString() ,)
-                                    ));
-                              }else if (article.type.toString() == "Epapers") {
+                                        builder: (context) => ReelsCardView(
+                                              postId: article.postId.toString(),
+                                            )));
+                              } else if (article.type.toString() == "Epapers") {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => PapersScreenPreview(
-                                        isBookmarked: article.isBookmarked?1:0,
+                                        isBookmarked: article.isBookmarked ? 1 : 0,
                                         postId: article.postId.toString(),
                                         name: "E-Paper",
                                         imageUrls: [PageData(id: article.postId, imageUrl: article.imageUrl.toString(), pageNumber: 1)],
@@ -100,7 +101,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                 width: double.infinity,
                                 height: 120,
                                 decoration: BoxDecoration(
-                                  color:AppColors.cardBackgroundColor,
+                                  color: AppColors.cardBackgroundColor,
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Padding(
@@ -189,28 +190,31 @@ class _SavedArticlesState extends State<SavedArticles> {
                                           ),
                                         ],
                                       ),
-                                      Positioned(top: 2,right: 2,child:   GestureDetector(
-                                        onTap: () {
-                                        settingsProvider.saveBookmarks(article.postId, context, 0).then((value) {
-                                          settingsProvider.getAllBookMarks();
-                                        },);
-
-                                        },
-                                        child: Container(
-                                          padding: EdgeInsets.all(6),
-                                          decoration: BoxDecoration(
-                                            color:
-                                            AppColors.appButtonColor,
-                                            shape: BoxShape.circle,
-                                          ),
-                                          child: Icon(
-                                            Icons.bookmark ,
-                                            color: Colors.white,
-                                            size: 16,
+                                      Positioned(
+                                        top: 2,
+                                        right: 2,
+                                        child: GestureDetector(
+                                          onTap: () {
+                                            settingsProvider.saveBookmarks(article.postId, context, 0).then(
+                                              (value) {
+                                                settingsProvider.getAllBookMarks();
+                                              },
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(6),
+                                            decoration: BoxDecoration(
+                                              color: AppColors.appButtonColor,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            child: Icon(
+                                              Icons.bookmark,
+                                              color: Colors.white,
+                                              size: 16,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                          )
+                                      )
                                     ],
                                   ),
                                 ),

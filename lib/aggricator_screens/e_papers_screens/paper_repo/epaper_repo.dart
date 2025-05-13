@@ -15,9 +15,12 @@ class EPaperRepo extends BaseService {
   }
 
 
-  Future getSingleEPapers(String paper) async {
+  Future getSingleEPapers(String paper, id) async {
+    Map<String, dynamic> body = {
+      "edition_id":id??""
+    };
     Response response = await makeRequest(baseUrl: BaseUrls.ePaperBaseUrlAws,
-      url: "${BaseUrls.getSingleEPapers}/$paper/today", method: RequestType.get,);
+      url: "${BaseUrls.getSingleEPapers}/$paper/today", method: RequestType.get,queryParameters: body);
     return response;
   }
 

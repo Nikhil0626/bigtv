@@ -18,8 +18,8 @@ import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../aggricator_screens/settings_screen/settings_view/feedback_view.dart';
-import '../../../utils/app_colors.dart';
+import '../settings_screen/settings_view/feedback_view.dart';
+import '../../utils/app_colors.dart';
 
 class GoogleAdsView extends StatefulWidget {
   final article;
@@ -120,7 +120,7 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => IndividualPostView1(postId: widget.article["homepage"]![index]['id'].toString(),isComeFrom: true,),
+                                    builder: (context) => IndividualPostView1(postId: widget.article["isHomeScreen"]![index]['id'].toString(),isComeFrom: true,),
                                   ));
                             },
                             child: Center(
@@ -141,7 +141,7 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
                                       child: CachedNetworkImage(
-                                        imageUrl: widget.article["homepage"]![index]['image_url'].toString(),
+                                        imageUrl: widget.article["isHomeScreen"]![index]['image_url'].toString(),
                                         height: 50,
                                         width: 50,
                                         fit: BoxFit.cover,

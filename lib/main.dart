@@ -5,7 +5,7 @@ import 'package:app_links/app_links.dart';
 import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
-import 'package:chotanews/screens/home_screen/home_screens/google_ads_view.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/google_ads_view.dart';
 import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
 import 'package:chotanews/services/analytics_service.dart';
 // import 'package:chotanews/services/kochava_service.dart';
@@ -20,10 +20,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:platform_device_id_plus/platform_device_id.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import 'aggricator_screens/ad_manager_screen/ad_manager_screen.dart';
+import 'aggricator_screens/ad_manager_screen/test_ads.dart';
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
@@ -48,7 +51,13 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.dark,
   ));
   await facebookAppEvents.setAdvertiserTracking(enabled: true);
-  MobileAds.instance.initialize();
+
+  String? deviceId = await PlatformDeviceId.getDeviceId;
+  log("Device ID: $deviceId");
+  MobileAds.instance.updateRequestConfiguration(
+    RequestConfiguration(testDeviceIds: [deviceId??""]),
+  );
+  unawaited(MobileAds.instance.initialize());
   await Firebase.initializeApp();
   // KochavaService.initKochava();
 
@@ -252,3 +261,42 @@ class NotificationHandler {
 final GlobalKey<NavigatorState> mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver = RouteObserver<ModalRoute<Object?>>();
 final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey();
+
+
+
+// <?xml version="1.0" encoding="UTF-8"?>
+// <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+// <plist version="1.0">
+// <dict>
+// <key>aps-environment</key>
+// <string>development</string>
+// <key>com.apple.developer.applesignin</key>
+// <array>
+// <string>Default</string>
+// </array>
+// <key>com.apple.developer.associated-domains</key>
+// <array>
+// <string>applinks:app.chotanews.com</string>
+// </array>
+// </dict>
+// </plist>
+
+
+///debug
+///
+// <?xml version="1.0" encoding="UTF-8"?>
+// <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+// <plist version="1.0">
+// <dict>
+// <key>aps-environment</key>
+// <string>development</string>
+// <key>com.apple.developer.applesignin</key>
+// <array>
+// <string>Default</string>
+// </array>
+// <key>com.apple.developer.associated-domains</key>
+// <array>
+// <string>applinks:app.chotanews.com</string>
+// </array>
+// </dict>
+// </plist>

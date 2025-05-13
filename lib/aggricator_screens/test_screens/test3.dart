@@ -13,6 +13,8 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   @override
   void initState() {
     super.initState();
+
+    print("sadbasjdhjadbjasdjhasdvjja");
     _loadNativeAd();
   }
 
@@ -53,8 +55,8 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         padding: const EdgeInsets.all(16.0),
         child: AdWidget(ad: _nativeAd!),
       )
-          : const Center(
-        child: CircularProgressIndicator(),
+          :  Center(
+        child: CircularProgressIndicator(color: Colors.green,),
       ),
     );
   }

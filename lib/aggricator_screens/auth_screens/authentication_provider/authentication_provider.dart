@@ -311,7 +311,9 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
+  bool isLocationSendingLoading = false;
   void addToSelectedLocations(String profileName) {
+
     if (!selectedLocations.contains(profileName)) {
       selectedLocations.add(profileName);
       log(selectedLocations.toString());
@@ -323,6 +325,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   Future sendLocationsToServer(BuildContext context, {bool isFilter = false}) async {
+    isLocationSendingLoading = true;
     List<int> selectedCategoryIds = getAllLocationList.where((item) => selectedLocations.contains(item.districtName.toString())).map((item) => item.districtId).toList();
     log("selkhvgbkjegjke ${selectedCategoryIds}");
     log("Selected District Names: $selectedLocations");
@@ -364,6 +367,7 @@ class AuthenticationProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
     } finally {
+      isLocationSendingLoading = false;
       notifyListeners();
     }
   }

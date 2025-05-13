@@ -43,31 +43,37 @@ class EPapersProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  Future getSingleEPapers(String paper) async {
+  SinglePaperModel? singlePaperModel;
+  Future getSingleEPapers(String paper,id) async {
     isMainPapers = true;
     getSinglePapersList = [];
-
+    print("sdfjsfjgjkhsahid adiuaidhwd");
     try {
-      Response response = await EPaperRepo().getSingleEPapers(paper);
+      Response response = await EPaperRepo().getSingleEPapers(paper,id);
       if (response.statusCode == 200) {
         log(response.data.toString());
-        List data = response.data;
-        getSinglePapersList = data.map((e) => SinglePaperModel.fromJson(e)).toList();
+        singlePaperModel =   SinglePaperModel.fromJson(response.data);
+
         // isBookMark = getSinglePapersList.first.data!
         //     .where((e) => e.isBookmarked == 1)
         //     .map((e) => e.id.toString())
         //     .toList();
+        isMainPapers = false;
+
+        notifyListeners();
+return singlePaperModel;
       }
     } on DioException catch (e, st) {
-      getSinglePapersList = [];
+      singlePaperModel = SinglePaperModel.fromJson({});
       log("Single paper dio error ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
-      getSinglePapersList = [];
+      singlePaperModel = SinglePaperModel.fromJson({});
       log("Single paper error ${e.toString()} ---- ${st.toString()}");
     } finally {
       isMainPapers = false;
+
       notifyListeners();
+      return singlePaperModel;
     }
   }
 

@@ -19,7 +19,7 @@ import '../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../screens/home_screen/botton_actions.dart';
 import '../../screens/home_screen/home_provider/provider.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../../screens/home_screen/home_screens/google_ads_view.dart';
+import '../ad_manager_screen/google_ads_view.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../screens/videos_main/video_views/gallery_screen.dart';
 import '../../screens/videos_main/video_views/video_preview.dart';
@@ -262,13 +262,13 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                   child: Container(
                                                                     padding: EdgeInsets.all(7),
                                                                     decoration: BoxDecoration(
-                                                                      color: (homeProvider.isBookMark.contains(article['id'].toString()) || article['isBookmarked'] == 1)
+                                                                      color: (homeProvider.isBookMark.contains(article['id'].toString()) || article['isBookmarked'] == 1) || widget.isComeFrom
                                                                           ? AppColors.appButtonColor
                                                                           : Colors.black54,
                                                                       shape: BoxShape.circle,
                                                                     ),
                                                                     child: Icon(
-                                                                      (homeProvider.isBookMark.contains(article['id'].toString()) || article['isBookmarked'] == 1)
+                                                                      (homeProvider.isBookMark.contains(article['id'].toString()) || article['isBookmarked'] == 1) || widget.isComeFrom
                                                                           ? Icons.bookmark
                                                                           : Icons.bookmark_outline,
                                                                       color: Colors.white,

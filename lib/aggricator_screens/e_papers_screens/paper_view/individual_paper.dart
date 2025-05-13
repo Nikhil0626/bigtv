@@ -27,7 +27,7 @@ class _IndividualPaperState extends State<IndividualPaper> {
   @override
   void initState() {
     context.read<EPapersProvider>().getSinglePapersList = [];
-    context.read<EPapersProvider>().getSingleEPapers(widget.paper);
+    // context.read<EPapersProvider>().getSingleEPapers(widget.paper);
     super.initState();
   }
 

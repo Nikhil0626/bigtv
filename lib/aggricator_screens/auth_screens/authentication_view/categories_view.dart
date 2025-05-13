@@ -49,8 +49,8 @@ class _CategoriesViewState extends State<CategoriesView> {
             children: [
               height(height: 10),
               Expanded(
-                child: SingleChildScrollView(
-                  child:authenticationProvider.isCatLoading?AppLoadingScreen(): Wrap(
+                child:authenticationProvider.isCatLoading?Center(child: AppLoadingScreen()): SingleChildScrollView(
+                  child: Wrap(
                     spacing: 10.w,
                     runSpacing: 10.h,
                     children: authenticationProvider.getAllCategoryList.map((category) {

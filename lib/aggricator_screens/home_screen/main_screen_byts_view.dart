@@ -20,7 +20,7 @@ import '../../globel_keys/global_variables_data.dart';
 import '../../screens/Auth_module/auth_provider/auth_provider.dart';
 import '../../screens/home_screen/botton_actions.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../../screens/home_screen/home_screens/google_ads_view.dart';
+import '../ad_manager_screen/google_ads_view.dart';
 import '../../screens/home_screen/home_screens/in_app_web_view.dart';
 import '../../screens/videos_main/video_views/gallery_screen.dart';
 import '../../screens/videos_main/video_views/video_preview.dart';
@@ -32,6 +32,7 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
+import '../ad_manager_screen/test_ads.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -71,6 +72,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   : widget.article['type'] == "GoogleAds"
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
+                          // child: FullScreenNativeAd(article: widget.article,),
                           child: GoogleAdsView(
                             isList: true,
                             article: widget.article,
@@ -634,7 +636,12 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     });
                                     homeProvide.getAllPostList = [];
                                     homeProvide.isReloadData();
-                                    homeProvide.getAllPost();
+                                    if(widget.isaiTags){
+                                      homeProvide.getAllPostsByAiId(widget.article['id']);
+                                    }else{
+                                      homeProvide.getAllPost();
+
+                                    }
                                   },
                                   child: context.read<FlipProvider>().isRefresh
                                       ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())

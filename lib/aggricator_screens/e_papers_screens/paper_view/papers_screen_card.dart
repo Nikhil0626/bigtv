@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/individual_paper.dart';
+import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_preview.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';
@@ -20,6 +21,7 @@ import '../../../utils/app_colors.dart';
 import '../../home_screen/home_provider.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/ePaper_main_model.dart';
+import '../paper_models/single_paper_model.dart';
 
 class PapersScreenCard extends StatefulWidget {
   const PapersScreenCard({super.key});
@@ -119,13 +121,17 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
 
                             ePapersProvider.getAllMainPapersList.length==1?InkWell(
                               onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => IndividualPaper(
-                                        paper: ePapersProvider.getAllMainPapersList[0].source,
-                                      ),
-                                    ));
+                                context.read<EPapersProvider>().getSingleEPapers(ePapersProvider.getAllMainPapersList[0].source,ePapersProvider.getAllMainPapersList[0].id).then((value) {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => PapersScreenPreview(
+                                          isBookmarked: 0 ,
+                                          imageUrls: value.data??[],
+                                          postId: value.id??"",
+                                        ),
+                                      ));
+                                },);
                               },
                               child: Container(
                                 alignment: Alignment.center,
@@ -300,10 +306,10 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                     // onUndo: _onUndo,
                                     allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
                                     // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
-                                    numberOfCardsDisplayed: 4,
+                                    numberOfCardsDisplayed: (ePapersProvider.getAllMainPapersList.length>3?4:ePapersProvider.getAllMainPapersList.length)??1,
                                     duration: const Duration(milliseconds: 100),
                                     backCardOffset: const Offset(0, 40),
-                                    padding: const EdgeInsets.only(left: 20.0,right: 20.0,bottom: 40.0,),
+                                    padding: const EdgeInsets.only(bottom: 40.0,),
                                     // alignment: Alignment.topCenter,
                                     cardBuilder: (
                                         context,
@@ -314,13 +320,21 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
 
                                       return  InkWell(
                                         onTap: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => IndividualPaper(
-                                                  paper: ePapersProvider.getAllMainPapersList[index].source,
-                                                ),
-                                              ));
+                                          print("sdfjsfjgjkhsahid adiuaidhwd");
+                                          context.read<EPapersProvider>().getSingleEPapers(ePapersProvider.getAllMainPapersList[index].source,ePapersProvider.getAllMainPapersList[index].id).then((value) {
+
+                                            print("sdfjsfjgjkhsahid adiuaidhwd");
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => PapersScreenPreview(
+                                                    isBookmarked: value['data'][0]['isBookmarked']==0?0:1 ,
+                                                    imageUrls: value['data'],
+                                                    postId: value['id'].toString(),
+                                                  ),
+                                                ));
+                                          },);
+
                                         },
                                         child: Container(
                                           alignment: Alignment.center,
@@ -361,7 +375,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
                                                     ),
                                                   ),
                                                   Container(
-                                                    padding: EdgeInsets.only(bottom: 6.h, top: 6.h),
+                                                    padding: EdgeInsets.only(bottom: 20.h, top: 6.h),
                                                     decoration: BoxDecoration(
                                                         color: AppColors.cardBackgroundColor,
                                                         borderRadius: BorderRadius.only(

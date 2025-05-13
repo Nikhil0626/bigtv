@@ -189,8 +189,8 @@ class _DistrictViewState extends State<DistrictView> {
                 Container(
                   height: 190, // Or remove if you want it to expand naturally
                   alignment: Alignment.topCenter,
-                  child: SingleChildScrollView(
-                    child:authenticationProvider.isLocationLoading?AppLoadingScreen(): Column(
+                  child:authenticationProvider.isLocationLoading?Center(child: AppLoadingScreen()):  SingleChildScrollView(
+                    child:Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: states.entries.map((entry) {
                         int stateId = entry.key;
@@ -242,7 +242,7 @@ class _DistrictViewState extends State<DistrictView> {
                           },);
                         }
                       : () {
-                          CustomToast.showErrorToast(msg: "Please Select only 5 District ");
+                          CustomToast.showErrorToast(msg: "Please select at least 2 district ");
                         },
                   child: Container(
                       width: MediaQuery.of(context).size.width,
@@ -252,7 +252,7 @@ class _DistrictViewState extends State<DistrictView> {
                               ? AppColors.loginBgColor
                               : AppColors.bodyTextColor.withOpacity(.2),
                           borderRadius: BorderRadius.all(Radius.circular(8.r))),
-                      child: Center(child: Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
+                      child: Center(child:authenticationProvider.isLocationSendingLoading?AppLoadingScreen(): Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
                 ),
                 SizedBox(height: 6.h),
                 LinearProgressIndicator(

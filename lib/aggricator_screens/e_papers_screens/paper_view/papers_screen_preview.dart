@@ -31,7 +31,7 @@ import 'package:share_plus/share_plus.dart';
 class PapersScreenPreview extends StatefulWidget {
   final String postId;
   final int isBookmarked;
-  final List<PageData> imageUrls;
+  final List imageUrls;
   final String name;
 
   PapersScreenPreview({
@@ -59,6 +59,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
   @override
   void initState() {
     super.initState();
+
     context.read<NewsPostsProvider>().currentPaperIndex = 0;
     context.read<NewsPostsProvider>().currentPaper = widget.imageUrls[0].imageUrl.toString();
 

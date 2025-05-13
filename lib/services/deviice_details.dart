@@ -5,6 +5,7 @@ import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:platform_device_id_plus/platform_device_id.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -19,6 +20,7 @@ Future<String?> getUniqueDeviceId(
 
   String? deviceId = await PlatformDeviceId.getDeviceId;
   log("Device ID: $deviceId");
+
   log("app latest version ${packageInfo.toString()}");
   log("app latest version ${packageInfo.buildNumber}");
 
