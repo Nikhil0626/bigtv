@@ -4,6 +4,7 @@ import UIKit
 import FirebaseCore
 import FirebaseDynamicLinks
 import WebEngage
+import webengage_flutter
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -12,6 +13,7 @@ import WebEngage
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
       FirebaseApp.configure()
+
       WebEngage.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
 
     GeneratedPluginRegistrant.register(with: self)

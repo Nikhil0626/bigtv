@@ -54,9 +54,9 @@ Future<void> main() async {
 
   String? deviceId = await PlatformDeviceId.getDeviceId;
   log("Device ID: $deviceId");
-  MobileAds.instance.updateRequestConfiguration(
-    RequestConfiguration(testDeviceIds: [deviceId??""]),
-  );
+  // MobileAds.instance.updateRequestConfiguration(
+  //   RequestConfiguration(testDeviceIds: [deviceId??""]),
+  // );
   unawaited(MobileAds.instance.initialize());
   await Firebase.initializeApp();
   // KochavaService.initKochava();
@@ -127,8 +127,6 @@ class _MyAppState extends State<MyApp> {
         final String? id = uri.queryParameters['postId'];
         sp.setString("webPostId", id.toString());
         _handleDeepLink(uri);
-
-
       }
     }, onError: (err) {
       log("Error in deep link handling: $err");
@@ -227,36 +225,6 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-class NotificationHandler {
-  static Map<String, dynamic>? pendingNotification;
-
-  static void handle(Map<String, dynamic> payload) {
-    final context = mainNavigatorKey.currentContext;
-    if (context != null) {
-      _navigateToPost(context, payload);
-    } else {
-      pendingNotification = payload;
-    }
-  }
-
-  static void checkPending() {
-    final context = mainNavigatorKey.currentContext;
-    if (context != null && pendingNotification != null) {
-      _navigateToPost(context, pendingNotification!);
-      pendingNotification = null;
-    }
-  }
-
-  static void _navigateToPost(BuildContext context, Map<String, dynamic> payload) {
-    final postId = payload["postId"].toString();
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => IndividualPostView(postId: postId),
-      ),
-    );
-  }
-}
 
 final GlobalKey<NavigatorState> mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver = RouteObserver<ModalRoute<Object?>>();

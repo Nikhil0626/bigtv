@@ -40,7 +40,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   void _loadNativeAd() {
     _nativeAd = NativeAd(
 
-      adUnitId: '/21775744923/example/native', // Test Ad Unit ID
+      adUnitId: '/21775744923/example/nativeee', // Test Ad Unit ID
       factoryId: 'adFactoryExample', // Your registered factory ID
       listener: NativeAdListener(
         onAdLoaded: (ad) {
@@ -61,7 +61,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
   void _loadBannerAd() {
     _bannerAd = BannerAd(
-      adUnitId: '/21775744923/example/fixed-size-banner', // Dummy test Ad Unit ID (valid test ID from Google)
+      adUnitId: '/21775744923/example/fixed-size-banneree', // Dummy test Ad Unit ID (valid test ID from Google)
       size: AdSize(width: 300, height: 250),
       request: const AdManagerAdRequest(),
       listener: BannerAdListener(

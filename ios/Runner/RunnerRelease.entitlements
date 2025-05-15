@@ -1,25 +1,17 @@
-
-
-
-
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- Enables Push Notifications in development mode -->
-    <key>aps-environment</key>
-    <string>development</string>
-
-    <!-- Enables Sign in with Apple -->
-    <key>com.apple.developer.applesignin</key>
-    <array>
-        <string>Default</string>
-    </array>
-
-    <!-- Enables Universal Links with your domain -->
-    <key>com.apple.developer.associated-domains</key>
-    <array>
-        <string>applinks:app.chotanews.com</string>
-    </array>
+	<key>aps-environment</key>
+	<string>development</string>
+	<key>com.apple.developer.applesignin</key>
+	<array>
+		<string>Default</string>
+	</array>
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>applinks:app.chotanews.com</string>
+		<string>webcredentials:app.chotanews.com</string>
+	</array>
 </dict>
 </plist>

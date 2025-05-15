@@ -1,43 +1,77 @@
+import 'package:card_swiper/card_swiper.dart';
+import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+class AdSwiperScreen extends StatelessWidget {
+  const AdSwiperScreen({Key? key}) : super(key: key);
 
-import 'dart:developer';
+  @override
+  Widget build(BuildContext context) {
+    final ads = List.generate(5, (index) => const NativeAdCard());
 
-import 'package:chotanews/services/base_service.dart';
-import 'package:chotanews/services/base_urls.dart';
-import 'package:chotanews/utils/app_enums.dart';
-import 'package:dio/dio.dart';
-
-class TestRepo extends BaseService{
-  
-  Future getHomePageNews() async{
-    final Map<String, dynamic> queryParams = {
-      'userid': "1",
-      'postid': "0",
-      'lpostid': "0",
-      'includeHomePage': "1",
-      'hasAds': true,
-      'isByNotification': false,
-      'deviceid': '993f0e149b5bed89',
-      'platform': 'ios',
-      'homefeed': "1",
-      'locationIds': 'undefined',
-    };
-    log(queryParams.toString());
-    try{
-      var response = await makeRequest(url: BaseUrls.getNews,method: RequestType.get,);
-      log("response.data.toString()");
-      log(response.data.toString());
-      return response;
-    }
-
-  on DioException  catch(e,st){
-      log(st.toString());
-      log(e.toString());
-    }  catch(e,st){
-      log(st.toString());
-      log(e.toString());
-    }
-
+    return Scaffold(
+      appBar: AppBar(title: const Text("Ads Only Swiper")),
+      body: Swiper(
+        itemBuilder: (BuildContext context, int index) {
+          return ads[index];
+        },
+        itemCount: ads.length,
+        scrollDirection: Axis.vertical,
+        loop: true,
+        autoplay: false,
+      ),
+    );
   }
-  
+}
+
+
+
+
+class NativeAdCard extends StatefulWidget {
+  const NativeAdCard({Key? key}) : super(key: key);
+
+  @override
+  State<NativeAdCard> createState() => _NativeAdCardState();
+}
+
+class _NativeAdCardState extends State<NativeAdCard> {
+  NativeAd? _nativeAd;
+  bool _isAdLoaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _nativeAd = NativeAd(
+      adUnitId: '/21775744923/example/native',
+      factoryId: 'adFactoryExample', // This must match your custom native factory ID
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          setState(() => _isAdLoaded = true);
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          print('NativeAd failed to load: $error');
+        },
+      ),
+      request: const AdRequest(),
+    )..load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _isAdLoaded
+        ? Container(
+      height: 300,
+      margin: const EdgeInsets.all(12),
+      child: AdWidget(ad: _nativeAd!),
+    )
+        : const Center(child: CircularProgressIndicator());
+  }
+
+  @override
+  void dispose() {
+    _nativeAd?.dispose();
+    super.dispose();
+  }
 }

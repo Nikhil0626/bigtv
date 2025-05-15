@@ -26,6 +26,7 @@ class GoogleAdsView extends StatefulWidget {
   final HomeProvider flipProvider;
   final isFoldable;
   bool isList;
+  int index;
 
   GoogleAdsView({
     super.key,
@@ -33,6 +34,7 @@ class GoogleAdsView extends StatefulWidget {
     required this.flipProvider,
     required this.isFoldable,
     this.isList = false,
+    this.index = 0,
   });
 
   @override
@@ -46,7 +48,7 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
   @override
   void initState() {
     super.initState();
-    loadAd();
+    // loadAd();
   }
 
   void loadAd() {
@@ -86,15 +88,16 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(
-          flex: 1,
-          child: !_isAdLoaded || _nativeAd == null
-              ?widget.article['adType']=="rating card"?RateYourApp():widget.article['adType']=="share card"?ShareYourApp():ShareYourApp()
-              : Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-            child: AdWidget(ad: _nativeAd!),
-          ),
-        ),
+        // Expanded(
+        //   flex: 1,
+        //   // child: context.read<HomeProvider>().adWidgets[5]!,
+        //   // child: !_isAdLoaded || _nativeAd == null
+        //   //     ?widget.article['adType']=="rating card"?RateYourApp():widget.article['adType']=="share card"?ShareYourApp():ShareYourApp()
+        //   //     : Padding(
+        //   //   padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
+        //   //   child: AdWidget(ad: _nativeAd!),
+        //   // ),
+        // ),
         if (widget.isList)
           Expanded(
             flex: 1,
@@ -108,113 +111,113 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
                     style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor),
                   ),
                   // height(height: 10),
-                  Expanded(
-                    child: Container(
-                      alignment: Alignment.center,
-                      child: ListView.builder(
-                        itemCount: 3,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => IndividualPostView1(postId: widget.article["isHomeScreen"]![index]['id'].toString(),isComeFrom: true,),
-                                  ));
-                            },
-                            child: Center(
-                              child: Container(
-                                width: MediaQuery
-                                    .of(context)
-                                    .size
-                                    .width,
-                                margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
-                                padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
-                                decoration: BoxDecoration(
-                                  color: AppColors.wColor,
-                                  border: Border.all(width: 2, color: AppColors.wColor),
-                                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                                ),
-                                child: Row(
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: CachedNetworkImage(
-                                        imageUrl: widget.article["isHomeScreen"]![index]['image_url'].toString(),
-                                        height: 50,
-                                        width: 50,
-                                        fit: BoxFit.cover,
-                                        placeholder: (context, url) =>
-                                            Container(
-                                              height: 50,
-                                              width: 50,
-                                              decoration: BoxDecoration(
-                                                color: AppColors.borderColor.withOpacity(.2),
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                            ),
-                                        errorWidget: (context, url, error) =>
-                                            Container(
-                                              height: 40,
-                                              width: 40,
-                                              decoration: BoxDecoration(
-                                                borderRadius: BorderRadius.circular(8),
-                                                color: Colors.grey.shade300,
-                                              ),
-                                              child: Center(
-                                                child: Icon(
-                                                  Icons.image,
-                                                  size: 30,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                      ),
-                                    ),
-                                    width(width: 10),
-                                    Expanded(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.start,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "${widget.article["homepage"][index]["title"]}",
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: fontStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w700,
-                                              color: AppColors.textColor,
-                                            ),
-                                          ),
-                                          height(height: 2),
-                                          Row(
-                                            children: [
-                                              index==0?SvgPicture.asset("assets/svg/like.svg",height: 16,width: 16,): index==2?SvgPicture.asset("assets/svg/share.svg",height: 16,width: 16,):SvgPicture.asset("assets/svg/eye.svg",height: 16,width: 16,),
-                                              width(width: 6),
-                                              Text(
-                                                index ==0?"టాప్ లైక్స్":index == 2?"టాప్ షేర్‌డ్": "టాప్ వ్యూడ్",
-                                                style: fontStyle(
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w400,
-                                                  color: AppColors.textColor,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+                  // Expanded(
+                  //   child: Container(
+                  //     alignment: Alignment.center,
+                  //     child: ListView.builder(
+                  //       itemCount: 3,
+                  //       physics: NeverScrollableScrollPhysics(),
+                  //       itemBuilder: (context, index) {
+                  //         return InkWell(
+                  //           onTap: () {
+                  //             Navigator.push(
+                  //                 context,
+                  //                 MaterialPageRoute(
+                  //                   builder: (context) => IndividualPostView1(postId: widget.article["isHomeScreen"]![index]['id'].toString(),isComeFrom: true,),
+                  //                 ));
+                  //           },
+                  //           child: Center(
+                  //             child: Container(
+                  //               width: MediaQuery
+                  //                   .of(context)
+                  //                   .size
+                  //                   .width,
+                  //               margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
+                  //               padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
+                  //               decoration: BoxDecoration(
+                  //                 color: AppColors.wColor,
+                  //                 border: Border.all(width: 2, color: AppColors.wColor),
+                  //                 borderRadius: BorderRadius.all(Radius.circular(10)),
+                  //               ),
+                  //               child: Row(
+                  //                 children: [
+                  //                   ClipRRect(
+                  //                     borderRadius: BorderRadius.circular(8),
+                  //                     child: CachedNetworkImage(
+                  //                       imageUrl: widget.article["isHomeScreen"]![index]['image_url'].toString(),
+                  //                       height: 50,
+                  //                       width: 50,
+                  //                       fit: BoxFit.cover,
+                  //                       placeholder: (context, url) =>
+                  //                           Container(
+                  //                             height: 50,
+                  //                             width: 50,
+                  //                             decoration: BoxDecoration(
+                  //                               color: AppColors.borderColor.withOpacity(.2),
+                  //                               borderRadius: BorderRadius.circular(8),
+                  //                             ),
+                  //                           ),
+                  //                       errorWidget: (context, url, error) =>
+                  //                           Container(
+                  //                             height: 40,
+                  //                             width: 40,
+                  //                             decoration: BoxDecoration(
+                  //                               borderRadius: BorderRadius.circular(8),
+                  //                               color: Colors.grey.shade300,
+                  //                             ),
+                  //                             child: Center(
+                  //                               child: Icon(
+                  //                                 Icons.image,
+                  //                                 size: 30,
+                  //                                 color: Colors.white,
+                  //                               ),
+                  //                             ),
+                  //                           ),
+                  //                     ),
+                  //                   ),
+                  //                   width(width: 10),
+                  //                   Expanded(
+                  //                     child: Column(
+                  //                       mainAxisAlignment: MainAxisAlignment.start,
+                  //                       crossAxisAlignment: CrossAxisAlignment.start,
+                  //                       children: [
+                  //                         Text(
+                  //                           "${widget.article["homepage"][index]["title"]}",
+                  //                           maxLines: 1,
+                  //                           overflow: TextOverflow.ellipsis,
+                  //                           style: fontStyle(
+                  //                             fontSize: 14,
+                  //                             fontWeight: FontWeight.w700,
+                  //                             color: AppColors.textColor,
+                  //                           ),
+                  //                         ),
+                  //                         height(height: 2),
+                  //                         Row(
+                  //                           children: [
+                  //                             index==0?SvgPicture.asset("assets/svg/like.svg",height: 16,width: 16,): index==2?SvgPicture.asset("assets/svg/share.svg",height: 16,width: 16,):SvgPicture.asset("assets/svg/eye.svg",height: 16,width: 16,),
+                  //                             width(width: 6),
+                  //                             Text(
+                  //                               index ==0?"టాప్ లైక్స్":index == 2?"టాప్ షేర్‌డ్": "టాప్ వ్యూడ్",
+                  //                               style: fontStyle(
+                  //                                 fontSize: 12,
+                  //                                 fontWeight: FontWeight.w400,
+                  //                                 color: AppColors.textColor,
+                  //                               ),
+                  //                             ),
+                  //                           ],
+                  //                         ),
+                  //                       ],
+                  //                     ),
+                  //                   ),
+                  //                 ],
+                  //               ),
+                  //             ),
+                  //           ),
+                  //         );
+                  //       },
+                  //     ),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

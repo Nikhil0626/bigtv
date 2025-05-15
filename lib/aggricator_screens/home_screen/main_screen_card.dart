@@ -38,6 +38,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   @override
   void initState() {
     super.initState();
+    log("hello home screen in 2222");
     context.read<HomeProvider>().getAllPostList = [];
     context.read<HomeProvider>().getAllAiTags();
     context.read<HomeProvider>().getAllPost();
@@ -289,13 +290,14 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                           : type == "GoogleAds"
                                               ? Padding(
                                                   padding: const EdgeInsets.only(bottom: 20.0),
-                                                  // child: FullScreenNativeAd( article: post,),
-                                                  child: GoogleAdsView(
-                                                    isList: true,
-                                                    article: post,
-                                                    flipProvider: context.read<HomeProvider>(),
-                                                    isFoldable: false,
-                                                  ),
+                                                  child: FullScreenNativeAd( article: post,),
+                                                  // child: GoogleAdsView(
+                                                  //   isList: true,
+                                                  //   article: post,
+                                                  //   flipProvider: context.read<HomeProvider>(),
+                                                  //   isFoldable: false,
+                                                  //   index:index,
+                                                  // ),
                                                 )
                                               : type == "Image"
                                                   ? ImageView(

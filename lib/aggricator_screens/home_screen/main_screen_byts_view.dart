@@ -72,14 +72,14 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   : widget.article['type'] == "GoogleAds"
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
-                          // child: FullScreenNativeAd(article: widget.article,),
-                          child: GoogleAdsView(
-                            isList: true,
-                            article: widget.article,
-                            flipProvider: context.read<HomeProvider>(),
-                            // screenshotController: adsScreenshotController,
-                            isFoldable: false,
-                          ),
+                          child: FullScreenNativeAd(article: widget.article,),
+                          // child: GoogleAdsView(
+                          //   isList: true,
+                          //   article: widget.article,
+                          //   flipProvider: context.read<HomeProvider>(),
+                          //   // screenshotController: adsScreenshotController,
+                          //   isFoldable: false,
+                          // ),
                         )
                       : widget.article['type'] == "Image"
                           ? InkWell(

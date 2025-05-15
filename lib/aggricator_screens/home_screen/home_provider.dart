@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:chotanews/aggricator_screens/home_screen/home_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -158,7 +159,7 @@ class HomeProvider extends ChangeNotifier {
 
       // if (isWebView) {
         // Create the custom map once
-        /*Map<String, dynamic> webUrlPost = {
+        Map<String, dynamic> webUrlPost = {
           "id": 000000,
           "postOrder": 00000,
           "author": 9,
@@ -299,16 +300,28 @@ class HomeProvider extends ChangeNotifier {
         };
 
         // Create a new list and insert the webUrlPost after every 4 items
-        List modifiedList = [];
-        for (int i = 0; i < data.length; i++) {
-          modifiedList.add(data[i]);
-          if ((i + 1) % 4 == 0) {
-            modifiedList.add(Map<String, dynamic>.from(webUrlPost));
-          }
-        }*/
 
+      List modifiedList = [];
+      for (int i = 0; i < data.length; i++) {
+        modifiedList.add(data[i]);
+        if ((i + 1) % 4 == 0) {
+          modifiedList.add(Map<String, dynamic>.from(webUrlPost));
+        }
+      }
 
-        if (isWebView) {
+        // List finalList = [];
+      // for (int i = 0; i < data.length; i++) {
+      //   finalList.add(data[i]);
+      //
+      //   // Insert ad placeholder after every 4 real items (5th position)
+      //   if ((i + 1) % 5 == 0) {
+      //     int adIndex = finalList.length; // position after insertion
+      //     finalList.add({"type": "ad_placeholder", "adIndex": adIndex});
+      //     _loadAdForPosition(adIndex);
+      //   }
+      // }
+
+      /*  if (isWebView) {
         getAllPostList.insert(0, {
           "id": 000000,
           "postOrder": 00000,
@@ -342,9 +355,11 @@ class HomeProvider extends ChangeNotifier {
           "categoryId": 2,
           "isBookmarked": 0
         });
-      }
-      getAllPostList.addAll(data);
+      }*/
+      getAllPostList.addAll(modifiedList);
       log(getAllPostList[0]['image_url'].toString());
+
+
       isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
@@ -358,6 +373,56 @@ class HomeProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+  // Map<int, Widget> adWidgets = {};
+  //
+  // void _loadAdForPosition(int index) {
+  //   NativeAd nativeAd = NativeAd(
+  //     adUnitId: '/21775744923/example/native',
+  //     factoryId: 'adFactoryExample',
+  //     request: AdRequest(),
+  //     listener: NativeAdListener(
+  //       onAdLoaded: (ad) {
+  //         adWidgets[index] = SizedBox(
+  //           height: 600,
+  //           width: 400,
+  //           child: AdWidget(ad: ad as NativeAd),
+  //         );
+  //         notifyListeners();
+  //       },
+  //       onAdFailedToLoad: (ad, error) {
+  //         ad.dispose();
+  //         _loadBannerAdForPosition(index);
+  //       },
+  //     ),
+  //   );
+  //   nativeAd.load();
+  // }
+  //
+  // void _loadBannerAdForPosition(int index) {
+  //
+  //   BannerAd bannerAd = BannerAd(
+  //     adUnitId: '/21775744923/example/banner',
+  //     size: AdSize.banner,
+  //     request: AdRequest(),
+  //     listener: BannerAdListener(
+  //       onAdLoaded: (ad) {
+  //         adWidgets[index] = SizedBox(
+  //           height: 50,
+  //           child: AdWidget(ad: ad as BannerAd),
+  //         );
+  //         notifyListeners();
+  //       },
+  //       onAdFailedToLoad: (ad, error) {
+  //         ad.dispose();
+  //         adWidgets[index] = const SizedBox();
+  //         notifyListeners();
+  //       },
+  //     ),
+  //   );
+  //   bannerAd.load();
+  // }
+
+
 
   bool isAiTagsLoading = false;
 
@@ -372,7 +437,7 @@ class HomeProvider extends ChangeNotifier {
     Map<String, dynamic> body = {
       "deviceid": deviceId??"",
       "aitagid": postId,
-      "user_id":userId??0,
+      "user_id":userId??"",
     };
     log(body.toString());
     try {

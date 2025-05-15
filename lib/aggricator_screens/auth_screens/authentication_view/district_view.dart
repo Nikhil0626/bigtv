@@ -118,7 +118,7 @@ class _DistrictViewState extends State<DistrictView> {
     super.initState();
   }
 
-  final Map<int, String> states = {
+  final Map<int, String>  states = {
     21: 'Andhra Pradesh',
     19: 'Telangana',
   };

@@ -57,6 +57,6 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager> with WidgetsB
 
   void getNotifications() async{
 
-    // subscribeToPushCallbacks(webEngage);
+    // subscribeToPushCallbacks();
   }
 }

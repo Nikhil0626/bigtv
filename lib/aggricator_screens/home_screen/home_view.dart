@@ -22,6 +22,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 import '../../globel_keys/global_variables_data.dart';
 import '../../main.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
+import '../../services/app_update_servuce.dart';
 import '../../services/deviice_details.dart';
 import '../../services/permission_handler_services.dart';
 import '../../services/webengage_notification.dart';
@@ -45,6 +46,10 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppUpdateService.checkForUpdate(context);
+    });
+    log("hello home screen in 1111");
     requestLocationPermission();
     requestNotificationPermission();
     getMobileNumber();
