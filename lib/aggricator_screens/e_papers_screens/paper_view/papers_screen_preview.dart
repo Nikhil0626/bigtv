@@ -234,13 +234,13 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                                   "data": {
                                                     "device_id": deviceId,
                                                     "userId": userId ?? "",
-                                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex].id,
+                                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex+1].id,
                                                     "isWhatAppShare": false,
                                                     "source_from":"paper"
                                                   }
                                                 });
 
-                                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex].id, "");
+                                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex+1].id, "");
 
                                                 try {
                                                   RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
@@ -249,12 +249,12 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                                   Uint8List pngBytes = byteData!.buffer.asUint8List();
 
                                                   final directory = await getTemporaryDirectory();
-                                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex].id.toString()}.png');
+                                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex+1].id.toString()}.png');
                                                   await imagePath.writeAsBytes(pngBytes);
 
                                                   await Share.shareXFiles(
                                                     [XFile(imagePath.path)],
-                                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex].imageUrl}',
+                                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex+1].imageUrl}',
                                                   );
                                                 } catch (e) {
                                                   print("Error capturing image: $e");

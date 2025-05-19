@@ -182,6 +182,8 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                               controller: controller,
                               cardsCount: homeProvider.getAllPostList.length,
                               onSwipe: (previousIndex, currentIndex, direction) {
+                                log("bskdjfnjskdfhnvkjdsfhvdks ${currentIndex == homeProvider.getAllPostList.length - 5}");
+
                                 if (direction == CardSwiperDirection.bottom) {
                                   context.read<HomeProvider>().flipEvent('news',homeProvider.getAllPostList[currentIndex!]['id'],false);
                                   _undo();
@@ -224,6 +226,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                 if (index == homeProvider.getAllPostList.length - 5) {
                                   homeProvider.getAllPost(postId: homeProvider.getAllPostList.last['id'].toString()); // Fetch next page
                                 }
+
                                 return Container(
                                   height: 520,
                                   // width: MediaQuery.of(context).size.width,

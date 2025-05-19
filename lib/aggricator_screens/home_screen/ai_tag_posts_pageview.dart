@@ -25,7 +25,7 @@ class AiTagPostsPageView extends StatefulWidget {
 
 class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
   late PageController _pageController;
-  int currentIndex = 0;
+
   int autoIndex = 0;
 
   @override
@@ -36,7 +36,7 @@ class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
     _pageController = PageController(viewportFraction: 1.0);
     _pageController.addListener(() {
       setState(() {
-        currentIndex = _pageController.page?.round() ?? 0;
+        context.read<HomeProvider>().currentIndex = _pageController.page?.round() ?? 0;
       });
     });
   }
@@ -87,7 +87,7 @@ class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
                           ),
                           children: [
                             TextSpan(
-                              text: "${homeProvider.getAllAiTagsPostList.isEmpty ? currentIndex : currentIndex + 1}",
+                              text: "${homeProvider.getAllAiTagsPostList.isEmpty ? homeProvider.currentIndex : homeProvider.currentIndex + 1}",
                               style: fontStyle(color: AppColors.appButtonColor, fontWeight: FontWeight.w600, fontSize: 12),
                             ),
                             TextSpan(
@@ -119,7 +119,7 @@ class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
                             scrollDirection: Axis.vertical,
                             itemCount: homeProvider.getAllAiTagsPostList.length,
                             onPageChanged: (value) {
-                              log("AiTagPostsPageView.  ${currentIndex}--- $value");
+                              log("AiTagPostsPageView.  ${homeProvider.currentIndex}--- $value");
                               context.read<HomeProvider>().flipEvent('news',homeProvider.getAllAiTagsPostList[value]['id'],value>autoIndex?true:false);
 
                               autoIndex=value;
@@ -147,6 +147,7 @@ class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
                                         child: MainScreenBytView(
                                           article: homeProvider.getAllAiTagsPostList[index],
                                           isaiTags: true,
+                                          aiTagId: widget.tagId,
                                         ),
                                       ),
                                     ),

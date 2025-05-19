@@ -32,13 +32,16 @@ class SettingsView extends StatefulWidget {
   const SettingsView({
     super.key,
   });
+
   @override
   _SettingsViewState createState() => _SettingsViewState();
 }
+
 class _SettingsViewState extends State<SettingsView> {
   NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
   bool isNotificationsEnabled = false;
   String appVersion = "";
+
   @override
   void initState() {
     getLogin();
@@ -89,11 +92,12 @@ class _SettingsViewState extends State<SettingsView> {
             // _buildNotificationRow(),
 
             _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () {
-              if (Platform.isIOS) {
-                Share.share("Check out this app: https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092");
-              } else {
-                Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
-              }
+              _showShareBottomSheet(context);
+              // if (Platform.isIOS) {
+              //   Share.share("Check out this app: https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092");
+              // } else {
+              //   Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
+              // }
             }),
 
             height(height: 5.h),
@@ -175,6 +179,146 @@ class _SettingsViewState extends State<SettingsView> {
           ],
         ),
       ),
+    );
+  }
+
+  void _showShareBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (BuildContext context) {
+        return FractionallySizedBox(
+          heightFactor: 0.35,
+          child: Container(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Share Our App",
+                  style: homeScreenFontStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+                height(height: 10),
+                Divider(
+                  height: 1,
+                  color: AppColors.borderColor,
+                ),
+                height(height: 10),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          Share.share(
+                            "Check out this app: https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092",
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    blurRadius: 5,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              padding: EdgeInsets.all(16),
+                              child: Icon(
+                                Icons.apple,
+                                size: 50,
+                                color: Colors.black,
+                              ),
+                            ),
+                            height(height: 8),
+                            Text(
+                              "App Store",
+                              style: newAppFont(fontWeight: FontWeight.w600, color: AppColors.headerTextColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pop(context);
+                          Share.share(
+                            "Check out this app: https://play.google.com/store/apps/details?id=com.chotanews",
+                          );
+                        },
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    blurRadius: 5,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              padding: EdgeInsets.all(16),
+                              child: Icon(
+                                Icons.android,
+                                size: 50,
+                                color: Colors.green,
+                              ),
+                            ),
+                            height(height: 8),
+                            Text(
+                              "Play Store",
+                              style: newAppFont(fontWeight: FontWeight.w600, color: AppColors.headerTextColor),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                height(height: 20),
+                InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: double.infinity,
+                    height: 35.h,
+                    // margin: EdgeInsets.only(bottom: 20.h),
+                    decoration: BoxDecoration(
+                      color: AppColors.appButtonColor,
+                      borderRadius: BorderRadius.all(Radius.circular(8.r)),
+                    ),
+                    child: Center(
+                      child: Text(
+                        'Cancel',
+                        style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                      ),
+                    ),
+                  ),
+                ),
+                height(height: 20),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

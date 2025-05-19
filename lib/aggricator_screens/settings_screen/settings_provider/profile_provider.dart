@@ -24,16 +24,17 @@ class ProfileProvider extends ChangeNotifier {
   bool isButtonEnabled = false;
   var profileData;
   File? selectedFile;
-
+  bool isMainLoading = false;
 
   Future getProfile() async {
+    isMainLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     // String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
       "user_id": userId,
     };
-    bool isMainLoading = true;
+
     try {
       Response response = await SettingsRepo().getProfile(body);
       log("data -- ${response.data}");
@@ -49,7 +50,7 @@ class ProfileProvider extends ChangeNotifier {
         yearController.text = data[0]??"";
         nameController.text = response.data['profile']['name']??"";
         uploadImageUrl = response.data['profile']['photo']??"";
-
+        notifyListeners();
         log("Like posted successfully: ${response.data}");
       } else {
         log("Failed to post like: ${response.statusCode}");
@@ -57,10 +58,14 @@ class ProfileProvider extends ChangeNotifier {
     } on DioException catch (e, st) {
       log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
+
       log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
     } finally {
+    Future.delayed(Duration(seconds: 1),() {
       isMainLoading = false;
       notifyListeners();
+
+    },);
     }
   }
   bool isProfileUpdate = false;

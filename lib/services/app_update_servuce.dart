@@ -18,15 +18,15 @@ class AppUpdateService {
           InAppUpdate.completeFlexibleUpdate();
         }).catchError((e) {
           log("Flexible update error: $e");
-          _showSnackBar(context, "Flexible update failed: $e");
+          // _showSnackBar(context, "Flexible update failed: $e");
         });
       } else {
         log("App is up to date.");
-        _showSnackBar(context, "Your app is up-to-date!");
+        // _showSnackBar(context, "Your app is up-to-date!");
       }
     } catch (e) {
       log("Failed to check for updates: $e");
-      _showSnackBar(context, "Failed to check for updates: $e");
+      // _showSnackBar(context, "Failed to check for updates: $e");
     }
   }
 

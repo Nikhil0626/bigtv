@@ -203,6 +203,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                 postType: widget.reelCard.postName ?? "",
                 icon: context.read<ReelsProviders>().isLikeList.contains(widget.reelCard.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                 label: 'లైక్',
+
                 isLike:  context.read<ReelsProviders>().isLikeList.contains(widget.reelCard.id.toString()),
                 onTap: () {
                   log("Like");

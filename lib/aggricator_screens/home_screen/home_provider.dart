@@ -1,14 +1,13 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/home_screen/home_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-import '../../globel_keys/global_variables_data.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../services/analytics_service.dart';
 import '../../services/webengage_event_tracks.dart';
@@ -19,6 +18,13 @@ class HomeProvider extends ChangeNotifier {
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
   List getAllSurveyDataList = [];
+
+
+  String adManageId = "";
+  String adManagerNativeId = "";
+  String adManagerBannerId = "";
+  String adMobNativeId = "";
+  String adMobBannerId = "";
 
   var getSinglePostList = {};
   int aiCurrentPostId = 0;
@@ -51,6 +57,11 @@ class HomeProvider extends ChangeNotifier {
 
   void isReloadData() {
     isReload = true;
+    notifyListeners();
+  }
+
+  void isReloadFalse() {
+    isReload = false;
     notifyListeners();
   }
 
@@ -93,38 +104,61 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getIndividualPost(postId, {bool isAds = false}) async {
-    getAllPostList = [];
+    log("getIndividualPost ${postId}");
+    if(isAds !=true) {
+      getAllPostList = [];
+    }
     isPostLoading = true;
+    // notifyListeners();
     try {
       Response response = await HomeRepo().getSinglePost(postId);
       log(response.data.toString());
-      getSinglePostList = response.data['data'];
-
-      log("fbnskjfnskjfnksfkjs");
-      log(getSinglePostList.toString());
-      if (isAds == false) {
-        getAllPostList.add(response.data['data']);
-        Future.delayed(
-          Duration(milliseconds: 300),
-          () {
-            getAllPost(postId: "0");
-          },
-        );
+      if (response.statusCode == 200) {
+        if (isAds == false) {
+          getAllPostList.add(response.data['data']);
+          Future.delayed(
+            Duration(milliseconds: 300),
+            () {
+              getAllPost( isGetAllPost: true);
+            },
+          );
+        } else {
+          getSinglePostList = response.data['data'];
+        }
       }
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
+      // getAllPostList = [];
+      Future.delayed(
+        Duration(milliseconds: 300),
+        () {
+          getAllPost( isGetAllPost: true);
+        },
+      );
+      isPostLoading = false;
+      notifyListeners();
     } catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api catch ${st.toString()}");
+      // getAllPostList = [];
+      Future.delayed(
+        Duration(milliseconds: 300),
+        () {
+          getAllPost( isGetAllPost: true);
+        },
+      );
+      isPostLoading = false;
+      notifyListeners();
     } finally {
       isPostLoading = false;
+      isReload = false;
       notifyListeners();
     }
   }
 
-  Future getAllPost({String postId = "0"}) async {
-    if (postId == 0) {
+  Future getAllPost({String postId = "0", bool isGetAllPost = false}) async {
+    if (isGetAllPost == false && postId =="0") {
       getAllPostList = [];
     }
     isBookMark = [];
@@ -148,168 +182,173 @@ class HomeProvider extends ChangeNotifier {
       "locationIds": locationIds,
       "categoriesId": categoriesIds,
       "userId": userId ?? 0,
+      "isAdManager":true
     };
     log("allpost body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
-
       List data = response.data['posts'];
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
+      adManageId =Platform.isIOS?response.data['adUnits']['ios']['admanageid']: response.data['adUnits']['android']['admanageid'];
+      adManagerNativeId =Platform.isIOS?response.data['adUnits']['ios']['admanagernativeid']: response.data['adUnits']['android']['admanagernativeid'];
+      adManagerBannerId = Platform.isIOS?response.data['adUnits']['ios']['admanagerbannerid']:response.data['adUnits']['android']['admanagerbannerid'];
+      adMobNativeId = Platform.isIOS?response.data['adUnits']['ios']['admobnativeid']:response.data['adUnits']['android']['admobnativeid'];
+      adMobBannerId = Platform.isIOS?response.data['adUnits']['ios']['admobbannerid']:response.data['adUnits']['android']['admobbannerid'];
 
       // if (isWebView) {
-        // Create the custom map once
-        Map<String, dynamic> webUrlPost = {
-          "id": 000000,
-          "postOrder": 00000,
-          "author": 9,
-          "title": "GoogleAds",
-          "content": "Hello",
-          "created": "2025-04-22T08:36:04",
-          "guid": "",
-          "post_type": "post",
-          "post_name": "సివిల్స్-తుది-ఫలితాలు-వి",
-          "post_mime_type": "",
-          "totalLikes": 8,
-          "totalViews": 14104,
-          "totalComments": 0,
-          "image_url": "",
-          "video_url": "",
-          "downloadUrl": null,
-          "gallery": null,
-          "type": "GoogleAds",
-          "totalShares": 0,
-          "isReporter": 0,
-          "reportedBy": "",
-          "categoryName": "నేషనల్",
-          "postUrl": "",
-          "subType": "",
-          "isStickyPost": 0,
-          "isHomeScreen": [
-            {
-              "id": 4067654,
-              "postOrder": 852068,
-              "author": 24,
-              "title": "కొత్త రేషన్‌కార్డులపై మరో అప్డేట్",
-              "content": "AP: కొత్త రేషన్‌‌కార్డుల దరఖాస్తులపై ప్రభుత్వం కీలక ప్రకటన చేసింది. గత ప్రభుత్వ హయాంలో రేషన్‌ కార్డుల కోసం దరఖాస్తు చేసుకున్న వారు మళ్లీ దరఖాస్తు చేసుకోవాల్సిన అవసరం లేదని ప్రభుత్వ వర్గాలు తెలిపాయి. వైసీపీ హయాంలో వచ్చిన దరఖాస్తుల్లో 3.36 లక్షల దరఖాస్తులు పెండింగ్‌లో ఉన్నాయని, అవి ప్రస్తుతం ప్రభుత్వ పరిశీలనలో ఉన్నట్టు పేర్కొన్నాయి.",
-              "created": "2025-05-11T06:40:44",
-              "guid": "https://chotanews.azurewebsites.net/?p=4067654",
-              "post_type": "post",
-              "post_name": "కొత్త-రేషన్‌కార్డులపై-మర",
-              "post_mime_type": "",
-              "totalLikes": 5,
-              "totalViews": 1787,
-              "totalComments": 0,
-              "image_url": "https://chotanews.azureedge.net/media/2025/03/RATION-CARDS.jpg",
-              "video_url": null,
-              "downloadUrl": null,
-              "gallery": null,
-              "type": "Standard",
-              "totalShares": 0,
-              "isReporter": 0,
-              "reportedBy": "",
-              "categoryName": "నేషనల్",
-              "postUrl": null,
-              "subType": "",
-              "isStickyPost": 0,
-              "adPosition": null,
-              "linkURLAndroid": "https://app.chotanews.com/individualPage?postId=4067654",
-              "linkURLIos": "https://app.chotanews.com/individualPage?postId=4067654",
-              "links": [],
-              "categoryId": 2,
-              "isBookmarked": 0
-            },
-            {
-              "id": 4067186,
-              "postOrder": 851931,
-              "author": 9,
-              "title": "‘ఛోటా న్యూస్’ యాప్ న్యూ అప్‌డేట్",
-              "content": "గ్లోబల్ టు లోకల్ వార్తలను అందరికంటే ముందుగా క్లుప్తంగా 45 పదాల్లో మీకు అందిస్తోంది ‘ఛోటా న్యూస్’యాప్. అందుకే ఇప్పుడు తెలుగువారి కొత్త అలవాటుగా ‘ఛోటా న్యూస్’ యాప్ సరికొత్తగా మారింది. ఈ యాప్‌ న్యూ అప్‌డేట్ కోసం మీరు వెంటనే ఈ లింక్ <link1>క్లిక్</link1> చేయండి.",
-              "created": "2025-05-11T04:46:23",
-              "guid": "https://chotanews.azurewebsites.net/?p=4067186",
-              "post_type": "post",
-              "post_name": "ఛోటా-న్యూస్-యాప్-న్యూ-అ-15",
-              "post_mime_type": "",
-              "totalLikes": 6,
-              "totalViews": 14192,
-              "totalComments": 0,
-              "image_url": "https://chotanews.azureedge.net/media/2025/05/wed-68202b896f8f2.jpeg",
-              "video_url": "",
-              "downloadUrl": null,
-              "gallery": null,
-              "type": "Standard",
-              "totalShares": 0,
-              "isReporter": 0,
-              "reportedBy": "",
-              "categoryName": "చోటా స్పెషల్",
-              "postUrl": "",
-              "subType": "StandardLink",
-              "isStickyPost": 1,
-              "adPosition": null,
-              "linkURLAndroid": "https://app.chotanews.com/individualPage?postId=4067186",
-              "linkURLIos": "https://app.chotanews.com/individualPage?postId=4067186",
-              "links": [
-                {
-                  "id": "link1",
-                  "value": "https://play.google.com/store/apps/details?id=com.chotanews"
-                }
-              ],
-              "categoryId": 18,
-              "isBookmarked": 0
-            },
-            {
-              "id": 4067634,
-              "postOrder": 852065,
-              "author": 24,
-              "title": "సూర్యకు గిఫ్ట్‌ ఇచ్చిన 'రెట్రో' డిస్ట్రిబ్యూటర్‌",
-              "content": "నటుడు సూర్య కథానాయకుడిగా నటించిన తాజా చిత్రం రెట్రో. ఇటీవల విడుదలైన ఈ మూవీ సక్సెస్‌ ఫుల్‌గా రన్‌ అవుతున్న విషయం తెలిసిందే. ఈ మూవీని శక్తి ఫిలిమ్‌ ఫ్యాక్టరీ సంస్థ అధినేత శక్తి వేలన్‌ తమిళనాడులో డిస్ట్రిబ్యూట్ చేశారు. మూవీ లాభాలు తెచ్చిపెట్టడంతో సూర్యకు కానుకగా వజ్రపు ఉంగరాన్ని శక్తి వేలన్‌ అందించారు. ఆ ఉంగరాన్ని సూర్య తిరిగి వేలన్‌కే ఇచ్చేశారు.",
-              "created": "2025-05-11T06:37:25",
-              "guid": "https://chotanews.azurewebsites.net/?p=4067634",
-              "post_type": "post",
-              "post_name": "సూర్యకు-గిఫ్ట్‌-ఇచ్చిన-ర",
-              "post_mime_type": "",
-              "totalLikes": 6,
-              "totalViews": 1602,
-              "totalComments": 0,
-              "image_url": "https://chotanews.azureedge.net/media/2025/05/fdbfbfhbthb.jpg",
-              "video_url": "",
-              "downloadUrl": null,
-              "gallery": null,
-              "type": "Standard",
-              "totalShares": 0,
-              "isReporter": 0,
-              "reportedBy": "",
-              "categoryName": "ఎంటర్‌టైన్‌మెంట్",
-              "postUrl": "",
-              "subType": "",
-              "isStickyPost": 0,
-              "adPosition": null,
-              "linkURLAndroid": "https://app.chotanews.com/individualPage?postId=4067634",
-              "linkURLIos": "https://app.chotanews.com/individualPage?postId=4067634",
-              "links": [],
-              "categoryId": 10,
-              "isBookmarked": 0
-            }
-          ],
-          "adPosition": null,
-          "linkURLAndroid": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
-          "linkURLIos": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
-          "links": [],
-          "categoryId": 2,
-          "isBookmarked": 0
-        };
+      // Create the custom map once
+      // Map<String, dynamic> webUrlPost = {
+      //   "id": 000000,
+      //   "postOrder": 00000,
+      //   "author": 9,
+      //   "title": "GoogleAds",
+      //   "content": "Hello",
+      //   "created": "2025-04-22T08:36:04",
+      //   "guid": "",
+      //   "post_type": "post",
+      //   "post_name": "సివిల్స్-తుది-ఫలితాలు-వి",
+      //   "post_mime_type": "",
+      //   "totalLikes": 8,
+      //   "totalViews": 14104,
+      //   "totalComments": 0,
+      //   "image_url": "",
+      //   "video_url": "",
+      //   "downloadUrl": null,
+      //   "gallery": null,
+      //   "type": "GoogleAds",
+      //   "totalShares": 0,
+      //   "isReporter": 0,
+      //   "reportedBy": "",
+      //   "categoryName": "నేషనల్",
+      //   "postUrl": "",
+      //   "subType": "",
+      //   "isStickyPost": 0,
+      //   "isHomeScreen": [
+      //     {
+      //       "id": 4067654,
+      //       "postOrder": 852068,
+      //       "author": 24,
+      //       "title": "కొత్త రేషన్‌కార్డులపై మరో అప్డేట్",
+      //       "content": "AP: కొత్త రేషన్‌‌కార్డుల దరఖాస్తులపై ప్రభుత్వం కీలక ప్రకటన చేసింది. గత ప్రభుత్వ హయాంలో రేషన్‌ కార్డుల కోసం దరఖాస్తు చేసుకున్న వారు మళ్లీ దరఖాస్తు చేసుకోవాల్సిన అవసరం లేదని ప్రభుత్వ వర్గాలు తెలిపాయి. వైసీపీ హయాంలో వచ్చిన దరఖాస్తుల్లో 3.36 లక్షల దరఖాస్తులు పెండింగ్‌లో ఉన్నాయని, అవి ప్రస్తుతం ప్రభుత్వ పరిశీలనలో ఉన్నట్టు పేర్కొన్నాయి.",
+      //       "created": "2025-05-11T06:40:44",
+      //       "guid": "https://chotanews.azurewebsites.net/?p=4067654",
+      //       "post_type": "post",
+      //       "post_name": "కొత్త-రేషన్‌కార్డులపై-మర",
+      //       "post_mime_type": "",
+      //       "totalLikes": 5,
+      //       "totalViews": 1787,
+      //       "totalComments": 0,
+      //       "image_url": "https://chotanews.azureedge.net/media/2025/03/RATION-CARDS.jpg",
+      //       "video_url": null,
+      //       "downloadUrl": null,
+      //       "gallery": null,
+      //       "type": "Standard",
+      //       "totalShares": 0,
+      //       "isReporter": 0,
+      //       "reportedBy": "",
+      //       "categoryName": "నేషనల్",
+      //       "postUrl": null,
+      //       "subType": "",
+      //       "isStickyPost": 0,
+      //       "adPosition": null,
+      //       "linkURLAndroid": "https://app.chotanews.com/individualPage?postId=4067654",
+      //       "linkURLIos": "https://app.chotanews.com/individualPage?postId=4067654",
+      //       "links": [],
+      //       "categoryId": 2,
+      //       "isBookmarked": 0
+      //     },
+      //     {
+      //       "id": 4067186,
+      //       "postOrder": 851931,
+      //       "author": 9,
+      //       "title": "‘ఛోటా న్యూస్’ యాప్ న్యూ అప్‌డేట్",
+      //       "content": "గ్లోబల్ టు లోకల్ వార్తలను అందరికంటే ముందుగా క్లుప్తంగా 45 పదాల్లో మీకు అందిస్తోంది ‘ఛోటా న్యూస్’యాప్. అందుకే ఇప్పుడు తెలుగువారి కొత్త అలవాటుగా ‘ఛోటా న్యూస్’ యాప్ సరికొత్తగా మారింది. ఈ యాప్‌ న్యూ అప్‌డేట్ కోసం మీరు వెంటనే ఈ లింక్ <link1>క్లిక్</link1> చేయండి.",
+      //       "created": "2025-05-11T04:46:23",
+      //       "guid": "https://chotanews.azurewebsites.net/?p=4067186",
+      //       "post_type": "post",
+      //       "post_name": "ఛోటా-న్యూస్-యాప్-న్యూ-అ-15",
+      //       "post_mime_type": "",
+      //       "totalLikes": 6,
+      //       "totalViews": 14192,
+      //       "totalComments": 0,
+      //       "image_url": "https://chotanews.azureedge.net/media/2025/05/wed-68202b896f8f2.jpeg",
+      //       "video_url": "",
+      //       "downloadUrl": null,
+      //       "gallery": null,
+      //       "type": "Standard",
+      //       "totalShares": 0,
+      //       "isReporter": 0,
+      //       "reportedBy": "",
+      //       "categoryName": "చోటా స్పెషల్",
+      //       "postUrl": "",
+      //       "subType": "StandardLink",
+      //       "isStickyPost": 1,
+      //       "adPosition": null,
+      //       "linkURLAndroid": "https://app.chotanews.com/individualPage?postId=4067186",
+      //       "linkURLIos": "https://app.chotanews.com/individualPage?postId=4067186",
+      //       "links": [
+      //         {
+      //           "id": "link1",
+      //           "value": "https://play.google.com/store/apps/details?id=com.chotanews"
+      //         }
+      //       ],
+      //       "categoryId": 18,
+      //       "isBookmarked": 0
+      //     },
+      //     {
+      //       "id": 4067634,
+      //       "postOrder": 852065,
+      //       "author": 24,
+      //       "title": "సూర్యకు గిఫ్ట్‌ ఇచ్చిన 'రెట్రో' డిస్ట్రిబ్యూటర్‌",
+      //       "content": "నటుడు సూర్య కథానాయకుడిగా నటించిన తాజా చిత్రం రెట్రో. ఇటీవల విడుదలైన ఈ మూవీ సక్సెస్‌ ఫుల్‌గా రన్‌ అవుతున్న విషయం తెలిసిందే. ఈ మూవీని శక్తి ఫిలిమ్‌ ఫ్యాక్టరీ సంస్థ అధినేత శక్తి వేలన్‌ తమిళనాడులో డిస్ట్రిబ్యూట్ చేశారు. మూవీ లాభాలు తెచ్చిపెట్టడంతో సూర్యకు కానుకగా వజ్రపు ఉంగరాన్ని శక్తి వేలన్‌ అందించారు. ఆ ఉంగరాన్ని సూర్య తిరిగి వేలన్‌కే ఇచ్చేశారు.",
+      //       "created": "2025-05-11T06:37:25",
+      //       "guid": "https://chotanews.azurewebsites.net/?p=4067634",
+      //       "post_type": "post",
+      //       "post_name": "సూర్యకు-గిఫ్ట్‌-ఇచ్చిన-ర",
+      //       "post_mime_type": "",
+      //       "totalLikes": 6,
+      //       "totalViews": 1602,
+      //       "totalComments": 0,
+      //       "image_url": "https://chotanews.azureedge.net/media/2025/05/fdbfbfhbthb.jpg",
+      //       "video_url": "",
+      //       "downloadUrl": null,
+      //       "gallery": null,
+      //       "type": "Standard",
+      //       "totalShares": 0,
+      //       "isReporter": 0,
+      //       "reportedBy": "",
+      //       "categoryName": "ఎంటర్‌టైన్‌మెంట్",
+      //       "postUrl": "",
+      //       "subType": "",
+      //       "isStickyPost": 0,
+      //       "adPosition": null,
+      //       "linkURLAndroid": "https://app.chotanews.com/individualPage?postId=4067634",
+      //       "linkURLIos": "https://app.chotanews.com/individualPage?postId=4067634",
+      //       "links": [],
+      //       "categoryId": 10,
+      //       "isBookmarked": 0
+      //     }
+      //   ],
+      //   "adPosition": null,
+      //   "linkURLAndroid": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+      //   "linkURLIos": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+      //   "links": [],
+      //   "categoryId": 2,
+      //   "isBookmarked": 0
+      // };
 
-        // Create a new list and insert the webUrlPost after every 4 items
+      // Create a new list and insert the webUrlPost after every 4 items
 
-      List modifiedList = [];
-      for (int i = 0; i < data.length; i++) {
-        modifiedList.add(data[i]);
-        if ((i + 1) % 4 == 0) {
-          modifiedList.add(Map<String, dynamic>.from(webUrlPost));
-        }
-      }
+      // List modifiedList = [];
+      // for (int i = 0; i < data.length; i++) {
+      //   modifiedList.add(data[i]);
+      //   if ((i + 1) % 4 == 0) {
+      //     modifiedList.add(Map<String, dynamic>.from(webUrlPost));
+      //   }
+      // }
 
-        // List finalList = [];
+      // List finalList = [];
       // for (int i = 0; i < data.length; i++) {
       //   finalList.add(data[i]);
       //
@@ -321,7 +360,7 @@ class HomeProvider extends ChangeNotifier {
       //   }
       // }
 
-      /*  if (isWebView) {
+      if (isWebView) {
         getAllPostList.insert(0, {
           "id": 000000,
           "postOrder": 00000,
@@ -355,10 +394,11 @@ class HomeProvider extends ChangeNotifier {
           "categoryId": 2,
           "isBookmarked": 0
         });
-      }*/
-      getAllPostList.addAll(modifiedList);
-      log(getAllPostList[0]['image_url'].toString());
+      }
+      getAllPostList.addAll(data);
 
+      log("sfbsvfjhshfejsosevfuyesfuyiesdfkejswihfveuwfyiwe");
+      log(getAllPostList.length.toString());
 
       isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
@@ -373,6 +413,7 @@ class HomeProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   // Map<int, Widget> adWidgets = {};
   //
   // void _loadAdForPosition(int index) {
@@ -422,22 +463,23 @@ class HomeProvider extends ChangeNotifier {
   //   bannerAd.load();
   // }
 
-
-
   bool isAiTagsLoading = false;
+  int currentIndex = 0;
 
   Future getAllPostsByAiId(postId) async {
+    log("sbvjdshgurhgiurehiouerjgjer");
     isBookMark = [];
     getAllAiTagsPostList = [];
     isAiTagsLoading = true;
+    currentIndex = 0;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
 
     Map<String, dynamic> body = {
-      "deviceid": deviceId??"",
+      "deviceid": deviceId ?? "",
       "aitagid": postId,
-      "user_id":userId??"",
+      "user_id": userId ?? "",
     };
     log(body.toString());
     try {
@@ -504,7 +546,7 @@ class HomeProvider extends ChangeNotifier {
     if (!isBookMark.contains(val['id'].toString())) {
       EventRepo().sendEvent({
         "key": "bookmark_article",
-        "data": {"device_id": deviceId??"", "userId": userId, "postId": val['id'].toString(), "isBookMark": true,"source_from":"news"}
+        "data": {"device_id": deviceId ?? "", "userId": userId, "postId": val['id'].toString(), "isBookMark": true, "source_from": "news"}
       });
       isBookMark.add(val['id'].toString());
       Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 1);
@@ -515,7 +557,7 @@ class HomeProvider extends ChangeNotifier {
       isBookMark.remove(val['id'].toString());
       EventRepo().sendEvent({
         "key": "bookmark_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isBookMark": false,"source_from":"news"}
+        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isBookMark": false, "source_from": "news"}
       });
       sendLikeDetails(userId, val['id'].toString(), false, val['title'].toString());
       log(isBookMark.toString());
@@ -524,7 +566,7 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void flipEvent(pageName,id,val)async {
+  void flipEvent(pageName, id, val) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
     String? deviceId = sp.getString("deviceId");

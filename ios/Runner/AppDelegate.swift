@@ -15,6 +15,7 @@ import webengage_flutter
       FirebaseApp.configure()
 
       WebEngage.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
+//      WebEngage.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions, notificationDelegate: self.bridge)
 
     GeneratedPluginRegistrant.register(with: self)
       let nativeAdFactory = NativeAdFactoryExample()

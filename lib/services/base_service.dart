@@ -94,6 +94,8 @@ class BaseService {
       },
       onError: (DioException e, ErrorInterceptorHandler handler) {
         // Log the error details
+        log('hello siva ${e.toString()}');
+        log('hello siva111 ${handler.toString()}');
         log('Error[${e.response?.statusCode}] => PATH: ${e.requestOptions.uri}');
         log('Message: ${e.message}');
         return handler.next(e); // Pass the error onward

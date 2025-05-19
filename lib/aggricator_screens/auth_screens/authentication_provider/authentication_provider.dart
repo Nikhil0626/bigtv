@@ -61,7 +61,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future sendOtp(BuildContext context) async {
     isLoginLoading = true;
-
+notifyListeners();
     log("ButtonClicked __${phoneController.text}");
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -117,29 +117,29 @@ class AuthenticationProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         sp.setString("loginType", "login");
         sp.setString("userId", response.data['user']['id'].toString());
-        // if (response.data['is_new_user'] == false) {
-        //   getAllCategories();
-        //   getAllLocations();
-        //   Navigator.pushAndRemoveUntil(
-        //     context,
-        //     MaterialPageRoute(
-        //       builder: (context) => HomeView(),
-        //     ),
-        //     (route) => false,
-        //   );
-        //   Future.delayed(
-        //     Duration(seconds: 2),
-        //     () {
-        //       newAppLoginStatus = NewAppLoginStatus.home;
-        //       saveLoginState();
-        //     },
-        //   );
-        // } else {
+        if (response.data['is_new_user'] == false) {
+          getAllCategories();
+          getAllLocations();
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomeView(),
+            ),
+            (route) => false,
+          );
+          Future.delayed(
+            Duration(seconds: 2),
+            () {
+              newAppLoginStatus = NewAppLoginStatus.home;
+              saveLoginState();
+            },
+          );
+        } else {
 
         newAppLoginStatus = NewAppLoginStatus.category;
         saveLoginState();
         getAllCategories();
-        // }
+        }
 
         EventRepo().sendEvent({
           "key": "otp_verify",
@@ -326,6 +326,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future sendLocationsToServer(BuildContext context, {bool isFilter = false}) async {
     isLocationSendingLoading = true;
+    notifyListeners();
     List<int> selectedCategoryIds = getAllLocationList.where((item) => selectedLocations.contains(item.districtName.toString())).map((item) => item.districtId).toList();
     log("selkhvgbkjegjke ${selectedCategoryIds}");
     log("Selected District Names: $selectedLocations");

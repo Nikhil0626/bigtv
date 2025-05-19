@@ -9,6 +9,7 @@ import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_scre
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_list.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -172,10 +173,7 @@ class _HomeViewState extends State<HomeView> {
                             ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.iconColors,
-                          ),
+                          child: AppLoadingScreen(),
                         )
                             : SvgPicture.asset(
                           "assets/svg/new_refresh.svg",
