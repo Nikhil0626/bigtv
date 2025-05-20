@@ -54,10 +54,10 @@ class _HomeViewState extends State<HomeView> {
     requestLocationPermission();
     requestNotificationPermission();
     getMobileNumber();
-    _webEngagePlugin = new WebEngagePlugin();
-    _webEngagePlugin.setUpPushCallbacks(onPushClick, onPushActionClick);
-    _webEngagePlugin.setUpInAppCallbacks(
-        onInAppClick, onInAppShown, onInAppDismiss, onInAppPrepared);
+    _webEngagePlugin =  WebEngagePlugin();
+    // _webEngagePlugin.setUpPushCallbacks(onPushClick, onPushActionClick);
+    // _webEngagePlugin.setUpInAppCallbacks(
+    //     onInAppClick, onInAppShown, onInAppDismiss, onInAppPrepared);
     _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
     subscribeToPushCallbacks();
     subscribeToTrackDeeplink();
@@ -68,8 +68,32 @@ class _HomeViewState extends State<HomeView> {
 
     super.initState();
   }
+
+  void subscribeToPushCallbacksIos() {
+    print("pushActionStream:33333" );
+    _webEngagePlugin.pushStream.listen((event) {
+      String? deepLink = event.deepLink;
+      Map<String, dynamic>? messagePayload = event.payload;
+      sendEventToServer(messagePayload?["postId"]??"0");
+
+    });
+
+    //Push action click listener
+    _webEngagePlugin.pushActionStream.listen((event) {
+      print("pushActionStream:" + event.toString());
+
+      String? deepLink = event.deepLink;
+      Map<String, dynamic>? messagePayload = event.payload;
+      sendEventToServer(messagePayload?["postId"]??"0");
+      //Implement the code here to use deeplink
+    });
+  }
 @override
   void dispose() {
+
+  _webEngagePlugin.pushSink.close();
+  _webEngagePlugin.pushActionSink.close();
+  _webEngagePlugin.trackDeeplinkURLStreamSink.close();
     super.dispose();
   }
 

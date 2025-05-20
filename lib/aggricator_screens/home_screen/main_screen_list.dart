@@ -155,13 +155,13 @@ class _MainScreenListState extends State<MainScreenList> {
                                       ),
                                       child: SizedBox(
                                         height: 270.h,
-                                        // child: banner(),
-                                        child: GoogleAdsView(
-                                          article: homeProvider.getAllPostList[index],
-                                          flipProvider: homeProvider,
-                                          // screenshotController: ScreenshotController(),
-                                          isFoldable: false,
-                                        ),
+                                        child: banner(),
+                                        // child: GoogleAdsView(
+                                        //   article: homeProvider.getAllPostList[index],
+                                        //   flipProvider: homeProvider,
+                                        //   // screenshotController: ScreenshotController(),
+                                        //   isFoldable: false,
+                                        // ),
                                       ),
                                     ),
                                   )

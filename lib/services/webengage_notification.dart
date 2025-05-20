@@ -48,7 +48,7 @@ void onInAppDismiss(Map<String, dynamic>? message) {
 
 
 void subscribeToPushCallbacks() async {
-  //Push click stream listener
+  print("pushActionStream:4444" );
   WebEngagePlugin().pushStream.listen((event) {
     String? deepLink = event.deepLink;
     Map<String, dynamic> messagePayload = event.payload!;
@@ -79,39 +79,14 @@ void sendEventToServer(msg) async{
   });
 }
 void subscribeToTrackDeeplink() {
-  // WebEngagePlugin().trackDeeplinkStream.listen((location) {
-  //   //Location URL
-  // });
+  print("pushActionStream:1111111" );
 }
 
 void subscribeToAnonymousIDCallback() {
-  // _webEngagePlugin.anonymousActionStream.listen((event) {
-  //   //  var message = event as Map<String,dynamic>;
-  //   this.setState(() {
-  //     anonymousId  =  "${event}";
-  //   });
-  // });
+  print("pushActionStream:22222" );
 }
 
-void subscribeToPushCallbacksIos() {
-  //Push click stream listener
-  WebEngagePlugin().pushStream.listen((event) {
-    String? deepLink = event.deepLink;
-    Map<String, dynamic>? messagePayload = event.payload;
-    sendEventToServer(messagePayload?["postId"]??"0");
 
-  });
-
-  //Push action click listener
-  WebEngagePlugin().pushActionStream.listen((event) {
-    print("pushActionStream:" + event.toString());
-
-    String? deepLink = event.deepLink;
-    Map<String, dynamic>? messagePayload = event.payload;
-    sendEventToServer(messagePayload?["postId"]??"0");
-    //Implement the code here to use deeplink
-  });
-}
 void showDialogWithMessage(String msg) {
   showDialog(
       context: mainNavigatorKey.currentState!.overlay!.context,

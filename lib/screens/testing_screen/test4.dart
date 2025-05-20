@@ -16,14 +16,12 @@ class _WebDashState extends State<WebDash> {
   late String os;
 
   void _onPushClick(Map<String, dynamic>? message, String? s) {
-    print("This is a push click callback from native to flutter. Payload " +
-        message.toString());
+    print("This is a push click callback from native to flutter. Payload $message");
   }
 
   void _onPushActionClick(Map<String, dynamic>? message, String? s) {
     print(
-        "This is a Push action click callback from native to flutter. Payload " +
-            message.toString());
+        "This is a Push action click callback from native to flutter. Payload $message");
     print(
         "This is a Push action click callback from native to flutter. SelectedId " +
             s.toString());
@@ -58,7 +56,7 @@ class _WebDashState extends State<WebDash> {
   }
 
   void initWebEngage() {
-    _webEngagePlugin = new WebEngagePlugin();
+    _webEngagePlugin =  WebEngagePlugin();
     _webEngagePlugin.setUpPushCallbacks(_onPushClick, _onPushActionClick);
     _webEngagePlugin.setUpInAppCallbacks(
         _onInAppClick, _onInAppShown, _onInAppDismiss, _onInAppPrepared);
@@ -74,10 +72,11 @@ class _WebDashState extends State<WebDash> {
   void _onTokenInvalidated(Map<String, dynamic>? message) {
     print("tokenInvalidated callback received " + message.toString());
     // Reset with new Security Token in the callback
-    WebEngagePlugin.setSecureToken("USER_NAME", "REPLACE_JWT_TOKEN_HERE");
+    WebEngagePlugin.setSecureToken("siva kumar", "$message");
   }
 
   void _listenToAnonymousID() {
+    print("pushActionStream:4444444" );
     _webEngagePlugin.anonymousActionStream.listen((event) {
       setState(() {
         data = "${event}";
@@ -414,7 +413,7 @@ class _WebDashState extends State<WebDash> {
   }
 
   void subscribeToPushCallbacks() async {
-    //Push click stream listener
+    print("pushActionStream:111111" );
     _webEngagePlugin.pushStream.listen((event) {
       String? deepLink = event.deepLink;
       Map<String, dynamic> messagePayload = event.payload!;
@@ -431,12 +430,14 @@ class _WebDashState extends State<WebDash> {
   }
 
   void subscribeToTrackDeeplink() {
+    print("pushActionStream:33333" );
     _webEngagePlugin.trackDeeplinkStream.listen((location) {
       //Location URL
     });
   }
 
   void subscribeToAnonymousIDCallback() {
+    print("pushActionStream:222222" );
     // _webEngagePlugin.anonymousActionStream.listen((event) {
     //   //  var message = event as Map<String,dynamic>;
     //   this.setState(() {

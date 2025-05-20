@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -42,8 +43,9 @@ class MainScreenBytView extends StatefulWidget {
   final article;
   String aiTagId;
   final bool isaiTags;
+  final bool isMainScreen;
 
-   MainScreenBytView({super.key, required this.article, this.isaiTags = false,this.aiTagId=""});
+   MainScreenBytView({super.key, required this.article, this.isaiTags = false,this.aiTagId="",this.isMainScreen = false,});
 
   @override
   State<MainScreenBytView> createState() => _MainScreenBytViewState();
@@ -105,7 +107,12 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     child: GestureDetector(
                                       onTap: () {
                                         context.read<HomeProvider>().isReloadFalse();
-                                        Navigator.pop(context);
+                                        if(widget.isMainScreen == true){
+                                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => HomeView(),), (route) => false,);
+                                        }else{
+                                          Navigator.pop(context);
+
+                                        }
                                       },
                                       child: Container(
                                         padding: EdgeInsets.all(7),
@@ -228,7 +235,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           // Main Content (Image or Video)
                                           widget.article['type'] == "Video"
                                               ? SizedBox(
-                                                  height: MediaQuery.of(context).size.height * .35,
+                                                  height:widget.isaiTags?MediaQuery.of(context).size.height * .30: MediaQuery.of(context).size.height * .35,
                                                   width: MediaQuery.of(context).size.width,
                                                   child: Align(
                                                     alignment: Alignment.topCenter,

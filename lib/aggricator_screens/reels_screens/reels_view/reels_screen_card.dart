@@ -388,16 +388,16 @@ class _EachReelCardState extends State<EachReelCard> {
                 child: Column(
                   children: [
                     Padding(
-                      padding:  EdgeInsets.symmetric(horizontal: 10.0.sp, vertical: 10.sp),
+                      padding:  EdgeInsets.symmetric(horizontal: 10.0.sp, vertical: 15.sp),
                       child: ClipRRect(
                         borderRadius: BorderRadius.all(Radius.circular(10.r)),
                         child: CachedNetworkImage(
                           imageUrl: widget.reel.thumbnailUrl.toString(),
-                          height: MediaQuery.of(context).size.height * .56,
+                          height: MediaQuery.of(context).size.height * .52,
                           width: MediaQuery.of(context).size.width,
                           fit: BoxFit.cover,
                           placeholder: (context, url) => Container(
-                            height: MediaQuery.of(context).size.height * .56,
+                            height: MediaQuery.of(context).size.height * .52,
                             width: MediaQuery.of(context).size.width,
                             color: AppColors.borderColor.withOpacity(.2),
                           ),

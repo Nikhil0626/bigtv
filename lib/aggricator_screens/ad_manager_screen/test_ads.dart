@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
@@ -38,20 +40,37 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _loadAllAds(BuildContext context) {
+
+    print("bhduighderkifherifhiraeugfhrieuhgui");
     _loadAdManagerNativeAd(context);
-    _loadAdMobNativeAd(context);
+    // _loadAdMobNativeAd(context);
     _loadBannerAd(context);
   }
 
-  void _loadAdManagerNativeAd(BuildContext context) {
+  void _loadAdManagerNativeAd(BuildContext context) async{
+    SharedPreferences sp =await SharedPreferences.getInstance();
+    String? userId = sp.getString("userId");
     _adManagerNativeAd = NativeAd(
-      adUnitId: context.read<HomeProvider>().adManagerNativeId,
+      adUnitId: "/22387492205,23277683599/com.chotanews.Native1.1747720256",
+      // adUnitId: context.read<HomeProvider>().adManagerNativeId,
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(
         onAdLoaded: (ad) {
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
         onAdFailedToLoad: (ad, error) {
+
+          EventRepo().sendEvent({
+            "key": "ads_available",
+            "data": {
+              "user_id":userId,
+              "nameOfAdsType":"AdManagerNativeAd",
+              "error":error.toString(),
+              "adUnitId":ad.adUnitId.toString(),
+              "ad":ad.responseInfo.toString()
+            }
+          });
+
           ad.dispose();
           print('AdManager Native failed: $error');
         },
@@ -60,7 +79,10 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     )..load();
   }
 
-  void _loadAdMobNativeAd(BuildContext context) {
+  void _loadAdMobNativeAd(BuildContext context) async{
+    SharedPreferences sp =await SharedPreferences.getInstance();
+
+    String? userId = sp.getString("userId");
     _adMobNativeAd = NativeAd(
       adUnitId: context.read<HomeProvider>().adMobNativeId,
       factoryId: 'adFactoryExample',
@@ -69,6 +91,17 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
         onAdFailedToLoad: (ad, error) {
+
+          EventRepo().sendEvent({
+            "key": "ads_available",
+            "data": {
+              "user_id":userId,
+              "nameOfAdsType":"AdMobNativeAd",
+              "error":error.toString(),
+              "adUnitId":ad.adUnitId.toString(),
+              "ad":ad.responseInfo.toString()
+            }
+          });
           ad.dispose();
           print('AdMob Native failed: $error');
         },
@@ -77,7 +110,9 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     )..load();
   }
 
-  void _loadBannerAd(BuildContext context) {
+  void _loadBannerAd(BuildContext context) async{
+    SharedPreferences sp =await SharedPreferences.getInstance();
+    String? userId = sp.getString("userId");
     _bannerAd = BannerAd(
       adUnitId: context.read<HomeProvider>().adManagerBannerId,
       size: AdSize(width: 300, height: 250),
@@ -88,6 +123,16 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           _onAdLoaded(ad, AdWidget(ad: ad as BannerAd));
         },
         onAdFailedToLoad: (ad, error) {
+          EventRepo().sendEvent({
+            "key": "ads_available",
+            "data": {
+              "user_id":userId,
+              "nameOfAdsType":"AdManagerBannerAd",
+              "error":error.toString(),
+              "adUnitId":ad.adUnitId.toString(),
+              "ad":ad.responseInfo.toString()
+            }
+          });
           ad.dispose();
           print('Banner failed: $error');
         },
@@ -633,7 +678,8 @@ class _bannerState extends State<banner> {
   void loadBannerAd() {
     final AdSize customAdSize = AdSize(width: 300, height: 250);
     _bannerAd = BannerAd(
-      adUnitId: '/21775744923/example/fixed-size-banner', // Dummy test Ad Unit ID (valid test ID from Google)
+      adUnitId: '/22387492205,23277683599/com.chotanews.Banner0.1747720224', // Dummy test Ad Unit ID (valid test ID from Google)
+      // adUnitId: '/21775744923/example/fixed-size-banner', // Dummy test Ad Unit ID (valid test ID from Google)
       size: customAdSize,
       request: const AdManagerAdRequest(),
       listener: BannerAdListener(

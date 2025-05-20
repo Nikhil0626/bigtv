@@ -93,7 +93,7 @@ Future<void> main() async {
 
   if (Platform.isIOS) {
     subscribeToPushCallbacks();
-    subscribeToPushCallbacksIos();
+    // subscribeToPushCallbacksIos();
   }
 }
 
@@ -245,10 +245,12 @@ class _MyAppState extends State<MyApp> {
         if (id != null) {
           postId = id;
           log("Navigating to Individual Post screen with postId: $postId");
-          mainNavigatorKey.currentState?.pushNamed(
-            '/individualPage',
-            arguments: {'postId': postId},
-          );
+          Future.delayed(Duration(milliseconds: 500),() {
+            mainNavigatorKey.currentState?.pushNamed(
+              '/individualPage',
+              arguments: {'postId': postId},
+            );
+          },);
         } else {
           log("postId is missing for /individualPage route.");
         }
