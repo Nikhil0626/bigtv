@@ -3,11 +3,14 @@ import 'dart:io';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:mobile_number/mobile_number.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../globel_keys/global_variables_data.dart';
 import '../screens/home_screen/home_repo/event_repo.dart';
@@ -52,6 +55,76 @@ Future<void> requestStoragePermission() async {
   }
 }
 
+
+Future<void> checkForUpdate() async {
+  PackageInfo _packageInfo = PackageInfo();
+  final info = await PackageManager.getPackageInfo();
+  _packageInfo = info;
+  if (Platform.isAndroid) {
+    try {
+      InAppUpdateManager manager = InAppUpdateManager();
+      AppUpdateInfo? updateInfo = await manager.checkForUpdate();
+
+      if (updateInfo == null) {
+        debugPrint("No update info received");
+        return;
+      }
+
+      debugPrint("Update Info: ${updateInfo.toJson()}");
+
+      if (updateInfo.updateAvailability ==
+          UpdateAvailability.developerTriggeredUpdateInProgress) {
+        debugPrint("Resuming developer triggered update...");
+        String? msg = await manager.startAnUpdate(
+            type: AppUpdateType.immediate);
+        debugPrint(msg ?? '');
+      } else if (updateInfo.updateAvailability ==
+          UpdateAvailability.updateAvailable) {
+        if (updateInfo.immediateAllowed) {
+          debugPrint("Starting immediate update...");
+          String? msg = await manager.startAnUpdate(
+              type: AppUpdateType.immediate);
+          debugPrint(msg ?? '');
+        } else if (updateInfo.flexibleAllowed) {
+          debugPrint("Starting flexible update...");
+          String? msg = await manager.startAnUpdate(
+              type: AppUpdateType.flexible);
+          debugPrint(msg ?? '');
+          // Optionally call completeFlexibleUpdate() after download finishes
+        } else {
+          debugPrint("Update available but no method allowed");
+        }
+      } else {
+        debugPrint("No update available");
+      }
+    } catch (e) {
+      debugPrint("Error checking update: $e");
+    }
+  } else if (Platform.isIOS) {
+    try {
+      VersionInfo? versionInfo =
+      await UpgradeVersion.getiOSStoreVersion(
+          packageInfo: _packageInfo, regionCode: "US");
+
+      if (versionInfo != null) {
+        debugPrint("iOS Store Info: ${versionInfo.toJson()}");
+
+        if (versionInfo.canUpdate && versionInfo.appStoreLink != null) {
+          final Uri url = Uri.parse(versionInfo.appStoreLink!);
+          if (await canLaunchUrl(url)) {
+            await launchUrl(url, mode: LaunchMode.externalApplication);
+          } else {
+            debugPrint("Cannot launch App Store URL");
+          }
+        } else {
+          debugPrint("No update needed or no URL");
+        }
+      }
+    } catch (e) {
+      debugPrint("Error checking iOS update: $e");
+    }
+  }
+}
 
 Future<void> initPlugin() async {
   final TrackingStatus status =

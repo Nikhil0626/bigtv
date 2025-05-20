@@ -119,7 +119,7 @@ class _DistrictViewState extends State<DistrictView> {
     super.initState();
   }
 
-  final Map<int, String> states = {
+  final Map<int, String>  states = {
     21: 'Andhra Pradesh',
     19: 'Telangana',
   };
@@ -254,7 +254,7 @@ class _DistrictViewState extends State<DistrictView> {
                               ? AppColors.loginBgColor
                               : AppColors.bodyTextColor.withOpacity(.2),
                           borderRadius: BorderRadius.all(Radius.circular(8.r))),
-                      child: Center(child:authenticationProvider.isLocationSendingLoading?AppLoadingScreen(): Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
+                      child: Center(child:authenticationProvider.isLocationSendingLoading?AppLoadingScreen(loadingColor: Colors.white,): Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
                 ),
                 SizedBox(height: 6.h),
                 LinearProgressIndicator(

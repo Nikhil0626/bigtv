@@ -38,6 +38,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   @override
   void initState() {
     super.initState();
+    log("hello home screen in 2222");
     context.read<HomeProvider>().getAllPostList = [];
     context.read<HomeProvider>().getAllAiTags();
     context.read<HomeProvider>().getAllPost();
@@ -181,6 +182,8 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                               controller: controller,
                               cardsCount: homeProvider.getAllPostList.length,
                               onSwipe: (previousIndex, currentIndex, direction) {
+                                log("bskdjfnjskdfhnvkjdsfhvdks ${currentIndex == homeProvider.getAllPostList.length - 5}");
+
                                 if (direction == CardSwiperDirection.bottom) {
                                   context.read<HomeProvider>().flipEvent('news',homeProvider.getAllPostList[currentIndex!]['id'],false);
                                   _undo();
@@ -223,6 +226,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                 if (index == homeProvider.getAllPostList.length - 5) {
                                   homeProvider.getAllPost(postId: homeProvider.getAllPostList.last['id'].toString()); // Fetch next page
                                 }
+
                                 return Container(
                                   height: 520,
                                   // width: MediaQuery.of(context).size.width,
@@ -289,13 +293,14 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                           : type == "GoogleAds"
                                               ? Padding(
                                                   padding: const EdgeInsets.only(bottom: 20.0),
-                                                  // child: FullScreenNativeAd( article: post,),
-                                                  child: GoogleAdsView(
-                                                    isList: true,
-                                                    article: post,
-                                                    flipProvider: context.read<HomeProvider>(),
-                                                    isFoldable: false,
-                                                  ),
+                                                  child: FullScreenNativeAd( article: post,),
+                                                  // child: GoogleAdsView(
+                                                  //   isList: true,
+                                                  //   article: post,
+                                                  //   flipProvider: context.read<HomeProvider>(),
+                                                  //   isFoldable: false,
+                                                  //   index:index,
+                                                  // ),
                                                 )
                                               : type == "Image"
                                                   ? ImageView(

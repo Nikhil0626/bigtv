@@ -9,6 +9,7 @@ import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_scre
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_list.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -22,6 +23,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 import '../../globel_keys/global_variables_data.dart';
 import '../../main.dart';
 import '../../screens/home_screen/home_repo/event_repo.dart';
+import '../../services/app_update_servuce.dart';
 import '../../services/deviice_details.dart';
 import '../../services/permission_handler_services.dart';
 import '../../services/webengage_notification.dart';
@@ -45,6 +47,10 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void initState() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppUpdateService.checkForUpdate(context);
+    });
+    log("hello home screen in 1111");
     requestLocationPermission();
     requestNotificationPermission();
     getMobileNumber();
@@ -167,10 +173,7 @@ class _HomeViewState extends State<HomeView> {
                             ? const SizedBox(
                           height: 20,
                           width: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.iconColors,
-                          ),
+                          child: AppLoadingScreen(),
                         )
                             : SvgPicture.asset(
                           "assets/svg/new_refresh.svg",

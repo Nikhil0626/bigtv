@@ -81,6 +81,33 @@ class _StandardCardState extends State<StandardCard> {
                                     widget.getAllPostList['image_url'].toString(),
                                     fit: BoxFit.fill,
                                   ),
+                                  Positioned(
+                                    top: 10,
+                                    right: 14,
+                                    child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          homeProvider.isBookMarkPost(widget.getAllPostList, context);
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.all(7),
+                                          decoration: BoxDecoration(
+                                            color: (homeProvider.isBookMark.contains(widget.getAllPostList['id'].toString()) || widget.getAllPostList['isBookmarked'] == 1)
+                                                ? AppColors.appButtonColor
+                                                : Colors.black54,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            (homeProvider.isBookMark.contains(widget.getAllPostList['id'].toString()) || widget.getAllPostList['isBookmarked'] == 1)
+                                                ? Icons.bookmark
+                                                : Icons.bookmark_outline,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  ),
                                   IconButton(
                                     icon: SvgPicture.asset(
                                       "assets/svg/play_circle.svg",

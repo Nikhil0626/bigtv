@@ -88,7 +88,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => IndividualPostView(
+                                      builder: (context) => IndividualPostView1(
                                         postId: article.postId.toString(),
                                         isComeFrom: true,
                                       ),

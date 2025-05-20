@@ -41,7 +41,7 @@ class _MainScreenListState extends State<MainScreenList> {
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
       return RefreshIndicator(
-        onRefresh: () => homeProvider.getAllPost(),
+        onRefresh: () => homeProvider.getAllPost(postId: "0"),
         child: Container(
           color: Colors.white,
           width: MediaQuery.of(context).size.width,

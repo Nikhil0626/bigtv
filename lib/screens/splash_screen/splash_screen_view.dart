@@ -45,20 +45,20 @@ class _SplashScreenState extends State<SplashScreen> {
 
     await Future.delayed(Duration(seconds: showGif ? 5 : 2));
 
-    if (_initialPushPayload != null &&
-        _initialPushPayload!['postId'] != null &&
-        (_initialPushPayload!['postId'] as String).isNotEmpty) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) =>
-              IndividualPostView(postId: _initialPushPayload!['postId']),
-        ),
-      );
-      return;
-    }else{
+    // if (_initialPushPayload != null &&
+    //     _initialPushPayload!['postId'] != null &&
+    //     (_initialPushPayload!['postId'] as String).isNotEmpty) {
+    //   Navigator.of(context).pushReplacement(
+    //     MaterialPageRoute(
+    //       builder: (context) =>
+    //           IndividualPostView(postId: _initialPushPayload!['postId']),
+    //     ),
+    //   );
+    //   return;
+    // }else{
       context.read<AuthenticationProvider>().isPageNavigation(context);
 
-    }
+    // }
 
     // 🚪 Default navigation
   }

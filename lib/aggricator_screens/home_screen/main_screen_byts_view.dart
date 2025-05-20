@@ -40,9 +40,10 @@ import 'package:http/http.dart' as http;
 
 class MainScreenBytView extends StatefulWidget {
   final article;
+  String aiTagId;
   final bool isaiTags;
 
-  const MainScreenBytView({super.key, required this.article, this.isaiTags = false});
+   MainScreenBytView({super.key, required this.article, this.isaiTags = false,this.aiTagId=""});
 
   @override
   State<MainScreenBytView> createState() => _MainScreenBytViewState();
@@ -72,14 +73,14 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   : widget.article['type'] == "GoogleAds"
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
-                          // child: FullScreenNativeAd(article: widget.article,),
-                          child: GoogleAdsView(
-                            isList: true,
-                            article: widget.article,
-                            flipProvider: context.read<HomeProvider>(),
-                            // screenshotController: adsScreenshotController,
-                            isFoldable: false,
-                          ),
+                          child: FullScreenNativeAd(article: widget.article,),
+                          // child: GoogleAdsView(
+                          //   isList: true,
+                          //   article: widget.article,
+                          //   flipProvider: context.read<HomeProvider>(),
+                          //   // screenshotController: adsScreenshotController,
+                          //   isFoldable: false,
+                          // ),
                         )
                       : widget.article['type'] == "Image"
                           ? InkWell(
@@ -103,6 +104,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     left: 14,
                                     child: GestureDetector(
                                       onTap: () {
+                                        context.read<HomeProvider>().isReloadFalse();
                                         Navigator.pop(context);
                                       },
                                       child: Container(
@@ -634,11 +636,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                         "userId": userId ?? "",
                                       }
                                     });
-                                    homeProvide.getAllPostList = [];
                                     homeProvide.isReloadData();
                                     if(widget.isaiTags){
-                                      homeProvide.getAllPostsByAiId(widget.article['id']);
+                                      homeProvide.getAllPostsByAiId(widget.aiTagId.toString());
                                     }else{
+                                      homeProvide.getAllPostList = [];
                                       homeProvide.getAllPost();
 
                                     }

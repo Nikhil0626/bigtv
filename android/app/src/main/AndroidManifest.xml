@@ -319,6 +319,16 @@
             </intent-filter>
 
             <!-- App Link sample -->
+
+            <!-- App Link sample -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="app.chotanews.com"  />
+            </intent-filter>
+
+
             <meta-data android:name="flutter-deeplink" android:value="true"/>
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
@@ -356,17 +366,21 @@
 <!--            </intent-filter>-->
 <!--        </service>-->
 
+
+
         <!-- Boot Receiver -->
-        <receiver
-            android:name="com.webengage.sdk.android.WebEngageBootReceiver"
-            android:enabled="true"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </receiver>
+<!--        <receiver-->
+<!--            android:name="com.webengage.sdk.android.WebEngageBootReceiver"-->
+<!--            android:enabled="true"-->
+<!--            android:exported="false">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.BOOT_COMPLETED" />-->
+<!--                <action android:name="android.intent.action.QUICKBOOT_POWERON" />-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
+
+
 <!--        <receiver-->
 <!--            android:name="com.webengage.sdk.android.WebEngageBootReceiver"-->
 <!--            android:exported="false">-->

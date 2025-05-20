@@ -53,8 +53,13 @@ class BaseUrls {
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
   /// Python apis
-  static const String ePaperBaseUrlAws = "http://3.108.235.31:8000";
+  static const String ePaperBaseUrlAws = "https://aggregator.chotanews.com";
   static const String baseUrlAwsDev = "https://api.chotanews.com";
+
+
+  /// Python Dec Apis
+  // static const String ePaperBaseUrlAws = "http://aggregator.chotanews.com";
+  // static const String baseUrlAwsDev = "https://dev.chotanews.com";
 
   ///Login login
   static const String sendOtpPy = "/send-otp";

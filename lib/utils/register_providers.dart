@@ -13,9 +13,11 @@ import '../screens/videos_main/video_bloc/videos_bloc.dart';
 class RegisterProviders {
   static providers(BuildContext context) {
     return [
-      BlocProvider<TestBloc>(
-        create: (BuildContext context) => TestBloc(),
-      ),BlocProvider<HomeHandleBloc>(
+      // BlocProvider<TestBloc>(
+      //   create: (BuildContext context) => TestBloc(),
+      // ),
+
+      BlocProvider<HomeHandleBloc>(
         create: (BuildContext context) => HomeHandleBloc(),
       ),
     BlocProvider<VideosBloc>(

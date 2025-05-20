@@ -18,7 +18,6 @@ class ReelsProviders extends ChangeNotifier {
   List<ReelsModel> getAllReelsList = [];
   List<String> isLikeList = [];
   bool isMuted = false;
-  late YoutubePlayerController controller;
 
   void toggleMute() {
     isMuted = !isMuted;
@@ -97,6 +96,7 @@ class ReelsProviders extends ChangeNotifier {
     try {
       log("body $body");
       Response response = await SettingsRepo().liked(body);
+      notifyListeners();
       if (response.statusCode == 200) {}
     } catch (e) {
       log("Error: $e");
@@ -116,20 +116,9 @@ class ReelsProviders extends ChangeNotifier {
       Response response = await ReelsRepo().getSingleReelData(body);
       if (response.statusCode == 200) {
         reelData = ReelsModel.fromJson(response.data['data']);
-        controller = YoutubePlayerController(
-          initialVideoId: YoutubePlayer.convertUrlToId(response.data['data']['videoUrl'])!,
-          flags: const YoutubePlayerFlags(
-            autoPlay: true,
-            mute: false,
-            forceHD: true,
-            loop: false,
-            disableDragSeek: true,
-            enableCaption: false,
-            controlsVisibleAtStart: true,
-          ),
-        );
         notifyListeners();
       }
+
     } on DioException catch (e, st) {
       log("Dio Exception -- ${e.toString()}/// ${st.toString()}");
     } catch (e, st) {
@@ -137,6 +126,7 @@ class ReelsProviders extends ChangeNotifier {
     } finally {
     isReelDataLoading = false;
       notifyListeners();
+      return reelData;
     }
   }
 

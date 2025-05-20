@@ -66,7 +66,7 @@ class _ProfileViewState extends State<ProfileView> {
       body: Consumer<ProfileProvider>(
         builder: (_,profileProvider,__) {
           return SafeArea(
-            child: Column(
+            child: profileProvider.isMainLoading?Center(child: AppLoadingScreen()):Column(
               children: [
                 SingleChildScrollView(
                   physics: ClampingScrollPhysics(),
