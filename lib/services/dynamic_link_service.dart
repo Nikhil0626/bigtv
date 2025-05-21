@@ -1,18 +1,12 @@
 import 'dart:developer';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/main.dart';
-import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
-import 'package:chotanews/screens/Auth_module/auth_screens/welcome_screen.dart';
-import 'package:chotanews/screens/home_screen/home_screens/home_top_tabs.dart';
-import 'package:chotanews/utils/app_enums.dart';
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+import '../aggricator_screens/event_repo.dart';
 import '../globel_keys/app_router.dart';
 import '../globel_keys/global_variables_data.dart';
-import '../screens/home_screen/home_repo/event_repo.dart';
-import '../screens/individual_post_view/individual_post.dart';
-import '../utils/local_data.dart';
 
 bool isLink = false;
 
@@ -63,9 +57,8 @@ class DynamicLinkService {
       return;
     }
 
-    log("Applying Skip : ${context.read<AuthProvider>().loginType}");
 
-    context.read<AuthProvider>().checkLoginStatus(context);
+    context.read<AuthenticationProvider>().checkLoginStatus(context);
 
   }
 

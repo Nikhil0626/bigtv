@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import '../aggricator_screens/event_repo.dart';
 import '../aggricator_screens/individual_post_details/individual_post_view.dart';
 import '../main.dart';
-import '../screens/home_screen/home_repo/event_repo.dart';
 
 
 

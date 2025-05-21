@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
@@ -17,14 +18,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../globel_keys/global_variables_data.dart';
-import '../../screens/Auth_module/auth_provider/auth_provider.dart';
-import '../../screens/home_screen/botton_actions.dart';
-import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../ad_manager_screen/google_ads_view.dart';
-import '../../screens/home_screen/home_screens/in_app_web_view.dart';
-import '../../screens/videos_main/video_views/gallery_screen.dart';
-import '../../screens/videos_main/video_views/video_preview.dart';
+import '../auth_screens/authentication_provider/authentication_provider.dart';
+import '../botton_actions.dart';
+import '../in_app_web_view.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
@@ -38,6 +34,9 @@ import '../settings_screen/settings_provider/settings_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
+
+import '../video_image_view/gallery_screen.dart';
+import '../video_image_view/video_preview.dart';
 
 class MainScreenBytView extends StatefulWidget {
   final article;
@@ -528,6 +527,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   child: Container(
                     color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
                     height: 45.sp,
+                    width: MediaQuery.of(context).size.width,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -539,130 +539,134 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                return BottomActions(
-                                  postType: widget.article['subType'] ?? "",
-                                  icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                  label: 'లైక్',
-                                  // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
-                                  isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                  onTap: () {
-                                    log("Like");
-                                    settingsProvider.isLikePost(widget.article);
+                          child: Expanded(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                  return BottomActions(
+                                    postType: widget.article['subType'] ?? "",
+                                    icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                    label: 'లైక్',
+                                    // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
+                                    isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                    onTap: () {
+                                      log("Like");
+                                      settingsProvider.isLikePost(widget.article);
 
-                                    // settingsProvider.isLikePost(widget.article);
-                                  },
-                                );
-                              }),
-                              width(width: 6),
-                              BottomActions(
-                                postType: widget.article['subType'].toString() ?? "",
-                                icon: "assets/svg/new_comment.svg",
-                                label: 'కామెంట్',
-                                onTap: () async {
-                                  SharedPreferences sp = await SharedPreferences.getInstance();
-                                  String? userId = sp.getString("userId");
-                                  String? deviceId = sp.getString("deviceId");
-                                  context.read<AuthProvider>().sendEvent("CommentPage");
-                                  EventRepo().sendEvent({
-                                    "key": "comments",
-                                    "data": {
-                                      "device_id": "$deviceId",
-                                      "userId": userId ?? "1234",
-                                      "postId": widget.article['id'].toString(),
-                                    }
-                                  });
-                                  log("Comment --- ${context.read<AuthProvider>().loginType}");
-                                  showComments(context, widget.article['id']);
-                                  EventRepo().sendEvent({
-                                    "key": "comments",
-                                    "data": {"deviceId": deviceId ?? "", "openTime": DateTime.now().toString()}
-                                  });
-                                },
-                              ),
-                              Spacer(),
-                              InkWell(
-                                onTap: () async {
-                                  SharedPreferences sp = await SharedPreferences.getInstance();
-                                  String? userId = sp.getString("userId");
-                                  String? deviceId = sp.getString("deviceId");
-                                  EventRepo().sendEvent({
-                                    "key": "share_via_articles",
-                                    "data": {"device_id": "$deviceId", "userId": userId ?? "", "postId": widget.article['id'].toString(), "isWhatAppShare": false, "source_from": "news"}
-                                  });
-
-                                  sendShareDetails(context.read<FlipProvider>().userId, widget.article['id'], widget.article['content'].toString());
-
-                                  if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
-                                    try {
-                                      final image = await adsScreenshotController.capture(
-                                        pixelRatio: 2.0,
-                                      );
-                                      if (image != null) {
-                                        final directory = await getTemporaryDirectory();
-                                        final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                        final imageFile = File(imagePath);
-                                        await imageFile.writeAsBytes(image);
-
-                                        Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
-                                      } else {
-                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                      }
-                                    } catch (e) {
-                                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                    }
-                                  } else if (widget.article['type'] == "Gallery") {
-                                    createAndSharePdfs(context, widget.article);
-                                  }
-                                },
-                                child: isSending
-                                    ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                    : SvgPicture.asset(
-                                        "assets/svg/share.svg",
-                                        height: 20,
-                                        width: 20,
-                                        color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                      ),
-                              ),
-                              width(width: 20),
-                              Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                                return InkWell(
-                                  onTap: () async{
-                                    log("Refresh");
-
-                                    SharedPreferences preferences = await SharedPreferences.getInstance();
-                                    String? deviceId = preferences.getString("deviceId");
-                                    String? userId = preferences.getString("userId");
+                                      // settingsProvider.isLikePost(widget.article);
+                                    },
+                                  );
+                                }),
+                                width(width: 6),
+                                BottomActions(
+                                  postType: widget.article['subType'].toString() ?? "",
+                                  icon: "assets/svg/new_comment.svg",
+                                  label: 'కామెంట్',
+                                  onTap: () async {
+                                    SharedPreferences sp = await SharedPreferences.getInstance();
+                                    String? userId = sp.getString("userId");
+                                    String? deviceId = sp.getString("deviceId");
+                                    context.read<AuthenticationProvider>().sendEvent("CommentPage");
                                     EventRepo().sendEvent({
-                                      "key": "reload",
+                                      "key": "comments",
                                       "data": {
                                         "device_id": "$deviceId",
-                                        "userId": userId ?? "",
+                                        "userId": userId ?? "1234",
+                                        "postId": widget.article['id'].toString(),
                                       }
                                     });
-                                    homeProvide.isReloadData();
-                                    if(widget.isaiTags){
-                                      homeProvide.getAllPostsByAiId(widget.aiTagId.toString());
-                                    }else{
-                                      homeProvide.getAllPostList = [];
-                                      homeProvide.getAllPost();
+                                    showComments(context, widget.article['id']);
+                                    EventRepo().sendEvent({
+                                      "key": "comments",
+                                      "data": {"deviceId": deviceId ?? "", "openTime": DateTime.now().toString()}
+                                    });
+                                  },
+                                ),
+                                Spacer(),
+                                InkWell(
+                                  onTap: () async {
+                                    SharedPreferences sp = await SharedPreferences.getInstance();
+                                    String? userId = sp.getString("userId");
+                                    String? deviceId = sp.getString("deviceId");
+                                    EventRepo().sendEvent({
+                                      "key": "share_via_articles",
+                                      "data": {"device_id": "$deviceId", "userId": userId ?? "", "postId": widget.article['id'].toString(), "isWhatAppShare": false, "source_from": "news"}
+                                    });
 
+                                    sendShareDetails(context.read<FlipProvider>().userId, widget.article['id'], widget.article['content'].toString());
+
+                                    if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                                      try {
+                                        final image = await adsScreenshotController.capture(
+                                          pixelRatio: 2.0,
+                                        );
+                                        if (image != null) {
+                                          final directory = await getTemporaryDirectory();
+                                          final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                          final imageFile = File(imagePath);
+                                          await imageFile.writeAsBytes(image);
+
+                                          Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                                        } else {
+                                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                        }
+                                      } catch (e) {
+                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                      }
+                                    } else if (widget.article['type'] == "Gallery") {
+                                      createAndSharePdfs(context, widget.article);
                                     }
                                   },
-                                  child: context.read<FlipProvider>().isRefresh
+                                  child: isSending
                                       ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
                                       : SvgPicture.asset(
-                                          "assets/svg/new_refresh.svg",
-                                          height: 22,
-                                          width: 22,
+                                          "assets/svg/share.svg",
+                                          height: 20,
+                                          width: 20,
                                           color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
                                         ),
-                                );
-                              }),
-                            ],
+                                ),
+                                width(width: 20),
+                                Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                  return SizedBox(
+                                    height: 40,
+                                    width: 40,
+                                    child: InkWell(
+                                      onTap: () async{
+                                        log("Refresh");
+
+                                        SharedPreferences preferences = await SharedPreferences.getInstance();
+                                        String? deviceId = preferences.getString("deviceId");
+                                        String? userId = preferences.getString("userId");
+                                        EventRepo().sendEvent({
+                                          "key": "reload",
+                                          "data": {
+                                            "device_id": "$deviceId",
+                                            "userId": userId ?? "",
+                                          }
+                                        });
+                                        homeProvide.isReloadData();
+                                        if(widget.isaiTags){
+                                          homeProvide.getAllPostsByAiId(widget.aiTagId.toString());
+                                        }else{
+                                          homeProvide.getAllPostList = [];
+                                          homeProvide.getAllPost();
+                                        }
+                                      },
+                                      child: context.read<FlipProvider>().isRefresh
+                                          ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                          : SvgPicture.asset(
+                                              "assets/svg/new_refresh.svg",
+                                              height: 22,
+                                              width: 22,
+                                              color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                            ),
+                                    ),
+                                  );
+                                }),
+                              ],
+                            ),
                           ),
                         ),
                       ],

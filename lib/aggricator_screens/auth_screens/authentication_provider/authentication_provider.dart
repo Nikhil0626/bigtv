@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_repo/authentication_repo.dart';
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:dio/dio.dart';
@@ -9,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../../globel_keys/global_variables_data.dart';
-import '../../../screens/home_screen/home_repo/event_repo.dart';
+
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/local_data.dart';
@@ -451,5 +452,17 @@ notifyListeners();
       "data": {"device_id": "$deviceId", "isLogin": true, "userId": userId}
     });
     isPageNavigation(context);
+  }
+
+  void sendEvent(pageName)async{
+    SharedPreferences sp  = await SharedPreferences.getInstance();
+
+
+    EventRepo().sendEvent({"key":"visited_page",
+      "data":{
+        "device_id": GlobalVariables().deviceId,
+        "userId":sp.getString("userId")??"",
+        "visitedPage":pageName,
+      }});
   }
 }

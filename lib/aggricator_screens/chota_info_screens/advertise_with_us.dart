@@ -1,4 +1,4 @@
-import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,8 +9,8 @@ import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../Auth_module/auth_provider/auth_provider.dart';
-import '../home_screen/home_repo/event_repo.dart';
+import '../event_repo.dart';
+import 'contact_us.dart';
 
 class AdvertiseWithUs extends StatefulWidget {
   const AdvertiseWithUs({super.key});
@@ -22,7 +22,7 @@ class AdvertiseWithUs extends StatefulWidget {
 class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
   @override
   void initState() {
-    context.read<AuthProvider>().sendEvent("AdvertisePage");
+    context.read<AuthenticationProvider>().sendEvent("AdvertisePage");
     super.initState();
   }
   @override

@@ -15,18 +15,12 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
+import '../../event_repo.dart';
 import '../../home_screen/home_provider.dart';
 import '../../home_screen/news_posts_provider.dart';
-import '../paper_models/single_paper_model.dart';
-
-import 'dart:io';
-import 'package:http/http.dart' as http;
-import 'package:path_provider/path_provider.dart';
-import 'package:share_plus/share_plus.dart';
 
 class PapersScreenPreview extends StatefulWidget {
   final String postId;

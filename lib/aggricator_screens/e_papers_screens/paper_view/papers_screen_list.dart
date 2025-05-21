@@ -6,7 +6,7 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
+import '../../in_app_web_view.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../../../screens/home_screen/home_provider/provider.dart';
 import '../paper_provider/epapers_provider.dart';

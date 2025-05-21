@@ -1,12 +1,11 @@
 import 'dart:developer';
 
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../screens/home_screen/home_repo/event_repo.dart';
-import '../../../services/webengage_event_tracks.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/ePaper_main_model.dart';
 import '../paper_models/single_paper_model.dart';

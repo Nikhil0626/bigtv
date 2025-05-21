@@ -2,9 +2,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import '../screens/home_screen/home_repo/event_repo.dart';
 import '../services/deviice_details.dart';
-import '../services/webengage_notification.dart';
 
 class AppLifecycleManager extends StatefulWidget {
   final Widget child;
@@ -56,7 +54,6 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager> with WidgetsB
   }
 
   void getNotifications() async{
-
     // subscribeToPushCallbacks();
   }
 }

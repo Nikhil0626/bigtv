@@ -2,6 +2,8 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/utils/app_no_data.dart';
@@ -15,14 +17,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../screens/Auth_module/auth_provider/auth_provider.dart';
-import '../../screens/home_screen/botton_actions.dart';
-import '../../screens/home_screen/home_provider/provider.dart';
-import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../ad_manager_screen/google_ads_view.dart';
-import '../../screens/home_screen/home_screens/in_app_web_view.dart';
-import '../../screens/videos_main/video_views/gallery_screen.dart';
-import '../../screens/videos_main/video_views/video_preview.dart';
+import '../ad_manager_screen/test_ads.dart';
+
 import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
@@ -32,8 +28,12 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
+import '../botton_actions.dart';
 import '../home_screen/main_screen_byts_view.dart';
+import '../in_app_web_view.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
+import '../video_image_view/gallery_screen.dart';
+import '../video_image_view/video_preview.dart';
 
 class IndividualPostView extends StatefulWidget {
   final String postId;
@@ -182,13 +182,14 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                           : article['type'] == "GoogleAds"
                                               ? Padding(
                                                   padding: const EdgeInsets.all(8.0),
-                                                  child: GoogleAdsView(
-                                                    article: article,
-                                                    flipProvider: context.read<HomeProvider>(),
-                                                    // screenshotController:
-                                                    //     adsScreenshotController,
-                                                    isFoldable: false,
-                                                  ),
+                                                  child: FullScreenNativeAd(article: article,),
+                                                  // child: GoogleAdsView(
+                                                  //   article: article,
+                                                  //   flipProvider: context.read<HomeProvider>(),
+                                                  //   // screenshotController:
+                                                  //   //     adsScreenshotController,
+                                                  //   isFoldable: false,
+                                                  // ),
                                                 )
                                               : article['type'] == "Image"
                                                   ? Image.network(
@@ -509,7 +510,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                   SharedPreferences sp = await SharedPreferences.getInstance();
                                                   String? userId = sp.getString("userId");
                                                   String? deviceId = sp.getString("deviceId");
-                                                  context.read<AuthProvider>().sendEvent("CommentPage");
+                                                  context.read<AuthenticationProvider>().sendEvent("CommentPage");
                                                   EventRepo().sendEvent({
                                                     "key": "comments",
                                                     "data": {
@@ -518,7 +519,6 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                       "postId": article['id'].toString(),
                                                     }
                                                   });
-                                                  log("Comment --- ${context.read<AuthProvider>().loginType}");
                                                   showComments(context, article['id']);
                                                   EventRepo().sendEvent({
                                                     "key": "comments",
@@ -540,7 +540,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                     "data": {"device_id": "$deviceId", "userId": userId ?? "", "postId": article['id'].toString(), "isWhatAppShare": false, "source_from": "news"}
                                                   });
 
-                                                  sendShareDetails(context.read<FlipProvider>().userId, article['id'], article['content'].toString());
+                                                  sendShareDetails(userId, article['id'], article['content'].toString());
 
                                                   if (article['type'] == "Standard" || article['type'] == "Video") {
                                                     try {

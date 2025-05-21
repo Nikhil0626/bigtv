@@ -1,11 +1,10 @@
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../Auth_module/auth_provider/auth_provider.dart';
-import 'chota_info.dart';
 
 class TermsConditions extends StatefulWidget {
   const TermsConditions({super.key});
@@ -18,7 +17,7 @@ class _TermsConditionsState extends State<TermsConditions> {
 
   @override
   void initState() {
-    context.read<AuthProvider>().sendEvent("TermsAndConditionsPage");
+    context.read<AuthenticationProvider>().sendEvent("TermsAndConditionsPage");
     super.initState();
   }
 
