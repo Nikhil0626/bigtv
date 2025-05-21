@@ -9,9 +9,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../globel_keys/global_variables_data.dart';
 import '../main.dart';
-import '../screens/home_screen/home_repo/event_repo.dart';
 
-/// Webengage events tracking
 
 void sendAndroidDeviceDetails(AndroidDeviceInfo details) {
   WebEngagePlugin.trackEvent('device_details', {

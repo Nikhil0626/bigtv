@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +15,9 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../aggricator_screens/botton_actions.dart';
+import '../../../aggricator_screens/event_repo.dart';
+import '../../../aggricator_screens/video_image_view/video_preview.dart';
 import '../../../globel_keys/global_variables_data.dart';
 import '../../../services/image_to_pdf_helper.dart';
 import '../../../services/webengage_event_tracks.dart';
@@ -23,12 +27,7 @@ import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
-import '../../Auth_module/auth_provider/auth_provider.dart';
-import '../../videos_main/video_views/video_preview.dart';
-import '../botton_actions.dart';
 import '../home_provider/provider.dart';
-import '../home_repo/event_repo.dart';
-import 'in_app_web_view.dart';
 
 class StandardPostView extends StatefulWidget {
   final article;
@@ -378,7 +377,7 @@ class _StandardPostViewState extends State<StandardPostView> {
                                 icon: "assets/svg/comment.svg",
                                 label: 'కామెంట్',
                                 onTap: () {
-                                  context.read<AuthProvider>().sendEvent("CommentPage");
+                                  context.read<AuthenticationProvider>().sendEvent("CommentPage");
                                   EventRepo().sendEvent({
                                     "key": "comments",
                                     "data": {
@@ -387,7 +386,6 @@ class _StandardPostViewState extends State<StandardPostView> {
                                       "postId": widget.article.id.toString(),
                                     }
                                   });
-                                  log("Comment --- ${context.read<AuthProvider>().loginType}");
                                   showComments(context, widget.article);
                                   EventRepo().sendEvent({
                                     "key": "comments",

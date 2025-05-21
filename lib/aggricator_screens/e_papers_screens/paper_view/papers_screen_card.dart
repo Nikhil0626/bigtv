@@ -16,7 +16,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../screens/home_screen/home_provider/provider.dart';
-import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
+import '../../in_app_web_view.dart';
 import '../../../utils/app_colors.dart';
 import '../../home_screen/home_provider.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';

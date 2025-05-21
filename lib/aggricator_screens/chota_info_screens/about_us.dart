@@ -1,15 +1,16 @@
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../Auth_module/auth_provider/auth_provider.dart';
+import 'contact_us.dart';
 
 class AboutUs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    context.read<AuthProvider>().sendEvent("AdvertisePage");
+    context.read<AuthenticationProvider>().sendEvent("AdvertisePage");
 
     return Scaffold(
       appBar: AppBar(
@@ -84,15 +85,15 @@ class AboutUs extends StatelessWidget {
               height(height: 10),
               ContactDetailTile(
                 title: "For support/feedback queries",
-                email: "info@chotanews.com",
+                email: "info@chotanews.com", onEmailTap: () {  },
               ),
               ContactDetailTile(
                 title: "For advertising/partnership enquiries",
-                email: "advertising@chotanews.com",
+                email: "advertising@chotanews.com", onEmailTap: () {  },
               ),
               ContactDetailTile(
                 title: "For complaints, queries, or grievances",
-                email: "grievance@chotanews.com",
+                email: "grievance@chotanews.com", onEmailTap: () {  },
               ),
               height(height: 20),
               Text(
@@ -154,37 +155,3 @@ class AboutUs extends StatelessWidget {
   }
 }
 
-class ContactDetailTile extends StatelessWidget {
-  final String title;
-  final String email;
-
-  ContactDetailTile({required this.title, required this.email});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      title: Text(
-        title,
-        style: fontStyle(fontSize: 16, fontWeight: FontWeight.w500),
-      ),
-      subtitle: InkWell(
-        onTap: () => _launchEmail(email), // Updated
-        child: Text(
-          email,
-          style: fontStyle(fontSize: 16, color: Colors.blue),
-        ),
-      ),
-    );
-  }
-
-  // Method to launch email
-  void _launchEmail(String email) async {
-    final Uri emailUri = Uri(scheme: 'mailto', path: email);
-    if (await canLaunchUrl(emailUri)) {
-      await launchUrl(emailUri);
-    } else {
-      throw 'Could not launch $email';
-    }
-  }
-}

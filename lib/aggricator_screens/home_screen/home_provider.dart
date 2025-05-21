@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -8,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../services/analytics_service.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';

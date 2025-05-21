@@ -1,18 +1,11 @@
 import 'dart:async';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:app_links/app_links.dart';
-import 'package:chotanews/screens/Auth_module/auth_provider/auth_provider.dart';
-import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/screens/home_screen/home_repo/event_repo.dart';
-import 'package:chotanews/screens/splash_screen/splash_screen_view.dart';
-import 'package:chotanews/screens/testing_screen/test_reforal.dart';
+
 import 'package:chotanews/services/analytics_service.dart';
 
-// import 'package:chotanews/services/kochava_service.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
-import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -34,6 +27,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
+import 'aggricator_screens/event_repo.dart';
 import 'aggricator_screens/home_screen/home_provider.dart';
 import 'aggricator_screens/home_screen/news_posts_provider.dart';
 import 'aggricator_screens/individual_post_details/individual_post_view.dart';
@@ -41,6 +35,7 @@ import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
+import 'aggricator_screens/splash_screen/splash_screen_view.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 Future<void> main() async {
@@ -87,10 +82,6 @@ Future<void> main() async {
     ], path: 'assets/translations', fallbackLocale: Locale("te"), child: AppLifecycleManager(child: MyApp())));
   });
 
-  if (Platform.isIOS) {
-    subscribeToPushCallbacks();
-    // subscribeToPushCallbacksIos();
-  }
 }
 
 @pragma('vm:entry-point')
@@ -188,7 +179,10 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _initDeepLinks();
+
   }
+
+
 
   Future<void> _initDeepLinks() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -349,9 +343,7 @@ class _MyAppState extends State<MyApp> {
       designSize: const Size(360, 690), // Adjust to your design
       child: MultiProvider(
         providers: [
-          ChangeNotifierProvider<FlipProvider>(create: (_) => FlipProvider()),
           ChangeNotifierProvider<EPapersProvider>(create: (_) => EPapersProvider()),
-          ChangeNotifierProvider<AuthProvider>(create: (_) => AuthProvider()),
           ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
           ChangeNotifierProvider<NewsPostsProvider>(create: (_) => NewsPostsProvider()),
           ChangeNotifierProvider<AuthenticationProvider>(create: (_) => AuthenticationProvider()),
@@ -399,38 +391,3 @@ final GlobalKey<NavigatorState> mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver = RouteObserver<ModalRoute<Object?>>();
 final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey();
 
-// <?xml version="1.0" encoding="UTF-8"?>
-// <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-// <plist version="1.0">y
-// <dict>
-// <key>aps-environment</key>
-// <string>development</string>
-// <key>com.apple.developer.applesignin</key>
-// <array>
-// <string>Default</string>
-// </array>
-// <key>com.apple.developer.associated-domains</key>
-// <array>
-// <string>applinks:app.chotanews.com</string>
-// </array>
-// </dict>
-// </plist>
-
-///debug
-///
-// <?xml version="1.0" encoding="UTF-8"?>
-// <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-// <plist version="1.0">
-// <dict>
-// <key>aps-environment</key>
-// <string>development</string>
-// <key>com.apple.developer.applesignin</key>
-// <array>
-// <string>Default</string>
-// </array>
-// <key>com.apple.developer.associated-domains</key>
-// <array>
-// <string>applinks:app.chotanews.com</string>
-// </array>
-// </dict>
-// </plist>

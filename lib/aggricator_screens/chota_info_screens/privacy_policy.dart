@@ -1,4 +1,4 @@
-import 'package:chotanews/screens/chota_info_screens/contact_us.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +9,7 @@ import '../../globel_keys/global_variables_data.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../Auth_module/auth_provider/auth_provider.dart';
-import '../home_screen/home_repo/event_repo.dart';
+import '../event_repo.dart';
 
 class PrivacyPolicy extends StatefulWidget {
   const PrivacyPolicy({super.key});
@@ -58,7 +57,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
 
   @override
   void initState() {
-    context.read<AuthProvider>().sendEvent("PrivacyPage");
+    context.read<AuthenticationProvider>().sendEvent("PrivacyPage");
     super.initState();
   }
 
@@ -276,5 +275,50 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
         ),
       ),
     );
+  }
+}
+
+
+class ContactDetailTile extends StatelessWidget {
+  final String title;
+  final String email;
+  final VoidCallback onEmailTap;
+
+  const ContactDetailTile({
+    Key? key,
+    required this.title,
+    required this.email,
+    required this.onEmailTap,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: title,
+            style: fontStyle(fontSize: 14, fontWeight: FontWeight.normal),
+          ),
+          const WidgetSpan(
+            child: SizedBox(height: 5),
+          ),
+          WidgetSpan(
+            child: GestureDetector(
+              onTap: onEmailTap,
+              child: Text(
+                textAlign: TextAlign.center,
+                email,
+                style: fontStyle(fontSize: 14, color: Colors.blue),
+              ),
+            ),
+          ),
+          const WidgetSpan(
+            child: SizedBox(height: 10),
+          ),
+        ],
+      ),
+    );
+
   }
 }

@@ -1,13 +1,12 @@
 import 'dart:developer';
 
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_repo/reels_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../../settings_screen/settings_repository/settings_repo.dart';
@@ -26,7 +25,6 @@ class ReelsProviders extends ChangeNotifier {
 
   Future getAllReels({String postId = "0"}) async {
     reelsLoading = true;
-    // getAllReelsList = [];
     isBookMark = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString('userId');

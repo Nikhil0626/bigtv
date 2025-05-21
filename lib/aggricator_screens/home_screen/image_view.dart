@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,16 +10,14 @@ import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-import '../../screens/Auth_module/auth_provider/auth_provider.dart';
-import '../../screens/home_screen/botton_actions.dart';
-import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
+import '../botton_actions.dart';
+import '../event_repo.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'main_screen_pageview.dart';
 
@@ -99,7 +98,7 @@ class _ImageViewState extends State<ImageView> {
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
-                          context.read<AuthProvider>().sendEvent("CommentPage");
+                          context.read<AuthenticationProvider>().sendEvent("CommentPage");
                           EventRepo().sendEvent({
                             "key": "comments",
                             "data": {

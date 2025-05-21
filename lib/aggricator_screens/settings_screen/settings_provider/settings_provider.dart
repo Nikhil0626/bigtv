@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/settings_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_model/bookmarks_model.dart';
 import 'package:chotanews/utils/app_toasts.dart';
@@ -12,8 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../globel_keys/global_variables_data.dart';
-import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../services/webengage_event_tracks.dart';
 
 class SettingsProvider extends ChangeNotifier {

@@ -1,19 +1,14 @@
 import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
-import 'package:chotanews/screens/profile_screen/profile_screen.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import '../../../utils/app_colors.dart';
-import '../settings_provider/settings_provider.dart';
-import 'settings_view.dart';
 
 class ProfileView extends StatefulWidget {
   ProfileView({Key? key}) : super(key: key);

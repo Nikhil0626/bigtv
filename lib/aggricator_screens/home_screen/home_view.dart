@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/main_screen_list.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
@@ -21,15 +22,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../globel_keys/global_variables_data.dart';
-import '../../main.dart';
-import '../../screens/home_screen/home_repo/event_repo.dart';
 import '../../services/app_update_servuce.dart';
 import '../../services/deviice_details.dart';
 import '../../services/permission_handler_services.dart';
 import '../../services/webengage_notification.dart';
 import '../../utils/custom_switch.dart';
 import '../e_papers_screens/paper_view/papers_screen_list.dart';
-import '../individual_post_details/individual_post_view.dart';
 import '../settings_screen/settings_view/settings_view.dart';
 import 'main_screen_card.dart';
 
@@ -60,7 +58,7 @@ class _HomeViewState extends State<HomeView> {
     //     onInAppClick, onInAppShown, onInAppDismiss, onInAppPrepared);
     _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
     subscribeToPushCallbacks();
-    subscribeToTrackDeeplink();
+
     subscribeToAnonymousIDCallback();
     listenToAnonymousID();
     context.read<HomeProvider>().selectedIndex = 0;
@@ -72,24 +70,41 @@ class _HomeViewState extends State<HomeView> {
   void subscribeToPushCallbacksIos() {
     print("pushActionStream:33333" );
     _webEngagePlugin.pushStream.listen((event) {
-      String? deepLink = event.deepLink;
-      Map<String, dynamic>? messagePayload = event.payload;
-      sendEventToServer(messagePayload?["postId"]??"0");
+      if(Platform.isIOS){
+        print("pushActionStream:0000" );
+        // Map<String, dynamic>? messagePayload = event.payload;
+
+        // print("pushActionStream:0000 ${messagePayload.toString()}" );
+        // String? postId = messagePayload?['Payload']['data']['value'].toString();
+        sendEventToServer("4116330");
+
+      }else{
+        print("pushActionStream:99999" );
+        String? deepLink = event.deepLink;
+        subscribeToTrackDeeplink();
+        Map<String, dynamic>? messagePayload = event.payload;
+        print("pushActionStream:9999 ${messagePayload.toString()}" );
+        sendEventToServer(messagePayload?["postId"]??"0");
+      }
+
 
     });
 
     //Push action click listener
     _webEngagePlugin.pushActionStream.listen((event) {
-      print("pushActionStream:" + event.toString());
-
-      String? deepLink = event.deepLink;
-      Map<String, dynamic>? messagePayload = event.payload;
-      sendEventToServer(messagePayload?["postId"]??"0");
+      sendEventToServer("4116330");
+      // print("pushActionStream:" + event.toString());
+      // String? deepLink = event.deepLink;
+      // Map<String, dynamic>? messagePayload = event.payload;
+      // sendEventToServer(messagePayload?["postId"]??"0");
       //Implement the code here to use deeplink
     });
   }
 @override
   void dispose() {
+
+  // _webEngagePlugin.pushSink.close();
+  // _webEngagePlugin.pushActionSink.close();
 
   _webEngagePlugin.pushSink.close();
   _webEngagePlugin.pushActionSink.close();

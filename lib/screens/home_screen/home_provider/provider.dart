@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/screens/home_screen/home_repo/home_repo.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/utils/local_data.dart';
@@ -13,14 +14,13 @@ import 'package:rxdart/rxdart.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../aggricator_screens/event_repo.dart';
 import '../../../globel_keys/app_router.dart';
 import '../../../globel_keys/global_variables_data.dart';
 import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
-import '../../Auth_module/auth_provider/auth_provider.dart';
 import '../home_models/all_post_comment_model.dart';
 import '../home_models/home_screen_model.dart';
-import '../home_repo/event_repo.dart';
 
 class FlipProvider extends ChangeNotifier {
   List<HomeScreenModel> mainArticlesData = [];
@@ -65,9 +65,9 @@ class FlipProvider extends ChangeNotifier {
 
   void isTabChange(val, BuildContext context, {bool isMainPage = false}) {
     if (isTab == 0) {
-      context.read<AuthProvider>().sendEvent("HomePage");
+      context.read<AuthenticationProvider>().sendEvent("HomePage");
     } else {
-      context.read<AuthProvider>().sendEvent("DistrictPage");
+      context.read<AuthenticationProvider>().sendEvent("DistrictPage");
     }
     isTab = val;
     if (!isMainPage) {
