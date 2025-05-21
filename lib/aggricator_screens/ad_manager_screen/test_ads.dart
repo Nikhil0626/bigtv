@@ -2,6 +2,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,7 +13,6 @@ import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
 import '../individual_post_details/individual_post_view.dart';
-import 'google_ads_view.dart';
 
 
 class FullScreenNativeAd extends StatefulWidget {
@@ -43,7 +43,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
     print("bhduighderkifherifhiraeugfhrieuhgui");
     _loadAdManagerNativeAd(context);
-    // _loadAdMobNativeAd(context);
+    _loadAdMobNativeAd(context);
     _loadBannerAd(context);
   }
 
@@ -180,9 +180,11 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     if (_adWidget != null) {
       return Scaffold(body: Column(
         children: [
-          Text("Native Ads"),
-          _adWidget!,
           Expanded(
+              flex: 1,
+              child: _adWidget!),
+          Expanded(
+            flex: 1,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: _buildRecommendedNews(context),
@@ -214,7 +216,8 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         Text("No Ads"),
         Expanded(
           flex: 1,
-          child:widget.article['adType']=="rating card"?RateYourApp():widget.article['adType']=="share card"?ShareYourApp():ShareYourApp(),
+          child: Center(child: AppLoadingScreen()),
+          // child:widget.article['adType']=="rating card"?RateYourApp():widget.article['adType']=="share card"?ShareYourApp():ShareYourApp(),
         ),
         Expanded(
           child: Padding(

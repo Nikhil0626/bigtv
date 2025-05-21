@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:app_links/app_links.dart';
 
 import 'package:chotanews/services/analytics_service.dart';
 
 import 'package:chotanews/services/permission_handler_services.dart';
+import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -178,14 +180,28 @@ class _MyAppState extends State<MyApp> {
   StreamSubscription<Uri>? linkSubscription;
   String postId = "";
   Map<String, dynamic>? _initialPushPayload;
+  late WebEngagePlugin _webEngagePlugin;
+
 
   @override
   void initState() {
     super.initState();
     _initDeepLinks();
+    _webEngagePlugin =  WebEngagePlugin();
+    // _webEngagePlugin.setUpPushCallbacks(onPushClick, onPushActionClick);
+    // _webEngagePlugin.setUpInAppCallbacks(
+    //     onInAppClick, onInAppShown, onInAppDismiss, onInAppPrepared);
+    _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
 
+    log(" pushActionStream: newwwwwwwwwwwwwwww");
+
+    // listenToAnonymousID();
   }
 
+  void _onTokenInvalidated(Map<String, dynamic>? message) {
+    print("tokenInvalidated callback received $message");
+    WebEngagePlugin.setSecureToken("siva kumar", message.toString());
+  }
 
 
   Future<void> _initDeepLinks() async {
@@ -263,71 +279,7 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
-  //  Future<void> _initDeepLinks() async {
-  //    final appLinks = AppLinks();
-  //    SharedPreferences sp = await SharedPreferences.getInstance();
-  //    try {
-  //      final initialUri = await appLinks.getInitialLink();
-  //      if (initialUri != null) {
-  //        debugPrint('Initial URI: $initialUri');
-  //        _handleDeepLink(initialUri);
-  //      }
-  //    } catch (err) {
-  //      debugPrint('Failed to get initial URI: $err');
-  //    }
-  //
-  //    log("Initializing deep link listener");
-  //    linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
-  //      if (uri != null) {
-  //        log("Deep link received: ${uri.toString()}");
-  //        final String? id = uri.queryParameters['postId'];
-  //        sp.setString("webPostId", id.toString());
-  //        _handleDeepLink(uri);
-  //      }
-  //    }, onError: (err) {
-  //      log("Error in deep link handling: $err");
-  //    });
-  //  }
-  //
-  //  void _handleDeepLink(Uri uri) async{
-  //    log("Path:mbzmcbsad $uri, ID:");
-  //    SharedPreferences sp = await SharedPreferences.getInstance();
-  //    final String path = uri.path;
-  //    final String? id = uri.queryParameters['postId'];
-  // // );
-  //    EventRepo().sendEvent({
-  //      "key": "dynamic_link_app_open",
-  //      "data": {
-  //        "device_id": sp.getString("deviceId")??"1234",
-  //        "userId": sp.getString('userId') ?? "",
-  //        "postId": id,
-  //      }
-  //    });
-  //    switch (path) {
-  //      case '/settings':
-  //        log("Navigating to Settings screen");
-  //        mainNavigatorKey.currentState?.pushNamed('/settings');
-  //        break;
-  //      case '/individualPage':
-  //        postId = id ?? "";
-  //        log("Navigating to Individual Post screen  $postId");
-  //        mainNavigatorKey.currentState?.pushNamed(
-  //          '/individualPage',
-  //          arguments: {'postId': postId},
-  //        );
-  //        break;
-  //      case '/profile':
-  //        log("Navigating to Profile screen");
-  //        mainNavigatorKey.currentState?.pushNamed(
-  //          '/profile',
-  //          arguments: {'userId': id},
-  //        );
-  //        break;
-  //      default:
-  //        log("Navigating to Home screen");
-  //        // mainNavigatorKey.currentState?.pushNamed('/');
-  //    }
-  //  }
+
 
   void setLocale(Locale locale) {
     setState(() {

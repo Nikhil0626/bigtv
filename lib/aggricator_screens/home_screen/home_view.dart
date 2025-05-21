@@ -40,7 +40,6 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
 
-  late WebEngagePlugin _webEngagePlugin;
   late PageController _pageController;
 
   @override
@@ -52,63 +51,24 @@ class _HomeViewState extends State<HomeView> {
     requestLocationPermission();
     requestNotificationPermission();
     getMobileNumber();
-    _webEngagePlugin =  WebEngagePlugin();
-    // _webEngagePlugin.setUpPushCallbacks(onPushClick, onPushActionClick);
-    // _webEngagePlugin.setUpInAppCallbacks(
-    //     onInAppClick, onInAppShown, onInAppDismiss, onInAppPrepared);
-    _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
     subscribeToPushCallbacks();
-
     subscribeToAnonymousIDCallback();
-    listenToAnonymousID();
     context.read<HomeProvider>().selectedIndex = 0;
     _pageController = PageController(initialPage: 0);
 
     super.initState();
   }
 
-  void subscribeToPushCallbacksIos() {
-    print("pushActionStream:33333" );
-    _webEngagePlugin.pushStream.listen((event) {
-      if(Platform.isIOS){
-        print("pushActionStream:0000" );
-        // Map<String, dynamic>? messagePayload = event.payload;
 
-        // print("pushActionStream:0000 ${messagePayload.toString()}" );
-        // String? postId = messagePayload?['Payload']['data']['value'].toString();
-        sendEventToServer("4116330");
-
-      }else{
-        print("pushActionStream:99999" );
-        String? deepLink = event.deepLink;
-        subscribeToTrackDeeplink();
-        Map<String, dynamic>? messagePayload = event.payload;
-        print("pushActionStream:9999 ${messagePayload.toString()}" );
-        sendEventToServer(messagePayload?["postId"]??"0");
-      }
-
-
-    });
-
-    //Push action click listener
-    _webEngagePlugin.pushActionStream.listen((event) {
-      sendEventToServer("4116330");
-      // print("pushActionStream:" + event.toString());
-      // String? deepLink = event.deepLink;
-      // Map<String, dynamic>? messagePayload = event.payload;
-      // sendEventToServer(messagePayload?["postId"]??"0");
-      //Implement the code here to use deeplink
-    });
-  }
 @override
   void dispose() {
 
   // _webEngagePlugin.pushSink.close();
   // _webEngagePlugin.pushActionSink.close();
 
-  _webEngagePlugin.pushSink.close();
-  _webEngagePlugin.pushActionSink.close();
-  _webEngagePlugin.trackDeeplinkURLStreamSink.close();
+  // _webEngagePlugin.pushSink.close();
+  // _webEngagePlugin.pushActionSink.close();
+  // _webEngagePlugin.trackDeeplinkURLStreamSink.close();
     super.dispose();
   }
 

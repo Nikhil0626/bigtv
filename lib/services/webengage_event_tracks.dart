@@ -100,23 +100,27 @@ void districtLocationUpdate(locationName,locationId,userId){
 }
 
 
-void contactViaMail(){
+void contactViaMail() async{
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  String? userId = sp.getString("userId");
   WebEngagePlugin.trackEvent('contact_via_mail', {
     "device_id": "${GlobalVariables().deviceId}",
     "date_time": DateTime.now().toString(),
-    "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
+    "user_id": userId??"",
   });
 }
 
 
 
-void contactViaCall(){
+void contactViaCall() async{
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  String? userId = sp.getString("userId");
   WebEngagePlugin.trackEvent('contact_via_call', {
     "device_id": "${GlobalVariables().deviceId}",
     "date_time": DateTime.now().toString(),
 
     /// add mail
-    "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
+    "user_id":userId??"",
   });
 }
 
@@ -134,21 +138,25 @@ void mobileVerificationDetails(number,status){
   }
 }
 
-void logoutUser(){
+void logoutUser()async{
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  String? userId = sp.getString("userId");
   WebEngagePlugin.trackEvent('logout_user', {
     "device_id": "${GlobalVariables().deviceId}",
     "date_time": DateTime.now().toString(),
-    "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
+    "user_id":userId??"",
   });
   WebEngagePlugin.userLogout();
 }
 
 
-void loginUser(){
+void loginUser()async{
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  String? userId = sp.getString("userId");
   WebEngagePlugin.trackEvent('login_user', {
     "device_id": "${GlobalVariables().deviceId}",
     "date_time": DateTime.now().toString(),
-    "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
+    "user_id": userId??"",
   });
 
 }
@@ -170,25 +178,29 @@ void sendUserAttribute(String nameOfDistrict)async{
 
 // WebEngagePlugin.setUserAttribute("userLocations", "కృష్ణ,గుంటూరు")
 
-void connectViaNotification(){
+void connectViaNotification()async{
+  SharedPreferences sp = await SharedPreferences.getInstance();
+  String? userId = sp.getString("userId");
   WebEngagePlugin.trackEvent('connect_via_notification', {
     "device_id": "${GlobalVariables().deviceId}",
     "date_time": DateTime.now().toString(),
     "post_title":"",
     "post_id":"",
-    "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
+    "user_id": userId??"",
   });
 }
 
 
-void connectViaPostLink(){
+void connectViaPostLink()async{
+  SharedPreferences sp = await SharedPreferences.getInstance();
+String? userId = sp.getString("userId");
 
   WebEngagePlugin.trackEvent('connect_via_postlink', {
     "device_id": "${GlobalVariables().deviceId}",
     "date_time": DateTime.now().toString(),
     "post_title":"",
     "post_id":"",
-    "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
+    "user_id": userId??"",
   });
 }
 

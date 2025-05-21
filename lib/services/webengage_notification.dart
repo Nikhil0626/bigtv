@@ -47,20 +47,23 @@ void onInAppDismiss(Map<String, dynamic>? message) {
 }
 
 
-void subscribeToPushCallbacks() async {
-  print("pushActionStream:4444" );
+void subscribeToPushCallbacks()  {
+  log("pushActionStream: flutter test 0000" );
   WebEngagePlugin().pushStream.listen((event) {
-    String? deepLink = event.deepLink;
-    Map<String, dynamic> messagePayload = event.payload!;
-    sendEventToServer(messagePayload["postId"]??"0");
+    log("pushActionStream: flutter test  11111" );
+    // String? deepLink = event.deepLink;
+    // Map<String, dynamic> messagePayload = event.payload!;
+    sendEventToServer("4118381");
   });
 
   //Push action click listener
   WebEngagePlugin().pushActionStream.listen((event) {
-    print("pushActionStream:" + event.toString());
-    String? deepLink = event.deepLink;
-    Map<String, dynamic>? messagePayload = event.payload;
-  sendEventToServer(messagePayload?["postId"]??"0");
+    log("pushActionStream: flutter test  22222" );
+    sendEventToServer("4118381");
+  //   print("pushActionStream:" + event.toString());
+  //   String? deepLink = event.deepLink;
+  //   Map<String, dynamic>? messagePayload = event.payload;
+  // sendEventToServer(messagePayload?["postId"]??"0");
     // showDialogWithMessage("PushAction click callback: " + event.toString());
   });
 }
@@ -111,8 +114,4 @@ void showDialogWithMessage(String msg) {
       });
 }
 
-void listenToAnonymousID() {
-  // WebEngagePlugin().anonymousActionStream.listen((event) {
-  //   log("listenToAnonymousID ${event}");
-  // });
-}
+// void list
