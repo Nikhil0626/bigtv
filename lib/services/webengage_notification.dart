@@ -51,8 +51,11 @@ void subscribeToPushCallbacks()  {
   log("pushActionStream: flutter test 0000" );
   WebEngagePlugin().pushStream.listen((event) {
     log("pushActionStream: flutter test  11111" );
-    // String? deepLink = event.deepLink;
-    // Map<String, dynamic> messagePayload = event.payload!;
+    String? deepLink = event.deepLink;
+    Map<String, dynamic> messagePayload = event.payload!;
+
+    log("pushActionStream: flutter test  11111 ${messagePayload}" );
+
     sendEventToServer("4118381");
   });
 

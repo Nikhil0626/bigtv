@@ -179,30 +179,13 @@ class _MyAppState extends State<MyApp> {
   Locale? _locale;
   StreamSubscription<Uri>? linkSubscription;
   String postId = "";
-  Map<String, dynamic>? _initialPushPayload;
-  late WebEngagePlugin _webEngagePlugin;
 
 
   @override
   void initState() {
     super.initState();
     _initDeepLinks();
-    _webEngagePlugin =  WebEngagePlugin();
-    // _webEngagePlugin.setUpPushCallbacks(onPushClick, onPushActionClick);
-    // _webEngagePlugin.setUpInAppCallbacks(
-    //     onInAppClick, onInAppShown, onInAppDismiss, onInAppPrepared);
-    _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
-
-    log(" pushActionStream: newwwwwwwwwwwwwwww");
-
-    // listenToAnonymousID();
   }
-
-  void _onTokenInvalidated(Map<String, dynamic>? message) {
-    print("tokenInvalidated callback received $message");
-    WebEngagePlugin.setSecureToken("siva kumar", message.toString());
-  }
-
 
   Future<void> _initDeepLinks() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
@@ -255,16 +238,16 @@ class _MyAppState extends State<MyApp> {
         if (id != null) {
           postId = id;
           log("Navigating to Individual Post screen with postId: $postId");
-          Future.delayed(Duration(milliseconds: 500),() {
+          await Future.delayed(const Duration(seconds: 1), () {
             mainNavigatorKey.currentState?.pushNamed(
               '/individualPage',
               arguments: {'postId': postId},
             );
-          },);
+          });
         } else {
           log("postId is missing for /individualPage route.");
         }
-        break;
+        return;
       case '/profile':
         log("Navigating to Profile screen");
         mainNavigatorKey.currentState?.pushNamed(
@@ -274,10 +257,11 @@ class _MyAppState extends State<MyApp> {
         break;
       default:
         log("Unrecognized path: $path — Navigating to Home screen (optional)");
-      // Optionally push home here if needed:
-      // mainNavigatorKey.currentState?.pushNamed('/');
+    // Optionally push home here if needed:
+    // mainNavigatorKey.currentState?.pushNamed('/');
     }
   }
+
 
 
 

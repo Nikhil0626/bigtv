@@ -28,6 +28,10 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   NativeAd? _adMobNativeAd;
   BannerAd? _bannerAd;
   bool _isBannerLoaded = false;
+  bool _isAdMObLoaded = false;
+
+  String? to = '';
+  String? from = '';
 
   bool _isAdShown = false;
   dynamic _shownAd; // Can be NativeAd or BannerAd
@@ -48,18 +52,21 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _loadAdManagerNativeAd(BuildContext context) async{
+    from = DateTime.now().toString();
+
     SharedPreferences sp =await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
     _adManagerNativeAd = NativeAd(
-      adUnitId: context.read<HomeProvider>().adManagerNativeId,
+      adUnitId:"",
       // adUnitId: context.read<HomeProvider>().adManagerNativeId,
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(
+
         onAdLoaded: (ad) {
+
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
         onAdFailedToLoad: (ad, error) {
-
           EventRepo().sendEvent({
             "key": "ads_available",
             "data": {
@@ -88,6 +95,10 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(
         onAdLoaded: (ad) {
+          _isAdMObLoaded = true;
+          setState(() {
+
+          });
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
         onAdFailedToLoad: (ad, error) {
@@ -114,7 +125,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     SharedPreferences sp =await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
     _bannerAd = BannerAd(
-      adUnitId: context.read<HomeProvider>().adManagerBannerId,
+      adUnitId: "",
       size: AdSize(width: 300, height: 250),
       request: AdManagerAdRequest(),
       listener: BannerAdListener(
@@ -141,6 +152,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _onAdLoaded(dynamic ad, Widget adWidget) {
+    to = DateTime.now().toString();
     if (_isAdShown) {
       ad.dispose(); // Don't need it
       return;
@@ -156,10 +168,12 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     if (ad != _adManagerNativeAd) {
       _adManagerNativeAd?.dispose();
       _adManagerNativeAd = null;
+      _isAdMObLoaded = false;
     }
     if (ad != _adMobNativeAd) {
       _adMobNativeAd?.dispose();
       _adMobNativeAd = null;
+      _isAdMObLoaded = false;
     }
     if (ad != _bannerAd) {
       _bannerAd?.dispose();
@@ -180,14 +194,24 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     if (_adWidget != null) {
       return Scaffold(body: Column(
         children: [
+          Text("Banner Ads  ----   $from ====>  $to"),
+          if(_isAdMObLoaded)
+            _adWidget!
+            else
           Expanded(
-              flex: 1,
-              child: _adWidget!),
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: _buildRecommendedNews(context),
+            child: Column(
+              children: [
+                Expanded(
+                    flex: 1,
+                    child: _adWidget!),
+                Expanded(
+                  flex: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: _buildRecommendedNews(context),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -212,20 +236,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     }
 
     return Scaffold(
-      body: Column(children: [
-        Text("No Ads"),
-        Expanded(
-          flex: 1,
-          child: Center(child: AppLoadingScreen()),
-          // child:widget.article['adType']=="rating card"?RateYourApp():widget.article['adType']=="share card"?ShareYourApp():ShareYourApp(),
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: _buildRecommendedNews(context),
-          ),
-        ),
-      ],)
+      body: Center(child: AppLoadingScreen()),
     );
   }
   Widget _buildRecommendedNews(BuildContext context) {

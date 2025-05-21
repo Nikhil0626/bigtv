@@ -48,7 +48,7 @@ class _HomeViewState extends State<HomeView> {
       AppUpdateService.checkForUpdate(context);
     });
     log("hello home screen in 1111");
-    requestLocationPermission();
+    // requestLocationPermission();
     requestNotificationPermission();
     getMobileNumber();
     subscribeToPushCallbacks();
