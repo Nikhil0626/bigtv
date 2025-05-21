@@ -31,7 +31,7 @@ class AuthenticationProvider extends ChangeNotifier {
   List<LocationModel> getAllLocationList = [];
   List<String> selectedLocations = [];
 
-  void validationErrors(value) {
+  void validationErrors(value ) {
     if (value == null || value.trim().isEmpty) {
       errorMessage = "Please Enter Mobile Number";
       isButtonEnabled = false;
@@ -271,7 +271,6 @@ notifyListeners();
       notifyListeners();
     }
   }
-
 
   bool isLocationLoading = false;
   Future getAllLocations() async {

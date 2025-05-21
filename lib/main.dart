@@ -43,20 +43,17 @@ import 'aggricator_screens/settings_screen/settings_provider/profile_provider.da
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   initPlugin();
   checkForUpdate();
   getAndSendReferrerDetails();
   await EasyLocalization.ensureInitialized();
-
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
   ));
   await facebookAppEvents.setAdvertiserTracking(enabled: true);
-
   String? deviceId = await PlatformDeviceId.getDeviceId;
   checkForUpdate();
   log("Device ID: $deviceId");
@@ -66,7 +63,6 @@ Future<void> main() async {
   unawaited(MobileAds.instance.initialize());
   await Firebase.initializeApp();
   // KochavaService.initKochava();
-
   /// app Events firebase
   AnalyticsService.logAppOpen();
   AnalyticsService().trackAppOpen();
