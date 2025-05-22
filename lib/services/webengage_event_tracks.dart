@@ -1,14 +1,11 @@
 import 'dart:developer';
 
-import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../globel_keys/global_variables_data.dart';
-import '../main.dart';
 
 
 void sendAndroidDeviceDetails(AndroidDeviceInfo details) {

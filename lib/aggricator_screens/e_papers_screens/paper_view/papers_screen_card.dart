@@ -1,27 +1,20 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
-import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/individual_paper.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_preview.dart';
 import 'package:chotanews/utils/app_fonts.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../screens/home_screen/home_provider/provider.dart';
+import '../../home_screen/home_provider/home_provider.dart';
 import '../../in_app_web_view.dart';
 import '../../../utils/app_colors.dart';
-import '../../home_screen/home_provider.dart';
-import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/ePaper_main_model.dart';
-import '../paper_models/single_paper_model.dart';
 
 class PapersScreenCard extends StatefulWidget {
   const PapersScreenCard({super.key});
@@ -33,7 +26,6 @@ class PapersScreenCard extends StatefulWidget {
 class _PapersScreenCardState extends State<PapersScreenCard> {
   int currentIndexs = 0;
 
-  // final CardSwiperController controller = CardSwiperController();
   final ScreenshotController adsScreenshotController = ScreenshotController();
   List<EPaperMainModel> removedCards = [];
   Offset slideOffset = Offset.zero;

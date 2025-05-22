@@ -36,12 +36,7 @@ class DynamicLinkService {
     log("Navigating to : $deepLink");
 
     if (postId != null && postId.isNotEmpty) {
-      EventRepo().sendEvent({"key":"dynamic_link_app_open",
-        "data":{
-          "device_id": GlobalVariables().deviceId,
-          "userId":sharedPreferences.getString('loginId')??"",
-          "postId":postId.toString(),
-        }});
+
       log("Navigating to Post ID: $postId");
       if (!context.mounted) return;
       Navigator.pushNamed(mainNavigatorKey.currentContext!, RoutesManager.homeScreen,arguments: {"postId":postId,"tab":"0"});

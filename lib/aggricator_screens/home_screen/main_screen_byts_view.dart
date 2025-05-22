@@ -2,10 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/event_repo.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
-import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -37,14 +34,15 @@ import 'package:http/http.dart' as http;
 
 import '../video_image_view/gallery_screen.dart';
 import '../video_image_view/video_preview.dart';
+import 'home_provider/home_provider.dart';
 
 class MainScreenBytView extends StatefulWidget {
   final article;
-  String aiTagId;
+ final  String aiTagId;
   final bool isaiTags;
   final bool isMainScreen;
 
-   MainScreenBytView({super.key, required this.article, this.isaiTags = false,this.aiTagId="",this.isMainScreen = false,});
+   const MainScreenBytView({super.key, required this.article, this.isaiTags = false,this.aiTagId="",this.isMainScreen = false,});
 
   @override
   State<MainScreenBytView> createState() => _MainScreenBytViewState();
@@ -373,17 +371,14 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                             child: ListView(
                                                               physics: const NeverScrollableScrollPhysics(),
                                                               children: widget.article['bulletPoints'].map<Widget>((item) {
-                                                                // Explicitly specify <Widget>
                                                                 return Row(
                                                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                                                  // Align items at the top
                                                                   children: [
                                                                     Text(
                                                                       "● ",
                                                                       style: TextStyle(
                                                                         fontSize: 14.sp,
                                                                         color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
-                                                                        // Reduce bullet size for better alignment
                                                                         height: 1, // Ensures proper line height
                                                                       ),
                                                                     ),
@@ -394,7 +389,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                         item,
                                                                         strutStyle: StrutStyle(
                                                                           fontSize: 16.sp,
-                                                                          // Match font size
                                                                           height: 1, // Ensures consistent line height
                                                                         ),
                                                                         style: homeScreenFontStyle(
@@ -563,23 +557,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 icon: "assets/svg/new_comment.svg",
                                 label: 'కామెంట్',
                                 onTap: () async {
-                                  SharedPreferences sp = await SharedPreferences.getInstance();
-                                  String? userId = sp.getString("userId");
-                                  String? deviceId = sp.getString("deviceId");
-                                  context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                  EventRepo().sendEvent({
-                                    "key": "comments",
-                                    "data": {
-                                      "device_id": "$deviceId",
-                                      "userId": userId ?? "1234",
-                                      "postId": widget.article['id'].toString(),
-                                    }
-                                  });
-                                  showComments(context, widget.article['id']);
-                                  EventRepo().sendEvent({
-                                    "key": "comments",
-                                    "data": {"deviceId": deviceId ?? "", "openTime": DateTime.now().toString()}
-                                  });
+                                  if(context.mounted) {
+                                    context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                    showComments(context, widget.article['id']);
+                                  }
+
                                 },
                               ),
                               Spacer(),
@@ -587,11 +569,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 onTap: () async {
                                   SharedPreferences sp = await SharedPreferences.getInstance();
                                   String? userId = sp.getString("userId");
-                                  String? deviceId = sp.getString("deviceId");
-                                  EventRepo().sendEvent({
-                                    "key": "share_via_articles",
-                                    "data": {"device_id": "$deviceId", "userId": userId ?? "", "postId": widget.article['id'].toString(), "isWhatAppShare": false, "source_from": "news"}
-                                  });
 
                                   sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
 
@@ -635,19 +612,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     onTap: () async{
                                       log("Refresh");
 
-                                      SharedPreferences preferences = await SharedPreferences.getInstance();
-                                      String? deviceId = preferences.getString("deviceId");
-                                      String? userId = preferences.getString("userId");
-                                      EventRepo().sendEvent({
-                                        "key": "reload",
-                                        "data": {
-                                          "device_id": "$deviceId",
-                                          "userId": userId ?? "",
-                                        }
-                                      });
                                       homeProvide.isReloadData();
                                       if(widget.isaiTags){
-                                        homeProvide.getAllPostsByAiId(widget.aiTagId.toString());
+                                        homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then((value) {
+                                          homeProvide.isReloadFalse();
+                                        },);
                                       }else{
                                         homeProvide.getAllPostList = [];
                                         homeProvide.getAllPost();
@@ -688,7 +657,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
       for (var item in imageData) {
         String imageUrl = item['Url'].toString() ?? '';
-        print("pdfff ${imageUrl}");
+        log("Pdf $imageUrl");
         if (imageUrl.isNotEmpty) {
           final response = await http.get(Uri.parse(imageUrl));
 
@@ -711,7 +680,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
               ),
             );
           } else {
-            print("Failed to load image: $imageUrl");
+            log("Failed to load image: $imageUrl");
           }
         }
       }
@@ -721,7 +690,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
       final file = File(filePath);
       await file.writeAsBytes(await pdf.save());
 
-      print("PDF saved at: $filePath");
+      log("PDF saved at: $filePath");
 
       await Share.shareXFiles([XFile(filePath)], text: "https://apps.signitivessoft.com/individualPage");
       isSending = false;
@@ -729,10 +698,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     } catch (e) {
       isSending = false;
       setState(() {});
-      print("Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      log("Error: $e");
     }
   }
 

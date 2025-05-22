@@ -168,19 +168,9 @@ ScreenshotController sc = ScreenshotController();
                         String? userId = sp.getString("userId");
                         String? deviceId = sp.getString("deviceId");
                         context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                        EventRepo().sendEvent({
-                          "key": "comments",
-                          "data": {
-                            "device_id": "$deviceId",
-                            "userId":userId ?? "",
-                            "postId": widget.postDetails['id'].toString(),
-                          }
-                        });
+
                         showComments(context, widget.postDetails['id']);
-                        EventRepo().sendEvent({
-                          "key": "comments",
-                          "data": {"deviceId": deviceId, "openTime": DateTime.now().toString()}
-                        });
+
                       },
                     ),
                     Spacer(),
@@ -193,16 +183,7 @@ ScreenshotController sc = ScreenshotController();
                         SharedPreferences sp = await SharedPreferences.getInstance();
                         String? userId = sp.getString("userId");
                         String? deviceId = sp.getString("deviceId");
-                        EventRepo().sendEvent({
-                          "key": "share_via_articles",
-                          "data": {
-                            "device_id": "$deviceId",
-                            "userId": userId?? "",
-                            "postId": widget.postDetails['id'].toString(),
-                            "isWhatAppShare": false,
-                            "source_from":"news"
-                          }
-                        });
+
 
                         sendShareDetails(userId, widget.postDetails['id'], widget.postDetails['content'].toString());
 

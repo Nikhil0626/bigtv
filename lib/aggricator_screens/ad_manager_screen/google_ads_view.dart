@@ -1,23 +1,16 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
-import 'package:chotanews/aggricator_screens/individual_post_details/individual_post_view.dart';
-import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
-import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/screens/home_screen/home_screens/standard_post_view.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
-import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../home_screen/home_provider/home_provider.dart';
 import '../settings_screen/settings_view/feedback_view.dart';
 import '../../utils/app_colors.dart';
 

@@ -146,11 +146,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
   Future<void> _launchPhone(String phone) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("loginId")??"";
-    EventRepo().sendEvent({"key":"contact_via_number",
-      "data":{
-        "device_id": GlobalVariables().deviceId,
-        "userId":userId,
-      }});
+
     contactViaCall();
     final Uri phoneUri = Uri(
       scheme: 'tel',
@@ -169,11 +165,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
   Future<void> launchSingleEmail(email) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("loginId")??"";
-    EventRepo().sendEvent({"key":"contact_via_email",
-      "data":{
-        "device_id": GlobalVariables().deviceId,
-        "userId":userId,
-      }});
+
     contactViaMail();
     await EasyLauncher.email(
         email: email,

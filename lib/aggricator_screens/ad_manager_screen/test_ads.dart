@@ -1,17 +1,15 @@
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/event_repo.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
 
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
+import '../home_screen/home_provider/home_provider.dart';
 import '../individual_post_details/individual_post_view.dart';
 
 
@@ -54,8 +52,6 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   void _loadAdManagerNativeAd(BuildContext context) async{
     from = DateTime.now().toString();
 
-    SharedPreferences sp =await SharedPreferences.getInstance();
-    String? userId = sp.getString("userId");
     _adManagerNativeAd = NativeAd(
       adUnitId:"",
       // adUnitId: context.read<HomeProvider>().adManagerNativeId,
@@ -67,16 +63,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
         onAdFailedToLoad: (ad, error) {
-          EventRepo().sendEvent({
-            "key": "ads_available",
-            "data": {
-              "user_id":userId,
-              "nameOfAdsType":"AdManagerNativeAd",
-              "error":error.toString(),
-              "adUnitId":ad.adUnitId.toString(),
-              "ad":ad.responseInfo.toString()
-            }
-          });
+
 
           ad.dispose();
           print('AdManager Native failed: $error');
@@ -87,9 +74,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _loadAdMobNativeAd(BuildContext context) async{
-    SharedPreferences sp =await SharedPreferences.getInstance();
 
-    String? userId = sp.getString("userId");
     _adMobNativeAd = NativeAd(
       adUnitId: context.read<HomeProvider>().adMobNativeId,
       factoryId: 'adFactoryExample',
@@ -103,16 +88,6 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         },
         onAdFailedToLoad: (ad, error) {
 
-          EventRepo().sendEvent({
-            "key": "ads_available",
-            "data": {
-              "user_id":userId,
-              "nameOfAdsType":"AdMobNativeAd",
-              "error":error.toString(),
-              "adUnitId":ad.adUnitId.toString(),
-              "ad":ad.responseInfo.toString()
-            }
-          });
           ad.dispose();
           print('AdMob Native failed: $error');
         },
@@ -122,8 +97,6 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _loadBannerAd(BuildContext context) async{
-    SharedPreferences sp =await SharedPreferences.getInstance();
-    String? userId = sp.getString("userId");
     _bannerAd = BannerAd(
       adUnitId: "",
       size: AdSize(width: 300, height: 250),
@@ -134,16 +107,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           _onAdLoaded(ad, AdWidget(ad: ad as BannerAd));
         },
         onAdFailedToLoad: (ad, error) {
-          EventRepo().sendEvent({
-            "key": "ads_available",
-            "data": {
-              "user_id":userId,
-              "nameOfAdsType":"AdManagerBannerAd",
-              "error":error.toString(),
-              "adUnitId":ad.adUnitId.toString(),
-              "ad":ad.responseInfo.toString()
-            }
-          });
+
           ad.dispose();
           print('Banner failed: $error');
         },

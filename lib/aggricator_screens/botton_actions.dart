@@ -1,11 +1,8 @@
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
-import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
-import '../../utils/app_fonts.dart';
-import '../../utils/app_spaces.dart';
 
 class BottomActions extends StatelessWidget {
   final String icon;
