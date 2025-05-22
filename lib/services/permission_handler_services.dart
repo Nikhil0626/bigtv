@@ -1,8 +1,11 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_install_referrer/flutter_install_referrer.dart';
 import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -10,7 +13,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../aggricator_screens/event_repo.dart';
 
 
 
@@ -178,4 +180,70 @@ Future<void> requestNotificationPermission() async {
     badge: true,
     sound: true,
   );
+}
+
+
+final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
+
+Future<void> getAndSendReferrerDetails() async {
+  try {
+    final referrerDetails = await InstallReferrer.app;
+
+    final String packageName = referrerDetails.packageName ?? 'unknown';
+    final String platform = referrerToReadableString(referrerDetails.referrer);
+    final String referrer = referrerDetails.referrer.toString();
+    final String clickTimestamp = DateTime.now().toString() ?? '0';
+    final String installTimestamp = DateTime.now().add(Duration(minutes: 10)).toString() ?? '0';
+
+    log("Install_referrer   ${{
+      'package_name': packageName,
+      'platform': platform,
+      'referrer_enum': referrer,
+      'click_timestamp': clickTimestamp,
+      'install_timestamp': installTimestamp,
+    }}");
+    // await analytics.logEvent(
+    //   name: 'Install_referrer',
+    //   parameters: {
+    //     'package_name': packageName,
+    //     'platform': platform,
+    //     'referrer_enum': referrer,
+    //     'click_timestamp': clickTimestamp,
+    //     'install_timestamp': installTimestamp,
+    //   },
+    // );
+
+    log('Referrer data sent to Firebase Analytics');
+  } catch (e) {
+    log('Failed to get or send install referrer: $e');
+  }
+}
+
+String referrerToReadableString(InstallationAppReferrer referrer) {
+  switch (referrer) {
+    case InstallationAppReferrer.iosAppStore:
+      return "Apple - App Store";
+    case InstallationAppReferrer.iosTestFlight:
+      return "Apple - Test Flight";
+    case InstallationAppReferrer.iosDebug:
+      return "Apple - Debug";
+    case InstallationAppReferrer.androidGooglePlay:
+      return "Android - Google Play";
+    case InstallationAppReferrer.androidAmazonAppStore:
+      return "Android - Amazon App Store";
+    case InstallationAppReferrer.androidHuaweiAppGallery:
+      return "Android - Huawei App Gallery";
+    case InstallationAppReferrer.androidOppoAppMarket:
+      return "Android - Oppo App Market";
+    case InstallationAppReferrer.androidSamsungAppShop:
+      return "Android - Samsung App Shop";
+    case InstallationAppReferrer.androidVivoAppStore:
+      return "Android - Vivo App Store";
+    case InstallationAppReferrer.androidXiaomiAppStore:
+      return "Android - Xiaomi App Store";
+    case InstallationAppReferrer.androidManually:
+      return "Android - Manual installation";
+    case InstallationAppReferrer.androidDebug:
+      return "Android - Debug";
+  }
 }

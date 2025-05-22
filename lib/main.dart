@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-
 import 'package:chotanews/services/analytics_service.dart';
 
 import 'package:chotanews/services/permission_handler_services.dart';
@@ -34,10 +33,10 @@ import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import 'aggricator_screens/splash_screen/splash_screen_view.dart';
 
 final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   initPlugin();
-  checkForUpdate();
   getAndSendReferrerDetails();
   await EasyLocalization.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -45,16 +44,10 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.dark,
   ));
   await facebookAppEvents.setAdvertiserTracking(enabled: true);
-  String? deviceId = await PlatformDeviceId.getDeviceId;
   checkForUpdate();
-  log("Device ID: $deviceId");
-  // MobileAds.instance.updateRequestConfiguration(
-  //   RequestConfiguration(testDeviceIds: [deviceId??""]),
-  // );
   unawaited(MobileAds.instance.initialize());
   await Firebase.initializeApp();
   // KochavaService.initKochava();
-  /// app Events firebase
   AnalyticsService.logAppOpen();
   AnalyticsService().trackAppOpen();
   AnalyticsService.startSession();
@@ -77,8 +70,8 @@ Future<void> main() async {
       Locale('te'),
     ], path: 'assets/translations', fallbackLocale: Locale("te"), child: AppLifecycleManager(child: MyApp())));
   });
-
 }
+
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -86,70 +79,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   WebEngagePlugin.onPushMessageReceive(message.data);
 }
 
-final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-Future<void> getAndSendReferrerDetails() async {
-  try {
-    final referrerDetails = await InstallReferrer.app;
-
-    final String packageName = referrerDetails.packageName ?? 'unknown';
-    final String platform = referrerToReadableString(referrerDetails.referrer);
-    final String referrer = referrerDetails.referrer.toString();
-    final String clickTimestamp = DateTime.now().toString() ?? '0';
-    final String installTimestamp = DateTime.now().add(Duration(minutes: 10)).toString() ?? '0';
-
-    log("Install_referrer   ${{
-      'package_name': packageName,
-      'platform': platform,
-      'referrer_enum': referrer,
-      'click_timestamp': clickTimestamp,
-      'install_timestamp': installTimestamp,
-    }}");
-    // await analytics.logEvent(
-    //   name: 'Install_referrer',
-    //   parameters: {
-    //     'package_name': packageName,
-    //     'platform': platform,
-    //     'referrer_enum': referrer,
-    //     'click_timestamp': clickTimestamp,
-    //     'install_timestamp': installTimestamp,
-    //   },
-    // );
-
-    print('Referrer data sent to Firebase Analytics');
-  } catch (e) {
-    print('Failed to get or send install referrer: $e');
-  }
-}
-
-String referrerToReadableString(InstallationAppReferrer referrer) {
-  switch (referrer) {
-    case InstallationAppReferrer.iosAppStore:
-      return "Apple - App Store";
-    case InstallationAppReferrer.iosTestFlight:
-      return "Apple - Test Flight";
-    case InstallationAppReferrer.iosDebug:
-      return "Apple - Debug";
-    case InstallationAppReferrer.androidGooglePlay:
-      return "Android - Google Play";
-    case InstallationAppReferrer.androidAmazonAppStore:
-      return "Android - Amazon App Store";
-    case InstallationAppReferrer.androidHuaweiAppGallery:
-      return "Android - Huawei App Gallery";
-    case InstallationAppReferrer.androidOppoAppMarket:
-      return "Android - Oppo App Market";
-    case InstallationAppReferrer.androidSamsungAppShop:
-      return "Android - Samsung App Shop";
-    case InstallationAppReferrer.androidVivoAppStore:
-      return "Android - Vivo App Store";
-    case InstallationAppReferrer.androidXiaomiAppStore:
-      return "Android - Xiaomi App Store";
-    case InstallationAppReferrer.androidManually:
-      return "Android - Manual installation";
-    case InstallationAppReferrer.androidDebug:
-      return "Android - Debug";
-  }
-}
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -170,16 +100,10 @@ class _MyAppState extends State<MyApp> {
 
   String postId = "";
 
-
   @override
   void initState() {
     super.initState();
   }
-
-
-
-
-
 
   void setLocale(Locale locale) {
     setState(() {
@@ -189,7 +113,6 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-
     super.dispose();
   }
 
@@ -245,4 +168,3 @@ class _MyAppState extends State<MyApp> {
 final GlobalKey<NavigatorState> mainNavigatorKey = GlobalKey<NavigatorState>();
 final RouteObserver<ModalRoute<Object?>> routeObserver = RouteObserver<ModalRoute<Object?>>();
 final GlobalKey<ScaffoldMessengerState> scaffoldKey = GlobalKey();
-
