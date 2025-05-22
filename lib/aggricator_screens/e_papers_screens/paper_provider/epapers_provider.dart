@@ -1,12 +1,11 @@
 import 'dart:developer';
 
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../screens/home_screen/home_repo/event_repo.dart';
-import '../../../services/webengage_event_tracks.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../paper_models/ePaper_main_model.dart';
 import '../paper_models/single_paper_model.dart';
@@ -86,10 +85,7 @@ return singlePaperModel;
     String? deviceId = sp.getString("deviceId");
     log(val.id.toString());
     if (!isBookMark.contains(val.id.toString())) {
-      EventRepo().sendEvent({
-        "key": "bookmark_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isBookMark": true,"source_from":"paper"}
-      });
+
       isBookMark.add(val.id.toString());
       Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
           val.id.toString(), context,1
@@ -100,10 +96,7 @@ return singlePaperModel;
           val.id.toString(), context,0
       );
       isBookMark.remove(val.id.toString());
-      EventRepo().sendEvent({
-        "key": "bookmark_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isBookMark": false,"source_from":"paper"}
-      });
+
       log(isBookMark.toString());
     }
 

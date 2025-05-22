@@ -1,7 +1,6 @@
 
 import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
@@ -10,6 +9,7 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
 
 class AiTagPostsPageView extends StatefulWidget {

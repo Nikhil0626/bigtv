@@ -12,7 +12,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
-import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
+import '../../in_app_web_view.dart';
 import '../../../services/base_urls.dart';
 import '../../../services/deviice_details.dart';
 import '../../../utils/app_fonts.dart';

@@ -1,13 +1,6 @@
-import 'dart:developer';
-import 'dart:io';
 
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/home_screen/news_posts_provider.dart';
-import 'package:chotanews/screens/home_screen/home_models/home_screen_model.dart';
-import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
-import 'package:chotanews/utils/app_toasts.dart';
-import 'package:chotanews/utils/local_data.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -15,8 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../globel_keys/app_router.dart';
-import 'app_enums.dart';
 import 'date_format.dart';
 
 void showComments(BuildContext context,  postId) {
@@ -58,9 +49,9 @@ class _CommentSectionState extends State<CommentSection> {
 
   @override
   Widget build(BuildContext context) {
-    EdgeInsets gestureInsets = MediaQuery.of(context).systemGestureInsets;
+    // EdgeInsets gestureInsets = MediaQuery.of(context).systemGestureInsets;
 
-    String navigationMode = (gestureInsets.bottom > 0) ? "Gesture" : "Button";
+    // String navigationMode = (gestureInsets.bottom > 0) ? "Gesture" : "Button";
     return Consumer<NewsPostsProvider>(
       builder: (_, newsPostsProvider, __) {
         return FractionallySizedBox(
@@ -282,8 +273,10 @@ class _CommentSectionState extends State<CommentSection> {
                                   );
                             }
                           } else {
-                            Navigator.pushAndRemoveUntil(
-                                context, MaterialPageRoute(builder: (context) => LoginBackgroundView(),),(route) => false,);
+                            if(context.mounted) {
+                              Navigator.pushAndRemoveUntil(
+                                context, MaterialPageRoute(builder: (context) => LoginBackgroundView(),), (route) => false,);
+                            }
                           }
                         },
                       ),

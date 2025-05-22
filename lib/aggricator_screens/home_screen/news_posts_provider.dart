@@ -1,11 +1,11 @@
 import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/home_screen/news_post_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'comments_model.dart';
+import 'home_model/comments_model.dart';
+import 'home_repo/news_post_repo.dart';
 
 class NewsPostsProvider extends ChangeNotifier {
   List<CommentsModel> getAllCommentsList = [];

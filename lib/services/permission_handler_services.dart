@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
@@ -6,14 +5,14 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:mobile_number/mobile_number.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../globel_keys/global_variables_data.dart';
-import '../screens/home_screen/home_repo/event_repo.dart';
+import '../aggricator_screens/event_repo.dart';
+
+
 
 Future<void> requestManageStoragePermission() async {
   if (Platform.isAndroid) {
@@ -137,6 +136,8 @@ Future<void> initPlugin() async {
   final uuid = await AppTrackingTransparency.getAdvertisingIdentifier();
   print("UUID: $uuid");
 }
+
+
 Future<void> requestLocationPermission() async {
   LocationPermission permission = await Geolocator.checkPermission();
 
@@ -164,17 +165,6 @@ Future<void> getAddressFromLatLng(double latitude, double longitude) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     print("location ------ $placemarks");
     Placemark place = placemarks[0];
-
-    EventRepo().sendEvent({"key":"live_location",
-      "data":{
-        "device_id": sp.getString("deviceId")??"",
-        "country": "${place.country}",
-        "state": "${place.administrativeArea}",
-        "district": place.locality.toString(),
-        "mandel": "${place.subLocality}",
-        "village": "",
-      }
-    });
     sendLiveLocationDetails(place);
   } catch (e) {
     print(e);

@@ -12,9 +12,9 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../screens/home_screen/botton_actions.dart';
-import '../../../screens/home_screen/home_repo/event_repo.dart';
-import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
+import '../../botton_actions.dart';
+import '../../event_repo.dart';
+import '../../in_app_web_view.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
@@ -198,17 +198,7 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                             onTap: () async {
                               SharedPreferences sp = await SharedPreferences.getInstance();
                               String? userId = sp.getString("userId");
-                              String? deviceId = sp.getString("deviceId");
-                              EventRepo().sendEvent({
-                                "key": "share_via_articles",
-                                "data": {
-                                  "device_id": "$deviceId",
-                                  "userId": userId ?? "",
-                                  "postId": widget.card.id.toString(),
-                                  "isWhatAppShare": false,
-                                  "source_from":"reel"
-                                }
-                              });
+
 
                               sendShareDetails(userId, widget.card.id, widget.card.content.toString());
 

@@ -58,8 +58,8 @@ class BaseUrls {
 
 
   /// Python Dec Apis
-  // static const String ePaperBaseUrlAws = "http://aggregator.chotanews.com";
-  // static const String baseUrlAwsDev = "https://dev.chotanews.com";
+  // static const String ePaperBaseUrlAws = "http://devaggregator.chotanews.com";
+  // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
 
   ///Login login
   static const String sendOtpPy = "/send-otp";
@@ -97,3 +97,6 @@ class BaseUrls {
   ///Update profile
   static const String getProfile = "/profile";
 }
+
+
+// 7386881205

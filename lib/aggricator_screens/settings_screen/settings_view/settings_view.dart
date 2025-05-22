@@ -1,28 +1,26 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
-import 'package:chotanews/services/base_urls.dart';
+import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import '../../../screens/Auth_module/auth_provider/auth_provider.dart';
-import '../../../screens/chota_info_screens/about_us.dart';
-import '../../../screens/chota_info_screens/advertise_with_us.dart';
-import '../../../screens/chota_info_screens/privacy_policy.dart';
-import '../../../screens/chota_info_screens/terms_conditions.dart';
-import '../../../screens/home_screen/home_repo/event_repo.dart';
-import '../../../screens/home_screen/home_screens/in_app_web_view.dart';
+
+
+import '../../../services/webengage_notification.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
+import '../../chota_info_screens/advertise_with_us.dart';
+import '../../chota_info_screens/privacy_policy.dart';
+import '../../chota_info_screens/terms_conditions.dart';
 import 'filters_screen/filter_view.dart';
 import 'profile_view.dart';
 import 'feedback_view.dart';
@@ -45,7 +43,7 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   void initState() {
     getLogin();
-    context.read<AuthProvider>().sendEvent("SettingsView");
+    context.read<AuthenticationProvider>().sendEvent("SettingsView");
     super.initState();
   }
 
@@ -156,13 +154,11 @@ class _SettingsViewState extends State<SettingsView> {
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () async {
+              closeSubscribe();
               SharedPreferences preferences = await SharedPreferences.getInstance();
               String? deviceId = preferences.getString("deviceId");
               String? userId = preferences.getString("userId");
-              EventRepo().sendEvent({
-                "key": "logout",
-                "data": {"device_id": "$deviceId", "isLogin": isNotificationsEnabled ? false : true, "userId": userId}
-              });
+
               WebEngagePlugin.trackEvent('logout_user', {
                 "device_id": "${deviceId}",
                 "date_time": DateTime.now().toString(),

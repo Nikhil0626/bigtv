@@ -1,5 +1,6 @@
-import 'package:card_swiper/card_swiper.dart';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_swiper_view/flutter_swiper_view.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 class AdSwiperScreen extends StatelessWidget {

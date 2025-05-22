@@ -2,8 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
-import 'package:chotanews/screens/home_screen/home_provider/provider.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,14 +15,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../globel_keys/global_variables_data.dart';
-import '../../screens/Auth_module/auth_provider/auth_provider.dart';
-import '../../screens/home_screen/botton_actions.dart';
-import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../ad_manager_screen/google_ads_view.dart';
-import '../../screens/home_screen/home_screens/in_app_web_view.dart';
-import '../../screens/videos_main/video_views/gallery_screen.dart';
-import '../../screens/videos_main/video_views/video_preview.dart';
+import '../auth_screens/authentication_provider/authentication_provider.dart';
+import '../botton_actions.dart';
+import '../in_app_web_view.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
@@ -38,12 +32,17 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 
+import '../video_image_view/gallery_screen.dart';
+import '../video_image_view/video_preview.dart';
+import 'home_provider/home_provider.dart';
+
 class MainScreenBytView extends StatefulWidget {
   final article;
-  String aiTagId;
+ final  String aiTagId;
   final bool isaiTags;
+  final bool isMainScreen;
 
-   MainScreenBytView({super.key, required this.article, this.isaiTags = false,this.aiTagId=""});
+   const MainScreenBytView({super.key, required this.article, this.isaiTags = false,this.aiTagId="",this.isMainScreen = false,});
 
   @override
   State<MainScreenBytView> createState() => _MainScreenBytViewState();
@@ -105,7 +104,12 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     child: GestureDetector(
                                       onTap: () {
                                         context.read<HomeProvider>().isReloadFalse();
-                                        Navigator.pop(context);
+                                        if(widget.isMainScreen == true){
+                                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => HomeView(),), (route) => false,);
+                                        }else{
+                                          Navigator.pop(context);
+
+                                        }
                                       },
                                       child: Container(
                                         padding: EdgeInsets.all(7),
@@ -228,7 +232,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           // Main Content (Image or Video)
                                           widget.article['type'] == "Video"
                                               ? SizedBox(
-                                                  height: MediaQuery.of(context).size.height * .35,
+                                                  height:widget.isaiTags?MediaQuery.of(context).size.height * .30: MediaQuery.of(context).size.height * .35,
                                                   width: MediaQuery.of(context).size.width,
                                                   child: Align(
                                                     alignment: Alignment.topCenter,
@@ -367,17 +371,14 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                             child: ListView(
                                                               physics: const NeverScrollableScrollPhysics(),
                                                               children: widget.article['bulletPoints'].map<Widget>((item) {
-                                                                // Explicitly specify <Widget>
                                                                 return Row(
                                                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                                                  // Align items at the top
                                                                   children: [
                                                                     Text(
                                                                       "● ",
                                                                       style: TextStyle(
                                                                         fontSize: 14.sp,
                                                                         color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
-                                                                        // Reduce bullet size for better alignment
                                                                         height: 1, // Ensures proper line height
                                                                       ),
                                                                     ),
@@ -388,7 +389,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                         item,
                                                                         strutStyle: StrutStyle(
                                                                           fontSize: 16.sp,
-                                                                          // Match font size
                                                                           height: 1, // Ensures consistent line height
                                                                         ),
                                                                         style: homeScreenFontStyle(
@@ -521,6 +521,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                   child: Container(
                     color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
                     height: 45.sp,
+                    width: MediaQuery.of(context).size.width,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -556,24 +557,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 icon: "assets/svg/new_comment.svg",
                                 label: 'కామెంట్',
                                 onTap: () async {
-                                  SharedPreferences sp = await SharedPreferences.getInstance();
-                                  String? userId = sp.getString("userId");
-                                  String? deviceId = sp.getString("deviceId");
-                                  context.read<AuthProvider>().sendEvent("CommentPage");
-                                  EventRepo().sendEvent({
-                                    "key": "comments",
-                                    "data": {
-                                      "device_id": "$deviceId",
-                                      "userId": userId ?? "1234",
-                                      "postId": widget.article['id'].toString(),
-                                    }
-                                  });
-                                  log("Comment --- ${context.read<AuthProvider>().loginType}");
-                                  showComments(context, widget.article['id']);
-                                  EventRepo().sendEvent({
-                                    "key": "comments",
-                                    "data": {"deviceId": deviceId ?? "", "openTime": DateTime.now().toString()}
-                                  });
+                                  if(context.mounted) {
+                                    context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                    showComments(context, widget.article['id']);
+                                  }
+
                                 },
                               ),
                               Spacer(),
@@ -581,13 +569,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 onTap: () async {
                                   SharedPreferences sp = await SharedPreferences.getInstance();
                                   String? userId = sp.getString("userId");
-                                  String? deviceId = sp.getString("deviceId");
-                                  EventRepo().sendEvent({
-                                    "key": "share_via_articles",
-                                    "data": {"device_id": "$deviceId", "userId": userId ?? "", "postId": widget.article['id'].toString(), "isWhatAppShare": false, "source_from": "news"}
-                                  });
 
-                                  sendShareDetails(context.read<FlipProvider>().userId, widget.article['id'], widget.article['content'].toString());
+                                  sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
 
                                   if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
                                     try {
@@ -622,37 +605,32 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                               ),
                               width(width: 20),
                               Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                                return InkWell(
-                                  onTap: () async{
-                                    log("Refresh");
+                                return SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: InkWell(
+                                    onTap: () async{
+                                      log("Refresh");
 
-                                    SharedPreferences preferences = await SharedPreferences.getInstance();
-                                    String? deviceId = preferences.getString("deviceId");
-                                    String? userId = preferences.getString("userId");
-                                    EventRepo().sendEvent({
-                                      "key": "reload",
-                                      "data": {
-                                        "device_id": "$deviceId",
-                                        "userId": userId ?? "",
+                                      homeProvide.isReloadData();
+                                      if(widget.isaiTags){
+                                        homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then((value) {
+                                          homeProvide.isReloadFalse();
+                                        },);
+                                      }else{
+                                        homeProvide.getAllPostList = [];
+                                        homeProvide.getAllPost();
                                       }
-                                    });
-                                    homeProvide.isReloadData();
-                                    if(widget.isaiTags){
-                                      homeProvide.getAllPostsByAiId(widget.aiTagId.toString());
-                                    }else{
-                                      homeProvide.getAllPostList = [];
-                                      homeProvide.getAllPost();
-
-                                    }
-                                  },
-                                  child: context.read<FlipProvider>().isRefresh
-                                      ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                      : SvgPicture.asset(
-                                          "assets/svg/new_refresh.svg",
-                                          height: 22,
-                                          width: 22,
-                                          color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                        ),
+                                    },
+                                    child: context.read<HomeProvider>().isReload
+                                        ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                        : SvgPicture.asset(
+                                            "assets/svg/new_refresh.svg",
+                                            height: 22,
+                                            width: 22,
+                                            color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                          ),
+                                  ),
                                 );
                               }),
                             ],
@@ -679,7 +657,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
       for (var item in imageData) {
         String imageUrl = item['Url'].toString() ?? '';
-        print("pdfff ${imageUrl}");
+        log("Pdf $imageUrl");
         if (imageUrl.isNotEmpty) {
           final response = await http.get(Uri.parse(imageUrl));
 
@@ -702,7 +680,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
               ),
             );
           } else {
-            print("Failed to load image: $imageUrl");
+            log("Failed to load image: $imageUrl");
           }
         }
       }
@@ -712,7 +690,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
       final file = File(filePath);
       await file.writeAsBytes(await pdf.save());
 
-      print("PDF saved at: $filePath");
+      log("PDF saved at: $filePath");
 
       await Share.shareXFiles([XFile(filePath)], text: "https://apps.signitivessoft.com/individualPage");
       isSending = false;
@@ -720,10 +698,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     } catch (e) {
       isSending = false;
       setState(() {});
-      print("Error: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      log("Error: $e");
     }
   }
 

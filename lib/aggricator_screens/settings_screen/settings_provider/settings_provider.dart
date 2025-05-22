@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/settings_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_model/bookmarks_model.dart';
 import 'package:chotanews/utils/app_toasts.dart';
@@ -12,8 +13,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../globel_keys/global_variables_data.dart';
-import '../../../screens/home_screen/home_repo/event_repo.dart';
 import '../../../services/webengage_event_tracks.dart';
 
 class SettingsProvider extends ChangeNotifier {
@@ -105,13 +104,9 @@ class SettingsProvider extends ChangeNotifier {
   void isLikePost(val) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
-    String? deviceId = sp.getString("deviceId");
     log(val['id'].toString());
     if (!isLikeList.contains(val['id'].toString())) {
-      EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString (), "isLike": true,"source_from":"news"}
-      });
+
       isLikeList.add(val['id'].toString());
       postLike(val['id'].toString(), true);
       sendLikeDetails(userId, val, true, val['title'].toString());
@@ -119,10 +114,7 @@ class SettingsProvider extends ChangeNotifier {
     } else {
       postLike(val['id'].toString(), false);
       isLikeList.remove(val['id'].toString());
-      EventRepo().sendEvent({
-        "key": "liked_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val['id'].toString(), "isLike": false,"source_from":"news"}
-      });
+
       sendLikeDetails(userId, val['id'].toString(), false, val['title'].toString());
       log(isLikeList.toString());
     }

@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -11,10 +12,6 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../screens/Auth_module/auth_provider/auth_provider.dart';
-import '../../screens/home_screen/botton_actions.dart';
-import '../../screens/home_screen/home_repo/event_repo.dart';
-import '../../screens/videos_main/video_views/video_preview.dart';
 import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
@@ -23,8 +20,9 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_and _source.dart';
+import '../botton_actions.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
-import 'home_provider.dart';
+import 'home_provider/home_provider.dart';
 import 'main_screen_pageview.dart';
 
 
@@ -202,21 +200,8 @@ ScreenshotController screenshotControllers = ScreenshotController();
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
-                          context.read<AuthProvider>().sendEvent("CommentPage");
-                          EventRepo().sendEvent({
-                            "key": "comments",
-                            "data": {
-                              "device_id": "$deviceId",
-                              "userId": userId?? "",
-                              "postId": widget.articalData['id'].toString(),
-                            }
-                          });
-                          log("Comment --- ${context.read<AuthProvider>().loginType}");
+                          context.read<AuthenticationProvider>().sendEvent("CommentPage");
                           showComments(context, widget.articalData['id']);
-                          EventRepo().sendEvent({
-                            "key": "comments",
-                            "data": {"deviceId": deviceId, "openTime": DateTime.now().toString()}
-                          });
                         },
                       ),
                       Spacer(),
@@ -229,16 +214,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
-                          EventRepo().sendEvent({
-                            "key": "share_via_articles",
-                            "data": {
-                              "device_id": "$deviceId",
-                              "userId": userId ?? "",
-                              "postId": widget.articalData['id'].toString(),
-                              "isWhatAppShare": false,
-                              "source_from":"news"
-                            }
-                          });
+
       
                           sendShareDetails(userId, widget.articalData['id'], widget.articalData['content'].toString());
       
