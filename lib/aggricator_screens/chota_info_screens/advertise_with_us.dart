@@ -25,6 +25,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
     context.read<AuthenticationProvider>().sendEvent("AdvertisePage");
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,7 +63,10 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
         ),
       ),
       body: Padding(
-        padding:  EdgeInsets.only(bottom: 16.0+ MediaQuery.of(context).padding.bottom,right: 16,top: 16,left: 16),
+        padding: EdgeInsets.only(bottom: 16.0 + MediaQuery
+            .of(context)
+            .padding
+            .bottom, right: 16, top: 16, left: 16),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +84,8 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                     ),
                     height(height: 10),
                     InkWell(
-                      onTap: () => launchSingleEmail('info@chotanews.com'),
+                      onTap: () => _launchEmail("info@chotanews.com"),
+                      // Updated
                       child: Text(
                         "info@chotanews.com",
                         style: fontStyle(
@@ -88,7 +93,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                           color: Colors.blue,
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -108,10 +113,12 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
               height(height: 20),
 
               ContactDetailTile(
-                title: "For Advertising / partnership enquires,  please write to ",
-                email: " advertising@chotanews.com",
-                onEmailTap: () => launchSingleEmail("advertising@chotanews.com"),
+                title: "For Advertising / partnership enquiries, please write to",
+                email: "advertising@chotanews.com",
+                onEmailTap: () => _launchEmail("advertising@chotanews.com"),
               ),
+
+
               height(height: 20),
 
               // Address Section
@@ -143,41 +150,25 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
       ),
     );
   }
-  Future<void> _launchPhone(String phone) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("loginId")??"";
-    EventRepo().sendEvent({"key":"contact_via_number",
-      "data":{
-        "device_id": GlobalVariables().deviceId,
-        "userId":userId,
-      }});
-    contactViaCall();
-    final Uri phoneUri = Uri(
-      scheme: 'tel',
-      path: phone,
-    );
-    try {
-      if (await canLaunch(phoneUri.toString())) {
-        await launch(phoneUri.toString());
-      } else {
-        throw 'Could not launch phone: $phone';
-      }
-    } catch (e) {
-      print('Error launching phone: $e');
+
+  // Method to launch email
+  void _launchEmail(String email) async {
+    final Uri emailUri = Uri(scheme: 'mailto', path: email);
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      throw 'Could not launch $email';
     }
   }
-  Future<void> launchSingleEmail(email) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("loginId")??"";
-    EventRepo().sendEvent({"key":"contact_via_email",
-      "data":{
-        "device_id": GlobalVariables().deviceId,
-        "userId":userId,
-      }});
-    contactViaMail();
-    await EasyLauncher.email(
-        email: email,
-        subject: "",
-        body: "");
+
+  // Method to launch phone call
+  void _launchPhone(String phoneNumber) async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    } else {
+      throw 'Could not call $phoneNumber';
+    }
   }
 }
+
