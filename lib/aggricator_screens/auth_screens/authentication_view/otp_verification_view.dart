@@ -11,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
-import 'package:sms_autofill/sms_autofill.dart';
 
 import '../../../utils/app_colors.dart';
 
@@ -32,14 +31,11 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
   @override
   void initState() {
     startCountdown();
-    _listenForSms();
+    // _listenForSms();
     super.initState();
   }
 
-  void _listenForSms() async {
-    var otpCode = SmsAutoFill().listenForCode;
-    log("otp autofill $otpCode");
-  }
+
 
   void startCountdown() {
     log("its working");

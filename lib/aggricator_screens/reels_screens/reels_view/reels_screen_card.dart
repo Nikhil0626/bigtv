@@ -7,7 +7,6 @@ import 'package:chotanews/aggricator_screens/reels_screens/reels_models/reels_mo
 import 'package:chotanews/aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_preview.dart';
 import 'package:chotanews/utils/app_fonts.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
@@ -21,7 +20,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../botton_actions.dart';
-import '../../event_repo.dart';
+import '../../home_screen/home_provider/home_provider.dart';
 import '../../in_app_web_view.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_colors.dart';
@@ -30,7 +29,6 @@ import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
 import '../../e_papers_screens/paper_view/papers_screen_card.dart';
-import '../../home_screen/home_provider.dart';
 
 class ReelsScreen extends StatefulWidget {
   @override
@@ -512,19 +510,9 @@ class _EachReelCardState extends State<EachReelCard> {
                               String? userId = sp.getString("userId");
                               String? deviceId = sp.getString("deviceId");
                               context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                              EventRepo().sendEvent({
-                                "key": "comments",
-                                "data": {
-                                  "device_id": "$deviceId",
-                                  "userId": userId ?? "",
-                                  "postId": widget.reel.id.toString(),
-                                }
-                              });
+
                               showComments(context, widget.reel.id.toString());
-                              EventRepo().sendEvent({
-                                "key": "comments",
-                                "data": {"deviceId": deviceId, "openTime": DateTime.now().toString()}
-                              });
+
                             },
                           ),
                           Spacer(),
@@ -536,17 +524,7 @@ class _EachReelCardState extends State<EachReelCard> {
                             onTap: () async {
                               SharedPreferences sp = await SharedPreferences.getInstance();
                               String? userId = sp.getString("userId");
-                              String? deviceId = sp.getString("deviceId");
-                              EventRepo().sendEvent({
-                                "key": "share_via_articles",
-                                "data": {
-                                  "device_id": "$deviceId",
-                                  "userId": userId ?? "",
-                                  "postId": widget.reel.id.toString(),
-                                  "isWhatAppShare": false,
-                                  "source_from":"reel"
-                                }
-                              });
+
 
                               sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
 

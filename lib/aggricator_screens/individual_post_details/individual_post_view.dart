@@ -3,8 +3,6 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'package:chotanews/aggricator_screens/event_repo.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/gestures.dart';
@@ -29,6 +27,7 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
 import '../botton_actions.dart';
+import '../home_screen/home_provider/home_provider.dart';
 import '../home_screen/main_screen_byts_view.dart';
 import '../in_app_web_view.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
@@ -511,19 +510,9 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                   String? userId = sp.getString("userId");
                                                   String? deviceId = sp.getString("deviceId");
                                                   context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                  EventRepo().sendEvent({
-                                                    "key": "comments",
-                                                    "data": {
-                                                      "device_id": "$deviceId",
-                                                      "userId": userId ?? "",
-                                                      "postId": article['id'].toString(),
-                                                    }
-                                                  });
+
                                                   showComments(context, article['id']);
-                                                  EventRepo().sendEvent({
-                                                    "key": "comments",
-                                                    "data": {"deviceId": deviceId.toString(), "openTime": DateTime.now().toString()}
-                                                  });
+
                                                 },
                                               ),
                                               Spacer(),
@@ -535,10 +524,6 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                   SharedPreferences sp = await SharedPreferences.getInstance();
                                                   String? userId = sp.getString("userId");
                                                   String? deviceId = sp.getString("deviceId");
-                                                  EventRepo().sendEvent({
-                                                    "key": "share_via_articles",
-                                                    "data": {"device_id": "$deviceId", "userId": userId ?? "", "postId": article['id'].toString(), "isWhatAppShare": false, "source_from": "news"}
-                                                  });
 
                                                   sendShareDetails(userId, article['id'], article['content'].toString());
 

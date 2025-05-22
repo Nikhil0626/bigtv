@@ -18,8 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
-import '../../event_repo.dart';
-import '../../home_screen/home_provider.dart';
+import '../../home_screen/home_provider/home_provider.dart';
 import '../../home_screen/news_posts_provider.dart';
 
 class PapersScreenPreview extends StatefulWidget {
@@ -163,16 +162,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                                     final prefs = await SharedPreferences.getInstance();
                                                     final userId = prefs.getString("userId");
                                                     final deviceId = prefs.getString("deviceId");
-                                                    EventRepo().sendEvent({
-                                                      "key": "share_via_articles",
-                                                      "data": {
-                                                        "device_id": deviceId,
-                                                        "userId": userId ?? "",
-                                                        "postId": widget.postId,
-                                                        "isWhatAppShare": false,
-                                                        "source_from":"paper"
-                                                      }
-                                                    });
+
                                                     context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[index], context);
                                                   },
                                                   child: Container(
@@ -221,18 +211,8 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
 
                                                 final prefs = await SharedPreferences.getInstance();
                                                 final userId = prefs.getString("userId");
-                                                final deviceId = prefs.getString("deviceId");
 
-                                                EventRepo().sendEvent({
-                                                  "key": "share_via_articles",
-                                                  "data": {
-                                                    "device_id": deviceId,
-                                                    "userId": userId ?? "",
-                                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex+1].id,
-                                                    "isWhatAppShare": false,
-                                                    "source_from":"paper"
-                                                  }
-                                                });
+
 
                                                 sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex+1].id, "");
 
@@ -285,7 +265,6 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                 builder: (_, ePapersProvider, __) {
                                   return GestureDetector(
                                     onTap: () async {
-                                      // currentIndex=currentIndex-1;
                                       context.read<HomeProvider>().flipEvent('paper',widget.imageUrls[currentIndex].id,false);
 
                                       log("current ++= $currentIndex ---- lase    ${widget.imageUrls.length}");

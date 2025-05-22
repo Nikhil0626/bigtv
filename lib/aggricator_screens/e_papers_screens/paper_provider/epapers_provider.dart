@@ -85,10 +85,7 @@ return singlePaperModel;
     String? deviceId = sp.getString("deviceId");
     log(val.id.toString());
     if (!isBookMark.contains(val.id.toString())) {
-      EventRepo().sendEvent({
-        "key": "bookmark_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isBookMark": true,"source_from":"paper"}
-      });
+
       isBookMark.add(val.id.toString());
       Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
           val.id.toString(), context,1
@@ -99,10 +96,7 @@ return singlePaperModel;
           val.id.toString(), context,0
       );
       isBookMark.remove(val.id.toString());
-      EventRepo().sendEvent({
-        "key": "bookmark_article",
-        "data": {"device_id": "$deviceId", "userId": userId, "postId": val.id.toString(), "isBookMark": false,"source_from":"paper"}
-      });
+
       log(isBookMark.toString());
     }
 

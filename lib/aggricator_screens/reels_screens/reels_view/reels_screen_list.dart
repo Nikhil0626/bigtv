@@ -198,17 +198,7 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                             onTap: () async {
                               SharedPreferences sp = await SharedPreferences.getInstance();
                               String? userId = sp.getString("userId");
-                              String? deviceId = sp.getString("deviceId");
-                              EventRepo().sendEvent({
-                                "key": "share_via_articles",
-                                "data": {
-                                  "device_id": "$deviceId",
-                                  "userId": userId ?? "",
-                                  "postId": widget.card.id.toString(),
-                                  "isWhatAppShare": false,
-                                  "source_from":"reel"
-                                }
-                              });
+
 
                               sendShareDetails(userId, widget.card.id, widget.card.content.toString());
 

@@ -25,7 +25,6 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
     context.read<AuthenticationProvider>().sendEvent("AdvertisePage");
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,8 +116,6 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                 email: "advertising@chotanews.com",
                 onEmailTap: () => _launchEmail("advertising@chotanews.com"),
               ),
-
-
               height(height: 20),
 
               // Address Section
@@ -171,4 +168,3 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
     }
   }
 }
-

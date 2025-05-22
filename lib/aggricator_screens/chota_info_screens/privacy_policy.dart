@@ -37,6 +37,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
       throw 'Could not call $phoneNumber';
     }
   }
+
   @override
   void initState() {
     context.read<AuthenticationProvider>().sendEvent("PrivacyPage");
@@ -288,5 +289,6 @@ class ContactDetailTile extends StatelessWidget {
         SizedBox(height: 10),
       ],
     );
+
   }
 }

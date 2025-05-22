@@ -1,11 +1,9 @@
-import 'dart:developer';
 
 import 'package:chotanews/utils/app_fonts.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../aggricator_screens/home_screen/home_provider.dart';
+import '../aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'app_colors.dart';
 
 class CustomSwitch extends StatelessWidget {

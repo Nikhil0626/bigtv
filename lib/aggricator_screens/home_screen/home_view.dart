@@ -1,10 +1,11 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
-import 'package:chotanews/aggricator_screens/event_repo.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:chotanews/aggricator_screens/home_screen/main_screen_list.dart';
+import 'package:chotanews/aggricator_screens/individual_post_details/individual_post_view.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_card.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_list.dart';
@@ -21,7 +22,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import '../../globel_keys/global_variables_data.dart';
 import '../../services/app_update_servuce.dart';
 import '../../services/deviice_details.dart';
 import '../../services/permission_handler_services.dart';
@@ -29,6 +29,7 @@ import '../../services/webengage_notification.dart';
 import '../../utils/custom_switch.dart';
 import '../e_papers_screens/paper_view/papers_screen_list.dart';
 import '../settings_screen/settings_view/settings_view.dart';
+import 'home_provider/home_provider.dart';
 import 'main_screen_card.dart';
 
 class HomeView extends StatefulWidget {
@@ -39,79 +40,90 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-
-  late WebEngagePlugin _webEngagePlugin;
+  final AppLinks _appLinks = AppLinks();
   late PageController _pageController;
+  StreamSubscription<Uri>? linkSubscription;
+  String? postId;
 
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppUpdateService.checkForUpdate(context);
     });
-    log("hello home screen in 1111");
-    requestLocationPermission();
+    _initDeepLinks();
     requestNotificationPermission();
     getMobileNumber();
-    _webEngagePlugin =  WebEngagePlugin();
-    // _webEngagePlugin.setUpPushCallbacks(onPushClick, onPushActionClick);
-    // _webEngagePlugin.setUpInAppCallbacks(
-    //     onInAppClick, onInAppShown, onInAppDismiss, onInAppPrepared);
-    _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
     subscribeToPushCallbacks();
-
-    subscribeToAnonymousIDCallback();
-    listenToAnonymousID();
     context.read<HomeProvider>().selectedIndex = 0;
     _pageController = PageController(initialPage: 0);
 
     super.initState();
   }
 
-  void subscribeToPushCallbacksIos() {
-    print("pushActionStream:33333" );
-    _webEngagePlugin.pushStream.listen((event) {
-      if(Platform.isIOS){
-        print("pushActionStream:0000" );
-        // Map<String, dynamic>? messagePayload = event.payload;
-
-        // print("pushActionStream:0000 ${messagePayload.toString()}" );
-        // String? postId = messagePayload?['Payload']['data']['value'].toString();
-        sendEventToServer("4116330");
-
-      }else{
-        print("pushActionStream:99999" );
-        String? deepLink = event.deepLink;
-        subscribeToTrackDeeplink();
-        Map<String, dynamic>? messagePayload = event.payload;
-        print("pushActionStream:9999 ${messagePayload.toString()}" );
-        sendEventToServer(messagePayload?["postId"]??"0");
+  Future<void> _initDeepLinks() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    try {
+      final initialUri = await _appLinks.getInitialLink(); // Use the same _appLinks
+      if (initialUri != null) {
+        debugPrint('Initial URI: $initialUri');
+        _handleDeepLink(initialUri);
+        return;
       }
+    } catch (err) {
+      debugPrint('Failed to get initial URI: $err');
+    }
 
-
-    });
-
-    //Push action click listener
-    _webEngagePlugin.pushActionStream.listen((event) {
-      sendEventToServer("4116330");
-      // print("pushActionStream:" + event.toString());
-      // String? deepLink = event.deepLink;
-      // Map<String, dynamic>? messagePayload = event.payload;
-      // sendEventToServer(messagePayload?["postId"]??"0");
-      //Implement the code here to use deeplink
+    log("Initializing deep link listener");
+    linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
+      if (uri != null) {
+        log("Deep link received: ${uri.toString()}");
+        final String? id = uri.queryParameters['postId'];
+        if (id != null) {
+          sp.setString("webPostId", id);
+        }
+        _handleDeepLink(uri);
+      }
+    }, onError: (err) {
+      log("Error in deep link handling: $err");
     });
   }
-@override
+
+  void _handleDeepLink(Uri uri) async {
+    log("Deep link path: $uri");
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    final String path = uri.path;
+    final String? id = uri.queryParameters['postId'];
+
+    switch (path) {
+      case '/individualPage':
+        if (id != null) {
+          postId = id;
+          log("Navigating to Individual Post screen with postId: $postId");
+          // Delay navigation until after the first frame is rendered
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => IndividualPostView(postId: postId ?? "0"),
+                ));
+          });
+        } else {
+          log("postId is missing for /individualPage route.");
+        }
+        return;
+      default:
+        log("Unrecognized path: $path — Navigating to Home screen (optional)");
+      // Optionally push home here if needed:
+      // mainNavigatorKey.currentState?.pushNamed('/');
+    }
+  }
+
+  @override
   void dispose() {
-
-  // _webEngagePlugin.pushSink.close();
-  // _webEngagePlugin.pushActionSink.close();
-
-  _webEngagePlugin.pushSink.close();
-  _webEngagePlugin.pushActionSink.close();
-  _webEngagePlugin.trackDeeplinkURLStreamSink.close();
+    linkSubscription?.cancel();
+    closeSubscribe();
     super.dispose();
   }
-
 
   getMobileNumber() async {
     WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
@@ -122,7 +134,9 @@ class _HomeViewState extends State<HomeView> {
     } else if (Platform.isAndroid) {
       var token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
-        getUniqueDeviceId(token, );
+        getUniqueDeviceId(
+          token,
+        );
         log('FCM Token: $token');
         _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
         WebEngagePlugin.setPushToken(token);
@@ -134,6 +148,7 @@ class _HomeViewState extends State<HomeView> {
     print("tokenInvalidated callback received $message");
     WebEngagePlugin.setSecureToken("siva kumar", message.toString());
   }
+
   DateTime? lastBackPressed;
 
   @override
@@ -152,10 +167,11 @@ class _HomeViewState extends State<HomeView> {
         return Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
-            automaticallyImplyLeading: false, // Removes back arrow
+            automaticallyImplyLeading: false,
+            // Removes back arrow
             backgroundColor: Colors.white,
             elevation: 0,
-            title:Row(
+            title: Row(
               children: [
                 Text(
                   "Chota",
@@ -183,98 +199,87 @@ class _HomeViewState extends State<HomeView> {
             actions: [
               Row(
                 children: [
-                  if( context.read<HomeProvider>().selectedIndex != 3)
-                  CustomSwitch(),
+                  if (context.read<HomeProvider>().selectedIndex != 3) CustomSwitch(),
                   width(width: 12),
-                  if( context.read<HomeProvider>().selectedIndex == 0)
-                  InkWell(
-                    onTap: () async{
-                      log("Refresh");
+                  if (context.read<HomeProvider>().selectedIndex == 0)
+                    InkWell(
+                      onTap: () async {
+                        log("Refresh");
 
-                      SharedPreferences preferences = await SharedPreferences.getInstance();
-                      String? deviceId = preferences.getString("deviceId");
-                      String? userId = preferences.getString("userId");
-                      EventRepo().sendEvent({
-                        "key": "reload",
-                        "data": {
-                          "device_id": "$deviceId",
-                          "userId": userId ?? "",
-                        }
-                      });
-                      homeProvider.getAllPostList = [];
-                      homeProvider.isReloadData();
-                      homeProvider.getAllPost();
-                    },
-                    child: Container(
-                      color: Colors.white,
-                      child: Center(
-                        child: homeProvider.isReload
-                            ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: AppLoadingScreen(),
-                        )
-                            : SvgPicture.asset(
-                          "assets/svg/new_refresh.svg",
-                          height: 20,
-                          width: 20,
-                          color: AppColors.textColor,
+                        SharedPreferences preferences = await SharedPreferences.getInstance();
+                        String? deviceId = preferences.getString("deviceId");
+                        String? userId = preferences.getString("userId");
+
+                        homeProvider.getAllPostList = [];
+                        homeProvider.isReloadData();
+                        homeProvider.getAllPost();
+                      },
+                      child: Container(
+                        color: Colors.white,
+                        child: Center(
+                          child: homeProvider.isReload
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: AppLoadingScreen(),
+                                )
+                              : SvgPicture.asset(
+                                  "assets/svg/new_refresh.svg",
+                                  height: 20,
+                                  width: 20,
+                                  color: AppColors.textColor,
+                                ),
                         ),
                       ),
                     ),
-                  ),
-                  if( context.read<HomeProvider>().selectedIndex == 2)
+                  if (context.read<HomeProvider>().selectedIndex == 2)
                     Consumer<ReelsProviders>(
                       builder: (_, reelsProviders, __) {
                         return InkWell(
                           onTap: () {
                             log("Refresh");
-                            EventRepo().sendEvent({
-                              "key": "reload",
-                              "data": {
-                                "device_id": "${GlobalVariables().deviceId}",
-                                "userId": GlobalVariables().userId ?? "",
-                              }
-                            });
+
                             reelsProviders.getAllReelsList = [];
                             homeProvider.isReloadData();
-                            reelsProviders.getAllReels().then((value) {
-                              homeProvider.isReload = false;
-                            },);
+                            reelsProviders.getAllReels().then(
+                              (value) {
+                                homeProvider.isReload = false;
+                              },
+                            );
                           },
                           child: Container(
                             color: Colors.white,
                             child: Center(
                               child: homeProvider.isReload
                                   ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: AppColors.iconColors,
-                                ),
-                              )
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColors.iconColors,
+                                      ),
+                                    )
                                   : SvgPicture.asset(
-                                "assets/svg/new_refresh.svg",
-                                height: 20,
-                                width: 20,
-                                color: AppColors.textColor,
-                              ),
+                                      "assets/svg/new_refresh.svg",
+                                      height: 20,
+                                      width: 20,
+                                      color: AppColors.textColor,
+                                    ),
                             ),
                           ),
                         );
-
                       },
                     ),
-                  if( context.read<HomeProvider>().selectedIndex == 3)
-                    Text("",style: fontStyle(fontWeight: FontWeight.w900),),
-                 width(width: 20),
+                  if (context.read<HomeProvider>().selectedIndex == 3)
+                    Text(
+                      "",
+                      style: fontStyle(fontWeight: FontWeight.w900),
+                    ),
+                  width(width: 20),
                 ],
               ),
             ],
           ),
-
-
           body: PageView(
             controller: _pageController,
             physics: NeverScrollableScrollPhysics(),
@@ -387,5 +392,4 @@ class _HomeViewState extends State<HomeView> {
       }),
     );
   }
-
 }

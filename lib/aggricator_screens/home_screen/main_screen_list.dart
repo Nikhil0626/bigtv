@@ -1,19 +1,17 @@
 import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/home_screen/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-import '../event_repo.dart';
 import '../in_app_web_view.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../ad_manager_screen/test_ads.dart';
 import '../video_image_view/gallery_screen.dart';
 import 'ai_tag_posts_pageview.dart';
+import 'home_provider/home_provider.dart';
 import 'image_view.dart';
 import 'list_standerd_post_view.dart';
 import 'main_screen_pageview.dart';
@@ -59,14 +57,7 @@ class _MainScreenListState extends State<MainScreenList> {
                         color: Colors.white,
                         child: InkWell(
                           onTap: () async{
-                            SharedPreferences preferences = await SharedPreferences.getInstance();
-                            String? userId = preferences.getString("userId");
-                            String? deviceId = preferences.getString("deviceId");
 
-                            EventRepo().sendEvent({
-                              "key": "ai_articles_opened",
-                              "data": {"device_id": "$deviceId", "userId": userId, "aiTagName":homeProvider.getAllAiTagsList[index]['aitagname'].toString(),"aiTagId": homeProvider.getAllAiTagsList[index]['aitagid'].toString()}
-                            });
                             Navigator.push(
                                 context,
                                 MaterialPageRoute(

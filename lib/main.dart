@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
 
-import 'package:app_links/app_links.dart';
 
 import 'package:chotanews/services/analytics_service.dart';
 
@@ -19,16 +18,13 @@ import 'package:flutter_install_referrer/flutter_install_referrer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-// import 'package:install_referrer/install_referrer.dart';
 import 'package:platform_device_id_plus/platform_device_id.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
-import 'aggricator_screens/event_repo.dart';
-import 'aggricator_screens/home_screen/home_provider.dart';
+import 'aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'aggricator_screens/home_screen/news_posts_provider.dart';
 import 'aggricator_screens/individual_post_details/individual_post_view.dart';
 import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
@@ -169,161 +165,21 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
-  final AppLinks _appLinks = AppLinks();
+
   Locale? _locale;
-  StreamSubscription<Uri>? linkSubscription;
+
   String postId = "";
-  Map<String, dynamic>? _initialPushPayload;
+
 
   @override
   void initState() {
     super.initState();
-    _initDeepLinks();
-
   }
 
 
 
-  Future<void> _initDeepLinks() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    try {
-      final initialUri = await _appLinks.getInitialLink(); // Use the same _appLinks
-      if (initialUri != null) {
-        debugPrint('Initial URI: $initialUri');
-        _handleDeepLink(initialUri);
-      }
-    } catch (err) {
-      debugPrint('Failed to get initial URI: $err');
-    }
 
-    log("Initializing deep link listener");
-    linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
-      if (uri != null) {
-        log("Deep link received: ${uri.toString()}");
-        final String? id = uri.queryParameters['postId'];
-        if (id != null) {
-          sp.setString("webPostId", id);
-        }
-        _handleDeepLink(uri);
-      }
-    }, onError: (err) {
-      log("Error in deep link handling: $err");
-    });
-  }
 
-  void _handleDeepLink(Uri uri) async {
-    log("Deep link path: $uri");
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    final String path = uri.path;
-    final String? id = uri.queryParameters['postId'];
-
-    EventRepo().sendEvent({
-      "key": "dynamic_link_app_open",
-      "data": {
-        "device_id": sp.getString("deviceId") ?? "1234",
-        "userId": sp.getString('userId') ?? "",
-        "postId": id ?? "",
-      }
-    });
-
-    switch (path) {
-      case '/settings':
-        log("Navigating to Settings screen");
-        mainNavigatorKey.currentState?.pushNamed('/settings');
-        break;
-      case '/individualPage':
-        if (id != null) {
-          postId = id;
-          log("Navigating to Individual Post screen with postId: $postId");
-          Future.delayed(Duration(milliseconds: 500),() {
-            mainNavigatorKey.currentState?.pushNamed(
-              '/individualPage',
-              arguments: {'postId': postId},
-            );
-          },);
-        } else {
-          log("postId is missing for /individualPage route.");
-        }
-        break;
-      case '/profile':
-        log("Navigating to Profile screen");
-        mainNavigatorKey.currentState?.pushNamed(
-          '/profile',
-          arguments: {'userId': id},
-        );
-        break;
-      default:
-        log("Unrecognized path: $path — Navigating to Home screen (optional)");
-      // Optionally push home here if needed:
-      // mainNavigatorKey.currentState?.pushNamed('/');
-    }
-  }
-
-  //  Future<void> _initDeepLinks() async {
-  //    final appLinks = AppLinks();
-  //    SharedPreferences sp = await SharedPreferences.getInstance();
-  //    try {
-  //      final initialUri = await appLinks.getInitialLink();
-  //      if (initialUri != null) {
-  //        debugPrint('Initial URI: $initialUri');
-  //        _handleDeepLink(initialUri);
-  //      }
-  //    } catch (err) {
-  //      debugPrint('Failed to get initial URI: $err');
-  //    }
-  //
-  //    log("Initializing deep link listener");
-  //    linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
-  //      if (uri != null) {
-  //        log("Deep link received: ${uri.toString()}");
-  //        final String? id = uri.queryParameters['postId'];
-  //        sp.setString("webPostId", id.toString());
-  //        _handleDeepLink(uri);
-  //      }
-  //    }, onError: (err) {
-  //      log("Error in deep link handling: $err");
-  //    });
-  //  }
-  //
-  //  void _handleDeepLink(Uri uri) async{
-  //    log("Path:mbzmcbsad $uri, ID:");
-  //    SharedPreferences sp = await SharedPreferences.getInstance();
-  //    final String path = uri.path;
-  //    final String? id = uri.queryParameters['postId'];
-  // // );
-  //    EventRepo().sendEvent({
-  //      "key": "dynamic_link_app_open",
-  //      "data": {
-  //        "device_id": sp.getString("deviceId")??"1234",
-  //        "userId": sp.getString('userId') ?? "",
-  //        "postId": id,
-  //      }
-  //    });
-  //    switch (path) {
-  //      case '/settings':
-  //        log("Navigating to Settings screen");
-  //        mainNavigatorKey.currentState?.pushNamed('/settings');
-  //        break;
-  //      case '/individualPage':
-  //        postId = id ?? "";
-  //        log("Navigating to Individual Post screen  $postId");
-  //        mainNavigatorKey.currentState?.pushNamed(
-  //          '/individualPage',
-  //          arguments: {'postId': postId},
-  //        );
-  //        break;
-  //      case '/profile':
-  //        log("Navigating to Profile screen");
-  //        mainNavigatorKey.currentState?.pushNamed(
-  //          '/profile',
-  //          arguments: {'userId': id},
-  //        );
-  //        break;
-  //      default:
-  //        log("Navigating to Home screen");
-  //        // mainNavigatorKey.currentState?.pushNamed('/');
-  //    }
-  //  }
 
   void setLocale(Locale locale) {
     setState(() {
@@ -333,7 +189,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void dispose() {
-    linkSubscription?.cancel();
+
     super.dispose();
   }
 

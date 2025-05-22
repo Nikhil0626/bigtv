@@ -136,6 +136,8 @@ Future<void> initPlugin() async {
   final uuid = await AppTrackingTransparency.getAdvertisingIdentifier();
   print("UUID: $uuid");
 }
+
+
 Future<void> requestLocationPermission() async {
   LocationPermission permission = await Geolocator.checkPermission();
 
@@ -163,17 +165,6 @@ Future<void> getAddressFromLatLng(double latitude, double longitude) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     print("location ------ $placemarks");
     Placemark place = placemarks[0];
-
-    EventRepo().sendEvent({"key":"live_location",
-      "data":{
-        "device_id": sp.getString("deviceId")??"",
-        "country": "${place.country}",
-        "state": "${place.administrativeArea}",
-        "district": place.locality.toString(),
-        "mandel": "${place.subLocality}",
-        "village": "",
-      }
-    });
     sendLiveLocationDetails(place);
   } catch (e) {
     print(e);

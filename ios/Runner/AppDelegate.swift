@@ -8,12 +8,13 @@ import webengage_flutter
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
+var bridge:WebEngagePlugin? = nil
   override func application(
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
       FirebaseApp.configure()
-      var bridge:WebEngagePlugin? = nil
+      
       bridge = WebEngagePlugin()
       WebEngage.sharedInstance().pushNotificationDelegate = bridge
       WebEngage.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)

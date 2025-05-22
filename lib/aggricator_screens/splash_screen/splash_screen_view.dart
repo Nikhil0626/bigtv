@@ -1,11 +1,10 @@
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../aggricator_screens/individual_post_details/individual_post_view.dart';
 
 
 class SplashScreen extends StatefulWidget {

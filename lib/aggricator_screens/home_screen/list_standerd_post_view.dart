@@ -21,9 +21,8 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_and _source.dart';
 import '../botton_actions.dart';
-import '../event_repo.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
-import 'home_provider.dart';
+import 'home_provider/home_provider.dart';
 import 'main_screen_pageview.dart';
 
 
@@ -202,19 +201,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
                           context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                          EventRepo().sendEvent({
-                            "key": "comments",
-                            "data": {
-                              "device_id": "$deviceId",
-                              "userId": userId?? "",
-                              "postId": widget.articalData['id'].toString(),
-                            }
-                          });
                           showComments(context, widget.articalData['id']);
-                          EventRepo().sendEvent({
-                            "key": "comments",
-                            "data": {"deviceId": deviceId, "openTime": DateTime.now().toString()}
-                          });
                         },
                       ),
                       Spacer(),
@@ -227,16 +214,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
-                          EventRepo().sendEvent({
-                            "key": "share_via_articles",
-                            "data": {
-                              "device_id": "$deviceId",
-                              "userId": userId ?? "",
-                              "postId": widget.articalData['id'].toString(),
-                              "isWhatAppShare": false,
-                              "source_from":"news"
-                            }
-                          });
+
       
                           sendShareDetails(userId, widget.articalData['id'], widget.articalData['content'].toString());
       

@@ -142,15 +142,7 @@ notifyListeners();
         getAllCategories();
         }
 
-        EventRepo().sendEvent({
-          "key": "otp_verify",
-          "data": {"device_id": "$deviceId", "isVerify": true, "mobileNumber": phoneController.text, "otp": otpController.text, "userId": response.data['user']['id'].toString()}
-        });
 
-        EventRepo().sendEvent({
-          "key": "login_skip",
-          "data": {"device_id": "$deviceId", "isLogin": true, "userId": response.data['user']['id'].toString()}
-        });
         WebEngagePlugin.userLogin(response.data['user']['id'].toString());
         WebEngagePlugin.setUserPhone(phoneController.text.toString());
         mobileVerificationDetails(phoneController.text.toString(), true);
@@ -242,15 +234,6 @@ notifyListeners();
     String? userId = preferences.getString("userId");
     preferences.setString("locationId", result);
 
-    EventRepo().sendEvent({
-      "key": "selected_categories",
-      "data": {
-        "device_id": "$deviceId",
-        "categories_name": catNames ?? "",
-        "categories_id": result ?? "",
-        "userId": userId ?? "",
-      }
-    });
     Map<String, dynamic> body = {"device_id": deviceId, "categoryids": selectedCategoryIds,"user_id": userId ?? "",};
 
     log(body.toString());
@@ -339,15 +322,6 @@ notifyListeners();
     String result = selectedCategoryIds.toSet().join(',');
     preferences.setString("locationId", result);
 
-    EventRepo().sendEvent({
-      "key": "selected_districts",
-      "data": {
-        "device_id": "$deviceId",
-        "location_name": nameOfDistrict ?? "",
-        "location_id": result ?? "",
-        "userId": userId ?? "",
-      }
-    });
 
     Map<String, dynamic> body = {"device_id": deviceId, "location_ids": selectedCategoryIds,"user_id": userId ?? "",};
 
@@ -431,10 +405,7 @@ notifyListeners();
     preferences.setString("loginState", newAppLoginStatus.toString());
     preferences.setString("loginType", "skip");
     String? deviceId = await preferences.getString("deviceId");
-    EventRepo().sendEvent({
-      "key": "login_skip",
-      "data": {"device_id": "$deviceId", "isLogin": true, "userId": ""}
-    });
+
     notifyListeners();
     // isPageNavigation(context);
   }
@@ -446,10 +417,7 @@ notifyListeners();
     preferences.setString("loginState", newAppLoginStatus.toString());
     String? deviceId = await preferences.getString("deviceId");
     String? userId = await preferences.getString("userId");
-    EventRepo().sendEvent({
-      "key": "login_skip",
-      "data": {"device_id": "$deviceId", "isLogin": true, "userId": userId}
-    });
+
     isPageNavigation(context);
   }
 
@@ -457,11 +425,6 @@ notifyListeners();
     SharedPreferences sp  = await SharedPreferences.getInstance();
 
 
-    EventRepo().sendEvent({"key":"visited_page",
-      "data":{
-        "device_id": GlobalVariables().deviceId,
-        "userId":sp.getString("userId")??"",
-        "visitedPage":pageName,
-      }});
+
   }
 }
