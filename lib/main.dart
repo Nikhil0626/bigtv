@@ -213,7 +213,6 @@ class _MyAppState extends State<MyApp> {
         ],
         child: MaterialApp(
           navigatorKey: mainNavigatorKey,
-          // use it only ONCE
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: const [Locale('te', '')],
           locale: _locale,
