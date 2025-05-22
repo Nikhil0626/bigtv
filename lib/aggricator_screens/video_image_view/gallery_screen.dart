@@ -216,7 +216,7 @@ ScreenshotController sc = ScreenshotController();
             ],
           ),
           Positioned(
-            bottom: widget.isHome ?Platform.isIOS? 45:20 : Platform.isIOS? 95:70+MediaQuery.of(context).padding.bottom+5,
+            bottom: widget.isHome ?Platform.isIOS? 45:50 : Platform.isIOS? 95:70+MediaQuery.of(context).padding.bottom+5,
             child:
 
             AnimatedSmoothIndicator(
