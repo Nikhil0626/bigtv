@@ -85,15 +85,19 @@ class AboutUs extends StatelessWidget {
               height(height: 10),
               ContactDetailTile(
                 title: "For support/feedback queries",
-                email: "info@chotanews.com", onEmailTap: () {  },
+                email: "info@chotanews.com",
+                onEmailTap: () => _launchEmail("info@chotanews.com"), // Added tap behavior
               ),
+
               ContactDetailTile(
                 title: "For advertising/partnership enquiries",
-                email: "advertising@chotanews.com", onEmailTap: () {  },
+                email: "advertising@chotanews.com", 
+                onEmailTap: () => _launchEmail("advertising@chotanews.com"),
               ),
               ContactDetailTile(
                 title: "For complaints, queries, or grievances",
-                email: "grievance@chotanews.com", onEmailTap: () {  },
+                email: "grievance@chotanews.com", 
+                onEmailTap: () => _launchEmail("grievance@Chotanews.com"),
               ),
               height(height: 20),
               Text(
