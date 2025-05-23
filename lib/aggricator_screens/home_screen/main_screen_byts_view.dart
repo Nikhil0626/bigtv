@@ -151,6 +151,129 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                       );
                                     }),
                                   ),
+                                  Positioned(
+                                    bottom: 0,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 6),
+                                      child: Container(
+                                        height: 45.sp,
+                                        color: Colors.transparent,
+                                        width: MediaQuery.of(context).size.width,
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                          children: [
+
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                                    return BottomActions(
+                                                      postType: widget.article['subType'] ?? "",
+                                                      icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                                      label: 'లైక్',
+                                                      // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
+                                                      isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                                      onTap: () {
+                                                        log("Like");
+                                                        settingsProvider.isLikePost(widget.article);
+
+                                                        // settingsProvider.isLikePost(widget.article);
+                                                      },
+                                                    );
+                                                  }),
+                                                  width(width: 6),
+                                                  BottomActions(
+                                                    postType: widget.article['subType'].toString() ?? "",
+                                                    icon: "assets/svg/new_comment.svg",
+                                                    label: 'కామెంట్',
+                                                    onTap: () async {
+                                                      if(context.mounted) {
+                                                        context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                                        showComments(context, widget.article['id']);
+                                                      }
+
+                                                    },
+                                                  ),
+                                                  Spacer(),
+                                                  InkWell(
+                                                    onTap: () async {
+                                                      SharedPreferences sp = await SharedPreferences.getInstance();
+                                                      String? userId = sp.getString("userId");
+
+                                                      sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
+
+                                                      if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                                                        try {
+                                                          final image = await adsScreenshotController.capture(
+                                                            pixelRatio: 2.0,
+                                                          );
+                                                          if (image != null) {
+                                                            final directory = await getTemporaryDirectory();
+                                                            final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                                            final imageFile = File(imagePath);
+                                                            await imageFile.writeAsBytes(image);
+
+                                                            Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                                                          } else {
+                                                            CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                                          }
+                                                        } catch (e) {
+                                                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                                        }
+                                                      } else if (widget.article['type'] == "Gallery") {
+                                                        createAndSharePdfs(context, widget.article);
+                                                      }
+                                                    },
+                                                    child: isSending
+                                                        ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                                        : SvgPicture.asset(
+                                                      "assets/svg/share.svg",
+                                                      height: 20,
+                                                      width: 20,
+                                                      color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                                    ),
+                                                  ),
+                                                  width(width: 20),
+                                                  Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                                    return SizedBox(
+                                                      height: 24,
+                                                      width: 24,
+                                                      child: InkWell(
+                                                        onTap: () async{
+                                                          log("Refresh");
+
+                                                          homeProvide.isReloadData();
+                                                          if(widget.isaiTags){
+                                                            homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then((value) {
+                                                              homeProvide.isReloadFalse();
+                                                            },);
+                                                          }else{
+                                                            homeProvide.getAllPostList = [];
+                                                            homeProvide.getAllPost();
+                                                          }
+                                                        },
+                                                        child: context.read<HomeProvider>().isReload
+                                                            ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                                            : SvgPicture.asset(
+                                                          "assets/svg/new_refresh.svg",
+                                                          height: 22,
+                                                          width: 22,
+                                                          color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                                        ),
+                                                      ),
+                                                    );
+                                                  }),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ],
                               ),
                             )
@@ -209,7 +332,132 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           ),
                                         );
                                       }),
-                                    )
+                                    ),
+                                    Positioned(
+                                      bottom: 0,
+                                      child: Padding(
+                                        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 6),
+                                        child: Container(
+                                          height: 45.sp,
+                                          color: Colors.transparent,
+                                          width: MediaQuery.of(context).size.width,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                            children: [
+
+                                              Padding(
+                                                padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                                      return BottomActions(
+                                                        postType: widget.article['subType'] ?? "",
+                                                        icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                                        label: 'లైక్',
+                                                        // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
+                                                        isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                                        onTap: () {
+                                                          log("Like");
+                                                          settingsProvider.isLikePost(widget.article);
+
+                                                          // settingsProvider.isLikePost(widget.article);
+                                                        },
+                                                      );
+                                                    }),
+                                                    width(width: 6),
+                                                    BottomActions(
+                                                      postType: widget.article['subType'].toString() ?? "",
+                                                      icon: "assets/svg/new_comment.svg",
+                                                      label: 'కామెంట్',
+                                                      onTap: () async {
+                                                        if(context.mounted) {
+                                                          context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                                          showComments(context, widget.article['id']);
+                                                        }
+
+                                                      },
+                                                    ),
+                                                    Spacer(),
+                                                    InkWell(
+                                                      onTap: () async {
+                                                        SharedPreferences sp = await SharedPreferences.getInstance();
+                                                        String? userId = sp.getString("userId");
+
+                                                        sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
+
+                                                        if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                                                          try {
+                                                            final image = await adsScreenshotController.capture(
+                                                              pixelRatio: 2.0,
+                                                            );
+                                                            if (image != null) {
+                                                              final directory = await getTemporaryDirectory();
+                                                              final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                                              final imageFile = File(imagePath);
+                                                              await imageFile.writeAsBytes(image);
+
+                                                              Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                                                            } else {
+                                                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                                            }
+                                                          } catch (e) {
+                                                            CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                                          }
+                                                        } else if (widget.article['type'] == "Gallery") {
+                                                          createAndSharePdfs(context, widget.article);
+                                                        }
+                                                      },
+                                                      child: isSending
+                                                          ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                                          : SvgPicture.asset(
+                                                        "assets/svg/share.svg",
+                                                        height: 20,
+                                                        width: 20,
+                                                        color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                                      ),
+                                                    ),
+                                                    width(width: 20),
+                                                    Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                                      return SizedBox(
+                                                        height: 24,
+                                                        width: 24,
+                                                        child: InkWell(
+                                                          onTap: () async{
+                                                            log("Refresh");
+
+                                                            homeProvide.isReloadData();
+                                                            if(widget.isaiTags){
+                                                              homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then((value) {
+                                                                homeProvide.isReloadFalse();
+                                                              },);
+                                                            }else{
+                                                              homeProvide.getAllPostList = [];
+                                                              homeProvide.getAllPost();
+                                                            }
+                                                          },
+                                                          child: context.read<HomeProvider>().isReload
+                                                              ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                                              : SvgPicture.asset(
+                                                            "assets/svg/new_refresh.svg",
+                                                            height: 22,
+                                                            width: 22,
+                                                            color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                                          ),
+                                                        ),
+                                                      );
+                                                    }),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+
+
                                   ],
                                 )
                               : Stack(
@@ -249,7 +497,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                     topLeft: Radius.circular(16.r),
                                                   ),
                                                   child: CachedNetworkImage(
-                                                    imageUrl: widget.article['image_url'],
+                                                    imageUrl: widget.article['image_url']??"fgyhuiiuh",
                                                     height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .65 : .4),
                                                     width: MediaQuery.of(context).size.width,
                                                     fit: BoxFit.fill,
@@ -514,7 +762,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 ),
             ),
           ),
-          (widget.article['type'] == "GoogleAds" || widget.article['type'] == "WebUrl")
+          (widget.article['type'] == "GoogleAds" || widget.article['type'] == "WebUrl"|| widget.article['type'] == "Image" ||widget.article['type'] == "Gallery")
               ? SizedBox.shrink()
               : Padding(
                   padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 6),

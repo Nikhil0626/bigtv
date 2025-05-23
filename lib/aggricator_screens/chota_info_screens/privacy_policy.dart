@@ -19,31 +19,22 @@ class PrivacyPolicy extends StatefulWidget {
 }
 
 class _PrivacyPolicyState extends State<PrivacyPolicy> {
-  Future<void> launchSingleEmail(email) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("loginId")??"";
 
-    contactViaMail();
-    await EasyLauncher.email(email: email, subject: "", body: "");
+  void _launchEmail(String email) async {
+    final Uri emailUri = Uri(scheme: 'mailto', path: email);
+    if (await canLaunchUrl(emailUri)) {
+      await launchUrl(emailUri);
+    } else {
+      throw 'Could not launch $email';
+    }
   }
 
-  Future<void> _launchPhone(String phone) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("loginId")??"";
-
-    contactViaCall();
-    final Uri phoneUri = Uri(
-      scheme: 'tel',
-      path: phone,
-    );
-    try {
-      if (await canLaunch(phoneUri.toString())) {
-        await launch(phoneUri.toString());
-      } else {
-        throw 'Could not launch phone: $phone';
-      }
-    } catch (e) {
-      print('Error launching phone: $e');
+  void _launchPhone(String phoneNumber) async {
+    final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);
+    if (await canLaunchUrl(phoneUri)) {
+      await launchUrl(phoneUri);
+    } else {
+      throw 'Could not call $phoneNumber';
     }
   }
 
@@ -200,21 +191,21 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
               ContactDetailTile(
                 title: "For any support/feedback queries,please write to",
                 email: " info@chotanews.com",
-                onEmailTap: () => launchSingleEmail("info@chotanews.com"),
+                onEmailTap: () => _launchEmail("info@chotanews.com"),
               ),
               height(height: 10),
               ContactDetailTile(
                 title: "For advertising/partnership enquiries, please write to",
                 email: " advertising@chotanews.com",
                 onEmailTap: () =>
-                    launchSingleEmail("advertising@chotanews.com"),
+                    _launchEmail("advertising@chotanews.com"),
               ),
               height(height: 10),
               ContactDetailTile(
                 title:
                     "For any complaints,queries, or grievances, please write to",
                 email: " grievance@chotanews.com",
-                onEmailTap: () => launchSingleEmail("grievance@chotanews.com"),
+                onEmailTap: () => _launchEmail("grievance@chotanews.com"),
               ),
               height(height: 20),
               Text(
@@ -270,7 +261,6 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
   }
 }
 
-
 class ContactDetailTile extends StatelessWidget {
   final String title;
   final String email;
@@ -285,31 +275,19 @@ class ContactDetailTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: title,
-            style: fontStyle(fontSize: 14, fontWeight: FontWeight.normal),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title, style: fontStyle(fontSize: 14)),
+        InkWell(
+          onTap: onEmailTap,
+          child: Text(
+            email,
+            style: fontStyle(fontSize: 14, color: Colors.blue),
           ),
-          const WidgetSpan(
-            child: SizedBox(height: 5),
-          ),
-          WidgetSpan(
-            child: GestureDetector(
-              onTap: onEmailTap,
-              child: Text(
-                textAlign: TextAlign.center,
-                email,
-                style: fontStyle(fontSize: 14, color: Colors.blue),
-              ),
-            ),
-          ),
-          const WidgetSpan(
-            child: SizedBox(height: 10),
-          ),
-        ],
-      ),
+        ),
+        SizedBox(height: 10),
+      ],
     );
 
   }

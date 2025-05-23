@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -496,7 +495,6 @@ class _EachReelCardState extends State<EachReelCard> {
                             label: 'లైక్',
                             isLike: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
                             onTap: () {
-                              log("Like");
                               widget.reelsProvider.isLikePost(widget.reel);
                             },
                           ),
@@ -506,9 +504,6 @@ class _EachReelCardState extends State<EachReelCard> {
                             label: 'కామెంట్',
                             iconColor: AppColors.iconColors,
                             onTap: () async {
-                              SharedPreferences sp = await SharedPreferences.getInstance();
-                              String? userId = sp.getString("userId");
-                              String? deviceId = sp.getString("deviceId");
                               context.read<AuthenticationProvider>().sendEvent("CommentPage");
 
                               showComments(context, widget.reel.id.toString());

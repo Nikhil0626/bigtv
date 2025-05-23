@@ -1,14 +1,18 @@
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../utils/app_colors.dart';
+import '../../../../utils/app_enums.dart';
 import '../../../../utils/app_fonts.dart';
 import '../../../../utils/app_spaces.dart';
 import '../../../../utils/app_toasts.dart';
+import '../../../ad_manager_screen/banner_300x50_size.dart';
 import '../../../auth_screens/authentication_model/location_model.dart';
 import '../../../auth_screens/authentication_provider/authentication_provider.dart';
 import '../../../home_screen/home_view.dart';
+import '../../settings_provider/settings_provider.dart';
 
 class UpdateRegionsView extends StatefulWidget {
   const UpdateRegionsView({super.key});
@@ -31,7 +35,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthenticationProvider>(builder: (_, authenticationProvider, __) {
+    return Consumer2<AuthenticationProvider,SettingsProvider>(builder: (_, authenticationProvider,settingsProvider, __) {
       return Scaffold(
         backgroundColor: Colors.white,
         bottomNavigationBar: Padding(
@@ -75,6 +79,10 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
+              height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success||settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
+              settingsProvider.bannerAdsLoading == BannerAdsLoading.loading?Center(child: AppLoadingScreen(),): settingsProvider.bannerAdsLoading == BannerAdsLoading.success ? Banner300x50Size() : SizedBox.shrink(),
+
+              height(height: 10),
               Expanded(
                 child: ListView(
                   children: [
