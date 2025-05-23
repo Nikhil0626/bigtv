@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 import '../../../services/webengage_notification.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
+import '../../ad_manager_screen/banner_300x50_size.dart';
 import '../../chota_info_screens/advertise_with_us.dart';
 import '../../chota_info_screens/privacy_policy.dart';
 import '../../chota_info_screens/terms_conditions.dart';
@@ -167,6 +169,8 @@ class _SettingsViewState extends State<SettingsView> {
               WebEngagePlugin.userLogout();
               context.read<AuthenticationProvider>().setLogOutStatus(context, false);
             }),
+            height(height: 10),
+           context.watch<SettingsProvider>().bannerAdsLoading ==BannerAdsLoading.fail ||context.watch<SettingsProvider>().bannerAdsLoading ==BannerAdsLoading.error?SizedBox.shrink(): Banner300x50Size(),
             Spacer(),
             Text(
               "V$appVersion",

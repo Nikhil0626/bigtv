@@ -6,14 +6,17 @@ import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/lo
 import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/settings_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_model/bookmarks_model.dart';
+import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../services/webengage_event_tracks.dart';
+import '../../home_screen/home_provider/home_provider.dart';
 
 class SettingsProvider extends ChangeNotifier {
   List<BookmarksModel> getAllBookmarkList = [];
@@ -32,7 +35,7 @@ class SettingsProvider extends ChangeNotifier {
     isBookMarkLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {"user_id": userId,"last_bookmark_id":id};
+    Map<String, dynamic> body = {"user_id": userId, "last_bookmark_id": id};
     try {
       log("body $body");
       Response response = await SettingsRepo().bookMarks(body);
@@ -54,7 +57,7 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> saveBookmarks(String postId, context,isBookMark) async {
+  Future<void> saveBookmarks(String postId, context, isBookMark) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     String? loginType = preferences.getString("loginType");
@@ -65,12 +68,10 @@ class SettingsProvider extends ChangeNotifier {
         log("body $body");
         Response response = await SettingsRepo().saveBookMarks(body);
         if (response.statusCode == 200) {
-          if(isBookMark == 1){
+          if (isBookMark == 1) {
             // CustomToast.showSuccessToast(msg: "Bookmark added",);
-
-          }else{
+          } else {
             // CustomToast.showErrorToast(msg: "Bookmark removed", );
-
           }
         }
       } catch (e) {
@@ -79,7 +80,7 @@ class SettingsProvider extends ChangeNotifier {
         notifyListeners();
       }
     } else {
-     Provider.of<AuthenticationProvider>(context,listen: false).setLogOutStatus(context,false);
+      Provider.of<AuthenticationProvider>(context, listen: false).setLogOutStatus(context, false);
     }
   }
 
@@ -106,7 +107,6 @@ class SettingsProvider extends ChangeNotifier {
     String? userId = sp.getString("userId");
     log(val['id'].toString());
     if (!isLikeList.contains(val['id'].toString())) {
-
       isLikeList.add(val['id'].toString());
       postLike(val['id'].toString(), true);
       sendLikeDetails(userId, val, true, val['title'].toString());
@@ -128,7 +128,7 @@ class SettingsProvider extends ChangeNotifier {
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
-      "user_id": userId??"0",
+      "user_id": userId ?? "0",
       "device_id": deviceId,
     };
 
@@ -181,7 +181,7 @@ class SettingsProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
     } finally {
-      isOthersSelected=false;
+      isOthersSelected = false;
 
       isFeedbackLoading = false;
       notifyListeners();
@@ -189,7 +189,7 @@ class SettingsProvider extends ChangeNotifier {
   }
 
   void addToSelectedEngagements(String profileName) {
-    if(profileName == "Others") {
+    if (profileName == "Others") {
       isOthersSelected = !isOthersSelected;
     }
     log(profileName);
@@ -202,4 +202,31 @@ class SettingsProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
+  late BannerAd bannerAd;
+
+  void loadBannerAd(BuildContext context) {
+    bannerAdsLoading = BannerAdsLoading.loading;
+
+    final AdSize customAdSize = AdSize(width: 300, height: 50);
+    bannerAd = BannerAd(
+      adUnitId: Provider.of<HomeProvider>(context, listen: false).adManagerBannerId,
+      size: customAdSize,
+      request: const AdManagerAdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          print(ad.responseInfo.toString());
+          bannerAdsLoading = BannerAdsLoading.success;
+          notifyListeners(); // ✅ Only notify after the ad loads
+        },
+        onAdFailedToLoad: (ad, error) {
+          bannerAdsLoading = BannerAdsLoading.fail;
+          ad.dispose();
+          notifyListeners(); // ✅ Only notify after error
+        },
+      ),
+    )..load();
+  }
+
 }

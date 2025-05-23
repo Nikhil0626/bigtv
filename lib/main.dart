@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:chotanews/services/analytics_service.dart';
 
@@ -8,16 +7,13 @@ import 'package:chotanews/utils/app_life_cycle.dart';
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:facebook_app_events/facebook_app_events.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_install_referrer/flutter_install_referrer.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-import 'package:platform_device_id_plus/platform_device_id.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
@@ -25,7 +21,6 @@ import 'aggricator_screens/auth_screens/authentication_provider/authentication_p
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'aggricator_screens/home_screen/news_posts_provider.dart';
-import 'aggricator_screens/individual_post_details/individual_post_view.dart';
 import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
@@ -98,7 +93,6 @@ class _MyAppState extends State<MyApp> {
 
   Locale? _locale;
 
-  String postId = "";
 
   @override
   void initState() {
@@ -130,34 +124,21 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
           ChangeNotifierProvider<ProfileProvider>(create: (_) => ProfileProvider()),
         ],
-        child: MaterialApp(
+        child:MaterialApp(
           navigatorKey: mainNavigatorKey,
           localizationsDelegates: context.localizationDelegates,
           supportedLocales: const [Locale('te', '')],
+          // Add your locales
           locale: _locale,
           theme: ThemeData(
             colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
             useMaterial3: true,
           ),
-          initialRoute: '/',
-          onGenerateInitialRoutes: (String routeName) {
-            if (postId.isNotEmpty) {
-              return [
-                MaterialPageRoute(
-                  builder: (_) => IndividualPostView(postId: postId),
-                ),
-              ];
-            }
-            return [
-              MaterialPageRoute(builder: (_) => SplashScreen()),
-            ];
-          },
           routes: {
-            '/individualPage': (context) => IndividualPostView(postId: postId),
+            '/': (context) => SplashScreen(),
             '/settings': (context) => SettingsView(),
-            // Ensure the root route is defined (even if onGenerateInitialRoutes is used)
-            // '/': (context) => SplashScreen(),
           },
+
           debugShowCheckedModeBanner: false,
         ),
       ),

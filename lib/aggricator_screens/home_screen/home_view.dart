@@ -62,59 +62,40 @@ class _HomeViewState extends State<HomeView> {
 
   Future<void> _initDeepLinks() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    try {
-      final initialUri = await _appLinks.getInitialLink(); // Use the same _appLinks
-      if (initialUri != null) {
-        debugPrint('Initial URI: $initialUri');
-        _handleDeepLink(initialUri);
-        return;
-      }
-    } catch (err) {
-      debugPrint('Failed to get initial URI: $err');
-    }
+    linkSubscription = AppLinks().uriLinkStream.listen((uri) {
+      debugPrint('onAppLink: $uri');
+      _handleDeepLink(uri);
+    },onError: (err) {
+        log("Error in deep link handling: $err");
+      });
 
-    log("Initializing deep link listener");
-    linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
-      if (uri != null) {
-        log("Deep link received: ${uri.toString()}");
-        final String? id = uri.queryParameters['postId'];
-        if (id != null) {
-          sp.setString("webPostId", id);
-        }
-        _handleDeepLink(uri);
-      }
-    }, onError: (err) {
-      log("Error in deep link handling: $err");
-    });
+    // log("Initializing deep link listener");
+    // linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
+    //   if (uri != null) {
+    //     log("Deep link received: ${uri.toString()}");
+    //     final String? id = uri.queryParameters['postId'];
+    //     if (id != null) {
+    //       sp.setString("webPostId", id);
+    //     }
+    //     _handleDeepLink(uri);
+    //   }
+    // }, onError: (err) {
+    //   log("Error in deep link handling: $err");
+    // });
   }
 
   void _handleDeepLink(Uri uri) async {
     log("Deep link path: $uri");
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    final String path = uri.path;
     final String? id = uri.queryParameters['postId'];
-
-    switch (path) {
-      case '/individualPage':
-        if (id != null) {
-          postId = id;
-          log("Navigating to Individual Post screen with postId: $postId");
-          // Delay navigation until after the first frame is rendered
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => IndividualPostView(postId: postId ?? "0"),
-                ));
-          });
-        } else {
-          log("postId is missing for /individualPage route.");
-        }
-        return;
-      default:
-        log("Unrecognized path: $path — Navigating to Home screen (optional)");
-      // Optionally push home here if needed:
-      // mainNavigatorKey.currentState?.pushNamed('/');
+    if (id != null) {
+      postId = id;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => IndividualPostView(postId: postId ?? "0"),
+            ));
+      });
     }
   }
 

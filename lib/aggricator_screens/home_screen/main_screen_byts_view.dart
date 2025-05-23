@@ -497,7 +497,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                     topLeft: Radius.circular(16.r),
                                                   ),
                                                   child: CachedNetworkImage(
-                                                    imageUrl: widget.article['image_url'],
+                                                    imageUrl: widget.article['image_url']??"fgyhuiiuh",
                                                     height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .65 : .4),
                                                     width: MediaQuery.of(context).size.width,
                                                     fit: BoxFit.fill,
