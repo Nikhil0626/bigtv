@@ -86,7 +86,7 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                 itemBuilder: (context, index) {
                   if (homeProvider.getAllPostList.length - 5 == index) {
                     log("is come from lin----k${homeProvider.getAllPostList[index]['id']}");
-                    context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList.last['id'].toString());
+                    context.read<HomeProvider>().getAllPost(postIds: homeProvider.getAllPostList.last['id'].toString());
                   }
                   return AnimatedBuilder(
                     animation: _pageController,
@@ -104,7 +104,7 @@ class _IndividualPostViewState extends State<IndividualPostView> {
                           offset: Offset(0, 50 * (1 - position)),
                           child: Container(
                             color: Colors.white,
-                            child: MainScreenBytView(article: homeProvider.getAllPostList[index]),
+                            child: MainScreenBytView(article: homeProvider.getAllPostList[index],isMainScreen: true,),
                           ),
                         ),
                       );

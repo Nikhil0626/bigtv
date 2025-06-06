@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/banner_300x50_size.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -28,11 +29,13 @@ import 'main_screen_pageview.dart';
 class StandardCard extends StatefulWidget {
   final getAllPostList;
   final index;
+  final int currentIndex;
 
   const StandardCard({
     super.key,
     this.getAllPostList,
     required this.index,
+    this.currentIndex = 0,
   });
 
   @override
@@ -44,6 +47,7 @@ class _StandardCardState extends State<StandardCard> {
 
   @override
   Widget build(BuildContext context) {
+    bool isCurrentIndex = widget.index == widget.currentIndex;
     return Screenshot(
       controller: sc,
       child: Stack(
@@ -187,78 +191,83 @@ class _StandardCardState extends State<StandardCard> {
                   ),
                 ),
                 Spacer(),
-                if(widget.getAllPostList['isStickyPost']==0)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4),
-                  child: DateAndSource(data: widget.getAllPostList),
-                ),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                        return BottomActions(
-                          iconColor: AppColors.iconColors,
-                          postType: widget.getAllPostList['subType'].toString() ?? "",
-                          icon: settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                          label: 'లైక్',
-                          isLike: settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()),
-                          onTap: () {
-                            log("Like");
-                            settingsProvider.isLikePost(widget.getAllPostList);
-                          },
-                        );
-                      }),
-                      BottomActions(
-                        postType: widget.getAllPostList['subType'] ?? "",
-                        icon: "assets/svg/new_comment.svg",
-                        label: 'కామెంట్',
-                        iconColor: AppColors.iconColors,
-                        onTap: () async {
-                          context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                          showComments(context, widget.getAllPostList['id']);
-
-                        },
-                      ),
-                      Spacer(),
-                      BottomActions(
-                        postType: widget.getAllPostList['subType'] ?? "",
-                        icon: "assets/svg/share.svg",
-                        label: 'షేర్',
-                        iconColor: AppColors.iconColors,
-                        onTap: () async {
-                          SharedPreferences sp = await SharedPreferences.getInstance();
-                          String? userId = sp.getString("userId");
-
-                          sendShareDetails(userId, widget.getAllPostList['id'], widget.getAllPostList['content'].toString());
-
-                          if (widget.getAllPostList['type'] == "Standard" || widget.getAllPostList['type'] == "Video") {
-                            try {
-                              final image = await sc.capture(
-                                pixelRatio: 2,
-                              );
-                              if (image != null) {
-                                final directory = await getTemporaryDirectory();
-                                final imagePath = '${directory.path}/${widget.getAllPostList['id']}.png';
-                                final imageFile = File(imagePath);
-                                await imageFile.writeAsBytes(image);
-
-                                Share.shareXFiles([XFile(imageFile.path)], text: Platform.isIOS ? widget.getAllPostList['linkURLAndroid'].toString() : widget.getAllPostList['linkURLIos'].toString());
-                              } else {
-                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                              }
-                            } catch (e) {
-                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                            }
-                          } else if (widget.getAllPostList['type'] == "Gallery") {
-                            createAndSharePdf(context, widget.getAllPostList);
-                          }
-                        },
-                      ),
-                    ],
+                if (widget.getAllPostList['isStickyPost'] == 0)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 4),
+                    child: DateAndSource(data: widget.getAllPostList),
                   ),
+                height(height: 10),
+
+                Center(
+                  child: isCurrentIndex ? Banner300x50Size() : SizedBox.shrink(),
                 ),
+                // Padding(
+                //   padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //     children: [
+                //       Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                //         return BottomActions(
+                //           iconColor: AppColors.iconColors,
+                //           postType: widget.getAllPostList['subType'].toString() ?? "",
+                //           icon: settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                //           label: 'లైక్',
+                //           isLike: settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()),
+                //           onTap: () {
+                //             log("Like");
+                //             settingsProvider.isLikePost(widget.getAllPostList);
+                //           },
+                //         );
+                //       }),
+                //       BottomActions(
+                //         postType: widget.getAllPostList['subType'] ?? "",
+                //         icon: "assets/svg/new_comment.svg",
+                //         label: 'కామెంట్',
+                //         iconColor: AppColors.iconColors,
+                //         onTap: () async {
+                //           context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                //           showComments(context, widget.getAllPostList['id']);
+                //
+                //         },
+                //       ),
+                //       Spacer(),
+                //       BottomActions(
+                //         postType: widget.getAllPostList['subType'] ?? "",
+                //         icon: "assets/svg/share.svg",
+                //         label: 'షేర్',
+                //         iconColor: AppColors.iconColors,
+                //         onTap: () async {
+                //           SharedPreferences sp = await SharedPreferences.getInstance();
+                //           String? userId = sp.getString("userId");
+                //
+                //           sendShareDetails(userId, widget.getAllPostList['id'], widget.getAllPostList['content'].toString());
+                //
+                //           if (widget.getAllPostList['type'] == "Standard" || widget.getAllPostList['type'] == "Video") {
+                //             try {
+                //               final image = await sc.capture(
+                //                 pixelRatio: 2,
+                //               );
+                //               if (image != null) {
+                //                 final directory = await getTemporaryDirectory();
+                //                 final imagePath = '${directory.path}/${widget.getAllPostList['id']}.png';
+                //                 final imageFile = File(imagePath);
+                //                 await imageFile.writeAsBytes(image);
+                //
+                //                 Share.shareXFiles([XFile(imageFile.path)], text: Platform.isIOS ? widget.getAllPostList['linkURLAndroid'].toString() : widget.getAllPostList['linkURLIos'].toString());
+                //               } else {
+                //                 CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                //               }
+                //             } catch (e) {
+                //               CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                //             }
+                //           } else if (widget.getAllPostList['type'] == "Gallery") {
+                //             createAndSharePdf(context, widget.getAllPostList);
+                //           }
+                //         },
+                //       ),
+                //     ],
+                //   ),
+                // ),
                 height(height: 20)
               ],
             ),

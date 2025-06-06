@@ -2,7 +2,7 @@ import Flutter
 import google_mobile_ads
 import UIKit
 import FirebaseCore
-import FirebaseDynamicLinks
+//import FirebaseDynamicLinks
 import WebEngage
 import webengage_flutter
 

@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -44,9 +45,15 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   void initState() {
+    context.read<SettingsProvider>().bannerAd.dispose();
     getLogin();
     context.read<AuthenticationProvider>().sendEvent("SettingsView");
     super.initState();
+  }
+  @override
+  void dispose() {
+    // context.read<SettingsProvider>().bannerAd.dispose();
+    super.dispose();
   }
 
   Future getLogin() async {
@@ -59,9 +66,8 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Padding(
+    return SafeArea(
+     child:  Padding(
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
@@ -170,7 +176,9 @@ class _SettingsViewState extends State<SettingsView> {
               context.read<AuthenticationProvider>().setLogOutStatus(context, false);
             }),
             height(height: 10),
-           context.watch<SettingsProvider>().bannerAdsLoading ==BannerAdsLoading.fail ||context.watch<SettingsProvider>().bannerAdsLoading ==BannerAdsLoading.error?SizedBox.shrink(): Banner300x50Size(),
+           context.watch<SettingsProvider>().bannerAdsLoading ==BannerAdsLoading.fail ?SizedBox.shrink(): Banner300x50Size(),
+
+
             Spacer(),
             Text(
               "V$appVersion",

@@ -45,7 +45,7 @@ void sendLikeDetails( userId,postId,isLike,content) {
   WebEngagePlugin.trackEvent('like_post_data', {
     "device_id": "${GlobalVariables().deviceId}",
     "post_id": postId.toString(),
-    "user_id": "${userId??""}",
+    "user_id": userId??0,
     "date_time": formattedDate,
     "isLike": isLike,
     "title_content": content,

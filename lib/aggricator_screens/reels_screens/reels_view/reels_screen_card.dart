@@ -35,7 +35,7 @@ class ReelsScreen extends StatefulWidget {
 }
 
 class _ReelsScreenState extends State<ReelsScreen> {
-  late YoutubePlayerController _controller;
+  YoutubePlayerController? _controller;
   List<ReelsModel> removedCards = [];
   Offset slideOffset = Offset.zero;
   bool isAnimating = false;
@@ -44,8 +44,8 @@ class _ReelsScreenState extends State<ReelsScreen> {
   @override
   void initState() {
     super.initState();
-      context.read<ReelsProviders>().getAllReelsList = [];
-      context.read<ReelsProviders>().getAllReels();
+    context.read<ReelsProviders>().getAllReelsList = [];
+    context.read<ReelsProviders>().getAllReels();
     _pageController = PageController(viewportFraction: 1.0);
   }
 
@@ -88,241 +88,89 @@ class _ReelsScreenState extends State<ReelsScreen> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Consumer<ReelsProviders>(builder: (_, reelsProvider, __) {
+    return SafeArea(
+      // backgroundColor: Colors.white,
+      child: Consumer<ReelsProviders>(builder: (_, reelsProvider, __) {
         return reelsProvider.reelsLoading
             ? Shimmer.fromColors(
-          baseColor: Colors.grey[300]!,
-          highlightColor: Colors.grey[100]!,
-          child: CardSwiper(
-            allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-            controller: controller,
-            // Assign the controller
-            cardsCount: 5,
-            onSwipe: (previousIndex, currentIndex, direction) {
-              print("Swiped from $previousIndex to $currentIndex");
-              return true;
-            },
-            numberOfCardsDisplayed: 4,
-            cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-              return ShimmerCard();
-            },
-          ),
-        )
+                baseColor: Colors.grey[300]!,
+                highlightColor: Colors.grey[100]!,
+                child: CardSwiper(
+                  allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+                  controller: controller,
+                  // Assign the controller
+                  cardsCount: 5,
+                  onSwipe: (previousIndex, currentIndex, direction) {
+                    print("Swiped from $previousIndex to $currentIndex");
+                    return true;
+                  },
+                  numberOfCardsDisplayed: 4,
+                  cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+                    return ShimmerCard();
+                  },
+                ),
+              )
             : reelsProvider.getAllReelsList.isEmpty
                 ? AppNoData()
-                :     Padding(
-                  padding: const EdgeInsets.only(bottom: 20.0),
-                  child: CardSwiper(
-                    controller: controller,
-                    cardsCount:  reelsProvider.getAllReelsList.length,
-                    onSwipe: (previousIndex, currentIndex, direction) {
-                      if (direction == CardSwiperDirection.bottom) {
-                        context.read<HomeProvider>().flipEvent('reel',reelsProvider.getAllReelsList[currentIndex!].id,false);
-                        _undo();
+                : Padding(
+                    padding: const EdgeInsets.only(bottom: 40.0),
+                    child: CardSwiper(
+                      controller: controller,
+                      cardsCount: reelsProvider.getAllReelsList.length,
+                      onSwipe: (previousIndex, currentIndex, direction) {
+                        if (direction == CardSwiperDirection.bottom) {
+                          context.read<HomeProvider>().flipEvent('reel', reelsProvider.getAllReelsList[currentIndex!].id, false);
+                          _undo();
 
-                        return false;
-                      }else{
-                        context.read<HomeProvider>().flipEvent('reel',reelsProvider.getAllReelsList[currentIndex!].id,true);
+                          return false;
+                        } else {
+                          context.read<HomeProvider>().flipEvent('reel', reelsProvider.getAllReelsList[currentIndex!].id, true);
+                        }
 
-                      }
-
-                      if (currentIndex != null) {
-                        currentIndexs = currentIndex;
-                      }
-                      debugPrint(
-                        'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
-                      );
-                      return true;
-                    },
-                    // onSwipeDirectionChange:  ,
-                    // onUndo: _onUndo,
-                    allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-                    // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
-                    numberOfCardsDisplayed: 4,
-                    duration: const Duration(milliseconds: 100),
-                    backCardOffset: const Offset(0, 40),
-                    padding: const EdgeInsets.only(left: 20.0,right: 20.0,bottom: 40.0,),
-                    // alignment: Alignment.topCenter,
-                    cardBuilder: (
+                        if (currentIndex != null) {
+                          currentIndexs = currentIndex;
+                        }
+                        debugPrint(
+                          'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
+                        );
+                        return true;
+                      },
+                      // onSwipeDirectionChange:  ,
+                      // onUndo: _onUndo,
+                      allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+                      // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
+                      numberOfCardsDisplayed: 4,
+                      duration: const Duration(milliseconds: 100),
+                      backCardOffset: const Offset(0, 40),
+                      padding: const EdgeInsets.only(
+                        left: 20.0,
+                        right: 20.0,
+                        bottom: 40.0,
+                      ),
+                      // alignment: Alignment.topCenter,
+                      cardBuilder: (
                         context,
                         index,
                         horizontalThresholdPercentage,
                         verticalThresholdPercentage,
-                        ) {
-                      final post =  reelsProvider.getAllReelsList[index];
+                      ) {
+                        final post = reelsProvider.getAllReelsList[index];
 
-                      return  EachReelCard(reel: post, reelsProvider: reelsProvider, index: index);
-                    },
-                  ),
-                );
-
-       /* Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Stack(
-                    children: [
-                      Container(
-                        height:620,
-                        width: MediaQuery.of(context).size.width,
-                        margin: EdgeInsets.symmetric(horizontal: 24.h),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundColor,
-                          borderRadius: BorderRadius.circular(12.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              blurRadius: 6,
-                              spreadRadius: 2,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        height: 600,
-                        width: MediaQuery.of(context).size.width,
-                        margin: EdgeInsets.symmetric(horizontal: 16.h),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundColor,
-                          borderRadius: BorderRadius.circular(12.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              blurRadius: 6,
-                              spreadRadius: 2,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        height: 580,
-                        width: MediaQuery.of(context).size.width,
-                        margin: EdgeInsets.symmetric(horizontal: 8.h),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundColor,
-                          borderRadius: BorderRadius.circular(12.r),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.2),
-                              blurRadius: 6,
-                              spreadRadius: 2,
-                              offset: Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        // child: StandardCard(
-                        //   index: 1,
-                        //   getAllPostList: homeProvider.getAllPostList[1],
-                        // ),
-                      ),
-                      Container(
-                        height: 560,
-                        width: MediaQuery.of(context).size.width,
-                        // margin: EdgeInsets.symmetric(horizontal: 8.h),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: AppColors.cardBackgroundColor,
-                          borderRadius: BorderRadius.circular(12.r),
-
-                        ),
-
-                      ),
-                      GestureDetector(
-                          onVerticalDragEnd: (details) {
-                            final velocity = details.velocity.pixelsPerSecond.dy;
-                            if (velocity < -500) {
-                              animateRemoveTopCard();
-                            } else if (velocity > 500) {
-                              animateUndoCard();
-                            }
-                          },
-                          child: PageView.builder(
-                            scrollDirection: Axis.vertical,
-                            itemCount: reelsProvider.getAllReelsList.length,
-                            itemBuilder: (context, index) {
-
-                              final post = reelsProvider.getAllReelsList[index];
-
-                              return AnimatedBuilder(
-                                animation: _pageController,
-                                builder: (context, child) {
-                                  double value = 1.0;
-                                  if (_pageController.hasClients && _pageController.position.haveDimensions) {
-                                    double page = _pageController.page ?? _pageController.initialPage.toDouble();
-                                    value = (1 - (page - index).abs()).clamp(0.0, 1.0).toDouble();
-                                  }
-                                  // if(reelsProvider.getAllReelsList.length-5 ==index){
-                                  //   reelsProvider.getAllReels(postId:reelsProvider.getAllReelsList[index].id.toString() );
-                                  // }
-                                  return Opacity(
-                                    opacity: value,
-                                    child: Transform.translate(
-                                      offset: Offset(0, 100 * (1.0 - value)),
-                                      child: Stack(
-                                        children: [
-                                          Container(
-                                            height: 560,
-
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                              color: AppColors.cardBackgroundColor,
-                                              borderRadius: BorderRadius.circular(12.r),
-                                              boxShadow: [
-                                                BoxShadow(
-                                                  color: Colors.grey.withOpacity(0.2),
-                                                  blurRadius: 6,
-                                                  spreadRadius: 2,
-                                                  offset: Offset(0, 3),
-                                                ),
-                                              ],
-                                            ),
-                                            child: EachReelCard(reel: post, reelsProvider: reelsProvider, index: index)
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-
-
-                            },
-                          )),
-                    ],
-                  ),
-                );*/
-
-        // CardSwiper(
-        //             allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-        //             cardsCount: reelsProvider.getAllReelsList.length,
-        //             onSwipe: (previousIndex, currentIndex, direction) {
-        //               print("Swiped from $previousIndex to $currentIndex");
-        //               return true;
-        //             },
-        //             numberOfCardsDisplayed: 4,
-        //             cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-        //               final reel = reelsProvider.getAllReelsList[index];
-        //               return EachReelCard(reel: reel, reelsProvider: reelsProvider,index:index);
-        //             },
-        //           );
+                        return EachReelCard(reel: post, reelsProvider: reelsProvider, index: index);
+                      },
+                    ),
+                  );
       }),
     );
   }
 
   int currentIndexs = 0;
-
-
 
   void _undo() {
     if (currentIndexs > 0) {
@@ -385,7 +233,7 @@ class _EachReelCardState extends State<EachReelCard> {
                 child: Column(
                   children: [
                     Padding(
-                      padding:  EdgeInsets.symmetric(horizontal: 10.0.sp, vertical: 15.sp),
+                      padding: EdgeInsets.symmetric(horizontal: 10.0.sp, vertical: 15.sp),
                       child: ClipRRect(
                         borderRadius: BorderRadius.all(Radius.circular(10.r)),
                         child: CachedNetworkImage(
@@ -407,6 +255,13 @@ class _EachReelCardState extends State<EachReelCard> {
                           ),
                         ),
                       ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 0,horizontal: 12.h),
+                      child: Text( widget.reel.title,style:homeScreenFontStyle(
+                          color:  AppColors.textColor ,
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold) ,),
                     ),
                     Container(
                       padding: EdgeInsets.only(bottom: 10.h, top: 10.h),
@@ -477,6 +332,7 @@ class _EachReelCardState extends State<EachReelCard> {
                         ],
                       ),
                     ),
+                    Spacer(),
                     Container(
                       padding: EdgeInsets.only(bottom: 16.h, top: 6.h, left: 10.sp, right: 10.sp),
                       decoration: BoxDecoration(
@@ -507,7 +363,6 @@ class _EachReelCardState extends State<EachReelCard> {
                               context.read<AuthenticationProvider>().sendEvent("CommentPage");
 
                               showComments(context, widget.reel.id.toString());
-
                             },
                           ),
                           Spacer(),
@@ -519,7 +374,6 @@ class _EachReelCardState extends State<EachReelCard> {
                             onTap: () async {
                               SharedPreferences sp = await SharedPreferences.getInstance();
                               String? userId = sp.getString("userId");
-
 
                               sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
 

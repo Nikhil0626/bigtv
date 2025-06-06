@@ -1,4 +1,3 @@
-
 import 'dart:developer';
 
 import 'package:chotanews/utils/app_colors.dart';
@@ -120,13 +119,16 @@ class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
                             itemCount: homeProvider.getAllAiTagsPostList.length,
                             onPageChanged: (value) {
                               log("AiTagPostsPageView.  ${homeProvider.currentIndex}--- $value");
-                              context.read<HomeProvider>().flipEvent('news',homeProvider.getAllAiTagsPostList[value]['id'],value>autoIndex?true:false);
+                              context.read<HomeProvider>().flipEvent('news', homeProvider.getAllAiTagsPostList[value]['id'], value > autoIndex ? true : false);
 
-                              autoIndex=value;
-                              setState(() {
-
-                              });
-                              },
+                              autoIndex = value;
+                              setState(() {});
+                              log(value.toString());
+                              log(homeProvider.getAllAiTagsPostList.length.toString());
+                              if (value == homeProvider.getAllAiTagsPostList.length - 1) {
+                                context.read<HomeProvider>().addOneMoreArticle(); // <-- You need to implement this method
+                              }
+                            },
                             itemBuilder: (context, index) {
                               return AnimatedBuilder(
                                 animation: _pageController,

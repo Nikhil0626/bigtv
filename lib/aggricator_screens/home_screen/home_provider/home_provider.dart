@@ -1,10 +1,13 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../services/analytics_service.dart';
@@ -37,6 +40,9 @@ class HomeProvider extends ChangeNotifier {
   bool isPostLoading = false;
   bool isMuted = false;
   late YoutubePlayerController controller;
+  int? _selectedTagId;
+
+  int? get selectedTagId => _selectedTagId;
 
   void onItemTapped(int index) {
     selectedIndex = index;
@@ -84,7 +90,7 @@ class HomeProvider extends ChangeNotifier {
     controller = YoutubePlayerController(
       initialVideoId: url, // Example YouTube video ID
       flags: const YoutubePlayerFlags(
-        autoPlay: true,
+        autoPlay: false,
         enableCaption: false,
         forceHD: false,
         disableDragSeek: true,
@@ -100,6 +106,13 @@ class HomeProvider extends ChangeNotifier {
   void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
     controller.dispose();
+    notifyListeners();
+  }
+
+
+
+  void setSelectedTagId(int id) {
+    _selectedTagId = id;
     notifyListeners();
   }
 
@@ -157,8 +170,18 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future getAllPost({String postId = "0", bool isGetAllPost = false}) async {
-    if (isGetAllPost == false && postId =="0") {
+   PageController? pageController=  PageController();
+  void scrollListener() {
+    if (pageController!.position.atEdge) {
+      bool isEnd = pageController!.position.pixels != 0;
+      if (isEnd) {
+        log("po)stId.toString()   $postId");
+        getAllPost(postIds: postId??"0");
+      }
+    }
+  }
+  Future getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
+    if (isGetAllPost == false && postIds =="0") {
       getAllPostList = [];
     }
     isBookMark = [];
@@ -170,7 +193,7 @@ class HomeProvider extends ChangeNotifier {
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
     List<int> locationIds = locationId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
-    log('Location IDs: $locationIds');
+    log('Location IDs: $locationIds ==== ${getAllPostList.length}');
 
     String categoriesId = preferences.getString("categoriesId") ?? "";
     List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
@@ -178,18 +201,22 @@ class HomeProvider extends ChangeNotifier {
 
     Map<String, dynamic> body = {
       "device_id": deviceId,
-      "postId": postId,
+      "postId": postIds,
       "locationIds": locationIds,
       "categoriesId": categoriesIds,
       "userId": userId ?? 0,
       "isAdManager":true
     };
-    log("allpost body ${body.toString()}");
+    log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
       List data = response.data['posts'];
+
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
+      postId =response.data['lastId'].toString()??"0";
+
+      log(postId.toString());
       adManageId =Platform.isIOS?response.data['adUnits']['ios']['admanageid']: response.data['adUnits']['android']['admanageid'];
       adManagerNativeId =Platform.isIOS?response.data['adUnits']['ios']['admanagernativeid']: response.data['adUnits']['android']['admanagernativeid'];
       adManagerBannerId = Platform.isIOS?response.data['adUnits']['ios']['admanagerbannerid']:response.data['adUnits']['android']['admanagerbannerid'];
@@ -256,8 +283,11 @@ class HomeProvider extends ChangeNotifier {
   Future getAllPostsByAiId(postId) async {
     log("sbvjdshgurhgiurehiouerjgjer");
     isBookMark = [];
-    getAllAiTagsPostList = [];
-    isAiTagsLoading = true;
+    getAllPostList = [];
+    // getAllAiTagsPostList = [];
+    // isAiTagsLoading = true;
+    isHomeLoading = true;
+    notifyListeners();
     currentIndex = 0;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -274,9 +304,9 @@ class HomeProvider extends ChangeNotifier {
       log(response.data.toString());
       List data = response.data;
 
-      getAllAiTagsPostList.addAll(data);
+      getAllPostList.addAll(data);
 
-      isBookMark = getAllAiTagsPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
+      isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -284,7 +314,7 @@ class HomeProvider extends ChangeNotifier {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api catch ${st.toString()}");
     } finally {
-      isAiTagsLoading = false;
+      isHomeLoading = false;
       notifyListeners();
     }
   }
@@ -351,5 +381,109 @@ class HomeProvider extends ChangeNotifier {
 
     AnalyticsService().trackArticlesRead();
     notifyListeners();
+  }
+
+  void addOneMoreArticle() {
+    final newArticle = {
+      "id": 10101010,
+      "postOrder": 10101010,
+      "author": 0,
+      "title": "Completed",
+      "content": "",
+      "created": "",
+      "guid": "",
+      "post_type": "",
+      "post_name": "",
+      "post_mime_type": "",
+      "totalLikes": 0,
+      "totalViews": 0,
+      "totalComments": 0,
+      "image_url": "",
+      "video_url": "",
+      "downloadUrl": null,
+      "gallery": null,
+      "type": "Completed",
+      "totalShares": 0,
+      "isReporter": 0,
+      "reportedBy": "",
+      "categoryName": "",
+      "postUrl": "",
+      "subType": "",
+      "isStickyPost": null,
+      "adPosition": "",
+      "linkURLAndroid": "",
+      "links": [],
+      "isBookmarked": 0
+    };
+
+    getAllAiTagsPostList.add(newArticle);
+    notifyListeners();
+  }
+  bool isBottomEnable  = true;
+  void pageChange({bool isValue = true}){
+    isBottomEnable = isValue;
+    notifyListeners();
+  }
+
+  bool isAiTagDataLoaded  = false;
+  void aiTagDataLoaded(value){
+    isAiTagDataLoaded = value;
+    notifyListeners();
+  }
+  final WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
+  bool _isSubscribed = false;
+  String? postId ="0";
+  void subscribeToPushCallbacks() {
+    if (_isSubscribed) return;
+    _isSubscribed = true;
+    log("pushActionStream: flutter test 0000");
+    _webEngagePlugin.pushStream.listen((event) {
+      Map<String, dynamic> messagePayload = event.payload!;
+      log("pushActionStream: flutter test  11111 --- ${messagePayload["postId"]}");
+      if (Platform.isIOS) {
+        log("pushActionStream: flutter test  11111 ${messagePayload['data']['customData'][0]['value']}");
+        postId = messagePayload['data']['customData'][0]['value'] ?? "0";
+       notifyListeners();
+      } else {
+        postId = messagePayload["postId"] ?? "0";
+        notifyListeners();
+      }
+    });
+
+    _webEngagePlugin.pushActionStream.listen((event) {
+      Map<String, dynamic>? messagePayload = event.payload;
+
+      log("pushActionStream: flutter test  22222  ${messagePayload}");
+
+      if (Platform.isIOS) {
+        log("pushActionStream: flutter test  11111 ${messagePayload?['data']['customData'][0]['value']}");
+        postId = messagePayload?['data']['customData'][0]['value'] ?? "0";
+        notifyListeners();
+      } else {
+        postId = messagePayload?["postId"] ?? "0";
+       notifyListeners();
+      }
+    });
+  }
+  StreamSubscription<Uri>? linkSubscription;
+
+  Future<void> initDeepLinks() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    linkSubscription = AppLinks().uriLinkStream.listen((uri) {
+      debugPrint('onAppLink: $uri');
+      _handleDeepLink(uri);
+    }, onError: (err) {
+      log("Error in deep link handling: $err");
+    });
+  }
+
+  void _handleDeepLink(Uri uri) async {
+    log("Deep link path: $uri");
+    final String? id = uri.queryParameters['postId'];
+    if (id != null) {
+      postId = id;
+    notifyListeners();
+
+    }
   }
 }

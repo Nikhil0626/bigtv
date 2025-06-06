@@ -8,6 +8,7 @@ import 'package:chotanews/utils/app_life_cycle.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,6 +32,11 @@ final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.updateRequestConfiguration(
+    RequestConfiguration(
+      testDeviceIds: ['8BAAE25215D922350D67D51EAF7546BB'], // Your actual device ID
+    ),
+  );
   initPlugin();
   getAndSendReferrerDetails();
   await EasyLocalization.ensureInitialized();
@@ -47,7 +53,7 @@ Future<void> main() async {
   AnalyticsService().trackAppOpen();
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
-
+  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {

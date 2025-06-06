@@ -88,7 +88,7 @@ class SettingsProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {"deviceId": deviceId, "postId": postId, "userId": userId, "isLiked": isLike};
+    Map<String, dynamic> body = {"deviceId": deviceId, "postId": postId, "userId": userId??0, "isLiked": isLike};
     try {
       log("body $body");
       Response response = await SettingsRepo().liked(body);
@@ -104,12 +104,12 @@ class SettingsProvider extends ChangeNotifier {
 
   void isLikePost(val) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("userId");
+    final userId = sp.getString("userId")??0;
     log(val['id'].toString());
     if (!isLikeList.contains(val['id'].toString())) {
       isLikeList.add(val['id'].toString());
       postLike(val['id'].toString(), true);
-      sendLikeDetails(userId, val, true, val['title'].toString());
+      sendLikeDetails(userId??0, val, true, val['title'].toString());
       log(isLikeList.toString());
     } else {
       postLike(val['id'].toString(), false);
@@ -203,27 +203,35 @@ class SettingsProvider extends ChangeNotifier {
     }
   }
 
+
+  String? to = '';
+  String? from = '';
+  String? renderTime = '';
   BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
   late BannerAd bannerAd;
 
   void loadBannerAd(BuildContext context) {
+    from =  DateTime.now().toString();
     bannerAdsLoading = BannerAdsLoading.loading;
 
     final AdSize customAdSize = AdSize(width: 300, height: 50);
     bannerAd = BannerAd(
-      adUnitId: Provider.of<HomeProvider>(context, listen: false).adManagerBannerId,
+      adUnitId: "/22387492205,23277683599/id1631068092.Banner1.1747894331",
       size: customAdSize,
       request: const AdManagerAdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
+          to =  DateTime.now().toString();
           print(ad.responseInfo.toString());
           bannerAdsLoading = BannerAdsLoading.success;
-          notifyListeners(); // ✅ Only notify after the ad loads
+          notifyListeners();
         },
         onAdFailedToLoad: (ad, error) {
+          to =  DateTime.now().toString();
+          print(error.responseInfo.toString());
           bannerAdsLoading = BannerAdsLoading.fail;
           ad.dispose();
-          notifyListeners(); // ✅ Only notify after error
+          notifyListeners();
         },
       ),
     )..load();
