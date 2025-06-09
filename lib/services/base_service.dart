@@ -115,7 +115,7 @@ class BaseService {
     CancelToken? token,
     Map<String, dynamic>? headers,
   }) async {
-    dio.options.baseUrl = baseUrl ?? BaseUrls.baseUrl;
+    dio.options.baseUrl = baseUrl ?? BaseUrls.baseUrlAwsDev;
     dio.options.connectTimeout = const Duration(seconds: 60);
     dio.options.receiveTimeout = const Duration(seconds: 60);
     dio.options.contentType = contentType ?? 'application/json';

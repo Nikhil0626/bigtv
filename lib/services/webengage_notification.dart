@@ -2,11 +2,12 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import '../aggricator_screens/home_screen/home_provider/home_provider.dart';
 import '../aggricator_screens/individual_post_details/individual_post_view.dart';
 import '../main.dart';
-
 
 WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
 bool _isSubscribed = false;
@@ -33,63 +34,60 @@ void onInAppShown(Map<String, dynamic>? message) {
 }
 
 void onInAppDismiss(Map<String, dynamic>? message) {
-  log(
-      "This is a callback on inapp dismiss from native to flutter. Payload $message");
+  log("This is a callback on inapp dismiss from native to flutter. Payload $message");
 }
 
-
-void subscribeToPushCallbacks()  {
+void subscribeToPushCallbacks() {
   if (_isSubscribed) return;
   _isSubscribed = true;
-  log("pushActionStream: flutter test 0000" );
+  log("pushActionStream: flutter test 0000");
   _webEngagePlugin.pushStream.listen((event) {
-    log("pushActionStream: flutter test  11111" );
+
     Map<String, dynamic> messagePayload = event.payload!;
-if(Platform.isIOS){
-  log("pushActionStream: flutter test  11111 ${messagePayload['data']['customData'][0]['value']}" );
+    log("pushActionStream: flutter test  11111 --- ${messagePayload["postId"]}");
+    if (Platform.isIOS) {
+      log("pushActionStream: flutter test  11111 ${messagePayload['data']['customData'][0]['value']}");
 
-  sendEventToServer(messagePayload['data']['customData'][0]['value']);
-}else{
-  sendEventToServer(messagePayload["postId"]??"0");
-}
-
+      sendEventToServer(messagePayload['data']['customData'][0]['value']);
+    } else {
+      sendEventToServer(messagePayload["postId"] ?? "0");
+    }
   });
 
   //Push action click listener
   _webEngagePlugin.pushActionStream.listen((event) {
     Map<String, dynamic>? messagePayload = event.payload;
 
-    log("pushActionStream: flutter test  22222  ${messagePayload}" );
+    log("pushActionStream: flutter test  22222  ${messagePayload}");
 
-    if(Platform.isIOS){
-      log("pushActionStream: flutter test  11111 ${messagePayload?['data']['customData'][0]['value']}" );
+    if (Platform.isIOS) {
+      log("pushActionStream: flutter test  11111 ${messagePayload?['data']['customData'][0]['value']}");
 
       sendEventToServer(messagePayload?['data']['customData'][0]['value']);
-    }else{
-      sendEventToServer(messagePayload?["postId"]??"0");
+    } else {
+      sendEventToServer(messagePayload?["postId"] ?? "0");
     }
   });
 }
 
-void sendEventToServer(msg) async{
-
-  Navigator.push(mainNavigatorKey.currentContext!, MaterialPageRoute(builder: (context) => IndividualPostView(postId:msg ),));
+void sendEventToServer(msg) async {
+  mainNavigatorKey.currentContext?.read<HomeProvider>().aiTagDataLoaded(true);
 
 }
+
 void subscribeToTrackDeeplink() {
-  log("pushActionStream:1111111" );
+  log("pushActionStream:1111111");
 }
 
 void subscribeToAnonymousIDCallback() {
-  log("pushActionStream:22222" );
+  log("pushActionStream:22222");
 }
 
-void closeSubscribe(){
-  log("pushActionStream:  dispose" );
+void closeSubscribe() {
+  log("pushActionStream:  dispose");
   _webEngagePlugin.pushSink.close();
   _webEngagePlugin.pushActionSink.close();
 }
-
 
 void showDialogWithMessage(String msg) {
   showDialog(

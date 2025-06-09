@@ -78,9 +78,8 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: Consumer<EPapersProvider>(builder: (_, ePapersProvider, __) {
+    return SafeArea(
+      child:  Consumer<EPapersProvider>(builder: (_, ePapersProvider, __) {
         return Container(
           color: Colors.white,
           width: MediaQuery.of(context).size.width.w,

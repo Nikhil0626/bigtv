@@ -72,9 +72,11 @@ ScreenshotController screenshotControllers = ScreenshotController();
                             child: Stack(
                               alignment: Alignment.center,
                               children: [
+
                                 Image.network(
                                   height: 330,
                                   width: MediaQuery.of(context).size.width,
+                                // imageUrl
                                   widget.articalData['image_url'].toString(),
                                   fit: BoxFit.fill,
                                 ),
@@ -94,6 +96,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                                         ));
                                   },
                                 ),
+
                               ],
                             ),
                           ),

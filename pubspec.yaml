@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 5.0.2+2119
+version: 5.0.2+2122
 environment:
   sdk: ^3.5.4
 dependencies:
@@ -25,7 +25,7 @@ dependencies:
   cached_network_image: ^3.4.1
   webengage_flutter: ^1.6.0
   firebase_messaging: ^15.2.5
-  firebase_dynamic_links: ^6.1.1
+#  firebase_dynamic_links: ^6.1.1
   flutter_otp_text_field: ^1.4.0+2
   smooth_page_indicator: ^1.2.0+3
   permission_handler: ^11.3.1
@@ -73,6 +73,14 @@ dependencies:
   in_app_update: ^4.2.3
   flutter_install_referrer: ^2.0.2
   flutter_upgrade_version: ^1.1.8
+  firebase_crashlytics: ^4.3.6
+  timeago: ^3.7.1
+  visibility_detector: ^0.4.0+2
+  lottie: ^3.3.1
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  workmanager: ^0.6.0
+  cron: ^0.6.2
 
 
 
@@ -82,6 +90,8 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^5.0.0
+  hive_generator: ^2.0.1
+  build_runner: ^2.4.15
 
 flutter:
 

@@ -40,25 +40,14 @@ class NativeAdFactoryExample: NativeAdFactory {
     override fun createNativeAd(nativeAd: NativeAd?, customOptions: MutableMap<String, Any>?): NativeAdView {
         val adView = layoutInflater.inflate(R.layout.my_native_ad, null) as NativeAdView
 
-        // Set the media view.
         adView.mediaView = adView.findViewById(R.id.ad_media)
 
-        // Set other ad assets.
         adView.headlineView = adView.findViewById(R.id.ad_headline)
         adView.bodyView = adView.findViewById(R.id.ad_body)
         adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
-//        adView.iconView = adView.findViewById(R.id.ad_app_icon)
-//        adView.priceView = adView.findViewById(R.id.ad_price)
-//        adView.starRatingView = adView.findViewById(R.id.ad_stars)
-//        adView.storeView = adView.findViewById(R.id.ad_store)
-//        adView.advertiserView = adView.findViewById(R.id.ad_advertiser)
-
-        // The headline and mediaContent are guaranteed to be in every NativeAd.
         (adView.headlineView as TextView).text = nativeAd?.headline
         adView.mediaView?.mediaContent = nativeAd?.mediaContent
 
-        // These assets aren't guaranteed to be in every NativeAd, so it's important to
-        // check before trying to display them.
         if (nativeAd?.body == null) {
             adView.bodyView?.visibility = View.INVISIBLE
         } else {
