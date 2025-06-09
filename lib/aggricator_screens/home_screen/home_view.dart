@@ -1,20 +1,17 @@
-import 'dart:developer';
-import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_card.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../services/app_update_servuce.dart';
-import '../../services/deviice_details.dart';
 import '../../services/permission_handler_services.dart';
 import '../../services/webengage_notification.dart';
 import '../settings_screen/settings_view/settings_view.dart';
@@ -36,14 +33,12 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    homeProvider?.aiTagDataLoaded(false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppUpdateService.checkForUpdate(context);
+      requestNotificationPermission();
+      homeProvider?.getMobileNumber();
     });
-    homeProvider?.initDeepLinks();
-    requestNotificationPermission();
-    getMobileNumber();
-    homeProvider?.subscribeToPushCallbacks();
+    context.read<HomeProvider>().subscribeToPushCallbacks();
     context.read<HomeProvider>().selectedIndex = 0;
     _pageController = PageController(initialPage: 0);
     super.initState();
@@ -51,32 +46,12 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void dispose() {
-    homeProvider?.linkSubscription?.cancel();
+    // homeProvider?.linkSubscription?.cancel();
     closeSubscribe();
     super.dispose();
   }
 
-  getMobileNumber() async {
-    WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
-    if (Platform.isIOS) {
-      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-      log('APNS Token: $apnsToken');
-      getUniqueDeviceId(apnsToken ?? "");
-    } else if (Platform.isAndroid) {
-      var token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
-        getUniqueDeviceId(token);
-        log('FCM Token: $token');
-        _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
-        WebEngagePlugin.setPushToken(token);
-      }
-    }
-  }
 
-  void _onTokenInvalidated(Map<String, dynamic>? message) {
-    print("tokenInvalidated callback received $message");
-    WebEngagePlugin.setSecureToken("siva kumar", message.toString());
-  }
 
   DateTime? lastBackPressed;
 
@@ -91,8 +66,7 @@ class _HomeViewState extends State<HomeView> {
       child: WillPopScope(
         onWillPop: () async {
           final now = DateTime.now();
-          if (lastBackPressed == null ||
-              now.difference(lastBackPressed!) > Duration(seconds: 2)) {
+          if (lastBackPressed == null || now.difference(lastBackPressed!) > Duration(seconds: 2)) {
             lastBackPressed = now;
             CustomToast.showInfoToast(msg: "Swipe again to exit");
             return false;
@@ -111,14 +85,9 @@ class _HomeViewState extends State<HomeView> {
                     onPageChanged: (index) {
                       homeProvider.onItemTapped(index);
                     },
-                    children: [
-                      MainScreenCard(),
-                      PapersScreenCard(),
-                      ReelsScreen(),
-                      SettingsView()
-                    ],
+                    children: [MainScreenCard(), PapersScreenCard(), ReelsScreen(), SettingsView()],
                   ),
-                  if (homeProvider.isBottomEnable)
+                  if (homeProvider.isBottomEnable && context.watch<SettingsProvider>().bannerAdsLoading != BannerAdsLoading.success)
                     Positioned(
                       left: 16,
                       right: 16,
@@ -146,16 +115,11 @@ class _HomeViewState extends State<HomeView> {
                               onTap: (index) {
                                 homeProvider.isTabChange();
                                 _pageController.jumpToPage(index);
-
-                                if( homeProvider.selectedIndex == 0){
+                                if (homeProvider.selectedIndex == 0) {
                                   context.read<HomeProvider>().setSelectedTagId(0);
-                                  homeProvider.pageChange(isValue: !homeProvider.isBottomEnable);
-                                }else{
-                                  // homeProvider.pageChange(isValue: homeProvider.isBottomEnable);
+                                  homeProvider.pageChange(isValue: true);
                                 }
-                                setState(() {
-
-                                });
+                                setState(() {});
                               },
                               selectedItemColor: AppColors.appButtonColor,
                               unselectedItemColor: AppColors.bodyTextColor,
@@ -170,9 +134,7 @@ class _HomeViewState extends State<HomeView> {
                                     "assets/new_app_icon/bytes.svg",
                                     height: 22,
                                     colorFilter: ColorFilter.mode(
-                                      homeProvider.selectedIndex == 0
-                                          ? AppColors.appButtonColor
-                                          : AppColors.bodyTextColor,
+                                      homeProvider.selectedIndex == 0 ? AppColors.appButtonColor : AppColors.bodyTextColor,
                                       BlendMode.srcIn,
                                     ),
                                   ),
@@ -183,9 +145,7 @@ class _HomeViewState extends State<HomeView> {
                                     "assets/new_app_icon/paper.svg",
                                     height: 22,
                                     colorFilter: ColorFilter.mode(
-                                      homeProvider.selectedIndex == 1
-                                          ? AppColors.appButtonColor
-                                          : AppColors.bodyTextColor,
+                                      homeProvider.selectedIndex == 1 ? AppColors.appButtonColor : AppColors.bodyTextColor,
                                       BlendMode.srcIn,
                                     ),
                                   ),
@@ -196,9 +156,7 @@ class _HomeViewState extends State<HomeView> {
                                     "assets/new_app_icon/reel.svg",
                                     height: 22,
                                     colorFilter: ColorFilter.mode(
-                                      homeProvider.selectedIndex == 2
-                                          ? AppColors.appButtonColor
-                                          : AppColors.bodyTextColor,
+                                      homeProvider.selectedIndex == 2 ? AppColors.appButtonColor : AppColors.bodyTextColor,
                                       BlendMode.srcIn,
                                     ),
                                   ),
@@ -209,9 +167,7 @@ class _HomeViewState extends State<HomeView> {
                                     "assets/new_app_icon/menu.svg",
                                     height: 22,
                                     colorFilter: ColorFilter.mode(
-                                      homeProvider.selectedIndex == 3
-                                          ? AppColors.appButtonColor
-                                          : AppColors.bodyTextColor,
+                                      homeProvider.selectedIndex == 3 ? AppColors.appButtonColor : AppColors.bodyTextColor,
                                       BlendMode.srcIn,
                                     ),
                                   ),

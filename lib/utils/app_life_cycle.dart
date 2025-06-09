@@ -44,13 +44,14 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager> with WidgetsB
 
     } else if (state == AppLifecycleState.resumed) {
       print('App is in the foreground.');
-      if( mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() != "0") {
-        log("getIndividualPost in life cycle ${mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() }");
-        mainNavigatorKey.currentContext?.read<HomeProvider>().getIndividualPost( mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString());
-      }else{
-        mainNavigatorKey.currentContext?.read<HomeProvider>().getAllPost();
-
-      }
+      // if( mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() != "0" ) {
+      //   log("getIndividualPost in life cycle ${mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() }");
+      //   mainNavigatorKey.currentContext?.read<HomeProvider>().getIndividualPost( mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString());
+      // }else{
+      //   log("getIndividualPost in home ${mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() }");
+      //   mainNavigatorKey.currentContext?.read<HomeProvider>().getAllPost();
+      //
+      // }
     // getNotifications();
     }
     if (state == AppLifecycleState.detached) {

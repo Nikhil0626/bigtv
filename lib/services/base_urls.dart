@@ -54,7 +54,7 @@ class BaseUrls {
 
   /// Python apis
   static const String ePaperBaseUrlAws = "https://aggregator.chotanews.com";
-  static const String baseUrlAwsDev = "x";
+  static const String baseUrlAwsDev = "https://api.chotanews.com";
 
 
   /// Python Dec Apis

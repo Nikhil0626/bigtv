@@ -12,6 +12,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -210,7 +211,12 @@ class SettingsProvider extends ChangeNotifier {
   BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
   late BannerAd bannerAd;
 
-  void loadBannerAd(BuildContext context) {
+  void loadBannerAd(BuildContext context) async{
+
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    String? userId= sharedPreferences.getString("userId");
+    String? deviceId= sharedPreferences.getString("deviceId");
     from =  DateTime.now().toString();
     bannerAdsLoading = BannerAdsLoading.loading;
 
@@ -220,16 +226,45 @@ class SettingsProvider extends ChangeNotifier {
       size: customAdSize,
       request: const AdManagerAdRequest(),
       listener: BannerAdListener(
-        onAdLoaded: (ad) {
+        onAdLoaded: (ad) async{
           to =  DateTime.now().toString();
           print(ad.responseInfo.toString());
           bannerAdsLoading = BannerAdsLoading.success;
+          Map<String, dynamic> newEvent = {
+            'key': 'ads_success',
+            'metadata': {
+              "sdkRequestStartTime":from,
+              "sdkRequestReceivedTime":to,
+              "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMicroseconds,
+              "createAt":DateTime.now(),
+              "adResponse":ad.responseInfo.toString(),
+            },
+            'userId': userId,
+            'deviceId': deviceId,
+          };
+          print("All Events: ${newEvent}");
+          await EventRepo().addEvent(newEvent);
+
           notifyListeners();
         },
-        onAdFailedToLoad: (ad, error) {
+        onAdFailedToLoad: (ad, error) async{
           to =  DateTime.now().toString();
           print(error.responseInfo.toString());
           bannerAdsLoading = BannerAdsLoading.fail;
+          Map<String, dynamic> newEvent = {
+            'key': 'ads_fail',
+            'metadata': {
+              "sdkRequestStartTime":from,
+              "sdkRequestReceivedTime":to,
+              "adsRenderingTime":0,
+              "createAt":DateTime.now(),
+              "adResponse":error.responseInfo.toString(),
+            },
+            'userId': userId,
+            'deviceId': deviceId,
+          };
+          print("All Events: ${newEvent}");
+          await EventRepo().addEvent(newEvent);
           ad.dispose();
           notifyListeners();
         },

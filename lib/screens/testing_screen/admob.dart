@@ -1,131 +1,182 @@
 import 'package:flutter/material.dart';
 
+
+import 'package:flutter/material.dart';
+
 void main() {
-  runApp(const MyApp());
+  runApp(const InshortsApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class InshortsApp extends StatelessWidget {
+  const InshortsApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: PaginatedPageView(),
+    return MaterialApp(
+      title: 'Inshorts Clone',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+      ),
+      home: const InshortsHomePage(),
     );
   }
 }
 
-class PaginatedPageView extends StatefulWidget {
-  const PaginatedPageView({super.key});
+class NewsModel {
+  final String title;
+  final String imageUrl;
+  final String content;
+  final String source;
 
-  @override
-  _PaginatedPageViewState createState() => _PaginatedPageViewState();
+  const NewsModel({
+    required this.title,
+    required this.imageUrl,
+    required this.content,
+    required this.source,
+  });
 }
 
-class _PaginatedPageViewState extends State<PaginatedPageView> {
-  final PageController _pageController = PageController();
+class InshortsHomePage extends StatelessWidget {
+  const InshortsHomePage({super.key});
 
-  List<String> _items = [];
-  int _currentPage = 0;
-  bool _isLoading = false;
-  bool _hasMore = true;
-
-  static const int _pageSize = 10;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchData(); // Initial data load
-    _pageController.addListener(_scrollListener);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
-  // Listener to detect when user scrolls near the end
-  void _scrollListener() {
-    if (_pageController.position.atEdge) {
-      bool isEnd = _pageController.position.pixels != 0;
-      if (isEnd && !_isLoading && _hasMore) {
-        _fetchData();
-      }
-    }
-  }
-
-  // Simulate API call to fetch data with pagination
-  Future<void> _fetchData() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
-
-    // Simulate API response for new page data
-    List<String> newFetchedItems = List.generate(
-      _pageSize,
-          (index) => 'Item ${( _currentPage * _pageSize ) + index + 1}',
-    );
-
-    // Simulate end of data after 200 items (for example)
-    if (_currentPage >= 3) {
-      newFetchedItems = [];
-    }
-
-    setState(() {
-      _isLoading = false;
-      if (newFetchedItems.isEmpty) {
-        _hasMore = false;
-      } else {
-        _currentPage++;
-        _items.addAll(newFetchedItems);
-      }
-    });
-  }
+  final List<NewsModel> newsList = const [
+    NewsModel(
+      title: "SpaceX Launches New Rocket",
+      imageUrl: "https://picsum.photos/id/1011/800/400",
+      content: "SpaceX successfully launched its Falcon 9 rocket carrying new Starlink satellites into orbit.",
+      source: "Space.com",
+    ),
+    NewsModel(
+      title: "Apple Announces iPhone 16",
+      imageUrl: "https://picsum.photos/id/1015/800/400",
+      content: "Apple unveiled the iPhone 16 with improved cameras and a new A18 chip.",
+      source: "TechCrunch",
+    ),
+    NewsModel(
+      title: "Monsoon Hits Kerala Early",
+      imageUrl: "https://picsum.photos/id/1016/800/400",
+      content: "The Indian Meteorological Department confirms early arrival of monsoon in Kerala.",
+      source: "NDTV",
+    ),
+    NewsModel(
+      title: "AI in Healthcare Advances",
+      imageUrl: "https://picsum.photos/id/1020/800/400",
+      content: "AI helps doctors diagnose rare conditions in record time using medical imaging.",
+      source: "Healthline",
+    ),
+    NewsModel(
+      title: "India Wins T20 Series",
+      imageUrl: "https://picsum.photos/id/1024/800/400",
+      content: "India defeats Australia 3-2 in the final T20 match with a last-over thriller.",
+      source: "ESPN",
+    ),
+    NewsModel(
+      title: "Google Launches Gemini AI",
+      imageUrl: "https://picsum.photos/id/1027/800/400",
+      content: "Gemini AI, Google’s new assistant, is designed to rival ChatGPT and Copilot.",
+      source: "Google Blog",
+    ),
+    NewsModel(
+      title: "Global Oil Prices Surge",
+      imageUrl: "https://picsum.photos/id/1033/800/400",
+      content: "Oil prices climb amid tensions in the Middle East and supply concerns.",
+      source: "Reuters",
+    ),
+    NewsModel(
+      title: "Dinosaur Fossil Found in Argentina",
+      imageUrl: "https://picsum.photos/id/1040/800/400",
+      content: "A newly found fossil sheds light on a species that lived 80 million years ago.",
+      source: "National Geographic",
+    ),
+    NewsModel(
+      title: "NASA Plans Moon Base by 2030",
+      imageUrl: "https://picsum.photos/id/1041/800/400",
+      content: "NASA reveals roadmap for a sustainable moon base within the next decade.",
+      source: "NASA",
+    ),
+    NewsModel(
+      title: "Climate Change Warning from UN",
+      imageUrl: "https://picsum.photos/id/1050/800/400",
+      content: "The UN issues a critical warning about accelerating climate change effects.",
+      source: "UN Report",
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Paginated PageView')),
-      body: Stack(
-        children: [
-          PageView.builder(
-            controller: _pageController,
-            itemCount: _items.length,
-            itemBuilder: (context, index) {
-              return Center(
-                child: Card(
-                  margin: const EdgeInsets.all(20),
-                  child: Padding(
-                    padding: const EdgeInsets.all(30),
-                    child: Text(
-                      _items[index],
-                      style: const TextStyle(fontSize: 24),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-
-          // Loading indicator at bottom center
-          if (_isLoading)
-            Positioned(
-              bottom: 20,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-        ],
+      body: PageView.builder(
+        scrollDirection: Axis.vertical,
+        physics: const BouncingScrollPhysics(),
+        itemCount: newsList.length,
+        itemBuilder: (context, index) {
+          return NewsFullPage(news: newsList[index]);
+        },
       ),
     );
   }
 }
+
+class NewsFullPage extends StatelessWidget {
+  final NewsModel news;
+
+  const NewsFullPage({super.key, required this.news});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.white,
+      child: SafeArea(
+        child: SingleChildScrollView(
+          physics: const PageScrollPhysics(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (news.imageUrl.isNotEmpty)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(0),
+                  child: Image.network(
+                    news.imageUrl,
+                    height: 300,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      news.title,
+                      style: const TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      news.content,
+                      style: const TextStyle(fontSize: 18),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      "Source: ${news.source}",
+                      style:
+                      const TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+
 
 
 // import 'package:flutter/material.dart';

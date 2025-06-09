@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
@@ -23,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-
+    EventRepo().processAndPushEvents();
     Future.delayed(Duration(milliseconds: 300), () {
       checkLastShownDate();
     });

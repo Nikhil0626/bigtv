@@ -3,25 +3,27 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../services/analytics_service.dart';
+import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../home_repo/home_repo.dart';
-
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
   List getAllSurveyDataList = [];
-
 
   String adManageId = "";
   String adManagerNativeId = "";
@@ -109,8 +111,6 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
-
   void setSelectedTagId(int id) {
     _selectedTagId = id;
     notifyListeners();
@@ -118,7 +118,7 @@ class HomeProvider extends ChangeNotifier {
 
   Future getIndividualPost(postId, {bool isAds = false}) async {
     log("getIndividualPost ${postId}");
-    if(isAds !=true) {
+    if (isAds != true) {
       getAllPostList = [];
     }
     isPostLoading = true;
@@ -132,7 +132,7 @@ class HomeProvider extends ChangeNotifier {
           Future.delayed(
             Duration(milliseconds: 300),
             () {
-              getAllPost( isGetAllPost: true);
+              getAllPost(isGetAllPost: true);
             },
           );
         } else {
@@ -146,7 +146,7 @@ class HomeProvider extends ChangeNotifier {
       Future.delayed(
         Duration(milliseconds: 300),
         () {
-          getAllPost( isGetAllPost: true);
+          getAllPost(isGetAllPost: true);
         },
       );
       isPostLoading = false;
@@ -158,7 +158,7 @@ class HomeProvider extends ChangeNotifier {
       Future.delayed(
         Duration(milliseconds: 300),
         () {
-          getAllPost( isGetAllPost: true);
+          getAllPost(isGetAllPost: true);
         },
       );
       isPostLoading = false;
@@ -170,24 +170,26 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-   PageController? pageController=  PageController();
+  PageController? pageController = PageController();
+
   void scrollListener() {
     if (pageController!.position.atEdge) {
       bool isEnd = pageController!.position.pixels != 0;
       if (isEnd) {
         log("po)stId.toString()   $postId");
-        getAllPost(postIds: postId??"0");
+        getAllPost(postIds: getAllPostList.last['id'].toString() ?? "0");
       }
     }
   }
+
   Future getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
-    if (isGetAllPost == false && postIds =="0") {
+    isHomeLoading = true;
+    if (isGetAllPost == false && postIds == "0") {
       getAllPostList = [];
     }
     isBookMark = [];
     isWebView = false;
     webUrl = "";
-    isHomeLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
@@ -199,14 +201,7 @@ class HomeProvider extends ChangeNotifier {
     List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
-    Map<String, dynamic> body = {
-      "device_id": deviceId,
-      "postId": postIds,
-      "locationIds": locationIds,
-      "categoriesId": categoriesIds,
-      "userId": userId ?? 0,
-      "isAdManager":true
-    };
+    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true};
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
@@ -214,14 +209,14 @@ class HomeProvider extends ChangeNotifier {
 
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
-      postId =response.data['lastId'].toString()??"0";
+      // postId = response.data['lastId'].toString() ?? "0";
 
-      log(postId.toString());
-      adManageId =Platform.isIOS?response.data['adUnits']['ios']['admanageid']: response.data['adUnits']['android']['admanageid'];
-      adManagerNativeId =Platform.isIOS?response.data['adUnits']['ios']['admanagernativeid']: response.data['adUnits']['android']['admanagernativeid'];
-      adManagerBannerId = Platform.isIOS?response.data['adUnits']['ios']['admanagerbannerid']:response.data['adUnits']['android']['admanagerbannerid'];
-      adMobNativeId = Platform.isIOS?response.data['adUnits']['ios']['admobnativeid']:response.data['adUnits']['android']['admobnativeid'];
-      adMobBannerId = Platform.isIOS?response.data['adUnits']['ios']['admobbannerid']:response.data['adUnits']['android']['admobbannerid'];
+      // log(postId.toString());
+      adManageId = Platform.isIOS ? response.data['adUnits']['ios']['admanageid'] : response.data['adUnits']['android']['admanageid'];
+      adManagerNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admanagernativeid'] : response.data['adUnits']['android']['admanagernativeid'];
+      adManagerBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerbannerid'] : response.data['adUnits']['android']['admanagerbannerid'];
+      adMobNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admobnativeid'] : response.data['adUnits']['android']['admobnativeid'];
+      adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
 
       if (isWebView) {
         getAllPostList.insert(0, {
@@ -361,7 +356,6 @@ class HomeProvider extends ChangeNotifier {
     String? deviceId = sp.getString("deviceId");
     log(val['id'].toString());
     if (!isBookMark.contains(val['id'].toString())) {
-
       isBookMark.add(val['id'].toString());
       Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 1);
       sendLikeDetails(userId, val, true, val['title'].toString());
@@ -378,7 +372,6 @@ class HomeProvider extends ChangeNotifier {
   }
 
   void flipEvent(pageName, id, val) async {
-
     AnalyticsService().trackArticlesRead();
     notifyListeners();
   }
@@ -419,20 +412,26 @@ class HomeProvider extends ChangeNotifier {
     getAllAiTagsPostList.add(newArticle);
     notifyListeners();
   }
-  bool isBottomEnable  = true;
-  void pageChange({bool isValue = true}){
+
+  bool isBottomEnable = true;
+
+  void pageChange({bool isValue = true}) {
     isBottomEnable = isValue;
     notifyListeners();
   }
 
-  bool isAiTagDataLoaded  = false;
-  void aiTagDataLoaded(value){
+  bool isAiTagDataLoaded = false;
+
+  void aiTagDataLoaded(value) {
     isAiTagDataLoaded = value;
     notifyListeners();
   }
+
   final WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
   bool _isSubscribed = false;
-  String? postId ="0";
+  bool isComeFromLinkOrNotification = false;
+  String? postId = "0";
+
   void subscribeToPushCallbacks() {
     if (_isSubscribed) return;
     _isSubscribed = true;
@@ -443,9 +442,13 @@ class HomeProvider extends ChangeNotifier {
       if (Platform.isIOS) {
         log("pushActionStream: flutter test  11111 ${messagePayload['data']['customData'][0]['value']}");
         postId = messagePayload['data']['customData'][0]['value'] ?? "0";
-       notifyListeners();
+        isComeFromLinkOrNotification =true;
+        getIndividualPost(postId);
+        notifyListeners();
       } else {
         postId = messagePayload["postId"] ?? "0";
+        isComeFromLinkOrNotification =true;
+        getIndividualPost(postId);
         notifyListeners();
       }
     });
@@ -458,32 +461,59 @@ class HomeProvider extends ChangeNotifier {
       if (Platform.isIOS) {
         log("pushActionStream: flutter test  11111 ${messagePayload?['data']['customData'][0]['value']}");
         postId = messagePayload?['data']['customData'][0]['value'] ?? "0";
+        isComeFromLinkOrNotification =true;
+       getIndividualPost(postId);
         notifyListeners();
       } else {
         postId = messagePayload?["postId"] ?? "0";
-       notifyListeners();
+        isComeFromLinkOrNotification =true;
+        getIndividualPost(postId);
+        notifyListeners();
       }
     });
   }
+
   StreamSubscription<Uri>? linkSubscription;
 
-  Future<void> initDeepLinks() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
+  Future<void> initDeepLinks(BuildContext context) async {
     linkSubscription = AppLinks().uriLinkStream.listen((uri) {
       debugPrint('onAppLink: $uri');
-      _handleDeepLink(uri);
+      _handleDeepLink(uri,context);
     }, onError: (err) {
       log("Error in deep link handling: $err");
     });
   }
 
-  void _handleDeepLink(Uri uri) async {
+  void _handleDeepLink(Uri uri,context) async {
     log("Deep link path: $uri");
     final String? id = uri.queryParameters['postId'];
     if (id != null) {
       postId = id;
-    notifyListeners();
-
+      isComeFromLinkOrNotification = true;
+      getIndividualPost(postId);
+      notifyListeners();
     }
+  }
+
+  getMobileNumber() async {
+    WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
+    if (Platform.isIOS) {
+      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      log('APNS Token: $apnsToken');
+      getUniqueDeviceId(apnsToken ?? "");
+    } else if (Platform.isAndroid) {
+      var token = await FirebaseMessaging.instance.getToken();
+      if (token != null) {
+        getUniqueDeviceId(token);
+        log('FCM Token: $token');
+        _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
+        WebEngagePlugin.setPushToken(token);
+      }
+    }
+  }
+
+  void _onTokenInvalidated(Map<String, dynamic>? message) {
+    print("tokenInvalidated callback received $message");
+    WebEngagePlugin.setSecureToken("siva kumar", message.toString());
   }
 }

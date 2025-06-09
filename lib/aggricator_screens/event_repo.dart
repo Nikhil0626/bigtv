@@ -1,20 +1,39 @@
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
+import 'package:hive/hive.dart';
 
 import '../../../services/base_service.dart';
 import '../../../services/base_urls.dart';
 import '../../../utils/app_enums.dart';
 
 class EventRepo extends BaseService {
-
   Future sendEvent(body) async {
     log("event body --- ${body}");
-    Response response = await makeRequest(url: BaseUrls.eventUrl,
-        baseUrl:BaseUrls.baseUrlAwsDev,
-        method: RequestType.post,
-        body: body);
+    Response response = await makeRequest(url: BaseUrls.eventUrl, baseUrl: BaseUrls.baseUrlAwsDev, method: RequestType.post, body: body);
     log(response.data.toString());
     return response;
+  }
+
+  Future<void> addEvent(Map<String, dynamic> eventData) async {
+    log("event body --- ${eventData}");
+    final box = Hive.box('events');
+    await box.add(eventData);
+  }
+
+  Future<void> processAndPushEvents() async {
+    final box = Hive.box('events');
+    final events = box.values.toList();
+    log("Event Data Push ${events.toString()}");
+    if (events.isEmpty) return;
+
+    Response response = await makeRequest(url: BaseUrls.eventUrl, baseUrl: BaseUrls.baseUrlAwsDev, method: RequestType.post, body: events);
+
+    if (response.statusCode == 200) {
+      await box.clear();
+      print("Events pushed and cleared successfully.");
+    } else {
+      print("Failed to push events: ${response.statusCode}");
+    }
   }
 }

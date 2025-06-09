@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 
+import '../../loading_screen/Banner300x50Size_loading.dart';
 import '../../utils/app_enums.dart';
 
 class Banner300x50Size extends StatefulWidget {
@@ -47,7 +48,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       builder: (_, settingProvider, __) {
         switch (settingProvider.bannerAdsLoading) {
           case BannerAdsLoading.loading:
-            return const Center(child: AppLoadingScreen());
+            return const Center(child: Banner300x50sizeLoading());
           case BannerAdsLoading.success:
             return SizedBox(
               width: MediaQuery.of(context).size.width,

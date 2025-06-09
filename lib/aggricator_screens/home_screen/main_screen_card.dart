@@ -34,60 +34,16 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   List<Map<String, dynamic>> removedCards = [];
   Offset slideOffset = Offset.zero;
   bool isAnimating = false;
-  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    log("hello home screen in 2222");
-    context.read<HomeProvider>().getAllPostList = [];
+    context.read<HomeProvider>().initDeepLinks(context);
     context.read<HomeProvider>().getAllAiTags();
-    log("pushActionStream: flutter test  11111 Home kwfhewkufeiu  ${context.read<HomeProvider>().postId}");
-    if (context.read<HomeProvider>().postId.toString() != "0") {
-      log("getIndividualPost in Home screen ${context.read<HomeProvider>().postId.toString()}");
-      context.read<HomeProvider>().getIndividualPost(context.read<HomeProvider>().postId.toString());
-    } else {
+    if (context.read<HomeProvider>().postId.toString() == "0") {
       context.read<HomeProvider>().getAllPost();
     }
-    _pageController = PageController(viewportFraction: 1.0);
   }
-
-  void animateRemoveTopCard() async {
-    if (context.read<HomeProvider>().getAllPostList.isEmpty || isAnimating) return;
-    setState(() {
-      isAnimating = true;
-      slideOffset = Offset(0, -1);
-    });
-    await Future.delayed(Duration(milliseconds: 600));
-    setState(() {
-      removedCards.add(context.read<HomeProvider>().getAllPostList.removeLast());
-      slideOffset = Offset.zero;
-      isAnimating = false;
-    });
-  }
-
-  void animateUndoCard() async {
-    if (removedCards.isEmpty || isAnimating) return;
-    setState(() {
-      isAnimating = true;
-      slideOffset = Offset(0, 1);
-      context.read<HomeProvider>().getAllPostList.add(removedCards.removeLast());
-    });
-
-    await Future.delayed(Duration(milliseconds: 50));
-    setState(() {
-      slideOffset = Offset.zero;
-    });
-
-    await Future.delayed(Duration(milliseconds: 600));
-    setState(() {
-      isAnimating = false;
-    });
-  }
-
-  final CardSwiperController controller = CardSwiperController();
-
-  double dragOffset = 0.0;
 
   @override
   Widget build(BuildContext context) {
@@ -108,8 +64,6 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                               ? SizedBox.shrink()
                               : SizedBox(
                                   height: 50,
-                                  // padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewPadding.bottom),
-
                                   child: ListView.builder(
                                     scrollDirection: Axis.horizontal,
                                     itemCount: homeProvider.getAllAiTagsList.length,
@@ -156,15 +110,6 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   }
 
   int currentIndexs = 0;
-
-  void _undo() {
-    if (currentIndexs > 0) {
-      setState(() {
-        currentIndexs--;
-      });
-      controller.undo();
-    }
-  }
 }
 
 class ShimmerCard extends StatelessWidget {

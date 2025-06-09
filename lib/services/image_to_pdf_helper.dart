@@ -2,7 +2,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:chotanews/utils/app_toasts.dart';
-// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -127,7 +126,7 @@ Future<void> createAndSharePdf(BuildContext context, article ) async {
                   ignoreMargins: true, // Ensures full coverage
                   child: pw.Image(
                     pdfImage,
-                    fit: pw.BoxFit.cover, // Covers the full page
+                    fit: pw.BoxFit.fill, // Covers the full page
                   ),
                 );
               },

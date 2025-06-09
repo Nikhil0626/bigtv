@@ -45,7 +45,7 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   void initState() {
-    context.read<SettingsProvider>().bannerAd.dispose();
+
     getLogin();
     context.read<AuthenticationProvider>().sendEvent("SettingsView");
     super.initState();

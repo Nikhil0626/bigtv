@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/ad_manager_screen/banner_300x50_size.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
 import 'package:chotanews/aggricator_screens/image_preview.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +30,6 @@ import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
 import '../ad_manager_screen/test_ads.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
-import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 
@@ -68,7 +66,6 @@ class MainScreenBytView extends StatefulWidget {
 class _MainScreenBytViewState extends State<MainScreenBytView> {
   ScreenshotController adsScreenshotController = ScreenshotController();
 
-
   @override
   Widget build(BuildContext context) {
     final content = widget.article['content'] ?? '';
@@ -77,46 +74,39 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
       onTap: () {
         context.read<HomeProvider>().pageChange(isValue: !context.read<HomeProvider>().isBottomEnable);
       },
-      // child: widget.index + 2 > context.read<HomeProvider>().getAllPostList.length
-      //     ? Card(
-      //       elevation: 4,
-      //       color: Colors.green[50],
-      //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      //       child: Padding(
-      //         padding: const EdgeInsets.all(20.0),
-      //         child: Center(
-      //           child: Column(
-      //             mainAxisAlignment: MainAxisAlignment.center,
-      //             crossAxisAlignment: CrossAxisAlignment.center,
-      //             children: [
-      //               Lottie.asset("assets/svg/done.json", height: 200, width: 200),
-      //               height(
-      //                 height: 10,
-      //               ),
-      //               Text(
-      //                 "Your have Read the News",
-      //                 style: homeScreenFontStyle(
-      //                     color:  AppColors.textColor ,
-      //                     fontSize: 18,
-      //                     fontWeight: FontWeight.bold),
-      //               ),
-      //               height(
-      //                 height: 20,
-      //               ),
-      //               Text(
-      //                 "${context.read<HomeProvider>().getAllPostList.length}/${context.read<HomeProvider>().getAllPostList.length} Completed",
-      //                 style: homeScreenFontStyle(
-      //                     color: Colors.green ,
-      //                     fontSize: 18,
-      //                     fontWeight: FontWeight.bold),
-      //               ),
-      //             ],
-      //           ),
-      //         ),
-      //       ),
-      //     )
-      //     :
-    child:   Container(
+      child: (widget.index + 2 > context.read<HomeProvider>().getAllPostList.length && context.read<HomeProvider>().isAiTagDataLoaded)
+          ? Card(
+              elevation: 4,
+              color: Colors.green[50],
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Lottie.asset("assets/svg/done.json", height: 200, width: 200),
+                      height(
+                        height: 10,
+                      ),
+                      Text(
+                        "Your have Read the News",
+                        style: homeScreenFontStyle(color: AppColors.textColor, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      height(
+                        height: 20,
+                      ),
+                      Text(
+                        "${context.read<HomeProvider>().getAllPostList.length}/${context.read<HomeProvider>().getAllPostList.length} Completed",
+                        style: homeScreenFontStyle(color: Colors.green, fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          : Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
@@ -146,285 +136,143 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     height: MediaQuery.of(context).size.height,
                                     fit: BoxFit.cover,
                                   ),
-                                  // Positioned(
-                                  //   top: 10,
-                                  //   right: 14,
-                                  //   child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-                                  //     return GestureDetector(
-                                  //       onTap: () {
-                                  //         homeProvider.isBookMarkPost(widget.article, context);
-                                  //       },
-                                  //       child: Container(
-                                  //         padding: EdgeInsets.all(7),
-                                  //         decoration: BoxDecoration(
-                                  //           color: (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1) ? AppColors.appButtonColor : Colors.black54,
-                                  //           shape: BoxShape.circle,
-                                  //         ),
-                                  //         child: Icon(
-                                  //           (homeProvider.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1) ? Icons.bookmark : Icons.bookmark_outline,
-                                  //           color: Colors.white,
-                                  //           size: 20,
-                                  //         ),
-                                  //       ),
-                                  //     );
-                                  //   }),
-                                  // ),
-                                  Positioned(
-                                    bottom: 0,
-                                    child: Padding(
-                                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 6),
-                                      child: Container(
-                                        height: 45.sp,
-                                        color: Colors.transparent,
-                                        width: MediaQuery.of(context).size.width,
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                          children: [
-                                            Padding(
-                                              padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
-                                              child: Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                                    return BottomActions(
-                                                      postType: widget.article['subType'] ?? "",
-                                                      icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                                      label: 'లైక్',
-                                                      // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
-                                                      isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                      onTap: () {
-                                                        log("Like");
-                                                        settingsProvider.isLikePost(widget.article);
+                                  if (widget.article['subType'] != "ImageAd")
+                                    Positioned(
+                                      bottom: 0,
+                                      child: Padding(
+                                        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 6),
+                                        child: Container(
+                                          height: 45.sp,
+                                          color: Colors.transparent,
+                                          width: MediaQuery.of(context).size.width,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                            children: [
+                                              Padding(
+                                                padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
+                                                child: Row(
+                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                  children: [
+                                                    Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                                      return BottomActions(
+                                                        postType: widget.article['subType'] ?? "",
+                                                        icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                                        label: 'లైక్',
+                                                        // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
+                                                        isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                                        onTap: () {
+                                                          log("Like");
+                                                          settingsProvider.isLikePost(widget.article);
 
-                                                        // settingsProvider.isLikePost(widget.article);
-                                                      },
-                                                    );
-                                                  }),
-                                                  width(width: 6),
-                                                  BottomActions(
-                                                    postType: widget.article['subType'].toString() ?? "",
-                                                    icon: "assets/svg/new_comment.svg",
-                                                    label: 'కామెంట్',
-                                                    onTap: () async {
-                                                      if (context.mounted) {
-                                                        context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                        showComments(context, widget.article['id']);
-                                                      }
-                                                    },
-                                                  ),
-                                                  Spacer(),
-                                                  InkWell(
-                                                    onTap: () async {
-                                                      SharedPreferences sp = await SharedPreferences.getInstance();
-                                                      String? userId = sp.getString("userId");
-
-                                                      sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
-
-                                                      if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
-                                                        try {
-                                                          final image = await adsScreenshotController.capture(
-                                                            pixelRatio: 2.0,
-                                                          );
-                                                          if (image != null) {
-                                                            final directory = await getTemporaryDirectory();
-                                                            final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                                            final imageFile = File(imagePath);
-                                                            await imageFile.writeAsBytes(image);
-
-                                                            Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
-                                                          } else {
-                                                            CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                                          }
-                                                        } catch (e) {
-                                                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                                        }
-                                                      } else if (widget.article['type'] == "Gallery") {
-                                                        createAndSharePdfs(context, widget.article);
-                                                      }
-                                                    },
-                                                    child: isSending
-                                                        ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                                        : SvgPicture.asset(
-                                                            "assets/svg/share.svg",
-                                                            height: 20,
-                                                            width: 20,
-                                                            color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                                          ),
-                                                  ),
-                                                  width(width: 20),
-                                                  Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                                                    return SizedBox(
-                                                      height: 24,
-                                                      width: 24,
-                                                      child: InkWell(
-                                                        onTap: () async {
-                                                          log("Refresh");
-
-                                                          homeProvide.isReloadData();
-                                                          if (widget.isaiTags) {
-                                                            homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
-                                                              (value) {
-                                                                homeProvide.isReloadFalse();
-                                                              },
-                                                            );
-                                                          } else {
-                                                            homeProvide.getAllPostList = [];
-                                                            homeProvide.getAllPost();
-                                                          }
+                                                          // settingsProvider.isLikePost(widget.article);
                                                         },
-                                                        child: context.read<HomeProvider>().isReload
-                                                            ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                                            : SvgPicture.asset(
-                                                                "assets/svg/new_refresh.svg",
-                                                                height: 22,
-                                                                width: 22,
-                                                                color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                                              ),
-                                                      ),
-                                                    );
-                                                  }),
-                                                ],
+                                                      );
+                                                    }),
+                                                    width(width: 6),
+                                                    BottomActions(
+                                                      postType: widget.article['subType'].toString() ?? "",
+                                                      icon: "assets/svg/new_comment.svg",
+                                                      label: 'కామెంట్',
+                                                      onTap: () async {
+                                                        if (context.mounted) {
+                                                          context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                                          showComments(context, widget.article['id']);
+                                                        }
+                                                      },
+                                                    ),
+                                                    Spacer(),
+                                                    InkWell(
+                                                      onTap: () async {
+                                                        SharedPreferences sp = await SharedPreferences.getInstance();
+                                                        String? userId = sp.getString("userId");
+
+                                                        sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
+
+                                                        if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                                                          try {
+                                                            final image = await adsScreenshotController.capture(
+                                                              pixelRatio: 2.0,
+                                                            );
+                                                            if (image != null) {
+                                                              final directory = await getTemporaryDirectory();
+                                                              final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                                              final imageFile = File(imagePath);
+                                                              await imageFile.writeAsBytes(image);
+
+                                                              Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                                                            } else {
+                                                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                                            }
+                                                          } catch (e) {
+                                                            CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                                          }
+                                                        } else if (widget.article['type'] == "Gallery") {
+                                                          createAndSharePdfs(context, widget.article);
+                                                        }
+                                                      },
+                                                      child: isSending
+                                                          ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                                          : SvgPicture.asset(
+                                                              "assets/svg/share.svg",
+                                                              height: 20,
+                                                              width: 20,
+                                                              color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                                            ),
+                                                    ),
+                                                    width(width: 20),
+                                                    Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                                      return SizedBox(
+                                                        height: 24,
+                                                        width: 24,
+                                                        child: InkWell(
+                                                          onTap: () async {
+                                                            log("Refresh");
+
+                                                            homeProvide.isReloadData();
+                                                            if (widget.isaiTags) {
+                                                              homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
+                                                                (value) {
+                                                                  homeProvide.isReloadFalse();
+                                                                },
+                                                              );
+                                                            } else {
+                                                              homeProvide.getAllPostList = [];
+                                                              homeProvide.getAllPost();
+                                                            }
+                                                          },
+                                                          child: context.read<HomeProvider>().isReload
+                                                              ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                                              : SvgPicture.asset(
+                                                                  "assets/svg/new_refresh.svg",
+                                                                  height: 22,
+                                                                  width: 22,
+                                                                  color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                                                ),
+                                                        ),
+                                                      );
+                                                    }),
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
                                 ],
                               )
                             : widget.article['type'] == "Gallery"
                                 ? Stack(
                                     children: [
+                                      // Image carousel
                                       FullPageCarousel(
                                         isHome: true,
                                         imageUrls: widget.article['gallery'] ?? [],
                                         postDetails: widget.article,
                                       ),
-                                      Positioned(
-                                        bottom: 0,
-                                        child: Padding(
-                                          padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 6),
-                                          child: Container(
-                                            height: 45.sp,
-                                            color: Colors.transparent,
-                                            width: MediaQuery.of(context).size.width,
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                              children: [
-                                                Padding(
-                                                  padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
-                                                  child: Row(
-                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                    children: [
-                                                      Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                                        return BottomActions(
-                                                          postType: widget.article['subType'] ?? "",
-                                                          icon: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                                          label: 'లైక్',
-                                                          // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
-                                                          isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                          onTap: () {
-                                                            log("Like");
-                                                            settingsProvider.isLikePost(widget.article);
 
-                                                            // settingsProvider.isLikePost(widget.article);
-                                                          },
-                                                        );
-                                                      }),
-                                                      width(width: 6),
-                                                      BottomActions(
-                                                        postType: widget.article['subType'].toString() ?? "",
-                                                        icon: "assets/svg/new_comment.svg",
-                                                        label: 'కామెంట్',
-                                                        onTap: () async {
-                                                          if (context.mounted) {
-                                                            context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                            showComments(context, widget.article['id']);
-                                                          }
-                                                        },
-                                                      ),
-                                                      Spacer(),
-                                                      InkWell(
-                                                        onTap: () async {
-                                                          SharedPreferences sp = await SharedPreferences.getInstance();
-                                                          String? userId = sp.getString("userId");
-
-                                                          sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
-
-                                                          if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
-                                                            try {
-                                                              final image = await adsScreenshotController.capture(
-                                                                pixelRatio: 2.0,
-                                                              );
-                                                              if (image != null) {
-                                                                final directory = await getTemporaryDirectory();
-                                                                final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                                                final imageFile = File(imagePath);
-                                                                await imageFile.writeAsBytes(image);
-
-                                                                Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
-                                                              } else {
-                                                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                                              }
-                                                            } catch (e) {
-                                                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                                            }
-                                                          } else if (widget.article['type'] == "Gallery") {
-                                                            createAndSharePdfs(context, widget.article);
-                                                          }
-                                                        },
-                                                        child: isSending
-                                                            ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                                            : SvgPicture.asset(
-                                                                "assets/svg/share.svg",
-                                                                height: 20,
-                                                                width: 20,
-                                                                color: Colors.grey,
-                                                              ),
-                                                      ),
-                                                      width(width: 20),
-                                                      Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                                                        return SizedBox(
-                                                          height: 24,
-                                                          width: 24,
-                                                          child: InkWell(
-                                                            onTap: () async {
-                                                              log("Refresh");
-
-                                                              homeProvide.isReloadData();
-                                                              if (widget.isaiTags) {
-                                                                homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
-                                                                  (value) {
-                                                                    homeProvide.isReloadFalse();
-                                                                  },
-                                                                );
-                                                              } else {
-                                                                homeProvide.getAllPostList = [];
-                                                                homeProvide.getAllPost();
-                                                              }
-                                                            },
-                                                            child: context.read<HomeProvider>().isReload
-                                                                ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                                                : SvgPicture.asset(
-                                                                    "assets/svg/new_refresh.svg",
-                                                                    height: 22,
-                                                                    width: 22,
-                                                                    color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                                                  ),
-                                                          ),
-                                                        );
-                                                      }),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ),
-                                      ),
+                                      // Bottom action bar
                                     ],
                                   )
                                 : Stack(
@@ -507,6 +355,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                               } else {
                                                 homeProvide.getAllPostList = [];
                                                 homeProvide.getAllPost();
+                                                homeProvide.pageChange(isValue: true);
                                               }
                                             },
                                             child: Container(
@@ -532,14 +381,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                             onTap: () {
                                               context.read<HomeProvider>().setSelectedTagId(0);
                                               context.read<HomeProvider>().aiTagDataLoaded(false);
-                                              Navigator.pushAndRemoveUntil(
-                                                context,
-                                                MaterialPageRoute(
-                                                  builder: (context) => HomeView(),
-                                                ),
-                                                (route) => false,
-                                              );
-
+                                              context.read<HomeProvider>().pageChange(isValue: true);
+                                              context.read<HomeProvider>().getAllPost();
                                             },
                                             child: Container(
                                               padding: EdgeInsets.all(7),
@@ -611,7 +454,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                         "● ",
                                                                         style: TextStyle(
                                                                           fontSize: 14.sp,
-                                                                          color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
+                                                                          color: AppColors.textColor.withOpacity(0.5) ,
                                                                           height: 1, // Ensures proper line height
                                                                         ),
                                                                       ),
@@ -625,7 +468,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                             height: 1, // Ensures consistent line height
                                                                           ),
                                                                           style: homeScreenFontStyle(
-                                                                            color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
+                                                                            color:  AppColors.textColor.withOpacity(0.5) ,
                                                                             fontWeight: FontWeight.w400,
                                                                             fontSize: 16.sp,
                                                                           ),
@@ -661,7 +504,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 ],
                                                               ),
                                                             ),
-                                                            if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
+                                                            // if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
                                                           ],
                                                         )
                                                       : RichText(
@@ -697,7 +540,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                           ),
                                                         ),
                                                 ),
-                                                if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
+                                                // if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
                                               ],
                                             ),
                                           ),
@@ -714,7 +557,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           height: 30,
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                                           decoration: BoxDecoration(
-                                            color:widget.article['subType'] == "BigBlackStandard"?Colors.black: AppColors.cardBackgroundColor,
+                                            color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : AppColors.cardBackgroundColor,
                                             borderRadius: BorderRadius.circular(20),
                                           ),
                                           child: Center(
@@ -726,11 +569,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                     style: fontStyle(
                                                       fontSize: Platform.isIOS ? 16 : 14,
                                                       fontWeight: FontWeight.bold,
-                                                      color:widget.article['subType'] == "BigBlackStandard"?Colors.white: Colors.black,
+                                                      color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.black,
                                                     ),
                                                   ),
                                                   TextSpan(
-                                                    text: "News ${widget.length}",
+                                                    text: "News",
                                                     style: fontStyle(
                                                       fontSize: Platform.isIOS ? 16 : 14,
                                                       fontWeight: FontWeight.bold,
@@ -755,7 +598,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           width: 120,
                                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
                                           decoration: BoxDecoration(
-                                            color:widget.article['subType'] == "BigBlackStandard"?Colors.black:  AppColors.cardBackgroundColor,
+                                            color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : AppColors.cardBackgroundColor,
                                             borderRadius: BorderRadius.circular(20),
                                           ),
                                           child: Row(
@@ -832,7 +675,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           ),
                                         ),
                                       ),
-
                                     ],
                                   ),
               ),
@@ -862,13 +704,13 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
             pdf.addPage(
               pw.Page(
-                pageFormat: PdfPageFormat.a4,
+                // pageFormat: PdfPageFormat.a4,
                 build: (pw.Context context) {
                   return pw.FullPage(
                     ignoreMargins: true, // Ensures full coverage
                     child: pw.Image(
                       pdfImage,
-                      fit: pw.BoxFit.cover, // Covers the full page
+                      fit: pw.BoxFit.contain, // Covers the full page
                     ),
                   );
                 },

@@ -72,11 +72,7 @@ void subscribeToPushCallbacks() {
 
 void sendEventToServer(msg) async {
   mainNavigatorKey.currentContext?.read<HomeProvider>().aiTagDataLoaded(true);
-  Navigator.push(
-      mainNavigatorKey.currentContext!,
-      MaterialPageRoute(
-        builder: (context) => IndividualPostView(postId: msg),
-      ));
+
 }
 
 void subscribeToTrackDeeplink() {

@@ -1,10 +1,13 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../loading_screen/ads_loading_screen.dart';
 import '../../utils/app_colors.dart';
@@ -59,10 +62,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
   void _loadAdManagerNativeAd(BuildContext context) {
     String? adUnitId = context.read<HomeProvider>().adManagerNativeId; // Replace with your logic
-    if (adUnitId == null || adUnitId.isEmpty) {
-      _checkIfAllAdsFailed();
-      return;
-    }
+
 
     from = DateTime.now().toString();
 
@@ -77,7 +77,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
           print('AdManager Native failed: $error');
-          _checkIfAllAdsFailed();
+          _checkIfAllAdsFailed(error);
         },
       ),
       request: AdRequest(),
@@ -86,10 +86,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
   void _loadAdMobNativeAd(BuildContext context) {
     String? adUnitId = context.read<HomeProvider>().adMobNativeId;
-    if (adUnitId == null || adUnitId.isEmpty) {
-      _checkIfAllAdsFailed();
-      return;
-    }
+
 
     _adMobNativeAd = NativeAd(
       adUnitId: adUnitId,
@@ -103,7 +100,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
           print('AdMob Native failed: $error');
-          _checkIfAllAdsFailed();
+          _checkIfAllAdsFailed(error);
         },
       ),
       request: AdRequest(),
@@ -112,10 +109,6 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
   void _loadBannerAd(BuildContext context) {
     String? adUnitId = context.read<HomeProvider>().adManagerBannerId; // Replace with your logic
-    if (adUnitId == null || adUnitId.isEmpty) {
-      _checkIfAllAdsFailed();
-      return;
-    }
 
     _bannerAd = BannerAd(
       adUnitId: adUnitId,
@@ -128,16 +121,44 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           _onAdLoaded(ad, AdWidget(ad: ad as BannerAd));
         },
         onAdFailedToLoad: (ad, error) {
+
           ad.dispose();
           print('Banner failed: $error');
-          _checkIfAllAdsFailed();
+          _checkIfAllAdsFailed(error);
         },
       ),
     )..load();
   }
 
-  void _onAdLoaded(dynamic ad, Widget adWidget) {
+  void _onAdLoaded(dynamic ad, Widget adWidget) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    String? userId= sharedPreferences.getString("userId");
+    String? deviceId= sharedPreferences.getString("deviceId");
     to = DateTime.now().toString();
+
+    Map<String, dynamic> newEvent = {
+      'key': 'ads_success',
+      'metadata': {
+        "sdkRequestStartTime":from,
+        "sdkRequestReceivedTime":to,
+        "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds,
+        "createAt":DateTime.now(),
+        "adResponse":ad.responseInfo.toString(),
+      },
+      'userId': userId,
+      'deviceId': deviceId,
+    };
+    print("All Events: ${newEvent}");
+    await EventRepo().addEvent(newEvent).then((value) {  final box = Hive.box('events');
+
+      final allEvents = box.values.toList();
+      print("All Events:");
+      for (var e in allEvents) {
+        log("$e");
+      }// adds the event to the list
+    },);
+
     if (_isAdShown) {
       ad.dispose();
       return;
@@ -174,13 +195,26 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     }
   }
 
-  void _checkIfAllAdsFailed() {
-    bannerAdsLoading = BannerAdsLoading.fail;
-    // if (_isAdShown) return;
+  void _checkIfAllAdsFailed(LoadAdError error)async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-    // bool noAdUnits = (_adManagerNativeAd == null &&
-    //     _adMobNativeAd == null &&
-    //     _bannerAd == null);
+    String? userId= sharedPreferences.getString("userId");
+    String? deviceId= sharedPreferences.getString("deviceId");
+    Map<String, dynamic> newEvent = {
+      'key': 'ads_fail',
+      'metadata': {
+        "sdkRequestStartTime":from,
+        "sdkRequestReceivedTime":to,
+        "adsRenderingTime":0,
+        "createAt":DateTime.now(),
+        "adResponse":error.responseInfo.toString(),
+      },
+      'userId': userId,
+      'deviceId': deviceId,
+    };
+    print("All Events: ${newEvent}");
+    await EventRepo().addEvent(newEvent);
+    bannerAdsLoading = BannerAdsLoading.fail;
 
     setState(() {
       _adLoadFailed = true;
