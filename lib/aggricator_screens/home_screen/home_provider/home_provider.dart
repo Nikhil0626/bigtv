@@ -11,8 +11,6 @@ import '../../../services/analytics_service.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../home_repo/home_repo.dart';
-
-
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
   List getAllAiTagsList = [];

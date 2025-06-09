@@ -25,47 +25,59 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
   }
 
   final Map<int, String> states = {
-    21: 'Andhra Pradesh',
-    19: 'Telangana',
+    5: 'Andhra Pradesh',
+    4: 'Telangana',
   };
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<AuthenticationProvider>(builder: (_, authenticationProvider, __) {
+    return Consumer<AuthenticationProvider>(
+        builder: (_, authenticationProvider, __) {
       return Scaffold(
         backgroundColor: Colors.white,
         bottomNavigationBar: Padding(
           padding: EdgeInsets.all(25.w),
           child: InkWell(
-            onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5
+            onTap: authenticationProvider.selectedLocations.length > 1 &&
+                    authenticationProvider.selectedLocations.length <= 5
                 ? () {
-                    authenticationProvider.sendLocationsToServer(context,).then((value) {
-                      if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HomeView(),
-                          ),
-                              (route) => false,
-                        );
-                      }
-                    },);
+                    authenticationProvider
+                        .sendLocationsToServer(
+                      context,
+                    )
+                        .then(
+                      (value) {
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HomeView(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      },
+                    );
                   }
                 : () {
-                    CustomToast.showErrorToast(msg: "Please Select only 5 District ");
+                    CustomToast.showErrorToast(
+                        msg: "Please Select only 5 District ");
                   },
             child: Container(
               width: double.infinity,
               height: 35.h,
               decoration: BoxDecoration(
-                color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5) ?AppColors.appButtonColor : AppColors.bodyTextColor.withOpacity(.2),
+                color: (authenticationProvider.selectedLocations.length > 1 &&
+                        authenticationProvider.selectedLocations.length <= 5)
+                    ? AppColors.appButtonColor
+                    : AppColors.bodyTextColor.withOpacity(.2),
                 borderRadius: BorderRadius.all(Radius.circular(8.r)),
-
               ),
               child: Center(
                 child: Text(
                   'Update',
-                  style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: newAppFont(
+                      color: Colors.white, fontWeight: FontWeight.w500),
                 ),
               ),
             ),
@@ -107,13 +119,29 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                           style: newAppFont(color: Colors.grey.shade500),
                           children: [
                             TextSpan(
-                              text: "0${authenticationProvider.selectedLocations.length}",
-                              style: newAppFont(color:AppColors.appButtonColor, fontWeight: FontWeight.w500),
+                              text:
+                                  "0${authenticationProvider.selectedLocations.length}",
+                              style: newAppFont(
+                                  color: AppColors.appButtonColor,
+                                  fontWeight: FontWeight.w500),
                             ),
-                            TextSpan(text: "/05\n",            style: newAppFont(color:Colors.grey.shade500, fontWeight: FontWeight.w600,),),
-                            if(authenticationProvider.selectedLocations.length>5)
-                              TextSpan(text: "You Have Selected Maximum Number of Districts",style: newAppFont(fontSize: 10,color: Colors.red,fontWeight: FontWeight.w400)),
-
+                            TextSpan(
+                              text: "/05\n",
+                              style: newAppFont(
+                                color: Colors.grey.shade500,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            if (authenticationProvider
+                                    .selectedLocations.length >
+                                5)
+                              TextSpan(
+                                  text:
+                                      "You Have Selected Maximum Number of Districts",
+                                  style: newAppFont(
+                                      fontSize: 10,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w400)),
                           ],
                         ),
                       ),
@@ -125,7 +153,11 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                         int stateId = entry.key;
                         String stateName = entry.value;
 
-                        List<LocationModel> districts = authenticationProvider.getAllLocationList.where((loc) => loc.stateId.toString() == stateId.toString()).toList();
+                        List<LocationModel> districts = authenticationProvider
+                            .getAllLocationList
+                            .where((loc) =>
+                                loc.stateId.toString() == stateId.toString())
+                            .toList();
 
                         return ExpansionTile(
                           tilePadding: EdgeInsets.symmetric(horizontal: 16),
@@ -133,23 +165,34 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                           backgroundColor: Colors.transparent,
                           childrenPadding: EdgeInsets.zero,
                           initiallyExpanded: false,
-                           iconColor: AppColors.iconColors,
+                          iconColor: AppColors.iconColors,
                           title: Row(
                             mainAxisAlignment: MainAxisAlignment.start,
                             children: [
-                              Text(stateName, style: newAppFont(fontWeight: FontWeight.w600,)),
+                              Text(stateName,
+                                  style: newAppFont(
+                                    fontWeight: FontWeight.w600,
+                                  )),
                               width(width: 10),
-                              Text("(${districts.length})", style: newAppFont(fontWeight: FontWeight.w300,color: AppColors.iconColors)),
+                              Text("(${districts.length})",
+                                  style: newAppFont(
+                                      fontWeight: FontWeight.w300,
+                                      color: AppColors.iconColors)),
                             ],
                           ),
                           children: districts.map((district) {
-                            bool isSelected = authenticationProvider.selectedLocations.contains(district.districtName);
+                            bool isSelected = authenticationProvider
+                                .selectedLocations
+                                .contains(district.districtName);
                             return CheckboxListTile(
-                              title: Text(district.districtName, style: newAppFont(fontWeight: FontWeight.bold)),
+                              title: Text(district.districtName,
+                                  style:
+                                      newAppFont(fontWeight: FontWeight.bold)),
                               value: isSelected,
                               activeColor: AppColors.appButtonColor,
                               onChanged: (bool? selected) {
-                                authenticationProvider.addToSelectedLocations(district.districtName);
+                                authenticationProvider.addToSelectedLocations(
+                                    district.districtName);
                               },
                             );
                           }).toList(),

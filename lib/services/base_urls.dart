@@ -3,7 +3,9 @@ import 'dart:core';
 class BaseUrls {
   /// Dev Base Url
   //   static const String baseUrl = "https://chotanews-fdcscrezbfd4befm.z01.azurefd.net/api";
+
   static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
+
 
   static const String baseUrlAws = "https://prodchotanews.signitivessoft.com/api";
 
@@ -51,15 +53,15 @@ class BaseUrls {
   static const String privacyPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Privacy+5.html";
 
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
-
+  //
   /// Python apis
   static const String ePaperBaseUrlAws = "https://aggregator.chotanews.com";
   static const String baseUrlAwsDev = "https://api.chotanews.com";
 
-
-  /// Python Dec Apis
-  // static const String ePaperBaseUrlAws = "http://devaggregator.chotanews.com";
-  // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
+ //
+ // // Python Dev Apis
+ //  // static const String ePaperBaseUrlAws = "http://devaggregator.chotanews.com";
+ //  static const String baseUrlAwsDev = "https://devapi.chotanews.com";
 
   ///Login login
   static const String sendOtpPy = "/send-otp";

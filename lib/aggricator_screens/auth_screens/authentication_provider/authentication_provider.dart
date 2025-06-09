@@ -187,7 +187,8 @@ notifyListeners();
       "user_id": userId ?? "",
     };
     try {
-      log("get all catttt");
+      log("get all catttt$body");
+
       Response response = await AuthenticationRepo().getAllCategories(body);
       if (response.statusCode == 200) {
         List data = response.data['categories'];

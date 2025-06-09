@@ -119,8 +119,8 @@ class _DistrictViewState extends State<DistrictView> {
   }
 
   final Map<int, String> states = {
-    21: 'Andhra Pradesh',
-    19: 'Telangana',
+    5: 'Andhra Pradesh',
+    4: 'Telangana',
   };
 
   @override

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -9,13 +7,31 @@ import 'package:provider/provider.dart';
 import 'home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
 
+/// ✅ Custom scroll physics to increase flipping speed
+class FastPageScrollPhysics extends PageScrollPhysics {
+  const FastPageScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
+
+  @override
+  FastPageScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return FastPageScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  Duration get transitionDuration => Duration.zero;}
+
 class MainScreenPageView extends StatefulWidget {
   final int startIndex;
   final bool isAiTags;
   final String tagName;
   final String tagId;
 
-  const MainScreenPageView({super.key, this.startIndex = 0, this.isAiTags = false, this.tagName = "", this.tagId = ""});
+  const MainScreenPageView({
+    super.key,
+    this.startIndex = 0,
+    this.isAiTags = false,
+    this.tagName = "",
+    this.tagId = "",
+  });
 
   @override
   _MainScreenPageViewState createState() => _MainScreenPageViewState();
@@ -23,113 +39,138 @@ class MainScreenPageView extends StatefulWidget {
 
 class _MainScreenPageViewState extends State<MainScreenPageView> {
   late PageController _pageController;
-  int autoIndex = 0;
+  double _currentPage = 0.0;
 
   @override
   void initState() {
-    autoIndex = 0;
     super.initState();
-    _pageController = PageController(viewportFraction: 1.0);
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToIndex(widget.startIndex);
+    _pageController = PageController(initialPage: widget.startIndex);
+    _pageController.addListener(() {
+      setState(() {
+        _currentPage = _pageController.page ?? 0.0;
+      });
     });
   }
 
-  void _scrollToIndex(int index) {
-    if (index >= 0) {
-      _pageController.jumpToPage(index); // For instant scroll
-      // _pageController.animateToPage(index, duration: Duration(milliseconds: 500), curve: Curves.easeInOut); // Smooth scroll
-    }
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+
     return Scaffold(
       body: Consumer<HomeProvider>(
         builder: (_, homeProvider, __) {
           if (homeProvider.getAllPostList.isEmpty) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
+
+          final articles = homeProvider.getAllPostList;
 
           return Column(
             children: [
               if (widget.isAiTags)
-                Padding(
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 20, bottom: 10),
-                  child: Row(
-                    children: [
-                      width(width: 10),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Icon(
-                          Icons.arrow_back,
-                          color: Colors.black,
-                          size: 24,
+                SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12.0),
+                    child: Row(
+                      children: [
+                        width(width: 10),
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.black,
+                            size: 24,
+                          ),
                         ),
-                      ),
-                      width(width: 10),
-                      Expanded(
+                        width(width: 10),
+                        Expanded(
                           child: Text(
-                        "${widget.tagName}",
-                        style: fontStyle(fontWeight: FontWeight.w900, fontSize: 16, color: AppColors.textColor),
-                      )),
-                      Container(
+                            widget.tagName,
+                            style: fontStyle(
+                              fontWeight: FontWeight.w900,
+                              fontSize: 16,
+                              color: AppColors.textColor,
+                            ),
+                          ),
+                        ),
+                        Container(
                           padding: EdgeInsets.all(2.sp),
-                          decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(2)), color: AppColors.loginNumberBg),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(2),
+                            color: AppColors.loginNumberBg,
+                          ),
                           child: Text(
-                            "3/${homeProvider.getAllPostList.length}",
-                            style: fontStyle(fontWeight: FontWeight.w600, fontSize: 12, color: AppColors.textColor),
-                          )),
-                      width(width: 10)
-                    ],
+                            "${(widget.startIndex + 1)}/${articles.length}",
+                            style: fontStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                              color: AppColors.textColor,
+                            ),
+                          ),
+                        ),
+                        width(width: 10),
+                      ],
+                    ),
                   ),
                 ),
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  child: PageView.builder(
-                    controller: _pageController,
-                    scrollDirection: Axis.vertical,
-                    itemCount: homeProvider.getAllPostList.length,
-                    onPageChanged: (value) {
-                      log("IndividualPostView  $autoIndex--- $value");
-                      context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
+                child: Stack(
+                  children: [
+                    ...List.generate(articles.length, (index) {
+                      final double position = index - _currentPage;
 
-                      autoIndex = value;
-                      setState(() {});
-                    },
-                    itemBuilder: (context, index) {
-                      if (homeProvider.getAllPostList.length - 5 == index) {
-                        log("is come from lin----k${homeProvider.getAllPostList[index]['id']}");
-                        context.read<HomeProvider>().getAllPost(postId: homeProvider.getAllPostList.last['id'].toString());
+                      if (position < -1 || position > 1) return const SizedBox();
+
+                      if (position <= 0) {
+                        return Positioned.fill(
+                          child: MainScreenBytView(
+                            article: articles[index],
+                          ),
+                        );
                       }
-                      return AnimatedBuilder(
-                        animation: _pageController,
-                        builder: (context, child) {
-                          double position = 1.0;
 
-                          if (_pageController.hasClients && _pageController.position.haveDimensions) {
-                            double? page = _pageController.page ?? 0;
-                            position = (1 - (page - index).abs()).clamp(0.0, 1.0);
-                          }
+                      final double visiblePortion = (1 - position).clamp(0.0, 1.0);
+                      final double topOffset = screenHeight * (1 - visiblePortion);
 
-                          return Opacity(
-                            opacity: position,
-                            child: Transform.translate(
-                              offset: Offset(0, 50 * (1 - position)),
-                              child: Container(
-                                color: Colors.white,
-                                child: MainScreenBytView(article: homeProvider.getAllPostList[index]),
-                              ),
+                      return Positioned(
+                        top: topOffset,
+                        left: 0,
+                        right: 0,
+                        height: screenHeight,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(32),
                             ),
-                          );
-                        },
+                          ),
+                          child: ClipRRect(
+                            borderRadius: const BorderRadius.vertical(
+                              top: Radius.circular(32),
+                            ),
+                            child: MainScreenBytView(
+                              article: articles[index],
+                            ),
+                          ),
+                        ),
                       );
-                    },
-                  ),
+                    }),
+
+                    // Transparent PageView to handle vertical scroll with faster speed
+                    PageView.builder(
+                      controller: _pageController,
+                      scrollDirection: Axis.vertical,
+                      physics: const FastPageScrollPhysics(),
+                      itemCount: articles.length,
+                      itemBuilder: (_, __) => const SizedBox.shrink(),
+                    ),
+                  ],
                 ),
               ),
             ],
