@@ -17,14 +17,12 @@ class AiTagPostsPageView extends StatefulWidget {
   final String tagId;
 
   const AiTagPostsPageView({super.key, this.isAiTags = false, this.tagName = "", this.tagId = ""});
-
   @override
   _AiTagPostsPageViewState createState() => _AiTagPostsPageViewState();
 }
 
 class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
   late PageController _pageController;
-
   int autoIndex = 0;
 
   @override
