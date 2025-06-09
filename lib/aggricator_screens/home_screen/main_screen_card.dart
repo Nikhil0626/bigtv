@@ -45,6 +45,29 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
     }
   }
 
+  Map<int, GlobalKey> aiTagKeys = {};
+  ScrollController aiTagScrollController = ScrollController();
+
+  void aiTagsScrollToCenter(int index) {
+    final keyContext = aiTagKeys[index]?.currentContext;
+    if (keyContext != null) {
+      final box = keyContext.findRenderObject() as RenderBox;
+      final size = box.size;
+      final position = box.localToGlobal(Offset.zero);
+
+      final screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+
+      final itemCenter = position.dx + size.width / 2;
+      final targetOffset = aiTagScrollController.offset + itemCenter - screenWidth / 2;
+
+      aiTagScrollController.animateTo(
+        targetOffset.clamp(0.0, aiTagScrollController.position.maxScrollExtent),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
@@ -65,32 +88,41 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                               : SizedBox(
                                   height: 50,
                                   child: ListView.builder(
+                                    controller: homeProvider.aiTagScrollController,
                                     scrollDirection: Axis.horizontal,
                                     itemCount: homeProvider.getAllAiTagsList.length,
                                     itemBuilder: (context, index) {
+                                      // Ensure key exists
+                                      if (!homeProvider.aiTagKeys.containsKey(index)) {
+                                        homeProvider.aiTagKeys[index] = GlobalKey();
+                                      }
+
+                                      final tag = homeProvider.getAllAiTagsList[index];
+                                      final tagId = tag['aitagid'];
+
                                       return InkWell(
+                                        key: homeProvider.aiTagKeys[index],
                                         onTap: () async {
-                                          context.read<HomeProvider>().setSelectedTagId(homeProvider.getAllAiTagsList[index]['aitagid']);
-                                          context.read<HomeProvider>().getAllPostsByAiId(homeProvider.getAllAiTagsList[index]['aitagid'].toString());
-                                          context.read<HomeProvider>().aiTagDataLoaded(true);
+                                          homeProvider.setSelectedTagId(tagId);
+                                          homeProvider.getAllPostsByAiId(tagId.toString());
+                                          homeProvider.aiTagDataLoaded(true);
+                                          homeProvider.aiTagsScrollToCenter(index);
                                         },
                                         child: Container(
                                           height: 30,
                                           margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
                                           decoration: BoxDecoration(
-                                            color: homeProvider.selectedTagId == homeProvider.getAllAiTagsList[index]['aitagid']
-                                                ? AppColors.appButtonColor // Highlighted tag color
-                                                : AppColors.cardBackgroundColor,
+                                            color: homeProvider.selectedTagId == tagId ? AppColors.appButtonColor : AppColors.cardBackgroundColor,
                                             borderRadius: BorderRadius.circular(12.r),
                                           ),
                                           alignment: Alignment.center,
                                           child: Padding(
                                             padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
                                             child: Text(
-                                              homeProvider.getAllAiTagsList[index]['aitagname'].toString(),
+                                              tag['aitagname'].toString(),
                                               textAlign: TextAlign.center,
                                               style: homeScreenFontStyle(
-                                                color: homeProvider.selectedTagId == homeProvider.getAllAiTagsList[index]['aitagid'] ? Colors.white : AppColors.textColor,
+                                                color: homeProvider.selectedTagId == tagId ? Colors.white : AppColors.textColor,
                                                 fontSize: 14.sp,
                                                 fontWeight: FontWeight.w500,
                                               ),

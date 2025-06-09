@@ -113,6 +113,12 @@ class HomeProvider extends ChangeNotifier {
 
   void setSelectedTagId(int id) {
     _selectedTagId = id;
+    // final index = getAllAiTagsList.indexWhere((tag) => tag['aitagid'] == id);
+    // if (index > 0) {
+    //   final selectedTag = getAllAiTagsList.removeAt(index);
+    //   getAllAiTagsList.insert(0, selectedTag);
+    // }
+
     notifyListeners();
   }
 
@@ -177,7 +183,9 @@ class HomeProvider extends ChangeNotifier {
       bool isEnd = pageController!.position.pixels != 0;
       if (isEnd) {
         log("po)stId.toString()   $postId");
-        getAllPost(postIds: getAllPostList.last['id'].toString() ?? "0");
+        if(!isAiTagDataLoaded) {
+          getAllPost(postIds: getAllPostList.last['id'].toString() ?? "0");
+        }
       }
     }
   }
@@ -209,9 +217,6 @@ class HomeProvider extends ChangeNotifier {
 
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
-      // postId = response.data['lastId'].toString() ?? "0";
-
-      // log(postId.toString());
       adManageId = Platform.isIOS ? response.data['adUnits']['ios']['admanageid'] : response.data['adUnits']['android']['admanageid'];
       adManagerNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admanagernativeid'] : response.data['adUnits']['android']['admanagernativeid'];
       adManagerBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerbannerid'] : response.data['adUnits']['android']['admanagerbannerid'];
@@ -254,8 +259,6 @@ class HomeProvider extends ChangeNotifier {
         });
       }
       getAllPostList.addAll(data);
-
-      log("sfbsvfjhshfejsosevfuyesfuyiesdfkejswihfveuwfyiwe");
       log(getAllPostList.length.toString());
 
       isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
@@ -515,5 +518,32 @@ class HomeProvider extends ChangeNotifier {
   void _onTokenInvalidated(Map<String, dynamic>? message) {
     print("tokenInvalidated callback received $message");
     WebEngagePlugin.setSecureToken("siva kumar", message.toString());
+  }
+
+  final Map<int, GlobalKey> aiTagKeys = {};
+  final ScrollController aiTagScrollController = ScrollController();
+
+  void aiTagsScrollToCenter(int index) {
+    final keyContext = aiTagKeys[index]?.currentContext;
+    if (keyContext != null) {
+      final RenderBox box = keyContext.findRenderObject() as RenderBox;
+      final size = box.size;
+      final position = box.localToGlobal(Offset.zero);
+
+      final screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width /
+          WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+
+      final itemCenter = position.dx + size.width / 2;
+      final targetOffset = aiTagScrollController.offset + itemCenter - screenWidth / 2;
+
+      aiTagScrollController.animateTo(
+        targetOffset.clamp(
+          0.0,
+          aiTagScrollController.position.maxScrollExtent,
+        ),
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+    }
   }
 }

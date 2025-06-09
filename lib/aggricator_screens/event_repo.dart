@@ -18,27 +18,25 @@ class EventRepo extends BaseService {
   Future<void> addEvent(Map<String, dynamic> eventData) async {
     log("event body --- ${eventData}");
     final box = Hive.box('events');
-
-
     await box.add(eventData);
   }
 
   Future<void> processAndPushEvents() async {
     final box = Hive.box('events');
+    // await box.clear();
     final events = box.values.map((e) => _convertEventToJson(e)).toList();
     log("Event Data Push ${events.toString()}");
-
     if (events.isEmpty) return;
 
     Response response = await makeRequest(
       url: BaseUrls.eventUrl,
       baseUrl: BaseUrls.baseUrlAwsDev,
       method: RequestType.post,
-      body: { events},
+      body: events,
     );
 
     if (response.statusCode == 200) {
-
+      await box.clear();
       print("Events pushed and cleared successfully.");
     } else {
       print("Failed to push events: ${response.statusCode}");
