@@ -228,34 +228,7 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                 ),
               ),
 
-              // Bookmark Icon (Top-Right)
-              Positioned(
-                top: 8.w,
-                right: 8.w,
-                child: Consumer<ReelsProviders>(builder: (_, homeProvider, __) {
-                  return GestureDetector(
-                    onTap: () {
-                      context.read<ReelsProviders>().isBookMarkPost(  widget.card,context);
 
-                      print("");
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: (homeProvider.isBookMark.contains(widget.card.id.toString()) || widget.card.isBookmarked == 1)
-                            ? AppColors.appButtonColor
-                            : Colors.black54,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        (homeProvider.isBookMark.contains(widget.card.id.toString()) ||  widget.card.isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  );
-                }),
-              ),
 
 
             ],

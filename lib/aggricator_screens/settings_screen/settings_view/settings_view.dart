@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -92,9 +91,9 @@ class _SettingsViewState extends State<SettingsView> {
               Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
             }),
             height(height: 5.h),
-            _buildSettingsRow(context, "BookMarks.svg", "Bookmarks", () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => SavedArticles()));
-            }),
+            // _buildSettingsRow(context, "BookMarks.svg", "Bookmarks", () {
+            //   Navigator.push(context, MaterialPageRoute(builder: (context) => SavedArticles()));
+            // }),
             // _buildNotificationRow(),
 
             _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () {
