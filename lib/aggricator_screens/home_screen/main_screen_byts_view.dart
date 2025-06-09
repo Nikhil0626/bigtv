@@ -350,12 +350,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                               log("Refresh");
 
                                               homeProvide.isReloadData();
-                                              if (widget.isaiTags) {
-                                                homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
-                                                  (value) {
-                                                    homeProvide.isReloadFalse();
-                                                  },
-                                                );
+                                              if (homeProvide.isAiTagDataLoaded) {
+                                                homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
                                               } else {
                                                 homeProvide.getAllPostList = [];
                                                 homeProvide.getAllPost();
