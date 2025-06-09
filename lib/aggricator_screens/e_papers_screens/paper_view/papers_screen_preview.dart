@@ -88,7 +88,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
       body: Consumer<NewsPostsProvider>(
         builder: (_, newsPostsProvider, __) {
           return Padding(
-            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top+6),
+            padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 6),
             child: Stack(
               children: [
                 Column(
@@ -100,7 +100,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                           width(width: 20),
                           const Icon(Icons.arrow_back_outlined, size: 20),
                           width(width: 20),
-                          Text(widget.name, style: newAppFont(fontSize: 16,fontWeight: FontWeight.w600)),
+                          Text(widget.name, style: newAppFont(fontSize: 16, fontWeight: FontWeight.w600)),
                         ],
                       ),
                     ),
@@ -109,13 +109,10 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                         children: [
                           GestureDetector(
                             onTap: newsPostsProvider.isPaperShowing,
-
                             child: PageView.builder(
                               controller: _pageController,
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: widget.imageUrls.length,
-
-
                               itemBuilder: (context, index) {
                                 final imageUrl = widget.imageUrls[index].imageUrl;
                                 return InteractiveViewer(
@@ -151,40 +148,6 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                               }
                                             },
                                           ),
-
-                                          Positioned(
-                                            top: 20,
-                                            right: 20,
-                                            child: Consumer<EPapersProvider>(
-                                              builder: (_, ePapersProvider, __) {
-                                                return GestureDetector(
-                                                  onTap: () async {
-                                                    final prefs = await SharedPreferences.getInstance();
-                                                    final userId = prefs.getString("userId");
-                                                    final deviceId = prefs.getString("deviceId");
-
-                                                    context.read<EPapersProvider>().isBookMarkPost(widget.imageUrls[index], context);
-                                                  },
-                                                  child: Container(
-                                                    padding: EdgeInsets.all(7),
-                                                    decoration: BoxDecoration(
-                                                      color: (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1)
-                                                          ? AppColors.appButtonColor
-                                                          : Colors.black54,
-                                                      shape: BoxShape.circle,
-                                                    ),
-                                                    child: Icon(
-                                                      (ePapersProvider.isBookMark.contains(widget.imageUrls[index].id) || widget.imageUrls[index].isBookmarked == 1)
-                                                          ? Icons.bookmark
-                                                          : Icons.bookmark_outline,
-                                                      color: Colors.white,
-                                                      size: 20,
-                                                    ),
-                                                  ),
-                                                );
-                                              },
-                                            ),
-                                          ),
                                           Positioned(
                                             top: 20,
                                             right: 80,
@@ -212,9 +175,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                                 final prefs = await SharedPreferences.getInstance();
                                                 final userId = prefs.getString("userId");
 
-
-
-                                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex+1].id, "");
+                                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].id, "");
 
                                                 try {
                                                   RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
@@ -223,12 +184,12 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                                   Uint8List pngBytes = byteData!.buffer.asUint8List();
 
                                                   final directory = await getTemporaryDirectory();
-                                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex+1].id.toString()}.png');
+                                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].id.toString()}.png');
                                                   await imagePath.writeAsBytes(pngBytes);
 
                                                   await Share.shareXFiles(
                                                     [XFile(imagePath.path)],
-                                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex+1].imageUrl}',
+                                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].imageUrl}',
                                                   );
                                                 } catch (e) {
                                                   print("Error capturing image: $e");
@@ -257,7 +218,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                               },
                             ),
                           ),
-                          if(currentIndex!=0)
+                          if (currentIndex != 0)
                             Positioned(
                               left: 10.sp,
                               top: MediaQuery.of(context).size.height / 2 - 50.sp,
@@ -265,17 +226,15 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                 builder: (_, ePapersProvider, __) {
                                   return GestureDetector(
                                     onTap: () async {
-                                      context.read<HomeProvider>().flipEvent('paper',widget.imageUrls[currentIndex].id,false);
+                                      context.read<HomeProvider>().flipEvent('paper', widget.imageUrls[currentIndex].id, false);
 
                                       log("current ++= $currentIndex ---- lase    ${widget.imageUrls.length}");
                                       postId = widget.imageUrls[currentIndex].id.toString();
                                       isBookmarked = widget.imageUrls[currentIndex].isBookmarked == 0 ? 0 : 1;
                                       newsPostsProvider.paperSet(widget.imageUrls[currentIndex].imageUrl, currentIndex);
-                                      currentIndex=currentIndex-1;
+                                      currentIndex = currentIndex - 1;
                                       _pageController.jumpToPage(currentIndex);
-                                      setState(() {
-
-                                      });
+                                      setState(() {});
                                     },
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.all(Radius.circular(20.r)),
@@ -288,32 +247,30 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                         ),
                                         child: Center(
                                             child: Icon(
-                                              Icons.arrow_back_ios_outlined,
-                                              size: 20.sp,
-                                              color: Colors.white,
-                                            )),
+                                          Icons.arrow_back_ios_outlined,
+                                          size: 20.sp,
+                                          color: Colors.white,
+                                        )),
                                       ),
                                     ),
                                   );
                                 },
                               ),
                             ),
-                          if(currentIndex!=widget.imageUrls.length-1)
+                          if (currentIndex != widget.imageUrls.length - 1)
                             Positioned(
                               right: 10.sp,
                               top: MediaQuery.of(context).size.height / 2 - 50.sp,
                               child: InkWell(
                                 onTap: () async {
-                                  context.read<HomeProvider>().flipEvent('paper',widget.imageUrls[currentIndex].id,true);
+                                  context.read<HomeProvider>().flipEvent('paper', widget.imageUrls[currentIndex].id, true);
                                   log("current ++= $currentIndex ---- lase    ${widget.imageUrls.length}");
                                   postId = widget.imageUrls[currentIndex].id.toString();
                                   isBookmarked = widget.imageUrls[currentIndex].isBookmarked == 0 ? 0 : 1;
                                   newsPostsProvider.paperSet(widget.imageUrls[currentIndex].imageUrl, currentIndex);
-                                  currentIndex=currentIndex+1;
+                                  currentIndex = currentIndex + 1;
                                   _pageController.jumpToPage(currentIndex);
-                                  setState(() {
-
-                                  });
+                                  setState(() {});
                                 },
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.all(Radius.circular(20.r)),
@@ -326,10 +283,10 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                     ),
                                     child: Center(
                                         child: Icon(
-                                          Icons.arrow_forward_ios_rounded,
-                                          size: 20.sp,
-                                          color: Colors.white,
-                                        )),
+                                      Icons.arrow_forward_ios_rounded,
+                                      size: 20.sp,
+                                      color: Colors.white,
+                                    )),
                                   ),
                                 ),
                               ),
@@ -338,46 +295,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                       ),
                     ),
                   ],
-                ),
-                if (newsPostsProvider.isBottomIsShow)
-                  Positioned(
-                    bottom: 0,
-                    child: Container(
-                      height: 170,
-                      width: MediaQuery.of(context).size.width,
-                      padding: const EdgeInsets.all(7),
-                      decoration: BoxDecoration(color: AppColors.ePaperCardColor),
-                      child: ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: widget.imageUrls.length,
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
-                              postId = widget.imageUrls[index].id.toString();
-                              isBookmarked = widget.imageUrls[index].isBookmarked == 0 ? 0 : 1;
-                              newsPostsProvider.paperSet(widget.imageUrls[index].imageUrl, index);
-                              newsPostsProvider.isPaperShowing();
-                              _pageController.jumpToPage(index);
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 5),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: CachedNetworkImage(
-                                  imageUrl: widget.imageUrls[index].imageUrl.toString(),
-                                  height: 150,
-                                  width: 100,
-                                  fit: BoxFit.fill,
-                                  placeholder: (context, url) => Container(color: Colors.grey.shade200),
-                                  errorWidget: (context, url, error) => Icon(Icons.image, size: 100, color: Colors.grey.shade300),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+                )
               ],
             ),
           );

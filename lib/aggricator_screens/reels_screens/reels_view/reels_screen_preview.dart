@@ -85,28 +85,6 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
     super.dispose();
   }
 
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _pageController = PageController(initialPage: widget.initialIndex);
-  //
-  //   _controllers = List.generate(
-  //     context.read<ReelsProviders>().getAllReelsList.length,
-  //     (index) => YoutubePlayerController(
-  //       initialVideoId: YoutubePlayer.convertUrlToId(context.read<ReelsProviders>().getAllReelsList[index].videoUrl)!,
-  //       flags: const YoutubePlayerFlags(
-  //         autoPlay: true,
-  //         mute: false,
-  //         forceHD: true,
-  //         loop: false,
-  //         disableDragSeek: true,
-  //         enableCaption: false,
-  //         controlsVisibleAtStart: true,
-  //       ),
-  //     ),
-  //   );
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -354,54 +332,26 @@ class _ReelsCardViewState extends State<ReelsCardView> {
         Positioned(
           top: 50,
           left: 20,
-          right: 20,
-          child: Row(children: [
-            GestureDetector(
-              onTap: () {
-                widget.youtubePlayerController.pause();
-                widget.youtubePlayerController.dispose();
-                Navigator.pop(context);
+          child: GestureDetector(
+            onTap: () {
+              widget.youtubePlayerController.pause();
+              widget.youtubePlayerController.dispose();
+              Navigator.pop(context);
 
-              },
-              child: Container(
-                padding: EdgeInsets.all(7),
-                decoration: BoxDecoration(
-                  color: Colors.black54,
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                  size: 20,
-                ),
+            },
+            child: Container(
+              padding: EdgeInsets.all(7),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.arrow_back,
+                color: Colors.white,
+                size: 20,
               ),
             ),
-            Spacer(),
-            Consumer<ReelsProviders>(builder: (_, homeProvider, __) {
-              return GestureDetector(
-                onTap: () {
-                  context.read<ReelsProviders>().isBookMarkPost(  widget.reelCard,context);
-
-                  print("");
-                },
-                child: Container(
-                  padding: EdgeInsets.all(7),
-                  decoration: BoxDecoration(
-                    color: (homeProvider.isBookMark.contains(widget.reelCard.id.toString()) || widget.reelCard.isBookmarked == 1)
-                        ? AppColors.appButtonColor
-                        : Colors.black54,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    (homeProvider.isBookMark.contains(widget.reelCard.id.toString()) ||  widget.reelCard.isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
-              );
-            }),
-
-          ],),
+          ),
         ),
       ],
     );

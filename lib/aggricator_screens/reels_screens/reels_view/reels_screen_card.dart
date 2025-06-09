@@ -403,31 +403,7 @@ class _EachReelCardState extends State<EachReelCard> {
                   ],
                 ),
               ),
-              Positioned(
-                top: 10,
-                right: 14,
-                child: Consumer<ReelsProviders>(builder: (_, homeProvider, __) {
-                  return GestureDetector(
-                    onTap: () {
-                      context.read<ReelsProviders>().isBookMarkPost(widget.reel, context);
 
-                      print("");
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color: (homeProvider.isBookMark.contains(widget.reel.id.toString()) || widget.reel.isBookmarked == 1) ? AppColors.appButtonColor : Colors.black54,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        (homeProvider.isBookMark.contains(widget.reel.id.toString()) || widget.reel.isBookmarked == 1) ? Icons.bookmark : Icons.bookmark_outline,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                    ),
-                  );
-                }),
-              ),
             ],
           ),
         ),

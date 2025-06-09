@@ -29,12 +29,14 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
 import '../ad_manager_screen/test_ads.dart';
+import '../reels_screens/reels_view/reels_screen_preview.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 
 import '../video_image_view/gallery_screen.dart';
 import '../video_image_view/video_preview.dart';
+import 'full_standed_video_view.dart';
 import 'home_provider/home_provider.dart';
 
 class MainScreenBytView extends StatefulWidget {
@@ -127,6 +129,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                               article: widget.article,
                             ),
                           )
+                        :widget.article['type'] == "Reel"
+                        ? FullStandardVideoView( rellData:  widget.article,)
                         : widget.article['type'] == "Image"
                             ? Stack(
                                 children: [

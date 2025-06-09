@@ -139,11 +139,11 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
     Map<String, dynamic> newEvent = {
       'key': 'ads_success',
-      'metadata': {
+      'eventData': {
         "sdkRequestStartTime":from,
         "sdkRequestReceivedTime":to,
         "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds,
-        "createAt":DateTime.now(),
+        "createAt":DateTime.now().toIso8601String(),
         "adResponse":ad.responseInfo.toString(),
       },
       'userId': userId,
@@ -201,8 +201,8 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     String? userId= sharedPreferences.getString("userId");
     String? deviceId= sharedPreferences.getString("deviceId");
     Map<String, dynamic> newEvent = {
-      'key': 'ads_fail',
-      'metadata': {
+      'key': 'ads_failure',
+      'eventData': {
         "sdkRequestStartTime":from,
         "sdkRequestReceivedTime":to,
         "adsRenderingTime":0,
@@ -519,3 +519,5 @@ class _BannerAdsState extends State<BannerAds> {
     );
   }
 }
+
+

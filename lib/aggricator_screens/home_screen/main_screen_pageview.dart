@@ -64,7 +64,9 @@ HomeProvider? homeProvider;
                       itemCount: homeProvider.getAllPostList.length,
                       onPageChanged: (value) {
                         log("IndividualPostView  $autoIndex--- $value");
-                        homeProvider.pageChange(isValue: false);
+                        if(homeProvider.isBottomEnable) {
+                          homeProvider.pageChange(isValue: false);
+                        }
                         if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
                           Future.delayed(
                             Duration(milliseconds: 2000),
@@ -72,7 +74,7 @@ HomeProvider? homeProvider;
                               log("IndividualPostView dddd $autoIndex--- $value ==== ");
                               context.read<HomeProvider>().aiTagDataLoaded(false);
                               context.read<HomeProvider>().setSelectedTagId(0);
-                              context.read<HomeProvider>().getAllPost();
+                              context.read<HomeProvider>().getAllPost(postIds:"0");
                             },
                           );
                         }
