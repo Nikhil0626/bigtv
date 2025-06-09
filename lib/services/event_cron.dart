@@ -14,10 +14,8 @@ class EventCron {
   EventCron._internal();
 
   void start() {
-    // Run immediately when app opens
-   EventRepo().processAndPushEvents();
 
-   // Schedule to run every 3 minutes
+   EventRepo().processAndPushEvents();
     _cron.schedule(Schedule.parse('*/10 * * * *'), () async {
       log("api call started");
       EventRepo().processAndPushEvents();

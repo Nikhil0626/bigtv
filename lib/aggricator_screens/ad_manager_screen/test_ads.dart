@@ -206,7 +206,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         "sdkRequestStartTime":from,
         "sdkRequestReceivedTime":to,
         "adsRenderingTime":0,
-        "createAt":DateTime.now(),
+        "createAt":DateTime.now().toIso8601String(),
         "adResponse":error.responseInfo.toString(),
       },
       'userId': userId,
