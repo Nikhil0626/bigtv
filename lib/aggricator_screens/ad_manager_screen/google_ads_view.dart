@@ -234,62 +234,68 @@ class RateYourApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
+      child: Card(
+        color: AppColors.adsBackgroundColor,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'Rate your experience\nwith chota news?',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-              ),
-            ),
-            height(height: 6.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                5,
-                    (index) =>
-                    Icon(
-                      Icons.star,
-                      color: AppColors.ratingColor,
-                      size: 40,
-                    ),
-              ),
-            ),
-            height(height: 4.h),
-            Text(
-              'Awesome, liked it',
-              style: TextStyle(
-                color: Colors.lightBlue,
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            height(height: 6.h),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.lightBlue,
-                foregroundColor: Colors.white,
-                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Rate your experience\nwith chota news?',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
                 ),
               ),
-              child: Text('Submit'),
-            ),
-          ],
+              height(height: 6.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  5,
+                      (index) =>
+                      Icon(
+                        Icons.star,
+                        color: AppColors.ratingColor,
+                        size: 40,
+                      ),
+                ),
+              ),
+              height(height: 4.h),
+              Text(
+                'Awesome, liked it',
+                style: TextStyle(
+                  color: Colors.lightBlue,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+              height(height: 6.h),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.lightBlue,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text('Submit'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -309,39 +315,51 @@ class _SurveyCardsState extends State<SurveyCards> {
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(
       builder: (_,homeProvider,__) {
-        return Container(
-          height: 330.h,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text(
-                  'Are liking our app?',
-                  textAlign: TextAlign.center,
-                  style: newAppFont(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
+        return ClipRRect(
+          child: Card(
+            color: AppColors.adsBackgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Container(
+              height: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
               ),
-              Expanded(
-
-                  child: ListView.builder(
-                    itemCount: homeProvider.getAllSurveyDataList.length,
-                    itemBuilder: (context, index) {
-                return Container(height: 30,
-                    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5)), border: Border.all(width: 1, color: AppColors.borderColor)),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
                     child: Text(
-                        'Are liking our app?',
-                        textAlign: TextAlign.center,
-                        style: newAppFont(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.black,
-                        )));
-              },))
-            ],
+                      'Are liking our app?',
+                      textAlign: TextAlign.center,
+                      style: newAppFont(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+                  Expanded(
+
+                      child: ListView.builder(
+                        itemCount: homeProvider.getAllSurveyDataList.length,
+                        itemBuilder: (context, index) {
+                    return Container(height: 30,
+                        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(5)), border: Border.all(width: 1, color: AppColors.borderColor)),
+                        child: Text(
+                            'Are liking our app?',
+                            textAlign: TextAlign.center,
+                            style: newAppFont(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            )));
+                  },))
+                ],
+              ),
+            ),
           ),
         );
       }
@@ -362,7 +380,7 @@ class ShareYourApp extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Container(
-          width: 300.sp,
+          width: MediaQuery.of(context).size.width,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),

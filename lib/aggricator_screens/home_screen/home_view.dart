@@ -1,33 +1,19 @@
-import 'dart:async';
-import 'dart:developer';
-import 'dart:io';
 
-import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
-import 'package:chotanews/aggricator_screens/home_screen/main_screen_list.dart';
-import 'package:chotanews/aggricator_screens/individual_post_details/individual_post_view.dart';
-import 'package:chotanews/aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_card.dart';
-import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_list.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
-import 'package:chotanews/utils/app_fonts.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:chotanews/utils/app_spaces.dart';
+import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../../services/app_update_servuce.dart';
-import '../../services/deviice_details.dart';
 import '../../services/permission_handler_services.dart';
 import '../../services/webengage_notification.dart';
-import '../../utils/custom_switch.dart';
-import '../e_papers_screens/paper_view/papers_screen_list.dart';
 import '../settings_screen/settings_view/settings_view.dart';
 import 'home_provider/home_provider.dart';
 import 'main_screen_card.dart';
@@ -40,337 +26,165 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  final AppLinks _appLinks = AppLinks();
   late PageController _pageController;
-  StreamSubscription<Uri>? linkSubscription;
-  String? postId;
+
+  HomeProvider? homeProvider;
 
   @override
   void initState() {
+    homeProvider = Provider.of<HomeProvider>(context, listen: false);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppUpdateService.checkForUpdate(context);
+      requestNotificationPermission();
+      homeProvider?.getMobileNumber();
     });
-    _initDeepLinks();
-    requestNotificationPermission();
-    getMobileNumber();
-    subscribeToPushCallbacks();
+    context.read<HomeProvider>().subscribeToPushCallbacks();
     context.read<HomeProvider>().selectedIndex = 0;
     _pageController = PageController(initialPage: 0);
-
     super.initState();
-  }
-
-  Future<void> _initDeepLinks() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    linkSubscription = AppLinks().uriLinkStream.listen((uri) {
-      debugPrint('onAppLink: $uri');
-      _handleDeepLink(uri);
-    },onError: (err) {
-        log("Error in deep link handling: $err");
-      });
-
-    // log("Initializing deep link listener");
-    // linkSubscription = _appLinks.uriLinkStream.listen((Uri? uri) {
-    //   if (uri != null) {
-    //     log("Deep link received: ${uri.toString()}");
-    //     final String? id = uri.queryParameters['postId'];
-    //     if (id != null) {
-    //       sp.setString("webPostId", id);
-    //     }
-    //     _handleDeepLink(uri);
-    //   }
-    // }, onError: (err) {
-    //   log("Error in deep link handling: $err");
-    // });
-  }
-
-  void _handleDeepLink(Uri uri) async {
-    log("Deep link path: $uri");
-    final String? id = uri.queryParameters['postId'];
-    if (id != null) {
-      postId = id;
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => IndividualPostView(postId: postId ?? "0"),
-            ));
-      });
-    }
   }
 
   @override
   void dispose() {
-    linkSubscription?.cancel();
+    // homeProvider?.linkSubscription?.cancel();
     closeSubscribe();
     super.dispose();
   }
 
-  getMobileNumber() async {
-    WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
-    if (Platform.isIOS) {
-      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-      log('APNS Token: $apnsToken');
-      getUniqueDeviceId(apnsToken ?? "");
-    } else if (Platform.isAndroid) {
-      var token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
-        getUniqueDeviceId(
-          token,
-        );
-        log('FCM Token: $token');
-        _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
-        WebEngagePlugin.setPushToken(token);
-      }
-    }
-  }
 
-  void _onTokenInvalidated(Map<String, dynamic>? message) {
-    print("tokenInvalidated callback received $message");
-    WebEngagePlugin.setSecureToken("siva kumar", message.toString());
-  }
 
   DateTime? lastBackPressed;
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        final now = DateTime.now();
-        if (lastBackPressed == null || now.difference(lastBackPressed!) > Duration(seconds: 2)) {
-          lastBackPressed = now;
-          CustomToast.showInfoToast(msg: "Swipe again to exit");
-          return false; // Do not pop
-        }
-        return true; // Exit app
-      },
-      child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-        return Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            automaticallyImplyLeading: false,
-            // Removes back arrow
-            backgroundColor: Colors.white,
-            elevation: 0,
-            title: Row(
-              children: [
-                Text(
-                  "Chota",
-                  style: fontStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                Container(
-                  // margin: EdgeInsets.only(left: 1),
-                  padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                  child: Text(
-                    "News",
-                    style: fontStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.lightBlue,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            actions: [
-              Row(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+      ),
+      child: WillPopScope(
+        onWillPop: () async {
+          final now = DateTime.now();
+          if (lastBackPressed == null || now.difference(lastBackPressed!) > Duration(seconds: 2)) {
+            lastBackPressed = now;
+            CustomToast.showInfoToast(msg: "Swipe again to exit");
+            return false;
+          }
+          return true;
+        },
+        child: Consumer<HomeProvider>(
+          builder: (_, homeProvider, __) {
+            return Scaffold(
+              backgroundColor: Colors.white,
+              body: Stack(
                 children: [
-                  if (context.read<HomeProvider>().selectedIndex != 3) CustomSwitch(),
-                  width(width: 12),
-                  if (context.read<HomeProvider>().selectedIndex == 0)
-                    InkWell(
-                      onTap: () async {
-                        log("Refresh");
-
-                        SharedPreferences preferences = await SharedPreferences.getInstance();
-                        String? deviceId = preferences.getString("deviceId");
-                        String? userId = preferences.getString("userId");
-
-                        homeProvider.getAllPostList = [];
-                        homeProvider.isReloadData();
-                        homeProvider.getAllPost();
-                      },
-                      child: Container(
-                        color: Colors.white,
-                        child: Center(
-                          child: homeProvider.isReload
-                              ? const SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: AppLoadingScreen(),
-                                )
-                              : SvgPicture.asset(
-                                  "assets/svg/new_refresh.svg",
-                                  height: 20,
-                                  width: 20,
-                                  color: AppColors.textColor,
+                  PageView(
+                    controller: _pageController,
+                    physics: NeverScrollableScrollPhysics(),
+                    onPageChanged: (index) {
+                      homeProvider.onItemTapped(index);
+                    },
+                    children: [MainScreenCard(), PapersScreenCard(), ReelsScreen(), SettingsView()],
+                  ),
+                  if (homeProvider.isBottomEnable && context.watch<SettingsProvider>().bannerAdsLoading != BannerAdsLoading.success)
+                    Positioned(
+                      left: 16,
+                      right: 16,
+                      bottom: 6,
+                      child: SafeArea(
+                        child: Container(
+                          height: 58, // reduced height
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black12,
+                                blurRadius: 6,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(20),
+                            child: BottomNavigationBar(
+                              backgroundColor: Colors.white,
+                              type: BottomNavigationBarType.fixed,
+                              currentIndex: homeProvider.selectedIndex,
+                              onTap: (index) {
+                                homeProvider.isTabChange();
+                                _pageController.jumpToPage(index);
+                                if (homeProvider.selectedIndex == 0) {
+                                  context.read<HomeProvider>().setSelectedTagId(0);
+                                  homeProvider.pageChange(isValue: true);
+                                }
+                                setState(() {});
+                              },
+                              selectedItemColor: AppColors.appButtonColor,
+                              unselectedItemColor: AppColors.bodyTextColor,
+                              selectedFontSize: 12,
+                              unselectedFontSize: 12,
+                              iconSize: 22,
+                              showSelectedLabels: true,
+                              showUnselectedLabels: true,
+                              items: [
+                                BottomNavigationBarItem(
+                                  icon: SvgPicture.asset(
+                                    "assets/new_app_icon/bytes.svg",
+                                    height: 22,
+                                    colorFilter: ColorFilter.mode(
+                                      homeProvider.selectedIndex == 0 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                  label: 'news'.tr(),
                                 ),
+                                BottomNavigationBarItem(
+                                  icon: SvgPicture.asset(
+                                    "assets/new_app_icon/paper.svg",
+                                    height: 22,
+                                    colorFilter: ColorFilter.mode(
+                                      homeProvider.selectedIndex == 1 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                  label: 'ePaper'.tr(),
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: SvgPicture.asset(
+                                    "assets/new_app_icon/reel.svg",
+                                    height: 22,
+                                    colorFilter: ColorFilter.mode(
+                                      homeProvider.selectedIndex == 2 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                  label: 'reels'.tr(),
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: SvgPicture.asset(
+                                    "assets/new_app_icon/menu.svg",
+                                    height: 22,
+                                    colorFilter: ColorFilter.mode(
+                                      homeProvider.selectedIndex == 3 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                                      BlendMode.srcIn,
+                                    ),
+                                  ),
+                                  label: 'more'.tr(),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  if (context.read<HomeProvider>().selectedIndex == 2)
-                    Consumer<ReelsProviders>(
-                      builder: (_, reelsProviders, __) {
-                        return InkWell(
-                          onTap: () {
-                            log("Refresh");
-
-                            reelsProviders.getAllReelsList = [];
-                            homeProvider.isReloadData();
-                            reelsProviders.getAllReels().then(
-                              (value) {
-                                homeProvider.isReload = false;
-                              },
-                            );
-                          },
-                          child: Container(
-                            color: Colors.white,
-                            child: Center(
-                              child: homeProvider.isReload
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: AppColors.iconColors,
-                                      ),
-                                    )
-                                  : SvgPicture.asset(
-                                      "assets/svg/new_refresh.svg",
-                                      height: 20,
-                                      width: 20,
-                                      color: AppColors.textColor,
-                                    ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  if (context.read<HomeProvider>().selectedIndex == 3)
-                    Text(
-                      "",
-                      style: fontStyle(fontWeight: FontWeight.w900),
-                    ),
-                  width(width: 20),
                 ],
               ),
-            ],
-          ),
-          body: PageView(
-            controller: _pageController,
-            physics: NeverScrollableScrollPhysics(),
-            onPageChanged: (index) {
-              homeProvider.onItemTapped(index);
-            },
-            children: [
-              homeProvider.isSwitched ? MainScreenList() : MainScreenCard(),
-              homeProvider.isSwitched ? PapersScreenList() : PapersScreenCard(),
-              homeProvider.isSwitched ? ReelsScreenList() : ReelsScreen(),
-              SettingsView()
-            ],
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            backgroundColor: Colors.white,
-            type: BottomNavigationBarType.fixed,
-            currentIndex: homeProvider.selectedIndex,
-            onTap: (index) {
-              homeProvider.isTabChange();
-              _pageController.jumpToPage(index); // Change the page when tapping the bottom bar
-            },
-            selectedItemColor: AppColors.appButtonColor,
-            unselectedItemColor: AppColors.bodyTextColor,
-            showSelectedLabels: true,
-            showUnselectedLabels: true,
-            unselectedLabelStyle: fontStyle(fontWeight: FontWeight.normal, fontSize: 14),
-            selectedLabelStyle: fontStyle(fontWeight: FontWeight.w600, fontSize: 14),
-            items: [
-              BottomNavigationBarItem(
-                icon: Column(
-                  children: [
-                    if (homeProvider.selectedIndex == 0)
-                      Container(
-                        width: 50,
-                        height: 3,
-                        color: Colors.blue, // Small bar under icon
-                      ),
-                    height(height: 4),
-                    SvgPicture.asset(
-                      "assets/new_app_icon/bytes.svg",
-                      colorFilter: ColorFilter.mode(
-                        homeProvider.selectedIndex == 0 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                  ],
-                ),
-                label: 'news'.tr(),
-              ),
-              BottomNavigationBarItem(
-                icon: Column(
-                  children: [
-                    if (homeProvider.selectedIndex == 1)
-                      Container(
-                        width: 50,
-                        height: 3,
-                        color: Colors.blue,
-                      ),
-                    height(height: 4),
-                    SvgPicture.asset("assets/new_app_icon/paper.svg",
-                        colorFilter: ColorFilter.mode(
-                          homeProvider.selectedIndex == 1 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                          BlendMode.srcIn,
-                        )),
-                  ],
-                ),
-                label: 'ePaper'.tr(),
-              ),
-              BottomNavigationBarItem(
-                icon: Column(
-                  children: [
-                    if (homeProvider.selectedIndex == 2)
-                      Container(
-                        width: 50,
-                        height: 3,
-                        color: Colors.blue,
-                      ),
-                    height(height: 4),
-                    SvgPicture.asset("assets/new_app_icon/reel.svg",
-                        colorFilter: ColorFilter.mode(
-                          homeProvider.selectedIndex == 2 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                          BlendMode.srcIn,
-                        )),
-                  ],
-                ),
-                label: 'reels'.tr(),
-              ),
-              BottomNavigationBarItem(
-                icon: Column(
-                  children: [
-                    if (homeProvider.selectedIndex == 3)
-                      Container(
-                        width: 50,
-                        height: 3,
-                        color: Colors.blue,
-                      ),
-                    height(height: 4),
-                    SvgPicture.asset("assets/new_app_icon/menu.svg",
-                        colorFilter: ColorFilter.mode(
-                          homeProvider.selectedIndex == 3 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                          BlendMode.srcIn,
-                        )),
-                  ],
-                ),
-                label: 'more'.tr(),
-              ),
-            ],
-          ),
-        );
-      }),
+            );
+          },
+        ),
+      ),
     );
   }
 }

@@ -2,7 +2,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:chotanews/utils/app_toasts.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
@@ -48,22 +47,22 @@ Future<void> convertImageUrlToPdfAndShare(BuildContext context,  article) async 
 
       print("PDF saved at: $filePath");
 
-      final DynamicLinkParameters parameters = DynamicLinkParameters(
-        uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
-        link: Uri.parse('https://chotanews.com/store?postId=${article.id}'), // Ensure this is a valid URL
-        androidParameters: const AndroidParameters(
-          packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
-        ),
-        iosParameters: const IOSParameters(
-          bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
-          appStoreId: '1631068092',
-        ),
-      );
-
-      final ShortDynamicLink shortLink =
-      await FirebaseDynamicLinks.instance.buildShortLink(parameters);
-      print("Short Link Created: ${shortLink.shortUrl}");
-      Share.shareXFiles([XFile(filePath)], text: "${shortLink.shortUrl}");
+      // final DynamicLinkParameters parameters = DynamicLinkParameters(
+      //   uriPrefix: 'https://chotanews.page.link', // Make sure this matches Firebase Console
+      //   link: Uri.parse('https://chotanews.com/store?postId=${article.id}'), // Ensure this is a valid URL
+      //   androidParameters: const AndroidParameters(
+      //     packageName: 'com.chotanews', // Ensure this matches your AndroidManifest.xml
+      //   ),
+      //   iosParameters: const IOSParameters(
+      //     bundleId: 'com.chotanewstelugu.app', // Ensure this matches Firebase Console
+      //     appStoreId: '1631068092',
+      //   ),
+      // );
+      //
+      // final ShortDynamicLink shortLink =
+      // await FirebaseDynamicLinks.instance.buildShortLink(parameters);
+      // print("Short Link Created: ${shortLink.shortUrl}");
+      // Share.shareXFiles([XFile(filePath)], text: "${shortLink.shortUrl}");
     } else {
       CustomToast.showErrorToast(msg: "Failed to load image");
 
@@ -127,7 +126,7 @@ Future<void> createAndSharePdf(BuildContext context, article ) async {
                   ignoreMargins: true, // Ensures full coverage
                   child: pw.Image(
                     pdfImage,
-                    fit: pw.BoxFit.cover, // Covers the full page
+                    fit: pw.BoxFit.fill, // Covers the full page
                   ),
                 );
               },

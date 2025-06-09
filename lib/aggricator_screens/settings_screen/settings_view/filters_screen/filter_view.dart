@@ -5,8 +5,10 @@ import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../utils/app_colors.dart';
+import '../../settings_provider/settings_provider.dart';
 
 class FilterView extends StatefulWidget {
   const FilterView({super.key});
@@ -21,6 +23,7 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
+    context.read<SettingsProvider>().bannerAd.dispose();
     _tabController = TabController(length: 2, vsync: this);
   }
 

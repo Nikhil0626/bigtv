@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/main.dart';
-import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
+// import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import '../aggricator_screens/event_repo.dart';
@@ -11,22 +11,22 @@ import '../globel_keys/global_variables_data.dart';
 bool isLink = false;
 
 class DynamicLinkService {
-  static final FirebaseDynamicLinks _firebaseDynamicLinks =
-      FirebaseDynamicLinks.instance;
-
-  static Future<void> handleDynamicLinks(BuildContext context) async {
-    log("Checking Initial Dynamic Link...");
-    try {
-      final PendingDynamicLinkData? initialLink =
-          await _firebaseDynamicLinks.getInitialLink();
-      if (initialLink!.link.toString().isEmpty) return;
-      if (!context.mounted) return;
-      handleDeepLink(context, initialLink.link);
-    } catch (e) {
-      log("Dynamic Link Exception: $e");
-      handleDeepLink(context, null);
-    }
-  }
+  // static final FirebaseDynamicLinks _firebaseDynamicLinks =
+  //     FirebaseDynamicLinks.instance;
+  //
+  // static Future<void> handleDynamicLinks(BuildContext context) async {
+  //   log("Checking Initial Dynamic Link...");
+  //   try {
+  //     final PendingDynamicLinkData? initialLink =
+  //         await _firebaseDynamicLinks.getInitialLink();
+  //     if (initialLink!.link.toString().isEmpty) return;
+  //     if (!context.mounted) return;
+  //     handleDeepLink(context, initialLink.link);
+  //   } catch (e) {
+  //     log("Dynamic Link Exception: $e");
+  //     handleDeepLink(context, null);
+  //   }
+  // }
 
   static Future<void> handleDeepLink(
        context, Uri? deepLink) async {

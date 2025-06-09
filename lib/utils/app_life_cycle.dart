@@ -1,7 +1,12 @@
+import 'dart:developer';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import '../aggricator_screens/home_screen/home_provider/home_provider.dart';
+import '../main.dart';
 import '../services/deviice_details.dart';
 
 class AppLifecycleManager extends StatefulWidget {
@@ -39,7 +44,15 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager> with WidgetsB
 
     } else if (state == AppLifecycleState.resumed) {
       print('App is in the foreground.');
-    getNotifications();
+      // if( mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() != "0" ) {
+      //   log("getIndividualPost in life cycle ${mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() }");
+      //   mainNavigatorKey.currentContext?.read<HomeProvider>().getIndividualPost( mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString());
+      // }else{
+      //   log("getIndividualPost in home ${mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() }");
+      //   mainNavigatorKey.currentContext?.read<HomeProvider>().getAllPost();
+      //
+      // }
+    // getNotifications();
     }
     if (state == AppLifecycleState.detached) {
       print('app_removes');

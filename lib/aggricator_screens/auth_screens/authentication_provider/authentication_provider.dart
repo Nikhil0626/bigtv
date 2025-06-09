@@ -32,7 +32,7 @@ class AuthenticationProvider extends ChangeNotifier {
   List<LocationModel> getAllLocationList = [];
   List<String> selectedLocations = [];
 
-  void validationErrors(value ) {
+  void validationErrors(value) {
     if (value == null || value.trim().isEmpty) {
       errorMessage = "Please Enter Mobile Number";
       isButtonEnabled = false;
@@ -62,7 +62,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future sendOtp(BuildContext context) async {
     isLoginLoading = true;
-notifyListeners();
+    notifyListeners();
     log("ButtonClicked __${phoneController.text}");
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -94,8 +94,8 @@ notifyListeners();
   }
 
   Future verifyOtp(
-      context,
-      ) async {
+    context,
+  ) async {
     errorMessage = '';
     isVerifyLoading = true;
     isButtonEnabled = false;
@@ -136,12 +136,11 @@ notifyListeners();
             },
           );
         } else {
-
-        newAppLoginStatus = NewAppLoginStatus.category;
-        saveLoginState();
-        getAllCategories();
+          newAppLoginStatus = NewAppLoginStatus.category;
+          saveLoginState();
+          getAllCategories();
+          // getAllLocations();
         }
-
 
         WebEngagePlugin.userLogin(response.data['user']['id'].toString());
         WebEngagePlugin.setUserPhone(phoneController.text.toString());
@@ -176,6 +175,7 @@ notifyListeners();
 
   bool isCatLoading = false;
   bool isCatSaveLoading = false;
+
   Future getAllCategories() async {
     isCatLoading = true;
     selectedCategories = [];
@@ -194,7 +194,7 @@ notifyListeners();
         getAllCategoryList = data
             .map(
               (e) => CategoryModel.fromJson(e),
-        )
+            )
             .toList();
 
         selectedCategories = getAllCategoryList.where((item) => item.isFollowed == true).map((item) => item.categoryName.toString()).toList();
@@ -234,7 +234,11 @@ notifyListeners();
     String? userId = preferences.getString("userId");
     preferences.setString("locationId", result);
 
-    Map<String, dynamic> body = {"device_id": deviceId, "categoryids": selectedCategoryIds,"user_id": userId ?? "",};
+    Map<String, dynamic> body = {
+      "device_id": deviceId,
+      "categoryids": selectedCategoryIds,
+      "user_id": userId ?? "",
+    };
 
     log(body.toString());
     try {
@@ -257,6 +261,7 @@ notifyListeners();
   }
 
   bool isLocationLoading = false;
+
   Future getAllLocations() async {
     isLocationLoading = true;
     selectedLocations = [];
@@ -275,7 +280,7 @@ notifyListeners();
         getAllLocationList = data
             .map(
               (e) => LocationModel.fromJson(e),
-        )
+            )
             .toList();
 
         selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.districtName.toString()).toList();
@@ -295,8 +300,8 @@ notifyListeners();
   }
 
   bool isLocationSendingLoading = false;
-  void addToSelectedLocations(String profileName) {
 
+  void addToSelectedLocations(String profileName) {
     if (!selectedLocations.contains(profileName)) {
       selectedLocations.add(profileName);
       log(selectedLocations.toString());
@@ -322,8 +327,11 @@ notifyListeners();
     String result = selectedCategoryIds.toSet().join(',');
     preferences.setString("locationId", result);
 
-
-    Map<String, dynamic> body = {"device_id": deviceId, "location_ids": selectedCategoryIds,"user_id": userId ?? "",};
+    Map<String, dynamic> body = {
+      "device_id": deviceId,
+      "location_ids": selectedCategoryIds,
+      "user_id": userId ?? "",
+    };
 
     log(body.toString());
     try {
@@ -357,7 +365,7 @@ notifyListeners();
           MaterialPageRoute(
             builder: (context) => HomeView(),
           ),
-              (route) => false,
+          (route) => false,
         );
         break;
       case NewAppLoginStatus.home:
@@ -366,7 +374,7 @@ notifyListeners();
           MaterialPageRoute(
             builder: (context) => HomeView(),
           ),
-              (route) => false,
+          (route) => false,
         );
         break;
       default:
@@ -375,7 +383,7 @@ notifyListeners();
           MaterialPageRoute(
             builder: (context) => LoginBackgroundView(),
           ),
-              (route) => false,
+          (route) => false,
         );
     }
   }
@@ -398,8 +406,8 @@ notifyListeners();
   }
 
   void continueAsGuest(
-      context,
-      ) async {
+    context,
+  ) async {
     newAppLoginStatus = NewAppLoginStatus.category;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginState", newAppLoginStatus.toString());
@@ -421,10 +429,7 @@ notifyListeners();
     isPageNavigation(context);
   }
 
-  void sendEvent(pageName)async{
-    SharedPreferences sp  = await SharedPreferences.getInstance();
-
-
-
+  void sendEvent(pageName) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
   }
 }

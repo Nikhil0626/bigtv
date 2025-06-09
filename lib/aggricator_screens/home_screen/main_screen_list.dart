@@ -38,7 +38,7 @@ class _MainScreenListState extends State<MainScreenList> {
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
       return RefreshIndicator(
-        onRefresh: () => homeProvider.getAllPost(postId: "0"),
+        onRefresh: () => homeProvider.getAllPost(postIds: "0"),
         child: Container(
           color: Colors.white,
           width: MediaQuery.of(context).size.width,
@@ -103,7 +103,7 @@ class _MainScreenListState extends State<MainScreenList> {
                     log(homeProvider.getAllPostList[index].toString());
                     log({homeProvider.getAllPostList.length - 5}.toString());
                     if (index == homeProvider.getAllPostList.length - 5) {
-                      homeProvider.getAllPost(postId: homeProvider.getAllPostList.last['id'].toString()); // Fetch next page
+                      homeProvider.getAllPost(postIds: homeProvider.getAllPostList.last['id'].toString()); // Fetch next page
                     }
                     return InkWell(
                         onTap: () {
