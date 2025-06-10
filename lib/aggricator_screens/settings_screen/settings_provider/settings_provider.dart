@@ -220,9 +220,12 @@ class SettingsProvider extends ChangeNotifier {
     from =  DateTime.now().toString();
     bannerAdsLoading = BannerAdsLoading.loading;
 
+    log(userId.toString());
+    log(deviceId.toString());
     final AdSize customAdSize = AdSize(width: 300, height: 50);
     bannerAd = BannerAd(
-      adUnitId: "/22387492205,23277683599/id1631068092.Banner1.1747894331",
+      // adUnitId: "/22387492205,23277683599/id1631068092.Banner1.1747894331",
+      adUnitId: context.read<HomeProvider>().adManagerBannerId,
       size: customAdSize,
       request: const AdManagerAdRequest(),
       listener: BannerAdListener(

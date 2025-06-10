@@ -28,10 +28,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
     super.initState();
   }
 
-  final Map<int, String> states = {
-    21: 'Andhra Pradesh',
-    19: 'Telangana',
-  };
+
 
   @override
   Widget build(BuildContext context) {
@@ -75,12 +72,12 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
             ),
           ),
         ),
-        body: Padding(
+        body:authenticationProvider.isLocationLoading?Center(child: AppLoadingScreen(),) : Padding(
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Column(
             children: [
               height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success||settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
-              settingsProvider.bannerAdsLoading == BannerAdsLoading.loading?Center(child: AppLoadingScreen(),): settingsProvider.bannerAdsLoading == BannerAdsLoading.success ? Banner300x50Size() : SizedBox.shrink(),
+              Banner300x50Size(),
 
               height(height: 10),
               Expanded(
@@ -129,7 +126,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                     height(height: 8),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      children: states.entries.map((entry) {
+                      children: authenticationProvider.states!.entries.map((entry) {
                         int stateId = entry.key;
                         String stateName = entry.value;
 

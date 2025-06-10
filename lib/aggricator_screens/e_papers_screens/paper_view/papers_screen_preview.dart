@@ -150,7 +150,7 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                           ),
                                           Positioned(
                                             top: 20,
-                                            right: 80,
+                                            right: 20,
                                             child: InkWell(
                                               onTap: () async {
                                                 // final url = 'https://enewspapers.s3.amazonaws.com/swetcha/2025-05-03/telangana/page_001.webp';

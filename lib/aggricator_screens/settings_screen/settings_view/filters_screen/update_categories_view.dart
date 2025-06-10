@@ -40,8 +40,8 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
             padding: EdgeInsets.all(16.w),
             child: Column(
               children: [
-                height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success||settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
-                settingsProvider.bannerAdsLoading == BannerAdsLoading.loading?Center(child: AppLoadingScreen(),): settingsProvider.bannerAdsLoading == BannerAdsLoading.success ? Banner300x50Size() : SizedBox.shrink(),
+                height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success || settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
+                Banner300x50Size(),
                 height(height: 10),
                 SingleChildScrollView(
                   child: authenticationProvider.isCatLoading

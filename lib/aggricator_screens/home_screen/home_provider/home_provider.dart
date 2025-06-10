@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -258,7 +259,17 @@ class HomeProvider extends ChangeNotifier {
           "isBookmarked": 0
         });
       }
-      getAllPostList.addAll(data);
+
+      final seen = <String>{};
+      final deduplicated = data.where((map) {
+        final key = jsonEncode(map);
+        return seen.add(key);
+      }).toList();
+
+
+      getAllPostList.addAll(deduplicated);
+      // log(getAllPostList.length.toString());
+      // getAllPostList = getAllPostList.toSet().toList();
       log(getAllPostList.length.toString());
 
       isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();

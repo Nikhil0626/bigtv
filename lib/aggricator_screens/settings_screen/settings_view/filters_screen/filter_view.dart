@@ -23,7 +23,7 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
   @override
   void initState() {
     super.initState();
-    context.read<SettingsProvider>().bannerAd.dispose();
+    // context.read<SettingsProvider>().bannerAd.dispose();
     _tabController = TabController(length: 2, vsync: this);
   }
 
