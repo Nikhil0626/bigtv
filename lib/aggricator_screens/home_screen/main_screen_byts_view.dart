@@ -29,7 +29,6 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
 import '../ad_manager_screen/test_ads.dart';
-import '../reels_screens/reels_view/reels_screen_preview.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
@@ -70,8 +69,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
   @override
   Widget build(BuildContext context) {
-    final content = widget.article['content'] ?? '';
-    final bool showIcon = content.length < 360;
+
     return InkWell(
       onTap: () {
         context.read<HomeProvider>().pageChange(isValue: !context.read<HomeProvider>().isBottomEnable);
@@ -350,12 +348,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                               log("Refresh");
 
                                               homeProvide.isReloadData();
-                                              if (widget.isaiTags) {
-                                                homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
-                                                  (value) {
-                                                    homeProvide.isReloadFalse();
-                                                  },
-                                                );
+                                              if (homeProvide.isAiTagDataLoaded) {
+                                                homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
                                               } else {
                                                 homeProvide.getAllPostList = [];
                                                 homeProvide.getAllPost();
@@ -508,7 +502,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 ],
                                                               ),
                                                             ),
-                                                            // if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
+                                                            if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
                                                           ],
                                                         )
                                                       : RichText(
@@ -544,7 +538,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                           ),
                                                         ),
                                                 ),
-                                                // if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
+                                                if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
                                               ],
                                             ),
                                           ),

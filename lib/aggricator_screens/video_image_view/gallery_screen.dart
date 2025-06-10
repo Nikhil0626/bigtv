@@ -15,6 +15,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import 'package:webengage_flutter/constants.dart';
 
 import '../../../aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import '../../../globel_keys/app_router.dart';
@@ -221,29 +222,25 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
       context: context,
       builder: (context) {
         return SafeArea(
-            child:SizedBox(
-              height: 150,
+            child:Container(
+              padding: EdgeInsets.symmetric(horizontal: 16,vertical: 20),
+              height: 280,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  InkWell(onTap: () {
-
-                  },child:  IconButton(
-                    icon: Icon(Icons.cancel_rounded,size: 20,color: Colors.red,),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),),
                   height(height: 10),
+                  Text(
+                    "Share Our Post",
+                    style: homeScreenFontStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+                  ),
+                  height(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
 
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.collections),
-                        label: Text('This Image'),
-                        onPressed: () async {
+                      InkWell(
+                        onTap: () async{
                           try {
                             Navigator.pop(context);
                             final response = await http.get(Uri.parse(article['gallery'][_currentIndex]['Url']));
@@ -270,21 +267,97 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                             );
                           }
                         },
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    blurRadius: 5,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              padding: EdgeInsets.all(16),
+                              child: Icon(
+                                Icons.image_outlined,
+                                size: 40,
+                                color: Colors.black,
+                              ),
+                            ),
+
+                            height(height: 8),
+                            Text(
+                              "Share This Image",
+                              style: newAppFont(fontWeight: FontWeight.w600, color: AppColors.headerTextColor),
+                            ),
+                          ],
+                        ),
                       ),
-                      ElevatedButton.icon(
-                        icon: Icon(Icons.collections),
-                        label: Text('All Images'),
-                        onPressed: () {
+                      InkWell(
+                        onTap:() {
                           createAndSharePdf(context, widget.postDetails).then(
                                 (value) {
                               Navigator.pop(context);
                             },
                           );
                         },
+                        child: Column(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.withOpacity(0.3),
+                                    blurRadius: 5,
+                                    spreadRadius: 2,
+                                  ),
+                                ],
+                              ),
+                              padding: EdgeInsets.all(16),
+                              child: Icon(
+                                Icons.file_copy_sharp,
+                                size: 40,
+                                color: Colors.black,
+                              ),
+                            ),
+                            height(height: 8),
+                            Text(
+                              "Share All Images",
+                              style: newAppFont(fontWeight: FontWeight.w600, color: AppColors.headerTextColor),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
-                  height(height: 10),
+                  height(height: 20),
+                  InkWell(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      height: 35.h,
+                      // margin: EdgeInsets.only(bottom: 20.h),
+                      decoration: BoxDecoration(
+                        color: AppColors.appButtonColor,
+                        borderRadius: BorderRadius.all(Radius.circular(8.r)),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Cancel',
+                          style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ),
+                  ),
+                  height(height: 20)
                 ],
               ),
             ));

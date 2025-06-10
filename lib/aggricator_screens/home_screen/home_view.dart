@@ -115,9 +115,9 @@ class _HomeViewState extends State<HomeView> {
                               onTap: (index) {
                                 homeProvider.isTabChange();
                                 _pageController.jumpToPage(index);
+                                homeProvider.pageChange(isValue: true);
                                 if (homeProvider.selectedIndex == 0) {
                                   context.read<HomeProvider>().setSelectedTagId(0);
-                                  homeProvider.pageChange(isValue: true);
                                 }
                                 setState(() {});
                               },

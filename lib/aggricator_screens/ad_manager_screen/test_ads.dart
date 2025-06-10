@@ -142,8 +142,8 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
       'eventData': {
         "sdkRequestStartTime":from,
         "sdkRequestReceivedTime":to,
-        "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds,
-        "createAt":DateTime.now().toIso8601String(),
+        "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds.toString(),
+        "createAt":DateTime.now().toString(),
         "adResponse":ad.responseInfo.toString(),
       },
       'userId': userId,
@@ -206,7 +206,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         "sdkRequestStartTime":from,
         "sdkRequestReceivedTime":to,
         "adsRenderingTime":0,
-        "createAt":DateTime.now().toIso8601String(),
+        "createAt":DateTime.now().toString(),
         "adResponse":error.responseInfo.toString(),
       },
       'userId': userId,
@@ -231,26 +231,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
   @override
   Widget build(BuildContext context) {
-    if (_adLoadFailed && bannerAdsLoading == BannerAdsLoading.fail) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 1,
-                child: widget.article['adType'] == "rating card"
-                    ? RateYourApp()
-                    : widget.article['adType'] == "share card"
-                        ? ShareYourApp()
-                        : ShareYourApp(),
-              ),
-              Expanded(flex: 1, child: _buildRecommendedNews(context)),
-            ],
-          ),
-        ),
-      );
-    }
+
 
     if (_adWidget != null) {
       return Scaffold(
@@ -275,8 +256,29 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         ),
       );
     }
-    if (bannerAdsLoading == BannerAdsLoading.loading) {
+    if (bannerAdsLoading == BannerAdsLoading.loading ) {
       return AdsLoadingScreen();
+    }
+
+    if (_adLoadFailed && bannerAdsLoading == BannerAdsLoading.fail) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Expanded(
+                flex: 1,
+                child: widget.article['adType'] == "rating card"
+                    ? RateYourApp()
+                    : widget.article['adType'] == "share card"
+                    ? ShareYourApp()
+                    : ShareYourApp(),
+              ),
+              Expanded(flex: 1, child: _buildRecommendedNews(context)),
+            ],
+          ),
+        ),
+      );
     }
     return Scaffold();
   }

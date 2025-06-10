@@ -261,6 +261,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   bool isLocationLoading = false;
+   Map<int, String>? states;
 
   Future getAllLocations() async {
     isLocationLoading = true;
@@ -282,6 +283,12 @@ class AuthenticationProvider extends ChangeNotifier {
               (e) => LocationModel.fromJson(e),
             )
             .toList();
+
+        states = {
+          for (var d in data) d['stateId']: d['stateName']
+        };
+
+        print(states);
 
         selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.districtName.toString()).toList();
         log(getAllLocationList.first.districtName.toString());
