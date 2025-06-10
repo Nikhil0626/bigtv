@@ -26,7 +26,6 @@ import '../../chota_info_screens/terms_conditions.dart';
 import 'filters_screen/filter_view.dart';
 import 'profile_view.dart';
 import 'feedback_view.dart';
-import 'book_marks_screen.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({
@@ -179,9 +178,12 @@ class _SettingsViewState extends State<SettingsView> {
 
 
             Spacer(),
-            Text(
-              "V$appVersion",
-              style: fontStyle(fontWeight: FontWeight.normal),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 70.0),
+              child: Text(
+                "V$appVersion",
+                style: fontStyle(fontWeight: FontWeight.normal),
+              ),
             ),
           ],
         ),

@@ -1,3 +1,4 @@
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -16,8 +17,8 @@ class _AdsLoadingScreenState extends State<AdsLoadingScreen> {
     return Padding(
       padding: const EdgeInsets.all(10.0),
       child: Shimmer.fromColors(
-        baseColor:Colors.white ,
-        highlightColor: Colors.grey[100]!,
+        baseColor:AppColors.cardBackgroundColor ,
+        highlightColor: Colors.grey[400]!,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -25,6 +26,7 @@ class _AdsLoadingScreenState extends State<AdsLoadingScreen> {
               flex: 1,
            child: Container(color: AppColors.cardBackgroundColor,),
             ),
+            height(height: 20),
             Expanded(flex: 1,child:Column(
               children: [
                 Container(color: Colors.white, width: MediaQuery.of(context).size.width),

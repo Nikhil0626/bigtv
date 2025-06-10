@@ -1,24 +1,14 @@
-import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/home_screen/standard_post_view.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart';
 import '../../loading_screen/home_shimmer.dart';
-import '../in_app_web_view.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_spaces.dart';
-import '../ad_manager_screen/test_ads.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
-import '../video_image_view/gallery_screen.dart';
-import 'ai_tag_posts_pageview.dart';
 import 'home_provider/home_provider.dart';
-import 'image_view.dart';
 import 'main_screen_pageview.dart';
 
 class MainScreenCard extends StatefulWidget {
@@ -72,70 +62,65 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   Widget build(BuildContext context) {
     return Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
       return SafeArea(
-        child: InkWell(
-          onTap: () {
-            homeProvider.pageChange(isValue: !homeProvider.isBottomEnable);
-          },
-          child: Center(
-            child: homeProvider.isHomeLoading
-                ? HomeShimmer()
-                : homeProvider.getAllPostList.isEmpty
-                    ? AppNoData()
-                    : Column(
-                        children: [
-                          homeProvider.getAllAiTagsList.isEmpty
-                              ? SizedBox.shrink()
-                              : SizedBox(
-                                  height: 50,
-                                  child: ListView.builder(
-                                    controller: homeProvider.aiTagScrollController,
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: homeProvider.getAllAiTagsList.length,
-                                    itemBuilder: (context, index) {
-                                      // Ensure key exists
-                                      if (!homeProvider.aiTagKeys.containsKey(index)) {
-                                        homeProvider.aiTagKeys[index] = GlobalKey();
-                                      }
+        child: Center(
+          child: homeProvider.isHomeLoading
+              ? HomeShimmer()
+              : homeProvider.getAllPostList.isEmpty
+                  ? AppNoData()
+                  : Column(
+                      children: [
+                        homeProvider.getAllAiTagsList.isEmpty
+                            ? SizedBox.shrink()
+                            : SizedBox(
+                                height: 50,
+                                child: ListView.builder(
+                                  controller: homeProvider.aiTagScrollController,
+                                  scrollDirection: Axis.horizontal,
+                                  itemCount: homeProvider.getAllAiTagsList.length,
+                                  itemBuilder: (context, index) {
+                                    // Ensure key exists
+                                    if (!homeProvider.aiTagKeys.containsKey(index)) {
+                                      homeProvider.aiTagKeys[index] = GlobalKey();
+                                    }
 
-                                      final tag = homeProvider.getAllAiTagsList[index];
-                                      final tagId = tag['aitagid'];
+                                    final tag = homeProvider.getAllAiTagsList[index];
+                                    final tagId = tag['aitagid'];
 
-                                      return InkWell(
-                                        key: homeProvider.aiTagKeys[index],
-                                        onTap: () async {
-                                          homeProvider.setSelectedTagId(tagId);
-                                          homeProvider.getAllPostsByAiId(tagId.toString());
-                                          homeProvider.aiTagDataLoaded(true);
-                                          homeProvider.aiTagsScrollToCenter(index);
-                                        },
-                                        child: Container(
-                                          height: 30,
-                                          margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
-                                          decoration: BoxDecoration(
-                                            color: homeProvider.selectedTagId == tagId ? AppColors.appButtonColor : AppColors.cardBackgroundColor,
-                                            borderRadius: BorderRadius.circular(12.r),
-                                          ),
-                                          alignment: Alignment.center,
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                                            child: Text(
-                                              tag['aitagname'].toString(),
-                                              textAlign: TextAlign.center,
-                                              style: homeScreenFontStyle(
-                                                color: homeProvider.selectedTagId == tagId ? Colors.white : AppColors.textColor,
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.w500,
-                                              ),
+                                    return InkWell(
+                                      key: homeProvider.aiTagKeys[index],
+                                      onTap: () async {
+                                        homeProvider.setSelectedTagId(tagId);
+                                        homeProvider.getAllPostsByAiId(tagId.toString());
+                                        homeProvider.aiTagDataLoaded(true);
+                                        homeProvider.aiTagsScrollToCenter(index);
+                                      },
+                                      child: Container(
+                                        height: 30,
+                                        margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+                                        decoration: BoxDecoration(
+                                          color: homeProvider.selectedTagId == tagId ? AppColors.appButtonColor : AppColors.cardBackgroundColor,
+                                          borderRadius: BorderRadius.circular(12.r),
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+                                          child: Text(
+                                            tag['aitagname'].toString(),
+                                            textAlign: TextAlign.center,
+                                            style: homeScreenFontStyle(
+                                              color: homeProvider.selectedTagId == tagId ? Colors.white : AppColors.textColor,
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w500,
                                             ),
                                           ),
                                         ),
-                                      );
-                                    },
-                                  )),
-                          Expanded(child: MainScreenPageView(startIndex: 0)),
-                        ],
-                      ),
-          ),
+                                      ),
+                                    );
+                                  },
+                                )),
+                        Expanded(child: MainScreenPageView(startIndex: 0)),
+                      ],
+                    ),
         ),
       );
     });
