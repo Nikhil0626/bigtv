@@ -1,4 +1,3 @@
-
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +43,6 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
       final box = keyContext.findRenderObject() as RenderBox;
       final size = box.size;
       final position = box.localToGlobal(Offset.zero);
-
       final screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
       final itemCenter = position.dx + size.width / 2;
