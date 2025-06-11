@@ -28,7 +28,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    context.read<HomeProvider>().initDeepLinks(context);
+
     context.read<HomeProvider>().getAllAiTags();
     if (context.read<HomeProvider>().postId.toString() == "0") {
       context.read<HomeProvider>().getAllPost();
@@ -65,9 +65,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
         child: Center(
           child: homeProvider.isHomeLoading
               ? HomeShimmer()
-              : homeProvider.getAllPostList.isEmpty
-                  ? AppNoData()
-                  : Column(
+              : context.read<HomeProvider>().getAllPostList.isEmpty?Center(child: AppNoData(),): Column(
                       children: [
                         homeProvider.getAllAiTagsList.isEmpty
                             ? SizedBox.shrink()

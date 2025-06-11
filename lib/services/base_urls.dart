@@ -1,11 +1,7 @@
 import 'dart:core';
 
 class BaseUrls {
-  /// Dev Base Url
-  //   static const String baseUrl = "https://chotanews-fdcscrezbfd4befm.z01.azurefd.net/api";
-  static const String baseUrl = "https://chotanews-prod-api.azurewebsites.net/api";
 
-  static const String baseUrlAws = "https://prodchotanews.signitivessoft.com/api";
 
   /// event states
   static const String eventUrl = "/events";

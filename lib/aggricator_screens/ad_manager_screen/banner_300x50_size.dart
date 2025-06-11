@@ -25,16 +25,16 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
   @override
   void initState() {
     super.initState();
-    _loadBannerAd();
+    _loadBannerAd(context);
   }
 
-  void _loadBannerAd() async {
+  void _loadBannerAd(BuildContext context) async {
     final AdSize customAdSize = AdSize(width: 320, height: 50);
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     String? userId = prefs.getString("userId");
     String? deviceId = prefs.getString("deviceId");
     String? from = DateTime.now().toString();
-log("wfnewfefefniin  ${context.read<HomeProvider>().adManagerBannerId}");
+
     final ad = BannerAd(
       adUnitId: context.read<HomeProvider>().adManagerBannerId,
       size: customAdSize,
@@ -49,30 +49,30 @@ log("wfnewfefefniin  ${context.read<HomeProvider>().adManagerBannerId}");
 
           await EventRepo().addEvent({
             'key': 'ads_success',
-            'metadata': {
+            'eventData': {
               "sdkRequestStartTime": from,
               "sdkRequestReceivedTime": to,
-              "adsRenderingTime": DateTime.now().difference(DateTime.parse(to)).inMicroseconds,
+              "adsRenderingTime": DateTime.now().difference(DateTime.parse(to)).inMicroseconds.toString(),
               "createAt": DateTime.now().toString(),
               "adResponse": ad.responseInfo.toString(),
             },
-            'userId': userId,
-            'deviceId': deviceId,
+            'userId': userId??"",
+            'deviceId': deviceId??"",
           });
         },
         onAdFailedToLoad: (ad, error) async {
           final to = DateTime.now().toString();
           await EventRepo().addEvent({
             'key': 'ads_failure',
-            'metadata': {
+            'eventData': {
               "sdkRequestStartTime": from,
               "sdkRequestReceivedTime": to,
-              "adsRenderingTime": 0,
+              "adsRenderingTime": "0",
               "createAt": DateTime.now().toString(),
               "adResponse": error.responseInfo.toString(),
             },
-            'userId': userId,
-            'deviceId': deviceId,
+            'userId': userId??"",
+            'deviceId': deviceId??"",
           });
           ad.dispose();
           setState(() {

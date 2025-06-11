@@ -42,9 +42,9 @@ HomeProvider? homeProvider;
     return Scaffold(
       body: Consumer<HomeProvider>(
         builder: (_, homeProvider, __) {
-          if (homeProvider.getAllPostList.isEmpty) {
-            return Center(child: CircularProgressIndicator());
-          }
+          // if (homeProvider.getAllPostList.isEmpty) {
+          //   return Center(child: AppNoData());
+          // }
 
           return Column(
             children: [
@@ -73,9 +73,9 @@ HomeProvider? homeProvider;
                             Duration(milliseconds: 2000),
                                 () {
                               log("IndividualPostView dddd $autoIndex--- $value ==== ");
-                              context.read<HomeProvider>().aiTagDataLoaded(false);
-                              context.read<HomeProvider>().setSelectedTagId(0);
-                              context.read<HomeProvider>().getAllPost(postIds:"0");
+                              homeProvider.aiTagDataLoaded(false);
+                              homeProvider.setSelectedTagId(0);
+                              homeProvider.getAllPost(postIds:"0");
                             },
                           );
                         }

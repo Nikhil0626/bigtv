@@ -23,6 +23,7 @@ import '../../ad_manager_screen/banner_300x50_size.dart';
 import '../../chota_info_screens/advertise_with_us.dart';
 import '../../chota_info_screens/privacy_policy.dart';
 import '../../chota_info_screens/terms_conditions.dart';
+import '../../home_screen/home_provider/home_provider.dart';
 import 'filters_screen/filter_view.dart';
 import 'profile_view.dart';
 import 'feedback_view.dart';
@@ -43,7 +44,6 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   void initState() {
-
     getLogin();
     context.read<AuthenticationProvider>().sendEvent("SettingsView");
     super.initState();
