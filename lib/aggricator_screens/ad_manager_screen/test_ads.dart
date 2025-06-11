@@ -5,7 +5,6 @@ import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -146,18 +145,11 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         "createAt":DateTime.now().toString(),
         "adResponse":ad.responseInfo.toString(),
       },
-      'userId': userId,
-      'deviceId': deviceId,
+      'userId': userId??"",
+      'deviceId': deviceId??"",
     };
     print("All Events: ${newEvent}");
-    await EventRepo().addEvent(newEvent).then((value) {  final box = Hive.box('events');
-
-      final allEvents = box.values.toList();
-      print("All Events:");
-      for (var e in allEvents) {
-        log("$e");
-      }// adds the event to the list
-    },);
+    await EventRepo().addEvent(newEvent);
 
     if (_isAdShown) {
       ad.dispose();
@@ -205,12 +197,12 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
       'eventData': {
         "sdkRequestStartTime":from,
         "sdkRequestReceivedTime":to,
-        "adsRenderingTime":0,
+        "adsRenderingTime":"0",
         "createAt":DateTime.now().toString(),
         "adResponse":error.responseInfo.toString(),
       },
-      'userId': userId,
-      'deviceId': deviceId,
+      'userId': userId??"",
+      'deviceId': deviceId??"",
     };
     print("All Events: ${newEvent}");
     await EventRepo().addEvent(newEvent);

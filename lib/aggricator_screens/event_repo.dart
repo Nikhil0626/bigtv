@@ -25,7 +25,7 @@ class EventRepo extends BaseService {
     final box = Hive.box('events');
     // await box.clear();
     final events = box.values.map((e) => _convertEventToJson(e)).toList();
-    log("Event Data Push ${events.toString()}");
+    log("Event Data Push ${events}");
     if (events.isEmpty) return;
 
     Response response = await makeRequest(

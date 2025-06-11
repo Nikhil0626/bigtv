@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/ad_manager_screen/banner_300x50_size.dart';
 import 'package:chotanews/aggricator_screens/image_preview.dart';
+import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -773,12 +774,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           ..onTap = () async {
             print("sbhjhfjksdfnsdknf1111 $link");
 
-            if (link == "https://play.google.com/store/apps/details?id=com.chotanews" && Platform.isIOS) {
-              print("sbhjhfjksdfnsdknf $link");
-              launchURL(Uri.parse("https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092"));
-            } else {
+
               launchURL(Uri.parse(link.toString()));
-            }
           },
       ));
 

@@ -235,15 +235,15 @@ class SettingsProvider extends ChangeNotifier {
           bannerAdsLoading = BannerAdsLoading.success;
           Map<String, dynamic> newEvent = {
             'key': 'ads_success',
-            'metadata': {
+            'eventData': {
               "sdkRequestStartTime":from,
               "sdkRequestReceivedTime":to,
-              "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMicroseconds,
-              "createAt":DateTime.now(),
+              "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMicroseconds.toString(),
+              "createAt":DateTime.now().toString(),
               "adResponse":ad.responseInfo.toString(),
             },
-            'userId': userId,
-            'deviceId': deviceId,
+            'userId': userId??"",
+            'deviceId': deviceId??"",
           };
           print("All Events: ${newEvent}");
           await EventRepo().addEvent(newEvent);
@@ -255,16 +255,16 @@ class SettingsProvider extends ChangeNotifier {
           print(error.responseInfo.toString());
           bannerAdsLoading = BannerAdsLoading.fail;
           Map<String, dynamic> newEvent = {
-            'key': 'ads_fail',
-            'metadata': {
+            'key': 'ads_failure',
+            'eventData': {
               "sdkRequestStartTime":from,
               "sdkRequestReceivedTime":to,
-              "adsRenderingTime":0,
-              "createAt":DateTime.now(),
+              "adsRenderingTime":"0",
+              "createAt":DateTime.now().toString(),
               "adResponse":error.responseInfo.toString(),
             },
-            'userId': userId,
-            'deviceId': deviceId,
+            'userId': userId??"",
+            'deviceId': deviceId??"",
           };
           print("All Events: ${newEvent}");
           await EventRepo().addEvent(newEvent);

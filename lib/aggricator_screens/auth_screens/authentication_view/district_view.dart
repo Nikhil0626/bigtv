@@ -118,10 +118,6 @@ class _DistrictViewState extends State<DistrictView> {
     super.initState();
   }
 
-  final Map<int, String> states = {
-    21: 'Andhra Pradesh',
-    19: 'Telangana',
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -203,7 +199,7 @@ class _DistrictViewState extends State<DistrictView> {
                       : SingleChildScrollView(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: states.entries.map((entry) {
+                            children: authenticationProvider.states!.entries.map((entry) {
                               int stateId = entry.key;
                               String stateName = entry.value;
 

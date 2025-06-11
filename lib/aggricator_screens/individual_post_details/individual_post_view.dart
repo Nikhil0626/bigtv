@@ -727,13 +727,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               print("sbhjhfjksdfnsdknf1111 $link");
-
-              if (link == "https://play.google.com/store/apps/details?id=com.chotanews" && Platform.isIOS) {
-                print("sbhjhfjksdfnsdknf $link");
-                launchURL(Uri.parse("https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092"));
-              } else {
                 launchURL(Uri.parse(link.toString()));
-              }
             }));
 
       return "";

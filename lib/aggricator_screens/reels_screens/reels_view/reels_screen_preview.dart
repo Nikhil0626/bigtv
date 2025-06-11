@@ -41,7 +41,6 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialIndex);
-
     final reelsList = context.read<ReelsProviders>().getAllReelsList;
 
     _controllers = List.generate(

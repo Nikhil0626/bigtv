@@ -233,7 +233,7 @@ class AuthenticationProvider extends ChangeNotifier {
     preferences.setString("categoriesId", result);
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
-    preferences.setString("locationId", result);
+    // preferences.setString("locationId", result);
 
     Map<String, dynamic> body = {
       "device_id": deviceId,

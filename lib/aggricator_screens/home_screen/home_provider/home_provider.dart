@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
+import 'package:chotanews/main.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -178,14 +179,17 @@ class HomeProvider extends ChangeNotifier {
   }
 
   PageController? pageController = PageController();
+  String? allPostLastId = "0";
+
 
   void scrollListener() {
     if (pageController!.position.atEdge) {
       bool isEnd = pageController!.position.pixels != 0;
       if (isEnd) {
         log("po)stId.toString()   $postId");
-        if(!isAiTagDataLoaded) {
-          getAllPost(postIds: getAllPostList.last['id'].toString() ?? "0");
+        if (!isAiTagDataLoaded && allPostLastId !="0") {
+          postId = "0";
+          getAllPost(postIds: allPostLastId ?? "0");
         }
       }
     }
@@ -199,6 +203,7 @@ class HomeProvider extends ChangeNotifier {
     isBookMark = [];
     isWebView = false;
     webUrl = "";
+    allPostLastId ="0";
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
@@ -218,6 +223,7 @@ class HomeProvider extends ChangeNotifier {
 
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
+      allPostLastId = response.data['lastId'].toString();
       adManageId = Platform.isIOS ? response.data['adUnits']['ios']['admanageid'] : response.data['adUnits']['android']['admanageid'];
       adManagerNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admanagernativeid'] : response.data['adUnits']['android']['admanagernativeid'];
       adManagerBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerbannerid'] : response.data['adUnits']['android']['admanagerbannerid'];
@@ -265,7 +271,6 @@ class HomeProvider extends ChangeNotifier {
         final key = jsonEncode(map);
         return seen.add(key);
       }).toList();
-
 
       getAllPostList.addAll(deduplicated);
       // log(getAllPostList.length.toString());
@@ -456,12 +461,12 @@ class HomeProvider extends ChangeNotifier {
       if (Platform.isIOS) {
         log("pushActionStream: flutter test  11111 ${messagePayload['data']['customData'][0]['value']}");
         postId = messagePayload['data']['customData'][0]['value'] ?? "0";
-        isComeFromLinkOrNotification =true;
+        isComeFromLinkOrNotification = true;
         getIndividualPost(postId);
         notifyListeners();
       } else {
         postId = messagePayload["postId"] ?? "0";
-        isComeFromLinkOrNotification =true;
+        isComeFromLinkOrNotification = true;
         getIndividualPost(postId);
         notifyListeners();
       }
@@ -475,12 +480,12 @@ class HomeProvider extends ChangeNotifier {
       if (Platform.isIOS) {
         log("pushActionStream: flutter test  11111 ${messagePayload?['data']['customData'][0]['value']}");
         postId = messagePayload?['data']['customData'][0]['value'] ?? "0";
-        isComeFromLinkOrNotification =true;
-       getIndividualPost(postId);
+        isComeFromLinkOrNotification = true;
+        getIndividualPost(postId);
         notifyListeners();
       } else {
         postId = messagePayload?["postId"] ?? "0";
-        isComeFromLinkOrNotification =true;
+        isComeFromLinkOrNotification = true;
         getIndividualPost(postId);
         notifyListeners();
       }
@@ -488,22 +493,35 @@ class HomeProvider extends ChangeNotifier {
   }
 
   StreamSubscription<Uri>? linkSubscription;
+  late PageController homePageController;
+  bool isHomeScreen = false;
 
   Future<void> initDeepLinks(BuildContext context) async {
     linkSubscription = AppLinks().uriLinkStream.listen((uri) {
       debugPrint('onAppLink: $uri');
-      _handleDeepLink(uri,context);
+      homePageController.jumpToPage(0);
+
+      isHomeLoading = true;
+      getAllPostList = [];
+      postId = "0";
+      // if (isHomeScreen == false) {
+      //   Navigator.pop(mainNavigatorKey.currentContext!);
+      // }
+      setSelectedTagId(0);
+      aiTagDataLoaded(false);
+      _handleDeepLink(uri, context);
     }, onError: (err) {
       log("Error in deep link handling: $err");
     });
   }
 
-  void _handleDeepLink(Uri uri,context) async {
+  void _handleDeepLink(Uri uri, context) async {
     log("Deep link path: $uri");
     final String? id = uri.queryParameters['postId'];
     if (id != null) {
       postId = id;
       isComeFromLinkOrNotification = true;
+      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
       getIndividualPost(postId);
       notifyListeners();
     }
@@ -541,8 +559,7 @@ class HomeProvider extends ChangeNotifier {
       final size = box.size;
       final position = box.localToGlobal(Offset.zero);
 
-      final screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width /
-          WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+      final screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
       final itemCenter = position.dx + size.width / 2;
       final targetOffset = aiTagScrollController.offset + itemCenter - screenWidth / 2;
