@@ -11,7 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
+import '../../event_repo.dart';
 import '../../in_app_web_view.dart';
 import '../../../services/base_urls.dart';
 import '../../../services/deviice_details.dart';
@@ -232,6 +234,17 @@ class _LoginViewState extends State<LoginView> {
 
               InkWell(
                 onTap:() async{
+                  SharedPreferences sp = await SharedPreferences.getInstance();
+                  String? userId = sp.getString("userId");
+
+                  // 🔥 Fire login_skip event without deviceId
+                  await EventRepo().addEvent({
+                    "userId": (userId ?? 'guest').toString(), // Converts userId to String
+                    "logIn": "skipped",
+                    "createAt": DateTime.now().toString()
+                  }, "login_skip");
+
+
 
                   context.read<AuthenticationProvider>().continueAsGuest(context);
 

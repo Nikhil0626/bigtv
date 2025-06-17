@@ -6,8 +6,6 @@ import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -29,11 +27,19 @@ class _SplashScreenState extends State<SplashScreen> {
     });
   }
 
-
   Future<void> checkLastShownDate() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? lastDate = prefs.getString('last_shown_date');
     String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
+
+    EventRepo().addEvent(
+      {
+        "createAt": DateTime.now().toString(),
+        "screen": "SplashScreen",
+        "platform": "android" // or "ios" depending on Platform
+      },
+      "app_opened",
+    );
 
     if (lastDate != today) {
       setState(() {
@@ -55,7 +61,7 @@ class _SplashScreenState extends State<SplashScreen> {
     //   );
     //   return;
     // }else{
-      context.read<AuthenticationProvider>().isPageNavigation(context);
+    context.read<AuthenticationProvider>().isPageNavigation(context);
 
     // }
 
@@ -75,25 +81,25 @@ class _SplashScreenState extends State<SplashScreen> {
       body: Center(
         child: showGif
             ? Container(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          color: Colors.white,
-          child: Image.asset(
-            "assets/svg/splash_video.gif",
-            fit: BoxFit.cover,
-          ),
-        )
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.white,
+                child: Image.asset(
+                  "assets/svg/splash_video.gif",
+                  fit: BoxFit.cover,
+                ),
+              )
             : SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
-          child: Center(
-            child: Image.asset(
-              "assets/playstore.png",
-              height: 100,
-              width: 100,
-            ),
-          ),
-        ),
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                child: Center(
+                  child: Image.asset(
+                    "assets/playstore.png",
+                    height: 100,
+                    width: 100,
+                  ),
+                ),
+              ),
       ),
     );
   }

@@ -12,6 +12,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../globel_keys/global_variables_data.dart';
 import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
@@ -21,6 +22,7 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_and _source.dart';
 import '../botton_actions.dart';
+import '../event_repo.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'home_provider/home_provider.dart';
 import 'main_screen_pageview.dart';
@@ -184,10 +186,17 @@ ScreenshotController screenshotControllers = ScreenshotController();
                           settingsProvider.isLikeList.contains(widget.articalData['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                           label: 'లైక్',
                           isLike: settingsProvider.isLikeList.contains(widget.articalData['id'].toString()),
-                          onTap: () {
+                          onTap: () async {
                             log("Like");
                             settingsProvider.isLikePost(widget.articalData);
-      
+                            await EventRepo().addEvent({
+                              "like": !settingsProvider.isLikeList.contains(widget.articalData['id'].toString()),
+                              "postId": widget.articalData['id'].toString(),
+                              "deviceId": (GlobalVariables().deviceId ?? 'unknown').toString(),
+                              "createAt": DateTime.now().toString()
+                            }, "liked_article");
+
+
                             // flipProvider.isLikePost(widget.articalData);
                           },
                         );
@@ -208,42 +217,69 @@ ScreenshotController screenshotControllers = ScreenshotController();
                         },
                       ),
                       Spacer(),
+
                       BottomActions(
                         postType: widget.articalData['subType'] ?? "",
                         icon: "assets/svg/share.svg",
                         label: 'షేర్',
                         iconColor: AppColors.iconColors,
                         onTap: () async {
+                          print("Share");
+
+                          // Get userId and deviceId before logging the event
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
 
-      
-                          sendShareDetails(userId, widget.articalData['id'], widget.articalData['content'].toString());
-      
-                          if (widget.articalData['type'] == "Standard" || widget.articalData['type'] == "Video"|| widget.articalData['type'] == "Image" ) {
+                          // Send event
+                          await EventRepo().addEvent({
+                            "userId": (userId ?? 'guest').toString(),
+                            "deviceId": (deviceId ?? 'unknown').toString(),
+                            "share": "news",
+                            "postId": widget.articalData['id'].toString(),
+                            "createAt": DateTime.now().toString()
+                          }, "shared_article");
+
+
+                          // Send share details to backend
+                          sendShareDetails(
+                            userId,
+                            widget.articalData['id'],
+                            widget.articalData['content'].toString(),
+                          );
+
+                          // Handle content type: Standard, Video, Image
+                          if (widget.articalData['type'] == "Standard" ||
+                              widget.articalData['type'] == "Video" ||
+                              widget.articalData['type'] == "Image") {
                             try {
-                              final image = await screenshotControllers.capture(
-                                pixelRatio: 2,
-                              );
+                              final image = await screenshotControllers.capture(pixelRatio: 2);
                               if (image != null) {
                                 final directory = await getTemporaryDirectory();
                                 final imagePath = '${directory.path}/${widget.articalData['id']}.png';
                                 final imageFile = File(imagePath);
                                 await imageFile.writeAsBytes(image);
-      
-                                Share.shareXFiles([XFile(imageFile.path)], text: widget.articalData['linkURLAndroid'].toString());
+
+                                Share.shareXFiles(
+                                  [XFile(imageFile.path)],
+                                  text: widget.articalData['linkURLAndroid'].toString(),
+                                );
                               } else {
-                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                               }
                             } catch (e) {
+                              print("Screenshot Error: $e");
                               CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                             }
-                          } else if (widget.articalData['type'] == "Gallery") {
+                          }
+
+                          // Handle content type: Gallery
+                          else if (widget.articalData['type'] == "Gallery") {
                             createAndSharePdf(context, widget.articalData);
                           }
                         },
                       ),
+
       
                     ],
                   ),

@@ -2,6 +2,9 @@ import 'dart:developer';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../globel_keys/global_variables_data.dart';
+import '../event_repo.dart';
 import 'home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
 
@@ -62,7 +65,7 @@ HomeProvider? homeProvider;
                       controller: homeProvider.pageController!,
                       scrollDirection: Axis.vertical,
                       itemCount: homeProvider.getAllPostList.length,
-                      onPageChanged: (value) {
+                      onPageChanged: (value) async {
                         log("IndividualPostView  $autoIndex--- $value");
                         if(homeProvider.isBottomEnable) {
                           homeProvider.pageChange(isValue: false);
@@ -80,6 +83,22 @@ HomeProvider? homeProvider;
                         }
 
                         context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
+
+                        SharedPreferences sp = await SharedPreferences.getInstance();
+                        String? userId = sp.getString("userId");
+
+                        // ✅ Add flip count event using EventRepo
+                        await EventRepo().addEvent({
+                          "flipCount": value + 1,
+                          "postId": homeProvider.getAllPostList[value]['id'].toString(),
+                          "userId": (userId ?? 'guest').toString(),
+                          "createAt": DateTime.now().toString(),
+                          "deviceId": (GlobalVariables().deviceId ?? 'unknown').toString(),
+                          "newsType": "News"
+                        }, "flip_count");
+
+                        log(" Flip Count Event Fired → postId: ${homeProvider.getAllPostList[value]['id']}, flipCount: ${value + 1}");
+
                         autoIndex = value;
                         setState(() {});
                       },
