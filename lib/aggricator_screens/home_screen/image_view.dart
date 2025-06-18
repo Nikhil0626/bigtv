@@ -37,13 +37,13 @@ class _ImageViewState extends State<ImageView> {
     return InkWell(
       onTap: () async {
         if (widget.getAllPostList ['type'] == "Image") {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MainScreenPageView(
-                  startIndex: widget.index,
-                ),
-              ));
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (context) => MainScreenPageView(
+          //         startIndex: widget.index,
+          //       ),
+          //     ));
         }else{
           log("sdbsjbfsjbfjhsfbhjsdbfsmkfb");
         }

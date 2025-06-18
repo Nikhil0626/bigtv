@@ -116,7 +116,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                     );
                                   },
                                 )),
-                        Expanded(child: MainScreenPageView(startIndex: 0)),
+                        Expanded(child: MainScreenPageView()),
                       ],
                     ),
         ),
