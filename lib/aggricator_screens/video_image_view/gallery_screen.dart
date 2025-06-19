@@ -172,7 +172,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                             settingsProvider.isLikePost(widget.postDetails);
                             await EventRepo().addEvent({
                               "like": !settingsProvider.isLikeList.contains(widget.postDetails['id'].toString()),
-                              "postId": widget.postDetails['id'].toString(),
+                              "postId": widget.postDetails['id'].toString()??"000",
                               "createAt": DateTime.now().toString()
                             }, "liked_article");
 
@@ -209,7 +209,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                         print("Share");
                         await EventRepo().addEvent({
                           "share": "news",
-                          "postId": widget.postDetails['id'].toString(),   // ✅ postId converted to String
+                          "postId": widget.postDetails['id'].toString()??"000",   // ✅ postId converted to String
                           "createAt": DateTime.now().toString(),
                         }, "shared_article");
 

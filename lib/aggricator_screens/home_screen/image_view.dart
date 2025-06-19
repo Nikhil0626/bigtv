@@ -90,8 +90,8 @@ class _ImageViewState extends State<ImageView> {
 
                             await EventRepo().addEvent({
                               "like": settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()),
-                              "postId": widget.getAllPostList['id'].toString(),
-                              "createAt": DateTime.now().toString()
+                              "postId": widget.getAllPostList['id'].toString()??"000",
+                              "createAt": DateTime.now().toString(),
                             }, "liked_article");
 
                           },
@@ -129,10 +129,8 @@ class _ImageViewState extends State<ImageView> {
                           String? deviceId = sp.getString("deviceId");
                           // Log event to server
                           await EventRepo().addEvent({
-                            "deviceId": (deviceId ?? 'unknown').toString(),
-                            "userId": (userId ?? 'guest').toString(),
                             "share": "news",
-                            "postId": widget.getAllPostList['id'].toString(),
+                            "postId": widget.getAllPostList['id'].toString()??"0000",
                             "createAt": DateTime.now().toString()
                           }, "shared_article");
 

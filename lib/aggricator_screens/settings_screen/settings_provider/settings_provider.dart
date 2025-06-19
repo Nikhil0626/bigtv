@@ -10,6 +10,7 @@ import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive/hive.dart';
@@ -234,40 +235,32 @@ class SettingsProvider extends ChangeNotifier {
           print(ad.responseInfo.toString());
           bannerAdsLoading = BannerAdsLoading.success;
           Map<String, dynamic> newEvent = {
-            'key': 'ads_success',
-            'eventData': {
-              "sdkRequestStartTime":from,
-              "sdkRequestReceivedTime":to,
-              "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMicroseconds.toString(),
-              "createAt":DateTime.now().toString(),
-              "adResponse":ad.responseInfo.toString(),
-            },
-            'userId': userId??"",
-            'deviceId': deviceId??"",
+            "sdkRequestStartTime":from,
+            "sdkRequestReceivedTime":to,
+            "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMicroseconds.toString(),
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.responseInfo.toString(),
           };
-          print("All Events: ${newEvent}");
-          await EventRepo().addEvent(newEvent);
+          print("All Events: $newEvent");
+          await EventRepo().addEvent(newEvent,"ads_success");
 
           notifyListeners();
         },
         onAdFailedToLoad: (ad, error) async{
           to =  DateTime.now().toString();
-          print(error.responseInfo.toString());
+          if (kDebugMode) {
+            print(error.responseInfo.toString());
+          }
           bannerAdsLoading = BannerAdsLoading.fail;
           Map<String, dynamic> newEvent = {
-            'key': 'ads_failure',
-            'eventData': {
-              "sdkRequestStartTime":from,
-              "sdkRequestReceivedTime":to,
-              "adsRenderingTime":"0",
-              "createAt":DateTime.now().toString(),
-              "adResponse":error.responseInfo.toString(),
-            },
-            'userId': userId??"",
-            'deviceId': deviceId??"",
+            "sdkRequestStartTime":from,
+            "sdkRequestReceivedTime":to,
+            "adsRenderingTime":"0",
+            "createAt":DateTime.now().toString(),
+            "adResponse":error.responseInfo.toString(),
           };
           print("All Events: ${newEvent}");
-          await EventRepo().addEvent(newEvent);
+          await EventRepo().addEvent(newEvent,"ads_failure");
           ad.dispose();
           notifyListeners();
         },

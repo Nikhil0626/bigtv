@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../services/base_service.dart';
 import '../../../services/base_urls.dart';
@@ -15,10 +16,21 @@ class EventRepo extends BaseService {
     return response;
   }
 
-  Future<void> addEvent(Map<String, dynamic> eventData) async {
-    log("event body --- ${eventData}");
+  Future<void> addEvent(Map<String, dynamic> eventData,eventName) async {
+    log("event body --- ${eventData} ----$eventName");
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    String? userId= sharedPreferences.getString("userId");
+    String? deviceId= sharedPreferences.getString("deviceId");
+
+    Map<String, dynamic> newEvent = {
+      'key': eventName,
+      'eventData':eventData,
+      'userId': userId??"guest",
+      'deviceId': deviceId??"12345",
+    };
     final box = Hive.box('events');
-    await box.add(eventData);
+    await box.add(newEvent);
   }
 
   Future<void> processAndPushEvents() async {

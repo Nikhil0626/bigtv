@@ -187,7 +187,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                   context.read<ReelsProviders>().isLikePost(widget.reelCard);
                   await EventRepo().addEvent({
                     "like": !context.read<ReelsProviders>().isLikeList.contains(widget.reelCard.id.toString()),
-                    "postId": widget.reelCard.id.toString(),
+                    "postId": widget.reelCard.id.toString()??"000",
                     "createAt": DateTime.now().toString()
                   }, "liked_article");
 
@@ -220,7 +220,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
 
                   await EventRepo().addEvent({
                     "share": "reels",
-                    "postId": widget.reelCard.id.toString(),        // ✅ postId converted to String
+                    "postId": widget.reelCard.id.toString()??"000",        // ✅ postId converted to String
                     "createAt": DateTime.now().toString(),
                   }, "shared_article");
 
