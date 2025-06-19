@@ -251,6 +251,7 @@ class _DistrictViewState extends State<DistrictView> {
                           ),
                         ),
                 ),
+
                 InkWell(
                   onTap: authenticationProvider.selectedLocations.length > 1 &&
                           authenticationProvider.selectedLocations.length <= 5
@@ -298,6 +299,7 @@ class _DistrictViewState extends State<DistrictView> {
                                       color: Colors.white,
                                       fontWeight: FontWeight.w500)))),
                 ),
+
                 SizedBox(height: 6.h),
                 LinearProgressIndicator(
                   value: 1,

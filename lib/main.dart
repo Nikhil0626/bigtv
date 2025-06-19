@@ -51,9 +51,6 @@ Future<void> main() async {
   await Hive.openBox('events');
   EventCron().start();
   MobileAds.instance.initialize();
-
-
-
   initPlugin();
   getAndSendReferrerDetails();
   await EasyLocalization.ensureInitialized();

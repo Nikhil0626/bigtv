@@ -209,70 +209,7 @@ class SettingsProvider extends ChangeNotifier {
   String? from = '';
   String? renderTime = '';
   BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
-  late BannerAd bannerAd;
+   BannerAd? bannerAd;
 
-  void loadBannerAd(BuildContext context) async{
-
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
-    String? userId= sharedPreferences.getString("userId");
-    String? deviceId= sharedPreferences.getString("deviceId");
-    from =  DateTime.now().toString();
-    bannerAdsLoading = BannerAdsLoading.loading;
-
-    log(userId.toString());
-    log(deviceId.toString());
-    final AdSize customAdSize = AdSize(width: 300, height: 50);
-    bannerAd = BannerAd(
-      // adUnitId: "/22387492205,23277683599/id1631068092.Banner1.1747894331",
-      adUnitId: context.read<HomeProvider>().adManagerBannerId,
-      size: customAdSize,
-      request: const AdManagerAdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) async{
-          to =  DateTime.now().toString();
-          print(ad.responseInfo.toString());
-          bannerAdsLoading = BannerAdsLoading.success;
-          Map<String, dynamic> newEvent = {
-            'key': 'ads_success',
-            'eventData': {
-              "sdkRequestStartTime":from,
-              "sdkRequestReceivedTime":to,
-              "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMicroseconds.toString(),
-              "createAt":DateTime.now().toString(),
-              "adResponse":ad.responseInfo.toString(),
-            },
-            'userId': userId??"",
-            'deviceId': deviceId??"",
-          };
-          print("All Events: ${newEvent}");
-          await EventRepo().addEvent(newEvent);
-
-          notifyListeners();
-        },
-        onAdFailedToLoad: (ad, error) async{
-          to =  DateTime.now().toString();
-          print(error.responseInfo.toString());
-          bannerAdsLoading = BannerAdsLoading.fail;
-          Map<String, dynamic> newEvent = {
-            'key': 'ads_failure',
-            'eventData': {
-              "sdkRequestStartTime":from,
-              "sdkRequestReceivedTime":to,
-              "adsRenderingTime":"0",
-              "createAt":DateTime.now().toString(),
-              "adResponse":error.responseInfo.toString(),
-            },
-            'userId': userId??"",
-            'deviceId': deviceId??"",
-          };
-          print("All Events: ${newEvent}");
-          await EventRepo().addEvent(newEvent);
-          ad.dispose();
-          notifyListeners();
-        },
-      ),
-    )..load();
-  }
 
 }
