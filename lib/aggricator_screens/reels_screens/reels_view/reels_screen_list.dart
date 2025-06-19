@@ -197,7 +197,7 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                               print("Share");
                               await EventRepo().addEvent({
                                 "share": "reels",
-                                "postId": widget.card.id.toString(),
+                                "postId": widget.card.id.toString()??"000",
                                 "createAt": DateTime.now().toString()
                               }, "shared_article");
 

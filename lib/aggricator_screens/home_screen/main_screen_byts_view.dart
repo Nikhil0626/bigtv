@@ -174,7 +174,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                               settingsProvider.isLikePost(widget.article);
                                                               await EventRepo().addEvent({
                                                                 "like": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                                "postId": widget.article['id'].toString(),
+                                                                "postId": widget.article['id'].toString()??'000',
                                                                 "createAt": DateTime.now().toString()
                                                               }, "liked_article");
 
@@ -641,7 +641,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                         settingsProvider.isLikePost(widget.article);
                                                         await EventRepo().addEvent({
                                                           "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                          "postId": widget.article['id'].toString(),
+                                                          "postId": widget.article['id'].toString()??"000",
                                                           "createAt": DateTime.now().toString()
                                                         }, "liked_article");
 

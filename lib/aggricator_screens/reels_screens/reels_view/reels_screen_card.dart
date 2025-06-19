@@ -357,7 +357,7 @@ class _EachReelCardState extends State<EachReelCard> {
                               log("Like");
                               await EventRepo().addEvent({
                                 "like": !widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
-                                "postId": widget.reel.id.toString(),
+                                "postId": widget.reel.id.toString()??"000",
                                 "createAt": DateTime.now().toString()
                               }, "liked_article");
                             },
@@ -388,9 +388,8 @@ class _EachReelCardState extends State<EachReelCard> {
 
                               // ✅ Now it's safe to use userId
                               await EventRepo().addEvent({
-                                "userId": (userId ?? 'guest').toString(),
                                 "share": "reels",
-                                "postId": widget.reel.id.toString(),
+                                "postId": widget.reel.id.toString()??"000",
                                 "createAt": DateTime.now().toString()
                               }, "shared_article");
 

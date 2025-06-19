@@ -248,10 +248,8 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                   String? userId = sp.getString("userId");
                                                                   String? deviceId = sp.getString("deviceId");
                                                                   await EventRepo().addEvent({
-                                                                    "deviceId": (deviceId ?? 'unknown').toString(),
-                                                                    "userId": (userId ?? 'guest').toString(),
                                                                     "share": "news",
-                                                                    "postId": article['id'].toString(),
+                                                                    "postId": article['id'].toString()??"000",
                                                                     "createAt": DateTime.now().toString()
                                                                   }, "shared_article");
 
@@ -635,7 +633,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                               settingsProvider.isLikePost(article);
                                                               await EventRepo().addEvent({
                                                                 "like": !settingsProvider.isLikeList.contains(article['id'].toString()),
-                                                                "postId": article['id'].toString(),
+                                                                "postId": article['id'].toString()??"000",
                                                                 "createAt": DateTime.now().toString()
                                                               }, "liked_article");
 

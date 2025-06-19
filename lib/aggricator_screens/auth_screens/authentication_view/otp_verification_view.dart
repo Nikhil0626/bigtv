@@ -119,12 +119,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
             InkWell(
               onTap: authenticationProvider.isOtpButtonEnabled
                   ? () async {
-                SharedPreferences sp = await SharedPreferences.getInstance();
-                String? userId = sp.getString("userId") ?? "guest";
-                String? deviceId = sp.getString("deviceId") ?? "unknown";
                 await EventRepo().addEvent({
-                  "userId": (userId ?? 'guest').toString(),  // Ensures it's a string
-                  "deviceId": deviceId,
                   "otpStatus": "attempted",
                   "createAt": DateTime.now().toString()
                 }, "otp_verify");

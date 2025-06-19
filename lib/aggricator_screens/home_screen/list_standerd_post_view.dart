@@ -191,8 +191,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                             settingsProvider.isLikePost(widget.articalData);
                             await EventRepo().addEvent({
                               "like": !settingsProvider.isLikeList.contains(widget.articalData['id'].toString()),
-                              "postId": widget.articalData['id'].toString(),
-                              "deviceId": (GlobalVariables().deviceId ?? 'unknown').toString(),
+                              "postId": widget.articalData['id'].toString()??"000",
                               "createAt": DateTime.now().toString()
                             }, "liked_article");
 
@@ -233,8 +232,6 @@ ScreenshotController screenshotControllers = ScreenshotController();
 
                           // Send event
                           await EventRepo().addEvent({
-                            "userId": (userId ?? 'guest').toString(),
-                            "deviceId": (deviceId ?? 'unknown').toString(),
                             "share": "news",
                             "postId": widget.articalData['id'].toString(),
                             "createAt": DateTime.now().toString()

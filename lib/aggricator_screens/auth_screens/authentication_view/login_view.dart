@@ -239,9 +239,8 @@ class _LoginViewState extends State<LoginView> {
 
                   // 🔥 Fire login_skip event without deviceId
                   await EventRepo().addEvent({
-                    "userId": (userId ?? 'guest').toString(), // Converts userId to String
                     "logIn": "skipped",
-                    "createAt": DateTime.now().toString()
+                    "createAt": DateTime.now().toString(),
                   }, "login_skip");
 
 

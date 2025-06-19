@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:flutter/material.dart';
@@ -36,9 +38,9 @@ class _SplashScreenState extends State<SplashScreen> {
       {
         "createAt": DateTime.now().toString(),
         "screen": "SplashScreen",
-        "platform": "android" // or "ios" depending on Platform
+        "platform":Platform.isIOS?"iOS": "android" // or "ios" depending on Platform
       },
-      "app_opened",
+      "opened_app",
     );
 
     if (lastDate != today) {

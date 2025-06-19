@@ -88,14 +88,14 @@ HomeProvider? homeProvider;
                         String? userId = sp.getString("userId");
 
                         // ✅ Add flip count event using EventRepo
-                        await EventRepo().addEvent({
-                          "flipCount": value + 1,
-                          "postId": homeProvider.getAllPostList[value]['id'].toString(),
-                          "userId": (userId ?? 'guest').toString(),
-                          "createAt": DateTime.now().toString(),
-                          "deviceId": (GlobalVariables().deviceId ?? 'unknown').toString(),
-                          "newsType": "News"
-                        }, "flip_count");
+                        // await EventRepo().addEvent({
+                        //   "flipCount": value + 1,
+                        //   "postId": homeProvider.getAllPostList[value]['id'].toString(),
+                        //   "userId": (userId ?? 'guest').toString(),
+                        //   "createAt": DateTime.now().toString(),
+                        //   "deviceId": (GlobalVariables().deviceId ?? 'unknown').toString(),
+                        //   "newsType": "News"
+                        // }, "flip_count");
 
                         log(" Flip Count Event Fired → postId: ${homeProvider.getAllPostList[value]['id']}, flipCount: ${value + 1}");
 

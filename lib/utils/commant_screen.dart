@@ -236,7 +236,7 @@ class _CommentSectionState extends State<CommentSection> {
                                   );
                               await EventRepo().addEvent({
                                 "commented": controller.text,
-                                "postId": widget.postId.toString(),
+                                "postId": widget.postId.toString()??0,
                                 "createAt": DateTime.now().toString()
                               }, "commented_article");
 
