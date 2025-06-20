@@ -30,10 +30,9 @@ class ReelsScreenList extends StatefulWidget {
 }
 
 class _ReelsScreenListState extends State<ReelsScreenList> {
-
   @override
   void initState() {
-    if(context.read<ReelsProviders>().getAllReelsList.isEmpty){
+    if (context.read<ReelsProviders>().getAllReelsList.isEmpty) {
       context.read<ReelsProviders>().getAllReelsList = [];
       context.read<ReelsProviders>().getAllReels();
     }
@@ -44,35 +43,36 @@ class _ReelsScreenListState extends State<ReelsScreenList> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Consumer<ReelsProviders>(
-        builder: (_,reelsProviders,__) {
-          return Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10.w),
-            child: GridView.builder(
-              itemCount: reelsProviders.getAllReelsList.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                childAspectRatio: 0.7,
-                crossAxisSpacing: 10.w,
-                mainAxisSpacing: 10.h,
-              ),
-              itemBuilder: (context, index) {
-                final card = reelsProviders.getAllReelsList[index];
-                return ReelsListViewCard(card: card,index: index, );
-              },
+      body: Consumer<ReelsProviders>(builder: (_, reelsProviders, __) {
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.w),
+          child: GridView.builder(
+            itemCount: reelsProviders.getAllReelsList.length,
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 0.7,
+              crossAxisSpacing: 10.w,
+              mainAxisSpacing: 10.h,
             ),
-          );
-        }
-      ),
+            itemBuilder: (context, index) {
+              final card = reelsProviders.getAllReelsList[index];
+              return ReelsListViewCard(
+                card: card,
+                index: index,
+              );
+            },
+          ),
+        );
+      }),
     );
   }
 }
 
-
 class ReelsListViewCard extends StatefulWidget {
   final ReelsModel card;
   final int index;
-  const ReelsListViewCard({super.key,required this.card,required this.index});
+
+  const ReelsListViewCard({super.key, required this.card, required this.index});
 
   @override
   State<ReelsListViewCard> createState() => _ReelsListViewCardState();
@@ -102,13 +102,12 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
               // Thumbnail Image with Rounded Corners
               CachedNetworkImage(
                 imageUrl: widget.card.thumbnailUrl,
-                fit: BoxFit.cover, // Ensure image fills the card
+                fit: BoxFit.cover,
+                // Ensure image fills the card
                 width: double.infinity,
                 height: double.infinity,
-                placeholder: (context, url) =>
-                    Center(child: CircularProgressIndicator()),
-                errorWidget: (context, url, error) =>
-                    Icon(Icons.error, color: Colors.red),
+                placeholder: (context, url) => Center(child: CircularProgressIndicator()),
+                errorWidget: (context, url, error) => Icon(Icons.error, color: Colors.red),
               ),
               // Dark Gradient Overlay at Bottom for better text visibility
               Positioned(
@@ -143,7 +142,6 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                         overflow: TextOverflow.ellipsis,
                       ),
                       height(height: 6.h),
-
                       Row(
                         children: [
                           width(width: 10),
@@ -193,12 +191,18 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                           BottomActions(
                             postType: "",
                             icon: "assets/svg/share.svg",
-                            label: 'షేర్',
+                            label: 'F',
                             iconColor: Colors.white,
                             onTap: () async {
+                              print("Share");
+                              await EventRepo().addEvent({
+                                "share": "reels",
+                                "postId": widget.card.id.toString()??"000",
+                                "createAt": DateTime.now().toString()
+                              }, "shared_article");
+
                               SharedPreferences sp = await SharedPreferences.getInstance();
                               String? userId = sp.getString("userId");
-
 
                               sendShareDetails(userId, widget.card.id, widget.card.content.toString());
 
@@ -227,10 +231,6 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                   ),
                 ),
               ),
-
-
-
-
             ],
           ),
         ),

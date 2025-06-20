@@ -52,9 +52,6 @@ Future<void> main() async {
   await Hive.openBox('events');
   EventCron().start();
   MobileAds.instance.initialize();
-
-
-
   initPlugin();
   getAndSendReferrerDetails();
   await EasyLocalization.ensureInitialized();
@@ -71,6 +68,7 @@ Future<void> main() async {
   AnalyticsService().trackAppOpen();
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
+
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 

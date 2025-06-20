@@ -31,7 +31,6 @@ class _IndividualPaperState extends State<IndividualPaper> {
 
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

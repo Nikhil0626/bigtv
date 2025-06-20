@@ -11,8 +11,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/app_colors.dart';
+import '../../event_repo.dart';
 
 class OtpVerificationView extends StatefulWidget {
   const OtpVerificationView({super.key});
@@ -116,8 +118,10 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
             height(height: 24.h),
             InkWell(
               onTap: authenticationProvider.isOtpButtonEnabled
-                  ? () {
-                      // if (!canResend) {
+                  ? () async {
+
+
+                // if (!canResend) {
                       // } else {
                       authenticationProvider.verifyOtp(context);
                       // }

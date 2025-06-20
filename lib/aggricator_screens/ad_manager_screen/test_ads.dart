@@ -136,20 +136,13 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     String? deviceId= sharedPreferences.getString("deviceId");
     to = DateTime.now().toString();
 
-    Map<String, dynamic> newEvent = {
-      'key': 'ads_success',
-      'eventData': {
-        "sdkRequestStartTime":from,
-        "sdkRequestReceivedTime":to,
-        "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds.toString(),
-        "createAt":DateTime.now().toString(),
-        "adResponse":ad.responseInfo.toString(),
-      },
-      'userId': userId??"",
-      'deviceId': deviceId??"",
-    };
-    print("All Events: ${newEvent}");
-    await EventRepo().addEvent(newEvent);
+    await EventRepo().addEvent( {
+      "sdkRequestStartTime":from,
+      "sdkRequestReceivedTime":to,
+      "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds.toString(),
+      "createAt":DateTime.now().toString(),
+      "adResponse":ad.responseInfo.toString(),
+    },"ads_success");
 
     if (_isAdShown) {
       ad.dispose();
@@ -192,20 +185,15 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
     String? userId= sharedPreferences.getString("userId");
     String? deviceId= sharedPreferences.getString("deviceId");
-    Map<String, dynamic> newEvent = {
-      'key': 'ads_failure',
-      'eventData': {
-        "sdkRequestStartTime":from,
-        "sdkRequestReceivedTime":to,
-        "adsRenderingTime":"0",
-        "createAt":DateTime.now().toString(),
-        "adResponse":error.responseInfo.toString(),
-      },
-      'userId': userId??"",
-      'deviceId': deviceId??"",
-    };
-    print("All Events: ${newEvent}");
-    await EventRepo().addEvent(newEvent);
+
+    await EventRepo().addEvent({
+      "sdkRequestStartTime":from,
+      "sdkRequestReceivedTime":to,
+      "adsRenderingTime":"0",
+      "createAt":DateTime.now().toString(),
+      "adResponse":error.responseInfo.toString(),
+    },"ads_success");
+
     bannerAdsLoading = BannerAdsLoading.fail;
 
     setState(() {

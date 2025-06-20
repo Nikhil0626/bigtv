@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -19,6 +20,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../botton_actions.dart';
+import '../../event_repo.dart';
 import '../../home_screen/home_provider/home_provider.dart';
 import '../../in_app_web_view.dart';
 import '../../../services/webengage_event_tracks.dart';
@@ -257,11 +259,11 @@ class _EachReelCardState extends State<EachReelCard> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(vertical: 0,horizontal: 12.h),
-                      child: Text( widget.reel.title,style:homeScreenFontStyle(
-                          color:  AppColors.textColor ,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold) ,),
+                      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 12.h),
+                      child: Text(
+                        widget.reel.title,
+                        style: homeScreenFontStyle(color: AppColors.textColor, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                      ),
                     ),
                     Container(
                       padding: EdgeInsets.only(bottom: 10.h, top: 10.h),
@@ -350,8 +352,14 @@ class _EachReelCardState extends State<EachReelCard> {
                             icon: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                             label: 'లైక్',
                             isLike: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
-                            onTap: () {
+                            onTap: () async {
                               widget.reelsProvider.isLikePost(widget.reel);
+                              log("Like");
+                              await EventRepo().addEvent({
+                                "like": !widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
+                                "postId": widget.reel.id.toString()??"000",
+                                "createAt": DateTime.now().toString()
+                              }, "liked_article");
                             },
                           ),
                           BottomActions(
@@ -361,6 +369,7 @@ class _EachReelCardState extends State<EachReelCard> {
                             iconColor: AppColors.iconColors,
                             onTap: () async {
                               context.read<AuthenticationProvider>().sendEvent("CommentPage");
+
 
                               showComments(context, widget.reel.id.toString());
                             },
@@ -372,8 +381,19 @@ class _EachReelCardState extends State<EachReelCard> {
                             label: 'షేర్',
                             iconColor: AppColors.iconColors,
                             onTap: () async {
+                              print("Share");
+
+                              // ✅ Get userId first
                               SharedPreferences sp = await SharedPreferences.getInstance();
                               String? userId = sp.getString("userId");
+
+                              // ✅ Now it's safe to use userId
+                              await EventRepo().addEvent({
+                                "share": "reels",
+                                "postId": widget.reel.id.toString()??"000",
+                                "createAt": DateTime.now().toString()
+                              }, "shared_article");
+
 
                               sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
 
@@ -387,15 +407,20 @@ class _EachReelCardState extends State<EachReelCard> {
                                   final imageFile = File(imagePath);
                                   await imageFile.writeAsBytes(image);
 
-                                  Share.shareXFiles([XFile(imageFile.path)], text: widget.reel.videoUrl);
+                                  Share.shareXFiles(
+                                    [XFile(imageFile.path)],
+                                    text: widget.reel.videoUrl,
+                                  );
                                 } else {
-                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                                 }
                               } catch (e) {
+                                print("Error: $e");
                                 CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                               }
                             },
                           ),
+
                         ],
                       ),
                     ),
@@ -403,7 +428,6 @@ class _EachReelCardState extends State<EachReelCard> {
                   ],
                 ),
               ),
-
             ],
           ),
         ),

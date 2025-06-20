@@ -249,6 +249,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                           setState(() {
                             settingsProvider.feedbackController.clear();
                             settingsProvider.selectedFeedbackList.clear();
+
                           });
                         },);
                       }else{

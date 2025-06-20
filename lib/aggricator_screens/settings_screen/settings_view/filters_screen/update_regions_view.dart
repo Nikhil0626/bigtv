@@ -28,11 +28,9 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
     super.initState();
   }
 
-
-
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthenticationProvider,SettingsProvider>(builder: (_, authenticationProvider,settingsProvider, __) {
+    return Consumer2<AuthenticationProvider, SettingsProvider>(builder: (_, authenticationProvider, settingsProvider, __) {
       return Scaffold(
         backgroundColor: Colors.white,
         bottomNavigationBar: Padding(
@@ -40,17 +38,23 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
           child: InkWell(
             onTap: authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5
                 ? () {
-                    authenticationProvider.sendLocationsToServer(context,).then((value) {
-                      if (context.mounted) {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => HomeView(),
-                          ),
-                              (route) => false,
-                        );
-                      }
-                    },);
+                    authenticationProvider
+                        .sendLocationsToServer(
+                      context,
+                    )
+                        .then(
+                      (value) {
+                        if (context.mounted) {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => HomeView(),
+                            ),
+                            (route) => false,
+                          );
+                        }
+                      },
+                    );
                   }
                 : () {
                     CustomToast.showErrorToast(msg: "Please Select only 5 District ");
@@ -59,9 +63,9 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
               width: double.infinity,
               height: 35.h,
               decoration: BoxDecoration(
-                color: (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5) ?AppColors.appButtonColor : AppColors.bodyTextColor.withOpacity(.2),
+                color:
+                    (authenticationProvider.selectedLocations.length > 1 && authenticationProvider.selectedLocations.length <= 5) ? AppColors.appButtonColor : AppColors.bodyTextColor.withOpacity(.2),
                 borderRadius: BorderRadius.all(Radius.circular(8.r)),
-
               ),
               child: Center(
                 child: Text(
@@ -72,102 +76,113 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
             ),
           ),
         ),
-        body:authenticationProvider.isLocationLoading?Center(child: AppLoadingScreen(),) : Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: [
-              height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success||settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
-              Banner300x50Size(),
-
-              height(height: 10),
-              Expanded(
-                child: ListView(
+        body: authenticationProvider.isLocationLoading
+            ? Center(
+                child: AppLoadingScreen(),
+              )
+            : Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
                   children: [
-                    // Padding(
-                    //   padding: const EdgeInsets.symmetric(vertical: 20),
-                    //   child: Container(
-                    //     padding: EdgeInsets.symmetric(horizontal: 10),
-                    //     decoration: BoxDecoration(
-                    //       color: Colors.grey[200],
-                    //       borderRadius: BorderRadius.circular(6),
-                    //     ),
-                    //     child: TextField(
-                    //       decoration: InputDecoration(
-                    //         icon: Icon(Icons.search, color: Colors.grey),
-                    //         hintText: 'Search',
-                    //         border: InputBorder.none,
-                    //       ),
-                    //       onChanged: (value) {
-                    //         // Implement search functionality if needed
-                    //       },
-                    //     ),
-                    //   ),
-                    // ),
-                    height(height: 12.h),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: RichText(
-                        text: TextSpan(
-                          text: "You have selected ",
-                          style: newAppFont(color: Colors.grey.shade500),
-                          children: [
-                            TextSpan(
-                              text: "0${authenticationProvider.selectedLocations.length}",
-                              style: newAppFont(color:AppColors.appButtonColor, fontWeight: FontWeight.w500),
+                    height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success || settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
+                    Banner300x50Size(),
+                    height(height: 10),
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          // Padding(
+                          //   padding: const EdgeInsets.symmetric(vertical: 20),
+                          //   child: Container(
+                          //     padding: EdgeInsets.symmetric(horizontal: 10),
+                          //     decoration: BoxDecoration(
+                          //       color: Colors.grey[200],
+                          //       borderRadius: BorderRadius.circular(6),
+                          //     ),
+                          //     child: TextField(
+                          //       decoration: InputDecoration(
+                          //         icon: Icon(Icons.search, color: Colors.grey),
+                          //         hintText: 'Search',
+                          //         border: InputBorder.none,
+                          //       ),
+                          //       onChanged: (value) {
+                          //         // Implement search functionality if needed
+                          //       },
+                          //     ),
+                          //   ),
+                          // ),
+                          height(height: 12.h),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: RichText(
+                              text: TextSpan(
+                                text: "You have selected ",
+                                style: newAppFont(color: Colors.grey.shade500),
+                                children: [
+                                  TextSpan(
+                                    text: "0${authenticationProvider.selectedLocations.length}",
+                                    style: newAppFont(color: AppColors.appButtonColor, fontWeight: FontWeight.w500),
+                                  ),
+                                  TextSpan(
+                                    text: "/05\n",
+                                    style: newAppFont(
+                                      color: Colors.grey.shade500,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  if (authenticationProvider.selectedLocations.length > 5)
+                                    TextSpan(text: "You Have Selected Maximum Number of Districts", style: newAppFont(fontSize: 10, color: Colors.red, fontWeight: FontWeight.w400)),
+                                ],
+                              ),
                             ),
-                            TextSpan(text: "/05\n",            style: newAppFont(color:Colors.grey.shade500, fontWeight: FontWeight.w600,),),
-                            if(authenticationProvider.selectedLocations.length>5)
-                              TextSpan(text: "You Have Selected Maximum Number of Districts",style: newAppFont(fontSize: 10,color: Colors.red,fontWeight: FontWeight.w400)),
+                          ),
+                          height(height: 8),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: authenticationProvider.states!.entries.map((entry) {
+                              int stateId = entry.key;
+                              String stateName = entry.value;
 
-                          ],
-                        ),
+                              List<LocationModel> districts = authenticationProvider.getAllLocationList.where((loc) => loc.stateId.toString() == stateId.toString()).toList();
+
+                              return ExpansionTile(
+                                tilePadding: EdgeInsets.symmetric(horizontal: 16),
+                                collapsedBackgroundColor: Colors.transparent,
+                                backgroundColor: Colors.transparent,
+                                childrenPadding: EdgeInsets.zero,
+                                initiallyExpanded: false,
+                                iconColor: AppColors.iconColors,
+                                title: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Text(stateName,
+                                        style: newAppFont(
+                                          fontWeight: FontWeight.w600,
+                                        )),
+                                    width(width: 10),
+                                    Text("(${districts.length})", style: newAppFont(fontWeight: FontWeight.w300, color: AppColors.iconColors)),
+                                  ],
+                                ),
+                                children: districts.map((district) {
+                                  bool isSelected = authenticationProvider.selectedLocations.contains(district.districtName);
+                                  return CheckboxListTile(
+                                    title: Text(district.districtName, style: newAppFont(fontWeight: FontWeight.bold)),
+                                    value: isSelected,
+                                    activeColor: AppColors.appButtonColor,
+                                    onChanged: (bool? selected) {
+                                      authenticationProvider.addToSelectedLocations(district.districtName);
+                                    },
+                                  );
+                                }).toList(),
+                              );
+                            }).toList(),
+                          ),
+                          height(height: 20),
+                        ],
                       ),
                     ),
-                    height(height: 8),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: authenticationProvider.states!.entries.map((entry) {
-                        int stateId = entry.key;
-                        String stateName = entry.value;
-
-                        List<LocationModel> districts = authenticationProvider.getAllLocationList.where((loc) => loc.stateId.toString() == stateId.toString()).toList();
-
-                        return ExpansionTile(
-                          tilePadding: EdgeInsets.symmetric(horizontal: 16),
-                          collapsedBackgroundColor: Colors.transparent,
-                          backgroundColor: Colors.transparent,
-                          childrenPadding: EdgeInsets.zero,
-                          initiallyExpanded: false,
-                           iconColor: AppColors.iconColors,
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(stateName, style: newAppFont(fontWeight: FontWeight.w600,)),
-                              width(width: 10),
-                              Text("(${districts.length})", style: newAppFont(fontWeight: FontWeight.w300,color: AppColors.iconColors)),
-                            ],
-                          ),
-                          children: districts.map((district) {
-                            bool isSelected = authenticationProvider.selectedLocations.contains(district.districtName);
-                            return CheckboxListTile(
-                              title: Text(district.districtName, style: newAppFont(fontWeight: FontWeight.bold)),
-                              value: isSelected,
-                              activeColor: AppColors.appButtonColor,
-                              onChanged: (bool? selected) {
-                                authenticationProvider.addToSelectedLocations(district.districtName);
-                              },
-                            );
-                          }).toList(),
-                        );
-                      }).toList(),
-                    ),
-                    height(height: 20),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
       );
     });
   }

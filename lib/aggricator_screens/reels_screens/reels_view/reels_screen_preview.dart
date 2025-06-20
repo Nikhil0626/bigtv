@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../botton_actions.dart';
+import '../../event_repo.dart';
 import '../../home_screen/home_provider/home_provider.dart';
 import '../../in_app_web_view.dart';
 import '../../../services/webengage_event_tracks.dart';
@@ -181,9 +182,15 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                 label: 'లైక్',
 
                 isLike:  context.read<ReelsProviders>().isLikeList.contains(widget.reelCard.id.toString()),
-                onTap: () {
+                onTap: () async {
                   log("Like");
                   context.read<ReelsProviders>().isLikePost(widget.reelCard);
+                  await EventRepo().addEvent({
+                    "like": !context.read<ReelsProviders>().isLikeList.contains(widget.reelCard.id.toString()),
+                    "postId": widget.reelCard.id.toString()??"000",
+                    "createAt": DateTime.now().toString()
+                  }, "liked_article");
+
                 },
               ),
               height(height: 20),
@@ -209,6 +216,14 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                 label: 'షేర్',
                 iconColor: Colors.white,
                 onTap: () async {
+                  print("Share");
+
+                  await EventRepo().addEvent({
+                    "share": "reels",
+                    "postId": widget.reelCard.id.toString()??"000",        // ✅ postId converted to String
+                    "createAt": DateTime.now().toString(),
+                  }, "shared_article");
+
                   SharedPreferences sp = await SharedPreferences.getInstance();
                   String? userId = sp.getString("userId");
                   String? deviceId = sp.getString("deviceId");

@@ -1,3 +1,4 @@
+import 'dart:math';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/home_screen/news_posts_provider.dart';
@@ -8,9 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../aggricator_screens/event_repo.dart';
 import 'date_format.dart';
-
-void showComments(BuildContext context,  postId) {
+void showComments(BuildContext context, postId) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true, // Allows BottomSheet to resize with keyboard
@@ -20,17 +21,15 @@ void showComments(BuildContext context,  postId) {
     builder: (context) {
       return Padding(
         padding: EdgeInsets.only(
-          bottom:
-              MediaQuery.of(context).viewInsets.bottom, // Push above keyboard
+          bottom: MediaQuery.of(context).viewInsets.bottom, // Push above keyboard
         ),
         child: CommentSection(postId: postId),
       );
     },
   );
 }
-
 class CommentSection extends StatefulWidget {
-  final  postId;
+  final postId;
 
   const CommentSection({super.key, required this.postId});
 
@@ -121,64 +120,37 @@ class _CommentSectionState extends State<CommentSection> {
                             )
                           : ListView.builder(
                               shrinkWrap: true,
-                              itemCount: newsPostsProvider.getAllCommentsList
-                                  .length,
+                              itemCount: newsPostsProvider.getAllCommentsList.length,
                               itemBuilder: (context, index) {
-                                var filteredComments = newsPostsProvider
-                                    .getAllCommentsList.toList();
+                                var filteredComments = newsPostsProvider.getAllCommentsList.toList();
 
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 12.0, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
                                   child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       // User Avatar
                                       CircleAvatar(
                                         child: Text(
-                                          filteredComments[index].user.name ==
-                                                  ""
-                                              ? "U"
-                                              : filteredComments[index]
-                                                      .user
-                                                      .name
-                                                      .toString()
-                                                      .split("")
-                                                      .first
-                                                      .toString() ??
-                                                  "U",
-                                          style: fontStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.normal),
+                                          filteredComments[index].user.name == "" ? "U" : filteredComments[index].user.name.toString().split("").first.toString() ?? "U",
+                                          style: fontStyle(fontSize: 16, fontWeight: FontWeight.normal),
                                         ),
                                       ),
                                       width(width: 10),
                                       // Comment Content
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
+                                              crossAxisAlignment: CrossAxisAlignment.center,
                                               children: [
                                                 Text(
-                                                  filteredComments[index]
-                                                              .user
-                                                              .name ==
-                                                          ""
-                                                      ? "User"
-                                                      : filteredComments[index]
-                                                          .user
-                                                          .name,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
+                                                  filteredComments[index].user.name == "" ? "User" : filteredComments[index].user.name,
+                                                  overflow: TextOverflow.ellipsis,
                                                   maxLines: 1,
                                                   style: const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.normal,
+                                                    fontWeight: FontWeight.normal,
                                                     fontSize: 12,
                                                   ),
                                                 ),
@@ -190,8 +162,7 @@ class _CommentSectionState extends State<CommentSection> {
                                                     style: fontStyle(
                                                       color: Colors.black,
                                                       fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.bold,
+                                                      fontWeight: FontWeight.bold,
                                                     ),
                                                   ),
                                                 ),
@@ -199,17 +170,14 @@ class _CommentSectionState extends State<CommentSection> {
                                                 Center(
                                                   child: Text(
                                                     formatTimeDifference(
-                                                      filteredComments[index]
-                                                          .createdAt
-                                                          .toString(),
+                                                      filteredComments[index].createdAt.toString(),
                                                       isComment: true,
                                                     ),
                                                     textAlign: TextAlign.center,
                                                     style: fontStyle(
                                                       color: Colors.black,
                                                       fontSize: 12,
-                                                      fontWeight:
-                                                          FontWeight.normal,
+                                                      fontWeight: FontWeight.normal,
                                                     ),
                                                   ),
                                                 ),
@@ -217,8 +185,7 @@ class _CommentSectionState extends State<CommentSection> {
                                             ),
                                             height(height: 8),
                                             ExpandableTextWidget(
-                                              text:
-                                                  filteredComments[index].text,
+                                              text: filteredComments[index].text,
                                             ),
                                             height(height: 8),
                                           ],
@@ -233,8 +200,7 @@ class _CommentSectionState extends State<CommentSection> {
 
                 // Comment Input Field
                 Padding(
-                  padding:  EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom,left: 12),
-
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 12),
                   child: Row(
                     children: [
                       Expanded(
@@ -255,27 +221,35 @@ class _CommentSectionState extends State<CommentSection> {
                           ),
                         ),
                       ),
-
                       const SizedBox(width: 8),
                       IconButton(
                         icon: const Icon(Icons.send, color: Colors.blue),
                         onPressed: () async {
                           SharedPreferences sp = await SharedPreferences.getInstance();
-                          bool isLogin = sp.getString("loginType").toString() == "login"?true:false??false;
+                          bool isLogin = sp.getString("loginType").toString() == "login" ? true : false ?? false;
                           if (isLogin) {
                             if (controller.text.isEmpty) {
                             } else {
-                              newsPostsProvider
-                                  .sendCommentsOnPost(
-                                      widget.postId, controller.text)
-                                  .then(
+                               EventRepo().addEvent({
+                                "commented": controller.text,
+                                "postId": widget.postId.toString()??"000",
+                                "createAt": DateTime.now().toString()
+                              }, "commented_article");
+                              newsPostsProvider.sendCommentsOnPost(widget.postId, controller.text).then(
                                     (value) => controller.text = '',
                                   );
+
+
                             }
                           } else {
-                            if(context.mounted) {
+                            if (context.mounted) {
                               Navigator.pushAndRemoveUntil(
-                                context, MaterialPageRoute(builder: (context) => LoginBackgroundView(),), (route) => false,);
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => LoginBackgroundView(),
+                                ),
+                                (route) => false,
+                              );
                             }
                           }
                         },
@@ -291,8 +265,6 @@ class _CommentSectionState extends State<CommentSection> {
     );
   }
 }
-
-
 
 class ExpandableTextWidget extends StatefulWidget {
   final String text;
@@ -361,4 +333,3 @@ class _ExpandableTextWidgetState extends State<ExpandableTextWidget> {
     );
   }
 }
-

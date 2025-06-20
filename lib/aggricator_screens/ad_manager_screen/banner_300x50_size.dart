@@ -48,32 +48,22 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
           });
 
           await EventRepo().addEvent({
-            'key': 'ads_success',
-            'eventData': {
-              "sdkRequestStartTime": from,
-              "sdkRequestReceivedTime": to,
-              "adsRenderingTime": DateTime.now().difference(DateTime.parse(to)).inMicroseconds.toString(),
-              "createAt": DateTime.now().toString(),
-              "adResponse": ad.responseInfo.toString(),
-            },
-            'userId': userId??"",
-            'deviceId': deviceId??"",
-          });
+            "sdkRequestStartTime": from,
+            "sdkRequestReceivedTime": to,
+            "adsRenderingTime": DateTime.now().difference(DateTime.parse(to)).inMicroseconds.toString(),
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.responseInfo.toString(),
+          }, "ads_success");
         },
         onAdFailedToLoad: (ad, error) async {
           final to = DateTime.now().toString();
           await EventRepo().addEvent({
-            'key': 'ads_failure',
-            'eventData': {
-              "sdkRequestStartTime": from,
-              "sdkRequestReceivedTime": to,
-              "adsRenderingTime": "0",
-              "createAt": DateTime.now().toString(),
-              "adResponse": error.responseInfo.toString(),
-            },
-            'userId': userId??"",
-            'deviceId': deviceId??"",
-          });
+            "sdkRequestStartTime": from,
+            "sdkRequestReceivedTime": to,
+            "adsRenderingTime": "0",
+            "createAt": DateTime.now().toString(),
+            "adResponse": error.responseInfo.toString(),
+          }, "ads_failure");
           ad.dispose();
           setState(() {
             _loadingState = BannerAdsLoading.fail;
@@ -107,7 +97,3 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
     }
   }
 }
-
-
-
-

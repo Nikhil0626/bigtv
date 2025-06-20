@@ -24,7 +24,6 @@ class AiTagPostsPageView extends StatefulWidget {
 
 class _AiTagPostsPageViewState extends State<AiTagPostsPageView> {
   late PageController _pageController;
-
   int autoIndex = 0;
 
   @override
