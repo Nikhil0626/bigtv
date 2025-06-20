@@ -242,7 +242,7 @@ class SettingsProvider extends ChangeNotifier {
             "adResponse":ad.responseInfo.toString(),
           };
           print("All Events: $newEvent");
-          await EventRepo().addEvent(newEvent,"ads_success");
+           EventRepo().addEvent(newEvent,"ads_success");
 
           notifyListeners();
         },

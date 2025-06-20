@@ -87,7 +87,7 @@ class _ImageViewState extends State<ImageView> {
                             print("Like");
                             settingsProvider.isLikePost(widget.getAllPostList);
 
-                            await EventRepo().addEvent({
+                             EventRepo().addEvent({
                               "like": settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()),
                               "postId": widget.getAllPostList['id'].toString() ?? "000",
                               "createAt": DateTime.now().toString(),
@@ -123,7 +123,7 @@ class _ImageViewState extends State<ImageView> {
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
                           // Log event to server
-                          await EventRepo().addEvent({"share": "news", "postId": widget.getAllPostList['id'].toString() ?? "0000", "createAt": DateTime.now().toString()}, "shared_article");
+                           EventRepo().addEvent({"share": "news", "postId": widget.getAllPostList['id'].toString() ?? "0000", "createAt": DateTime.now().toString()}, "shared_article");
 
                           // Send share details
                           sendShareDetails(

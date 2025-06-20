@@ -170,7 +170,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                           onTap: () async {
                             log("Like");
                             settingsProvider.isLikePost(widget.postDetails);
-                            await EventRepo().addEvent({
+                             EventRepo().addEvent({
                               "like": !settingsProvider.isLikeList.contains(widget.postDetails['id'].toString()),
                               "postId": widget.postDetails['id'].toString()??"000",
                               "createAt": DateTime.now().toString()
@@ -207,7 +207,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                       iconColor: AppColors.iconColors,
                       onTap: () async {
                         print("Share");
-                        await EventRepo().addEvent({
+                         EventRepo().addEvent({
                           "share": "news",
                           "postId": widget.postDetails['id'].toString()??"000",   // ✅ postId converted to String
                           "createAt": DateTime.now().toString(),

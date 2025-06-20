@@ -189,7 +189,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                           onTap: () async {
                             log("Like");
                             settingsProvider.isLikePost(widget.articalData);
-                            await EventRepo().addEvent({
+                             EventRepo().addEvent({
                               "like": !settingsProvider.isLikeList.contains(widget.articalData['id'].toString()),
                               "postId": widget.articalData['id'].toString()??"000",
                               "createAt": DateTime.now().toString()
@@ -229,7 +229,7 @@ ScreenshotController screenshotControllers = ScreenshotController();
                           String? userId = sp.getString("userId");
 
 
-                          await EventRepo().addEvent({
+                           EventRepo().addEvent({
                             "share": "news",
                             "postId": widget.articalData['id'].toString(),
                             "createAt": DateTime.now().toString()
