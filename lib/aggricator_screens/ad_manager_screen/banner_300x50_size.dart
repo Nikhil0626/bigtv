@@ -30,9 +30,6 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
 
   void _loadBannerAd(BuildContext context) async {
     final AdSize customAdSize = AdSize(width: 320, height: 50);
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userId = prefs.getString("userId");
-    String? deviceId = prefs.getString("deviceId");
     String? from = DateTime.now().toString();
 
     final ad = BannerAd(

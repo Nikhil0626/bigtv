@@ -538,8 +538,8 @@ class HomeProvider extends ChangeNotifier {
     isAiTagDataLoaded = false;
     _selectedTagId = null;
     getAllAiTagsPostList = [];
+    isHomeLoading = true;
 
-    // Ensure we have a valid context
     if (mainNavigatorKey.currentContext == null) {
       await Future.delayed(const Duration(milliseconds: 300));
       if (mainNavigatorKey.currentContext == null) return;

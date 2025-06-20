@@ -71,6 +71,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
   @override
   Widget build(BuildContext context) {
+    log("jsdkjnvdskndjkvndjkvndjkvn   ${widget.index}");
     return InkWell(
       onTap: () {
         context.read<HomeProvider>().pageChange(isValue: !context.read<HomeProvider>().isBottomEnable);
@@ -110,7 +111,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           : Container(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+              // padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
               child: Screenshot(
                 controller: adsScreenshotController,
                 child: widget.article['type'].toString() == "WebUrl"
@@ -172,12 +173,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                             onTap: () async {
                                                               log("Like");
                                                               settingsProvider.isLikePost(widget.article);
-                                                               EventRepo().addEvent({
+                                                              EventRepo().addEvent({
                                                                 "like": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                                "postId": widget.article['id'].toString()??'000',
+                                                                "postId": widget.article['id'].toString() ?? '000',
                                                                 "createAt": DateTime.now().toString()
                                                               }, "liked_article");
-
 
                                                               // settingsProvider.isLikePost(widget.article);
                                                             },
@@ -200,12 +200,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                           onTap: () async {
                                                             SharedPreferences sp = await SharedPreferences.getInstance();
                                                             String? userId = sp.getString("userId");
-                                                             EventRepo().addEvent({
-                                                              "share": "news",
-                                                              "postId": widget.article['id'].toString(),
-                                                              "createAt": DateTime.now().toString()
-                                                            }, "shared_article");
-
+                                                            EventRepo().addEvent({"share": "news", "postId": widget.article['id'].toString(), "createAt": DateTime.now().toString()}, "shared_article");
 
                                                             sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
 
@@ -230,11 +225,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                             } else if (widget.article['type'] == "Gallery") {
                                                               createAndSharePdfs(context, widget.article);
                                                             }
-                                                             EventRepo().addEvent({
-                                                              "share": "news",
-                                                              "postId": widget.article['id'].toString(),
-                                                              "createAt": DateTime.now().toString()
-                                                            }, "shared_article");
+                                                            EventRepo().addEvent({"share": "news", "postId": widget.article['id'].toString(), "createAt": DateTime.now().toString()}, "shared_article");
                                                           },
                                                           child: isSending
                                                               ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
@@ -256,10 +247,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
                                                                 homeProvide.isReloadData();
                                                                 if (widget.isaiTags) {
-                                                                   EventRepo().addEvent({
-                                                                    "refresh": false,
-                                                                    "createAt": DateTime.now().toString()
-                                                                  }, "reload_article");
+                                                                  EventRepo().addEvent({"refresh": false, "createAt": DateTime.now().toString()}, "reload_article");
                                                                   homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
                                                                     (value) {
                                                                       homeProvide.isReloadFalse();
@@ -268,10 +256,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 } else {
                                                                   homeProvide.getAllPostList = [];
                                                                   homeProvide.getAllPost();
-                                                                   EventRepo().addEvent({
-                                                                    "refresh": true,
-                                                                    "createAt": DateTime.now().toString()
-                                                                  }, "reload_article");
+                                                                  EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
                                                                 }
                                                               },
                                                               child: context.read<HomeProvider>().isReload
@@ -321,7 +306,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                             ),
                                             child: widget.article['type'] == "Video"
                                                 ? SizedBox(
-                                                    height: MediaQuery.of(context).size.height * .31,
+                                                    height: MediaQuery.of(context).size.height * .33,
                                                     width: MediaQuery.of(context).size.width,
                                                     child: Align(
                                                       alignment: Alignment.topCenter,
@@ -377,10 +362,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                               return InkWell(
                                                 onTap: () async {
                                                   log("Refresh");
-                                                   EventRepo().addEvent({
-                                                    "refresh": true,
-                                                    "createAt": DateTime.now().toString()
-                                                  }, "reload_article");
+                                                  EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
                                                   homeProvide.isReloadData();
                                                   if (homeProvide.isAiTagDataLoaded) {
                                                     homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
@@ -435,12 +417,12 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                             child: Container(
                                               height: widget.article['subType'] == "BigBlackStandard"
                                                   ? MediaQuery.of(context).size.height * .3
-                                                  : (widget.article['type'] == "Video")
-                                                      ? MediaQuery.of(context).size.height * .55
+                                                  : widget.article['type'] == "Video"
+                                                      ? (Platform.isIOS ? MediaQuery.of(context).size.height * .48 : MediaQuery.of(context).size.height * .55)
                                                       : MediaQuery.of(context).size.height * .58,
                                               width: MediaQuery.of(context).size.width,
                                               decoration: BoxDecoration(
-                                                color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor : Colors.white,
+                                                color: widget.article['subType'] == "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
                                                 borderRadius: BorderRadius.only(
                                                   topRight: Radius.circular(10.sp),
                                                   topLeft: Radius.circular(10.sp),
@@ -571,7 +553,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                               ),
                                                             ),
                                                     ),
-                                                    if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
+                                                    if (widget.article['subType'] != "BigBlackStandard" && widget.index != 0) Banner300x50Size()
                                                   ],
                                                 ),
                                               ),
@@ -581,8 +563,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                             left: 8,
                                             bottom: widget.article['subType'] == "BigBlackStandard"
                                                 ? MediaQuery.of(context).size.height * .30 - 15
-                                                : (widget.article['type'] == "Video")
-                                                    ? MediaQuery.of(context).size.height * .55 - 15
+                                                : widget.article['type'] == "Video"
+                                                    ? (Platform.isIOS ? MediaQuery.of(context).size.height * .48 - 15 : MediaQuery.of(context).size.height * .55 - 15)
                                                     : MediaQuery.of(context).size.height * .58 - 15,
                                             child: Container(
                                               height: 30,
@@ -621,8 +603,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                             right: 8,
                                             bottom: widget.article['subType'] == "BigBlackStandard"
                                                 ? MediaQuery.of(context).size.height * .30 - 15
-                                                : (widget.article['type'] == "Video")
-                                                    ? MediaQuery.of(context).size.height * .55 - 15
+                                                : widget.article['type'] == "Video"
+                                                    ? (Platform.isIOS ? MediaQuery.of(context).size.height * .48 - 15 : MediaQuery.of(context).size.height * .55 - 15)
                                                     : MediaQuery.of(context).size.height * .58 - 15,
                                             child: Container(
                                               height: 30,
@@ -640,12 +622,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       onTap: () async {
                                                         log("Like");
                                                         settingsProvider.isLikePost(widget.article);
-                                                         EventRepo().addEvent({
+                                                        EventRepo().addEvent({
                                                           "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                          "postId": widget.article['id'].toString()??"000",
+                                                          "postId": widget.article['id'].toString() ?? "000",
                                                           "createAt": DateTime.now().toString()
                                                         }, "liked_article");
-
                                                       },
                                                       child: SizedBox(
                                                         width: 24,
@@ -698,11 +679,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       } else if (widget.article['type'] == "Gallery") {
                                                         createAndSharePdfs(context, widget.article);
                                                       }
-                                                       EventRepo().addEvent({
-                                                        "share": "news",
-                                                        "postId": widget.article['id'].toString(),
-                                                        "createAt": DateTime.now().toString()
-                                                      }, "shared_article");
+                                                      EventRepo().addEvent({"share": "news", "postId": widget.article['id'].toString(), "createAt": DateTime.now().toString()}, "shared_article");
                                                     },
                                                     child: isSending
                                                         ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
