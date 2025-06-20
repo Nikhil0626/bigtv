@@ -16,19 +16,20 @@ class EventRepo extends BaseService {
     return response;
   }
 
-  Future<void> addEvent(Map<String, dynamic> eventData,eventName) async {
-    log("event body --- ${eventData} ----$eventName");
+  Future<void> addEvent(Map<String, dynamic> eventData, eventName) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-    String? userId= sharedPreferences.getString("userId");
-    String? deviceId= sharedPreferences.getString("deviceId");
+    String? userId = sharedPreferences.getString("userId");
+    String? deviceId = sharedPreferences.getString("deviceId");
 
     Map<String, dynamic> newEvent = {
       'key': eventName,
-      'eventData':eventData,
-      'userId': userId??"guest",
-      'deviceId': deviceId??"12345",
+      'eventData': eventData,
+      'userId': userId ?? "guest",
+      'deviceId': deviceId ?? "12345",
     };
+    log("event body --- $newEvent");
+
     final box = Hive.box('events');
     await box.add(newEvent);
   }
@@ -65,5 +66,4 @@ class EventRepo extends BaseService {
     });
     return eventMap;
   }
-
 }

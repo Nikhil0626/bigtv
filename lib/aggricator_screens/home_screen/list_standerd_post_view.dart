@@ -225,20 +225,16 @@ ScreenshotController screenshotControllers = ScreenshotController();
                         onTap: () async {
                           print("Share");
 
-                          // Get userId and deviceId before logging the event
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           String? userId = sp.getString("userId");
-                          String? deviceId = sp.getString("deviceId");
 
-                          // Send event
+
                           await EventRepo().addEvent({
                             "share": "news",
                             "postId": widget.articalData['id'].toString(),
                             "createAt": DateTime.now().toString()
                           }, "shared_article");
 
-
-                          // Send share details to backend
                           sendShareDetails(
                             userId,
                             widget.articalData['id'],

@@ -18,6 +18,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../../services/analytics_service.dart';
 import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
+import '../../event_repo.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../home_repo/home_repo.dart';
 
@@ -455,41 +456,114 @@ class HomeProvider extends ChangeNotifier {
     if (_isSubscribed) return;
     _isSubscribed = true;
     log("pushActionStream: flutter test 0000");
+
     _webEngagePlugin.pushStream.listen((event) {
-      Map<String, dynamic> messagePayload = event.payload!;
-      log("pushActionStream: flutter test  11111 --- ${messagePayload["postId"]}");
-      if (Platform.isIOS) {
-        log("pushActionStream: flutter test  11111 ${messagePayload['data']['customData'][0]['value']}");
-        postId = messagePayload['data']['customData'][0]['value'] ?? "0";
-        isComeFromLinkOrNotification = true;
-        getIndividualPost(postId);
-        notifyListeners();
-      } else {
-        postId = messagePayload["postId"] ?? "0";
-        isComeFromLinkOrNotification = true;
-        getIndividualPost(postId);
-        notifyListeners();
-      }
+      // Map<String, dynamic> messagePayload = event.payload!;
+      // log("pushActionStream: flutter test  11111 --- ${messagePayload["postId"]}");
+      // if (Platform.isIOS) {
+      //   log("pushActionStream: flutter test  11111 ${messagePayload['data']['customData'][0]['value']}");
+      //   postId = messagePayload['data']['customData'][0]['value'] ?? "0";
+      //   isComeFromLinkOrNotification = true;
+      //   getIndividualPost(postId);
+      //    EventRepo().addEvent({
+      //    "platform":"iOS",
+      //    "comeFrom":"Notification",
+      //     "postId": postId.toString()??"000",
+      //     "createAt": DateTime.now().toString()
+      //   }, "opened_via_notification");
+      //   notifyListeners();
+      // } else {
+      //   postId = messagePayload["postId"] ?? "0";
+      //   isComeFromLinkOrNotification = true;
+      //   getIndividualPost(postId);
+      //   EventRepo().addEvent({
+      //     "platform":"Android",
+      //     "comeFrom":"Notification",
+      //     "postId": postId.toString()??"000",
+      //     "createAt": DateTime.now().toString()
+      //   }, "opened_via_notification");
+      //   notifyListeners();
+      // }
+      _handleNotificationTap(event.payload);
     });
 
     _webEngagePlugin.pushActionStream.listen((event) {
-      Map<String, dynamic>? messagePayload = event.payload;
+      // Map<String, dynamic>? messagePayload = event.payload;
+      //
+      // log("pushActionStream: flutter test  22222  ${messagePayload}");
+      //
+      // if (Platform.isIOS) {
+      //   log("pushActionStream: flutter test  11111 ${messagePayload?['data']['customData'][0]['value']}");
+      //   postId = messagePayload?['data']['customData'][0]['value'] ?? "0";
+      //   isComeFromLinkOrNotification = true;
+      //   getIndividualPost(postId);
+      //   notifyListeners();
+      // } else {
+      //   postId = messagePayload?["postId"] ?? "0";
+      //   isComeFromLinkOrNotification = true;
+      //   getIndividualPost(postId);
+      //   notifyListeners();
+      // }
+      _handleNotificationTap(event.payload);
 
-      log("pushActionStream: flutter test  22222  ${messagePayload}");
-
-      if (Platform.isIOS) {
-        log("pushActionStream: flutter test  11111 ${messagePayload?['data']['customData'][0]['value']}");
-        postId = messagePayload?['data']['customData'][0]['value'] ?? "0";
-        isComeFromLinkOrNotification = true;
-        getIndividualPost(postId);
-        notifyListeners();
-      } else {
-        postId = messagePayload?["postId"] ?? "0";
-        isComeFromLinkOrNotification = true;
-        getIndividualPost(postId);
-        notifyListeners();
-      }
     });
+  }
+
+  void _handleNotificationTap(Map<String, dynamic>? messagePayload) async {
+    log("Notification tapped with payload: $messagePayload");
+
+    // Extract post ID from notification payload
+    if (Platform.isIOS) {
+      postId = messagePayload?['data']['customData'][0]['value'] ?? "0";
+      EventRepo().addEvent({
+        "platform":"iOS",
+        "comeFrom":"Notification",
+        "postId": postId.toString()??"000",
+        "createAt": DateTime.now().toString()
+      }, "opened_via_notification");
+    } else {
+      postId = messagePayload?["postId"] ?? "0";
+      EventRepo().addEvent({
+        "platform":"Android",
+        "comeFrom":"Notification",
+        "postId": postId.toString()??"000",
+        "createAt": DateTime.now().toString()
+      }, "opened_via_notification");
+    }
+
+    if (postId == "0") return;
+
+    isComeFromLinkOrNotification = true;
+
+    isAiTagDataLoaded = false;
+    _selectedTagId = null;
+    getAllAiTagsPostList = [];
+
+    // Ensure we have a valid context
+    if (mainNavigatorKey.currentContext == null) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      if (mainNavigatorKey.currentContext == null) return;
+    }
+
+    // Navigate to home screen first if needed
+    Navigator.of(mainNavigatorKey.currentContext!, rootNavigator: true).popUntil((route) => route.isFirst);
+    homePageController.jumpToPage(0);
+    // Reset post list and load the specific post
+    getAllPostList = [];
+    // postId ="0";
+    notifyListeners();
+
+    // Wait for home screen to be ready
+    // await Future.delayed(const Duration(milliseconds: 100));
+    //
+    // // Load and display the post
+    await getIndividualPost(postId);
+
+    // Additional delay to ensure UI is ready
+    // await Future.delayed(const Duration(milliseconds: 300));
+
+    // Show the post detail view
+    // _showPostDetailView();
   }
 
   StreamSubscription<Uri>? linkSubscription;
@@ -523,6 +597,11 @@ class HomeProvider extends ChangeNotifier {
       isComeFromLinkOrNotification = true;
       Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
       getIndividualPost(postId);
+      EventRepo().addEvent({
+        "comeFrom":"Deeplink",
+        "postId": postId.toString()??"000",
+        "createAt": DateTime.now().toString()
+      }, "opened_via_deeplink");
       notifyListeners();
     }
   }

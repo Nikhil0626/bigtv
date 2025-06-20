@@ -67,6 +67,7 @@ Future<void> main() async {
   AnalyticsService().trackAppOpen();
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
+
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 

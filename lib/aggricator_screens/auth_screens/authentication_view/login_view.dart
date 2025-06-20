@@ -1,4 +1,3 @@
-
 import 'dart:developer';
 import 'dart:io';
 
@@ -29,17 +28,18 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-   AuthenticationProvider? authenticationProvider;
+  AuthenticationProvider? authenticationProvider;
 
-@override
+  @override
   void initState() {
-  authenticationProvider = Provider.of<AuthenticationProvider>(listen: false,context);
-  authenticationProvider!.phoneController.text = "";
-  authenticationProvider!.isButtonEnabled = false;
-  getMobileNumber();
-  // context.read<AuthProvider>().sendEvent("WellComePage");
+    authenticationProvider = Provider.of<AuthenticationProvider>(listen: false, context);
+    authenticationProvider!.phoneController.text = "";
+    authenticationProvider!.isButtonEnabled = false;
+    getMobileNumber();
+    // context.read<AuthProvider>().sendEvent("WellComePage");
     super.initState();
   }
+
   getMobileNumber() async {
     WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
     if (Platform.isIOS) {
@@ -49,13 +49,16 @@ class _LoginViewState extends State<LoginView> {
     } else if (Platform.isAndroid) {
       var token = await FirebaseMessaging.instance.getToken();
       if (token != null) {
-        getUniqueDeviceId(token, );
+        getUniqueDeviceId(
+          token,
+        );
         log('FCM Token: $token');
         _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
         WebEngagePlugin.setPushToken(token);
       }
     }
   }
+
   void _onTokenInvalidated(Map<String, dynamic>? message) {
     print("tokenInvalidated callback received $message");
     WebEngagePlugin.setSecureToken("siva kumar", message.toString());
@@ -63,10 +66,10 @@ class _LoginViewState extends State<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    return  Padding(
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child:  Container(
-        height: MediaQuery.of(context).size.height*.5,
+      child: Container(
+        height: MediaQuery.of(context).size.height * .5,
         width: 326.w,
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
@@ -90,7 +93,7 @@ class _LoginViewState extends State<LoginView> {
                 width: 280.w,
                 padding: const EdgeInsets.only(left: 10),
                 decoration: BoxDecoration(
-                  color:AppColors.loginNumberBg ,
+                  color: AppColors.loginNumberBg,
                   border: Border.all(color: AppColors.borderColor),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
@@ -103,7 +106,10 @@ class _LoginViewState extends State<LoginView> {
                         width: 24.w,
                         child: SvgPicture.asset('assets/svg/indianFlag.svg', fit: BoxFit.cover),
                       ),
-                      Text(" +91",style: newAppFont(color: AppColors.textColor,fontWeight: FontWeight.w600),),
+                      Text(
+                        " +91",
+                        style: newAppFont(color: AppColors.textColor, fontWeight: FontWeight.w600),
+                      ),
                       width(width: 10),
                       Container(
                         width: 1.w,
@@ -114,7 +120,7 @@ class _LoginViewState extends State<LoginView> {
                           decoration: BoxDecoration(
                             color: Colors.white,
                             // border: Border.all(color: AppColors.borderColor),
-                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(8.r),topRight:  Radius.circular(8.r)),
+                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(8.r), topRight: Radius.circular(8.r)),
                           ),
                           child: TextFormField(
                             controller: authenticationProvider!.phoneController,
@@ -132,7 +138,7 @@ class _LoginViewState extends State<LoginView> {
                             //   LengthLimitingTextInputFormatter(10),
                             // ],
 
-                            onChanged:(value) =>  authenticationProvider!.validationErrors(value),
+                            onChanged: (value) => authenticationProvider!.validationErrors(value),
                           ),
                         ),
                       ),
@@ -142,13 +148,16 @@ class _LoginViewState extends State<LoginView> {
               ),
               if (authenticationProvider!.errorMessage != null && !authenticationProvider!.isButtonEnabled)
                 Padding(
-                  padding: EdgeInsets.only(top: 4.h,right: 8.w),
+                  padding: EdgeInsets.only(top: 4.h, right: 8.w),
                   child: Container(
                     alignment: Alignment.centerRight,
                     child: Text(
                       textAlign: TextAlign.right,
                       authenticationProvider!.errorMessage!,
-                      style: fontStyle(color: Colors.red, fontSize: 12.sp,),
+                      style: fontStyle(
+                        color: Colors.red,
+                        fontSize: 12.sp,
+                      ),
                     ),
                   ),
                 ),
@@ -205,19 +214,22 @@ class _LoginViewState extends State<LoginView> {
               InkWell(
                 onTap: authenticationProvider!.isButtonEnabled
                     ? () {
-                  if (_formKey.currentState!.validate()) {
-                    authenticationProvider!.sendOtp(context);
-                  }
-                }
+                        if (_formKey.currentState!.validate()) {
+                          authenticationProvider!.sendOtp(context);
+                        }
+                      }
                     : null,
-
                 child: Container(
-                  width: MediaQuery.of(context).size.width,
+                    width: MediaQuery.of(context).size.width,
                     height: 36.h,
                     decoration: BoxDecoration(
-                        color: !authenticationProvider!.isButtonEnabled?AppColors.bodyTextColor.withOpacity(.2):AppColors.loginBgColor,
-                        borderRadius: BorderRadius.all(Radius.circular(8.r))),
-                    child: Center(child:authenticationProvider!.isLoginLoading?AppLoadingScreen(loadingColor: Colors.white,): Text('Log In / Signup', style: newAppFont(color: Colors.white,fontWeight: FontWeight.w500)))),
+                        color: !authenticationProvider!.isButtonEnabled ? AppColors.bodyTextColor.withOpacity(.2) : AppColors.loginBgColor, borderRadius: BorderRadius.all(Radius.circular(8.r))),
+                    child: Center(
+                        child: authenticationProvider!.isLoginLoading
+                            ? AppLoadingScreen(
+                                loadingColor: Colors.white,
+                              )
+                            : Text('Log In / Signup', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
               ),
               height(height: 20.h),
               Row(
@@ -231,33 +243,21 @@ class _LoginViewState extends State<LoginView> {
                 ],
               ),
               height(height: 20.h),
-
               InkWell(
-                onTap:() async{
-                  SharedPreferences sp = await SharedPreferences.getInstance();
-                  String? userId = sp.getString("userId");
-
-                  // 🔥 Fire login_skip event without deviceId
-                  await EventRepo().addEvent({
-                    "logIn": "skipped",
-                    "createAt": DateTime.now().toString(),
-                  }, "login_skip");
-
-
-
+                onTap: () async {
                   context.read<AuthenticationProvider>().continueAsGuest(context);
-
+                   EventRepo().addEvent({
+                    "loginType": "skip",
+                    "mobileNumber": "",
+                    "createAt": DateTime.now().toString(),
+                  }, "login_event");
                 },
-
                 child: Container(
                     width: MediaQuery.of(context).size.width,
                     height: 36.h,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColors.borderColor,width: 1),
-                        borderRadius: BorderRadius.all(Radius.circular(8.r))),
-                    child: Center(child:Text('Continue as Guest', style: newAppFont(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600)))),
+                    decoration: BoxDecoration(border: Border.all(color: AppColors.borderColor, width: 1), borderRadius: BorderRadius.all(Radius.circular(8.r))),
+                    child: Center(child: Text('Continue as Guest', style: newAppFont(color: Colors.black, fontSize: 14, fontWeight: FontWeight.w600)))),
               ),
-
             ],
           ),
         ),

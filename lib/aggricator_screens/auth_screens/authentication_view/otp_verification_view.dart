@@ -119,10 +119,7 @@ class _OtpVerificationViewState extends State<OtpVerificationView> {
             InkWell(
               onTap: authenticationProvider.isOtpButtonEnabled
                   ? () async {
-                await EventRepo().addEvent({
-                  "otpStatus": "attempted",
-                  "createAt": DateTime.now().toString()
-                }, "otp_verify");
+
 
                 // if (!canResend) {
                       // } else {

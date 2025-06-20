@@ -18,6 +18,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
+import '../../event_repo.dart';
 import '../../home_screen/home_provider/home_provider.dart';
 import '../../home_screen/news_posts_provider.dart';
 
@@ -191,6 +192,11 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                                     [XFile(imagePath.path)],
                                                     text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].imageUrl}',
                                                   );
+                                                   EventRepo().addEvent({
+                                                    "share": "Epaper",
+                                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex],
+                                                    "createAt": DateTime.now().toString()
+                                                  }, "shared_article");
                                                 } catch (e) {
                                                   print("Error capturing image: $e");
                                                 }

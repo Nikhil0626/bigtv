@@ -90,10 +90,9 @@ class _ImageViewState extends State<ImageView> {
 
                             await EventRepo().addEvent({
                               "like": settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()),
-                              "postId": widget.getAllPostList['id'].toString()??"000",
+                              "postId": widget.getAllPostList['id'].toString() ?? "000",
                               "createAt": DateTime.now().toString(),
                             }, "liked_article");
-
                           },
                         );
                       }),
@@ -109,12 +108,9 @@ class _ImageViewState extends State<ImageView> {
                           context.read<AuthenticationProvider>().sendEvent("CommentPage");
 
                           showComments(context, widget.getAllPostList['id']);
-
                         },
                       ),
-
                       Spacer(),
-
                       BottomActions(
                         postType: widget.getAllPostList['subType'] ?? "",
                         icon: "assets/svg/share.svg",
@@ -128,12 +124,7 @@ class _ImageViewState extends State<ImageView> {
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
                           // Log event to server
-                          await EventRepo().addEvent({
-                            "share": "news",
-                            "postId": widget.getAllPostList['id'].toString()??"0000",
-                            "createAt": DateTime.now().toString()
-                          }, "shared_article");
-
+                          await EventRepo().addEvent({"share": "news", "postId": widget.getAllPostList['id'].toString() ?? "0000", "createAt": DateTime.now().toString()}, "shared_article");
 
                           // Send share details
                           sendShareDetails(
@@ -143,9 +134,7 @@ class _ImageViewState extends State<ImageView> {
                           );
 
                           // Handle Standard / Video / Image types
-                          if (widget.getAllPostList['type'] == "Standard" ||
-                              widget.getAllPostList['type'] == "Video" ||
-                              widget.getAllPostList['type'] == "Image") {
+                          if (widget.getAllPostList['type'] == "Standard" || widget.getAllPostList['type'] == "Video" || widget.getAllPostList['type'] == "Image") {
                             try {
                               final image = await sc.capture(pixelRatio: 2);
                               if (image != null) {
@@ -156,9 +145,7 @@ class _ImageViewState extends State<ImageView> {
 
                                 Share.shareXFiles(
                                   [XFile(imageFile.path)],
-                                  text: Platform.isIOS
-                                      ? widget.getAllPostList['linkURLIos'].toString()
-                                      : widget.getAllPostList['linkURLAndroid'].toString(),
+                                  text: Platform.isIOS ? widget.getAllPostList['linkURLIos'].toString() : widget.getAllPostList['linkURLAndroid'].toString(),
                                 );
                               } else {
                                 CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
@@ -175,7 +162,6 @@ class _ImageViewState extends State<ImageView> {
                           }
                         },
                       ),
-
                     ],
                   ),
                 ),

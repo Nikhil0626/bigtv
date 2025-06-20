@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../loading_screen/home_shimmer.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_spaces.dart';
+import '../event_repo.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'home_provider/home_provider.dart';
 import 'main_screen_pageview.dart';
@@ -89,6 +90,11 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                         homeProvider.getAllPostsByAiId(tagId.toString());
                                         homeProvider.aiTagDataLoaded(true);
                                         homeProvider.aiTagsScrollToCenter(index);
+                                         EventRepo().addEvent({
+                                          "aiTagName":  tag['aitagname'].toString(),
+                                          "aiTagId":tag['aitagid'].toString(),
+                                          "createAt": DateTime.now().toString(),
+                                        }, "ai_tag_click");
                                       },
                                       child: Container(
                                         height: 30,

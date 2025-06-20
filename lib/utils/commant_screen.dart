@@ -230,15 +230,15 @@ class _CommentSectionState extends State<CommentSection> {
                           if (isLogin) {
                             if (controller.text.isEmpty) {
                             } else {
-                              print("Comment");
+                               EventRepo().addEvent({
+                                "commented": controller.text,
+                                "postId": widget.postId.toString()??"000",
+                                "createAt": DateTime.now().toString()
+                              }, "commented_article");
                               newsPostsProvider.sendCommentsOnPost(widget.postId, controller.text).then(
                                     (value) => controller.text = '',
                                   );
-                              await EventRepo().addEvent({
-                                "commented": controller.text,
-                                "postId": widget.postId.toString()??0,
-                                "createAt": DateTime.now().toString()
-                              }, "commented_article");
+
 
                             }
                           } else {

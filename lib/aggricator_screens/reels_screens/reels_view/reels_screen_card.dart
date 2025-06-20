@@ -370,6 +370,7 @@ class _EachReelCardState extends State<EachReelCard> {
                             onTap: () async {
                               context.read<AuthenticationProvider>().sendEvent("CommentPage");
 
+
                               showComments(context, widget.reel.id.toString());
                             },
                           ),

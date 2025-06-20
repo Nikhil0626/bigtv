@@ -34,20 +34,20 @@ class _SplashScreenState extends State<SplashScreen> {
     String? lastDate = prefs.getString('last_shown_date');
     String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
 
-    EventRepo().addEvent(
-      {
-        "createAt": DateTime.now().toString(),
-        "screen": "SplashScreen",
-        "platform":Platform.isIOS?"iOS": "android" // or "ios" depending on Platform
-      },
-      "opened_app",
-    );
+
 
     if (lastDate != today) {
       setState(() {
         showGif = true;
       });
       await prefs.setString('last_shown_date', today);
+      EventRepo().addEvent(
+        {
+          "createAt": DateTime.now().toString(),
+          "platform":Platform.isIOS?"iOS": "android"
+        },
+        "opened_app",
+      );
     }
 
     await Future.delayed(Duration(seconds: showGif ? 5 : 2));

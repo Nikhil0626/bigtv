@@ -200,10 +200,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                           onTap: () async {
                                                             SharedPreferences sp = await SharedPreferences.getInstance();
                                                             String? userId = sp.getString("userId");
-                                                            String? deviceId = sp.getString("deviceId");
-                                                            await EventRepo().addEvent({
-                                                              "deviceId": (deviceId ?? 'unknown').toString(),
-                                                              "userId": (userId ?? 'guest').toString(),
+                                                             EventRepo().addEvent({
                                                               "share": "news",
                                                               "postId": widget.article['id'].toString(),
                                                               "createAt": DateTime.now().toString()
@@ -233,6 +230,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                             } else if (widget.article['type'] == "Gallery") {
                                                               createAndSharePdfs(context, widget.article);
                                                             }
+                                                            await EventRepo().addEvent({
+                                                              "share": "news",
+                                                              "postId": widget.article['id'].toString(),
+                                                              "createAt": DateTime.now().toString()
+                                                            }, "shared_article");
                                                           },
                                                           child: isSending
                                                               ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
@@ -697,6 +699,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       } else if (widget.article['type'] == "Gallery") {
                                                         createAndSharePdfs(context, widget.article);
                                                       }
+                                                      await EventRepo().addEvent({
+                                                        "share": "news",
+                                                        "postId": widget.article['id'].toString(),
+                                                        "createAt": DateTime.now().toString()
+                                                      }, "shared_article");
                                                     },
                                                     child: isSending
                                                         ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
