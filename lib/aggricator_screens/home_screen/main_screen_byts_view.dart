@@ -172,7 +172,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                             onTap: () async {
                                                               log("Like");
                                                               settingsProvider.isLikePost(widget.article);
-                                                              await EventRepo().addEvent({
+                                                               EventRepo().addEvent({
                                                                 "like": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
                                                                 "postId": widget.article['id'].toString()??'000',
                                                                 "createAt": DateTime.now().toString()
@@ -230,7 +230,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                             } else if (widget.article['type'] == "Gallery") {
                                                               createAndSharePdfs(context, widget.article);
                                                             }
-                                                            await EventRepo().addEvent({
+                                                             EventRepo().addEvent({
                                                               "share": "news",
                                                               "postId": widget.article['id'].toString(),
                                                               "createAt": DateTime.now().toString()
@@ -256,7 +256,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
                                                                 homeProvide.isReloadData();
                                                                 if (widget.isaiTags) {
-                                                                  await EventRepo().addEvent({
+                                                                   EventRepo().addEvent({
                                                                     "refresh": false,
                                                                     "createAt": DateTime.now().toString()
                                                                   }, "reload_article");
@@ -268,7 +268,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 } else {
                                                                   homeProvide.getAllPostList = [];
                                                                   homeProvide.getAllPost();
-                                                                  await EventRepo().addEvent({
+                                                                   EventRepo().addEvent({
                                                                     "refresh": true,
                                                                     "createAt": DateTime.now().toString()
                                                                   }, "reload_article");
@@ -377,7 +377,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                               return InkWell(
                                                 onTap: () async {
                                                   log("Refresh");
-                                                  await EventRepo().addEvent({
+                                                   EventRepo().addEvent({
                                                     "refresh": true,
                                                     "createAt": DateTime.now().toString()
                                                   }, "reload_article");
@@ -641,7 +641,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       onTap: () async {
                                                         log("Like");
                                                         settingsProvider.isLikePost(widget.article);
-                                                        await EventRepo().addEvent({
+                                                         EventRepo().addEvent({
                                                           "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
                                                           "postId": widget.article['id'].toString()??"000",
                                                           "createAt": DateTime.now().toString()
@@ -699,7 +699,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       } else if (widget.article['type'] == "Gallery") {
                                                         createAndSharePdfs(context, widget.article);
                                                       }
-                                                      await EventRepo().addEvent({
+                                                       EventRepo().addEvent({
                                                         "share": "news",
                                                         "postId": widget.article['id'].toString(),
                                                         "createAt": DateTime.now().toString()

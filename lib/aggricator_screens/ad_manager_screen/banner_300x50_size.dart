@@ -47,7 +47,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
             _loadingState = BannerAdsLoading.success;
           });
 
-          await EventRepo().addEvent({
+           EventRepo().addEvent({
             "sdkRequestStartTime": from,
             "sdkRequestReceivedTime": to,
             "adsRenderingTime": DateTime.now().difference(DateTime.parse(to)).inMicroseconds.toString(),
@@ -57,7 +57,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
         },
         onAdFailedToLoad: (ad, error) async {
           final to = DateTime.now().toString();
-          await EventRepo().addEvent({
+           EventRepo().addEvent({
             "sdkRequestStartTime": from,
             "sdkRequestReceivedTime": to,
             "adsRenderingTime": "0",

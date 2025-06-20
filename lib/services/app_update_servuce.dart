@@ -1,9 +1,14 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:in_app_update/in_app_update.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../aggricator_screens/event_repo.dart';
 
 class AppUpdateService {
   static Future<void> checkForUpdate(BuildContext context) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+
     try {
       log("Checking for updates...");
       AppUpdateInfo updateInfo = await InAppUpdate.checkForUpdate();
@@ -16,6 +21,13 @@ class AppUpdateService {
         await InAppUpdate.startFlexibleUpdate().then((_) {
           log("Completing flexible update...");
           InAppUpdate.completeFlexibleUpdate();
+
+          String? storedVersion = sp.getString("app_version");
+
+          EventRepo().addEvent({
+            "currentVersion":storedVersion,
+            "createAt": DateTime.now().toString(),
+          }, "app_update");
         }).catchError((e) {
           log("Flexible update error: $e");
           // _showSnackBar(context, "Flexible update failed: $e");

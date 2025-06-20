@@ -43,6 +43,11 @@ Future<String?> getUniqueDeviceId(
 
     if (sp.getString("deviceName").toString() != "true") {
       sendAndroidDeviceDetails(androidInfo);
+
+      EventRepo().addEvent({
+        "platform": Platform.isIOS ? "iOS" : "android",
+        "createAt": DateTime.now().toString(),
+      }, "first_open");
       EventRepo().addEvent(
         {
           "createAt": DateTime.now().toString(),
@@ -70,6 +75,10 @@ Future<String?> getUniqueDeviceId(
 
     if (sp.getString("deviceName").toString() != "true") {
       sendiOSDeviceDetails(iosInfo);
+      EventRepo().addEvent({
+        "platform": Platform.isIOS ? "iOS" : "android",
+        "createAt": DateTime.now().toString(),
+      }, "first_open");
       EventRepo().addEvent(
         {
           "createAt": DateTime.now().toString(),
