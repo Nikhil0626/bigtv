@@ -247,7 +247,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                   SharedPreferences sp = await SharedPreferences.getInstance();
                                                                   String? userId = sp.getString("userId");
                                                                   String? deviceId = sp.getString("deviceId");
-                                                                  await EventRepo().addEvent({
+                                                                   EventRepo().addEvent({
                                                                     "share": "news",
                                                                     "postId": article['id'].toString()??"000",
                                                                     "createAt": DateTime.now().toString()
@@ -296,7 +296,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                       homeProvide.getAllPostList = [];
                                                                       homeProvide.getAllPost();
 
-                                                                      await EventRepo().addEvent({
+                                                                       EventRepo().addEvent({
                                                                         "refresh": true,
                                                                         "createAt": DateTime.now().toString()
                                                                       }, "reload_article");
@@ -631,7 +631,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                             onTap: () async {
                                                               log("Like");
                                                               settingsProvider.isLikePost(article);
-                                                              await EventRepo().addEvent({
+                                                               EventRepo().addEvent({
                                                                 "like": !settingsProvider.isLikeList.contains(article['id'].toString()),
                                                                 "postId": article['id'].toString()??"000",
                                                                 "createAt": DateTime.now().toString()

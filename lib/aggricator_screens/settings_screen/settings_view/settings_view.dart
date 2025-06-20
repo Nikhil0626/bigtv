@@ -176,7 +176,7 @@ class _SettingsViewState extends State<SettingsView> {
               });
               WebEngagePlugin.userLogout();
               context.read<AuthenticationProvider>().setLogOutStatus(context, false);
-              await EventRepo().addEvent({
+               EventRepo().addEvent({
                 "loginType": "logout",
                 "mobileNumber": "",
                 "createAt": DateTime.now().toString(),

@@ -355,7 +355,7 @@ class _EachReelCardState extends State<EachReelCard> {
                             onTap: () async {
                               widget.reelsProvider.isLikePost(widget.reel);
                               log("Like");
-                              await EventRepo().addEvent({
+                               EventRepo().addEvent({
                                 "like": !widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
                                 "postId": widget.reel.id.toString()??"000",
                                 "createAt": DateTime.now().toString()
@@ -388,7 +388,7 @@ class _EachReelCardState extends State<EachReelCard> {
                               String? userId = sp.getString("userId");
 
                               // ✅ Now it's safe to use userId
-                              await EventRepo().addEvent({
+                               EventRepo().addEvent({
                                 "share": "reels",
                                 "postId": widget.reel.id.toString()??"000",
                                 "createAt": DateTime.now().toString()

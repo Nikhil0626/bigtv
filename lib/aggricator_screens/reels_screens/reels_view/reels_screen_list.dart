@@ -195,7 +195,7 @@ class _ReelsListViewCardState extends State<ReelsListViewCard> {
                             iconColor: Colors.white,
                             onTap: () async {
                               print("Share");
-                              await EventRepo().addEvent({
+                               EventRepo().addEvent({
                                 "share": "reels",
                                 "postId": widget.card.id.toString()??"000",
                                 "createAt": DateTime.now().toString()

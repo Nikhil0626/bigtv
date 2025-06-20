@@ -79,7 +79,7 @@ class AuthenticationProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         newAppLoginStatus = NewAppLoginStatus.otp;
         saveLoginState();
-        await EventRepo().addEvent({
+         EventRepo().addEvent({
           "loginType": "mobileNumber",
           "mobileNumber":  otpController.text??"",
           "createAt": DateTime.now().toString(),
@@ -156,7 +156,7 @@ class AuthenticationProvider extends ChangeNotifier {
         saveUserid("");
         preferences.setString("userName", "User${phoneController.text.substring(phoneController.text.length - 4)}");
         preferences.setString("referralCode", "");
-        await EventRepo().addEvent({
+         EventRepo().addEvent({
           "otpStatus": "complete",
           "mobileNumber":otpController.text??"",
           "otp": phoneController.text??"",
@@ -173,7 +173,7 @@ class AuthenticationProvider extends ChangeNotifier {
       CustomToast.showErrorToast(msg: e.message);
       log("error dio ${e.toString()}");
       log("error dio  ${st.toString()}");
-      await EventRepo().addEvent({
+       EventRepo().addEvent({
         "otpStatus": "fail",
         "mobileNumber":otpController.text??"",
         "otp": phoneController.text??"",
@@ -183,7 +183,7 @@ class AuthenticationProvider extends ChangeNotifier {
       log("error  ${e.toString()}");
       log("error  ${st.toString()}");
       CustomToast.showErrorToast(msg: "Something went wrong");
-      await EventRepo().addEvent({
+       EventRepo().addEvent({
         "otpStatus": "fail",
         "mobileNumber":otpController.text??"",
         "otp": phoneController.text??"",
@@ -272,7 +272,7 @@ class AuthenticationProvider extends ChangeNotifier {
           newAppLoginStatus = NewAppLoginStatus.location;
         }
         log(response.data.toString());
-        await EventRepo().addEvent({
+         EventRepo().addEvent({
           "listOfCategoriesIds":result??"",
           "listOfCategoriesNames":catNames??"",
           "updateStatus":"complete",
@@ -281,7 +281,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
-      await EventRepo().addEvent({
+       EventRepo().addEvent({
         "listOfCategoriesIds":result??"",
         "listOfCategoriesNames":catNames??"",
         "updateStatus":"fail",
@@ -289,7 +289,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }, "update_categories");
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
-      await EventRepo().addEvent({
+       EventRepo().addEvent({
         "listOfCategoriesIds":result??"",
         "listOfCategoriesNames":catNames??"",
         "updateStatus":"fail",
@@ -392,7 +392,7 @@ class AuthenticationProvider extends ChangeNotifier {
         }
 
         log(response.data.toString());
-        await EventRepo().addEvent({
+         EventRepo().addEvent({
           "listOfLocationsIds":result??"",
           "listOfLocationsNames":nameOfDistrict??"",
           "updateStatus":"complete",
@@ -401,7 +401,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
-      await EventRepo().addEvent({
+       EventRepo().addEvent({
         "listOfLocationsIds":result??"",
         "listOfLocationsNames":nameOfDistrict??"",
         "updateStatus":"fail",
@@ -409,7 +409,7 @@ class AuthenticationProvider extends ChangeNotifier {
       }, "update_locations");
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
-      await EventRepo().addEvent({
+       EventRepo().addEvent({
         "listOfLocationsIds":result??"",
         "listOfLocationsNames":nameOfDistrict??"",
         "updateStatus":"fail",

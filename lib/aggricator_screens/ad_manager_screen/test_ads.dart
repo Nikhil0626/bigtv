@@ -136,7 +136,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     String? deviceId= sharedPreferences.getString("deviceId");
     to = DateTime.now().toString();
 
-    await EventRepo().addEvent( {
+     EventRepo().addEvent( {
       "sdkRequestStartTime":from,
       "sdkRequestReceivedTime":to,
       "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds.toString(),
@@ -186,7 +186,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     String? userId= sharedPreferences.getString("userId");
     String? deviceId= sharedPreferences.getString("deviceId");
 
-    await EventRepo().addEvent({
+     EventRepo().addEvent({
       "sdkRequestStartTime":from,
       "sdkRequestReceivedTime":to,
       "adsRenderingTime":"0",
