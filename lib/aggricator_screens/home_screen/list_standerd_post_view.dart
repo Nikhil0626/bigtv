@@ -89,13 +89,13 @@ ScreenshotController screenshotControllers = ScreenshotController();
                                     width: 58,
                                   ),
                                   onPressed: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder: (context) => MainScreenPageView(
-                                            startIndex: widget.index,
-                                          ),
-                                        ));
+                                    // Navigator.push(
+                                    //     context,
+                                    //     MaterialPageRoute(
+                                    //       builder: (context) => MainScreenPageView(
+                                    //         startIndex: widget.index,
+                                    //       ),
+                                    //     ));
                                   },
                                 ),
 

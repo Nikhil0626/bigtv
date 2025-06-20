@@ -118,13 +118,7 @@ class _StandardCardState extends State<StandardCard> {
                                       width: 58,
                                     ),
                                     onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => MainScreenPageView(
-                                              startIndex: widget.index,
-                                            ),
-                                          ));
+
                                     },
                                   ),
                                 ],

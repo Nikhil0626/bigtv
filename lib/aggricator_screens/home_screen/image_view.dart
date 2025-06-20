@@ -24,8 +24,7 @@ import 'main_screen_pageview.dart';
 class ImageView extends StatefulWidget {
   final getAllPostList;
   final index;
-
-  const ImageView({super.key, required this.getAllPostList, required this.index});
+  const ImageView({super.key,required this.getAllPostList,required this.index});
 
   @override
   State<ImageView> createState() => _ImageViewState();
@@ -38,15 +37,15 @@ class _ImageViewState extends State<ImageView> {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
-        if (widget.getAllPostList['type'] == "Image") {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MainScreenPageView(
-                  startIndex: widget.index,
-                ),
-              ));
-        } else {
+        if (widget.getAllPostList ['type'] == "Image") {
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (context) => MainScreenPageView(
+          //         startIndex: widget.index,
+          //       ),
+          //     ));
+        }else{
           log("sdbsjbfsjbfjhsfbhjsdbfsmkfb");
         }
       },
@@ -191,6 +190,7 @@ class _ImageViewState extends State<ImageView> {
                 );
               }),
             ),
+
           ],
         ),
       ),

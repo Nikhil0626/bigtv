@@ -34,7 +34,8 @@ class EventRepo extends BaseService {
     await box.add(newEvent);
   }
 
-  Future<void> processAndPushEvents() async {
+  Future<void>
+  processAndPushEvents() async {
     final box = Hive.box('events');
     // await box.clear();
     final events = box.values.map((e) => _convertEventToJson(e)).toList();
