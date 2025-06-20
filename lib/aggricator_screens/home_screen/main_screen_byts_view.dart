@@ -536,7 +536,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                     ],
                                                                   ),
                                                                 ),
-                                                                if (widget.article['subType'] != "BigBlackStandard") Banner300x50Size()
                                                               ],
                                                             )
                                                           : RichText(
