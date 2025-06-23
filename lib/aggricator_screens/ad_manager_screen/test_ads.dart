@@ -32,6 +32,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   BannerAd? _bannerAd;
 
   bool _isBannerLoaded = false;
+  bool _isAdMobBannerLoaded = false;
   bool _isAdMObLoaded = false;
   bool _isAdShown = false;
   bool _adLoadFailed = false;
@@ -57,6 +58,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     _loadAdManagerNativeAd(context);
     _loadAdMobNativeAd(context);
     _loadBannerAd(context);
+    _loadBannerAdMob(context);
   }
 
   void _loadAdManagerNativeAd(BuildContext context) {
@@ -111,7 +113,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
     _bannerAd = BannerAd(
       adUnitId: adUnitId,
-      size: AdSize(width: 300, height: 250),
+      size: AdSize(width: 320, height: 250),
       request: AdManagerAdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
@@ -123,6 +125,27 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
           ad.dispose();
           print('Banner failed: $error');
+          _checkIfAllAdsFailed(error);
+        },
+      ),
+    )..load();
+  }
+  void _loadBannerAdMob(BuildContext context) {
+    String adUnitId = context.read<HomeProvider>().adMobBannerId;
+
+    _bannerAd = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.mediumRectangle, // 320x250
+      request: AdRequest(), // Use AdRequest() for AdMob
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          _isAdMobBannerLoaded = true;
+          print('Ad loaded: ${ad.responseInfo}');
+          _onAdLoaded(ad as BannerAd, AdWidget(ad: ad));
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          ad.dispose();
+          print('Ad failed to load: $error');
           _checkIfAllAdsFailed(error);
         },
       ),

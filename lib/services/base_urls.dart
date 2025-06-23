@@ -53,7 +53,7 @@ class BaseUrls {
   static const String baseUrlAwsDev = "https://api.chotanews.com";
 
 
-  /// Python Dec Apis
+  /// Python Dev Apis
   // static const String ePaperBaseUrlAws = "http://devaggregator.chotanews.com";
   // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
 
