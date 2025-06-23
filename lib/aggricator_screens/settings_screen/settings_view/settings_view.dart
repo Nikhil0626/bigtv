@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
@@ -14,8 +15,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-
-
 import '../../../services/webengage_notification.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
@@ -23,6 +22,8 @@ import '../../ad_manager_screen/banner_300x50_size.dart';
 import '../../chota_info_screens/advertise_with_us.dart';
 import '../../chota_info_screens/privacy_policy.dart';
 import '../../chota_info_screens/terms_conditions.dart';
+import '../../event_repo.dart';
+import '../../home_screen/home_provider/home_provider.dart';
 import 'filters_screen/filter_view.dart';
 import 'profile_view.dart';
 import 'feedback_view.dart';
@@ -43,14 +44,13 @@ class _SettingsViewState extends State<SettingsView> {
 
   @override
   void initState() {
-
     getLogin();
     context.read<AuthenticationProvider>().sendEvent("SettingsView");
     super.initState();
   }
+
   @override
   void dispose() {
-    // context.read<SettingsProvider>().bannerAd.dispose();
     super.dispose();
   }
 
@@ -65,11 +65,15 @@ class _SettingsViewState extends State<SettingsView> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-     child:  Padding(
+      child: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
             _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
+              EventRepo().addEvent({
+                "visitPageName":"Edit Profile",
+                "createAt": DateTime.now().toString(),
+              }, "compliance_section");
               if (isNotificationsEnabled == false) {
                 Navigator.push(
                   context,
@@ -90,23 +94,18 @@ class _SettingsViewState extends State<SettingsView> {
               Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
             }),
             height(height: 5.h),
-            // _buildSettingsRow(context, "BookMarks.svg", "Bookmarks", () {
-            //   Navigator.push(context, MaterialPageRoute(builder: (context) => SavedArticles()));
-            // }),
-            // _buildNotificationRow(),
 
-            _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () {
+            _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () async {
               _showShareBottomSheet(context);
-              // if (Platform.isIOS) {
-              //   Share.share("Check out this app: https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092");
-              // } else {
-              //   Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
-              // }
             }),
 
             height(height: 5.h),
 
             _buildSettingsRow(context, "Help_support.svg", "Help & Support", () {
+              EventRepo().addEvent({
+                "visitPageName": "Help & Support",
+                "createAt": DateTime.now().toString(),
+              }, "compliance_section");
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -117,6 +116,10 @@ class _SettingsViewState extends State<SettingsView> {
 
             height(height: 5.h),
             _buildSettingsRow(context, "Advertise_icon.svg", "Advertise With Us", () {
+              EventRepo().addEvent({
+                "visitPageName": "Advertise With Us",
+                "createAt": DateTime.now().toString(),
+              }, "compliance_section");
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -124,20 +127,13 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            // height(height: 5.h),
-            // _buildSettingsRow(context, "About_app.svg", "Contact Us", () {
-            //   Navigator.push(
-            //     context,
-            //     MaterialPageRoute(
-            //       builder: (context) => InAppWebViewScreen(
-            //         webUrl: BaseUrls.contactPage,
-            //         title: "Contact Us",
-            //       ),
-            //     ),
-            //   );
-            // }),
+
             height(height: 5.h),
             _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
+              EventRepo().addEvent({
+                "visitPageName": "Terms & Conditions",
+                "createAt": DateTime.now().toString(),
+              }, "compliance_section");
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -147,6 +143,10 @@ class _SettingsViewState extends State<SettingsView> {
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy", () {
+              EventRepo().addEvent({
+                "visitPageName": "Privacy Policy",
+                "createAt": DateTime.now().toString(),
+              }, "compliance_section");
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -156,6 +156,10 @@ class _SettingsViewState extends State<SettingsView> {
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "Feedback.svg", "Feedback", () {
+              EventRepo().addEvent({
+                "visitPageName": "Feedback",
+                "createAt": DateTime.now().toString(),
+              }, "compliance_section");
               Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
             }),
             height(height: 5.h),
@@ -172,10 +176,14 @@ class _SettingsViewState extends State<SettingsView> {
               });
               WebEngagePlugin.userLogout();
               context.read<AuthenticationProvider>().setLogOutStatus(context, false);
+               EventRepo().addEvent({
+                "loginType": "logout",
+                "mobileNumber": "",
+                "createAt": DateTime.now().toString(),
+              }, "login_event");
             }),
             height(height: 10),
-           context.watch<SettingsProvider>().bannerAdsLoading ==BannerAdsLoading.fail ?SizedBox.shrink(): Banner300x50Size(),
-
+            context.watch<SettingsProvider>().bannerAdsLoading == BannerAdsLoading.fail ? SizedBox.shrink() : Banner300x50Size(),
 
             Spacer(),
             Padding(
@@ -225,6 +233,10 @@ class _SettingsViewState extends State<SettingsView> {
                       GestureDetector(
                         onTap: () {
                           Navigator.pop(context);
+                          EventRepo().addEvent({
+                            "shareApp": Platform.isIOS ? "iOS" : "Android",
+                            "createAt": DateTime.now().toString(),
+                          }, "share_app");
                           Share.share(
                             "Check out this app: https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092",
                           );
@@ -263,6 +275,10 @@ class _SettingsViewState extends State<SettingsView> {
                       GestureDetector(
                         onTap: () {
                           Navigator.pop(context);
+                          EventRepo().addEvent({
+                            "shareApp": Platform.isIOS ? "iOS" : "Android",
+                            "createAt": DateTime.now().toString(),
+                          }, "share_app");
                           Share.share(
                             "Check out this app: https://play.google.com/store/apps/details?id=com.chotanews",
                           );

@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:hive/hive.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../services/base_service.dart';
 import '../../../services/base_urls.dart';
@@ -15,17 +16,30 @@ class EventRepo extends BaseService {
     return response;
   }
 
-  Future<void> addEvent(Map<String, dynamic> eventData) async {
-    log("event body --- ${eventData}");
+  Future<void> addEvent(Map<String, dynamic> eventData, eventName) async {
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    String? userId = sharedPreferences.getString("userId");
+    String? deviceId = sharedPreferences.getString("deviceId");
+
+    Map<String, dynamic> newEvent = {
+      'key': eventName,
+      'eventData': eventData,
+      'userId': userId ?? "guest",
+      'deviceId': deviceId ?? "12345",
+    };
+    log("event body --- $newEvent");
+
     final box = Hive.box('events');
-    await box.add(eventData);
+    await box.add(newEvent);
   }
 
-  Future<void> processAndPushEvents() async {
+  Future<void>
+  processAndPushEvents() async {
     final box = Hive.box('events');
     // await box.clear();
     final events = box.values.map((e) => _convertEventToJson(e)).toList();
-    log("Event Data Push ${events.toString()}");
+    log("Event Data Push ${events}");
     if (events.isEmpty) return;
 
     Response response = await makeRequest(
@@ -53,5 +67,4 @@ class EventRepo extends BaseService {
     });
     return eventMap;
   }
-
 }

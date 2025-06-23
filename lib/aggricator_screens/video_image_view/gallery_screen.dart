@@ -24,6 +24,7 @@ import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/commant_screen.dart';
 
 import '../botton_actions.dart';
+import '../event_repo.dart';
 
 class FullPageCarousel extends StatefulWidget {
   final List<dynamic> imageUrls;
@@ -166,9 +167,16 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                           icon: isLiked ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                           label: 'లైక్',
                           isLike: isLiked,
-                          onTap: () {
+                          onTap: () async {
                             log("Like");
                             settingsProvider.isLikePost(widget.postDetails);
+                             EventRepo().addEvent({
+                              "like": !settingsProvider.isLikeList.contains(widget.postDetails['id'].toString()),
+                              "postId": widget.postDetails['id'].toString()??"000",
+                              "createAt": DateTime.now().toString()
+                            }, "liked_article");
+
+
                           },
                         );
                       },
@@ -198,6 +206,14 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                       label: 'షేర్',
                       iconColor: AppColors.iconColors,
                       onTap: () async {
+                        print("Share");
+                         EventRepo().addEvent({
+                          "share": "news",
+                          "postId": widget.postDetails['id'].toString()??"000",   // ✅ postId converted to String
+                          "createAt": DateTime.now().toString(),
+                        }, "shared_article");
+
+
                         SharedPreferences sp = await SharedPreferences.getInstance();
                         String? userId = sp.getString("userId");
                         sendShareDetails(userId, widget.postDetails['id'], widget.postDetails['content'].toString());

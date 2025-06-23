@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:chotanews/screens/testing_screen/admob.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/event_cron.dart';
 
@@ -51,9 +52,6 @@ Future<void> main() async {
   await Hive.openBox('events');
   EventCron().start();
   MobileAds.instance.initialize();
-
-
-
   initPlugin();
   getAndSendReferrerDetails();
   await EasyLocalization.ensureInitialized();
@@ -70,6 +68,7 @@ Future<void> main() async {
   AnalyticsService().trackAppOpen();
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
+
   FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -18,7 +19,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../../loading_screen/home_shimmer.dart';
 import '../../botton_actions.dart';
+import '../../event_repo.dart';
 import '../../home_screen/home_provider/home_provider.dart';
 import '../../in_app_web_view.dart';
 import '../../../services/webengage_event_tracks.dart';
@@ -98,74 +101,79 @@ class _ReelsScreenState extends State<ReelsScreen> {
       // backgroundColor: Colors.white,
       child: Consumer<ReelsProviders>(builder: (_, reelsProvider, __) {
         return reelsProvider.reelsLoading
-            ? Shimmer.fromColors(
-                baseColor: Colors.grey[300]!,
-                highlightColor: Colors.grey[100]!,
-                child: CardSwiper(
-                  allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-                  controller: controller,
-                  // Assign the controller
-                  cardsCount: 5,
-                  onSwipe: (previousIndex, currentIndex, direction) {
-                    print("Swiped from $previousIndex to $currentIndex");
-                    return true;
-                  },
-                  numberOfCardsDisplayed: 4,
-                  cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-                    return ShimmerCard();
-                  },
-                ),
-              )
+            ? HomeShimmer()
             : reelsProvider.getAllReelsList.isEmpty
                 ? AppNoData()
-                : Padding(
-                    padding: const EdgeInsets.only(bottom: 40.0),
-                    child: CardSwiper(
-                      controller: controller,
-                      cardsCount: reelsProvider.getAllReelsList.length,
-                      onSwipe: (previousIndex, currentIndex, direction) {
-                        if (direction == CardSwiperDirection.bottom) {
-                          context.read<HomeProvider>().flipEvent('reel', reelsProvider.getAllReelsList[currentIndex!].id, false);
-                          _undo();
+                : ReelPreviewScreen(initialIndex: 0);
 
-                          return false;
-                        } else {
-                          context.read<HomeProvider>().flipEvent('reel', reelsProvider.getAllReelsList[currentIndex!].id, true);
-                        }
-
-                        if (currentIndex != null) {
-                          currentIndexs = currentIndex;
-                        }
-                        debugPrint(
-                          'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
-                        );
-                        return true;
-                      },
-                      // onSwipeDirectionChange:  ,
-                      // onUndo: _onUndo,
-                      allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-                      // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
-                      numberOfCardsDisplayed: 4,
-                      duration: const Duration(milliseconds: 100),
-                      backCardOffset: const Offset(0, 40),
-                      padding: const EdgeInsets.only(
-                        left: 20.0,
-                        right: 20.0,
-                        bottom: 40.0,
-                      ),
-                      // alignment: Alignment.topCenter,
-                      cardBuilder: (
-                        context,
-                        index,
-                        horizontalThresholdPercentage,
-                        verticalThresholdPercentage,
-                      ) {
-                        final post = reelsProvider.getAllReelsList[index];
-
-                        return EachReelCard(reel: post, reelsProvider: reelsProvider, index: index);
-                      },
-                    ),
-                  );
+        // ? Shimmer.fromColors(
+        //     baseColor: Colors.grey[300]!,
+        //     highlightColor: Colors.grey[100]!,
+        //     child: CardSwiper(
+        //       allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+        //       controller: controller,
+        //       // Assign the controller
+        //       cardsCount: 5,
+        //       onSwipe: (previousIndex, currentIndex, direction) {
+        //         print("Swiped from $previousIndex to $currentIndex");
+        //         return true;
+        //       },
+        //       numberOfCardsDisplayed: 4,
+        //       cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
+        //         return ShimmerCard();
+        //       },
+        //     ),
+        //   )
+        // : reelsProvider.getAllReelsList.isEmpty
+        //     ? AppNoData()
+        //     : Padding(
+        //         padding: const EdgeInsets.only(bottom: 40.0),
+        //         child: CardSwiper(
+        //           controller: controller,
+        //           cardsCount: reelsProvider.getAllReelsList.length,
+        //           onSwipe: (previousIndex, currentIndex, direction) {
+        //             if (direction == CardSwiperDirection.bottom) {
+        //               context.read<HomeProvider>().flipEvent('reel', reelsProvider.getAllReelsList[currentIndex!].id, false);
+        //               _undo();
+        //
+        //               return false;
+        //             } else {
+        //               context.read<HomeProvider>().flipEvent('reel', reelsProvider.getAllReelsList[currentIndex!].id, true);
+        //             }
+        //
+        //             if (currentIndex != null) {
+        //               currentIndexs = currentIndex;
+        //             }
+        //             debugPrint(
+        //               'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
+        //             );
+        //             return true;
+        //           },
+        //           // onSwipeDirectionChange:  ,
+        //           // onUndo: _onUndo,
+        //           allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
+        //           // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
+        //           numberOfCardsDisplayed: 4,
+        //           duration: const Duration(milliseconds: 100),
+        //           backCardOffset: const Offset(0, 40),
+        //           padding: const EdgeInsets.only(
+        //             left: 20.0,
+        //             right: 20.0,
+        //             bottom: 40.0,
+        //           ),
+        //           // alignment: Alignment.topCenter,
+        //           cardBuilder: (
+        //             context,
+        //             index,
+        //             horizontalThresholdPercentage,
+        //             verticalThresholdPercentage,
+        //           ) {
+        //             final post = reelsProvider.getAllReelsList[index];
+        //
+        //             return EachReelCard(reel: post, reelsProvider: reelsProvider, index: index);
+        //           },
+        //         ),
+        //       );
       }),
     );
   }
@@ -257,11 +265,11 @@ class _EachReelCardState extends State<EachReelCard> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.symmetric(vertical: 0,horizontal: 12.h),
-                      child: Text( widget.reel.title,style:homeScreenFontStyle(
-                          color:  AppColors.textColor ,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold) ,),
+                      padding: EdgeInsets.symmetric(vertical: 0, horizontal: 12.h),
+                      child: Text(
+                        widget.reel.title,
+                        style: homeScreenFontStyle(color: AppColors.textColor, fontSize: 16.sp, fontWeight: FontWeight.bold),
+                      ),
                     ),
                     Container(
                       padding: EdgeInsets.only(bottom: 10.h, top: 10.h),
@@ -350,8 +358,12 @@ class _EachReelCardState extends State<EachReelCard> {
                             icon: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                             label: 'లైక్',
                             isLike: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
-                            onTap: () {
+                            onTap: () async {
                               widget.reelsProvider.isLikePost(widget.reel);
+                              log("Like");
+                              EventRepo().addEvent(
+                                  {"like": !widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()), "postId": widget.reel.id.toString() ?? "000", "createAt": DateTime.now().toString()},
+                                  "liked_article");
                             },
                           ),
                           BottomActions(
@@ -372,8 +384,14 @@ class _EachReelCardState extends State<EachReelCard> {
                             label: 'షేర్',
                             iconColor: AppColors.iconColors,
                             onTap: () async {
+                              print("Share");
+
+                              // ✅ Get userId first
                               SharedPreferences sp = await SharedPreferences.getInstance();
                               String? userId = sp.getString("userId");
+
+                              // ✅ Now it's safe to use userId
+                              EventRepo().addEvent({"share": "reels", "postId": widget.reel.id.toString() ?? "000", "createAt": DateTime.now().toString()}, "shared_article");
 
                               sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
 
@@ -387,11 +405,15 @@ class _EachReelCardState extends State<EachReelCard> {
                                   final imageFile = File(imagePath);
                                   await imageFile.writeAsBytes(image);
 
-                                  Share.shareXFiles([XFile(imageFile.path)], text: widget.reel.videoUrl);
+                                  Share.shareXFiles(
+                                    [XFile(imageFile.path)],
+                                    text: widget.reel.videoUrl,
+                                  );
                                 } else {
-                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                                 }
                               } catch (e) {
+                                print("Error: $e");
                                 CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                               }
                             },
@@ -403,7 +425,6 @@ class _EachReelCardState extends State<EachReelCard> {
                   ],
                 ),
               ),
-
             ],
           ),
         ),

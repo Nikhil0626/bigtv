@@ -1,4 +1,3 @@
-
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_card.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
@@ -26,21 +25,21 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  late PageController _pageController;
-
   HomeProvider? homeProvider;
 
   @override
   void initState() {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    homeProvider?.isHomeScreen = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppUpdateService.checkForUpdate(context);
       requestNotificationPermission();
       homeProvider?.getMobileNumber();
     });
-    context.read<HomeProvider>().subscribeToPushCallbacks();
-    context.read<HomeProvider>().selectedIndex = 0;
-    _pageController = PageController(initialPage: 0);
+    homeProvider?.initDeepLinks(context);
+    homeProvider?.subscribeToPushCallbacks();
+    homeProvider?.selectedIndex = 0;
+    homeProvider?.homePageController = PageController(initialPage: 0);
     super.initState();
   }
 
@@ -50,8 +49,6 @@ class _HomeViewState extends State<HomeView> {
     closeSubscribe();
     super.dispose();
   }
-
-
 
   DateTime? lastBackPressed;
 
@@ -80,7 +77,7 @@ class _HomeViewState extends State<HomeView> {
               body: Stack(
                 children: [
                   PageView(
-                    controller: _pageController,
+                    controller: homeProvider.homePageController,
                     physics: NeverScrollableScrollPhysics(),
                     onPageChanged: (index) {
                       homeProvider.onItemTapped(index);
@@ -114,7 +111,7 @@ class _HomeViewState extends State<HomeView> {
                               currentIndex: homeProvider.selectedIndex,
                               onTap: (index) {
                                 homeProvider.isTabChange();
-                                _pageController.jumpToPage(index);
+                                homeProvider.homePageController.jumpToPage(index);
                                 homeProvider.pageChange(isValue: true);
                                 if (homeProvider.selectedIndex == 0) {
                                   context.read<HomeProvider>().setSelectedTagId(0);

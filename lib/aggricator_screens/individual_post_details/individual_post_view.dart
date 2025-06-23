@@ -29,6 +29,7 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
 import '../botton_actions.dart';
+import '../event_repo.dart';
 import '../home_screen/home_provider/home_provider.dart';
 import '../home_screen/main_screen_byts_view.dart';
 import '../image_preview.dart';
@@ -240,10 +241,18 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                 },
                                                               ),
                                                               Spacer(),
+
                                                               InkWell(
                                                                 onTap: () async {
                                                                   SharedPreferences sp = await SharedPreferences.getInstance();
                                                                   String? userId = sp.getString("userId");
+                                                                  String? deviceId = sp.getString("deviceId");
+                                                                   EventRepo().addEvent({
+                                                                    "share": "news",
+                                                                    "postId": article['id'].toString()??"000",
+                                                                    "createAt": DateTime.now().toString()
+                                                                  }, "shared_article");
+
 
                                                                   sendShareDetails(userId, article['id'], article['content'].toString());
 
@@ -274,6 +283,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                   color: article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
                                                                 ),
                                                               ),
+
                                                               width(width: 20),
                                                               Consumer<HomeProvider>(builder: (_, homeProvide, __) {
                                                                 return SizedBox(
@@ -282,11 +292,14 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                   child: InkWell(
                                                                     onTap: () async {
                                                                       log("Refresh");
-
                                                                       homeProvide.isReloadData();
-
                                                                       homeProvide.getAllPostList = [];
                                                                       homeProvide.getAllPost();
+
+                                                                       EventRepo().addEvent({
+                                                                        "refresh": true,
+                                                                        "createAt": DateTime.now().toString()
+                                                                      }, "reload_article");
                                                                     },
                                                                     child: context.read<HomeProvider>().isReload
                                                                         ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
@@ -615,9 +628,17 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                       children: [
                                                         Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
                                                           return InkWell(
-                                                            onTap: () {
+                                                            onTap: () async {
                                                               log("Like");
                                                               settingsProvider.isLikePost(article);
+                                                               EventRepo().addEvent({
+                                                                "like": !settingsProvider.isLikeList.contains(article['id'].toString()),
+                                                                "postId": article['id'].toString()??"000",
+                                                                "createAt": DateTime.now().toString()
+                                                              }, "liked_article");
+
+
+
                                                             },
                                                             child: SizedBox(
                                                               width: 24,
@@ -727,13 +748,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
               print("sbhjhfjksdfnsdknf1111 $link");
-
-              if (link == "https://play.google.com/store/apps/details?id=com.chotanews" && Platform.isIOS) {
-                print("sbhjhfjksdfnsdknf $link");
-                launchURL(Uri.parse("https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092"));
-              } else {
                 launchURL(Uri.parse(link.toString()));
-              }
             }));
 
       return "";

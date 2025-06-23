@@ -11,11 +11,11 @@ class AnalyticsService {
   static final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
   static DateTime? _sessionStartTime;
 
-
-
   static Future<void> logEvent2(String name) async {
     try {
-      await _analytics.logEvent(name: name, );
+      await _analytics.logEvent(
+        name: name,
+      );
       // KochavaMeasurement.instance.sendEvent(name,);
       await FacebookAppEvents().logEvent(name: name);
 
@@ -34,15 +34,31 @@ class AnalyticsService {
     log("send event $count");
     if (count == 10) {
       log("send event 10 stored");
-      logEvent2("user_red_10_article_on_day_0", );
+      logEvent2(
+        "user_red_10_article_on_day_0",
+      );
+      EventRepo().addEvent({
+        "user_read_article": "user_red_10_article_on_day_0",
+        "createAt": DateTime.now().toString(),
+      }, "perDay_read_article");
     }
     if (count == 20) {
       log("send event 20 stored");
       logEvent2("user_red_20_article_on_day_0");
+      EventRepo().addEvent({
+        "user_read_article": "user_red_20_article_on_day_0",
+        "createAt": DateTime.now().toString(),
+      }, "perDay_read_article");
     }
-    if(count == 30){
+    if (count == 30) {
       log("send event 30 stored");
-      logEvent2("user_red_30_article_on_day_0", );
+      logEvent2(
+        "user_red_30_article_on_day_0",
+      );
+      EventRepo().addEvent({
+        "user_read_article": "user_red_30_article_on_day_0",
+        "createAt": DateTime.now().toString(),
+      }, "perDay_read_article");
     }
   }
 
@@ -61,12 +77,28 @@ class AnalyticsService {
 
     if (daysSinceFirstOpen == 1) {
       logEvent2("D1_retention");
+      EventRepo().addEvent({
+        "retention": "D1_retention",
+        "createAt": DateTime.now().toString(),
+      }, "day_retention");
     } else if (daysSinceFirstOpen == 7) {
       logEvent2("D7_retention");
+      EventRepo().addEvent({
+        "retention": "D7_retention",
+        "createAt": DateTime.now().toString(),
+      }, "day_retention");
     } else if (daysSinceFirstOpen == 15) {
       logEvent2("D15_retention");
+      EventRepo().addEvent({
+        "retention": "D15_retention",
+        "createAt": DateTime.now().toString(),
+      }, "day_retention");
     } else if (daysSinceFirstOpen == 30) {
       logEvent2("D30_retention");
+      EventRepo().addEvent({
+        "retention": "D30_retention",
+        "createAt": DateTime.now().toString(),
+      }, "day_retention");
     }
   }
 
@@ -112,9 +144,17 @@ class AnalyticsService {
 
     if (totalTime24h >= 5 * 60) {
       logEvent2("user_spent_5_minutes_in_24_hours");
+      EventRepo().addEvent({
+        "sessions":"user_spent_5_minutes_in_24_hours",
+        "createAt": DateTime.now().toString(),
+      }, "user_sessions");
     }
     if (totalTime48h >= 20 * 60) {
-      logEvent2( "user_spent_20_minutes_in_48_hours");
+      logEvent2("user_spent_20_minutes_in_48_hours");
+      EventRepo().addEvent({
+        "sessions":"user_spent_20_minutes_in_48_hours",
+        "createAt": DateTime.now().toString(),
+      }, "user_sessions");
     }
   }
 
@@ -129,21 +169,22 @@ class AnalyticsService {
     }
 
     if (openDays.length >= 3) {
-      logEvent2(  " user_consecutive_app_open_3_days");
+      logEvent2("user_consecutive_app_open_3_days");
+      EventRepo().addEvent({
+        "sessions":" user_consecutive_app_open_3_days",
+        "createAt": DateTime.now().toString(),
+      }, "user_sessions");
     }
     if (openDays.length >= 7) {
-      logEvent2( "user_consecutive_app_open_7_days");
+      logEvent2("user_consecutive_app_open_7_days");
+      EventRepo().addEvent({
+        "sessions":"user_consecutive_app_open_7_days",
+        "createAt": DateTime.now().toString(),
+      }, "user_sessions");
     }
   }
-
-
 
   static Future<void> logAppOpen() async {
     await _analytics.logAppOpen();
   }
-
-
-
-
 }
-

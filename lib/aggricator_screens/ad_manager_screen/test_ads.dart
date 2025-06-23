@@ -5,7 +5,6 @@ import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,6 +32,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   BannerAd? _bannerAd;
 
   bool _isBannerLoaded = false;
+  bool _isAdMobBannerLoaded = false;
   bool _isAdMObLoaded = false;
   bool _isAdShown = false;
   bool _adLoadFailed = false;
@@ -58,6 +58,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     _loadAdManagerNativeAd(context);
     _loadAdMobNativeAd(context);
     _loadBannerAd(context);
+    _loadBannerAdMob(context);
   }
 
   void _loadAdManagerNativeAd(BuildContext context) {
@@ -112,7 +113,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
     _bannerAd = BannerAd(
       adUnitId: adUnitId,
-      size: AdSize(width: 300, height: 250),
+      size: AdSize(width: 320, height: 250),
       request: AdManagerAdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
@@ -129,6 +130,27 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
       ),
     )..load();
   }
+  void _loadBannerAdMob(BuildContext context) {
+    String adUnitId = context.read<HomeProvider>().adMobBannerId;
+
+    _bannerAd = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.mediumRectangle, // 320x250
+      request: AdRequest(), // Use AdRequest() for AdMob
+      listener: BannerAdListener(
+        onAdLoaded: (Ad ad) {
+          _isAdMobBannerLoaded = true;
+          print('Ad loaded: ${ad.responseInfo}');
+          _onAdLoaded(ad as BannerAd, AdWidget(ad: ad));
+        },
+        onAdFailedToLoad: (Ad ad, LoadAdError error) {
+          ad.dispose();
+          print('Ad failed to load: $error');
+          _checkIfAllAdsFailed(error);
+        },
+      ),
+    )..load();
+  }
 
   void _onAdLoaded(dynamic ad, Widget adWidget) async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
@@ -137,27 +159,13 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     String? deviceId= sharedPreferences.getString("deviceId");
     to = DateTime.now().toString();
 
-    Map<String, dynamic> newEvent = {
-      'key': 'ads_success',
-      'eventData': {
-        "sdkRequestStartTime":from,
-        "sdkRequestReceivedTime":to,
-        "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds.toString(),
-        "createAt":DateTime.now().toString(),
-        "adResponse":ad.responseInfo.toString(),
-      },
-      'userId': userId,
-      'deviceId': deviceId,
-    };
-    print("All Events: ${newEvent}");
-    await EventRepo().addEvent(newEvent).then((value) {  final box = Hive.box('events');
-
-      final allEvents = box.values.toList();
-      print("All Events:");
-      for (var e in allEvents) {
-        log("$e");
-      }// adds the event to the list
-    },);
+     EventRepo().addEvent( {
+      "sdkRequestStartTime":from,
+      "sdkRequestReceivedTime":to,
+      "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds.toString(),
+      "createAt":DateTime.now().toString(),
+      "adResponse":ad.responseInfo.toString(),
+    },"ads_success");
 
     if (_isAdShown) {
       ad.dispose();
@@ -200,20 +208,15 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
     String? userId= sharedPreferences.getString("userId");
     String? deviceId= sharedPreferences.getString("deviceId");
-    Map<String, dynamic> newEvent = {
-      'key': 'ads_failure',
-      'eventData': {
-        "sdkRequestStartTime":from,
-        "sdkRequestReceivedTime":to,
-        "adsRenderingTime":0,
-        "createAt":DateTime.now().toString(),
-        "adResponse":error.responseInfo.toString(),
-      },
-      'userId': userId,
-      'deviceId': deviceId,
-    };
-    print("All Events: ${newEvent}");
-    await EventRepo().addEvent(newEvent);
+
+     EventRepo().addEvent({
+      "sdkRequestStartTime":from,
+      "sdkRequestReceivedTime":to,
+      "adsRenderingTime":"0",
+      "createAt":DateTime.now().toString(),
+      "adResponse":error.responseInfo.toString(),
+    },"ads_success");
+
     bannerAdsLoading = BannerAdsLoading.fail;
 
     setState(() {

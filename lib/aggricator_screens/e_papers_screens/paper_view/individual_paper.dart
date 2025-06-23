@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
+import '../../home_screen/home_provider/home_provider.dart';
 import '../../in_app_web_view.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
@@ -27,10 +28,9 @@ class _IndividualPaperState extends State<IndividualPaper> {
   @override
   void initState() {
     context.read<EPapersProvider>().getSinglePapersList = [];
-    // context.read<EPapersProvider>().getSingleEPapers(widget.paper);
+
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,4 +1,3 @@
-
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../../loading_screen/home_shimmer.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_spaces.dart';
+import '../event_repo.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'home_provider/home_provider.dart';
 import 'main_screen_pageview.dart';
@@ -28,7 +28,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-    context.read<HomeProvider>().initDeepLinks(context);
+
     context.read<HomeProvider>().getAllAiTags();
     if (context.read<HomeProvider>().postId.toString() == "0") {
       context.read<HomeProvider>().getAllPost();
@@ -44,7 +44,6 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
       final box = keyContext.findRenderObject() as RenderBox;
       final size = box.size;
       final position = box.localToGlobal(Offset.zero);
-
       final screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
 
       final itemCenter = position.dx + size.width / 2;
@@ -65,9 +64,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
         child: Center(
           child: homeProvider.isHomeLoading
               ? HomeShimmer()
-              : homeProvider.getAllPostList.isEmpty
-                  ? AppNoData()
-                  : Column(
+              : context.read<HomeProvider>().getAllPostList.isEmpty?Center(child: AppNoData(),): Column(
                       children: [
                         homeProvider.getAllAiTagsList.isEmpty
                             ? SizedBox.shrink()
@@ -93,6 +90,11 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                         homeProvider.getAllPostsByAiId(tagId.toString());
                                         homeProvider.aiTagDataLoaded(true);
                                         homeProvider.aiTagsScrollToCenter(index);
+                                         EventRepo().addEvent({
+                                          "aiTagName":  tag['aitagname'].toString(),
+                                          "aiTagId":tag['aitagid'].toString(),
+                                          "createAt": DateTime.now().toString(),
+                                        }, "ai_tag_click");
                                       },
                                       child: Container(
                                         height: 30,
@@ -118,7 +120,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                     );
                                   },
                                 )),
-                        Expanded(child: MainScreenPageView(startIndex: 0)),
+                        Expanded(child: MainScreenPageView()),
                       ],
                     ),
         ),

@@ -16,6 +16,7 @@ import '../../utils/app_colors.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../botton_actions.dart';
+import '../event_repo.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import 'home_provider/home_provider.dart';
 import 'main_screen_pageview.dart';
@@ -30,20 +31,20 @@ class ImageView extends StatefulWidget {
 }
 
 class _ImageViewState extends State<ImageView> {
-
   ScreenshotController sc = ScreenshotController();
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () async {
         if (widget.getAllPostList ['type'] == "Image") {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MainScreenPageView(
-                  startIndex: widget.index,
-                ),
-              ));
+          // Navigator.push(
+          //     context,
+          //     MaterialPageRoute(
+          //       builder: (context) => MainScreenPageView(
+          //         startIndex: widget.index,
+          //       ),
+          //     ));
         }else{
           log("sdbsjbfsjbfjhsfbhjsdbfsmkfb");
         }
@@ -62,7 +63,7 @@ class _ImageViewState extends State<ImageView> {
                         Radius.circular(12),
                       ),
                       child: Image.network(
-                        widget.getAllPostList ['image_url'].toString() ?? "",
+                        widget.getAllPostList['image_url'].toString() ?? "",
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
                         fit: BoxFit.cover,
@@ -78,62 +79,84 @@ class _ImageViewState extends State<ImageView> {
                       Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
                         return BottomActions(
                           iconColor: AppColors.iconColors,
-                          postType: widget.getAllPostList ['subType'].toString() ?? "",
-                          icon: settingsProvider.isLikeList.contains(widget.getAllPostList ['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                          postType: widget.getAllPostList['subType']?.toString() ?? "",
+                          icon: settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                           label: 'లైక్',
-                          isLike: settingsProvider.isLikeList.contains(widget.getAllPostList ['id'].toString()),
-                          onTap: () {
-                            log("Like");
-                            settingsProvider.isLikePost(widget.getAllPostList );
+                          isLike: settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()),
+                          onTap: () async {
+                            print("Like");
+                            settingsProvider.isLikePost(widget.getAllPostList);
+
+                             EventRepo().addEvent({
+                              "like": settingsProvider.isLikeList.contains(widget.getAllPostList['id'].toString()),
+                              "postId": widget.getAllPostList['id'].toString() ?? "000",
+                              "createAt": DateTime.now().toString(),
+                            }, "liked_article");
                           },
                         );
                       }),
                       BottomActions(
-                        postType: widget.getAllPostList ['subType'] ?? "",
+                        postType: widget.getAllPostList['subType'] ?? "",
                         icon: "assets/svg/new_comment.svg",
                         label: 'కామెంట్',
                         iconColor: AppColors.iconColors,
-                        onTap: () async{
+                        onTap: () async {
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           String? userId = sp.getString("userId");
                           String? deviceId = sp.getString("deviceId");
                           context.read<AuthenticationProvider>().sendEvent("CommentPage");
 
-                          showComments(context, widget.getAllPostList ['id']);
-
+                          showComments(context, widget.getAllPostList['id']);
                         },
                       ),
                       Spacer(),
                       BottomActions(
-                        postType: widget.getAllPostList ['subType'] ?? "",
+                        postType: widget.getAllPostList['subType'] ?? "",
                         icon: "assets/svg/share.svg",
                         label: 'షేర్',
                         iconColor: AppColors.iconColors,
                         onTap: () async {
+                          print("Share tapped");
+
+                          // Get userId from shared preferences
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           String? userId = sp.getString("userId");
+                          String? deviceId = sp.getString("deviceId");
+                          // Log event to server
+                           EventRepo().addEvent({"share": "news", "postId": widget.getAllPostList['id'].toString() ?? "0000", "createAt": DateTime.now().toString()}, "shared_article");
 
-                          sendShareDetails(userId, widget.getAllPostList ['id'], widget.getAllPostList ['content'].toString());
+                          // Send share details
+                          sendShareDetails(
+                            userId,
+                            widget.getAllPostList['id'],
+                            widget.getAllPostList['content'].toString(),
+                          );
 
-                          if (widget.getAllPostList ['type'] == "Standard" || widget.getAllPostList ['type'] == "Video" || widget.getAllPostList ['type'] == "Image") {
+                          // Handle Standard / Video / Image types
+                          if (widget.getAllPostList['type'] == "Standard" || widget.getAllPostList['type'] == "Video" || widget.getAllPostList['type'] == "Image") {
                             try {
-                              final image = await sc.capture(
-                                pixelRatio: 2,
-                              );
+                              final image = await sc.capture(pixelRatio: 2);
                               if (image != null) {
                                 final directory = await getTemporaryDirectory();
-                                final imagePath = '${directory.path}/${widget.getAllPostList ['id']}.png';
+                                final imagePath = '${directory.path}/${widget.getAllPostList['id']}.png';
                                 final imageFile = File(imagePath);
                                 await imageFile.writeAsBytes(image);
 
-                                Share.shareXFiles([XFile(imageFile.path)], text: Platform.isIOS ? widget.getAllPostList ['linkURLAndroid'].toString() : widget.getAllPostList ['linkURLIos'].toString());
+                                Share.shareXFiles(
+                                  [XFile(imageFile.path)],
+                                  text: Platform.isIOS ? widget.getAllPostList['linkURLIos'].toString() : widget.getAllPostList['linkURLAndroid'].toString(),
+                                );
                               } else {
-                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                               }
                             } catch (e) {
+                              print("Error while capturing or sharing: $e");
                               CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                             }
-                          } else if (widget.getAllPostList ['type'] == "Gallery") {
+                          }
+
+                          // Handle Gallery type
+                          else if (widget.getAllPostList['type'] == "Gallery") {
                             createAndSharePdf(context, widget.getAllPostList);
                           }
                         },
@@ -146,33 +169,26 @@ class _ImageViewState extends State<ImageView> {
             Positioned(
               top: 10,
               right: 14,
-              child: Consumer<HomeProvider>(
-                builder: (_,homeProvider,__) {
-                  return GestureDetector(
-                    onTap: () {
-
-                      homeProvider.isBookMarkPost( widget.getAllPostList , context);
-                      print("");
-                    },
-                    child: Container(
-                      padding: EdgeInsets.all(7),
-                      decoration: BoxDecoration(
-                        color:  (homeProvider.isBookMark.contains(widget.getAllPostList ['id'].toString()) || widget.getAllPostList ['isBookmarked'] == 1)
-                            ? AppColors.appButtonColor
-                            : Colors.black54,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        (homeProvider.isBookMark.contains(widget.getAllPostList ['id'].toString()) || widget.getAllPostList ['isBookmarked'] == 1)
-                            ? Icons.bookmark
-                            : Icons.bookmark_outline,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+              child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                return GestureDetector(
+                  onTap: () {
+                    homeProvider.isBookMarkPost(widget.getAllPostList, context);
+                    print("");
+                  },
+                  child: Container(
+                    padding: EdgeInsets.all(7),
+                    decoration: BoxDecoration(
+                      color: (homeProvider.isBookMark.contains(widget.getAllPostList['id'].toString()) || widget.getAllPostList['isBookmarked'] == 1) ? AppColors.appButtonColor : Colors.black54,
+                      shape: BoxShape.circle,
                     ),
-                  );
-                }
-              ),
+                    child: Icon(
+                      (homeProvider.isBookMark.contains(widget.getAllPostList['id'].toString()) || widget.getAllPostList['isBookmarked'] == 1) ? Icons.bookmark : Icons.bookmark_outline,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                  ),
+                );
+              }),
             ),
 
           ],

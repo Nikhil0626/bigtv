@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../home_screen/home_provider/home_provider.dart';
 import '../reels_provider/reels_providers.dart';
 
 class ReelsCardView extends StatefulWidget {
@@ -23,6 +24,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
   @override
   void initState() {
     super.initState();
+
     context.read<ReelsProviders>().getIndividualReelData(widget.postId).then((value) {
       print(value.toString());
       final videoId = YoutubePlayer.convertUrlToId(value.videoUrl);
