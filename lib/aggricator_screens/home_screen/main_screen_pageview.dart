@@ -42,9 +42,7 @@ HomeProvider? homeProvider;
     return Scaffold(
       body: Consumer<HomeProvider>(
         builder: (_, homeProvider, __) {
-          // if (homeProvider.getAllPostList.isEmpty) {
-          //   return Center(child: AppNoData());
-          // }
+
 
           return Column(
             children: [

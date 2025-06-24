@@ -68,7 +68,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     from = DateTime.now().toString();
 
     _adManagerNativeAd = NativeAd(
-      adUnitId: adUnitId,
+      adUnitId: '	/6499/example/native',
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(
         onAdLoaded: (ad) {
@@ -88,24 +88,67 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   void _loadAdMobNativeAd(BuildContext context) {
     String? adUnitId = context.read<HomeProvider>().adMobNativeId;
 
-
     _adMobNativeAd = NativeAd(
-      adUnitId: adUnitId,
-      factoryId: 'adFactoryExample',
-      listener: NativeAdListener(
-        onAdLoaded: (ad) {
-          _isAdMObLoaded = true;
-          print('AdManager Native success: ${ad.responseInfo.toString()}');
-          _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-          print('AdMob Native failed: $error');
-          _checkIfAllAdsFailed(error);
-        },
-      ),
-      request: AdRequest(),
-    )..load();
+        adUnitId:adUnitId,
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+                  _isAdMObLoaded = true;
+                  print('AdManager Native success: ${ad.responseInfo.toString()}');
+                  _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
+          },
+          onAdFailedToLoad: (ad, error) {
+                  ad.dispose();
+                  print('AdMob Native failed: $error');
+                  _checkIfAllAdsFailed(error);
+          },
+        ),
+        request: const AdRequest(),
+        // Styling
+        nativeTemplateStyle: NativeTemplateStyle(
+          // Required: Choose a template.
+            templateType: TemplateType.medium,
+            // Optional: Customize the ad's style.
+            mainBackgroundColor: AppColors.cardBackgroundColor,
+            cornerRadius: 10.0,
+            callToActionTextStyle: NativeTemplateTextStyle(
+                textColor: Colors.black,
+                backgroundColor:AppColors.cardBackgroundColor,
+                style: NativeTemplateFontStyle.monospace,
+                size: 16.0),
+            primaryTextStyle: NativeTemplateTextStyle(
+                textColor: Colors.black,
+                backgroundColor: AppColors.cardBackgroundColor,
+                style: NativeTemplateFontStyle.italic,
+                size: 16.0),
+            secondaryTextStyle: NativeTemplateTextStyle(
+                textColor: Colors.black,
+                backgroundColor: AppColors.cardBackgroundColor,
+                style: NativeTemplateFontStyle.bold,
+                size: 16.0),
+            tertiaryTextStyle: NativeTemplateTextStyle(
+                textColor: Colors.black,
+                backgroundColor: AppColors.cardBackgroundColor,
+                style: NativeTemplateFontStyle.normal,
+                size: 16.0)))
+      ..load();
+
+    // _adMobNativeAd = NativeAd(
+    //   adUnitId: adUnitId,
+    //   factoryId: 'adFactoryExample',
+    //   listener: NativeAdListener(
+    //     onAdLoaded: (ad) {
+    //       _isAdMObLoaded = true;
+    //       print('AdManager Native success: ${ad.responseInfo.toString()}');
+    //       _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
+    //     },
+    //     onAdFailedToLoad: (ad, error) {
+    //       ad.dispose();
+    //       print('AdMob Native failed: $error');
+    //       _checkIfAllAdsFailed(error);
+    //     },
+    //   ),
+    //   request: AdRequest(),
+    // )..load();
   }
 
   void _loadBannerAd(BuildContext context) {
@@ -153,10 +196,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _onAdLoaded(dynamic ad, Widget adWidget) async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-    String? userId= sharedPreferences.getString("userId");
-    String? deviceId= sharedPreferences.getString("deviceId");
     to = DateTime.now().toString();
 
      EventRepo().addEvent( {
@@ -204,10 +244,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _checkIfAllAdsFailed(LoadAdError error)async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-    String? userId= sharedPreferences.getString("userId");
-    String? deviceId= sharedPreferences.getString("deviceId");
 
      EventRepo().addEvent({
       "sdkRequestStartTime":from,
@@ -238,11 +275,12 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
     if (_adWidget != null) {
       return Scaffold(
-        body: _isAdMObLoaded
-            ? _adWidget!
-            : Column(
+        body:  Column(
                 children: [
-                  Expanded(flex: 1, child: _adWidget!),
+                  Expanded(flex: 1, child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                    child: _adWidget!,
+                  )),
                   Expanded(flex: 1, child: _buildRecommendedNews(context)),
                 ],
               ),
@@ -271,11 +309,14 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
             children: [
               Expanded(
                 flex: 1,
-                child: widget.article['adType'] == "rating card"
-                    ? RateYourApp()
-                    : widget.article['adType'] == "share card"
-                    ? ShareYourApp()
-                    : ShareYourApp(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 3),
+                  child: widget.article['adType'] == "rating card"
+                      ? RateYourApp()
+                      : widget.article['adType'] == "share card"
+                      ? ShareYourApp()
+                      : ShareYourApp(),
+                ),
               ),
               Expanded(flex: 1, child: _buildRecommendedNews(context)),
             ],
