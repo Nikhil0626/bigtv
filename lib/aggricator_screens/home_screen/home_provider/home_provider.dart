@@ -267,13 +267,13 @@ class HomeProvider extends ChangeNotifier {
         });
       }
 
-      final seen = <String>{};
-      final deduplicated = data.where((map) {
-        final key = jsonEncode(map);
-        return seen.add(key);
-      }).toList();
+      // final seen = <String>{};
+      // final deduplicated = data.where((map) {
+      //   final key = jsonEncode(map);
+      //   return seen.add(key);
+      // }).toList();
 
-      getAllPostList.addAll(deduplicated);
+      getAllPostList.addAll(data);
       // log(getAllPostList.length.toString());
       // getAllPostList = getAllPostList.toSet().toList();
       log(getAllPostList.length.toString());

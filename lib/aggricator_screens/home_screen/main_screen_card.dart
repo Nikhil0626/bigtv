@@ -64,7 +64,11 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
         child: Center(
           child: homeProvider.isHomeLoading
               ? HomeShimmer()
-              : context.read<HomeProvider>().getAllPostList.isEmpty?Center(child: AppNoData(),): Column(
+              : context.read<HomeProvider>().getAllPostList.isEmpty
+                  ? Center(
+                      child: AppNoData(),
+                    )
+                  : Column(
                       children: [
                         homeProvider.getAllAiTagsList.isEmpty
                             ? SizedBox.shrink()
@@ -90,9 +94,9 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                         homeProvider.getAllPostsByAiId(tagId.toString());
                                         homeProvider.aiTagDataLoaded(true);
                                         homeProvider.aiTagsScrollToCenter(index);
-                                         EventRepo().addEvent({
-                                          "aiTagName":  tag['aitagname'].toString(),
-                                          "aiTagId":tag['aitagid'].toString(),
+                                        EventRepo().addEvent({
+                                          "aiTagName": tag['aitagname'].toString(),
+                                          "aiTagId": tag['aitagid'].toString(),
                                           "createAt": DateTime.now().toString(),
                                         }, "ai_tag_click");
                                       },

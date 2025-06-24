@@ -29,7 +29,7 @@ class _FullStandardVideoViewState extends State<FullStandardVideoView> {
     ytController = YoutubePlayerController(
       initialVideoId: YoutubePlayer.convertUrlToId("https://www.youtube.com/watch?v=${widget.rellData['reel_video_code']}")!,
       flags: const YoutubePlayerFlags(
-        autoPlay: true,
+        autoPlay: false,
         mute: false,
         forceHD: false,
         loop: false,
@@ -41,6 +41,12 @@ class _FullStandardVideoViewState extends State<FullStandardVideoView> {
   }
 
   @override
+  void dispose() {
+    ytController?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
@@ -48,31 +54,42 @@ class _FullStandardVideoViewState extends State<FullStandardVideoView> {
           child: Screenshot(
             controller: sc,
             child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-              return YoutubePlayer(
-                controller: ytController!,
-                // showVideoProgressIndicator: true,
-                bottomActions: [
-                  CurrentPosition(),
-                  ProgressBar(
-                    isExpanded: true,
-                    colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
-                  ),
-                  RemainingDuration(),
-                  IconButton(
-                    icon: Icon(
-                      homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
-                      color: Colors.white,
+              return GestureDetector(
+                onVerticalDragUpdate: (details) {
+                  // ytController?.pause();
+                  final controller = context.read<HomeProvider>().pageController!;
+                  // controller.position.moveTo(controller.position.pixels - details.delta.dy);
+                  controller.nextPage(
+                    duration: Duration(milliseconds: 600),
+                    curve: Curves.easeIn,
+                  );
+                },
+                child: YoutubePlayer(
+                  controller: ytController!,
+                  // showVideoProgressIndicator: true,
+                  bottomActions: [
+                    CurrentPosition(),
+                    ProgressBar(
+                      isExpanded: true,
+                      colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
                     ),
-                    onPressed: () {
-                      if (homeProvider.isMuted) {
-                        ytController?.unMute();
-                      } else {
-                        ytController?.mute();
-                      }
-                      homeProvider.toggleMute(); // Update your isMuted state
-                    },
-                  ), // ✅ Show remaining time
-                ],
+                    RemainingDuration(),
+                    IconButton(
+                      icon: Icon(
+                        homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        if (homeProvider.isMuted) {
+                          ytController?.unMute();
+                        } else {
+                          ytController?.mute();
+                        }
+                        homeProvider.toggleMute(); // Update your isMuted state
+                      },
+                    ), // ✅ Show remaining time
+                  ],
+                ),
               );
             }),
           ),
