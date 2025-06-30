@@ -68,9 +68,37 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     from = DateTime.now().toString();
 
     _adManagerNativeAd = NativeAd(
-      adUnitId: '	/6499/example/native',
+      adUnitId: adUnitId,
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(
+        onAdClosed: (ad) {
+          EventRepo().addEvent( {
+            "onAdClosed":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClosed");
+        },
+        onAdOpened: (ad) {
+          EventRepo().addEvent( {
+            "onAdOpened":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdOpened");
+        },
+        onAdImpression: (ad) {
+          EventRepo().addEvent( {
+            "onAdImpression":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdImpression");
+        },
+        onAdClicked:  (ad) {
+          EventRepo().addEvent( {
+            "onAdClicked":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClicked");
+        },
         onAdLoaded: (ad) {
           print('AdManager Native success: ${ad.responseInfo.toString()}');
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
@@ -91,6 +119,34 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     _adMobNativeAd = NativeAd(
         adUnitId:adUnitId,
         listener: NativeAdListener(
+          onAdClosed: (ad) {
+            EventRepo().addEvent( {
+              "onAdClosed":true,
+              "createAt":DateTime.now().toString(),
+              "adResponse":ad.toString(),
+            },"onAdClosed");
+          },
+          onAdOpened: (ad) {
+            EventRepo().addEvent( {
+              "onAdOpened":true,
+              "createAt":DateTime.now().toString(),
+              "adResponse":ad.toString(),
+            },"onAdOpened");
+          },
+          onAdImpression: (ad) {
+            EventRepo().addEvent( {
+              "onAdImpression":true,
+              "createAt":DateTime.now().toString(),
+              "adResponse":ad.toString(),
+            },"onAdImpression");
+          },
+          onAdClicked:  (ad) {
+            EventRepo().addEvent( {
+              "onAdClicked":true,
+              "createAt":DateTime.now().toString(),
+              "adResponse":ad.toString(),
+            },"onAdClicked");
+          },
           onAdLoaded: (ad) {
                   _isAdMObLoaded = true;
                   print('AdManager Native success: ${ad.responseInfo.toString()}');
@@ -159,6 +215,34 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
       size: AdSize(width: 320, height: 250),
       request: AdManagerAdRequest(),
       listener: BannerAdListener(
+        onAdClosed: (ad) {
+          EventRepo().addEvent( {
+            "onAdClosed":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClosed");
+        },
+        onAdOpened: (ad) {
+          EventRepo().addEvent( {
+            "onAdOpened":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdOpened");
+        },
+        onAdImpression: (ad) {
+          EventRepo().addEvent( {
+            "onAdImpression":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdImpression");
+        },
+        onAdClicked:  (ad) {
+          EventRepo().addEvent( {
+            "onAdClicked":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClicked");
+        },
         onAdLoaded: (ad) {
           _isBannerLoaded = true;
           print('AdManager Native success: ${ad.responseInfo.toString()}');
@@ -181,6 +265,34 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
       size: AdSize.mediumRectangle, // 320x250
       request: AdRequest(), // Use AdRequest() for AdMob
       listener: BannerAdListener(
+        onAdClosed: (ad) {
+          EventRepo().addEvent( {
+            "onAdClosed":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClosed");
+        },
+        onAdOpened: (ad) {
+          EventRepo().addEvent( {
+            "onAdOpened":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdOpened");
+        },
+        onAdImpression: (ad) {
+          EventRepo().addEvent( {
+            "onAdImpression":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdImpression");
+        },
+        onAdClicked:  (ad) {
+          EventRepo().addEvent( {
+            "onAdClicked":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClicked");
+        },
         onAdLoaded: (Ad ad) {
           _isAdMobBannerLoaded = true;
           print('Ad loaded: ${ad.responseInfo}');
