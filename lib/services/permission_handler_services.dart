@@ -1,11 +1,11 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_install_referrer/flutter_install_referrer.dart';
 import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,8 +13,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-
-
+import '../aggricator_screens/event_repo.dart';
 
 Future<void> requestManageStoragePermission() async {
   if (Platform.isAndroid) {
@@ -29,8 +28,7 @@ Future<void> requestManageStoragePermission() async {
         await Permission.manageExternalStorage.request();
       }
     } else if (status.isPermanentlyDenied) {
-      print(
-          "⚠️ Manage External Storage permission permanently denied. Opening settings...");
+      print("⚠️ Manage External Storage permission permanently denied. Opening settings...");
       await openAppSettings();
     }
   }
@@ -56,7 +54,6 @@ Future<void> requestStoragePermission() async {
   }
 }
 
-
 Future<void> checkForUpdate() async {
   PackageInfo _packageInfo = PackageInfo();
   final info = await PackageManager.getPackageInfo();
@@ -73,23 +70,18 @@ Future<void> checkForUpdate() async {
 
       debugPrint("Update Info: ${updateInfo.toJson()}");
 
-      if (updateInfo.updateAvailability ==
-          UpdateAvailability.developerTriggeredUpdateInProgress) {
+      if (updateInfo.updateAvailability == UpdateAvailability.developerTriggeredUpdateInProgress) {
         debugPrint("Resuming developer triggered update...");
-        String? msg = await manager.startAnUpdate(
-            type: AppUpdateType.immediate);
+        String? msg = await manager.startAnUpdate(type: AppUpdateType.immediate);
         debugPrint(msg ?? '');
-      } else if (updateInfo.updateAvailability ==
-          UpdateAvailability.updateAvailable) {
+      } else if (updateInfo.updateAvailability == UpdateAvailability.updateAvailable) {
         if (updateInfo.immediateAllowed) {
           debugPrint("Starting immediate update...");
-          String? msg = await manager.startAnUpdate(
-              type: AppUpdateType.immediate);
+          String? msg = await manager.startAnUpdate(type: AppUpdateType.immediate);
           debugPrint(msg ?? '');
         } else if (updateInfo.flexibleAllowed) {
           debugPrint("Starting flexible update...");
-          String? msg = await manager.startAnUpdate(
-              type: AppUpdateType.flexible);
+          String? msg = await manager.startAnUpdate(type: AppUpdateType.flexible);
           debugPrint(msg ?? '');
           // Optionally call completeFlexibleUpdate() after download finishes
         } else {
@@ -103,9 +95,7 @@ Future<void> checkForUpdate() async {
     }
   } else if (Platform.isIOS) {
     try {
-      VersionInfo? versionInfo =
-      await UpgradeVersion.getiOSStoreVersion(
-          packageInfo: _packageInfo, regionCode: "US");
+      VersionInfo? versionInfo = await UpgradeVersion.getiOSStoreVersion(packageInfo: _packageInfo, regionCode: "US");
 
       if (versionInfo != null) {
         debugPrint("iOS Store Info: ${versionInfo.toJson()}");
@@ -128,17 +118,14 @@ Future<void> checkForUpdate() async {
 }
 
 Future<void> initPlugin() async {
-  final TrackingStatus status =
-  await AppTrackingTransparency.trackingAuthorizationStatus;
+  final TrackingStatus status = await AppTrackingTransparency.trackingAuthorizationStatus;
   if (status == TrackingStatus.notDetermined) {
-
     await AppTrackingTransparency.requestTrackingAuthorization();
   }
 
   final uuid = await AppTrackingTransparency.getAdvertisingIdentifier();
   print("UUID: $uuid");
 }
-
 
 Future<void> requestLocationPermission() async {
   LocationPermission permission = await Geolocator.checkPermission();
@@ -151,10 +138,8 @@ Future<void> requestLocationPermission() async {
     }
   }
 
-  if (permission == LocationPermission.always ||
-      permission == LocationPermission.whileInUse) {
-    Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high);
+  if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+    Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
     print("Location: ${position.latitude}, ${position.longitude}");
     getAddressFromLatLng(position.latitude, position.longitude);
   }
@@ -162,8 +147,7 @@ Future<void> requestLocationPermission() async {
 
 Future<void> getAddressFromLatLng(double latitude, double longitude) async {
   try {
-    List<Placemark> placemarks =
-        await placemarkFromCoordinates(latitude, longitude);
+    List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
     SharedPreferences sp = await SharedPreferences.getInstance();
     print("location ------ $placemarks");
     Placemark place = placemarks[0];
@@ -173,7 +157,6 @@ Future<void> getAddressFromLatLng(double latitude, double longitude) async {
   }
 }
 
-
 Future<void> requestNotificationPermission() async {
   await FirebaseMessaging.instance.requestPermission(
     alert: true,
@@ -182,68 +165,44 @@ Future<void> requestNotificationPermission() async {
   );
 }
 
-
 final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
-Future<void> getAndSendReferrerDetails() async {
+Future<void> getReferrerFromPlayStore() async {
+  SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
   try {
-    final referrerDetails = await InstallReferrer.app;
+    final ReferrerDetails referrerDetails = await AndroidPlayInstallReferrer.installReferrer;
 
-    final String packageName = referrerDetails.packageName ?? 'unknown';
-    final String platform = referrerToReadableString(referrerDetails.referrer);
-    final String referrer = referrerDetails.referrer.toString();
-    final String clickTimestamp = DateTime.now().toString() ?? '0';
-    final String installTimestamp = DateTime.now().add(Duration(minutes: 10)).toString() ?? '0';
+    final String? referrerUrl = referrerDetails.installReferrer;
+    sharedPreferences.setString("Nikil", referrerUrl ?? "Siva Kumar");
+    final int clickTimestamp = referrerDetails.referrerClickTimestampSeconds;
+    final int installTimestamp = referrerDetails.installBeginTimestampSeconds;
+    EventRepo().addEvent({
+      'referrerUrl': referrerUrl,
+      'clickTimestamp': clickTimestamp,
+      'installTimestamp': installTimestamp,
+      "createAt": DateTime.now().toString(),
+      "error": "",
+    }, "app_update");
 
-    log("Install_referrer   ${{
-      'package_name': packageName,
-      'platform': platform,
-      'referrer_enum': referrer,
-      'click_timestamp': clickTimestamp,
-      'install_timestamp': installTimestamp,
-    }}");
-    // await analytics.logEvent(
-    //   name: 'Install_referrer',
-    //   parameters: {
-    //     'package_name': packageName,
-    //     'platform': platform,
-    //     'referrer_enum': referrer,
-    //     'click_timestamp': clickTimestamp,
-    //     'install_timestamp': installTimestamp,
-    //   },
-    // );
+    final uri = Uri.parse("https://dummy.com/?$referrerUrl");
+    final source = uri.queryParameters['utm_source'];
+    final campaign = uri.queryParameters['utm_campaign'];
+    final refCode = uri.queryParameters['ref_code'];
 
-    log('Referrer data sent to Firebase Analytics');
+    log("📦 Referrer URL: $referrerUrl");
+    log("🕒 Click Time: $clickTimestamp");
+    log("🕒 Install Time: $installTimestamp");
+    log("📢 Campaign: $campaign");
+    log("🎁 Referral Code: $refCode");
+    log("📡 Source: $source");
   } catch (e) {
-    log('Failed to get or send install referrer: $e');
-  }
-}
-
-String referrerToReadableString(InstallationAppReferrer referrer) {
-  switch (referrer) {
-    case InstallationAppReferrer.iosAppStore:
-      return "Apple - App Store";
-    case InstallationAppReferrer.iosTestFlight:
-      return "Apple - Test Flight";
-    case InstallationAppReferrer.iosDebug:
-      return "Apple - Debug";
-    case InstallationAppReferrer.androidGooglePlay:
-      return "Android - Google Play";
-    case InstallationAppReferrer.androidAmazonAppStore:
-      return "Android - Amazon App Store";
-    case InstallationAppReferrer.androidHuaweiAppGallery:
-      return "Android - Huawei App Gallery";
-    case InstallationAppReferrer.androidOppoAppMarket:
-      return "Android - Oppo App Market";
-    case InstallationAppReferrer.androidSamsungAppShop:
-      return "Android - Samsung App Shop";
-    case InstallationAppReferrer.androidVivoAppStore:
-      return "Android - Vivo App Store";
-    case InstallationAppReferrer.androidXiaomiAppStore:
-      return "Android - Xiaomi App Store";
-    case InstallationAppReferrer.androidManually:
-      return "Android - Manual installation";
-    case InstallationAppReferrer.androidDebug:
-      return "Android - Debug";
+    EventRepo().addEvent({
+      'referrerUrl': "",
+      'clickTimestamp': "",
+      'installTimestamp': "",
+      "createAt": DateTime.now().toString(),
+      "error": e.toString(),
+    }, "app_update");
+    print("❌ Error getting install referrer: $e");
   }
 }

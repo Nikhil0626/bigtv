@@ -71,7 +71,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
   @override
   Widget build(BuildContext context) {
-    log("jsdkjnvdskndjkvndjkvndjkvn   ${widget.index}");
     return InkWell(
       onTap: () {
         context.read<HomeProvider>().pageChange(isValue: !context.read<HomeProvider>().isBottomEnable);
@@ -108,7 +107,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                 ),
               ),
             )
-          : Container(
+          : SizedBox(
               height: MediaQuery.of(context).size.height,
               width: MediaQuery.of(context).size.width,
               // padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),

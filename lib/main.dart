@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:chotanews/screens/testing_screen/admob.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/event_cron.dart';
@@ -22,6 +23,7 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 
@@ -53,7 +55,8 @@ Future<void> main() async {
   EventCron().start();
   MobileAds.instance.initialize();
   initPlugin();
-  getAndSendReferrerDetails();
+  // getAndSendReferrerDetails();
+  getReferrerFromPlayStore();
   await EasyLocalization.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,

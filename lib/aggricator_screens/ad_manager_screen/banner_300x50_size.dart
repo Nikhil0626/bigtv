@@ -137,9 +137,37 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
 
     _adMobBanner = BannerAd(
       adUnitId: context.read<HomeProvider>().adMobBannerId, // Replace with your AdMob Unit ID
-      size: AdSize.mediumRectangle,
+      size: AdSize(width: 320, height: 50),
       request: const AdRequest(nonPersonalizedAds: true),
       listener: BannerAdListener(
+        onAdClosed: (ad) {
+          EventRepo().addEvent( {
+            "onAdClosed":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClosed");
+        },
+        onAdOpened: (ad) {
+          EventRepo().addEvent( {
+            "onAdOpened":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdOpened");
+        },
+        onAdImpression: (ad) {
+          EventRepo().addEvent( {
+            "onAdImpression":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdImpression");
+        },
+        onAdClicked:  (ad) {
+          EventRepo().addEvent( {
+            "onAdClicked":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClicked");
+        },
         onAdLoaded: (ad) {
           _handleAdLoaded(ad as BannerAd, "AdMob", fromTime);
         },
@@ -159,6 +187,34 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       size: AdSize(width: 320, height: 50),
       request: const AdManagerAdRequest(),
       listener: BannerAdListener(
+        onAdClosed: (ad) {
+          EventRepo().addEvent( {
+            "onAdClosed":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClosed");
+        },
+        onAdOpened: (ad) {
+          EventRepo().addEvent( {
+            "onAdOpened":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdOpened");
+        },
+        onAdImpression: (ad) {
+          EventRepo().addEvent( {
+            "onAdImpression":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdImpression");
+        },
+        onAdClicked:  (ad) {
+          EventRepo().addEvent( {
+            "onAdClicked":true,
+            "createAt":DateTime.now().toString(),
+            "adResponse":ad.toString(),
+          },"onAdClicked");
+        },
         onAdLoaded: (ad) {
           _handleAdLoaded(ad as BannerAd, "AdManager", fromTime);
         },
