@@ -185,10 +185,11 @@ Future<void> getReferrerFromPlayStore() async {
     }, "app_update");
 
     final uri = Uri.parse("https://dummy.com/?$referrerUrl");
+    log("📦 Referrer URL: $referrerUrl");
     final source = uri.queryParameters['utm_source'];
     final campaign = uri.queryParameters['utm_campaign'];
-    final refCode = uri.queryParameters['ref_code'];
-
+    final refCode = uri.queryParameters['user_id'];
+    sharedPreferences.setString("referralCode", uri.queryParameters['user_id'].toString().split("=").last.toString() ?? "chota123");
     log("📦 Referrer URL: $referrerUrl");
     log("🕒 Click Time: $clickTimestamp");
     log("🕒 Install Time: $installTimestamp");

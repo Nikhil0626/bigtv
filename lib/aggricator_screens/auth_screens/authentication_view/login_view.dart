@@ -36,6 +36,8 @@ class _LoginViewState extends State<LoginView> {
     authenticationProvider!.phoneController.text = "";
     authenticationProvider!.isButtonEnabled = false;
     getMobileNumber();
+    getData();
+
     // context.read<AuthProvider>().sendEvent("WellComePage");
     super.initState();
   }
@@ -86,7 +88,14 @@ class _LoginViewState extends State<LoginView> {
         child: Form(
           key: _formKey,
           child: Column(
-            children: [
+            children: [Text(
+              'Get Code $siva',
+              style: newAppFont(
+                fontSize: 11.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
               height(height: 10.h),
               Container(
                 height: 40.h,
@@ -263,5 +272,15 @@ class _LoginViewState extends State<LoginView> {
         ),
       ),
     );
+  }
+
+  String? siva;
+  void getData() async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    siva = sharedPreferences.getString("Nikil")??"hello raja";
+    setState(() {
+
+    });
   }
 }
