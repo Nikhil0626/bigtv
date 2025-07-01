@@ -8,6 +8,9 @@ import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../home_screen/home_repo/movie_reviews.dart';
+import '../home_screen/home_repo/polls_screen.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -34,18 +37,13 @@ class _SplashScreenState extends State<SplashScreen> {
     String? lastDate = prefs.getString('last_shown_date');
     String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
 
-
-
     if (lastDate != today) {
       setState(() {
         showGif = true;
       });
       await prefs.setString('last_shown_date', today);
       EventRepo().addEvent(
-        {
-          "createAt": DateTime.now().toString(),
-          "platform":Platform.isIOS?"iOS": "android"
-        },
+        {"createAt": DateTime.now().toString(), "platform": Platform.isIOS ? "iOS" : "android"},
         "opened_app",
       );
     }
@@ -63,11 +61,15 @@ class _SplashScreenState extends State<SplashScreen> {
     //   );
     //   return;
     // }else{
-    context.read<AuthenticationProvider>().isPageNavigation(context);
+    // context.read<AuthenticationProvider>().isPageNavigation(context);
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => PollsScreen(),
+      ),
+    );
 
     // }
-
-    // 🚪 Default navigation
   }
 
   @override
