@@ -1,8 +1,13 @@
+import 'dart:io';
+
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../event_repo.dart';
 import 'all_rewards.dart';
 import 'claimed_rewards.dart';
 import 'no_claimed_rewards.dart';
@@ -15,12 +20,33 @@ class ReferEarn extends StatefulWidget {
 }
 class _ReferEarnState extends State<ReferEarn> {
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getData();
+  }
+  String? myReferralCode;
+  String? myReferralLink;
+  void getData() async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    myReferralCode = sharedPreferences.getString("myReferralCode")??"hello raja";
+    myReferralLink = sharedPreferences.getString("myReferralLink")??"hello raja";
+    setState(() {
+
+    });
+  }
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        leading: Icon(Icons.arrow_back, color: Colors.black, size: 25),
+        leading: InkWell(
+          onTap: (){
+            Navigator.pop(context);
+          },
+            child: Icon(Icons.arrow_back, color: Colors.black, size: 25)),
         title: Text(
           "Refer & Earn",
           style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w700),
@@ -94,7 +120,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "CHOTA2024XYZ",
+                              "$myReferralCode",
                               style: TextStyle(
                                 color: Colors.lightBlue,
                                 fontSize: 14.sp,
@@ -113,7 +139,15 @@ class _ReferEarnState extends State<ReferEarn> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: ()  {
+                              EventRepo().addEvent({
+                                "shareApp": Platform.isIOS ? "iOS" : "Android",
+                                "createAt": DateTime.now().toString(),
+                              }, "share_app");
+                              Share.share(
+                                "Click link and get bonus: $myReferralLink",
+                              );
+                            },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.lightBlue,
                             shape: RoundedRectangleBorder(

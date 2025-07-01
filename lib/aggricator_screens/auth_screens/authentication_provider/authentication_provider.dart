@@ -100,7 +100,8 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future verifyOtp(
     context,
-  ) async {
+  ) async
+  {
     errorMessage = '';
     isVerifyLoading = true;
     isButtonEnabled = false;
