@@ -21,6 +21,7 @@ class _MovieRatingsState extends State<MovieRatings> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
+
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
@@ -81,6 +82,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                         ),
                         height(height: 8),
                         Consumer<RatingProvider>(builder: (_, ratingProvider, __) {
+                          ratingProvider.selectedStar = widget.article['userRating'] ?? 0;
                           return Column(
                             children: [
                               Row(
@@ -112,58 +114,60 @@ class _MovieRatingsState extends State<MovieRatings> {
                                 }),
                               ),
                               height(height: 12),
-                              TextFormField(
-                                onTap: () {
-                                  context.read<HomeProvider>().pageChange(isValue: false);
-                                },
-                                controller: ratingProvider.commentController,
-                                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-                                decoration: InputDecoration(
-                                  hintText: "Type your comment here (optional)",
-                                  hintStyle: TextStyle(fontSize: 12, color: Colors.black45),
-                                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(color: Colors.lightBlue),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(color: Colors.lightBlue),
-                                  ),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide(color: Colors.lightBlue),
-                                  ),
-                                ),
-                              ),
-                              height(height: 12),
-                              GestureDetector(
-                                onTap: ratingProvider.selectedStar >= 1
-                                    ? () {
-                                        if (ratingProvider.commentController.text.isNotEmpty && ratingProvider.selectedStar > 1) {
-                                          ratingProvider.postSubmitRating(widget.article['id']);
-                                        } else {
-                                          print("Add comment & select more than 1 star");
-                                        }
-                                      }
-                                    : null,
-                                child: Container(
-                                  height: 40,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    color: ratingProvider.selectedStar >= 1 ? Colors.lightBlue : Colors.grey.shade300,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    "Submit",
-                                    style: fontStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w700,
+                              if (widget.article['userHasReviewed'] == false)
+                                TextFormField(
+                                  onTap: () {
+                                    context.read<HomeProvider>().pageChange(isValue: false);
+                                  },
+                                  controller: ratingProvider.commentController,
+                                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+                                  decoration: InputDecoration(
+                                    hintText: "Type your comment here (optional)",
+                                    hintStyle: TextStyle(fontSize: 12, color: Colors.black45),
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.lightBlue),
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.lightBlue),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide(color: Colors.lightBlue),
                                     ),
                                   ),
                                 ),
-                              ),
+                              if (widget.article['userHasReviewed'] == false) height(height: 12),
+                              if (widget.article['userHasReviewed'] == false)
+                                GestureDetector(
+                                  onTap: ratingProvider.selectedStar >= 1
+                                      ? () {
+                                          if (ratingProvider.commentController.text.isNotEmpty && ratingProvider.selectedStar > 1) {
+                                            ratingProvider.postSubmitRating(widget.article['id']);
+                                          } else {
+                                            print("Add comment & select more than 1 star");
+                                          }
+                                        }
+                                      : null,
+                                  child: Container(
+                                    height: 40,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: ratingProvider.selectedStar >= 1 ? Colors.lightBlue : Colors.grey.shade300,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      "Submit",
+                                      style: fontStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                             ],
                           );
                         }),
@@ -173,75 +177,74 @@ class _MovieRatingsState extends State<MovieRatings> {
                           children: [
                             Text("Critics Reviews", style: fontStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                             Spacer(),
-                            Text("More", style: fontStyle(color: Colors.lightBlue, fontSize: 12, fontWeight: FontWeight.w600)),
-                            IconButton(
-                              onPressed: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ListReviews(
-                                              postId: widget.article["id"].toString(),
-                                            )));
-                              },
-                              icon: Icon(Icons.keyboard_arrow_right_outlined, color: Colors.lightBlue, size: 29),
-                            ),
+                            InkWell(
+                                onTap: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => ListReviews(
+                                                postId: widget.article["id"].toString(),
+                                              )));
+                                },
+                                child: Text("More >", style: fontStyle(color: Colors.lightBlue, fontSize: 16, fontWeight: FontWeight.w600))),
                           ],
                         ),
-                        SizedBox(
-                          height: 115,
-                          width: 298,
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.horizontal,
-                            itemCount: widget.article["topComments"].length,
-                            itemBuilder: (context, index) {
-                              return Container(
-                                height: 100,
-                                width: 298,
-                                margin: EdgeInsets.only(right: 12),
-                                padding: EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(color: Colors.lightBlue),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.account_circle, size: 24, color: Colors.black),
-                                        width(width: 8),
-                                        Text(widget.article["topComments"][index]["userName"], style: fontStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                                        Spacer(),
-                                        Icon(Icons.star, color: AppColors.ratingColor, size: 18),
-                                        width(width: 4),
-                                        Text('${widget.article["topComments"][index]["rating"].toString()}/5', style: fontStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-                                      ],
-                                    ),
-                                    height(height: 6),
-                                    Text(
-                                      widget.article["topComments"][index]["comment"],
-                                      style: fontStyle(
-                                        color: Colors.grey.shade800,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    height(height: 6),
-                                    Text(
-                                        " ${formatTimeDifference(
-                                          widget.article["topComments"][index]["createdAt"],
-                                        )}",
-                                        // widget.article["topComments"][index]["createdAt"],
-                                        style: fontStyle(color: Colors.grey.shade500, fontSize: 12)),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                        // height(height: 16),
+                        // SizedBox(
+                        //   height: 115,
+                        //   width: 298,
+                        //   child: ListView.builder(
+                        //     shrinkWrap: true,
+                        //     scrollDirection: Axis.horizontal,
+                        //     itemCount: widget.article["topComments"].length,
+                        //     itemBuilder: (context, index) {
+                        //       return Container(
+                        //         height: 100,
+                        //         width: 298,
+                        //         margin: EdgeInsets.only(right: 12),
+                        //         padding: EdgeInsets.all(12),
+                        //         decoration: BoxDecoration(
+                        //           borderRadius: BorderRadius.circular(12),
+                        //           border: Border.all(color: Colors.lightBlue),
+                        //         ),
+                        //         child: Column(
+                        //           crossAxisAlignment: CrossAxisAlignment.start,
+                        //           children: [
+                        //             Row(
+                        //               children: [
+                        //                 Icon(Icons.account_circle, size: 24, color: Colors.black),
+                        //                 width(width: 8),
+                        //                 Text(widget.article["topComments"][index]["userName"], style: fontStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        //                 Spacer(),
+                        //                 Icon(Icons.star, color: AppColors.ratingColor, size: 18),
+                        //                 width(width: 4),
+                        //                 Text('${widget.article["topComments"][index]["rating"].toString()}/5', style: fontStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                        //               ],
+                        //             ),
+                        //             height(height: 6),
+                        //             Text(
+                        //               widget.article["topComments"][index]["comment"],
+                        //               style: fontStyle(
+                        //                 color: Colors.grey.shade800,
+                        //                 fontSize: 14,
+                        //                 fontWeight: FontWeight.w500,
+                        //               ),
+                        //               maxLines: 2,
+                        //               overflow: TextOverflow.ellipsis,
+                        //             ),
+                        //             height(height: 6),
+                        //             Text(
+                        //                 " ${formatTimeDifference(
+                        //                   widget.article["topComments"][index]["createdAt"],
+                        //                 )}",
+                        //                 // widget.article["topComments"][index]["createdAt"],
+                        //                 style: fontStyle(color: Colors.grey.shade500, fontSize: 12)),
+                        //           ],
+                        //         ),
+                        //       );
+                        //     },
+                        //   ),
+                        // ),
                       ],
                     ),
                   ),
