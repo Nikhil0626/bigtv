@@ -1,24 +1,23 @@
-import 'dart:developer';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../loading_screen/ads_loading_screen.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_enums.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
+import '../event_repo.dart';
 import '../home_screen/home_provider/home_provider.dart';
 import '../individual_post_details/individual_post_view.dart';
 import 'google_ads_view.dart';
 
 class FullScreenNativeAd extends StatefulWidget {
-  final article;
+  final dynamic article;
 
   const FullScreenNativeAd({super.key, required this.article});
 
@@ -30,20 +29,20 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   NativeAd? _adManagerNativeAd;
   NativeAd? _adMobNativeAd;
   BannerAd? _bannerAd;
-
-  bool _isBannerLoaded = false;
-  bool _isAdMobBannerLoaded = false;
-  bool _isAdMObLoaded = false;
-  bool _isAdShown = false;
-  bool _adLoadFailed = false;
-  bool _hasTriedLoadingAds = false;
-
-  dynamic _shownAd;
+  BannerAd? _bannerAd1;
   Widget? _adWidget;
+  String? source = '';
 
-  String? to = '';
-  String? from = '';
+  bool _adDisplayed = false;
+  int _failCount = 0;
+  bool _hasTriedLoadingAds = false;
   BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
+
+  DateTime? requestInitiated;
+  DateTime? responseReceived;
+  DateTime? adCreativeDownloaded;
+  DateTime? adRendered;
+  DateTime? impressionLogged;
 
   @override
   void initState() {
@@ -54,7 +53,6 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
   void _loadAllAds(BuildContext context) {
     _hasTriedLoadingAds = true;
-    log("ads loading quick...");
     _loadAdManagerNativeAd(context);
     _loadAdMobNativeAd(context);
     _loadBannerAd(context);
@@ -62,50 +60,74 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _loadAdManagerNativeAd(BuildContext context) {
-    String? adUnitId = context.read<HomeProvider>().adManagerNativeId; // Replace with your logic
-
-
-    from = DateTime.now().toString();
+    String? adUnitId = context.read<HomeProvider>().adManagerNativeId;
+    requestInitiated = DateTime.now();
 
     _adManagerNativeAd = NativeAd(
       adUnitId: adUnitId,
-      factoryId: 'adFactoryExample',
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.medium,
+        mainBackgroundColor: Colors.white,
+        cornerRadius: 10.0,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          backgroundColor: Colors.blue,
+          style: NativeTemplateFontStyle.monospace,
+          size: 16.0,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          backgroundColor: Colors.white,
+          style: NativeTemplateFontStyle.bold,
+          size: 16.0,
+        ),
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          backgroundColor: Colors.white,
+          style: NativeTemplateFontStyle.bold,
+          size: 16.0,
+        ),
+      ),
       listener: NativeAdListener(
-        onAdClosed: (ad) {
-          EventRepo().addEvent( {
-            "onAdClosed":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdClosed");
-        },
-        onAdOpened: (ad) {
-          EventRepo().addEvent( {
-            "onAdOpened":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdOpened");
+        onAdLoaded: (ad) {
+          source = "Adm_Native";
+          responseReceived = DateTime.now();
+          adCreativeDownloaded = DateTime.now();
+          adRendered = DateTime.now();
+          _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
         onAdImpression: (ad) {
-          EventRepo().addEvent( {
-            "onAdImpression":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdImpression");
+          impressionLogged = DateTime.now();
+          _logLatencyMetrics();
+          EventRepo().addEvent({
+            "onAdImpression": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdImpression");
         },
-        onAdClicked:  (ad) {
-          EventRepo().addEvent( {
-            "onAdClicked":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdClicked");
+        onAdClicked: (ad) {
+          EventRepo().addEvent({
+            "onAdClicked": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdClicked");
         },
-        onAdLoaded: (ad) {
-          print('AdManager Native success: ${ad.responseInfo.toString()}');
-          _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
+        onAdClosed: (ad) {
+          EventRepo().addEvent({
+            "onAdClosed": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdClosed");
+        },
+        onAdOpened: (ad) {
+          EventRepo().addEvent({
+            "onAdOpened": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdOpened");
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
-          print('AdManager Native failed: $error');
           _checkIfAllAdsFailed(error);
         },
       ),
@@ -115,262 +137,273 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
   void _loadAdMobNativeAd(BuildContext context) {
     String? adUnitId = context.read<HomeProvider>().adMobNativeId;
+    requestInitiated = DateTime.now();
 
     _adMobNativeAd = NativeAd(
-        adUnitId:adUnitId,
-        listener: NativeAdListener(
-          onAdClosed: (ad) {
-            EventRepo().addEvent( {
-              "onAdClosed":true,
-              "createAt":DateTime.now().toString(),
-              "adResponse":ad.toString(),
-            },"onAdClosed");
-          },
-          onAdOpened: (ad) {
-            EventRepo().addEvent( {
-              "onAdOpened":true,
-              "createAt":DateTime.now().toString(),
-              "adResponse":ad.toString(),
-            },"onAdOpened");
-          },
-          onAdImpression: (ad) {
-            EventRepo().addEvent( {
-              "onAdImpression":true,
-              "createAt":DateTime.now().toString(),
-              "adResponse":ad.toString(),
-            },"onAdImpression");
-          },
-          onAdClicked:  (ad) {
-            EventRepo().addEvent( {
-              "onAdClicked":true,
-              "createAt":DateTime.now().toString(),
-              "adResponse":ad.toString(),
-            },"onAdClicked");
-          },
-          onAdLoaded: (ad) {
-                  _isAdMObLoaded = true;
-                  print('AdManager Native success: ${ad.responseInfo.toString()}');
-                  _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
-          },
-          onAdFailedToLoad: (ad, error) {
-                  ad.dispose();
-                  print('AdMob Native failed: $error');
-                  _checkIfAllAdsFailed(error);
-          },
+      adUnitId: adUnitId,
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          source = "Am_Native";
+          responseReceived = DateTime.now();
+          adCreativeDownloaded = DateTime.now();
+          adRendered = DateTime.now();
+          _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
+        },
+        onAdImpression: (ad) {
+          impressionLogged = DateTime.now();
+          _logLatencyMetrics();
+          EventRepo().addEvent({
+            "onAdImpression": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdImpression");
+        },
+        onAdClicked: (ad) {
+          EventRepo().addEvent({
+            "onAdClicked": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdClicked");
+        },
+        onAdClosed: (ad) {
+          EventRepo().addEvent({
+            "onAdClosed": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdClosed");
+        },
+        onAdOpened: (ad) {
+          EventRepo().addEvent({
+            "onAdOpened": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdOpened");
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          _checkIfAllAdsFailed(error);
+        },
+      ),
+      request: const AdRequest(),
+      nativeTemplateStyle: NativeTemplateStyle(
+        templateType: TemplateType.medium,
+        mainBackgroundColor: AppColors.cardBackgroundColor,
+        cornerRadius: 10.0,
+        callToActionTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          backgroundColor: AppColors.cardBackgroundColor,
+          style: NativeTemplateFontStyle.monospace,
+          size: 16.0,
         ),
-        request: const AdRequest(),
-        // Styling
-        nativeTemplateStyle: NativeTemplateStyle(
-          // Required: Choose a template.
-            templateType: TemplateType.medium,
-            // Optional: Customize the ad's style.
-            mainBackgroundColor: AppColors.cardBackgroundColor,
-            cornerRadius: 10.0,
-            callToActionTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.black,
-                backgroundColor:AppColors.cardBackgroundColor,
-                style: NativeTemplateFontStyle.monospace,
-                size: 16.0),
-            primaryTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.black,
-                backgroundColor: AppColors.cardBackgroundColor,
-                style: NativeTemplateFontStyle.italic,
-                size: 16.0),
-            secondaryTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.black,
-                backgroundColor: AppColors.cardBackgroundColor,
-                style: NativeTemplateFontStyle.bold,
-                size: 16.0),
-            tertiaryTextStyle: NativeTemplateTextStyle(
-                textColor: Colors.black,
-                backgroundColor: AppColors.cardBackgroundColor,
-                style: NativeTemplateFontStyle.normal,
-                size: 16.0)))
-      ..load();
-
-    // _adMobNativeAd = NativeAd(
-    //   adUnitId: adUnitId,
-    //   factoryId: 'adFactoryExample',
-    //   listener: NativeAdListener(
-    //     onAdLoaded: (ad) {
-    //       _isAdMObLoaded = true;
-    //       print('AdManager Native success: ${ad.responseInfo.toString()}');
-    //       _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
-    //     },
-    //     onAdFailedToLoad: (ad, error) {
-    //       ad.dispose();
-    //       print('AdMob Native failed: $error');
-    //       _checkIfAllAdsFailed(error);
-    //     },
-    //   ),
-    //   request: AdRequest(),
-    // )..load();
+        primaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          backgroundColor: AppColors.cardBackgroundColor,
+          style: NativeTemplateFontStyle.italic,
+          size: 16.0,
+        ),
+        secondaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          backgroundColor: AppColors.cardBackgroundColor,
+          style: NativeTemplateFontStyle.bold,
+          size: 16.0,
+        ),
+        tertiaryTextStyle: NativeTemplateTextStyle(
+          textColor: Colors.black,
+          backgroundColor: AppColors.cardBackgroundColor,
+          style: NativeTemplateFontStyle.normal,
+          size: 16.0,
+        ),
+      ),
+    )..load();
   }
 
   void _loadBannerAd(BuildContext context) {
-    String? adUnitId = context.read<HomeProvider>().adManagerBannerId; // Replace with your logic
-
+    final adUnitId = context.read<HomeProvider>().adManagerBannerId;
+    requestInitiated = DateTime.now();
     _bannerAd = BannerAd(
       adUnitId: adUnitId,
-      size: AdSize(width: 320, height: 250),
-      request: AdManagerAdRequest(),
+      size: AdSize.mediumRectangle,
+      request: const AdManagerAdRequest(),
       listener: BannerAdListener(
-        onAdClosed: (ad) {
-          EventRepo().addEvent( {
-            "onAdClosed":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdClosed");
-        },
-        onAdOpened: (ad) {
-          EventRepo().addEvent( {
-            "onAdOpened":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdOpened");
-        },
-        onAdImpression: (ad) {
-          EventRepo().addEvent( {
-            "onAdImpression":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdImpression");
-        },
-        onAdClicked:  (ad) {
-          EventRepo().addEvent( {
-            "onAdClicked":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdClicked");
-        },
         onAdLoaded: (ad) {
-          _isBannerLoaded = true;
-          print('AdManager Native success: ${ad.responseInfo.toString()}');
+          source = "Adm_Banner";
+          responseReceived = DateTime.now();
           _onAdLoaded(ad, AdWidget(ad: ad as BannerAd));
         },
         onAdFailedToLoad: (ad, error) {
-
           ad.dispose();
-          print('Banner failed: $error');
           _checkIfAllAdsFailed(error);
-        },
-      ),
-    )..load();
-  }
-  void _loadBannerAdMob(BuildContext context) {
-    String adUnitId = context.read<HomeProvider>().adMobBannerId;
-
-    _bannerAd = BannerAd(
-      adUnitId: adUnitId,
-      size: AdSize.mediumRectangle, // 320x250
-      request: AdRequest(), // Use AdRequest() for AdMob
-      listener: BannerAdListener(
-        onAdClosed: (ad) {
-          EventRepo().addEvent( {
-            "onAdClosed":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdClosed");
-        },
-        onAdOpened: (ad) {
-          EventRepo().addEvent( {
-            "onAdOpened":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdOpened");
         },
         onAdImpression: (ad) {
-          EventRepo().addEvent( {
-            "onAdImpression":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdImpression");
+          impressionLogged = DateTime.now();
+          _logLatencyMetrics();
+          EventRepo().addEvent({
+            "onAdImpression": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdImpression");
         },
-        onAdClicked:  (ad) {
-          EventRepo().addEvent( {
-            "onAdClicked":true,
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.toString(),
-          },"onAdClicked");
+        onAdClicked: (ad) {
+          EventRepo().addEvent({
+            "onAdClicked": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdClicked");
         },
-        onAdLoaded: (Ad ad) {
-          _isAdMobBannerLoaded = true;
-          print('Ad loaded: ${ad.responseInfo}');
-          _onAdLoaded(ad as BannerAd, AdWidget(ad: ad));
+        onAdClosed: (ad) {
+          EventRepo().addEvent({
+            "onAdClosed": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdClosed");
         },
-        onAdFailedToLoad: (Ad ad, LoadAdError error) {
-          ad.dispose();
-          print('Ad failed to load: $error');
-          _checkIfAllAdsFailed(error);
+        onAdOpened: (ad) {
+          EventRepo().addEvent({
+            "onAdOpened": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdOpened");
         },
       ),
     )..load();
   }
 
-  void _onAdLoaded(dynamic ad, Widget adWidget) async {
+  void _loadBannerAdMob(BuildContext context) {
+    final adUnitId = context.read<HomeProvider>().adMobBannerId;
+    requestInitiated = DateTime.now();
+    _bannerAd1 = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.mediumRectangle,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          source = "Am_Banner";
+          responseReceived = DateTime.now();
+          _onAdLoaded(ad, AdWidget(ad: ad as BannerAd));
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          _checkIfAllAdsFailed(error);
+        },
+        onAdImpression: (ad) {
+          impressionLogged = DateTime.now();
+          _logLatencyMetrics();
+          EventRepo().addEvent({
+            "onAdImpression": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdImpression");
+        },
+        onAdClicked: (ad) {
+          EventRepo().addEvent({
+            "onAdClicked": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdClicked");
+        },
+        onAdClosed: (ad) {
+          EventRepo().addEvent({
+            "onAdClosed": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdClosed");
+        },
+        onAdOpened: (ad) {
+          EventRepo().addEvent({
+            "onAdOpened": true,
+            "createAt": DateTime.now().toString(),
+            "adResponse": ad.toString(),
+          }, "onAdOpened");
+        },
+      ),
+    )..load();
+  }
 
-    to = DateTime.now().toString();
+  bool adsEmptyCheck( input,) {
+    if (input == null) return false;
 
-     EventRepo().addEvent( {
-      "sdkRequestStartTime":from,
-      "sdkRequestReceivedTime":to,
-      "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMilliseconds.toString(),
-      "createAt":DateTime.now().toString(),
-      "adResponse":ad.responseInfo.toString(),
-    },"ads_success");
+    if (input is Iterable || input is Map || input is String) {
+      return input.isNotEmpty;
+    }
 
-    if (_isAdShown) {
+    return true; // For objects or primitives
+  }
+
+  void _onAdLoaded(dynamic ad, Widget adWidget) {
+    if (_adDisplayed) {
       ad.dispose();
       return;
     }
+    // if(adsEmptyCheck(ad.responseInfo.adResponse.loadedAdapterResponseInfo) && adsEmptyCheck(ad.responseInfo.adResponse.adapterResponses))
 
+    _adDisplayed = true;
+    _failCount = 0;
+    final wrappedAdWidget = Container(
+      key: UniqueKey(),
+      child: adWidget,
+    );
     setState(() {
       bannerAdsLoading = BannerAdsLoading.success;
-      _isAdShown = true;
-      _shownAd = ad;
-      _adWidget = adWidget;
-      _adLoadFailed = false;
+      _adWidget = wrappedAdWidget;
+      _hasTriedLoadingAds = false;
     });
-
-    // Dispose other ads
-    if (ad != _adManagerNativeAd) {
-      _adManagerNativeAd?.dispose();
-      _adManagerNativeAd = null;
-    }
-    if (ad != _adMobNativeAd) {
-      _adMobNativeAd?.dispose();
-      _adMobNativeAd = null;
-    }
-    if (ad != _bannerAd) {
-      _bannerAd?.dispose();
-      _bannerAd = null;
-    }
-
-    bool noAdUnits = (_adManagerNativeAd == null && _adMobNativeAd == null && _bannerAd == null);
-
-    if (noAdUnits) {
-      setState(() {
-        _adLoadFailed = true;
-      });
-    }
+    EventRepo().addEvent({
+      "adSource": source,
+      "sdkRequestStartTime": requestInitiated.toString(),
+      "sdkRequestReceivedTime": responseReceived.toString(),
+      "adsRenderingTime": responseReceived!.difference(requestInitiated!).inMilliseconds.toString(),
+      "createAt": DateTime.now().toString(),
+      "adResponse": ad.responseInfo.toString(),
+    }, "ads_success");
+    _disposeOtherAds(except: ad);
   }
 
-  void _checkIfAllAdsFailed(LoadAdError error)async {
+  void _checkIfAllAdsFailed(LoadAdError error) {
+    _failCount++;
+    if (_adDisplayed) return;
+    if (_failCount >= 4) {
+      setState(() {
+        bannerAdsLoading = BannerAdsLoading.fail;
+        _hasTriedLoadingAds = false;
+      });
+    }
+    EventRepo().addEvent({
+      "adSource": source,
+      "sdkRequestStartTime": requestInitiated.toString(),
+      "sdkRequestReceivedTime": responseReceived.toString(),
+      "adsRenderingTime": "0",
+      "createAt": DateTime.now().toString(),
+      "adResponse": error.responseInfo.toString(),
+    }, "ads_failure");
+  }
 
+  void _disposeOtherAds({required dynamic except}) {
+    if (_adManagerNativeAd != null && _adManagerNativeAd != except) _adManagerNativeAd?.dispose();
+    if (_adMobNativeAd != null && _adMobNativeAd != except) _adMobNativeAd?.dispose();
+    if (_bannerAd != null && _bannerAd != except) _bannerAd?.dispose();
+    if (_bannerAd1 != null && _bannerAd1 != except) _bannerAd1?.dispose();
+  }
 
-     EventRepo().addEvent({
-      "sdkRequestStartTime":from,
-      "sdkRequestReceivedTime":to,
-      "adsRenderingTime":"0",
-      "createAt":DateTime.now().toString(),
-      "adResponse":error.responseInfo.toString(),
-    },"ads_success");
-
-    bannerAdsLoading = BannerAdsLoading.fail;
-
-    setState(() {
-      _adLoadFailed = true;
-    });
+  void _logLatencyMetrics() {
+    if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
+      final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
+      final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+      final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+      final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+      EventRepo().addEvent({
+        "adSource": source,
+        "requestInitiated": requestInitiated.toString(),
+        "responseReceived": responseReceived.toString(),
+        "adCreativeDownloaded": adCreativeDownloaded.toString(),
+        "adRendered": adRendered.toString(),
+        "impressionLogged": impressionLogged.toString(),
+        "latency_request": requestLatency.toString(),
+        "latency_load": loadLatency.toString(),
+        "latency_render": renderLatency.toString(),
+        "latency_total": totalLatency.toString(),
+        "createAt": DateTime.now().toString(),
+      }, "ad_latency_metrics");
+    }
   }
 
   @override
@@ -378,75 +411,72 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     _adManagerNativeAd?.dispose();
     _adMobNativeAd?.dispose();
     _bannerAd?.dispose();
+    _bannerAd1?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
-
-    if (_adWidget != null) {
-      return Scaffold(
-        body:  Column(
-                children: [
-                  Expanded(flex: 1, child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                    child: _adWidget!,
-                  )),
-                  Expanded(flex: 1, child: _buildRecommendedNews(context)),
-                ],
-              ),
-      );
-    }
-
-    if (_isBannerLoaded && _bannerAd != null) {
-      return Scaffold(
-        body: Column(
-          children: [
-            AdWidget(ad: _bannerAd!),
-            Expanded(child: _buildRecommendedNews(context)),
-          ],
-        ),
-      );
-    }
-    if (bannerAdsLoading == BannerAdsLoading.loading ) {
+    if (bannerAdsLoading == BannerAdsLoading.loading || _hasTriedLoadingAds) {
       return AdsLoadingScreen();
     }
 
-    if (_adLoadFailed && bannerAdsLoading == BannerAdsLoading.fail) {
-      return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Expanded(
-                flex: 1,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20.0,vertical: 3),
-                  child: widget.article['adType'] == "rating card"
-                      ? RateYourApp()
-                      : widget.article['adType'] == "share card"
-                      ? ShareYourApp()
-                      : ShareYourApp(),
-                ),
-              ),
-              Expanded(flex: 1, child: _buildRecommendedNews(context)),
-            ],
+    return Scaffold(
+      body: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child: _adWidget != null
+                ? Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      ShareYourApp(),
+                      Container(
+                        color: Platform.isIOS ? Colors.transparent : Colors.white,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        child: _bannerAd != null
+                            ? Container(
+                                color: Platform.isIOS ? Colors.transparent : Colors.white,
+                                alignment: Alignment.center,
+                                width: _bannerAd!.size.width.toDouble(),
+                                height: _bannerAd!.size.height.toDouble(),
+                                child: _adWidget)
+                            : _bannerAd1 != null
+                                ? Container(
+                                    color: Platform.isIOS ? Colors.transparent : Colors.white,
+                                    alignment: Alignment.center,
+                                    width: _bannerAd!.size.width.toDouble(),
+                                    height: _bannerAd!.size.height.toDouble(),
+                                    child: _adWidget)
+                                : Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                                    child: _adWidget,
+                                  ),
+                      ),
+                    ],
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: widget.article['adType'] == "rating card" ? RateYourApp() : ShareYourApp(),
+                  ),
           ),
-        ),
-      );
-    }
-    return Scaffold();
+          height(height: 6),
+          Expanded(flex: 1, child: _buildRecommendedNews(context)),
+        ],
+      ),
+    );
   }
 
   Widget _buildRecommendedNews(BuildContext context) {
     return Column(
       children: [
-        Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
+        Text("Recommended News ", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
+        height(height: 10),
         Expanded(
           child: ListView.builder(
             itemCount: 3,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
               final post = widget.article["homepage"]![index];
               return InkWell(
@@ -481,21 +511,16 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
                           placeholder: (context, url) => Container(
                             height: 50,
                             width: 50,
-                            decoration: BoxDecoration(
-                              color: AppColors.borderColor.withOpacity(.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                            color: AppColors.borderColor.withOpacity(.2),
                           ),
                           errorWidget: (context, url, error) => Container(
                             height: 40,
                             width: 40,
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
                               color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Center(
-                              child: Icon(Icons.image, size: 30, color: Colors.white),
-                            ),
+                            child: const Icon(Icons.image, size: 30, color: Colors.white),
                           ),
                         ),
                       ),
@@ -544,138 +569,183 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 }
 
-class GAMBannerAdWidget extends StatefulWidget {
-  const GAMBannerAdWidget({super.key});
-
-  @override
-  State<GAMBannerAdWidget> createState() => _GAMBannerAdWidgetState();
-}
-
-class _GAMBannerAdWidgetState extends State<GAMBannerAdWidget> {
-  late AdManagerBannerAd _ad;
-  bool _isAdLoaded = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _ad = AdManagerBannerAd(
-      adUnitId: '/6499/example/banner', // ✅ Replace with your GAM banner ad unit
-      sizes: [AdSize.mediumRectangle],
-      request: AdManagerAdRequest(),
-      listener: AdManagerBannerAdListener(
-        onAdLoaded: (ad) {
-          setState(() {
-            _isAdLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-          print('Ad failed to load: $error');
-        },
-      ),
-    );
-
-    _ad.load();
-  }
-
-  @override
-  void dispose() {
-    _ad.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: _isAdLoaded
-          ? Container(
-              width: _ad.sizes[0].width.toDouble(),
-              height: _ad.sizes[0].height.toDouble(),
-              child: AdWidget(ad: _ad),
-            )
-          : const CircularProgressIndicator(),
-    );
-  }
-}
-
-class BannerAds extends StatefulWidget {
-  final article;
-
-  const BannerAds({super.key, required this.article});
-
-  @override
-  _BannerAdsState createState() => _BannerAdsState();
-}
-
-class _BannerAdsState extends State<BannerAds> {
-  late BannerAd _bannerAd;
-  bool _isAdLoaded = false;
-  BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
-
-  @override
-  void initState() {
-    super.initState();
-    loadBannerAd();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // You can safely access context or ancestors here if needed.
-  }
-
-  @override
-  void dispose() {
-    // Ensure the banner ad is disposed only if it is loaded
-    if (_isAdLoaded) {
-      _bannerAd.dispose();
-    }
-    super.dispose();
-  }
-
-  void loadBannerAd() {
-    bannerAdsLoading = BannerAdsLoading.loading;
-    setState(() {});
-    final AdSize customAdSize = AdSize(width: 300, height: 250);
-    _bannerAd = BannerAd(
-      adUnitId: context.read<HomeProvider>().adManagerBannerId, // Dummy test Ad Unit ID (valid test ID from Google)
-      // adUnitId: '/21775744923/example/fixed-size-bannerpppp', // Dummy test Ad Unit ID (valid test ID from Google)
-      size: customAdSize,
-      request: const AdManagerAdRequest(),
-      listener: BannerAdListener(onAdLoaded: (ad) {
-        setState(() {
-          bannerAdsLoading = BannerAdsLoading.success;
-          _isAdLoaded = true;
-        });
-        print('Banner ad loaded.');
-      }, onAdFailedToLoad: (ad, error) {
-        bannerAdsLoading = BannerAdsLoading.fail;
-        ad.dispose();
-        setState(() {});
-      }),
-    );
-    _bannerAd.load();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: bannerAdsLoading == BannerAdsLoading.loading
-            ? Center(
-                child: BannerAdsLoadingScreen(),
-              )
-            : bannerAdsLoading == BannerAdsLoading.success
-                ? AdWidget(ad: _bannerAd)
-                : widget.article['adType'] == "rating card"
-                    ? RateYourApp()
-                    : widget.article['adType'] == "share card"
-                        ? ShareYourApp()
-                        : ShareYourApp(),
-      ),
-    );
-  }
-}
-
-
+// NativeAd? _adManagerNativeAd;
+// NativeAd? _adMobNativeAd;
+// BannerAd? _bannerAd;
+//
+// bool _isBannerLoaded = false;
+// bool _isAdMobBannerLoaded = false;
+// bool _isAdMObLoaded = false;
+// bool _isAdShown = false;
+// bool _adLoadFailed = false;
+// bool _hasTriedLoadingAds = false;
+//
+// dynamic _shownAd;
+// Widget? _adWidget;
+//
+// String? to = '';
+// String? from = '';
+// BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
+//
+// @override
+// void initState() {
+//   super.initState();
+//   bannerAdsLoading = BannerAdsLoading.loading;
+//   _loadAllAds(context);
+// }
+//
+// void _loadAllAds(BuildContext context) {
+//   _hasTriedLoadingAds = true;
+//   log("ads loading quick...");
+//   _loadAdManagerNativeAd(context);
+//   _loadAdMobNativeAd(context);
+//   _loadBannerAd(context);
+//   _loadBannerAdMob(context);
+// }
+//
+// void _loadAdManagerNativeAd(BuildContext context) {
+//   String? adUnitId = context.read<HomeProvider>().adManagerNativeId; // Replace with your logic
+//
+//
+//   from = DateTime.now().toString();
+//
+//   _adManagerNativeAd = NativeAd(
+//     adUnitId: adUnitId,
+//     factoryId: 'adFactoryExample',
+//     listener: NativeAdListener(
+//       onAdClosed: (ad) {
+//         EventRepo().addEvent( {
+//           "onAdClosed":true,
+//           "createAt":DateTime.now().toString(),
+//           "adResponse":ad.toString(),
+//         },"onAdClosed");
+//       },
+//       onAdOpened: (ad) {
+//         EventRepo().addEvent( {
+//           "onAdOpened":true,
+//           "createAt":DateTime.now().toString(),
+//           "adResponse":ad.toString(),
+//         },"onAdOpened");
+//       },
+//       onAdImpression: (ad) {
+//         EventRepo().addEvent( {
+//           "onAdImpression":true,
+//           "createAt":DateTime.now().toString(),
+//           "adResponse":ad.toString(),
+//         },"onAdImpression");
+//       },
+//       onAdClicked:  (ad) {
+//         EventRepo().addEvent( {
+//           "onAdClicked":true,
+//           "createAt":DateTime.now().toString(),
+//           "adResponse":ad.toString(),
+//         },"onAdClicked");
+//       },
+//       onAdLoaded: (ad) {
+//         print('AdManager Native success: ${ad.responseInfo.toString()}');
+//         _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
+//       },
+//       onAdFailedToLoad: (ad, error) {
+//         ad.dispose();
+//         print('AdManager Native failed: $error');
+//         _checkIfAllAdsFailed(error);
+//       },
+//     ),
+//     request: AdRequest(),
+//   )..load();
+// }
+//
+// void _loadAdMobNativeAd(BuildContext context) {
+//   String? adUnitId = context.read<HomeProvider>().adMobNativeId;
+//
+//   _adMobNativeAd = NativeAd(
+//       adUnitId:adUnitId,
+//       listener: NativeAdListener(
+//         onAdClosed: (ad) {
+//           EventRepo().addEvent( {
+//             "onAdClosed":true,
+//             "createAt":DateTime.now().toString(),
+//             "adResponse":ad.toString(),
+//           },"onAdClosed");
+//         },
+//         onAdOpened: (ad) {
+//           EventRepo().addEvent( {
+//             "onAdOpened":true,
+//             "createAt":DateTime.now().toString(),
+//             "adResponse":ad.toString(),
+//           },"onAdOpened");
+//         },
+//         onAdImpression: (ad) {
+//           EventRepo().addEvent( {
+//             "onAdImpression":true,
+//             "createAt":DateTime.now().toString(),
+//             "adResponse":ad.toString(),
+//           },"onAdImpression");
+//         },
+//         onAdClicked:  (ad) {
+//           EventRepo().addEvent( {
+//             "onAdClicked":true,
+//             "createAt":DateTime.now().toString(),
+//             "adResponse":ad.toString(),
+//           },"onAdClicked");
+//         },
+//         onAdLoaded: (ad) {
+//                 _isAdMObLoaded = true;
+//                 print('AdManager Native success: ${ad.responseInfo.toString()}');
+//                 _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
+//         },
+//         onAdFailedToLoad: (ad, error) {
+//                 ad.dispose();
+//                 print('AdMob Native failed: $error');
+//                 _checkIfAllAdsFailed(error);
+//         },
+//       ),
+//       request: const AdRequest(),
+//       // Styling
+//       nativeTemplateStyle: NativeTemplateStyle(
+//         // Required: Choose a template.
+//           templateType: TemplateType.medium,
+//           // Optional: Customize the ad's style.
+//           mainBackgroundColor: AppColors.cardBackgroundColor,
+//           cornerRadius: 10.0,
+//           callToActionTextStyle: NativeTemplateTextStyle(
+//               textColor: Colors.black,
+//               backgroundColor:AppColors.cardBackgroundColor,
+//               style: NativeTemplateFontStyle.monospace,
+//               size: 16.0),
+//           primaryTextStyle: NativeTemplateTextStyle(
+//               textColor: Colors.black,
+//               backgroundColor: AppColors.cardBackgroundColor,
+//               style: NativeTemplateFontStyle.italic,
+//               size: 16.0),
+//           secondaryTextStyle: NativeTemplateTextStyle(
+//               textColor: Colors.black,
+//               backgroundColor: AppColors.cardBackgroundColor,
+//               style: NativeTemplateFontStyle.bold,
+//               size: 16.0),
+//           tertiaryTextStyle: NativeTemplateTextStyle(
+//               textColor: Colors.black,
+//               backgroundColor: AppColors.cardBackgroundColor,
+//               style: NativeTemplateFontStyle.normal,
+//               size: 16.0)))
+//     ..load();
+//
+//   // _adMobNativeAd = NativeAd(
+//   //   adUnitId: adUnitId,
+//   //   factoryId: 'adFactoryExample',
+//   //   listener: NativeAdListener(
+//   //     onAdLoaded: (ad) {
+//   //       _isAdMObLoaded = true;
+//   //       print('AdManager Native success: ${ad.responseInfo.toString()}');
+//   //       _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
+//   //     },
+//   //     onAdFailedToLoad: (ad, error) {
+//   //       ad.dispose();
+//   //       print('AdMob Native failed: $error');
+//   //       _checkIfAllAdsFailed(error);
+//   //     },
+//   //   ),
+//   //   request: AdRequest(),
+//   // )..load();
+// }
+//

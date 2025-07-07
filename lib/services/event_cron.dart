@@ -16,7 +16,7 @@ class EventCron {
   void start() {
 
    EventRepo().processAndPushEvents();
-    _cron.schedule(Schedule.parse('*/02 * * * *'), () async {
+    _cron.schedule(Schedule.parse('*/15 * * * *'), () async {
       log("api call started");
       EventRepo().processAndPushEvents();
     });

@@ -18,6 +18,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../ad_manager_screen/save_units.dart';
 import '../auth_screens/authentication_provider/authentication_provider.dart';
 import '../botton_actions.dart';
 import '../event_repo.dart';
@@ -122,7 +123,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                         ),
                       )
                     : widget.article['type'] == "GoogleAds"
-                        ? Container(
+                        ? Platform.isIOS?IosAdsWidgetScreen( article: widget.article,):Container(
                             color: Colors.white,
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
@@ -552,7 +553,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                               ),
                                                             ),
                                                     ),
-                                                    if (widget.article['subType'] != "BigBlackStandard" && widget.index != 0) Banner300x50Size()
+                                                    if (widget.article['subType'] != "BigBlackStandard" && widget.index != 0 &&  widget.article['type'] != "GoogleAds") Banner300x50Size()
                                                   ],
                                                 ),
                                               ),

@@ -353,6 +353,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getSurveyData() async {
+    getAllSurveyDataList = [];
     try {
       Response response = await HomeRepo().surveyApi();
       getAllSurveyDataList.addAll(response.data['choices']);

@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../services/analytics_service.dart';
+import '../ad_manager_screen/banner_ads_provider.dart';
 import 'home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
 
@@ -19,7 +22,17 @@ class MainScreenPageView extends StatefulWidget {
 }
 
 class _MainScreenPageViewState extends State<MainScreenPageView> {
+  int _currentPage = 0;
 
+  DateTime? _pageStartTime;
+  Timer? _pageTimer;
+
+  final List<String> articles = [
+    'Article 1',
+    'Article 2',
+    'Article 3',
+    // Add more as needed
+  ];
   int autoIndex = 0;
   final Gradient rainbowGradient = LinearGradient(
     colors: [
@@ -35,6 +48,7 @@ HomeProvider? homeProvider;
     autoIndex = 0;
     super.initState();
     homeProvider?.pageController?.addListener(homeProvider!.scrollListener);
+    _pageStartTime = DateTime.now();
   }
 
   @override
@@ -62,6 +76,7 @@ HomeProvider? homeProvider;
                       scrollDirection: Axis.vertical,
                       itemCount: homeProvider.getAllPostList.length,
                       onPageChanged: (value) {
+                        BannerAdsProvider().disposeAllAds();
                         log("IndividualPostView  $autoIndex--- $value");
                         if(homeProvider.isBottomEnable) {
                           homeProvider.pageChange(isValue: false);
@@ -80,7 +95,17 @@ HomeProvider? homeProvider;
 
                         context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
                         autoIndex = value;
-                        setState(() {});
+
+                        final now = DateTime.now();
+                        final duration = now.difference(_pageStartTime ?? now);
+
+                        AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
+
+
+                        setState(() {
+                          _pageStartTime = now;
+                        });
+
                       },
                       itemBuilder: (context, index) {
                         return Container(

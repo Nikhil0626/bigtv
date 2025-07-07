@@ -17,6 +17,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../ad_manager_screen/banner_300x50_size.dart';
+import '../ad_manager_screen/save_units.dart';
 import '../ad_manager_screen/test_ads.dart';
 
 import '../../services/image_to_pdf_helper.dart';
@@ -180,7 +181,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                   ),
                                 )
                               : article['type'] == "GoogleAds"
-                                  ? Padding(
+                                  ? Platform.isIOS?IosAdsWidgetScreen(article: article,):Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: FullScreenNativeAd(
                                         article: article,
