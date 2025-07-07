@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+
+import '../../../utils/app_fonts.dart';
 class NoClaimedRewards extends StatefulWidget {
   const NoClaimedRewards({super.key});
 
@@ -21,7 +23,7 @@ class _NoClaimedRewardsState extends State<NoClaimedRewards> {
         ),
         title: Text(
           "Claimed Rewards",
-          style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w700),
+          style: fontStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w700),
         ),
       ),
 

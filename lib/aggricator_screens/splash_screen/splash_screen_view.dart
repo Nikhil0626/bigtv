@@ -8,8 +8,8 @@ import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../home_screen/home_repo/movie_reviews.dart';
-import '../home_screen/home_repo/polls_screen.dart';
+import '../../rating_view/movie_reviews.dart';
+import '../../rating_view/polls_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -61,13 +61,13 @@ class _SplashScreenState extends State<SplashScreen> {
     //   );
     //   return;
     // }else{
-    // context.read<AuthenticationProvider>().isPageNavigation(context);
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => PollsScreen(),
-      ),
-    );
+    context.read<AuthenticationProvider>().isPageNavigation(context);
+    //
+    // Navigator.of(context).pushReplacement(
+    //   MaterialPageRoute(
+    //     builder: (context) => PollsScreen(),
+    //   ),
+    // );
 
     // }
   }

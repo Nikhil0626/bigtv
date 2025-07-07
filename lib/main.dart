@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:chotanews/rating_view/rating_provider.dart';
 import 'package:chotanews/screens/testing_screen/admob.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/event_cron.dart';
@@ -145,6 +146,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<ReelsProviders>(create: (_) => ReelsProviders()),
           ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
           ChangeNotifierProvider<ProfileProvider>(create: (_) => ProfileProvider()),
+          ChangeNotifierProvider<RatingProvider>(create: (_) => RatingProvider()),
         ],
         child:MaterialApp(
           navigatorKey: mainNavigatorKey,

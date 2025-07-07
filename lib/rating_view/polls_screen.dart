@@ -2,6 +2,8 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../utils/app_fonts.dart';
+
 class PollsScreen extends StatefulWidget {
   const PollsScreen({super.key});
 
@@ -64,17 +66,17 @@ class _PollsScreenState extends State<PollsScreen> {
                         children: [
                           TextSpan(
                             text: "Chota ",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                           TextSpan(
                             text: "News",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.lightBlue,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -88,7 +90,7 @@ class _PollsScreenState extends State<PollsScreen> {
             height(height: 25.h),
             Text(
               "8 వసంతాలు సినిమా ఎలా అనిపిస్తుంది?",
-              style: TextStyle(color: Colors.black, fontSize: 20, fontWeight: FontWeight.w700),
+              style: fontStyle(color: Colors.black, fontSize: 20.sp, fontWeight: FontWeight.w700),
             ),
             height(height: 15.h),
             Container(
@@ -103,7 +105,7 @@ class _PollsScreenState extends State<PollsScreen> {
                 padding: const EdgeInsets.all(15.0),
                 child: Text(
                   "బాగుంది",
-                  style: TextStyle(color: Colors.grey.shade900, fontSize: 14, fontWeight: FontWeight.w500),
+                  style: fontStyle(color: Colors.grey.shade900, fontSize: 14.sp, fontWeight: FontWeight.w500),
                 ),
               ),
             ),
@@ -120,7 +122,7 @@ class _PollsScreenState extends State<PollsScreen> {
                 padding: const EdgeInsets.all(15.0),
                 child: Text(
                   "బాగలేదు",
-                  style: TextStyle(color: Colors.grey.shade900, fontSize: 14, fontWeight: FontWeight.w500),
+                  style: fontStyle(color: Colors.grey.shade900, fontSize: 14.sp, fontWeight: FontWeight.w500),
                 ),
               ),
             ),
@@ -137,7 +139,7 @@ class _PollsScreenState extends State<PollsScreen> {
                 padding: const EdgeInsets.all(15.0),
                 child: Text(
                   "తెలియదు",
-                  style: TextStyle(color: Colors.grey.shade900, fontSize: 15, fontWeight: FontWeight.w500),
+                  style: fontStyle(color: Colors.grey.shade900, fontSize: 15.sp, fontWeight: FontWeight.w500),
                 ),
               ),
             ),
@@ -154,9 +156,9 @@ class _PollsScreenState extends State<PollsScreen> {
                 child: Center(
                   child: Text(
                     "Submit",
-                    style: TextStyle(
+                    style: fontStyle(
                       color: Colors.white,
-                      fontSize: 14,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                     ),
                   ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../../utils/app_fonts.dart';
+
 class AllRewards extends StatefulWidget {
   const AllRewards({super.key});
 
@@ -25,7 +27,7 @@ class _AllRewardsState extends State<AllRewards> {
         ),
         title: Text(
           "View  All",
-          style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w800),
+          style: fontStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w800),
         ),
       ),
       body: Column(
@@ -37,7 +39,7 @@ class _AllRewardsState extends State<AllRewards> {
               alignment: Alignment.centerLeft,
               child: Text(
                 "Popular Rewards",
-                style: TextStyle(
+                style: fontStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w800,
                 ),
@@ -82,7 +84,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 6.h),
                                   Text(
                                     "2GB Data",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.grey.shade500,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w600,
@@ -91,7 +93,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 1.h),
                                   Text(
                                     "Free 1 day",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.black,
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w700,
@@ -100,7 +102,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 1.h),
                                   Text(
                                     "10 Referrals",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.black,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w500,
@@ -140,7 +142,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 6.h),
                                   Text(
                                     "Amazon Gift Card",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.grey.shade500,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w600,
@@ -149,7 +151,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 2.h),
                                   Text(
                                     "₹100",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.black,
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w700,
@@ -158,7 +160,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 2.h),
                                   Text(
                                     "20 Referrals",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.black,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w500,
@@ -204,7 +206,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 6.h),
                                   Text(
                                     "OTT Subscription",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.grey.shade500,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w600,
@@ -213,7 +215,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 2.h),
                                   Text(
                                     "Free 1 months",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.black,
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w700,
@@ -222,7 +224,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 2.h),
                                   Text(
                                     "50 Referrals",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.black,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w500,
@@ -262,7 +264,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 6.h),
                                   Text(
                                     "Instant Cash",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.grey.shade500,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w600,
@@ -271,7 +273,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 2.h),
                                   Text(
                                     "₹1000",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.black,
                                       fontSize: 16.sp,
                                       fontWeight: FontWeight.w700,
@@ -280,7 +282,7 @@ class _AllRewardsState extends State<AllRewards> {
                                   height(height: 2.h),
                                   Text(
                                     "100 Referrals",
-                                    style: TextStyle(
+                                    style: fontStyle(
                                       color: Colors.black,
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w500,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
 
 class ClaimedRewards extends StatefulWidget {
@@ -29,7 +30,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
         ),
         title: Text(
           "Claimed Rewards",
-          style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w800),
+          style: fontStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w800),
         ),
         backgroundColor: Colors.white,
         elevation: 0,
@@ -52,8 +53,8 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: SizedBox(
-                      height: 140,
-                      width: 98,
+                      height: 140.h,
+                      width: 98.w,
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
@@ -70,14 +71,14 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                                 child: SvgPicture.asset(
                                   'assets/images/download.svg',
                                   fit: BoxFit.contain,
-                                  width: 24,
-                                  height: 24,
+                                  width: 24.w,
+                                  height: 24.h,
                                 ),
                               ),
                               height(height: 8.h),
                               Text(
                                 "80",
-                                style: TextStyle(
+                                style: fontStyle(
                                   color: Colors.black,
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w700,
@@ -86,7 +87,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                               height(height: 4.h),
                               Text(
                                 "Downloads",
-                                style: TextStyle(
+                                style: fontStyle(
                                   color: Colors.white,
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
@@ -102,8 +103,8 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: SizedBox(
-                      height: 140,
-                      width: 98,
+                      height: 140.h,
+                      width: 98.w,
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
@@ -119,15 +120,15 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                                 backgroundColor: Colors.blue.shade50,
                                 child: SvgPicture.asset(
                                   'assets/images/claimed_reward.svg',
-                                  width: 24,
-                                  height: 24,
+                                  width: 24.w,
+                                  height: 24.h,
                                   fit: BoxFit.contain,
                                 ),
                               ),
                               height(height: 8.h),
                               Text(
                                 "10",
-                                style: TextStyle(
+                                style: fontStyle(
                                   color: Colors.black,
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w700,
@@ -136,7 +137,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                               height(height: 4.h),
                               Text(
                                 "Claimed",
-                                style: TextStyle(
+                                style: fontStyle(
                                   color: Colors.white,
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
@@ -153,8 +154,8 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                   Padding(
                     padding: EdgeInsets.all(8.0),
                     child: SizedBox(
-                      height: 140,
-                      width: 98,
+                      height: 140.h,
+                      width: 98.w,
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
@@ -170,15 +171,15 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                                 backgroundColor: Colors.orange.shade50,
                                 child: SvgPicture.asset(
                                   'assets/images/pending.svg',
-                                  width: 24,
-                                  height: 24,
+                                  width: 24.w,
+                                  height: 24.h,
                                   fit: BoxFit.contain,
                                 ),
                               ),
                               height(height: 8.h),
                               Text(
                                 "70",
-                                style: TextStyle(
+                                style: fontStyle(
                                   color: Colors.black,
                                   fontSize: 20.sp,
                                   fontWeight: FontWeight.w700,
@@ -187,7 +188,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                               height(height: 4.h),
                               Text(
                                 "Balance",
-                                style: TextStyle(
+                                style: fontStyle(
                                   color: Colors.white,
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w500,
@@ -204,14 +205,14 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
               ),
             ),
           ),
-          height(height: 15),
+          height(height: 15.h),
           Padding(
             padding: EdgeInsets.only(left: 22),
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 "Transactions History",
-                style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
+                style: fontStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
               ),
             ),
           ),
@@ -234,8 +235,8 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                       child: SvgPicture.asset(
                         'assets/images/gift.svg',
                         color: Colors.white,
-                        width: 24,
-                        height: 24,
+                        width: 24.w,
+                        height: 24.h,
                         fit: BoxFit.contain,
                       ),
                     ),
@@ -247,7 +248,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                         children: [
                           Text(
                             "2 GB Data",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
@@ -256,7 +257,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                           height(height: 4.h),
                           Text(
                             "Earned on 22 Jun 25",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.grey.shade600,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
@@ -271,7 +272,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                       children: [
                         Text(
                           "-10",
-                          style: TextStyle(
+                          style: fontStyle(
                             color: Colors.black,
                             fontSize: 12.sp,
                             fontWeight: FontWeight.w800,
@@ -289,7 +290,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                           ),
                           child: Text(
                             "Claimed",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.green.shade900,
                               fontWeight: FontWeight.w800,
                               fontSize: 12.sp,

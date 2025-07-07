@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../../utils/app_fonts.dart';
 import 'all_rewards.dart';
 import 'claimed_rewards.dart';
 import 'no_claimed_rewards.dart';
-
 class ReferEarn extends StatefulWidget {
   const ReferEarn({super.key});
 
@@ -23,7 +23,7 @@ class _ReferEarnState extends State<ReferEarn> {
         leading: Icon(Icons.arrow_back, color: Colors.black, size: 25),
         title: Text(
           "Refer & Earn",
-          style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w700),
+          style: fontStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w700),
         ),
       ),
       body: SafeArea(
@@ -54,7 +54,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           );
                         },
                         child: Text("Refer & Earn",
-                          style: TextStyle(
+                          style: fontStyle(
                           color: Colors.white,
                           fontSize: 20.sp,
                           fontWeight: FontWeight.w700,
@@ -64,7 +64,7 @@ class _ReferEarnState extends State<ReferEarn> {
                       height(height: 10.h),
                       Text(
                         "Share ChotaNews app with friends and earn rewards!",
-                        style: TextStyle(
+                        style: fontStyle(
                           color: Colors.white,
                           fontSize: 14.sp,
                           fontWeight: FontWeight.w500,
@@ -75,7 +75,7 @@ class _ReferEarnState extends State<ReferEarn> {
                       height(height: 15.h),
                       Text(
                         "My Referral code",
-                        style: TextStyle(
+                        style: fontStyle(
                           color: Colors.white,
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
@@ -95,7 +95,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           children: [
                             Text(
                               "CHOTA2024XYZ",
-                              style: TextStyle(
+                              style: fontStyle(
                                 color: Colors.lightBlue,
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,
@@ -128,7 +128,7 @@ class _ReferEarnState extends State<ReferEarn> {
                               width(width: 12.w),
                               Text(
                                 "Invite Friends",
-                                style: TextStyle(
+                                style: fontStyle(
                                   color: Colors.white,
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.bold,
@@ -176,7 +176,7 @@ class _ReferEarnState extends State<ReferEarn> {
                             height(height: 8.h),
                             Text(
                               "120",
-                              style: TextStyle(
+                              style: fontStyle(
                                 color: Colors.black,
                                 fontSize: 20.sp,
                                 fontWeight: FontWeight.w700,
@@ -185,7 +185,7 @@ class _ReferEarnState extends State<ReferEarn> {
                             height(height: 4.h),
                             Text(
                               "Invited",
-                              style: TextStyle(
+                              style: fontStyle(
                                 color: Colors.black,
                                 fontSize: 12.sp,
                                 fontWeight: FontWeight.w600,
@@ -225,7 +225,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 8.h),
                           Text(
                             "80",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 20.sp,
                               fontWeight: FontWeight.w700,
@@ -234,7 +234,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 4.h),
                           Text(
                             "Downloads",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -273,7 +273,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 8.h),
                           Text(
                             "40",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 20.sp,
                               fontWeight: FontWeight.w700,
@@ -282,7 +282,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 4.h),
                           Text(
                             "Pending",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -316,7 +316,7 @@ class _ReferEarnState extends State<ReferEarn> {
                         children: [
                           Text(
                             "Progress to next Reward",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 15.sp,
                               fontWeight: FontWeight.w700,
@@ -340,7 +340,7 @@ class _ReferEarnState extends State<ReferEarn> {
                         children: [
                           Text(
                             "10 Friends referred",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.grey.shade600,
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w500,
@@ -348,7 +348,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           ),
                           Text(
                             "20 needed",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -375,7 +375,7 @@ class _ReferEarnState extends State<ReferEarn> {
                       height(height: 4.h),
                       Text(
                         "You're 10 friends away from your next reward!",
-                        style: TextStyle(
+                        style: fontStyle(
                           color: Colors.grey.shade500,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w500,
@@ -417,7 +417,7 @@ class _ReferEarnState extends State<ReferEarn> {
                     children: [
                       Text(
                         "Reward Earned",
-                        style: TextStyle(
+                        style: fontStyle(
                           color: Colors.white,
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w800,
@@ -426,7 +426,7 @@ class _ReferEarnState extends State<ReferEarn> {
                       height(height: 4.h),
                       Text(
                         "2 GB Data",
-                        style: TextStyle(
+                        style: fontStyle(
                           color: Colors.white,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w700,
@@ -452,7 +452,7 @@ class _ReferEarnState extends State<ReferEarn> {
                     ),
                     child: Text(
                       "Claim",
-                      style: TextStyle(
+                      style: fontStyle(
                         color: Colors.white,
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w500,
@@ -469,7 +469,7 @@ class _ReferEarnState extends State<ReferEarn> {
                   padding: const EdgeInsets.only(left: 17),
                   child: Text(
                     "Popular Rewards",
-                    style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900),
+                    style: fontStyle(fontSize: 16.sp, fontWeight: FontWeight.w900),
                   ),
                 ),
                 Spacer(),
@@ -481,7 +481,7 @@ class _ReferEarnState extends State<ReferEarn> {
                       },
                       child: Text(
                         "View All",
-                        style: TextStyle(color: Colors.lightBlue, fontSize: 14.sp, fontWeight: FontWeight.w600),
+                        style: fontStyle(color: Colors.lightBlue, fontSize: 14.sp, fontWeight: FontWeight.w600),
                       )),
                 )
               ],
@@ -518,7 +518,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 6.h),
                           Text(
                             "2GB Data",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.grey.shade500,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -527,7 +527,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 2.h),
                           Text(
                             "Free 1 day",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
@@ -536,7 +536,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 2.h),
                           Text(
                             "10 Referrals",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
@@ -569,14 +569,14 @@ class _ReferEarnState extends State<ReferEarn> {
                             child: SvgPicture.asset(
                               'assets/images/progress_reward.svg',
                               fit: BoxFit.contain,
-                              width: 24,
-                              height: 24,
+                              width: 24.w,
+                              height: 24.h,
                             ),
                           ),
                           height(height: 6.h),
                           Text(
                             "Amazon Gift Card",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.grey.shade500,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -585,7 +585,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 2.h),
                           Text(
                             "₹100",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
@@ -594,7 +594,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 2.h),
                           Text(
                             "20 Referrals",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
@@ -633,14 +633,14 @@ class _ReferEarnState extends State<ReferEarn> {
                             child: SvgPicture.asset(
                               'assets/images/subscription.svg',
                               fit: BoxFit.contain,
-                              width: 24,
-                              height: 24,
+                              width: 24.w,
+                              height: 24.h,
                             ),
                           ),
                           height(height: 6.h),
                           Text(
                             "OTT Subscription",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.grey.shade500,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -649,7 +649,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 2.h),
                           Text(
                             "Free 1 months",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
@@ -658,7 +658,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 2.h),
                           Text(
                             "50 Referrals",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
@@ -691,14 +691,14 @@ class _ReferEarnState extends State<ReferEarn> {
                             child: SvgPicture.asset(
                               'assets/images/instant_cash.svg',
                               fit: BoxFit.contain,
-                              width: 24,
-                              height: 24,
+                              width: 24.w,
+                              height: 24.h,
                             ),
                           ),
                           height(height: 6.h),
                           Text(
                             "Instant Cash",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.grey.shade500,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w600,
@@ -707,7 +707,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 2.h),
                           Text(
                             "₹1000",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
@@ -716,7 +716,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           height(height: 2.h),
                           Text(
                             "100 Referrals",
-                            style: TextStyle(
+                            style: fontStyle(
                               color: Colors.black,
                               fontSize: 12.sp,
                               fontWeight: FontWeight.w500,
@@ -757,15 +757,15 @@ class _ReferEarnState extends State<ReferEarn> {
                             'assets/images/users.svg',
                             color: Colors.white,
                             fit: BoxFit.contain,
-                            width: 24,
-                            height: 24,
+                            width: 24.w,
+                            height: 24.h,
                           ),
                         ),
                       ),
                       height(height: 2.h),
                       Text(
                         "Referral History",
-                        style: TextStyle(
+                        style: fontStyle(
                           color: Colors.black,
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,
@@ -820,7 +820,7 @@ class _ReferEarnState extends State<ReferEarn> {
                       height(height: 2.h),
                       Text(
                         "Claimed Rewards",
-                        style: TextStyle(
+                        style: fontStyle(
                           color: Colors.black,
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w700,

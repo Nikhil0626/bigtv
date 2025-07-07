@@ -17,8 +17,6 @@ class FeedbackForm extends StatefulWidget {
 class _FeedbackFormState extends State<FeedbackForm> {
   int selectedStar = 0;
 
-
-
   String get feedbackMessage {
     switch (selectedStar) {
       case 1:
@@ -39,10 +37,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
   @override
   void initState() {
     context.read<SettingsProvider>().feedbackList = [];
-
-    context.read<SettingsProvider>().isOthersSelected=false;
+    context.read<SettingsProvider>().isOthersSelected = false;
     context.read<SettingsProvider>().getFeedBack();
-
     super.initState();
   }
 
@@ -60,225 +56,211 @@ class _FeedbackFormState extends State<FeedbackForm> {
       ),
       body: Consumer<SettingsProvider>(
         builder: (_, settingsProvider, __) {
-          return settingsProvider.isFeedbackLoading?AppLoadingScreen():SingleChildScrollView(
-            padding: const EdgeInsets.all(8.0),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Tell us what you think",
-                    style: newAppFont(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 20,
-                        color: AppColors.appButtonColor
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  height(height: 16),
-                  SizedBox(
-                    height: 180,
-                    width: double.infinity,
-                    child: Card(
-                      color: AppColors.cardBackgroundColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Rate your experience with ChotaNews?",
-                              style: newAppFont(
-
-                                fontSize: 16,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            SizedBox(height: 8),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: List.generate(5, (index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    setState(() {
-                                      selectedStar = index + 1;
-                                    });
-                                  },
-                                  child: Icon(
-                                    Icons.star,
-                                    color: index < selectedStar
-                                        ? AppColors.ratingColor
-                                        : Colors.grey,
-                                    size: 40,
-                                  ),
-                                );
-                              }),
-                            ),
-                            SizedBox(height: 3),
-                            Text(
-                              feedbackMessage,
-                              style: newAppFont(
-
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.appButtonColor,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ],
+          return settingsProvider.isFeedbackLoading
+              ? AppLoadingScreen()
+              : SingleChildScrollView(
+                  padding:  EdgeInsets.all(8.0),
+                  child: Padding(
+                    padding:  EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "Tell us what you think",
+                          style: newAppFont(fontWeight: FontWeight.w700, fontSize: 20, color: AppColors.appButtonColor),
+                          textAlign: TextAlign.center,
                         ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: Card(
-                      color:     AppColors.cardBackgroundColor,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "What should we improve?",
-                              style: newAppFont(
-                                fontSize: 16,
+                        height(height: 16),
+                        SizedBox(
+                          height: 180,
+                          width: double.infinity,
+                          child: Card(
+                            color: AppColors.cardBackgroundColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "Rate your experience with ChotaNews?",
+                                    style: newAppFont(
+                                      fontSize: 16,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  SizedBox(height: 8),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                    children: List.generate(5, (index) {
+                                      return GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            selectedStar = index + 1;
+                                          });
+                                        },
+                                        child: Icon(
+                                          Icons.star,
+                                          color: index < selectedStar ? AppColors.ratingColor : Colors.grey,
+                                          size: 40,
+                                        ),
+                                      );
+                                    }),
+                                  ),
+                                  SizedBox(height: 3),
+                                  Text(
+                                    feedbackMessage,
+                                    style: newAppFont(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.appButtonColor,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
                               ),
                             ),
-                            height(height: 8),
-                            Wrap(
-                              spacing: 10.w,
-                              runSpacing: 10.w,
-                              crossAxisAlignment: WrapCrossAlignment.start,
-                              children: settingsProvider.feedbackList.map((category) {
-                                final isSelected = settingsProvider.selectedFeedbackList
-                                    .contains(category['optionText'].toString());
-
-                                return GestureDetector(
-                                  onTap: () {
-                                    settingsProvider.addToSelectedEngagements(
-                                        category['optionText'].toString());
-                                  },
-                                  child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? AppColors.appButtonColor
-                                          : AppColors.cardBackgroundColor,
-                                      borderRadius: BorderRadius.circular(15.r),
-                                    ),
-                                    child: Text(
-                                      category['optionText'].toString(),
-                                      textAlign: TextAlign.center,
-                                      style: newAppFont(
-                                        color: isSelected ? Colors.white : Colors.black87,
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w500,
-                                      ),
+                          ),
+                        ),
+                        SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: Card(
+                            color: AppColors.cardBackgroundColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    "What should we improve?",
+                                    style: newAppFont(
+                                      fontSize: 16,
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  settingsProvider.isOthersSelected ?
-                  SizedBox(
-                    width: double.infinity,
-                    child: Card(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                                  height(height: 8),
+                                  Wrap(
+                                    spacing: 10.w,
+                                    runSpacing: 10.w,
+                                    crossAxisAlignment: WrapCrossAlignment.start,
+                                    children: settingsProvider.feedbackList.map((category) {
+                                      final isSelected = settingsProvider.selectedFeedbackList.contains(category['optionText'].toString());
 
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Please tell us more about it?",
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                            height(height: 8),
-                            TextField(
-                              controller: settingsProvider.feedbackController,
-                              maxLines: 3,
-                              decoration: InputDecoration(
-                                fillColor: Colors.white,
-                                filled: true,
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Colors.grey, width: 1.0),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: AppColors.appButtonColor, width: 2.0),
-                                ),
-                                hintText: "Enter your comment...",
+                                      return GestureDetector(
+                                        onTap: () {
+                                          settingsProvider.addToSelectedEngagements(category['optionText'].toString());
+                                        },
+                                        child: Container(
+                                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+                                          decoration: BoxDecoration(
+                                            color: isSelected ? AppColors.appButtonColor : AppColors.cardBackgroundColor,
+                                            borderRadius: BorderRadius.circular(15.r),
+                                          ),
+                                          child: Text(
+                                            category['optionText'].toString(),
+                                            textAlign: TextAlign.center,
+                                            style: newAppFont(
+                                              color: isSelected ? Colors.white : Colors.black87,
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }).toList(),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ),
-                  ):
-                  SizedBox.shrink(),
-                  height(height: 16),
-                  InkWell(
-                    onTap: (){
-                      if(settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0) {
-                        settingsProvider.postFeedBack(selectedStar,).then((value) {
-                          selectedStar = 0;
-                          setState(() {
-                            settingsProvider.feedbackController.clear();
-                            settingsProvider.selectedFeedbackList.clear();
-
-                          });
-                        },);
-                      }else{
-                        CustomToast.showErrorToast(msg: "Select at list one star and value field");
-                      }
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      height: 35.h,
-                      // margin: EdgeInsets.only(bottom: 20.h),
-                      decoration: BoxDecoration(
-                        color: (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar>0)
-                            ? AppColors.appButtonColor
-                            : AppColors.bodyTextColor.withOpacity(.2),
-                        borderRadius: BorderRadius.all(Radius.circular(8.r)),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Submit',
-                          style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                        settingsProvider.isOthersSelected
+                            ? SizedBox(
+                                width: double.infinity,
+                                child: Card(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          "Please tell us more about it?",
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 14,
+                                          ),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                        height(height: 8),
+                                        TextField(
+                                          controller: settingsProvider.feedbackController,
+                                          maxLines: 3,
+                                          decoration: InputDecoration(
+                                            fillColor: Colors.white,
+                                            filled: true,
+                                            border: OutlineInputBorder(
+                                              borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                                            ),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(color: Colors.grey, width: 1.0),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(color: AppColors.appButtonColor, width: 2.0),
+                                            ),
+                                            hintText: "Enter your comment...",
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              )
+                            : SizedBox.shrink(),
+                        height(height: 16),
+                        InkWell(
+                          onTap: () {
+                            if (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar > 0) {
+                              settingsProvider.postFeedBack(selectedStar,).then((value) {
+                                  selectedStar = 0;
+                                  setState(() {
+                                    settingsProvider.feedbackController.clear();
+                                    settingsProvider.selectedFeedbackList.clear();
+                                  });
+                                },
+                              );
+                            } else {
+                              CustomToast.showErrorToast(msg: "Select at list one star and value field");
+                            }
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            height: 35.h,
+                            // margin: EdgeInsets.only(bottom: 20.h),
+                            decoration: BoxDecoration(
+                              color: (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar > 0) ? AppColors.appButtonColor : AppColors.bodyTextColor.withOpacity(.2),
+                              borderRadius: BorderRadius.all(Radius.circular(8.r)),
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Submit',
+                                style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-
-                ],
-              ),
-            ),
-          );
+                );
         },
       ),
     );

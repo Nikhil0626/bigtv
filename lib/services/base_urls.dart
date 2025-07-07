@@ -47,15 +47,15 @@ class BaseUrls {
   static const String privacyPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Privacy+5.html";
 
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
+  //
+  // /// Python apis
+  // static const String ePaperBaseUrlAws = "https://aggregator.chotanews.com";
+  // static const String baseUrlAwsDev = "https://api.chotanews.com";
+  //
 
-  /// Python apis
-  static const String ePaperBaseUrlAws = "https://aggregator.chotanews.com";
-  static const String baseUrlAwsDev = "https://api.chotanews.com";
-
-
-  /// Python Dev Apis
-  // static const String ePaperBaseUrlAws = "http://devaggregator.chotanews.com";
-  // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
+  // Python Dev Apis
+  static const String ePaperBaseUrlAws = "http://devaggregator.chotanews.com";
+  static const String baseUrlAwsDev = "https://devapi.chotanews.com";
 
   ///Login login
   static const String sendOtpPy = "/send-otp";
@@ -68,6 +68,11 @@ class BaseUrls {
   static const String getAllPost = "/allposts";
   static const String aiTags = "/aitags";
   static const String aiTagsById = "/aitag/content";
+
+  ///Rating
+  static const String postRating = "/reviews/submit";
+  static const String getReviewsById = "/reviews/";
+
 
   ///Categories Apis
   static const String getAllCategories = "/categories";
@@ -92,6 +97,8 @@ class BaseUrls {
 
   ///Update profile
   static const String getProfile = "/profile";
+
+  ///
 }
 
 
