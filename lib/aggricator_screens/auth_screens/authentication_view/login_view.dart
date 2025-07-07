@@ -37,6 +37,8 @@ class _LoginViewState extends State<LoginView> {
     authenticationProvider!.phoneController.text = "";
     authenticationProvider!.isButtonEnabled = false;
     getMobileNumber();
+    getData();
+
     // context.read<AuthProvider>().sendEvent("WellComePage");
     super.initState();
   }
@@ -84,63 +86,67 @@ class _LoginViewState extends State<LoginView> {
             ),
           ],
         ),
-        child: Center(
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                height(height: 10.h),
-                Container(
-                  height: 40.h,
-                  width: 280.w,
-                  padding: const EdgeInsets.only(left: 10),
-                  decoration: BoxDecoration(
-                    color: AppColors.loginNumberBg,
-                    border: Border.all(color: AppColors.borderColor),
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                  child: SizedBox(
-                    width: 80,
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          height: 18.h,
-                          width: 24.w,
-                          child: SvgPicture.asset('assets/svg/indianFlag.svg', fit: BoxFit.cover),
-                        ),
-                        Text(
-                          " +91",
-                          style: newAppFont(color: AppColors.textColor, fontWeight: FontWeight.w600),
-                        ),
-                        width(width: 10),
-                        Container(
-                          width: 1.w,
-                          color: Colors.grey,
-                        ),
-                        Expanded(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              // border: Border.all(color: AppColors.borderColor),
-                              borderRadius: BorderRadius.only(bottomRight: Radius.circular(8.r), topRight: Radius.circular(8.r)),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [Text(
+              'Get Code $siva',
+              style: newAppFont(
+                fontSize: 11.sp,
+                color: Colors.black,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+              height(height: 10.h),
+              Container(
+                height: 40.h,
+                width: 280.w,
+                padding: const EdgeInsets.only(left: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.loginNumberBg,
+                  border: Border.all(color: AppColors.borderColor),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: SizedBox(
+                  width: 80,
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        height: 18.h,
+                        width: 24.w,
+                        child: SvgPicture.asset('assets/svg/indianFlag.svg', fit: BoxFit.cover),
+                      ),
+                      Text(
+                        " +91",
+                        style: newAppFont(color: AppColors.textColor, fontWeight: FontWeight.w600),
+                      ),
+                      width(width: 10),
+                      Container(
+                        width: 1.w,
+                        color: Colors.grey,
+                      ),
+                      Expanded(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            // border: Border.all(color: AppColors.borderColor),
+                            borderRadius: BorderRadius.only(bottomRight: Radius.circular(8.r), topRight: Radius.circular(8.r)),
+                          ),
+                          child: TextFormField(
+                            controller: authenticationProvider!.phoneController,
+                            keyboardType: TextInputType.number,
+                            maxLength: 10,
+                            style: newAppFont(fontSize: 16.sp, fontWeight: FontWeight.w400),
+                            decoration: const InputDecoration(
+                              hintText: "",
+                              border: InputBorder.none,
+                              counterText: "",
+                              contentPadding: EdgeInsets.only(left: 8),
                             ),
-                            child: TextFormField(
-                              controller: authenticationProvider!.phoneController,
-                              keyboardType: TextInputType.number,
-                              maxLength: 10,
-                              style: newAppFont(fontSize: 16.sp, fontWeight: FontWeight.w400),
-                              decoration: const InputDecoration(
-                                hintText: "",
-                                border: InputBorder.none,
-                                counterText: "",
-                                contentPadding: EdgeInsets.only(left: 8),
-                              ),
-                              // inputFormatters: [
-                              //   FilteringTextInputFormatter.digitsOnly,
-                              //   LengthLimitingTextInputFormatter(10),
-                              // ],
+                            // inputFormatters: [
+                            //   FilteringTextInputFormatter.digitsOnly,
+                            //   LengthLimitingTextInputFormatter(10),
+                            // ],
 
                               onChanged: (value) => authenticationProvider!.validationErrors(value),
                             ),
@@ -295,7 +301,16 @@ class _LoginViewState extends State<LoginView> {
             ),
           ),
         ),
-      ),
-    );
+      );
+  }
+
+  String? siva;
+  void getData() async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    siva = sharedPreferences.getString("Nikil")??"hello raja";
+    setState(() {
+
+    });
   }
 }

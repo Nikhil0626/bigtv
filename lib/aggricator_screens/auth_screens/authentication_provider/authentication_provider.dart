@@ -110,7 +110,8 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future verifyOtp(
     context,
-  ) async {
+  ) async
+  {
     errorMessage = '';
     isVerifyLoading = true;
     isButtonEnabled = false;
@@ -121,17 +122,22 @@ class AuthenticationProvider extends ChangeNotifier {
 
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? deviceId = sp.getString("deviceId");
+    String? referralCode = sp.getString("referralCode");
     try {
       Map<String, dynamic> body = {
         "mobile_number": phoneController.text.toString(),
         "otp": otpController.text,
         "device_id": deviceId,
+        "referral_id": referralCode ?? "",
+
       };
       log(body.toString());
       Response response = await AuthenticationRepo().validateOtp(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
         sp.setString("loginType", "login");
+        sp.setString("myReferralCode", response.data['user']['referral_code'].toString() ?? "");
+        sp.setString("myReferralLink", response.data['referral_link'].toString() ?? "");
         sp.setString("userId", response.data['user']['id'].toString());
         sp.setString("userStatus", response.data['user']['status'].toString());
         if (response.data['is_new_user'] == false) {

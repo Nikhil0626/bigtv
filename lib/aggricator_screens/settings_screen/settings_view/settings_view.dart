@@ -5,6 +5,7 @@ import 'package:chotanews/aggricator_screens/auth_screens/authentication_provide
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_view/refer_earn.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
@@ -138,6 +139,19 @@ class _SettingsViewState extends State<SettingsView> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => TermsConditions(),
+                ),
+              );
+            }),
+            height(height: 5.h),
+            _buildSettingsRow(context, "Terms_icon.svg", "Refer And Earn", () {
+              // EventRepo().addEvent({
+              //   "visitPageName": "Terms & Conditions",
+              //   "createAt": DateTime.now().toString(),
+              // }, "compliance_section");
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ReferEarn(),
                 ),
               );
             }),
