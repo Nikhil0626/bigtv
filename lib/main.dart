@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:chotanews/aggricator_screens/ad_manager_screen/banner_ads_provider.dart';
+import 'package:chotanews/rating_view/rating_provider.dart';
 import 'package:chotanews/screens/testing_screen/admob.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/event_cron.dart';
@@ -148,6 +149,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<ReelsProviders>(create: (_) => ReelsProviders()),
           ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
           ChangeNotifierProvider<ProfileProvider>(create: (_) => ProfileProvider()),
+          ChangeNotifierProvider<RatingProvider>(create: (_) => RatingProvider()),
           ChangeNotifierProvider(create: (_) => BannerAdsProvider())
         ],
         child:MaterialApp(

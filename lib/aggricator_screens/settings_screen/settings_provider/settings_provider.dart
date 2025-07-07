@@ -65,7 +65,11 @@ class SettingsProvider extends ChangeNotifier {
     String? loginType = preferences.getString("loginType");
 
     if (loginType == "login") {
-      Map<String, dynamic> body = {"post_id": postId, "user_id": userId, "bookmark": isBookMark};
+      Map<String, dynamic> body = {
+        "post_id": postId,
+        "user_id": userId,
+        "bookmark": isBookMark
+      };
       try {
         log("body $body");
         Response response = await SettingsRepo().saveBookMarks(body);
@@ -155,17 +159,20 @@ class SettingsProvider extends ChangeNotifier {
 
   bool isFeedbackLoading = false;
 
-  Future postFeedBack(
-    rating,
-  ) async {
+  Future postFeedBack(rating,) async {
     isFeedbackLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
-
     String? userId = preferences.getString("userId");
     List selectedCategoryIds = feedbackList.where((item) => selectedFeedbackList.contains(item['optionText'].toString())).map((item) => item['optionId'].toString()).toList();
 
-    Map<String, dynamic> body = {"device_id": deviceId, "user_id": userId, "user_rating": rating, "comment_ids": selectedCategoryIds, "custom_comment": feedbackController.text ?? ""};
+    Map<String, dynamic> body = {
+      "device_id": deviceId,
+      "user_id": userId,
+      "user_rating": rating,
+      "comment_ids": selectedCategoryIds,
+      "custom_comment": feedbackController.text ?? ""
+    };
 
     log(body.toString());
     try {
@@ -189,6 +196,7 @@ class SettingsProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
 
   void addToSelectedEngagements(String profileName) {
     if (profileName == "Others") {
