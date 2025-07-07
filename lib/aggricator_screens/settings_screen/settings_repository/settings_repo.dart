@@ -45,7 +45,11 @@ class SettingsRepo  extends BaseService{
         url: BaseUrls.getProfile, method: RequestType.post, body: body);
     return response;
   }
-
+  Future deleteAccount(body) async{
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.getProfile, method: RequestType.delete,queryParameters: body);
+    return response;
+  }
   Future getProfile(body) async{
     Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
         url: BaseUrls.getProfile, method: RequestType.get, queryParameters: body);

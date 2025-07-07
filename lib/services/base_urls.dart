@@ -97,6 +97,7 @@ class BaseUrls {
   static const String getReferralStats = "/referral/stats";
   static const String getAvailableRewards = "/rewards/available";
   static const String getClaimedReward = "/rewards/claim";
+  static const String deleteAccount = "/profile";
 }
 
 

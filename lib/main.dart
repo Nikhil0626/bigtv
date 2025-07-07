@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/referral_provider/referral_provider.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/banner_ads_provider.dart';
 import 'package:chotanews/screens/testing_screen/admob.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/event_cron.dart';
@@ -28,6 +29,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'aggricator_screens/ad_manager_screen/banner_300x50_size.dart';
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/event_repo.dart';
@@ -67,7 +69,6 @@ Future<void> main() async {
   checkForUpdate();
   unawaited(MobileAds.instance.initialize());
   await Firebase.initializeApp();
-  // KochavaService.initKochava();
   AnalyticsService.logAppOpen();
   AnalyticsService().trackAppOpen();
   AnalyticsService.startSession();
@@ -150,6 +151,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
           ChangeNotifierProvider<ProfileProvider>(create: (_) => ProfileProvider()),
           ChangeNotifierProvider<ReferralProvider>(create: (_) => ReferralProvider()),
+          ChangeNotifierProvider(create: (_) => BannerAdsProvider())
         ],
         child:MaterialApp(
           navigatorKey: mainNavigatorKey,

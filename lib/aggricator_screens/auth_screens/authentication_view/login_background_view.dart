@@ -169,7 +169,7 @@ class LoginBackgroundView extends StatelessWidget {
                         left: 0,
                         right: 0,
                         child: SizedBox(
-                          height: screenHeight * 0.5,
+                          height:context.watch<AuthenticationProvider>().isBlockedUser == false? MediaQuery.of(context).size.height * .57: screenHeight * 0.5,
                           child: AnimatedSwitcher(
                             duration: Duration(milliseconds: 300),
                             child: _getLoginContent(authenticationProvider.newAppLoginStatus),

@@ -22,6 +22,7 @@ class AuthenticationProvider extends ChangeNotifier {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController otpController = TextEditingController();
   bool isLoginLoading = false;
+  bool isBlockedUser = true;
   bool isVerifyLoading = false;
   String? errorMessage;
   bool isButtonEnabled = false;
@@ -60,6 +61,11 @@ class AuthenticationProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void updateNumber() {
+    isBlockedUser = true;
+    notifyListeners();
+  }
+
   Future sendOtp(BuildContext context) async {
     isLoginLoading = true;
     notifyListeners();
@@ -77,14 +83,18 @@ class AuthenticationProvider extends ChangeNotifier {
       Response response = await AuthenticationRepo().sendOtp(body);
       log(response.toString());
       if (response.statusCode == 200) {
-        newAppLoginStatus = NewAppLoginStatus.otp;
-        saveLoginState();
-         EventRepo().addEvent({
-          "loginType": "mobileNumber",
-          "mobileNumber":  otpController.text??"",
-          "createAt": DateTime.now().toString(),
-        }, "login_event");
-        otpController.text = "";
+        if (response.data['is_active'] == false) {
+          isBlockedUser = response.data['is_active'];
+        } else {
+          newAppLoginStatus = NewAppLoginStatus.otp;
+          saveLoginState();
+          EventRepo().addEvent({
+            "loginType": "mobileNumber",
+            "mobileNumber": otpController.text ?? "",
+            "createAt": DateTime.now().toString(),
+          }, "login_event");
+          otpController.text = "";
+        }
       } else {
         CustomToast.showErrorToast(msg: "Check your mobile number try again");
       }
@@ -129,6 +139,7 @@ class AuthenticationProvider extends ChangeNotifier {
         sp.setString("myReferralCode", response.data['user']['referral_code'].toString() ?? "");
         sp.setString("myReferralLink", response.data['referral_link'].toString() ?? "");
         sp.setString("userId", response.data['user']['id'].toString());
+        sp.setString("userStatus", response.data['user']['status'].toString());
         if (response.data['is_new_user'] == false) {
           getAllCategories();
           getAllLocations();
@@ -162,12 +173,7 @@ class AuthenticationProvider extends ChangeNotifier {
         saveUserid("");
         preferences.setString("userName", "User${phoneController.text.substring(phoneController.text.length - 4)}");
         preferences.setString("referralCode", "");
-         EventRepo().addEvent({
-          "otpStatus": "complete",
-          "mobileNumber":otpController.text??"",
-          "otp": phoneController.text??"",
-          "createAt": DateTime.now().toString()
-        }, "otp_verify");
+        EventRepo().addEvent({"otpStatus": "complete", "mobileNumber": otpController.text ?? "", "otp": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
         phoneController.text = "";
         notifyListeners();
       }
@@ -179,22 +185,12 @@ class AuthenticationProvider extends ChangeNotifier {
       CustomToast.showErrorToast(msg: e.message);
       log("error dio ${e.toString()}");
       log("error dio  ${st.toString()}");
-       EventRepo().addEvent({
-        "otpStatus": "fail",
-        "mobileNumber":otpController.text??"",
-        "otp": phoneController.text??"",
-        "createAt": DateTime.now().toString()
-      }, "otp_verify");
+      EventRepo().addEvent({"otpStatus": "fail", "mobileNumber": otpController.text ?? "", "otp": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
     } catch (e, st) {
       log("error  ${e.toString()}");
       log("error  ${st.toString()}");
       CustomToast.showErrorToast(msg: "Something went wrong");
-       EventRepo().addEvent({
-        "otpStatus": "fail",
-        "mobileNumber":otpController.text??"",
-        "otp": phoneController.text??"",
-        "createAt": DateTime.now().toString()
-      }, "otp_verify");
+      EventRepo().addEvent({"otpStatus": "fail", "mobileNumber": otpController.text ?? "", "otp": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
     } finally {
       isVerifyLoading = false;
       notifyListeners();
@@ -278,29 +274,14 @@ class AuthenticationProvider extends ChangeNotifier {
           newAppLoginStatus = NewAppLoginStatus.location;
         }
         log(response.data.toString());
-         EventRepo().addEvent({
-          "listOfCategoriesIds":result??"",
-          "listOfCategoriesNames":catNames??"",
-          "updateStatus":"complete",
-          "createAt": DateTime.now().toString()
-        }, "update_categories");
+        EventRepo().addEvent({"listOfCategoriesIds": result ?? "", "listOfCategoriesNames": catNames ?? "", "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_categories");
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
-       EventRepo().addEvent({
-        "listOfCategoriesIds":result??"",
-        "listOfCategoriesNames":catNames??"",
-        "updateStatus":"fail",
-        "createAt": DateTime.now().toString()
-      }, "update_categories");
+      EventRepo().addEvent({"listOfCategoriesIds": result ?? "", "listOfCategoriesNames": catNames ?? "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_categories");
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
-       EventRepo().addEvent({
-        "listOfCategoriesIds":result??"",
-        "listOfCategoriesNames":catNames??"",
-        "updateStatus":"fail",
-        "createAt": DateTime.now().toString()
-      }, "update_categories");
+      EventRepo().addEvent({"listOfCategoriesIds": result ?? "", "listOfCategoriesNames": catNames ?? "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_categories");
     } finally {
       isCatSaveLoading = false;
       notifyListeners();
@@ -308,7 +289,7 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   bool isLocationLoading = false;
-   Map<int, String>? states;
+  Map<int, String>? states;
 
   Future getAllLocations() async {
     isLocationLoading = true;
@@ -331,9 +312,7 @@ class AuthenticationProvider extends ChangeNotifier {
             )
             .toList();
 
-        states = {
-          for (var d in data) d['stateId']: d['stateName']
-        };
+        states = {for (var d in data) d['stateId']: d['stateName']};
 
         print(states);
 
@@ -398,29 +377,14 @@ class AuthenticationProvider extends ChangeNotifier {
         }
 
         log(response.data.toString());
-         EventRepo().addEvent({
-          "listOfLocationsIds":result??"",
-          "listOfLocationsNames":nameOfDistrict??"",
-          "updateStatus":"complete",
-          "createAt": DateTime.now().toString()
-        }, "update_locations");
+        EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": nameOfDistrict ?? "", "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_locations");
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
-       EventRepo().addEvent({
-        "listOfLocationsIds":result??"",
-        "listOfLocationsNames":nameOfDistrict??"",
-        "updateStatus":"fail",
-        "createAt": DateTime.now().toString()
-      }, "update_locations");
+      EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": nameOfDistrict ?? "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
-       EventRepo().addEvent({
-        "listOfLocationsIds":result??"",
-        "listOfLocationsNames":nameOfDistrict??"",
-        "updateStatus":"fail",
-        "createAt": DateTime.now().toString()
-      }, "update_locations");
+      EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": nameOfDistrict ?? "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
     } finally {
       isLocationSendingLoading = false;
       notifyListeners();

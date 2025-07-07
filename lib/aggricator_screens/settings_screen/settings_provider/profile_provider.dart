@@ -104,6 +104,31 @@ class ProfileProvider extends ChangeNotifier {
     }
   }
 
+  Future deleteAccount() async{
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+
+    String? userId = preferences.getString("userId");
+Map<String,dynamic> body = {
+  "user_id": userId
+};
+
+    try {
+      Response response = await SettingsRepo().deleteAccount(body);
+      if (response.statusCode == 200) {
+        CustomToast.showSuccessToast(msg: "Your account will be permanently delete within 48 hours");
+        log("Like posted successfully: ${response.data}");
+      }
+    } on DioException catch (e, st) {
+      log("Like posted successfully:");
+    } catch (e, st) {
+      CustomToast.showSuccessToast(msg: "Profile data not updated");
+      log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
+    } finally {
+
+      notifyListeners();
+    }
+  }
+
 
   bool isProfileLoading = false;
 
