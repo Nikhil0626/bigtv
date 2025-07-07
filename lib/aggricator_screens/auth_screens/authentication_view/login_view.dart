@@ -301,8 +301,7 @@ class _LoginViewState extends State<LoginView> {
             ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   String? siva;
