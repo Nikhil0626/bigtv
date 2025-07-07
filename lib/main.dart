@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/referral_provider/referral_provider.dart';
 import 'package:chotanews/aggricator_screens/ad_manager_screen/banner_ads_provider.dart';
+import 'package:chotanews/rating_view/rating_provider.dart';
 import 'package:chotanews/screens/testing_screen/admob.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/event_cron.dart';
@@ -58,7 +59,6 @@ Future<void> main() async {
   EventCron().start();
   MobileAds.instance.initialize();
   initPlugin();
-  // getAndSendReferrerDetails();
   getReferrerFromPlayStore();
   await EasyLocalization.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -151,6 +151,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
           ChangeNotifierProvider<ProfileProvider>(create: (_) => ProfileProvider()),
           ChangeNotifierProvider<ReferralProvider>(create: (_) => ReferralProvider()),
+          ChangeNotifierProvider<RatingProvider>(create: (_) => RatingProvider()),
           ChangeNotifierProvider(create: (_) => BannerAdsProvider())
         ],
         child:MaterialApp(

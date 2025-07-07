@@ -69,6 +69,11 @@ class BaseUrls {
   static const String aiTags = "/aitags";
   static const String aiTagsById = "/aitag/content";
 
+  ///Rating
+  static const String postRating = "/reviews/submit";
+  static const String getReviewsById = "/reviews/";
+
+
   ///Categories Apis
   static const String getAllCategories = "/categories";
 
@@ -92,6 +97,8 @@ class BaseUrls {
 
   ///Update profile
   static const String getProfile = "/profile";
+
+  ///
 
   ///Referral Apis
   static const String getReferralStats = "/referral/stats";

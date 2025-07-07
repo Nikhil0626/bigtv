@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/event_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -9,8 +8,8 @@ import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../home_screen/home_repo/movie_reviews.dart';
-import '../home_screen/home_repo/polls_screen.dart';
+import '../../rating_view/movie_reviews.dart';
+import '../../rating_view/polls_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -62,13 +61,13 @@ class _SplashScreenState extends State<SplashScreen> {
     //   );
     //   return;
     // }else{
-    // context.read<AuthenticationProvider>().isPageNavigation(context);
-
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => LoginBackgroundView(),
-      ),
-    );
+    context.read<AuthenticationProvider>().isPageNavigation(context);
+    //
+    // Navigator.of(context).pushReplacement(
+    //   MaterialPageRoute(
+    //     builder: (context) => PollsScreen(),
+    //   ),
+    // );
 
     // }
   }
