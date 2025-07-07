@@ -99,6 +99,7 @@ class BaseUrls {
   static const String getProfile = "/profile";
 
   ///
+  static const String deleteAccount = "/profile";
 }
 
 

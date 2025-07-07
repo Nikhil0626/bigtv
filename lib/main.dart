@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:android_play_install_referrer/android_play_install_referrer.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/banner_ads_provider.dart';
 import 'package:chotanews/rating_view/rating_provider.dart';
 import 'package:chotanews/screens/testing_screen/admob.dart';
 import 'package:chotanews/services/analytics_service.dart';
@@ -23,9 +25,11 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'aggricator_screens/ad_manager_screen/banner_300x50_size.dart';
 import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/event_repo.dart';
@@ -54,7 +58,7 @@ Future<void> main() async {
   EventCron().start();
   MobileAds.instance.initialize();
   initPlugin();
-  getAndSendReferrerDetails();
+  getReferrerFromPlayStore();
   await EasyLocalization.ensureInitialized();
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
@@ -64,7 +68,6 @@ Future<void> main() async {
   checkForUpdate();
   unawaited(MobileAds.instance.initialize());
   await Firebase.initializeApp();
-  // KochavaService.initKochava();
   AnalyticsService.logAppOpen();
   AnalyticsService().trackAppOpen();
   AnalyticsService.startSession();
@@ -147,6 +150,7 @@ class _MyAppState extends State<MyApp> {
           ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
           ChangeNotifierProvider<ProfileProvider>(create: (_) => ProfileProvider()),
           ChangeNotifierProvider<RatingProvider>(create: (_) => RatingProvider()),
+          ChangeNotifierProvider(create: (_) => BannerAdsProvider())
         ],
         child:MaterialApp(
           navigatorKey: mainNavigatorKey,

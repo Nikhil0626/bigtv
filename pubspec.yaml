@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 5.0.4+2130
+version: 5.0.5+2147
 environment:
   sdk: ^3.5.4
 dependencies:
@@ -82,6 +82,7 @@ dependencies:
   hive_flutter: ^1.1.0
   workmanager: ^0.6.0
   cron: ^0.6.2
+  android_play_install_referrer: ^0.4.0
 
 
 

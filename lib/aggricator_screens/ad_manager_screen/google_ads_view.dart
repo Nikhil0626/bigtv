@@ -62,7 +62,7 @@ class _GoogleAdsViewState extends State<GoogleAdsView> {
             setState(() {
               _isAdLoaded = false;
               _nativeAd = null;
-              context.read<HomeProvider>().getSurveyData();
+
             });
           }
           print('Ad failed to load: $error');
@@ -342,7 +342,6 @@ class _SurveyCardsState extends State<SurveyCards> {
                     ),
                   ),
                   Expanded(
-
                       child: ListView.builder(
                         itemCount: homeProvider.getAllSurveyDataList.length,
                         itemBuilder: (context, index) {
@@ -432,3 +431,139 @@ class ShareYourApp extends StatelessWidget {
     );
   }
 }
+
+
+
+// class GAMBannerAdWidget extends StatefulWidget {
+//   const GAMBannerAdWidget({super.key});
+//
+//   @override
+//   State<GAMBannerAdWidget> createState() => _GAMBannerAdWidgetState();
+// }
+//
+// class _GAMBannerAdWidgetState extends State<GAMBannerAdWidget> {
+//   late AdManagerBannerAd _ad;
+//   bool _isAdLoaded = false;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//
+//     _ad = AdManagerBannerAd(
+//       adUnitId: '/6499/example/banner', // ✅ Replace with your GAM banner ad unit
+//       sizes: [AdSize.mediumRectangle],
+//       request: AdManagerAdRequest(),
+//       listener: AdManagerBannerAdListener(
+//         onAdLoaded: (ad) {
+//           setState(() {
+//             _isAdLoaded = true;
+//           });
+//         },
+//         onAdFailedToLoad: (ad, error) {
+//           ad.dispose();
+//           print('Ad failed to load: $error');
+//         },
+//       ),
+//     );
+//
+//     _ad.load();
+//   }
+//
+//   @override
+//   void dispose() {
+//     _ad.dispose();
+//     super.dispose();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: _isAdLoaded
+//           ? Container(
+//         width: _ad.sizes[0].width.toDouble(),
+//         height: _ad.sizes[0].height.toDouble(),
+//         child: AdWidget(ad: _ad),
+//       )
+//           : const CircularProgressIndicator(),
+//     );
+//   }
+// }
+
+// class BannerAds extends StatefulWidget {
+//   final article;
+//
+//   const BannerAds({super.key, required this.article});
+//
+//   @override
+//   _BannerAdsState createState() => _BannerAdsState();
+// }
+
+// class _BannerAdsState extends State<BannerAds> {
+//   late BannerAd _bannerAd;
+//   bool _isAdLoaded = false;
+//   BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     loadBannerAd();
+//   }
+//
+//   @override
+//   void didChangeDependencies() {
+//     super.didChangeDependencies();
+//     // You can safely access context or ancestors here if needed.
+//   }
+//
+//   @override
+//   void dispose() {
+//     // Ensure the banner ad is disposed only if it is loaded
+//     if (_isAdLoaded) {
+//       _bannerAd.dispose();
+//     }
+//     super.dispose();
+//   }
+//
+//   void loadBannerAd() {
+//     bannerAdsLoading = BannerAdsLoading.loading;
+//     setState(() {});
+//     final AdSize customAdSize = AdSize(width: 300, height: 250);
+//     _bannerAd = BannerAd(
+//       adUnitId: context.read<HomeProvider>().adManagerBannerId, // Dummy test Ad Unit ID (valid test ID from Google)
+//       // adUnitId: '/21775744923/example/fixed-size-bannerpppp', // Dummy test Ad Unit ID (valid test ID from Google)
+//       size: customAdSize,
+//       request: const AdManagerAdRequest(),
+//       listener: BannerAdListener(onAdLoaded: (ad) {
+//         setState(() {
+//           bannerAdsLoading = BannerAdsLoading.success;
+//           _isAdLoaded = true;
+//         });
+//         print('Banner ad loaded.');
+//       }, onAdFailedToLoad: (ad, error) {
+//         bannerAdsLoading = BannerAdsLoading.fail;
+//         ad.dispose();
+//         setState(() {});
+//       }),
+//     );
+//     _bannerAd.load();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       body: Center(
+//         child: bannerAdsLoading == BannerAdsLoading.loading
+//             ? Center(
+//           child: BannerAdsLoadingScreen(),
+//         )
+//             : bannerAdsLoading == BannerAdsLoading.success
+//             ? AdWidget(ad: _bannerAd)
+//             : widget.article['adType'] == "rating card"
+//             ? RateYourApp()
+//             : widget.article['adType'] == "share card"
+//             ? ShareYourApp()
+//             : ShareYourApp(),
+//       ),
+//     );
+//   }
+// }

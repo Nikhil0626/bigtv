@@ -166,3 +166,35 @@
 // ),
 // )
 // :
+
+import 'package:flutter/material.dart' ;
+import 'package:shared_preferences/shared_preferences.dart';
+
+class Hello123 extends StatefulWidget {
+  const Hello123({super.key});
+
+  @override
+  State<Hello123> createState() => _Hello123State();
+}
+
+class _Hello123State extends State<Hello123> {
+
+  @override
+  void initState() {
+getData();
+    super.initState();
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(body: Center(child: Text(siva??"hello chota"),),);
+  }
+String? siva;
+  void getData() async{
+    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+
+    siva = sharedPreferences.getString("Nikil")??"hello raja";
+    setState(() {
+
+    });
+  }
+}

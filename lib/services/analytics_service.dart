@@ -37,30 +37,89 @@ class AnalyticsService {
       logEvent2(
         "user_red_10_article_on_day_0",
       );
-      EventRepo().addEvent({
-        "user_read_article": "user_red_10_article_on_day_0",
-        "createAt": DateTime.now().toString(),
-      }, "perDay_read_article");
+      // EventRepo().addEvent({
+      //   "user_read_article": "user_red_10_article_on_day_0",
+      //   "createAt": DateTime.now().toString(),
+      // }, "perDay_read_article");
     }
     if (count == 20) {
       log("send event 20 stored");
       logEvent2("user_red_20_article_on_day_0");
-      EventRepo().addEvent({
-        "user_read_article": "user_red_20_article_on_day_0",
-        "createAt": DateTime.now().toString(),
-      }, "perDay_read_article");
+      // EventRepo().addEvent({
+      //   "user_read_article": "user_red_20_article_on_day_0",
+      //   "createAt": DateTime.now().toString(),
+      // }, "perDay_read_article");
     }
     if (count == 30) {
       log("send event 30 stored");
       logEvent2(
         "user_red_30_article_on_day_0",
       );
-      EventRepo().addEvent({
-        "user_read_article": "user_red_30_article_on_day_0",
-        "createAt": DateTime.now().toString(),
-      }, "perDay_read_article");
+      // EventRepo().addEvent({
+      //   "user_read_article": "user_red_30_article_on_day_0",
+      //   "createAt": DateTime.now().toString(),
+      // }, "perDay_read_article");
     }
   }
+
+  Future<void> trackArticleReadingTime(Duration duration, allPostList) async {
+    final seconds = duration.inSeconds;
+
+    if (seconds < 5) {
+      EventRepo().addEvent({
+        "user_read_time": "flipped_under_5_sec",
+        "postId": "$allPostList",
+        "seconds": seconds.toString(),
+        "createAt": DateTime.now().toString(),
+      }, "perDay_read_time");
+      logEvent2("flipped_under_5_sec");
+    } else if (seconds < 30) {
+      EventRepo().addEvent({
+        "user_read_time": "flipped_under_30_sec",
+        "postId": "$allPostList",
+        "seconds": seconds.toString(),
+        "createAt": DateTime.now().toString(),
+      }, "perDay_read_time");
+      logEvent2("flipped_under_30_sec");
+    } else if (seconds < 60) {
+      EventRepo().addEvent({
+        "user_read_time": "flipped_under_60_sec",
+        "postId": "$allPostList",
+        "seconds": seconds.toString(),
+        "createAt": DateTime.now().toString(),
+      }, "perDay_read_time");
+      logEvent2("flipped_under_60_sec");
+    } else {
+      EventRepo().addEvent({
+        "user_read_time": "flipped_over_60_sec",
+        "postId": "$allPostList",
+        "seconds": seconds.toString(),
+        "createAt": DateTime.now().toString(),
+      }, "perDay_read_time");
+      logEvent2("flipped_over_60_sec");
+    }
+    // final prefs = await SharedPreferences.getInstance();
+    //
+    // List<String> triggered =
+    //     prefs.getStringList("reading_time_triggered_$today") ?? [];
+    //
+    // for (int threshold in thresholds) {
+    //   String key = "read_${threshold}_sec";
+    //   if (secondsSpent >= threshold && !triggered.contains(key)) {
+    //     // Mark as triggered
+    //     triggered.add(key);
+    //     log("send time event $key stored");
+    //
+    //     // Log event
+    //     logEvent2(key);
+
+    //   }
+    // }
+    //
+    // // Save updated triggered list
+    // prefs.setStringList("reading_time_triggered_$today", triggered);
+  }
+
 
   static Future<void> checkRetention() async {
     final prefs = await SharedPreferences.getInstance();
