@@ -93,7 +93,10 @@ class BaseUrls {
   ///Update profile
   static const String getProfile = "/profile";
 
-  ///Referral
+  ///Referral Apis
+  static const String getReferralStats = "/referral/stats";
+  static const String getAvailableRewards = "/rewards/available";
+  static const String getClaimedReward = "/rewards/claim";
 }
 
 
