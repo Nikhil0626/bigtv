@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/referral_provider/referral_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -226,91 +227,62 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                 ),
               ),
               height(height: 5.h),
-              SizedBox(
-                height: 100.h,
-                width: 327.w,
-                child: Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  color: Colors.white,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 24.r,
-                          backgroundColor: Colors.orange.shade800,
-                          child: SvgPicture.asset(
-                            'assets/images/gift.svg',
-                            color: Colors.white,
-                            width: 24,
-                            height: 24,
-                            fit: BoxFit.contain,
-                          ),
-                        ),
-                        width(width: 12.w),
-                        Expanded(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "2 GB Data",
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 16.sp,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              height(height: 4.h),
-                              Text(
-                                "Earned on 22 Jun 25",
-                                style: TextStyle(
-                                  color: Colors.grey.shade600,
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.end,
+              Container(
+                // color: Colors.black,
+                height: 400,
+                child: ListView.builder(
+                    // shrinkWrap: true,
+
+                    itemCount: referralProvider.referralRewardsClaimed.length,
+                  itemBuilder: (context, index) {
+                    final reward = referralProvider.referralRewardsClaimed[index];
+                    return Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      color: Colors.white,
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        child: Row(
                           children: [
-                            Text(
-                              "-10",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontSize: 12.sp,
-                                fontWeight: FontWeight.w800,
+                            Padding(
+                               padding: const EdgeInsets.only(top: 5),
+                              child: CachedNetworkImage(
+                                imageUrl: reward['icon_url'] ?? "",
+                                width: 60,
+                                height: 60,
+                                fit: BoxFit.contain,
                               ),
                             ),
-                            height(height: 6.h),
-                            TextButton(
-                              onPressed: () {},
-                              style: TextButton.styleFrom(
-                                backgroundColor: Colors.green.shade100,
-                                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 3.h),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
+                            width(width: 12),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  reward['value'] ?? "",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16.sp,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
-                              ),
-                              child: Text(
-                                "Claimed",
-                                style: TextStyle(
-                                  color: Colors.green.shade900,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 12.sp,
+                                height(height: 4.h),
+                                Text(
+                                  "Earned on 22 Jun 25",
+                                  style: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
+                    );
+                  }
                 ),
               ),
             ],

@@ -38,8 +38,6 @@ class _ReferEarnState extends State<ReferEarn> {
   String? myReferralCode;
   String? myReferralLink;
 
-
-
   void getData() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     myReferralCode =
@@ -294,8 +292,7 @@ class _ReferEarnState extends State<ReferEarn> {
                               ),
                             ),
                             Text(
-                              "${referralProvider.referralData['needed']} / ${referralProvider.referralData['needed'] +
-                                  referralProvider.referralData['downloads']} needed",
+                              "${referralProvider.referralData['needed']} / ${referralProvider.referralData['needed'] + referralProvider.referralData['downloads']} needed",
                               style: TextStyle(
                                 color: Colors.black,
                                 fontSize: 14.sp,
@@ -342,10 +339,11 @@ class _ReferEarnState extends State<ReferEarn> {
                   child: PageView.builder(
                       scrollDirection: Axis.horizontal,
                       controller: PageController(viewportFraction: 1.0),
-                      itemCount: referralProvider.referralRewardsList.length,
+                      itemCount:
+                          referralProvider.referralData['next_reward'].length,
                       itemBuilder: (context, index) {
                         final reward =
-                            referralProvider.referralRewardsList[index];
+                            referralProvider.referralData['next_reward'][index];
                         return Container(
                           padding:
                               EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -402,7 +400,118 @@ class _ReferEarnState extends State<ReferEarn> {
                               //hai
                               TextButton(
                                 onPressed: () async {
-                                  await referralProvider.postClaimedRewards(reward,"","", false);
+                                  String? selectedTelecom;
+                                  bool isMyNumber = true;
+                                  TextEditingController phoneController =
+                                      TextEditingController();
+                                  showModalBottomSheet(
+                                    isScrollControlled: true,
+                                    context: context,
+                                    backgroundColor: Colors.white,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(16)),
+                                    ),
+                                    builder: (BuildContext context) {
+                                      return Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 20.0, vertical: 24.0),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              // DropdownButtonFormField<String>(
+                                              //   value: selectedTelecom,
+                                              //   decoration: InputDecoration(
+                                              //     labelText:
+                                              //         'Select your network',
+                                              //     border: OutlineInputBorder(),
+                                              //   ),
+                                              //   items: referralProvider
+                                              //       .telecomProviders
+                                              //       .map((String value) {
+                                              //     return DropdownMenuItem<
+                                              //         String>(
+                                              //       value: value,
+                                              //       child: Text(value),
+                                              //     );
+                                              //   }).toList(),
+                                              //   onChanged: (String? value) {
+                                              //     setState(() =>
+                                              //         selectedTelecom = value);
+                                              //   },
+                                              // ),
+                                              SizedBox(height: 16),
+                                              Row(
+                                                children: [
+                                                  Checkbox(
+                                                    value: isMyNumber,
+                                                    onChanged: (value) {
+                                                      setState(() {
+                                                        isMyNumber = value!;
+                                                      });
+                                                    },
+                                                  ),
+                                                  const Text(
+                                                      'Do you want to recharge other number?'),
+                                                ],
+                                              ),
+                                              if (isMyNumber) ...[
+                                                const SizedBox(height: 16),
+                                                TextField(
+                                                  controller: phoneController,
+                                                  decoration:
+                                                      const InputDecoration(
+                                                    labelText:
+                                                        'Enter your phone number',
+                                                    border:
+                                                        OutlineInputBorder(),
+                                                    prefixText: '+91 ',
+                                                  ),
+                                                  keyboardType:
+                                                      TextInputType.phone,
+                                                ),
+                                              ],
+                                              SizedBox(height: 10,),
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: ElevatedButton(
+                                                  onPressed: () {
+                                                    if (selectedTelecom == null) {
+                                                      CustomToast.showErrorToast(msg: 'Please select a telecom provider');
+                                                      return;
+                                                    }
+
+                                                    if (!isMyNumber && phoneController.text.isEmpty) {
+                                                      CustomToast.showErrorToast(msg: "'Please enter phone number'");
+                                                      return;
+                                                    }
+
+                                                    Navigator.pop(context);
+                                                    referralProvider.postClaimedRewards(
+                                                      reward,
+                                                      selectedTelecom!,
+                                                      isMyNumber ? "" : phoneController.text,
+                                                      isMyNumber,
+                                                    );
+                                                  },
+                                                  style: ElevatedButton.styleFrom(
+                                                    backgroundColor: Colors.blue, // Background color
+                                                    foregroundColor: Colors.white, // Text/icon color
+                                                    elevation: 5, // Button shadow
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(10), // Rounded corners
+                                                    ),
+                                                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Button padding
+                                                  ),
+                                                  child: Text('Submit'),
+                                                ),
+                                              ),
+                                            ],
+                                          ));
+                                    },
+                                  );
+                                  await referralProvider.postClaimedRewards(
+                                      reward, "", "", false);
                                 },
                                 style: TextButton.styleFrom(
                                   backgroundColor: Colors.lightBlue.shade500,
@@ -658,9 +767,6 @@ class _ReferEarnState extends State<ReferEarn> {
     );
   }
 }
-
-
- 
 
 class InvitedCardScreen extends StatelessWidget {
   final String image;

@@ -44,6 +44,7 @@ class ReferralProvider extends ChangeNotifier{
   Future getAvailableRewards() async {
     referralRewardsList.clear();
     isLoading = true;
+    notifyListeners();
     try {
       Response response = await ReferralRepo().getAvailableRewards();
       log("Rewards posted successfully: ${response.data}");
@@ -64,7 +65,6 @@ class ReferralProvider extends ChangeNotifier{
   }
 
   Future getClaimedRewards() async {
-    referralRewardsClaimed.clear();
     isLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
@@ -73,7 +73,7 @@ class ReferralProvider extends ChangeNotifier{
     };
     try {
       Response response = await ReferralRepo().getClaimedRewards(body);
-      log("Rewards posted successfully: ${response.data}");
+      log("Rewards posted successfully: 22222  ${response.data}");
       if (response.statusCode == 200) {
         referralRewardsClaimed.addAll(response.data);
         log("Get Rewards list updated: ${referralRewardsClaimed} items");
@@ -91,7 +91,6 @@ class ReferralProvider extends ChangeNotifier{
   }
 
   Future postClaimedRewards(reward,providerName, otherNumber, isMyNumber) async {
-    referralRewardsClaimed.clear();
     isLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
