@@ -18,9 +18,9 @@ class AllRewards extends StatefulWidget {
 class _AllRewardsState extends State<AllRewards> {
   @override
   void initState() {
-    // TODO: implement initState
+
     super.initState();
-    context.read<ReferralProvider>().getAvailableRewards();
+
   }
   @override
   Widget build(BuildContext context) {

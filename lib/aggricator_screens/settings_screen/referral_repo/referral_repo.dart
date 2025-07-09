@@ -19,13 +19,18 @@ class ReferralRepo extends BaseService{
 
   Future getClaimedRewards(body) async{
     Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
-      url: BaseUrls.getClaimedReward, method: RequestType.get,);
+      url: BaseUrls.getClaimedReward, method: RequestType.get,queryParameters: body);
     return response;
   }
 
   Future postClaimedRewards(body) async{
     Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
-        url: BaseUrls.getClaimedReward, method: RequestType.post,);
+        url: BaseUrls.getClaimedReward, method: RequestType.post,body: body);
+    return response;
+  }
+  Future getAllProvidersNames() async{
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.serviceProviders, method: RequestType.get,);
     return response;
   }
  }

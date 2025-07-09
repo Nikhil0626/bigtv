@@ -21,7 +21,6 @@ class _MovieRatingsState extends State<MovieRatings> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: true,
@@ -53,29 +52,84 @@ class _MovieRatingsState extends State<MovieRatings> {
                       ),
                     ),
                     child: ListView(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
                       padding: EdgeInsets.zero,
                       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                       children: [
                         height(height: 10),
                         Container(
-                          height: 56,
-                          width: double.infinity,
+                          height: 170,
+                          width: MediaQuery.of(context).size.width,
                           decoration: BoxDecoration(
                             border: Border.all(color: Colors.grey.shade300),
                             color: Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(10),
-                            // boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), offset: Offset(0, 3))],
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              ratingBlock("Chota Meter", widget.article['chotaMeter']),
-                              width(width: 20),
-                              ratingBlock("Critic Rating", widget.article['chotarating']),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                children: [
+                                  ratingBlock("Chota Meter", widget.article['chotaMeter']),
+                                  ratingBlock("Critic Rating", widget.article['chotarating']),
+                                ],
+                              ),
+                              Divider(),
+                              height(height: 8),
+
+                              // BookMyShow
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("BookMyShow", style: fontStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.star, size: 16, color: AppColors.ratingColor),
+                                      width(width: 4),
+                                      Text("4.5", style: fontStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              height(height: 6),
+
+                              // NTV
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("NTV", style: fontStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.star, size: 16, color: AppColors.ratingColor),
+                                      width(width: 4),
+                                      Text("7.2", style: fontStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              height(height: 6),
+
+                              // Metacritic
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Metacritic", style: fontStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                                  Row(
+                                    children: [
+                                      Icon(Icons.star, size: 16, color: AppColors.ratingColor),
+                                      width(width: 4),
+                                      Text("6.8", style: fontStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
-                        height(height: 10),
+                        height(height: 12),
                         Padding(
                           padding: EdgeInsets.only(right: 15),
                           child: Text(widget.article['title'], style: fontStyle(fontSize: 16, fontWeight: FontWeight.w700)),

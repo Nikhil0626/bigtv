@@ -60,11 +60,11 @@ class CustomToast {
     return _showToast(flush);
   }
 
-  static Future<dynamic> showErrorToast({@required String? msg}) {
+  static Future<dynamic> showErrorToast({@required String? msg,int timeDuration = 1 }) {
     Flushbar flush = Flushbar(
       message: msg.toString(),
       backgroundColor: Colors.red,
-      duration: const Duration(seconds: 1),
+      duration:  Duration(seconds:timeDuration),
       margin: const EdgeInsets.all(15),
       borderRadius: const BorderRadius.all(Radius.circular(15)),
       icon: const Icon(

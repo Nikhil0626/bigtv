@@ -1,12 +1,11 @@
-import 'dart:ffi';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/referral_provider/referral_provider.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
-import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +16,6 @@ import '../../../utils/app_fonts.dart';
 import '../../event_repo.dart';
 import 'all_rewards.dart';
 import 'claimed_rewards.dart';
-import 'no_claimed_rewards.dart';
 
 class ReferEarn extends StatefulWidget {
   const ReferEarn({super.key});
@@ -29,9 +27,10 @@ class ReferEarn extends StatefulWidget {
 class _ReferEarnState extends State<ReferEarn> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     context.read<ReferralProvider>().getReferralStats();
+    context.read<ReferralProvider>().getAvailableRewards();
+
     getData();
   }
 
@@ -40,10 +39,9 @@ class _ReferEarnState extends State<ReferEarn> {
 
   void getData() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    myReferralCode =
-        sharedPreferences.getString("myReferralCode") ?? "hello raja";
-    myReferralLink =
-        sharedPreferences.getString("myReferralLink") ?? "hello raja";
+    myReferralCode = sharedPreferences.getString("myReferralCode") ?? "hello raja";
+    myReferralLink = sharedPreferences.getString("myReferralLink") ?? "hello raja";
+    log("get code $myReferralCode /////  get my link $myReferralLink");
     setState(() {});
   }
 
@@ -60,114 +58,83 @@ class _ReferEarnState extends State<ReferEarn> {
             child: Icon(Icons.arrow_back, color: Colors.black, size: 25)),
         title: Text(
           "Refer & Earn",
-          style: TextStyle(
-              color: Colors.black,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w700),
+          style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w700),
         ),
       ),
       body: SafeArea(
         child: Consumer<ReferralProvider>(builder: (_, referralProvider, __) {
-          double progress = referralProvider.referralData['downloads'] /
-              (referralProvider.referralData['needed'] +
-                  referralProvider.referralData['downloads']);
-          int difference = referralProvider.referralData['needed'];
-          progress = progress.clamp(0.0, 1.0);
           return SingleChildScrollView(
               child: Column(
             children: [
               Container(
-                // width: 350,
                 decoration: BoxDecoration(
-                  color: Colors.blue.shade700,
-                  borderRadius: BorderRadius.only(
-                      bottomLeft: Radius.circular(10),
-                      bottomRight: Radius.circular(10)),
+                  borderRadius: BorderRadius.only(bottomRight: Radius.circular(20), bottomLeft: Radius.circular(20)), // rounded corners
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      Color(0xFF00A8FF), // End color
+                      Color(0xFF1371A2), // Start color
+                    ],
+                  ),
                 ),
                 padding: const EdgeInsets.all(18.0),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => NoClaimedRewards(),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        "Refer & Earn",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w700,
-                        ),
+                    Text(
+                      "Refer & Earn",
+                      style: fontStyle(
+                        color: Colors.white,
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
-                    height(height: 10.h),
+                    height(height: 10),
                     Text(
                       "Share ChotaNews app with friends and earn rewards!",
-                      style: TextStyle(
+                      style: fontStyle(
                         color: Colors.white,
-                        fontSize: 14.sp,
+                        fontSize: 14,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    height(height: 15.h),
+                    height(height: 15),
                     Text(
                       "My Referral code",
-                      style: TextStyle(
+                      style: fontStyle(
                         color: Colors.white,
-                        fontSize: 16.sp,
+                        fontSize: 18,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    height(height: 10.h),
+                    height(height: 10),
                     Container(
-                      height: 44.h,
-                      width: double.infinity,
+                      height: 40,
+                      width: MediaQuery.of(context).size.width,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(13),
+                        borderRadius: BorderRadius.circular(10),
                       ),
-                      padding: EdgeInsets.symmetric(horizontal: 15),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "$myReferralCode",
-                            style: TextStyle(
-                              color: Colors.lightBlue,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          GestureDetector(
-                            // onTap: (){
-                            //   Clipboard.setData(ClipboardData(text: "${myReferralCode}"));
-                            //   ScaffoldMessenger.of(context).showSnackBar(
-                            //     SnackBar(content: Text("Copied to clipboard")),
-                            //   );
-                            // },
-                            child: Icon(
-                              Icons.copy,
-                              color: Colors.lightBlue,
-                              size: 25,
-                            ),
-                          ),
-                        ],
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "$myReferralCode",
+                        style: fontStyle(
+                          color: Colors.lightBlue,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                    height(height: 16.h),
+                    height(height: 16),
                     SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
+                      width: MediaQuery.of(context).size.width,
+                      child: InkWell(
+                        onTap: () {
                           EventRepo().addEvent({
                             "shareApp": Platform.isIOS ? "iOS" : "Android",
                             "createAt": DateTime.now().toString(),
@@ -176,35 +143,36 @@ class _ReferEarnState extends State<ReferEarn> {
                             "Click link and get bonus: $myReferralLink",
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.lightBlue,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
+                        child: Container(
+                          height: 40,
+                          width: MediaQuery.of(context).size.width,
+                          decoration: BoxDecoration(
+                            color: Color(0xff00A8FF),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.share_outlined,
-                                color: Colors.white, size: 25),
-                            width(width: 12.w),
-                            Text(
-                              "Invite Friends",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.share_outlined, color: Colors.white, size: 20),
+                              width(width: 12.w),
+                              Text(
+                                "Invite Friends",
+                                style: fontStyle(
+                                  color: Colors.white,
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
               ),
-              height(height: 10.h),
+              height(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 6.0,
@@ -215,38 +183,35 @@ class _ReferEarnState extends State<ReferEarn> {
                     Expanded(
                         flex: 1,
                         child: InvitedCardScreen(
-                          count: referralProvider.referralData['invited']
-                              .toString(),
+                          count: referralProvider.referralData['invited'].toString(),
                           image: 'assets/images/users.svg',
                           name: "Invited",
                         )),
                     Expanded(
                         flex: 1,
                         child: InvitedCardScreen(
-                          count: referralProvider.referralData['downloads']
-                              .toString(),
+                          count: referralProvider.referralData['downloads'].toString(),
                           image: 'assets/images/download.svg',
                           name: "Downloads",
                         )),
                     Expanded(
                         flex: 1,
                         child: InvitedCardScreen(
-                          count: referralProvider.referralData['pending']
-                              .toString(),
+                          count: referralProvider.referralData['pending'].toString(),
                           image: 'assets/images/pending.svg',
                           name: "Pending",
                         )),
                   ],
                 ),
               ),
-              height(height: 10.h),
+              height(height: 10),
               Container(
                 height: 130,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16.0,
                 ),
                 child: Card(
-                  elevation: 5,
+                  elevation: 2,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -261,9 +226,9 @@ class _ReferEarnState extends State<ReferEarn> {
                           children: [
                             Text(
                               "Progress to next Reward",
-                              style: TextStyle(
+                              style: fontStyle(
                                 color: Colors.black,
-                                fontSize: 15.sp,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -272,57 +237,59 @@ class _ReferEarnState extends State<ReferEarn> {
                               backgroundColor: Colors.blue,
                               child: SvgPicture.asset(
                                 'assets/images/progress_reward.svg',
-                                width: 18.w,
-                                height: 18.h,
+                                width: 20,
+                                height: 20,
                                 fit: BoxFit.contain,
                               ),
                             ),
                           ],
                         ),
-                        height(height: 6.h),
+                        height(height: 6),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "${referralProvider.referralData['downloads']} Friends referred",
-                              style: TextStyle(
+                              "${referralProvider.referralData['downloads'] ?? 0} Friends referred",
+                              style: fontStyle(
                                 color: Colors.grey.shade600,
-                                fontSize: 14.sp,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             Text(
-                              "${referralProvider.referralData['needed']} / ${referralProvider.referralData['needed'] + referralProvider.referralData['downloads']} needed",
-                              style: TextStyle(
+                              " needed",
+                              style: fontStyle(
                                 color: Colors.black,
-                                fontSize: 14.sp,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
                         ),
-                        height(height: 8.h),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(10),
-                          child: Container(
-                            height: 8.h,
-                            width: 300.w,
-                            color: Colors.grey.shade300,
-                            child: FractionallySizedBox(
-                              alignment: Alignment.centerLeft,
-                              widthFactor: progress,
-                              child: Container(
-                                color: Colors.green.shade800,
+                        height(height: 8),
+                        Center(
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Container(
+                              height: 8,
+                              width: MediaQuery.of(context).size.width - 60,
+                              color: Colors.grey.shade300,
+                              child: FractionallySizedBox(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: referralProvider.progress ?? 0.0,
+                                child: Container(
+                                  color: Colors.green.shade800,
+                                ),
                               ),
                             ),
                           ),
                         ),
-                        height(height: 4.h),
+                        height(height: 6),
                         Text(
-                          "You're ${difference} friends away from your next reward!",
-                          style: TextStyle(
+                          "You're ${referralProvider.difference ?? 0} friends away from your next reward!",
+                          style: fontStyle(
                             color: Colors.grey.shade500,
-                            fontSize: 12.sp,
+                            fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -331,431 +298,258 @@ class _ReferEarnState extends State<ReferEarn> {
                   ),
                 ),
               ),
-              height(height: 10.h),
-              if (referralProvider.referralRewardsList.isNotEmpty)
+              height(height: 10),
+              if (referralProvider.referralData['next_reward'].isNotEmpty)
                 SizedBox(
-                  height: 88.h,
-                  width: 327.w,
+                  width: MediaQuery.of(context).size.width,
+                  height: 120,
                   child: PageView.builder(
                       scrollDirection: Axis.horizontal,
                       controller: PageController(viewportFraction: 1.0),
-                      itemCount:
-                          referralProvider.referralData['next_reward'].length,
+                      itemCount: referralProvider.referralData['next_reward'].length,
                       itemBuilder: (context, index) {
-                        final reward =
-                            referralProvider.referralData['next_reward'][index];
+                        final reward = referralProvider.referralData['next_reward'][index];
                         return Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          margin: EdgeInsets.symmetric(horizontal: 16),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
                             image: DecorationImage(
-                              image: AssetImage(
-                                  'assets/svg/whatsapp_background.png'),
-                              opacity: 0.3,
+                              image: AssetImage('assets/svg/icons_bg1.png'),
+
                               fit: BoxFit.cover, //
                             ),
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Container(
-                                width: 80.w,
-                                height: 80.h,
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 5, horizontal: 5),
-                                child: Center(
-                                  child: CachedNetworkImage(
-                                    imageUrl: reward['icon_url'],
-                                    width: 70.w,
-                                    height: 70.h,
-                                    fit: BoxFit.contain,
-                                  ),
-                                ),
-                              ),
                               Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
                                     "${reward['reward_category']}",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w800,
+                                    style: fontStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   ),
-                                  height(height: 4.h),
+                                  height(height: 6),
                                   Text(
                                     "${reward['value']}",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w700,
+                                    style: fontStyle(
+                                      color: Colors.white,
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  height(height: 10),
+                                  InkWell(
+                                    onTap: () async {
+                                      log(reward['reward_category']);
+                                      context.read<ReferralProvider>().allProvidersRechargeList = [];
+                                      context.read<ReferralProvider>().allProvidersOttList = [];
+                                      context.read<ReferralProvider>().selectedOperator = "";
+                                      context.read<ReferralProvider>().getAllProvidersNames().then(
+                                        (value) {
+                                          if (reward['reward_category'] == "Mobile Recharge") {
+                                            showRechargeOperatorBottomSheet(context, reward, true);
+                                          } else if (reward['reward_category'] == "OTT Subscription") {
+                                            showRechargeOperatorBottomSheet(context, reward, false);
+                                          } else {
+                                            context.read<ReferralProvider>().postClaimedRewards(
+                                              reward,
+                                                  "",
+                                                );
+                                          }
+                                        },
+                                      );
+                                    },
+                                    child: Container(
+                                      width: 80,
+                                      height: 30,
+                                      decoration: BoxDecoration(
+                                        color: Colors.lightBlue,
+                                        borderRadius: BorderRadius.circular(8),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          "Claim",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ],
                               ),
-                              //hai
-                              TextButton(
-                                onPressed: () async {
-                                  String? selectedTelecom;
-                                  bool isMyNumber = true;
-                                  TextEditingController phoneController =
-                                      TextEditingController();
-                                  showModalBottomSheet(
-                                    isScrollControlled: true,
-                                    context: context,
-                                    backgroundColor: Colors.white,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.vertical(
-                                          top: Radius.circular(16)),
-                                    ),
-                                    builder: (BuildContext context) {
-                                      return Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 20.0, vertical: 24.0),
-                                          child: Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              // DropdownButtonFormField<String>(
-                                              //   value: selectedTelecom,
-                                              //   decoration: InputDecoration(
-                                              //     labelText:
-                                              //         'Select your network',
-                                              //     border: OutlineInputBorder(),
-                                              //   ),
-                                              //   items: referralProvider
-                                              //       .telecomProviders
-                                              //       .map((String value) {
-                                              //     return DropdownMenuItem<
-                                              //         String>(
-                                              //       value: value,
-                                              //       child: Text(value),
-                                              //     );
-                                              //   }).toList(),
-                                              //   onChanged: (String? value) {
-                                              //     setState(() =>
-                                              //         selectedTelecom = value);
-                                              //   },
-                                              // ),
-                                              SizedBox(height: 16),
-                                              Row(
-                                                children: [
-                                                  Checkbox(
-                                                    value: isMyNumber,
-                                                    onChanged: (value) {
-                                                      setState(() {
-                                                        isMyNumber = value!;
-                                                      });
-                                                    },
-                                                  ),
-                                                  const Text(
-                                                      'Do you want to recharge other number?'),
-                                                ],
-                                              ),
-                                              if (isMyNumber) ...[
-                                                const SizedBox(height: 16),
-                                                TextField(
-                                                  controller: phoneController,
-                                                  decoration:
-                                                      const InputDecoration(
-                                                    labelText:
-                                                        'Enter your phone number',
-                                                    border:
-                                                        OutlineInputBorder(),
-                                                    prefixText: '+91 ',
-                                                  ),
-                                                  keyboardType:
-                                                      TextInputType.phone,
-                                                ),
-                                              ],
-                                              SizedBox(height: 10,),
-                                              SizedBox(
-                                                width: double.infinity,
-                                                child: ElevatedButton(
-                                                  onPressed: () {
-                                                    if (selectedTelecom == null) {
-                                                      CustomToast.showErrorToast(msg: 'Please select a telecom provider');
-                                                      return;
-                                                    }
-
-                                                    if (!isMyNumber && phoneController.text.isEmpty) {
-                                                      CustomToast.showErrorToast(msg: "'Please enter phone number'");
-                                                      return;
-                                                    }
-
-                                                    Navigator.pop(context);
-                                                    referralProvider.postClaimedRewards(
-                                                      reward,
-                                                      selectedTelecom!,
-                                                      isMyNumber ? "" : phoneController.text,
-                                                      isMyNumber,
-                                                    );
-                                                  },
-                                                  style: ElevatedButton.styleFrom(
-                                                    backgroundColor: Colors.blue, // Background color
-                                                    foregroundColor: Colors.white, // Text/icon color
-                                                    elevation: 5, // Button shadow
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(10), // Rounded corners
-                                                    ),
-                                                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12), // Button padding
-                                                  ),
-                                                  child: Text('Submit'),
-                                                ),
-                                              ),
-                                            ],
-                                          ));
-                                    },
-                                  );
-                                  await referralProvider.postClaimedRewards(
-                                      reward, "", "", false);
-                                },
-                                style: TextButton.styleFrom(
-                                  backgroundColor: Colors.lightBlue.shade500,
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 16, vertical: 8),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Claim",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
+                              Image.asset(
+                                "assets/svg/gift.png",
+                                height: 80,
+                                width: 80,
                               ),
                             ],
                           ),
                         );
                       }),
                 ),
-              height(height: 5.h),
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 17),
-                    child: Text(
-                      "Popular Rewards",
-                      style: TextStyle(
-                          fontSize: 16.sp, fontWeight: FontWeight.w900),
-                    ),
+              height(height: 6),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 20.0),
+                  child: Text(
+                    "Popular Rewards",
+                    textAlign: TextAlign.start,
+                    style: fontStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
-                  Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 12),
-                    child: TextButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => AllRewards(),
-                              ));
-                        },
-                        child: Text(
-                          "View All",
-                          style: TextStyle(
-                              color: Colors.lightBlue,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600),
-                        )),
-                  )
-                ],
+                ),
               ),
-              height(height: 10.h),
-              GridView.builder(
-                  itemCount: referralProvider.referralRewardsList.length > 3
-                      ? 4
-                      : referralProvider.referralRewardsList.length,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 6.w,
-                    mainAxisSpacing: 6.h,
-                    childAspectRatio: 1.0,
-                  ),
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    final reward = referralProvider.referralRewardsList[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16.0,
+              height(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: SizedBox(
+                  height: 400,
+                  width: MediaQuery.of(context).size.width,
+                  child: GridView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: referralProvider.referralRewardsList.length,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        childAspectRatio: 1.1,
                       ),
-                      child: Card(
-                          elevation: 5,
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12.r),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                CachedNetworkImage(
-                                  imageUrl: reward['icon_url'] ?? '',
-                                  fit: BoxFit.cover,
-                                  width: 70.w,
-                                  height: 70.h,
-                                  placeholder: (context, url) =>
-                                      CircularProgressIndicator(strokeWidth: 2),
-                                  errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
-                                ),
-                                SizedBox(height: 1.h),
-                                Text(
-                                  reward['name'] ?? "Reward Title",
-                                  style: fontStyle(
-                                    color: Colors.grey.shade500,
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                SizedBox(height: 2.h),
-                                Text(
-                                  reward['value'] ??
-                                      "Reward description goes here.",
-                                  style: fontStyle(
-                                    color: Colors.black,
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                SizedBox(height: 2.h),
-                                Text(
-                                  "${reward['required_referrals'].toString()} referral" ??
-                                      '',
-                                  style: fontStyle(
-                                    color: Colors.black,
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                )
-                              ],
+                      shrinkWrap: true,
+                      itemBuilder: (context, index) {
+                        final reward = referralProvider.referralRewardsList[index];
+                        return Card(
+                            elevation: 2,
+                            color: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
-                          )),
-                    );
-                  }),
-              height(height: 15.h),
-              // SizedBox(
-              //   height: 60.h,
-              //   width: 327.w,
-              //   child: Card(
-              //     elevation: 7,
-              //     shape: RoundedRectangleBorder(
-              //       borderRadius: BorderRadius.circular(10),
-              //     ),
-              //     color: Colors.white,
-              //     child: Padding(
-              //       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-              //       child: Row(
-              //         mainAxisAlignment: MainAxisAlignment.spaceAround,
-              //         children: [
-              //           Container(
-              //             width: 32.w,
-              //             height: 32.h,
-              //             decoration: BoxDecoration(
-              //               color: Colors.lightBlue,
-              //               borderRadius: BorderRadius.circular(8),
-              //             ),
-              //             child: Center(
-              //               child: SvgPicture.asset(
-              //                 'assets/images/users.svg',
-              //                 color: Colors.white,
-              //                 fit: BoxFit.contain,
-              //                 width: 24,
-              //                 height: 24,
-              //               ),
-              //             ),
-              //           ),
-              //           height(height: 2.h),
-              //           Text(
-              //             "Referral History",
-              //             style: TextStyle(
-              //               color: Colors.black,
-              //               fontSize: 16.sp,
-              //               fontWeight: FontWeight.w700,
-              //             ),
-              //           ),
-              //           height(height: 2.h),
-              //           IconButton(
-              //             onPressed: () {},
-              //             icon: Icon(
-              //               Icons.arrow_forward_ios_outlined,
-              //               color: Colors.grey.shade600,
-              //               size: 25,
-              //             ),
-              //           ),
-              //         ],
-              //       ),
-              //     ),
-              //   ),
-              // ),
-              height(height: 5.h),
-              SizedBox(
-                height: 60.h,
-                width: 327.w,
-                child: Card(
-                  elevation: 7,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  color: Colors.white,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Container(
-                          width: 32.w,
-                          height: 32.h,
-                          decoration: BoxDecoration(
-                            color: Colors.lightBlue,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Center(
-                            child: SvgPicture.asset(
-                              'assets/images/progress_reward.svg',
-                              color: Colors.white,
-                              fit: BoxFit.contain,
-                              width: 24.w,
-                              height: 24.h,
-                            ),
-                          ),
-                        ),
-                        height(height: 2.h),
-                        Text(
-                          "Claimed Rewards",
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        height(height: 2.h),
-                        IconButton(
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ClaimedRewards(),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  CachedNetworkImage(
+                                    imageUrl: reward['icon_url'] ?? '',
+                                    fit: BoxFit.cover,
+                                    width: 80,
+                                    height: 80,
+                                    placeholder: (context, url) => SizedBox(
+                                      width: 80,
+                                      height: 80,
+                                      child: AppLoadingScreen(),
+                                    ),
+                                    errorWidget: (context, url, error) => Icon(
+                                      Icons.error,
+                                      size: 60,
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    reward['name'] ?? "Reward Title",
+                                    textAlign: TextAlign.center,
+                                    style: fontStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    reward['value'] ?? "Reward description goes here.",
+                                    style: fontStyle(
+                                      color: Colors.black,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    "${reward['required_referrals'].toString()} referral" ?? '',
+                                    style: fontStyle(
+                                      color: Colors.black,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  )
+                                ],
                               ),
-                            );
-                          },
-                          icon: Icon(
+                            ));
+                      }),
+                ),
+              ),
+              height(height: 16),
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ClaimedRewards(),
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 50,
+                  width: MediaQuery.of(context).size.width,
+                  margin: EdgeInsets.symmetric(horizontal: 14),
+                  child: Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    color: Colors.white,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              color: Colors.lightBlue,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Center(
+                              child: SvgPicture.asset(
+                                'assets/images/progress_reward.svg',
+                                color: Colors.white,
+                                fit: BoxFit.contain,
+                                width: 24,
+                                height: 24,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "Claimed Rewards",
+                            style: fontStyle(
+                              color: Colors.black,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                          Icon(
                             Icons.arrow_forward_ios_outlined,
                             color: Colors.grey.shade600,
-                            size: 25,
+                            size: 20,
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -764,6 +558,121 @@ class _ReferEarnState extends State<ReferEarn> {
           ));
         }),
       ),
+    );
+  }
+
+  void showRechargeOperatorBottomSheet(BuildContext context, referralProvider, isRecharge) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      isScrollControlled: true,
+      builder: (context) {
+        List<ProvidersNamesModel> optNames = isRecharge ? context.watch<ReferralProvider>().allProvidersRechargeList : context.watch<ReferralProvider>().allProvidersOttList;
+        return Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: StatefulBuilder(
+            builder: (context, setState) {
+              return Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: Container(
+                            width: 100,
+                            height: 4,
+                            margin: const EdgeInsets.only(bottom: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[400],
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
+                        ),
+                        Text(
+                          'Select Operator',
+                          textAlign: TextAlign.start,
+                          style: fontStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        height(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: context.watch<ReferralProvider>().selectedOperator.isNotEmpty == true ? context.watch<ReferralProvider>().selectedOperator : null, // avoids empty string issue
+                          decoration: const InputDecoration(
+                            labelText: 'Select Operator',
+                            border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                          items: optNames.map<DropdownMenuItem<String>>((operator) {
+                            return DropdownMenuItem<String>(
+                              value: operator.id.toString(),
+                              child: Text(
+                                operator.name.toString(),
+                                style: fontStyle(fontSize: 14, color: Colors.black),
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (String? value) {
+                            log(value.toString());
+                            context.read<ReferralProvider>().updateProvider(value);
+                          },
+                        ),
+                        height(height: 20),
+                        ElevatedButton(
+                          onPressed: (context.watch<ReferralProvider>().selectedOperator == null || context.watch<ReferralProvider>().selectedOperator.isEmpty)
+                              ? null
+                              : () async {
+                                  await context
+                                      .read<ReferralProvider>()
+                                      .postClaimedRewards(
+                                        referralProvider,
+                                        "",
+                                      )
+                                      .then(
+                                    (value) {
+                                      Navigator.pop(context);
+                                    },
+                                  );
+                                  print('Selected Operator: $referralProvider');
+                                },
+                          style: ElevatedButton.styleFrom(
+                            minimumSize: Size(double.infinity, 50),
+                            backgroundColor: Colors.blue,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            'Submit',
+                            style: fontStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white),
+                          ),
+                        ),
+                        height(height: 10),
+                      ],
+                    ),
+                  ),
+                  Positioned(right: 16,
+                    top: 10,
+                    child: InkWell(
+                      onTap: (){
+                        Navigator.pop(context);
+                      },
+                      child: Icon(Icons.cancel,color: Colors.red,size: 24,),
+                    ),
+                  )
+                ],
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -787,7 +696,7 @@ class InvitedCardScreen extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.all(8.0),
       child: Card(
-        elevation: 5,
+        elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -798,31 +707,31 @@ class InvitedCardScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircleAvatar(
-                radius: 20,
+                radius: 25,
                 backgroundColor: Colors.blue.shade100,
                 child: SvgPicture.asset(
                   image ?? "",
                   fit: BoxFit.contain,
-                  width: 24.w,
-                  height: 24.h,
+                  width: 24,
+                  height: 24,
                 ),
               ),
-              height(height: 8.h),
+              height(height: 8),
               Text(
                 count ?? "0",
-                style: TextStyle(
+                style: fontStyle(
                   color: Colors.black,
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w700,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              height(height: 4.h),
+              height(height: 4),
               Text(
                 name ?? "",
-                style: TextStyle(
+                style: fontStyle(
                   color: Colors.black,
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
                 ),
                 textAlign: TextAlign.center,
               ),
