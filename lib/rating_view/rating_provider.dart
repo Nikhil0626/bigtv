@@ -46,18 +46,17 @@ class RatingProvider extends ChangeNotifier {
     }
   }
 
-   Map<String,dynamic>  getAllReviews = {};
+  Map<String, dynamic> getAllReviews = {};
+
   Future getReviews(String postId) async {
     try {
       Response response = await RatingRepo().getReviews(postId);
       log(response.data.toString());
       if (response.statusCode == 200) {
-        getAllReviews= response.data;
+        getAllReviews = response.data;
         notifyListeners();
         log(getAllReviews.toString());
       }
     } catch (e, st) {}
-
   }
-
 }
