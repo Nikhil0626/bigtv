@@ -8,6 +8,7 @@ import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/s
 import 'package:chotanews/aggricator_screens/settings_screen/settings_view/refer_earn.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -148,12 +149,17 @@ class _SettingsViewState extends State<SettingsView> {
               //   "visitPageName": "Terms & Conditions",
               //   "createAt": DateTime.now().toString(),
               // }, "compliance_section");
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ReferEarn(),
-                ),
-              );
+              if(!isNotificationsEnabled ){
+                CustomToast.showErrorToast(msg: "Your currently using your application in guest mode please login and join your Refer & Earn contest",timeDuration: 3);
+              }else{
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReferEarn(),
+                  ),
+                );
+              }
+
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy", () {
