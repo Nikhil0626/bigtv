@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:chotanews/aggricator_screens/settings_screen/referral_provider/referral_provider.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/event_cron.dart';
 
 import 'package:chotanews/services/permission_handler_services.dart';
+import 'package:chotanews/services/register_provider.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 
 import 'package:easy_localization/easy_localization.dart';
@@ -31,6 +31,7 @@ import 'aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'aggricator_screens/home_screen/home_provider/news_posts_provider.dart';
 import 'aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
 import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
+import 'aggricator_screens/referral_screen/referral_provider/referral_provider.dart';
 import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
@@ -133,18 +134,7 @@ class _MyAppState extends State<MyApp> {
     return ScreenUtilInit(
       designSize: const Size(360, 690), // Adjust to your design
       child: MultiProvider(
-        providers: [
-          ChangeNotifierProvider<EPapersProvider>(create: (_) => EPapersProvider()),
-          ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
-          ChangeNotifierProvider<NewsPostsProvider>(create: (_) => NewsPostsProvider()),
-          ChangeNotifierProvider<AuthenticationProvider>(create: (_) => AuthenticationProvider()),
-          ChangeNotifierProvider<ReelsProviders>(create: (_) => ReelsProviders()),
-          ChangeNotifierProvider<SettingsProvider>(create: (_) => SettingsProvider()),
-          ChangeNotifierProvider<ProfileProvider>(create: (_) => ProfileProvider()),
-          ChangeNotifierProvider<ReferralProvider>(create: (_) => ReferralProvider()),
-          ChangeNotifierProvider<RatingProvider>(create: (_) => RatingProvider()),
-          ChangeNotifierProvider(create: (_) => BannerAdsProvider())
-        ],
+        providers:  AppProviders.all,
         child: MaterialApp(
           navigatorKey: mainNavigatorKey,
           localizationsDelegates: context.localizationDelegates,

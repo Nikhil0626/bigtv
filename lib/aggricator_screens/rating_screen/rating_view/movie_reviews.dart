@@ -88,121 +88,94 @@ class _MovieRatingsState extends State<MovieRatings> {
                   topRight: Radius.circular(20),
                 ),
               ),
-              child: Expanded(
-                child: ListView(
-                  physics: NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                  children: [
-                    height(height: 10),
-                    Container(
-                      height: MediaQuery.of(context).size.height * .20,
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        color: AppColors.cardBackgroundColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              ratingBlock("Chota Meter", widget.article['chotaMeter']),
-                              ratingBlock("Critic Rating", widget.article['chotarating']),
-                            ],
-                          ),
-                          Divider(),
-                          height(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(child: Text("BookMyShow", maxLines: 1, style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600))),
-                              SizedBox(
-                                width: 80,
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.star, size: 16, color: AppColors.ratingColor),
-                                    width(width: 10),
-                                    Text("4.5 / 5", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          height(height: 6),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(child: Text("NTV", maxLines: 1, style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600))),
-                              SizedBox(
-                                width: 80,
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.star, size: 16, color: AppColors.ratingColor),
-                                    width(width: 10),
-                                    Text("7.2 / 10", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                          height(height: 6),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(child: Text("Metacritic", maxLines: 1, style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600))),
-                              SizedBox(
-                                width: 80,
-                                child: Row(
-                                  children: [
-                                    Icon(Icons.star, size: 16, color: AppColors.ratingColor),
-                                    width(width: 10),
-                                    Text("6.8 / 10", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
+              child: ListView(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                children: [
+                  height(height: 10),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      color: AppColors.cardBackgroundColor,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    height(height: 10),
-                    Text(widget.article['title'], maxLines: 2, overflow: TextOverflow.ellipsis, style: fontStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                    height(height: 10),
-                    Consumer<RatingProvider>(builder: (_, ratingProvider, __) {
-                      return Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: List.generate(5, (index) {
-                              return widget.article['userHasReviewed'] == false
-                                  ? GestureDetector(
-                                      onTap: () {
-                                        ratingProvider.ratingUpdate(index + 1);
-                                      },
-                                      child: Stack(
-                                        alignment: Alignment.center,
-                                        children: [
-                                          if (index < ratingProvider.selectedStar)
-                                            Icon(
-                                              Icons.star,
-                                              color: AppColors.ratingColor,
-                                              size: 36,
-                                            ),
-                                          Icon(
-                                            Icons.star_outline_outlined,
-                                            color: index < ratingProvider.selectedStar ? AppColors.ratingColor : Colors.grey,
-                                            size: 36,
-                                          ),
-                                        ],
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            ratingBlock("Chota Meter", widget.article['chotaMeter']),
+                            ratingBlock("Critic Rating", widget.article['chotarating']),
+                          ],
+                        ),
+                        Divider(),
+                        SizedBox(height: 4),
+                        if (widget.article['externalRatings'] != null &&
+                            widget.article['externalRatings'] is List &&
+                            widget.article['externalRatings'].isNotEmpty)
+                          SizedBox(
+                            height: widget.article['externalRatings'].length * 30.0, // approx height per item
+                            child: ListView.builder(
+                              itemCount: widget.article['externalRatings'].length,
+                              physics: NeverScrollableScrollPhysics(), // prevent scroll inside Column
+                              itemBuilder: (context, index) {
+                                final rating = widget.article['externalRatings'][index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "${rating['platform_name']}",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                        ),
                                       ),
-                                    )
-                                  : Stack(
+                                      SizedBox(
+                                        width: 80,
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.star, size: 16, color: AppColors.ratingColor),
+                                            SizedBox(width: 10),
+                                            Text(
+                                              "${rating['platform_rating']}",
+                                              style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  height(height: 10),
+                  Text(widget.article['title'], maxLines: 2, overflow: TextOverflow.ellipsis, style: fontStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  height(height: 10),
+                  Consumer<RatingProvider>(builder: (_, ratingProvider, __) {
+                    return Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(5, (index) {
+                            return widget.article['userHasReviewed'] == false
+                                ? GestureDetector(
+                                    onTap: () {
+                                      ratingProvider.ratingUpdate(index + 1);
+                                    },
+                                    child: Stack(
                                       alignment: Alignment.center,
                                       children: [
                                         if (index < ratingProvider.selectedStar)
@@ -217,90 +190,106 @@ class _MovieRatingsState extends State<MovieRatings> {
                                           size: 36,
                                         ),
                                       ],
-                                    );
-                            }),
-                          ),
-                          height(height: 12),
-                          if (widget.article['userHasReviewed'] == false && ratingProvider.isRated == false)
-                            TextFormField(
-                              onTap: () {
-                                context.read<HomeProvider>().pageChange(isValue: false);
-                              },
-                              controller: ratingProvider.commentController,
-                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
-                              decoration: InputDecoration(
-                                hintText: "Type your comment here (optional)",
-                                hintStyle: TextStyle(fontSize: 12, color: Colors.black45),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: Colors.lightBlue),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: Colors.lightBlue),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: Colors.lightBlue),
-                                ),
-                              ),
-                            ),
-                          if (widget.article['userHasReviewed'] == false && ratingProvider.isRated == false) height(height: 10),
-                          if (widget.article['userHasReviewed'] == false && ratingProvider.isRated == false)
-                            GestureDetector(
-                              onTap: ratingProvider.selectedStar >= 1
-                                  ? () async {
-                                      SharedPreferences sp = await SharedPreferences.getInstance();
-                                      bool isLogin = sp.getString("loginType") != "login" ? true : false;
-
-                                      if (isLogin) {
-                                        CustomToast.showErrorToast(msg: "Your a guest user, Pleas login to give a rating");
-                                      } else {
-                                        ratingProvider.postSubmitRating(widget.article['id'], widget.article['userHasReviewed']);
-                                      }
-                                    }
-                                  : null,
-                              child: Container(
-                                height: 40,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  color: ratingProvider.selectedStar >= 1 ? Colors.lightBlue : Colors.grey.shade300,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  "Submit",
-                                  style: fontStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      );
-                    }),
-                    height(height: 10),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text("Critics Reviews", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                        Spacer(),
-                        InkWell(
+                                    ),
+                                  )
+                                : Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      if (index < ratingProvider.selectedStar)
+                                        Icon(
+                                          Icons.star,
+                                          color: AppColors.ratingColor,
+                                          size: 36,
+                                        ),
+                                      Icon(
+                                        Icons.star_outline_outlined,
+                                        color: index < ratingProvider.selectedStar ? AppColors.ratingColor : Colors.grey,
+                                        size: 36,
+                                      ),
+                                    ],
+                                  );
+                          }),
+                        ),
+                        height(height: 12),
+                        if (widget.article['userHasReviewed'] == false && ratingProvider.isRated == false)
+                          TextFormField(
                             onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ListReviews(
-                                            postId: widget.article["id"].toString(),
-                                          )));
+                              context.read<HomeProvider>().pageChange(isValue: false);
                             },
-                            child: Text("More >", style: fontStyle(color: Colors.lightBlue, fontSize: 14, fontWeight: FontWeight.w600))),
+                            controller: ratingProvider.commentController,
+                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+                            decoration: InputDecoration(
+                              hintText: "Type your comment here (optional)",
+                              hintStyle: TextStyle(fontSize: 12, color: Colors.black45),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.lightBlue),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.lightBlue),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.lightBlue),
+                              ),
+                            ),
+                          ),
+                        if (widget.article['userHasReviewed'] == false && ratingProvider.isRated == false) height(height: 10),
+                        if (widget.article['userHasReviewed'] == false && ratingProvider.isRated == false)
+                          GestureDetector(
+                            onTap: ratingProvider.selectedStar >= 1
+                                ? () async {
+                                    SharedPreferences sp = await SharedPreferences.getInstance();
+                                    bool isLogin = sp.getString("loginType") != "login" ? true : false;
+
+                                    if (isLogin) {
+                                      CustomToast.showErrorToast(msg: "Your a guest user, Pleas login to give a rating");
+                                    } else {
+                                      ratingProvider.postSubmitRating(widget.article['id'], widget.article['userHasReviewed']);
+                                    }
+                                  }
+                                : null,
+                            child: Container(
+                              height: 40,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: ratingProvider.selectedStar >= 1 ? Colors.lightBlue : Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "Submit",
+                                style: fontStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
                       ],
-                    ),
-                  ],
-                ),
+                    );
+                  }),
+                  height(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Critics Reviews", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Spacer(),
+                      InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ListReviews(
+                                          postId: widget.article["id"].toString(),
+                                        )));
+                          },
+                          child: Text("More >", style: fontStyle(color: Colors.lightBlue, fontSize: 14, fontWeight: FontWeight.w600))),
+                    ],
+                  ),
+                ],
               ),
             ),
           ),
@@ -390,7 +379,7 @@ class _MovieRatingsState extends State<MovieRatings> {
             children: [
               Icon(Icons.star, color: AppColors.ratingColor, size: 20),
               width(width: 6),
-              Text("$value / 5", style: fontStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+              Text("$value", style: fontStyle(fontSize: 12, fontWeight: FontWeight.w700)),
             ],
           ),
         ],

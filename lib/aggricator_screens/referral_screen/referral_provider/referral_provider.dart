@@ -1,10 +1,10 @@
-import 'dart:convert';
 import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/settings_screen/referral_repo/referral_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../referral_repo/referral_repo.dart';
 
 class ReferralProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -22,11 +22,7 @@ class ReferralProvider extends ChangeNotifier {
   Future getReferralStats() async {
     isDataLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {
-      "user_id": userId ?? "0",
-    };
 
     try {
       Response response = await ReferralRepo().getReferralStats(userId);
@@ -85,7 +81,7 @@ class ReferralProvider extends ChangeNotifier {
       log("Rewards posted successfully: ${response.data}");
       if (response.statusCode == 200) {
         referralRewardsClaimed = response.data;
-        log("Get Rewards list updated: ${referralRewardsClaimed} items");
+        log("Get Rewards list updated: $referralRewardsClaimed items");
       } else {
         log("Failed to Get Rewards: ${response.statusCode}");
       }
@@ -99,7 +95,7 @@ class ReferralProvider extends ChangeNotifier {
     }
   }
 
-  Future postClaimedRewards(reward, providerName,{bool isRecharge = false}) async {
+  Future postClaimedRewards(reward, providerName, {bool isRecharge = false}) async {
     referralRewardsClaimed.clear();
     isLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -107,15 +103,15 @@ class ReferralProvider extends ChangeNotifier {
     Map<String, dynamic> body = {
       "user_id": userId,
       "reward_id": reward['id'],
-      "provider_id": isRecharge?0:selectedOperator,
+      "provider_id": isRecharge ? 0 : selectedOperator,
     };
-    log('postClaminedRewardsbody $body');
+    log('Calamined Rewards Body $body');
     try {
       Response response = await ReferralRepo().postClaimedRewards(body);
       log("Rewards posted successfully: ${response.data}");
       if (response.statusCode == 200) {
         referralRewardsClaimed.addAll(response.data);
-        log("Rewards list updated: ${referralRewardsClaimed} items");
+        log("Rewards list updated: $referralRewardsClaimed items");
       } else {
         log("Failed to post Rewards: ${response.statusCode}");
       }
@@ -132,34 +128,29 @@ class ReferralProvider extends ChangeNotifier {
   Future getAllProvidersNames() async {
     try {
       Response response = await ReferralRepo().getAllProvidersNames();
-      print('Data: ${response.data}');
+      log('Data: ${response.data}');
       final Map<String, dynamic> jsonMap = response.data;
-      print('Data: $jsonMap');
-      allProvidersRechargeList = (jsonMap['mobile'] as List)
-          .map((item) => ProvidersNamesModel.fromJson(item))
-          .toList();
+      log('Data: $jsonMap');
+      allProvidersRechargeList = (jsonMap['mobile'] as List).map((item) => ProvidersNamesModel.fromJson(item)).toList();
 
-      allProvidersOttList = (jsonMap['ott'] as List)
-          .map((item) => ProvidersNamesModel.fromJson(item))
-          .toList();
+      allProvidersOttList = (jsonMap['ott'] as List).map((item) => ProvidersNamesModel.fromJson(item)).toList();
 
-      print('OTT: ${allProvidersRechargeList.map((e) => e.name)}');
-      print('Data: ${allProvidersOttList.map((e) => e.name)}');
-
+      log('OTT: ${allProvidersRechargeList.map((e) => e.name)}');
+      log('Data: ${allProvidersOttList.map((e) => e.name)}');
     } on DioException catch (e, st) {
+      log('error : ${e.toString()} --- ${st.toString()}');
     } catch (e, st) {
+      log('error : ${e.toString()} --- ${st.toString()}');
     } finally {
       notifyListeners();
     }
   }
 
-
-  void updateProvider(value){
+  void updateProvider(value) {
     selectedOperator = value;
     notifyListeners();
   }
 }
-
 
 class ProvidersNamesModel {
   final String name;

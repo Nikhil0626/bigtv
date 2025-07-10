@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/settings_screen/referral_provider/referral_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
@@ -13,7 +12,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/app_fonts.dart';
-import '../../event_repo.dart';
+import '../../events_data/event_repo.dart';
+import '../referral_provider/referral_provider.dart';
 import 'all_rewards.dart';
 import 'claimed_rewards.dart';
 

@@ -1,4 +1,3 @@
-import 'package:chotanews/aggricator_screens/settings_screen/referral_provider/referral_provider.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_view/no_claimed_rewards.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
+import '../referral_provider/referral_provider.dart';
 
 class ClaimedRewards extends StatefulWidget {
   const ClaimedRewards({super.key});
