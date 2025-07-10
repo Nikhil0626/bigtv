@@ -79,8 +79,6 @@ class _MovieRatingsState extends State<MovieRatings> {
                               ),
                               Divider(),
                               height(height: 8),
-
-                              // BookMyShow
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -96,7 +94,6 @@ class _MovieRatingsState extends State<MovieRatings> {
                               ),
                               height(height: 6),
 
-                              // NTV
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -243,7 +240,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                 child: Text("More >", style: fontStyle(color: Colors.lightBlue, fontSize: 16, fontWeight: FontWeight.w600))),
                           ],
                         ),
-                        // height(height: 16),
+                        height(height: 16),
                         // SizedBox(
                         //   height: 115,
                         //   width: 298,
