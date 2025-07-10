@@ -19,6 +19,13 @@ class RatingProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+bool isFilterData = false;
+  void filterData(rating) {
+    isFilterData = !isFilterData;
+    notifyListeners();
+    getReviews(rating,isFilterData?"highest_rated":"lowest_rated");
+  }
+
   Future<void> postSubmitRating(article, rated) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
@@ -46,14 +53,21 @@ class RatingProvider extends ChangeNotifier {
     } catch (e, st) {
       print(e.toString());
       print(st.toString());
+    }finally{
+      notifyListeners();
     }
   }
 
   Map<String, dynamic> getAllReviews = {};
 
-  Future getReviews(String postId) async {
+  Future getReviews(String postId,name) async {
+
+    Map<String, dynamic> body ={
+      "sort_by":name,
+
+    };
     try {
-      Response response = await RatingRepo().getReviews(postId);
+      Response response = await RatingRepo().getReviews(postId,body);
       log(response.data.toString());
       if (response.statusCode == 200) {
         getAllReviews = response.data;

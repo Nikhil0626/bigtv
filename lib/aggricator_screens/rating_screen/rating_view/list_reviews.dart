@@ -23,7 +23,7 @@ class _ListReviewsState extends State<ListReviews> {
   @override
   void initState() {
     super.initState();
-    context.read<RatingProvider>().getReviews(widget.postId);
+    context.read<RatingProvider>().getReviews(widget.postId,"sort_by");
   }
 
   @override
@@ -77,7 +77,15 @@ class _ListReviewsState extends State<ListReviews> {
                               style: fontStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
                             ),
                             Spacer(),
-                            Icon(Icons.arrow_back_outlined, size: 25),
+                            InkWell(
+                              onTap: (){
+                                ratingProvider.filterData(widget.postId);
+                              },
+                              child: Transform.rotate(
+                                angle: 0.0, // 180 degrees in radians (π)
+                                child: Icon(Icons.filter_list, size: 25),
+                              ),
+                            ),
                           ],
                         ),
                       ),
