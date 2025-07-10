@@ -11,13 +11,14 @@ class RatingProvider extends ChangeNotifier {
   final FocusNode commentFocusNode = FocusNode();
   int selectedStar = 0;
   bool isLoading = false;
+  bool isRated = false;
 
   void ratingUpdate(rating) {
     selectedStar = rating;
     notifyListeners();
   }
 
-  Future<void> postSubmitRating(article) async {
+  Future<void> postSubmitRating(article, rated) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
@@ -33,6 +34,7 @@ class RatingProvider extends ChangeNotifier {
       Response response = await RatingRepo().postSubmitRating(body);
       log(response.data.toString());
       if (response.statusCode == 201) {
+        isRated = true;
         CustomToast.showSuccessToast(
           msg: response.data["message"],
         );
