@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 
 import '../../../utils/app_fonts.dart';
+import '../../../utils/app_loading_screen.dart';
 
 class AllRewards extends StatefulWidget {
   const AllRewards({super.key});
@@ -49,62 +50,70 @@ class _AllRewardsState extends State<AllRewards> {
                         crossAxisCount: 2,
                       crossAxisSpacing: 6.w,
                       mainAxisSpacing: 6.h,
-                      childAspectRatio: 1.0,
+                      childAspectRatio: 0.9,
                     ),
                     itemBuilder: (context, index) {
                       final referral = referralProvider.referralRewardsList[index];
                       return Card(
-                        elevation: 5,
-                        color: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(2),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: referral['icon_url'] ?? '',
-                                fit: BoxFit.cover,
-                                width: 70.w,
-                                height: 70.h,
-                                placeholder: (context, url) => CircularProgressIndicator(strokeWidth: 2),
-                                errorWidget: (context, url, error) => Icon(Icons.error),
-                              ),
-                              SizedBox(height: 1.h),
-                              Text(
-                                referral['name'] ?? "Reward Title",
-                                style: fontStyle(
-                                  color: Colors.grey.shade500,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                referral['value'] ?? "Reward description goes here.",
-                                style: fontStyle(
-                                  color: Colors.black,
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            "${referral['required_referrals'].toString()} referral" ?? '',
-                            style: fontStyle(
-                              color: Colors.black,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          )
-                            ],
+                          elevation: 2,
+                          color: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        )
-                      );
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                CachedNetworkImage(
+                                  imageUrl: referral['icon_url'] ?? '',
+                                  fit: BoxFit.cover,
+                                  width: 80,
+                                  height: 80,
+                                  placeholder: (context, url) => SizedBox(
+                                    width: 80,
+                                    height: 80,
+                                    child: AppLoadingScreen(),
+                                  ),
+                                  errorWidget: (context, url, error) => Icon(
+                                    Icons.error,
+                                    size: 60,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  referral['name'] ?? "Reward Title",
+                                  textAlign: TextAlign.center,
+                                  style: fontStyle(
+                                    color: Colors.grey.shade500,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Text(
+                                  referral['value'] ?? "Reward description goes here.",
+                                  style: fontStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  "${referral['required_referrals'].toString()} referral" ?? '',
+                                  style: fontStyle(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                )
+                              ],
+                            ),
+                          ));
                     }
                 ),
               );

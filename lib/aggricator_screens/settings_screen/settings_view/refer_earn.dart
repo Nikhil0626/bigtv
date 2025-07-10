@@ -14,6 +14,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/app_fonts.dart';
 import '../../event_repo.dart';
+import 'all_rewards.dart';
 import 'claimed_rewards.dart';
 
 class ReferEarn extends StatefulWidget {
@@ -56,13 +57,13 @@ class _ReferEarnState extends State<ReferEarn> {
             },
             child: Icon(Icons.arrow_back, color: Colors.black, size: 25)),
         title: Text(
-          "Refer & Earn",
+          "రిఫర్ & ఏర్న్",
           style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w700),
         ),
       ),
       body: SafeArea(
         child: Consumer<ReferralProvider>(builder: (_, referralProvider, __) {
-          return SingleChildScrollView(
+          return referralProvider.isDataLoading?AppLoadingScreen(): SingleChildScrollView(
               child: Column(
             children: [
               Container(
@@ -83,7 +84,7 @@ class _ReferEarnState extends State<ReferEarn> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "Refer & Earn",
+                      "రిఫర్ & ఏర్న్",
                       style: fontStyle(
                         color: Colors.white,
                         fontSize: 20.sp,
@@ -92,10 +93,10 @@ class _ReferEarnState extends State<ReferEarn> {
                     ),
                     height(height: 10),
                     Text(
-                      "Share ChotaNews app with friends and earn rewards!",
+                      "మీ మిత్రులకు ఆప్ ని షేర్ చెయ్యండి బహుమతులు పొందండి!",
                       style: fontStyle(
                         color: Colors.white,
-                        fontSize: 14,
+                        fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
                       maxLines: 2,
@@ -103,7 +104,7 @@ class _ReferEarnState extends State<ReferEarn> {
                     ),
                     height(height: 15),
                     Text(
-                      "My Referral code",
+                      "మీ రిఫెరల్ కోడ్",
                       style: fontStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -156,7 +157,7 @@ class _ReferEarnState extends State<ReferEarn> {
                               Icon(Icons.share_outlined, color: Colors.white, size: 20),
                               width(width: 12.w),
                               Text(
-                                "Invite Friends",
+                                "మిత్రులని ఆహ్వానించండి",
                                 style: fontStyle(
                                   color: Colors.white,
                                   fontSize: 14.sp,
@@ -182,30 +183,30 @@ class _ReferEarnState extends State<ReferEarn> {
                     Expanded(
                         flex: 1,
                         child: InvitedCardScreen(
-                          count: referralProvider.referralData['invited'].toString(),
+                          count: referralProvider.referralData['invited'].toString()??"0",
                           image: 'assets/images/users.svg',
-                          name: "Invited",
+                          name: "ఇన్వైటెడ్",
                         )),
                     Expanded(
                         flex: 1,
                         child: InvitedCardScreen(
-                          count: referralProvider.referralData['downloads'].toString(),
+                          count: referralProvider.referralData['downloads'].toString()??"0",
                           image: 'assets/images/download.svg',
-                          name: "Downloads",
+                          name: "డౌన్లోడ్స్",
                         )),
                     Expanded(
                         flex: 1,
                         child: InvitedCardScreen(
-                          count: referralProvider.referralData['pending'].toString(),
+                          count: referralProvider.referralData['pending'].toString()??"0",
                           image: 'assets/images/pending.svg',
-                          name: "Pending",
+                          name: "పెండింగ్",
                         )),
                   ],
                 ),
               ),
               height(height: 10),
               Container(
-                height: 130,
+                height: 135,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16.0,
                 ),
@@ -224,21 +225,30 @@ class _ReferEarnState extends State<ReferEarn> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "Progress to next Reward",
+                              "మీ తర్వాతి బహుమతి",
                               style: fontStyle(
                                 color: Colors.black,
-                                fontSize: 14,
+                                fontSize: 16,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
+                            // CircleAvatar(
+                            //   radius: 16,
+                            //   backgroundColor: Colors.blue,
+                            //   child: SvgPicture.asset(
+                            //     'assets/svg/gift.png',
+                            //     width: 20,
+                            //     height: 20,
+                            //     fit: BoxFit.contain,
+                            //   ),
+                            // ),
                             CircleAvatar(
-                              radius: 16,
+                              radius: 20,
                               backgroundColor: Colors.blue,
-                              child: SvgPicture.asset(
-                                'assets/images/progress_reward.svg',
-                                width: 20,
-                                height: 20,
-                                fit: BoxFit.contain,
+                              child: Image.asset(
+                                "assets/svg/gift.png",
+                                height: 30,
+                                width: 30,
                               ),
                             ),
                           ],
@@ -248,7 +258,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              "${referralProvider.referralData['downloads'] ?? 0} Friends referred",
+                              "${referralProvider.referralData['downloads'] ?? 0} మిత్రులని ఆహ్వానించారు",
                               style: fontStyle(
                                 color: Colors.grey.shade600,
                                 fontSize: 14,
@@ -256,7 +266,7 @@ class _ReferEarnState extends State<ReferEarn> {
                               ),
                             ),
                             Text(
-                              " needed",
+                              " ${referralProvider.referralData['needed'] ?? 0} కావేలను",
                               style: fontStyle(
                                 color: Colors.black,
                                 fontSize: 14,
@@ -270,7 +280,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: Container(
-                              height: 8,
+                              height: 7,
                               width: MediaQuery.of(context).size.width - 60,
                               color: Colors.grey.shade300,
                               child: FractionallySizedBox(
@@ -285,7 +295,7 @@ class _ReferEarnState extends State<ReferEarn> {
                         ),
                         height(height: 6),
                         Text(
-                          "You're ${referralProvider.difference ?? 0} friends away from your next reward!",
+                          "మీరు తర్వాత బహుమతికీ ${referralProvider.difference ?? 0} మిత్రులకి దూరం గా వున్నారు!",
                           style: fontStyle(
                             color: Colors.grey.shade500,
                             fontSize: 12,
@@ -297,8 +307,9 @@ class _ReferEarnState extends State<ReferEarn> {
                   ),
                 ),
               ),
-              height(height: 10),
-              referralProvider.referralData['next_reward'].isNotEmpty?
+              height(height: 20),
+              referralProvider.referralData['next_reward'] != null &&
+                  referralProvider.referralData['next_reward'].isNotEmpty?
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
                   height: 120,
@@ -328,7 +339,7 @@ class _ReferEarnState extends State<ReferEarn> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    "${reward['reward_category']}",
+                                    "${reward['reward_category'] ?? ""}",
                                     style: fontStyle(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -337,7 +348,7 @@ class _ReferEarnState extends State<ReferEarn> {
                                   ),
                                   height(height: 6),
                                   Text(
-                                    "${reward['value']}",
+                                    "${reward['value'] ?? ""}",
                                     style: fontStyle(
                                       color: Colors.white,
                                       fontSize: 12,
@@ -396,33 +407,56 @@ class _ReferEarnState extends State<ReferEarn> {
                           ),
                         );
                       }),
-                ):SizedBox(),
+                ):SizedBox.shrink(),
+              if(referralProvider.referralRewardsList.isNotEmpty)
               height(height: 6),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
+              if(referralProvider.referralRewardsList.isNotEmpty)
+                 Padding(
                   padding: const EdgeInsets.only(left: 20.0),
-                  child: Text(
-                    "Popular Rewards",
-                    textAlign: TextAlign.start,
-                    style: fontStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Popular Rewards",
+                        style: fontStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AllRewards(),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 20.0),
+                          child: Text(
+                            "View all",
+                            style: fontStyle(fontSize: 16, fontWeight: FontWeight.w400, color: Colors.lightBlue),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-              height(height: 10),
+              if(referralProvider.referralRewardsList.isNotEmpty)
+              height(height: 20),
+              if(referralProvider.referralRewardsList.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: SizedBox(
+                child:
+                    SizedBox(
                   height: 400,
                   width: MediaQuery.of(context).size.width,
                   child: GridView.builder(
                       scrollDirection: Axis.horizontal,
-                      itemCount: referralProvider.referralRewardsList.length,
+                      itemCount: referralProvider.referralRewardsList.length > 4 ? 4 :referralProvider.referralRewardsList.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2,
                         crossAxisSpacing: 10,
                         mainAxisSpacing: 10,
-                        childAspectRatio: 1.1,
+                        childAspectRatio: 1.14,
                       ),
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
@@ -515,7 +549,7 @@ class _ReferEarnState extends State<ReferEarn> {
                         horizontal: 10,
                       ),
                       child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
                           Container(
                             width: 30,
@@ -534,12 +568,15 @@ class _ReferEarnState extends State<ReferEarn> {
                               ),
                             ),
                           ),
-                          Text(
-                            "Claimed Rewards",
-                            style: fontStyle(
-                              color: Colors.black,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
+                          width(width: 10),
+                          Expanded(
+                            child: Text(
+                              "Claimed Rewards",
+                              style: fontStyle(
+                                color: Colors.black,
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                              ),
                             ),
                           ),
                           Icon(
@@ -553,6 +590,7 @@ class _ReferEarnState extends State<ReferEarn> {
                   ),
                 ),
               ),
+              SizedBox(height: 10,)
             ],
           ));
         }),
@@ -679,7 +717,7 @@ class _ReferEarnState extends State<ReferEarn> {
 class InvitedCardScreen extends StatelessWidget {
   final String image;
 
-  final String count;
+  final String? count;
 
   final String name;
 
@@ -693,7 +731,7 @@ class InvitedCardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(8.0),
+      padding: EdgeInsets.all(4.0),
       child: Card(
         elevation: 2,
         shape: RoundedRectangleBorder(
@@ -707,12 +745,13 @@ class InvitedCardScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 25,
-                backgroundColor: Colors.blue.shade100,
+                backgroundColor:name == "Downloads"?Colors.green.shade100:name == "Pending"?Colors.orange.shade100:Colors.blue.shade100,
                 child: SvgPicture.asset(
                   image ?? "",
                   fit: BoxFit.contain,
                   width: 24,
                   height: 24,
+
                 ),
               ),
               height(height: 8),
@@ -729,7 +768,7 @@ class InvitedCardScreen extends StatelessWidget {
                 name ?? "",
                 style: fontStyle(
                   color: Colors.black,
-                  fontSize: 14,
+                  fontSize: 13,
                   fontWeight: FontWeight.w400,
                 ),
                 textAlign: TextAlign.center,

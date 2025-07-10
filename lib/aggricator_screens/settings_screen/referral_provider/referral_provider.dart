@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ReferralProvider extends ChangeNotifier {
   bool isLoading = false;
+  bool isDataLoading = false;
   var referralData = {};
   List referralRewardsList = [];
   List<ProvidersNamesModel> allProvidersRechargeList = [];
@@ -19,7 +20,7 @@ class ReferralProvider extends ChangeNotifier {
   int difference = 0;
 
   Future getReferralStats() async {
-    isLoading = true;
+    isDataLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
@@ -44,7 +45,7 @@ class ReferralProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Unexpected error while posting referral: ${e.toString()} ---- ${st.toString()}");
     } finally {
-      isLoading = false;
+      isDataLoading = false;
       notifyListeners();
     }
   }

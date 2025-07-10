@@ -47,9 +47,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
       body: Consumer<ReferralProvider>(builder: (_, referralProvider, __) {
         return referralProvider.isLoading
             ? AppLoadingScreen()
-            : referralProvider.referralRewardsClaimed.isEmpty
-                ? NoClaimedRewards()
-                : Column(
+            :  Column(
                     children: [
                       Container(
                         margin: EdgeInsets.all(16),
@@ -205,98 +203,103 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                       ),
                       height(height: 5),
                       Expanded(
-                        child: ListView.builder(
-                          itemCount: referralProvider.referralRewardsClaimed['rewards'].length,
-                          itemBuilder: (context, index) {
-                            var data = referralProvider.referralRewardsClaimed['rewards'][index];
-                          return SizedBox(
-                            height: 120,
-                            width: MediaQuery.of(context).size.width,
-                            child: Card(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              color: Colors.white,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                                child: Row(
-                                  children: [
-                                    CircleAvatar(
-                                      radius: 24.r,
-                                      backgroundColor: Colors.orange.shade800,
-                                      child: SvgPicture.asset(
-                                        'assets/images/gift.svg',
-                                        color: Colors.white,
-                                        width: 24,
-                                        height: 24,
-                                        fit: BoxFit.contain,
+                        child:referralProvider.referralRewardsClaimed['rewards'].isEmpty
+                            ? NoClaimedRewards()
+                            : Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: ListView.builder(
+                            itemCount: referralProvider.referralRewardsClaimed['rewards'].length,
+                            itemBuilder: (context, index) {
+                              var data = referralProvider.referralRewardsClaimed['rewards'][index];
+                            return SizedBox(
+                              height: 120,
+                              width: MediaQuery.of(context).size.width,
+                              child: Card(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                                  child: Row(
+                                    children: [
+                                      CircleAvatar(
+                                        radius: 24.r,
+                                        backgroundColor: Colors.orange.shade800,
+                                        child: SvgPicture.asset(
+                                          'assets/images/gift.svg',
+                                          color: Colors.white,
+                                          width: 24,
+                                          height: 24,
+                                          fit: BoxFit.contain,
+                                        ),
                                       ),
-                                    ),
-                                    width(width: 12.w),
-                                    Expanded(
-                                      child: Column(
+                                      width(width: 12.w),
+                                      Expanded(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "${data['name']}",
+                                              style: TextStyle(
+                                                color: Colors.black,
+                                                fontSize: 16.sp,
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                            height(height: 4.h),
+                                            Text(
+                                              "${data['created_at']}",
+                                              style: TextStyle(
+                                                color: Colors.grey.shade600,
+                                                fontSize: 12.sp,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Column(
                                         mainAxisAlignment: MainAxisAlignment.center,
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment: CrossAxisAlignment.end,
                                         children: [
                                           Text(
-                                            "${data['name']}",
+                                            "-10",
                                             style: TextStyle(
                                               color: Colors.black,
-                                              fontSize: 16.sp,
-                                              fontWeight: FontWeight.w700,
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w800,
                                             ),
                                           ),
-                                          height(height: 4.h),
-                                          Text(
-                                            "${data['created_at']}",
-                                            style: TextStyle(
-                                              color: Colors.grey.shade600,
-                                              fontSize: 12.sp,
-                                              fontWeight: FontWeight.w500,
+                                          height(height: 6.h),
+                                          TextButton(
+                                            onPressed: () {},
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: Colors.green.shade100,
+                                              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 3.h),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(15),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              "Claimed",
+                                              style: TextStyle(
+                                                color: Colors.green.shade900,
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 12.sp,
+                                              ),
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                    Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        Text(
-                                          "-10",
-                                          style: TextStyle(
-                                            color: Colors.black,
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w800,
-                                          ),
-                                        ),
-                                        height(height: 6.h),
-                                        TextButton(
-                                          onPressed: () {},
-                                          style: TextButton.styleFrom(
-                                            backgroundColor: Colors.green.shade100,
-                                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 3.h),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(15),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            "Claimed",
-                                            style: TextStyle(
-                                              color: Colors.green.shade900,
-                                              fontWeight: FontWeight.w800,
-                                              fontSize: 12.sp,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },),
+                            );
+                          },),
+                        ),
                       )
 
                     ],
