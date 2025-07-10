@@ -1,5 +1,6 @@
 import 'package:chotanews/rating_view/rating_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,7 +32,7 @@ class _ListReviewsState extends State<ListReviews> {
         backgroundColor: Colors.white,
         leading: BackButton(color: Colors.black),
         title: Text(
-          "కుబేర సినిమా టీజర్",
+          "సినిమా రివ్యూస్",
           style: fontStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
         ),
       ),
@@ -42,7 +43,7 @@ class _ListReviewsState extends State<ListReviews> {
             final overallRating = ratingProvider.getAllReviews['overall_rating']?.toString() ?? "0";
 
             return reviews.isEmpty
-                ? Center(child: Text("No reviews available"))
+                ? Center(child: AppNoData())
                 : Column(
                     children: [
                       Padding(
@@ -75,7 +76,7 @@ class _ListReviewsState extends State<ListReviews> {
                               style: fontStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
                             ),
                             Spacer(),
-                            Icon(Icons.filter_list_rounded, size: 25),
+                            Icon(Icons.arrow_back_outlined, size: 25),
                           ],
                         ),
                       ),

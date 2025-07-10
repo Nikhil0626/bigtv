@@ -14,7 +14,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/app_fonts.dart';
 import '../../event_repo.dart';
-import 'all_rewards.dart';
 import 'claimed_rewards.dart';
 
 class ReferEarn extends StatefulWidget {
@@ -299,7 +298,7 @@ class _ReferEarnState extends State<ReferEarn> {
                 ),
               ),
               height(height: 10),
-              if (referralProvider.referralData['next_reward'].isNotEmpty)
+              referralProvider.referralData['next_reward'].isNotEmpty?
                 SizedBox(
                   width: MediaQuery.of(context).size.width,
                   height: 120,
@@ -397,7 +396,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           ),
                         );
                       }),
-                ),
+                ):SizedBox(),
               height(height: 6),
               Align(
                 alignment: Alignment.centerLeft,
