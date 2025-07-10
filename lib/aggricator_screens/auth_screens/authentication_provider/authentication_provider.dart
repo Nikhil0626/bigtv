@@ -137,7 +137,7 @@ class AuthenticationProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         sp.setString("loginType", "login");
         sp.setString("myReferralCode", response.data['user']['referral_code'].toString() ?? "");
-        sp.setString("myReferralLink", response.data['referral_link'].toString() ?? "");
+        sp.setString("myReferralLink", response.data['user']['refferal_link'].toString() ?? "");
         sp.setString("userId", response.data['user']['id'].toString());
         sp.setString("userStatus", response.data['user']['status'].toString());
         if (response.data['is_new_user'] == false) {
