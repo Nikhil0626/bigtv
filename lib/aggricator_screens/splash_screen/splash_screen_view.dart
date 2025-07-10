@@ -1,15 +1,12 @@
 import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'package:chotanews/aggricator_screens/event_repo.dart';
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../rating_view/movie_reviews.dart';
-import '../../rating_view/polls_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,7 +19,6 @@ class _SplashScreenState extends State<SplashScreen> {
   bool showGif = false;
   StreamSubscription? pushSub;
   StreamSubscription? pushActionSub;
-  Map<String, dynamic>? _initialPushPayload;
 
   @override
   void initState() {
@@ -49,27 +45,7 @@ class _SplashScreenState extends State<SplashScreen> {
     }
 
     await Future.delayed(Duration(seconds: showGif ? 5 : 2));
-
-    // if (_initialPushPayload != null &&
-    //     _initialPushPayload!['postId'] != null &&
-    //     (_initialPushPayload!['postId'] as String).isNotEmpty) {
-    //   Navigator.of(context).pushReplacement(
-    //     MaterialPageRoute(
-    //       builder: (context) =>
-    //           IndividualPostView(postId: _initialPushPayload!['postId']),
-    //     ),
-    //   );
-    //   return;
-    // }else{
     context.read<AuthenticationProvider>().isPageNavigation(context);
-    //
-    // Navigator.of(context).pushReplacement(
-    //   MaterialPageRoute(
-    //     builder: (context) => PollsScreen(),
-    //   ),
-    // );
-
-    // }
   }
 
   @override

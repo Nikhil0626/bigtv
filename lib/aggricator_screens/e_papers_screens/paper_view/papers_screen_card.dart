@@ -14,7 +14,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../home_screen/home_provider/home_provider.dart';
-import '../../in_app_web_view.dart';
+import '../../../utils/in_app_web_view.dart';
 import '../../../utils/app_colors.dart';
 import '../paper_models/ePaper_main_model.dart';
 

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:in_app_update/in_app_update.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../aggricator_screens/event_repo.dart';
+import '../aggricator_screens/events_data/event_repo.dart';
 
 class AppUpdateService {
   static Future<void> checkForUpdate(BuildContext context) async {

@@ -18,9 +18,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
-import '../../event_repo.dart';
+import '../../events_data/event_repo.dart';
 import '../../home_screen/home_provider/home_provider.dart';
-import '../../home_screen/news_posts_provider.dart';
+import '../../home_screen/home_provider/news_posts_provider.dart';
 
 class PapersScreenPreview extends StatefulWidget {
   final String postId;

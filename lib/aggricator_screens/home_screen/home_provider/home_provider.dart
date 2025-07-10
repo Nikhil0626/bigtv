@@ -1,11 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
-import 'package:chotanews/main.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -15,10 +12,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../../../globel_keys/globel_keys.dart';
 import '../../../services/analytics_service.dart';
 import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
-import '../../event_repo.dart';
+import '../../events_data/event_repo.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../home_repo/home_repo.dart';
 

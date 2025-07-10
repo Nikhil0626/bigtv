@@ -8,10 +8,10 @@ import '../../../../utils/app_enums.dart';
 import '../../../../utils/app_fonts.dart';
 import '../../../../utils/app_spaces.dart';
 import '../../../../utils/app_toasts.dart';
-import '../../../ad_manager_screen/banner_300x50_size.dart';
+import '../../../ad_manager_screen/ad_screen/banner_300x50_size.dart';
 import '../../../auth_screens/authentication_model/location_model.dart';
 import '../../../auth_screens/authentication_provider/authentication_provider.dart';
-import '../../../home_screen/home_view.dart';
+import '../../../home_screen/home_view/home_view.dart';
 import '../../settings_provider/settings_provider.dart';
 
 class UpdateRegionsView extends StatefulWidget {

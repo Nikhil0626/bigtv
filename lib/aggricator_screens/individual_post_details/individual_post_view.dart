@@ -16,11 +16,10 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../ad_manager_screen/banner_300x50_size.dart';
-import '../ad_manager_screen/save_units.dart';
-import '../ad_manager_screen/test_ads.dart';
+import '../ad_manager_screen/ad_screen/banner_300x50_size.dart';
+import '../ad_manager_screen/ad_screen/ios_ads_view.dart';
+import '../ad_manager_screen/ad_screen/android_ads_view.dart';
 
-import '../../services/image_to_pdf_helper.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
@@ -29,107 +28,16 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
-import '../botton_actions.dart';
-import '../event_repo.dart';
+import '../../utils/botton_actions.dart';
+import '../events_data/event_repo.dart';
 import '../home_screen/home_provider/home_provider.dart';
-import '../home_screen/main_screen_byts_view.dart';
-import '../image_preview.dart';
-import '../in_app_web_view.dart';
+import '../home_screen/home_support_widgets/image_preview.dart';
+import '../../utils/in_app_web_view.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
-import '../video_image_view/gallery_screen.dart';
-import '../video_image_view/video_preview.dart';
+import '../video_image_screen/gallery_screen.dart';
+import '../video_image_screen/video_preview.dart';
 
-//
-// class IndividualPostView extends StatefulWidget {
-//   final String postId;
-//   final bool isComeFrom;
-//
-//   const IndividualPostView({super.key, required this.postId, this.isComeFrom = false});
-//
-//   @override
-//   State<IndividualPostView> createState() => _IndividualPostViewState();
-// }
-//
-// class _IndividualPostViewState extends State<IndividualPostView> {
-//   late PageController _pageController;
-//   int autoIndex = 0;
-//
-//   @override
-//   void initState() {
-//     autoIndex = 0;
-//     super.initState();
-//     getWebData();
-//     _pageController = PageController(viewportFraction: 1.0);
-//     context.read<HomeProvider>().getAllPostList = [];
-//     context.read<HomeProvider>().getIndividualPost( postId.toString());
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return WillPopScope(
-//       onWillPop: () async {
-//         Navigator.pop(context);
-//         return false; // Prevent default pop behavior
-//       },
-//       child: Scaffold(
-//         body: Consumer<HomeProvider>(
-//           builder: (_, homeProvider, __) {
-//
-//
-//             return Padding(
-//               padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-//               child:homeProvider.isPostLoading?Center(child: AppLoadingScreen()): homeProvider.getAllPostList.isEmpty?Center(child: AppNoData()):PageView.builder(
-//                 controller: _pageController,
-//                 scrollDirection: Axis.vertical,
-//                 itemCount: homeProvider.getAllPostList.length,
-//                 onPageChanged: (value) {
-//                   log("IndividualPostView  ${autoIndex}--- $value");
-//                   context.read<HomeProvider>().flipEvent('news', homeProvider.getAllAiTagsPostList[value]['id'], value > autoIndex ? true : false);
-//
-//                   autoIndex = value;
-//                   setState(() {});
-//                 },
-//                 itemBuilder: (context, index) {
-//                   if (homeProvider.getAllPostList.length - 5 == index) {
-//                     log("is come from lin----k${homeProvider.getAllPostList[index]['id']}");
-//                     context.read<HomeProvider>().getAllPost(postIds: homeProvider.getAllPostList.last['id'].toString());
-//                   }
-//                   return AnimatedBuilder(
-//                     animation: _pageController,
-//                     builder: (context, child) {
-//                       double position = 1.0;
-//
-//                       if (_pageController.hasClients && _pageController.position.haveDimensions) {
-//                         double? page = _pageController.page ?? 0;
-//                         position = (1 - (page - index).abs()).clamp(0.0, 1.0);
-//                       }
-//
-//                       return Opacity(
-//                         opacity: position,
-//                         child: Transform.translate(
-//                           offset: Offset(0, 50 * (1 - position)),
-//                           child: Container(
-//                             color: Colors.white,
-//                             child: MainScreenBytView(article: homeProvider.getAllPostList[index],isMainScreen: true,),
-//                           ),
-//                         ),
-//                       );
-//                     },
-//                   );
-//                 },
-//               ),
-//             );
-//           },
-//         ),
-//       ),
-//     );
-//   }
-//
-//   void getWebData() async {
-//     SharedPreferences sp = await SharedPreferences.getInstance();
-//     sp.setString("webPostId", "");
-//   }
-// }
+
 
 class IndividualPostView1 extends StatefulWidget {
   final String postId;
@@ -326,7 +234,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                       : article['type'] == "Gallery"
                                           ? Stack(
                                               children: [
-                                                // Image carousel
+
                                                 FullPageCarousel(
                                                   isHome: true,
                                                   imageUrls: article['gallery'] ?? [],

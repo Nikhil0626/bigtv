@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/event_repo.dart';
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:hive/hive.dart';

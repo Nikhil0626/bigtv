@@ -1,5 +1,5 @@
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_view/home_view.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';
@@ -11,7 +11,7 @@ import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_enums.dart';
 import '../../../../utils/app_fonts.dart';
 import '../../../../utils/app_spaces.dart';
-import '../../../ad_manager_screen/banner_300x50_size.dart';
+import '../../../ad_manager_screen/ad_screen/banner_300x50_size.dart';
 
 class UpdateCategoriesView extends StatefulWidget {
   const UpdateCategoriesView({super.key});

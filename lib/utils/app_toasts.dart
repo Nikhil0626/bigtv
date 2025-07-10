@@ -1,7 +1,7 @@
 import 'package:another_flushbar/flushbar.dart';
 import 'package:flutter/material.dart';
 
-import '../main.dart';
+import '../globel_keys/globel_keys.dart';
 import 'app_fonts.dart';
 
 class CustomToast {

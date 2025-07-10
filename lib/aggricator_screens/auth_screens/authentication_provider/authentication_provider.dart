@@ -1,8 +1,8 @@
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_repo/authentication_repo.dart';
-import 'package:chotanews/aggricator_screens/event_repo.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_view/home_view.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';

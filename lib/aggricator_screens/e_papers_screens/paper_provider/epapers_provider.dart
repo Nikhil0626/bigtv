@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/event_repo.dart';
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';

@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
-import 'package:chotanews/aggricator_screens/home_screen/news_posts_provider.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_provider/news_posts_provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../aggricator_screens/event_repo.dart';
+import '../aggricator_screens/events_data/event_repo.dart';
 import 'date_format.dart';
 void showComments(BuildContext context, postId) {
   showModalBottomSheet(

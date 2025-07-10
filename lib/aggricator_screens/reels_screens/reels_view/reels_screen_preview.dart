@@ -14,10 +14,10 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-import '../../botton_actions.dart';
-import '../../event_repo.dart';
+import '../../../utils/botton_actions.dart';
+import '../../events_data/event_repo.dart';
 import '../../home_screen/home_provider/home_provider.dart';
-import '../../in_app_web_view.dart';
+import '../../../utils/in_app_web_view.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';

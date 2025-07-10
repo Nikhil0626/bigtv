@@ -6,7 +6,7 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import '../../in_app_web_view.dart';
+import '../../../utils/in_app_web_view.dart';
 import '../paper_provider/epapers_provider.dart';
 
 class PapersScreenList extends StatelessWidget {

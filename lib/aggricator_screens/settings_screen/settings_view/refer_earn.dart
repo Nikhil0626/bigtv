@@ -13,7 +13,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/app_fonts.dart';
-import '../../event_repo.dart';
+import '../../events_data/event_repo.dart';
 import 'claimed_rewards.dart';
 
 class ReferEarn extends StatefulWidget {
@@ -298,105 +298,106 @@ class _ReferEarnState extends State<ReferEarn> {
                 ),
               ),
               height(height: 10),
-              referralProvider.referralData['next_reward'].isNotEmpty?
-                SizedBox(
-                  width: MediaQuery.of(context).size.width,
-                  height: 120,
-                  child: PageView.builder(
-                      scrollDirection: Axis.horizontal,
-                      controller: PageController(viewportFraction: 1.0),
-                      itemCount: referralProvider.referralData['next_reward'].length,
-                      itemBuilder: (context, index) {
-                        final reward = referralProvider.referralData['next_reward'][index];
-                        return Container(
-                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                          margin: EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                            image: DecorationImage(
-                              image: AssetImage('assets/svg/icons_bg1.png'),
+              referralProvider.referralData['next_reward'].isNotEmpty
+                  ? SizedBox(
+                      width: MediaQuery.of(context).size.width,
+                      height: 120,
+                      child: PageView.builder(
+                          scrollDirection: Axis.horizontal,
+                          controller: PageController(viewportFraction: 1.0),
+                          itemCount: referralProvider.referralData['next_reward'].length,
+                          itemBuilder: (context, index) {
+                            final reward = referralProvider.referralData['next_reward'][index];
+                            return Container(
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                              margin: EdgeInsets.symmetric(horizontal: 16),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(10),
+                                image: DecorationImage(
+                                  image: AssetImage('assets/svg/icons_bg1.png'),
 
-                              fit: BoxFit.cover, //
-                            ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                                  fit: BoxFit.cover, //
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
-                                  Text(
-                                    "${reward['reward_category']}",
-                                    style: fontStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  height(height: 6),
-                                  Text(
-                                    "${reward['value']}",
-                                    style: fontStyle(
-                                      color: Colors.white,
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  height(height: 10),
-                                  InkWell(
-                                    onTap: () async {
-                                      log(reward['reward_category']);
-                                      context.read<ReferralProvider>().allProvidersRechargeList = [];
-                                      context.read<ReferralProvider>().allProvidersOttList = [];
-                                      context.read<ReferralProvider>().selectedOperator = "";
-                                      context.read<ReferralProvider>().getAllProvidersNames().then(
-                                        (value) {
-                                          if (reward['reward_category'] == "Mobile Recharge") {
-                                            showRechargeOperatorBottomSheet(context, reward, true);
-                                          } else if (reward['reward_category'] == "OTT Subscription") {
-                                            showRechargeOperatorBottomSheet(context, reward, false);
-                                          } else {
-                                            context.read<ReferralProvider>().postClaimedRewards(
-                                              reward,
-                                                  "",
-                                                );
-                                          }
-                                        },
-                                      );
-                                    },
-                                    child: Container(
-                                      width: 80,
-                                      height: 30,
-                                      decoration: BoxDecoration(
-                                        color: Colors.lightBlue,
-                                        borderRadius: BorderRadius.circular(8),
+                                  Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${reward['reward_category']}",
+                                        style: fontStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
                                       ),
-                                      child: Center(
-                                        child: Text(
-                                          "Claim",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 14.sp,
-                                            fontWeight: FontWeight.w500,
+                                      height(height: 6),
+                                      Text(
+                                        "${reward['value']}",
+                                        style: fontStyle(
+                                          color: Colors.white,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                      height(height: 10),
+                                      InkWell(
+                                        onTap: () async {
+                                          log(reward['reward_category']);
+                                          context.read<ReferralProvider>().allProvidersRechargeList = [];
+                                          context.read<ReferralProvider>().allProvidersOttList = [];
+                                          context.read<ReferralProvider>().selectedOperator = "";
+                                          context.read<ReferralProvider>().getAllProvidersNames().then(
+                                            (value) {
+                                              if (reward['reward_category'] == "Mobile Recharge") {
+                                                showRechargeOperatorBottomSheet(context, reward, true);
+                                              } else if (reward['reward_category'] == "OTT Subscription") {
+                                                showRechargeOperatorBottomSheet(context, reward, false);
+                                              } else {
+                                                context.read<ReferralProvider>().postClaimedRewards(
+                                                      reward,
+                                                      "",
+                                                    );
+                                              }
+                                            },
+                                          );
+                                        },
+                                        child: Container(
+                                          width: 80,
+                                          height: 30,
+                                          decoration: BoxDecoration(
+                                            color: Colors.lightBlue,
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              "Claim",
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
+                                    ],
+                                  ),
+                                  Image.asset(
+                                    "assets/svg/gift.png",
+                                    height: 80,
+                                    width: 80,
                                   ),
                                 ],
                               ),
-                              Image.asset(
-                                "assets/svg/gift.png",
-                                height: 80,
-                                width: 80,
-                              ),
-                            ],
-                          ),
-                        );
-                      }),
-                ):SizedBox(),
+                            );
+                          }),
+                    )
+                  : SizedBox(),
               height(height: 6),
               Align(
                 alignment: Alignment.centerLeft,
@@ -657,13 +658,18 @@ class _ReferEarnState extends State<ReferEarn> {
                       ],
                     ),
                   ),
-                  Positioned(right: 16,
+                  Positioned(
+                    right: 16,
                     top: 10,
                     child: InkWell(
-                      onTap: (){
+                      onTap: () {
                         Navigator.pop(context);
                       },
-                      child: Icon(Icons.cancel,color: Colors.red,size: 24,),
+                      child: Icon(
+                        Icons.cancel,
+                        color: Colors.red,
+                        size: 24,
+                      ),
                     ),
                   )
                 ],

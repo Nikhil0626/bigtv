@@ -9,7 +9,7 @@ import '../../globel_keys/global_variables_data.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../event_repo.dart';
+import '../events_data/event_repo.dart';
 
 class PrivacyPolicy extends StatefulWidget {
   const PrivacyPolicy({super.key});

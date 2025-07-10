@@ -13,7 +13,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 import '../../../services/webengage_notification.dart';
 import '../../../utils/app_colors.dart';
 import '../../auth_screens/authentication_provider/authentication_provider.dart';
-import '../../event_repo.dart';
+import '../../events_data/event_repo.dart';
 
 class ProfileView extends StatefulWidget {
   ProfileView({Key? key}) : super(key: key);
