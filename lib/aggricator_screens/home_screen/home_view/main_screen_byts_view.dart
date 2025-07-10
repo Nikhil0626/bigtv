@@ -43,7 +43,7 @@ import '../home_provider/home_provider.dart';
 
 class MainScreenBytView extends StatefulWidget {
   final article;
-  final PageController;
+  final pageController;
   final int length;
   final int index;
   final String aiTagId;
@@ -58,7 +58,7 @@ class MainScreenBytView extends StatefulWidget {
     this.aiTagId = "",
     this.aiTagName = "",
     this.isMainScreen = false,
-    this.PageController,
+    this.pageController,
     this.length = 0,
     this.index = 0,
   });
