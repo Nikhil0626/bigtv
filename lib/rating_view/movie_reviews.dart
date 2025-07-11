@@ -132,7 +132,8 @@ class _MovieRatingsState extends State<MovieRatings> {
                           child: Text(widget.article['title'], style: fontStyle(fontSize: 16, fontWeight: FontWeight.w700)),
                         ),
                         height(height: 8),
-                        Consumer<RatingProvider>(builder: (_, ratingProvider, __) {
+                        Consumer<RatingProvider>(
+                            builder: (_, ratingProvider, __) {
                           ratingProvider.selectedStar = widget.article['userRating'] ?? 0;
                           return Column(
                             children: [
@@ -166,6 +167,8 @@ class _MovieRatingsState extends State<MovieRatings> {
                               ),
                               height(height: 12),
                               if (widget.article['userHasReviewed'] == false)
+
+
                                 TextFormField(
                                   onTap: () {
                                     context.read<HomeProvider>().pageChange(isValue: false);
@@ -190,8 +193,12 @@ class _MovieRatingsState extends State<MovieRatings> {
                                     ),
                                   ),
                                 ),
-                              if (widget.article['userHasReviewed'] == false) height(height: 12),
+
+
                               if (widget.article['userHasReviewed'] == false)
+                                height(height: 12),
+                              if (widget.article['userHasReviewed'] == false)
+
                                 GestureDetector(
                                   onTap: ratingProvider.selectedStar >= 1
                                       ? () {
@@ -265,11 +272,15 @@ class _MovieRatingsState extends State<MovieRatings> {
                         //               children: [
                         //                 Icon(Icons.account_circle, size: 24, color: Colors.black),
                         //                 width(width: 8),
-                        //                 Text(widget.article["topComments"][index]["userName"], style: fontStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                        //                 Text(
+                        //                 widget.article["topComments"][index]["userName"],
+                        //                 style: fontStyle(fontSize: 12, fontWeight: FontWeight.w600)),
                         //                 Spacer(),
                         //                 Icon(Icons.star, color: AppColors.ratingColor, size: 18),
                         //                 width(width: 4),
-                        //                 Text('${widget.article["topComments"][index]["rating"].toString()}/5', style: fontStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                        //                 Text(
+                        //                 '${widget.article["topComments"][index]["rating"].toString()}/5',
+                        //                 style: fontStyle(fontSize: 12, fontWeight: FontWeight.w800)),
                         //               ],
                         //             ),
                         //             height(height: 6),

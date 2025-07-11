@@ -61,13 +61,13 @@ class _SplashScreenState extends State<SplashScreen> {
     //   );
     //   return;
     // }else{
-    context.read<AuthenticationProvider>().isPageNavigation(context);
+    // context.read<AuthenticationProvider>().isPageNavigation(context);
     //
-    // Navigator.of(context).pushReplacement(
-    //   MaterialPageRoute(
-    //     builder: (context) => PollsScreen(),
-    //   ),
-    // );
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => PollsScreen(),
+      ),
+    );
 
     // }
   }

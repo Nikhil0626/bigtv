@@ -110,8 +110,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future verifyOtp(
     context,
-  ) async
-  {
+  ) async {
     errorMessage = '';
     isVerifyLoading = true;
     isButtonEnabled = false;
@@ -129,7 +128,6 @@ class AuthenticationProvider extends ChangeNotifier {
         "otp": otpController.text,
         "device_id": deviceId,
         "referral_id": referralCode ?? "",
-
       };
       log(body.toString());
       Response response = await AuthenticationRepo().validateOtp(body);
@@ -381,10 +379,10 @@ class AuthenticationProvider extends ChangeNotifier {
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
-      EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": nameOfDistrict ?? "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
+      EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
-      EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": nameOfDistrict ?? "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
+      EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
     } finally {
       isLocationSendingLoading = false;
       notifyListeners();
