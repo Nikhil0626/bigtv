@@ -72,6 +72,7 @@ class BaseUrls {
   ///Rating
   static const String postRating = "/reviews/submit";
   static const String getReviewsById = "/reviews/";
+  static const String postProcessReferral = "/process-referral";
 
 
   ///Categories Apis
