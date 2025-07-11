@@ -1,8 +1,8 @@
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_repo/authentication_repo.dart';
-import 'package:chotanews/aggricator_screens/event_repo.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_view.dart';
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_view/home_view.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -135,7 +135,7 @@ class AuthenticationProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         sp.setString("loginType", "login");
         sp.setString("myReferralCode", response.data['user']['referral_code'].toString() ?? "");
-        sp.setString("myReferralLink", response.data['referral_link'].toString() ?? "");
+        sp.setString("myReferralLink", response.data['user']['refferal_link'].toString() ?? "");
         sp.setString("userId", response.data['user']['id'].toString());
         sp.setString("userStatus", response.data['user']['status'].toString());
         if (response.data['is_new_user'] == false) {

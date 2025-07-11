@@ -1,7 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:chotanews/aggricator_screens/event_repo.dart';
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:device_info_plus/device_info_plus.dart';

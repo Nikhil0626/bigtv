@@ -92,7 +92,7 @@
 // }
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'package:chotanews/aggricator_screens/home_screen/main_screen_card.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_view/main_screen_card.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -102,7 +102,7 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
-import '../../home_screen/home_view.dart';
+import '../../home_screen/home_view/home_view.dart';
 import '../authentication_model/location_model.dart';
 
 class DistrictView extends StatefulWidget {

@@ -6,8 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import '../aggricator_screens/home_screen/home_provider/home_provider.dart';
-import '../aggricator_screens/individual_post_details/individual_post_view.dart';
-import '../main.dart';
+import '../globel_keys/globel_keys.dart';
 
 WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
 bool _isSubscribed = false;

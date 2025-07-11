@@ -9,7 +9,7 @@ import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../event_repo.dart';
+import '../events_data/event_repo.dart';
 import 'contact_us.dart';
 
 class AdvertiseWithUs extends StatefulWidget {

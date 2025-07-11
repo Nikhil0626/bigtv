@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/event_repo.dart';
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
@@ -17,7 +17,6 @@ class EPapersProvider extends ChangeNotifier {
   List<SinglePaperModel> getSinglePapersList = [];
 
   Future getMainEPapers() async {
-
     isMainPapers = true;
 
     try {
@@ -26,10 +25,7 @@ class EPapersProvider extends ChangeNotifier {
         log(response.data.toString());
         List data = response.data;
         getAllMainPapersList = data.map((e) => EPaperMainModel.fromJson(e)).toList();
-        isBookMark = getAllMainPapersList
-            .where((e) => e.isBookmarked == 1)
-            .map((e) => e.id.toString())
-            .toList();
+        isBookMark = getAllMainPapersList.where((e) => e.isBookmarked == 1).map((e) => e.id.toString()).toList();
       }
     } on DioException catch (e, st) {
       getAllMainPapersList = [];
@@ -42,25 +38,23 @@ class EPapersProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   SinglePaperModel? singlePaperModel;
-  Future getSingleEPapers(String paper,id) async {
+
+  Future getSingleEPapers(String paper, id) async {
     isMainPapers = true;
     getSinglePapersList = [];
-    print("sdfjsfjgjkhsahid adiuaidhwd");
+    log("single bookmarked $id");
     try {
-      Response response = await EPaperRepo().getSingleEPapers(paper,id);
+      Response response = await EPaperRepo().getSingleEPapers(paper, id);
       if (response.statusCode == 200) {
         log(response.data.toString());
-        singlePaperModel =   SinglePaperModel.fromJson(response.data);
-
-        // isBookMark = getSinglePapersList.first.data!
-        //     .where((e) => e.isBookmarked == 1)
-        //     .map((e) => e.id.toString())
-        //     .toList();
+        singlePaperModel = SinglePaperModel.fromJson(response.data);
+        log("single bookmarked ${response.data}");
         isMainPapers = false;
 
         notifyListeners();
-return singlePaperModel;
+        return singlePaperModel;
       }
     } on DioException catch (e, st) {
       singlePaperModel = SinglePaperModel.fromJson({});
@@ -76,25 +70,19 @@ return singlePaperModel;
     }
   }
 
-
   List isBookMark = [];
 
-  void isBookMarkPost(val,context) async {
+  void isBookMarkPost(val, context) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
     String? deviceId = sp.getString("deviceId");
     log(val.id.toString());
     if (!isBookMark.contains(val.id.toString())) {
-
       isBookMark.add(val.id.toString());
-      Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val.id.toString(), context,1
-      );
+      Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val.id.toString(), context, 1);
       log(isBookMark.toString());
     } else {
-      Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val.id.toString(), context,0
-      );
+      Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val.id.toString(), context, 0);
       isBookMark.remove(val.id.toString());
 
       log(isBookMark.toString());

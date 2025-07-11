@@ -13,7 +13,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../aggricator_screens/event_repo.dart';
+import '../aggricator_screens/events_data/event_repo.dart';
 
 Future<void> requestManageStoragePermission() async {
   if (Platform.isAndroid) {

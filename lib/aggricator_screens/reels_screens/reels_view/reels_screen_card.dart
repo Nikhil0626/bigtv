@@ -16,21 +16,18 @@ import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:shimmer/shimmer.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
-import '../../../loading_screen/home_shimmer.dart';
-import '../../botton_actions.dart';
-import '../../event_repo.dart';
-import '../../home_screen/home_provider/home_provider.dart';
-import '../../in_app_web_view.dart';
+import '../../../utils/botton_actions.dart';
+import '../../events_data/event_repo.dart';
+import '../../../utils/in_app_web_view.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_spaces.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
-import '../../e_papers_screens/paper_view/papers_screen_card.dart';
+import '../../loading_screen/home_shimmer.dart';
 
 class ReelsScreen extends StatefulWidget {
   @override
@@ -105,89 +102,11 @@ class _ReelsScreenState extends State<ReelsScreen> {
             : reelsProvider.getAllReelsList.isEmpty
                 ? AppNoData()
                 : ReelPreviewScreen(initialIndex: 0);
-
-        // ? Shimmer.fromColors(
-        //     baseColor: Colors.grey[300]!,
-        //     highlightColor: Colors.grey[100]!,
-        //     child: CardSwiper(
-        //       allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-        //       controller: controller,
-        //       // Assign the controller
-        //       cardsCount: 5,
-        //       onSwipe: (previousIndex, currentIndex, direction) {
-        //         print("Swiped from $previousIndex to $currentIndex");
-        //         return true;
-        //       },
-        //       numberOfCardsDisplayed: 4,
-        //       cardBuilder: (context, index, percentThresholdX, percentThresholdY) {
-        //         return ShimmerCard();
-        //       },
-        //     ),
-        //   )
-        // : reelsProvider.getAllReelsList.isEmpty
-        //     ? AppNoData()
-        //     : Padding(
-        //         padding: const EdgeInsets.only(bottom: 40.0),
-        //         child: CardSwiper(
-        //           controller: controller,
-        //           cardsCount: reelsProvider.getAllReelsList.length,
-        //           onSwipe: (previousIndex, currentIndex, direction) {
-        //             if (direction == CardSwiperDirection.bottom) {
-        //               context.read<HomeProvider>().flipEvent('reel', reelsProvider.getAllReelsList[currentIndex!].id, false);
-        //               _undo();
-        //
-        //               return false;
-        //             } else {
-        //               context.read<HomeProvider>().flipEvent('reel', reelsProvider.getAllReelsList[currentIndex!].id, true);
-        //             }
-        //
-        //             if (currentIndex != null) {
-        //               currentIndexs = currentIndex;
-        //             }
-        //             debugPrint(
-        //               'The card $previousIndex was swiped to the ${direction.name}. Now the card $currentIndex is on top',
-        //             );
-        //             return true;
-        //           },
-        //           // onSwipeDirectionChange:  ,
-        //           // onUndo: _onUndo,
-        //           allowedSwipeDirection: AllowedSwipeDirection.symmetric(vertical: true),
-        //           // allowedSwipeDirection: AllowedSwipeDirection.only(up:true),
-        //           numberOfCardsDisplayed: 4,
-        //           duration: const Duration(milliseconds: 100),
-        //           backCardOffset: const Offset(0, 40),
-        //           padding: const EdgeInsets.only(
-        //             left: 20.0,
-        //             right: 20.0,
-        //             bottom: 40.0,
-        //           ),
-        //           // alignment: Alignment.topCenter,
-        //           cardBuilder: (
-        //             context,
-        //             index,
-        //             horizontalThresholdPercentage,
-        //             verticalThresholdPercentage,
-        //           ) {
-        //             final post = reelsProvider.getAllReelsList[index];
-        //
-        //             return EachReelCard(reel: post, reelsProvider: reelsProvider, index: index);
-        //           },
-        //         ),
-        //       );
       }),
     );
   }
 
   int currentIndexs = 0;
-
-  void _undo() {
-    if (currentIndexs > 0) {
-      setState(() {
-        currentIndexs--;
-      });
-      controller.undo();
-    }
-  }
 }
 
 class EachReelCard extends StatefulWidget {

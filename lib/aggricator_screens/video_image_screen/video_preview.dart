@@ -1,0 +1,100 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+
+import '../home_screen/home_provider/home_provider.dart';
+
+class VideoPreview extends StatefulWidget {
+  final String url;
+  final String imageUrl;
+  final bool isVideoScreen;
+  final bool isFoldable;
+  final String postId;
+
+  VideoPreview({super.key, required this.url, required this.imageUrl, this.isVideoScreen = false, this.isFoldable = false, this.postId = "0"});
+
+  @override
+  _VideoPreview createState() => _VideoPreview();
+}
+
+class _VideoPreview extends State<VideoPreview> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<HomeProvider>().youtubeInitial(widget.url);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+      return homeProvider.isPlaying
+          ? Container(
+              width: MediaQuery.of(context).size.width,
+              decoration: BoxDecoration(color: Colors.white),
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: YoutubePlayerBuilder(
+                      player: YoutubePlayer(
+                        controller: homeProvider.controller,
+                        showVideoProgressIndicator: false,
+                        onReady: () => debugPrint("YouTube Player Ready"),
+                        onEnded: (metaData) {
+                          homeProvider.isPlayingYoutube(false);
+                        },
+                        bottomActions: [
+                          CurrentPosition(),
+                          ProgressBar(isExpanded: true),
+                          RemainingDuration(),
+                          IconButton(
+                            icon: Icon(homeProvider.isMuted ? Icons.volume_off : Icons.volume_up),
+                            onPressed: () {
+                              if (homeProvider.isMuted) {
+                                homeProvider.controller.unMute();
+                              } else {
+                                homeProvider.controller.mute();
+                              }
+                              homeProvider.toggleMute();
+                            },
+                          ),
+                        ],
+                      ),
+                      builder: (context, player) => player,
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.network(
+                    height: 330,
+                    width: MediaQuery.of(context).size.width,
+                    widget.imageUrl,
+                    fit: BoxFit.fill,
+                  ),
+                  IconButton(
+                    icon: SvgPicture.asset(
+                      "assets/svg/play_circle.svg",
+                      height: 58,
+                      width: 58,
+                    ),
+                    onPressed: () {
+                      homeProvider.isPlayingYoutube(true);
+                    },
+                  ),
+                ],
+              ),
+            );
+    });
+  }
+}
