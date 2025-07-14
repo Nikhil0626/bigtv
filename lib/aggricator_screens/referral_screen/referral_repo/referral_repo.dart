@@ -33,4 +33,9 @@ class ReferralRepo extends BaseService{
         url: BaseUrls.serviceProviders, method: RequestType.get,);
     return response;
   }
+
+  Future postProcessReferral( body) async {
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.postProcessReferral, method: RequestType.post, body: body);
+    return response;
+  }
  }

@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/settings_screen/settings_view/no_claimed_rewards.dart';
+import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
@@ -46,8 +47,8 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
       ),
       body: Consumer<ReferralProvider>(builder: (_, referralProvider, __) {
         return referralProvider.isLoading
-            ? AppLoadingScreen()
-            :  Column(
+            ? NoClaimedRewards()
+            : referralProvider.referralRewardsClaimed.isEmpty?AppNoData(): Column(
                     children: [
                       Container(
                         margin: EdgeInsets.all(16),
@@ -85,7 +86,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                                     ),
                                     height(height: 8.h),
                                     Text(
-                                      "${referralProvider.referralRewardsClaimed['points']['downloads']}",
+                                      "${referralProvider.referralRewardsClaimed['points']['downloads']??0}",
                                       style: TextStyle(
                                         color: Colors.black,
                                         fontSize: 20.sp,

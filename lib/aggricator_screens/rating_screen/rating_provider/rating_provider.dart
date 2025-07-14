@@ -58,34 +58,7 @@ bool isFilterData = false;
     }
   }
 
-  Future<void> postProcessReferral(article, rated) async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? myReferralCode = preferences.getString("myReferralCode");
-    String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {
-      "user_id": userId??"0",
-      "referral_code": "$myReferralCode"
-    };
-    log(body.toString());
-    try {
-      Response response = await RatingRepo().postProcessReferral(body);
-      log(response.data.toString());
-      if (response.statusCode == 201) {
-        isRated = true;
-        CustomToast.showSuccessToast(
-          msg: response.data["message"],
-        );
-      } else {}
-    } on DioException catch (e, st) {
-      CustomToast.showErrorToast(msg: "something went wrong");
-      log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
-    } catch (e, st) {
-      print(e.toString());
-      print(st.toString());
-    }finally{
-      notifyListeners();
-    }
-  }
+
 
   Map<String, dynamic> getAllReviews = {};
 

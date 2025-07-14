@@ -37,7 +37,6 @@ class _MovieRatingsState extends State<MovieRatings> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-
     return Screenshot(
       controller: adsScreenshotController,
       child: Stack(
@@ -114,6 +113,9 @@ class _MovieRatingsState extends State<MovieRatings> {
                             ratingBlock("Critic Rating", widget.article['chotarating']),
                           ],
                         ),
+                        if(widget.article['externalRatings'] != null &&
+                            widget.article['externalRatings'] is List &&
+                            widget.article['externalRatings'].isNotEmpty)
                         Divider(),
                         SizedBox(height: 4),
                         if (widget.article['externalRatings'] != null &&
