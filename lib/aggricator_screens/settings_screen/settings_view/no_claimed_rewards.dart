@@ -13,30 +13,10 @@ class NoClaimedRewards extends StatefulWidget {
 class _NoClaimedRewardsState extends State<NoClaimedRewards> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_outlined, color: Colors.black, size: 25),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: Text(
-          "Claimed Rewards",
-          style: fontStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w700),
-        ),
-      ),
-
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-           Center(
-             child: SvgPicture.asset(
-              'assets/images/no_claimed_reward.svg',
-              fit: BoxFit.contain,
-             ),
-           ),
-        ],
+    return Center(
+      child: SvgPicture.asset(
+        'assets/images/no_claimed_reward.svg',
+        fit: BoxFit.contain,
       ),
     );
   }

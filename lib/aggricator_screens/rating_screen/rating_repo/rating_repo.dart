@@ -15,4 +15,5 @@ class RatingRepo extends BaseService {
     Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: "${BaseUrls.getReviewsById}$postId", method: RequestType.get, queryParameters: body);
     return response;
   }
+
 }

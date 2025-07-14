@@ -6,6 +6,7 @@ import '../aggricator_screens/auth_screens/authentication_provider/authenticatio
 import '../aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import '../aggricator_screens/home_screen/home_provider/home_provider.dart';
 import '../aggricator_screens/home_screen/home_provider/news_posts_provider.dart';
+import '../aggricator_screens/polls_screens/poll_provider.dart';
 import '../aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
 import '../aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
 import '../aggricator_screens/referral_screen/referral_provider/referral_provider.dart';
@@ -26,5 +27,6 @@ class AppProviders {
     ChangeNotifierProvider<ReferralProvider>(create: (_) => ReferralProvider()),
     ChangeNotifierProvider<RatingProvider>(create: (_) => RatingProvider()),
     ChangeNotifierProvider<BannerAdsProvider>(create: (_) => BannerAdsProvider()),
+    ChangeNotifierProvider<PollProvider>(create: (_) => PollProvider()),
   ];
 }

@@ -169,20 +169,23 @@ final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
 Future<void> getReferrerFromPlayStore() async {
   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  String? userId = sharedPreferences.getString("userId");
   try {
     final ReferrerDetails referrerDetails = await AndroidPlayInstallReferrer.installReferrer;
 
     final String? referrerUrl = referrerDetails.installReferrer;
-    sharedPreferences.setString("Nikil", referrerUrl ?? "Siva Kumar");
     final int clickTimestamp = referrerDetails.referrerClickTimestampSeconds;
     final int installTimestamp = referrerDetails.installBeginTimestampSeconds;
     EventRepo().addEvent({
+      "shareApp": Platform.isIOS ? "iOS" : "Android",
+      "userId": userId ?? "0",
       'referrerUrl': referrerUrl,
       'clickTimestamp': clickTimestamp,
       'installTimestamp': installTimestamp,
       "createAt": DateTime.now().toString(),
       "error": "",
-    }, "app_update");
+      "isSharedUser": false
+    }, "referral");
 
     final uri = Uri.parse("https://dummy.com/?$referrerUrl");
     log("📦 Referrer URL: $referrerUrl");
@@ -190,20 +193,16 @@ Future<void> getReferrerFromPlayStore() async {
     final campaign = uri.queryParameters['utm_campaign'];
     final refCode = uri.queryParameters['user_id'];
     sharedPreferences.setString("referralCode", uri.queryParameters['user_id'].toString().split("=").last.toString() ?? "chota123");
-    log("📦 Referrer URL: $referrerUrl");
-    log("🕒 Click Time: $clickTimestamp");
-    log("🕒 Install Time: $installTimestamp");
-    log("📢 Campaign: $campaign");
-    log("🎁 Referral Code: $refCode");
-    log("📡 Source: $source");
   } catch (e) {
     EventRepo().addEvent({
+      "shareApp": Platform.isIOS ? "iOS" : "Android",
+      "userId": userId ?? "0",
       'referrerUrl': "",
       'clickTimestamp': "",
       'installTimestamp': "",
       "createAt": DateTime.now().toString(),
       "error": e.toString(),
-    }, "app_update");
-    print("❌ Error getting install referrer: $e");
+      "isSharedUser": false
+    }, "referral");
   }
 }

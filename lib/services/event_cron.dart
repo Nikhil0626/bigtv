@@ -23,7 +23,6 @@ class EventCron {
   }
 
 
-
   void stop() {
     _cron.close();
   }

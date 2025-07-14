@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../utils/app_toasts.dart';
 import '../referral_repo/referral_repo.dart';
 
 class ReferralProvider extends ChangeNotifier {
@@ -31,7 +32,7 @@ class ReferralProvider extends ChangeNotifier {
         final data = response.data as Map<String, dynamic>;
         referralData = data;
         progress = int.parse(referralData['downloads'].toString()) / (int.parse(referralData['needed'].toString()) + int.parse(referralData['downloads'].toString()));
-        difference = referralData['needed'] ?? 0;
+        difference = int.parse(referralData['needed'].toString()) - int.parse(referralData['downloads'].toString());
         progress = progress.clamp(0.0, 1.0);
       } else {
         log("Failed to post referral: ${response.statusCode}");
@@ -103,7 +104,7 @@ class ReferralProvider extends ChangeNotifier {
     Map<String, dynamic> body = {
       "user_id": userId,
       "reward_id": reward['id'],
-      "provider_id": isRecharge ? 0 : selectedOperator,
+      "provider_id": isRecharge ? providerName : selectedOperator,
     };
     log('Calamined Rewards Body $body');
     try {
@@ -142,6 +143,32 @@ class ReferralProvider extends ChangeNotifier {
     } catch (e, st) {
       log('error : ${e.toString()} --- ${st.toString()}');
     } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> postProcessReferral() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? myReferralCode = preferences.getString("myReferralCode");
+    String? userId = preferences.getString("userId");
+    Map<String, dynamic> body = {
+      "user_id": userId??"0",
+      "referral_code": "$myReferralCode"
+    };
+    log(body.toString());
+    try {
+      Response response = await ReferralRepo().postProcessReferral(body);
+      log(response.data.toString());
+      if (response.statusCode == 200) {
+        getReferralStats();
+      } else {}
+    } on DioException catch (e, st) {
+      CustomToast.showErrorToast(msg: "something went wrong");
+      log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
+    } catch (e, st) {
+      print(e.toString());
+      print(st.toString());
+    }finally{
       notifyListeners();
     }
   }

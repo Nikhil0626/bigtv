@@ -113,8 +113,8 @@ class _MovieRatingsState extends State<MovieRatings> {
                             ratingBlock("Critic Rating", widget.article['chotarating']),
                           ],
                         ),
-                        Divider(),
-                        height(height: 4),
+                        if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty) Divider(),
+                        SizedBox(height: 4),
                         if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty)
                           SizedBox(
                             height: widget.article['externalRatings'].length * 30.0, // approx height per item
@@ -141,7 +141,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                         child: Row(
                                           children: [
                                             Icon(Icons.star, size: 16, color: AppColors.ratingColor),
-                                            width(width: 10),
+                                            SizedBox(width: 10),
                                             Text(
                                               "${rating['platform_rating']}",
                                               style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
@@ -208,7 +208,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                           }),
                         ),
                         height(height: 12),
-                        if (widget.article['userHasReviewed'] == false && ratingProvider.isRated == false)
+                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
                           TextFormField(
                             onTap: () {
                               context.read<HomeProvider>().pageChange(isValue: false);

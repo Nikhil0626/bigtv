@@ -23,17 +23,7 @@ import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 
-import 'aggricator_screens/ad_manager_screen/ad_provider/banner_ads_provider.dart';
-import 'aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import 'aggricator_screens/events_data/event_repo.dart';
-import 'aggricator_screens/home_screen/home_provider/home_provider.dart';
-import 'aggricator_screens/home_screen/home_provider/news_posts_provider.dart';
-import 'aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
-import 'aggricator_screens/reels_screens/reels_provider/reels_providers.dart';
-import 'aggricator_screens/referral_screen/referral_provider/referral_provider.dart';
-import 'aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
-import 'aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import 'aggricator_screens/splash_screen/splash_screen_view.dart';
 import 'globel_keys/globel_keys.dart';
@@ -134,7 +124,7 @@ class _MyAppState extends State<MyApp> {
     return ScreenUtilInit(
       designSize: const Size(360, 690), // Adjust to your design
       child: MultiProvider(
-        providers:  AppProviders.all,
+        providers: AppProviders.all,
         child: MaterialApp(
           navigatorKey: mainNavigatorKey,
           localizationsDelegates: context.localizationDelegates,
@@ -156,5 +146,3 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
-
-

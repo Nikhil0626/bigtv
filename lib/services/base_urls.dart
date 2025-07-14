@@ -74,6 +74,7 @@ class BaseUrls {
   static const String getReviewsById = "/reviews/";
   static const String postPoll ="/polls/submit";
   static const String getPollCommentsById = "/polls/";
+  static const String postProcessReferral = "/process-referral";
 
 
   ///Categories Apis
@@ -85,9 +86,6 @@ class BaseUrls {
   ///Location Apis
   static const String getAllLocation = "/locations";
 
-  ///profile Apis
-  static const String updateProfile = "/";
-
   ///Bookmarks Apis
   static const String getAllBookMarks = "/bookmark";
 
@@ -97,18 +95,17 @@ class BaseUrls {
   ///Like Apis
   static const String like = "/like";
 
+  /// Polls apis
+  static const String submitPolls="/polls/submit";
+
   ///Update profile
   static const String getProfile = "/profile";
-
-  ///
 
   ///Referral Apis
   static const String getReferralStats = "/referral/stats";
   static const String getAvailableRewards = "/rewards/available";
   static const String getClaimedReward = "/rewards/claim";
-  static const String deleteAccount = "/profile";
   static const String serviceProviders = "/service_providers";
 }
 
 
-// 7386881205

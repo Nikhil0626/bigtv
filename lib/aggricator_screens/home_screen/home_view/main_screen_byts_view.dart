@@ -31,6 +31,7 @@ import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
 import '../../ad_manager_screen/ad_screen/android_ads_view.dart';
+import '../../polls_screens/polls_view/polls_screen.dart';
 import '../../rating_screen/rating_view/movie_reviews.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -107,7 +108,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         : SizedBox(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
-            child: (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString() == "Reviews")
+            child: (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString() == "Polls")
+                ? PollsScreen(article: widget.article,)
+                :  (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString() == "Reviews")
                 ? MovieRatings(article: widget.article,)
                 : InkWell(
                     onTap: () {
