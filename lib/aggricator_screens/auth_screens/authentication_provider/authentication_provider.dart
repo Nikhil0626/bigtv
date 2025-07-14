@@ -90,7 +90,7 @@ class AuthenticationProvider extends ChangeNotifier {
           saveLoginState();
           EventRepo().addEvent({
             "loginType": "mobileNumber",
-            "mobileNumber": otpController.text ?? "",
+            "mobileNumber": phoneController.text ?? "",
             "createAt": DateTime.now().toString(),
           }, "login_event");
           otpController.text = "";
@@ -446,7 +446,6 @@ class AuthenticationProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginState", newAppLoginStatus.toString());
     preferences.setString("loginType", "skip");
-    String? deviceId = await preferences.getString("deviceId");
 
     notifyListeners();
     // isPageNavigation(context);
@@ -457,8 +456,6 @@ class AuthenticationProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.clear();
     preferences.setString("loginState", newAppLoginStatus.toString());
-    String? deviceId = await preferences.getString("deviceId");
-    String? userId = await preferences.getString("userId");
 
     isPageNavigation(context);
   }

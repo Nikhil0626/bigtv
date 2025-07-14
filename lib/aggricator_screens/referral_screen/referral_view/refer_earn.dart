@@ -36,11 +36,13 @@ class _ReferEarnState extends State<ReferEarn> {
 
   String? myReferralCode;
   String? myReferralLink;
+  String? userId;
 
   void getData() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     myReferralCode = sharedPreferences.getString("myReferralCode") ?? "N/A";
     myReferralLink = sharedPreferences.getString("myReferralLink") ?? "N/A";
+    userId = sharedPreferences.getString("userId") ?? "N/A";
     log("get code $myReferralCode /////  get my link $myReferralLink");
     setState(() {});
   }
@@ -140,8 +142,14 @@ class _ReferEarnState extends State<ReferEarn> {
                                 context.read<ReferralProvider>().postProcessReferral();
                                 EventRepo().addEvent({
                                   "shareApp": Platform.isIOS ? "iOS" : "Android",
+                                  "userId": userId ?? "0",
+                                  'referrerUrl': myReferralLink,
+                                  'clickTimestamp': DateTime.now().toString(),
+                                  'installTimestamp': "",
                                   "createAt": DateTime.now().toString(),
-                                }, "share_app");
+                                  "error": "",
+                                  "isSharedUser": true
+                                }, "referral");
                                 Share.share(
                                   "Click link and get bonus: $myReferralLink",
                                 );
@@ -333,7 +341,7 @@ class _ReferEarnState extends State<ReferEarn> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              "${reward['name'] == null ? "Test" : reward['name'] ?? ""}",
+                                              "${reward['reward_type'] == null ? "Test" : reward['reward_type'] ?? ""}",
                                               style: fontStyle(
                                                 color: Colors.white,
                                                 fontSize: 16,
@@ -342,7 +350,7 @@ class _ReferEarnState extends State<ReferEarn> {
                                             ),
                                             height(height: 6),
                                             Text(
-                                              "${reward['coupon_value'] == null ? "Test card" : reward['coupon_value'] ?? ""}",
+                                              "Coupon Value : ${reward['coupon_value'] == null ? "Test card" : reward['coupon_value'] ?? ""}",
                                               style: fontStyle(
                                                 color: Colors.white,
                                                 fontSize: 12,
@@ -357,12 +365,12 @@ class _ReferEarnState extends State<ReferEarn> {
                                                 context.read<ReferralProvider>().selectedOperator = "";
                                                 context.read<ReferralProvider>().getAllProvidersNames().then(
                                                   (value) {
-                                                    if (reward['name'] == "Mobile Recharge") {
+                                                    if (reward['reward_type'] == "Mobile Recharge") {
                                                       showRechargeOperatorBottomSheet(context, reward, true);
-                                                    } else if (reward['name'] == "OTT Subscription") {
+                                                    } else if (reward['reward_type'] == "OTT Subscription") {
                                                       showRechargeOperatorBottomSheet(context, reward, false);
                                                     } else {
-                                                      context.read<ReferralProvider>().postClaimedRewards(reward, reward['name'] == "Gift Card" ? "-1" : "-2", isRecharge: true);
+                                                      context.read<ReferralProvider>().postClaimedRewards(reward, reward['coupon_value'] == "Gift Card" ? "-1" : "-2", isRecharge: true);
                                                     }
                                                   },
                                                 );
@@ -448,7 +456,6 @@ class _ReferEarnState extends State<ReferEarn> {
                               itemBuilder: (context, index) {
                                 final reward = referralProvider.referralRewardsList[index];
                                 return Container(
-
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(12),
@@ -491,10 +498,10 @@ class _ReferEarnState extends State<ReferEarn> {
                                         Padding(
                                           padding: const EdgeInsets.symmetric(horizontal: 8.0),
                                           child: Text(
-                                            reward['value'] ?? "Reward description goes here.",
+                                            "Coupon Value : ${reward['coupon_value'] == null ? "Test card" : reward['coupon_value'] ?? ""} RS",
                                             style: fontStyle(
                                               color: Colors.black,
-                                              fontSize: 14,
+                                              fontSize: 12,
                                               fontWeight: FontWeight.w700,
                                             ),
                                             maxLines: 1,
@@ -582,7 +589,7 @@ class _ReferEarnState extends State<ReferEarn> {
                       ),
                     ),
                     SizedBox(
-                      height: 10,
+                      height: 20,
                     )
                   ],
                 ));

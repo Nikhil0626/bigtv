@@ -159,8 +159,8 @@ class ReferralProvider extends ChangeNotifier {
     try {
       Response response = await ReferralRepo().postProcessReferral(body);
       log(response.data.toString());
-      if (response.statusCode == 201) {
-
+      if (response.statusCode == 200) {
+        getReferralStats();
       } else {}
     } on DioException catch (e, st) {
       CustomToast.showErrorToast(msg: "something went wrong");

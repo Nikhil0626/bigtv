@@ -95,6 +95,9 @@ class BaseUrls {
   ///Like Apis
   static const String like = "/like";
 
+  /// Polls apis
+  static const String submitPolls="/polls/submit";
+
   ///Update profile
   static const String getProfile = "/profile";
 

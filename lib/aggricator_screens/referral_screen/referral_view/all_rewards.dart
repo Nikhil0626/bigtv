@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_loading_screen.dart';
+import '../../../utils/app_spaces.dart';
 import '../referral_provider/referral_provider.dart';
 
 class AllRewards extends StatefulWidget {
@@ -51,47 +52,51 @@ class _AllRewardsState extends State<AllRewards> {
                       childAspectRatio: 0.9,
                     ),
                     itemBuilder: (context, index) {
-                      final referral = referralProvider.referralRewardsList[index];
-                      return Card(
-                          elevation: 2,
-                          color: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      final reward = referralProvider.referralRewardsList[index];
+                      return Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                spreadRadius: 2,
+                                blurRadius: 8,
+                                offset: Offset(0, 4), // horizontal, vertical
+                              ),
+                            ],
                           ),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                CachedNetworkImage(
-                                  imageUrl: referral['icon_url'] ?? '',
-                                  fit: BoxFit.cover,
-                                  width: 80,
-                                  height: 80,
-                                  placeholder: (context, url) => SizedBox(
-                                    width: 80,
-                                    height: 80,
-                                    child: AppLoadingScreen(),
-                                  ),
-                                  errorWidget: (context, url, error) => Icon(
-                                    Icons.error,
-                                    size: 60,
-                                    color: Colors.red,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              CircleAvatar(
+                                radius: 30,
+                                backgroundColor: Colors.grey.shade200,
+                                child: ClipOval(
+                                  child: Image.network(
+                                    reward['icon_url'] ?? '',
+                                    fit: BoxFit.fill,
+                                    width: 60,
+                                    height: 60,
+                                    errorBuilder: (context, error, stackTrace) => Icon(Icons.image),
                                   ),
                                 ),
-                                SizedBox(height: 4),
-                                Text(
-                                  referral['name'] ?? "Reward Title",
-                                  textAlign: TextAlign.center,
-                                  style: fontStyle(
-                                    color: Colors.grey.shade500,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                              ),
+                              height(height: 4),
+                              Text(
+                                reward['name'] ?? "Reward Title",
+                                textAlign: TextAlign.center,
+                                style: fontStyle(
+                                  color: Colors.grey.shade500,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                SizedBox(height: 4),
-                                Text(
-                                  referral['value'] ?? "Reward description goes here.",
+                              ),
+                              height(height: 4),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                child: Text(
+                                  "Coupon Value : ${reward['coupon_value'] == null ? "Test card" : reward['coupon_value'] ?? ""} RS",
                                   style: fontStyle(
                                     color: Colors.black,
                                     fontSize: 14,
@@ -100,17 +105,17 @@ class _AllRewardsState extends State<AllRewards> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                SizedBox(height: 2),
-                                Text(
-                                  "${referral['required_referrals'].toString()} referral" ?? '',
-                                  style: fontStyle(
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                )
-                              ],
-                            ),
+                              ),
+                              height(height: 2),
+                              Text(
+                                "${reward['required_referrals'].toString()} referral" ?? '',
+                                style: fontStyle(
+                                  color: Colors.black,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              )
+                            ],
                           ));
                     }
                 ),
