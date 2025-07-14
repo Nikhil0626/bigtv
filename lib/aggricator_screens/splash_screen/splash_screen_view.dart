@@ -8,6 +8,8 @@ import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../polls_screens/polls_view/polls_comments.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -43,9 +45,13 @@ class _SplashScreenState extends State<SplashScreen> {
         "opened_app",
       );
     }
-
     await Future.delayed(Duration(seconds: showGif ? 5 : 2));
     context.read<AuthenticationProvider>().isPageNavigation(context);
+    //
+    //   Navigator.push(
+    //     context,
+    //     MaterialPageRoute(builder: (context) => PollsComments()),
+    //   );
   }
 
   @override
