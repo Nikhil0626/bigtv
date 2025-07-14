@@ -37,7 +37,6 @@ class _MovieRatingsState extends State<MovieRatings> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-
     return Screenshot(
       controller: adsScreenshotController,
       child: Stack(
@@ -115,10 +114,8 @@ class _MovieRatingsState extends State<MovieRatings> {
                           ],
                         ),
                         Divider(),
-                        SizedBox(height: 4),
-                        if (widget.article['externalRatings'] != null &&
-                            widget.article['externalRatings'] is List &&
-                            widget.article['externalRatings'].isNotEmpty)
+                        height(height: 4),
+                        if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty)
                           SizedBox(
                             height: widget.article['externalRatings'].length * 30.0, // approx height per item
                             child: ListView.builder(
@@ -144,7 +141,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                         child: Row(
                                           children: [
                                             Icon(Icons.star, size: 16, color: AppColors.ratingColor),
-                                            SizedBox(width: 10),
+                                            width(width: 10),
                                             Text(
                                               "${rating['platform_rating']}",
                                               style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
