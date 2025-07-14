@@ -1,12 +1,12 @@
-import 'package:chotanews/rating_view/rating_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../utils/app_colors.dart';
-import '../utils/app_fonts.dart';
-import '../utils/app_spaces.dart';
-import '../utils/date_format.dart';
+import '../../rating_screen/rating_provider/rating_provider.dart';
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_fonts.dart';
+import '../../../utils/app_spaces.dart';
+import '../../../utils/date_format.dart';
 
 class PollsComments extends StatefulWidget {
   const PollsComments({super.key});
