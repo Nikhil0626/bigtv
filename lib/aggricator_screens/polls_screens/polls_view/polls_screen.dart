@@ -46,7 +46,6 @@ class _PollsScreenState extends State<PollsScreen> {
           ),
         ),
 
-        /// Share button
         Positioned(
           top: 10,
           right: 10,
@@ -64,7 +63,7 @@ class _PollsScreenState extends State<PollsScreen> {
           ),
         ),
 
-        /// Poll UI
+
         Positioned(
           bottom: 0,
           left: 0,
@@ -87,7 +86,7 @@ class _PollsScreenState extends State<PollsScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    /// Title
+
                     Text(
                       widget.article['title'] ?? '',
                       maxLines: 2,
@@ -101,7 +100,7 @@ class _PollsScreenState extends State<PollsScreen> {
 
                     height(height: 12),
 
-                    /// Options List
+
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
@@ -120,7 +119,7 @@ class _PollsScreenState extends State<PollsScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Stack(
                               children: [
-                                /// Result bar (after voting)
+
                                 if (hasVoted)
                                   Container(
                                     height: 50,
@@ -131,7 +130,7 @@ class _PollsScreenState extends State<PollsScreen> {
                                     ),
                                   ),
 
-                                /// Background container
+
                                 Container(
                                   height: 50,
                                   decoration: BoxDecoration(
@@ -145,7 +144,7 @@ class _PollsScreenState extends State<PollsScreen> {
                                   ),
                                 ),
 
-                                /// Text
+
                                 Container(
                                   height: 50,
                                   padding: const EdgeInsets.symmetric(horizontal: 16),
