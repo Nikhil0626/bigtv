@@ -26,6 +26,7 @@ class _PollsScreenState extends State<PollsScreen> {
     optionsPolls = widget.article['pollData']['options'];
     hasVoted = widget.article['pollData']['userHasVoted'] ?? false;
     Future.delayed(Duration.zero, () {
+      context.read<PollProvider>().votes = [];
       context.read<PollProvider>().initialPollData(optionsPolls);
     });
   }
@@ -34,7 +35,7 @@ class _PollsScreenState extends State<PollsScreen> {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        /// Background image
+
         Positioned.fill(
           child: CachedNetworkImage(
             imageUrl: widget.article['image_url'] ?? "",
@@ -85,6 +86,8 @@ class _PollsScreenState extends State<PollsScreen> {
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
 
                     Text(
@@ -119,30 +122,25 @@ class _PollsScreenState extends State<PollsScreen> {
                             padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Stack(
                               children: [
-
+                                Container(
+                                  height: 50,
+                                  width: MediaQuery.of(context).size.width ,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade900,
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.grey.shade400),
+                                  ),
+                                ),
                                 if (hasVoted)
                                   Container(
                                     height: 50,
                                     width: MediaQuery.of(context).size.width * (percentage / 100),
                                     decoration: BoxDecoration(
-                                      color: Colors.lightBlue.withOpacity(0.6),
+                                      color: Colors.lightBlue,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                   ),
 
-
-                                Container(
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    color: hasVoted
-                                        ? Colors.grey.shade200
-                                        : isSelected
-                                        ? Colors.green
-                                        : Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey.shade400),
-                                  ),
-                                ),
 
 
                                 Container(
@@ -155,7 +153,7 @@ class _PollsScreenState extends State<PollsScreen> {
                                         child: Text(
                                           optionsPolls[index]['text'],
                                           style: fontStyle(
-                                            color: hasVoted || isSelected ? Colors.black : Colors.black87,
+                                            color: hasVoted || isSelected ? Colors.white : Colors.black87,
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -165,7 +163,7 @@ class _PollsScreenState extends State<PollsScreen> {
                                         Text(
                                           '${percentage.toStringAsFixed(1)}% • $optionVotes',
                                           style: fontStyle(
-                                            color: Colors.black87,
+                                            color: hasVoted?Colors.white:Colors.black87,
                                             fontSize: 12,
                                             fontWeight: FontWeight.w500,
                                           ),
@@ -304,8 +302,8 @@ class _PollsScreenState extends State<PollsScreen> {
                         ),
                       ),
                     ],
-
-                    if (!hasVoted) height(height: 30),
+                    if(widget.article['topComments'].isEmpty)
+                    height(height: 55),
                   ],
                 ),
               );
