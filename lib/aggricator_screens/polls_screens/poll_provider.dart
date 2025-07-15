@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PollProvider with ChangeNotifier {
   final TextEditingController commentController = TextEditingController();
   int? selectedIndex;
-  final List<int> votes = [];
+   List<int> votes = [];
 
   void initialPollData(List<dynamic> votesList) {
     if (votes.isEmpty) {
