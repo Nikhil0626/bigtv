@@ -97,6 +97,7 @@ class BaseUrls {
 
   /// Polls apis
   static const String submitPolls="/polls/submit";
+  static const String getAllPolls="/polls";
 
   ///Update profile
   static const String getProfile = "/profile";

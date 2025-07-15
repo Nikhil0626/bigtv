@@ -39,6 +39,7 @@ class _PapersScreenCardState extends State<PapersScreenCard> {
     _pageController = PageController(viewportFraction: 1.0);
     context.read<EPapersProvider>().isBookMark = [];
     context.read<EPapersProvider>().getAllMainPapersList = [];
+
     context.read<EPapersProvider>().getMainEPapers();
     super.initState();
   }

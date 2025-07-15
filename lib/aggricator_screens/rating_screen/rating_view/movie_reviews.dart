@@ -233,8 +233,8 @@ class _MovieRatingsState extends State<MovieRatings> {
                               ),
                             ),
                           ),
-                        if (widget.article['userHasReviewed'] == false && ratingProvider.isRated == false) height(height: 10),
-                        if (widget.article['userHasReviewed'] == false && ratingProvider.isRated == false)
+                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))height(height: 10),
+                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
                           GestureDetector(
                             onTap: ratingProvider.selectedStar >= 1
                                 ? () async {
