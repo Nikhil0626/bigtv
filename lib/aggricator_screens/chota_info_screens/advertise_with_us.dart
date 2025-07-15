@@ -46,7 +46,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
         ),
         title: Row(
           children: [
-            const SizedBox(width: 4),
+             width(width: 4),
             Padding(
               padding: const EdgeInsets.only(top: 1),
               child: Text(

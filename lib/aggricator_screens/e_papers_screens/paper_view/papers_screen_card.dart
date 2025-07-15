@@ -494,7 +494,7 @@ class ShimmerCard extends StatelessWidget {
               borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
             ),
           ),
-          SizedBox(height: 10),
+          height(height: 10),
 
           // ✅ Shimmer Title Placeholder
           Padding(
@@ -505,7 +505,7 @@ class ShimmerCard extends StatelessWidget {
               color: Colors.grey[300],
             ),
           ),
-          SizedBox(height: 10),
+          height(height: 10),
 
           // ✅ Shimmer Buttons Placeholder
           Padding(
@@ -519,7 +519,7 @@ class ShimmerCard extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 20),
+          height(height: 20),
         ],
       ),
     );

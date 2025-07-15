@@ -7,10 +7,9 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
 import '../../home_screen/home_provider/home_provider.dart';
-import '../../rating_screen/rating_provider/rating_provider.dart';
 
 class PollsScreen extends StatefulWidget {
-  const PollsScreen({super.key, this.article});
+   PollsScreen({super.key, this.article});
 
   final article;
 
@@ -28,13 +27,11 @@ class _PollsScreenState extends State<PollsScreen> {
 
   @override
   void dispose() {
-
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Stack(
       children: [
         Positioned.fill(
@@ -49,14 +46,14 @@ class _PollsScreenState extends State<PollsScreen> {
           top: 10,
           right: 10,
           child: Padding(
-            padding: const EdgeInsets.only(top: 8, right: 12),
+            padding:  EdgeInsets.only(top: 8, right: 12),
             child: Container(
               decoration: BoxDecoration(
                 color: Colors.black.withOpacity(0.6),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.ios_share_outlined, color: Colors.white, size: 22),
+                icon:  Icon(Icons.ios_share_outlined, color: Colors.white, size: 22),
                 onPressed: () {},
               ),
             ),
@@ -67,7 +64,7 @@ class _PollsScreenState extends State<PollsScreen> {
           left: 0,
           right: 0,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding:  EdgeInsets.symmetric(horizontal: 16.0),
             child: Consumer<PollProvider>(builder: (_, pollProvider, __) {
               // pollProvider.initialPollData();
               final int totalVotes = pollProvider.votes.reduce((a, b) => a + b);
@@ -77,7 +74,7 @@ class _PollsScreenState extends State<PollsScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 18),
+                    padding:  EdgeInsets.symmetric(vertical: 6, horizontal: 18),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(.6),
                       borderRadius: BorderRadius.circular(20),
@@ -111,7 +108,7 @@ class _PollsScreenState extends State<PollsScreen> {
                   height(height: 6),
                   ListView.builder(
                     shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                    physics:  NeverScrollableScrollPhysics(),
                     itemCount: optionsPolls.length,
                     itemBuilder: (context, index) {
                       final bool isSelected = pollProvider.selectedIndex == index;
@@ -119,11 +116,10 @@ class _PollsScreenState extends State<PollsScreen> {
 
                       return GestureDetector(
                         onTap: () {
-                          pollProvider.submitPolls(widget.article['id'],index);
-
+                          pollProvider.submitPolls(widget.article['id'], index);
                         },
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 3),
+                          padding:  EdgeInsets.symmetric(vertical: 3),
                           child: Center(
                             child: Stack(
                               children: [
@@ -148,7 +144,7 @@ class _PollsScreenState extends State<PollsScreen> {
                                 Container(
                                   height: 50,
                                   width: MediaQuery.of(context).size.width,
-                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  padding:  EdgeInsets.symmetric(horizontal: 16),
                                   child: Row(
                                     children: [
                                       Expanded(
@@ -174,7 +170,7 @@ class _PollsScreenState extends State<PollsScreen> {
                                                   fontWeight: FontWeight.w500,
                                                 ),
                                               )
-                                            : const SizedBox(),
+                                            :  SizedBox(),
                                       ),
                                     ],
                                   ),
@@ -195,29 +191,29 @@ class _PollsScreenState extends State<PollsScreen> {
                         context.read<HomeProvider>().pageChange(isValue: false);
                       },
                       controller: pollProvider.commentController,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
                         color: Colors.white,
                       ),
                       decoration: InputDecoration(
                         hintText: "Type your comment here (optional)",
-                        hintStyle: const TextStyle(fontSize: 12, color: Colors.white70),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        hintStyle:  TextStyle(fontSize: 12, color: Colors.white70),
+                        contentPadding:  EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         filled: true,
                         fillColor: Colors.grey.shade900,
                         // dark fill to match the screen
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.white),
+                          borderSide:  BorderSide(color: Colors.white),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.white),
+                          borderSide:  BorderSide(color: Colors.white),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(color: Colors.white),
+                          borderSide:  BorderSide(color: Colors.white),
                         ),
                       ),
                     ),
@@ -255,9 +251,9 @@ class _PollsScreenState extends State<PollsScreen> {
                   widget.article['topComments'].isEmpty
                       ? SizedBox.shrink()
                       : Padding(
-                          padding: const EdgeInsets.only(top: 16, bottom: 6),
+                          padding:  EdgeInsets.only(top: 16, bottom: 6),
                           child: Row(
-                            children: const [
+                            children:  [
                               Text("Top Comments", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
                               Spacer(),
                               Text("More >", style: TextStyle(color: Colors.lightBlue, fontSize: 15, fontWeight: FontWeight.bold)),
@@ -274,8 +270,8 @@ class _PollsScreenState extends State<PollsScreen> {
                             itemBuilder: (context, index) {
                               return Container(
                                 width: MediaQuery.of(context).size.width - 100,
-                                margin: const EdgeInsets.only(right: 4),
-                                padding: const EdgeInsets.all(10),
+                                margin:  EdgeInsets.only(right: 4),
+                                padding:  EdgeInsets.all(10),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   border: Border.all(color: Colors.grey),

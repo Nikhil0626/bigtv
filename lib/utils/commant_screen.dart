@@ -221,7 +221,7 @@ class _CommentSectionState extends State<CommentSection> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                       width(width: 8),
                       IconButton(
                         icon: const Icon(Icons.send, color: Colors.blue),
                         onPressed: () async {

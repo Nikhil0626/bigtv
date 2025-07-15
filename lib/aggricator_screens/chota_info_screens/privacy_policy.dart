@@ -65,7 +65,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
         ),
         title: Row(
           children: [
-            const SizedBox(width: 1),
+             width(width: 1),
             Padding(
               padding: const EdgeInsets.only(top: 1),
               child: Text(
@@ -286,7 +286,7 @@ class ContactDetailTile extends StatelessWidget {
             style: fontStyle(fontSize: 14, color: Colors.blue),
           ),
         ),
-        SizedBox(height: 10),
+        height(height: 10),
       ],
     );
 

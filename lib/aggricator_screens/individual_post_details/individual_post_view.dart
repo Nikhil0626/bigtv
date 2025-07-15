@@ -389,7 +389,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                                     height: 1, // Ensures proper line height
                                                                                   ),
                                                                                 ),
-                                                                                SizedBox(width: 5.sp),
+                                                                                width(width: 5.sp),
                                                                                 // Space between bullet & text
                                                                                 Expanded(
                                                                                   child: Text(

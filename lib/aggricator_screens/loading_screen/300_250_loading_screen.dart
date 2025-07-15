@@ -1,3 +1,4 @@
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -35,7 +36,7 @@ class Loading300250Screen extends StatelessWidget {
                     color: Colors.grey[300],
                   ),
                 ),
-                const SizedBox(height: 16),
+                 height(height: 16),
                 Expanded(
                   child: ListView.builder(
                     itemCount: 3, // just show 3 shimmer items as placeholder

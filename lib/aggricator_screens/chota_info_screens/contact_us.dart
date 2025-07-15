@@ -102,7 +102,7 @@ class _ContactUsState extends State<ContactUs> {
         ),
         title: Row(
           children: [
-            const SizedBox(width: 4),
+             width(width: 4),
             Padding(
               padding: const EdgeInsets.only(top: 1),
               child: Text(
@@ -222,8 +222,8 @@ class ContactDetailTile extends StatelessWidget {
             text: title,
             style: fontStyle(fontSize: 14, fontWeight: FontWeight.normal),
           ),
-          const WidgetSpan(
-            child: SizedBox(height: 5),
+           WidgetSpan(
+            child: height(height: 5),
           ),
           WidgetSpan(
             child: GestureDetector(

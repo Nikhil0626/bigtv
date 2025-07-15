@@ -60,14 +60,14 @@ class _ListReviewsState extends State<ListReviews> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(Icons.star, color: AppColors.ratingColor, size: 28),
-                          SizedBox(width: 7.w),
+                          width(width: 7.w),
                           Text(
                             "$overallRating/5",
                             style: fontStyle(fontSize: 24.sp, fontWeight: FontWeight.w600),
                           ),
                         ],
                       ),
-                      SizedBox(height: 20.h),
+                      height(height: 20.h),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: Row(
@@ -114,7 +114,7 @@ class _ListReviewsState extends State<ListReviews> {
                                   Row(
                                     children: [
                                       Icon(Icons.account_circle, size: 35, color: Colors.black),
-                                      SizedBox(width: 8.w),
+                                      width(width: 8.w),
                                       Expanded(
                                         child: Text(
                                           userName,
@@ -123,21 +123,21 @@ class _ListReviewsState extends State<ListReviews> {
                                         ),
                                       ),
                                       Icon(Icons.star, color: AppColors.ratingColor, size: 23),
-                                      SizedBox(width: 4.w),
+                                      width(width: 4.w),
                                       Text(
                                         "$rating/5",
                                         style: fontStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 5.h),
+                                  height(height: 5.h),
                                   Text(
                                     comment,
                                     style: fontStyle(fontSize: 14.sp, fontWeight: FontWeight.w500),
                                     maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  SizedBox(height: 8.h),
+                                  height(height: 8.h),
                                   Text(
                                     timeAgo,
                                     style: fontStyle(

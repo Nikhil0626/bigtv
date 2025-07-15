@@ -114,7 +114,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                           ],
                         ),
                         if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty) Divider(),
-                        SizedBox(height: 4),
+                        height(height: 4),
                         if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty)
                           SizedBox(
                             height: widget.article['externalRatings'].length * 30.0, // approx height per item
@@ -141,7 +141,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                         child: Row(
                                           children: [
                                             Icon(Icons.star, size: 16, color: AppColors.ratingColor),
-                                            SizedBox(width: 10),
+                                            width(width: 10),
                                             Text(
                                               "${rating['platform_rating']}",
                                               style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),

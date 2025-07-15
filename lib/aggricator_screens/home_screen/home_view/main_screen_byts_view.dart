@@ -482,7 +482,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                     height: 1, // Ensures proper line height
                                                                                   ),
                                                                                 ),
-                                                                                SizedBox(width: 5.sp),
+                                                                                width(width: 5.sp),
                                                                                 // Space between bullet & text
                                                                                 Expanded(
                                                                                   child: Text(

@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_upgrade_version/flutter_upgrade_version.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -114,7 +115,7 @@ class _TestReforalState extends State<TestReforal> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text("App Version: $appVersion ($buildNumber)"),
-                const SizedBox(height: 20),
+                 height(height: 20),
                 ElevatedButton(
                   onPressed: _checkForUpdate,
                   child: const Text("Check for Update"),

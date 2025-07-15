@@ -302,14 +302,14 @@ class _DistrictViewState extends State<DistrictView> {
                                       fontWeight: FontWeight.w500)))),
                 ),
 
-                SizedBox(height: 6.h),
+                height(height: 6.h),
                 LinearProgressIndicator(
                   value: 1,
                   backgroundColor: AppColors.borderColor,
                   valueColor:
                       AlwaysStoppedAnimation<Color>(AppColors.appButtonColor),
                 ),
-                SizedBox(height: 8.h),
+                height(height: 8.h),
                 Center(
                   child: Text(
                     'Step 2/2',

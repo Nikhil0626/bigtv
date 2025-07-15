@@ -137,6 +137,7 @@
 // }
 
 
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -406,7 +407,7 @@ class _NewsArticlePageState extends State<NewsArticlePage> {
                                           height: 1.4,
                                           fontWeight: FontWeight.bold,
                                           wordSpacing: 2,color: Colors.black))),
-                              SizedBox(height: 12),
+                              height(height: 12),
 
                               Text(
                                 content.length > 430 ? content.substring(0, 430) + '…' : content,
@@ -419,7 +420,7 @@ class _NewsArticlePageState extends State<NewsArticlePage> {
                                   ),
                                 ),
                               ),
-                              SizedBox(height: 12),
+                              height(height: 12),
                               Row(
                                 children: [
                                   InkWell(
@@ -441,7 +442,7 @@ class _NewsArticlePageState extends State<NewsArticlePage> {
                                     ),
                                   ),
 
-                                  SizedBox(width: 10),
+                                  width(width: 10),
                                   Text("$sourceName | ",
                                       style: TextStyle(fontSize: 14)),
                                   Text(relativeTime,
@@ -607,7 +608,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('Comments', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-          SizedBox(height: 10),
+          height(height: 10),
           Flexible(
             child: ListView.builder(
               shrinkWrap: true,
@@ -620,7 +621,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(comment.text),
-                      SizedBox(height: 4),
+                      height(height: 4),
                       Text(
                         timeago.format(comment.time),
                         style: TextStyle(fontSize: 12, color: Colors.grey),
@@ -654,7 +655,7 @@ class _CommentBottomSheetState extends State<CommentBottomSheet> {
                     },
                   ),
                 ),
-                SizedBox(width: 8),
+                width(width: 8),
                 ElevatedButton(
                   onPressed: _addComment,
                   child: Text('Send'),

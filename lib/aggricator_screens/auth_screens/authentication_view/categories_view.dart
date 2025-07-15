@@ -95,13 +95,13 @@ class _CategoriesViewState extends State<CategoriesView> {
                         borderRadius: BorderRadius.all(Radius.circular(8.r))),
                     child: Center(child: Text('Next', style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500)))),
               ),
-              SizedBox(height: 16.h),
+              height(height: 16.h),
               LinearProgressIndicator(
                 value: 0.5,
                 backgroundColor: AppColors.borderColor,
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.appButtonColor),
               ),
-              SizedBox(height: 8.h),
+              height(height: 8.h),
               Center(
                 child: Text(
                   'Step 1/2',

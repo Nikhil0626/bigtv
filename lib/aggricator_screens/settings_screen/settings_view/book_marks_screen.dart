@@ -158,7 +158,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                                     style: TextStyle(color: Colors.black),
                                                   ),
                                                 ),
-                                                SizedBox(height: 6),
+                                                height(height: 6),
                                                 Text(
                                                   article.title.toString(),
                                                   overflow: TextOverflow.ellipsis,
@@ -169,7 +169,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                                     fontWeight: FontWeight.w500,
                                                   ),
                                                 ),
-                                                SizedBox(height: 6),
+                                                height(height: 6),
                                                 Row(
                                                   children: [
                                                     Icon(Icons.access_time_outlined, color: Colors.grey.shade700, size: 16),

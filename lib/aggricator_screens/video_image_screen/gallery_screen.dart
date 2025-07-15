@@ -173,7 +173,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                       },
                     ),
 
-                    SizedBox(width: 12.sp),
+                    width(width: 12.sp),
 
                     // Comment Button
                     BottomActions(
