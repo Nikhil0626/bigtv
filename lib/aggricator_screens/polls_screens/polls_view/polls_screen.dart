@@ -254,7 +254,23 @@ class _PollsScreenState extends State<PollsScreen> {
                                 ),
                               );
                             },
-                            child: Text("More >", style: fontStyle(color: Colors.lightBlue, fontWeight: FontWeight.bold)),
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PollsComments(postId: '',),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  "More >",
+                                  style: TextStyle(
+                                    color: Colors.lightBlue,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              )
                           ),
                         ],
                       ),
