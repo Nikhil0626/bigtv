@@ -1,7 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
@@ -31,15 +33,24 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> checkLastShownDate() async {
+    final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? lastDate = prefs.getString('last_shown_date');
     String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
 
-    if (lastDate != today) {
+    if (lastDate == today) {
+      log("hbejberjhgbherjb");
       setState(() {
         showGif = true;
       });
       await prefs.setString('last_shown_date', today);
+      await analytics.logEvent(
+        name: 'chota_app_opened',
+        parameters: {
+          "platform": Platform.isIOS ? "iOS" : "android", // actual int (not string)
+          'createAt': DateTime.now().toString() // ISO format preferred
+        },
+      );
       EventRepo().addEvent(
         {"createAt": DateTime.now().toString(), "platform": Platform.isIOS ? "iOS" : "android"},
         "opened_app",
