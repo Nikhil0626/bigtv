@@ -94,7 +94,11 @@ class SettingsProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {"deviceId": deviceId, "postId": postId, "userId": userId??0, "isLiked": isLike};
+    Map<String, dynamic> body = {
+      "deviceId": deviceId,
+      "postId": postId,
+      "userId": userId??0,
+      "isLiked": isLike};
     try {
       log("body $body");
       Response response = await SettingsRepo().liked(body);

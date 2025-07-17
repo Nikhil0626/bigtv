@@ -9,7 +9,6 @@ import '../../../utils/app_fonts.dart';
 import '../../../utils/date_format.dart';
 import '../rating_provider/rating_provider.dart';
 
-
 class ListReviews extends StatefulWidget {
   final String postId;
 
@@ -23,7 +22,7 @@ class _ListReviewsState extends State<ListReviews> {
   @override
   void initState() {
     super.initState();
-    context.read<RatingProvider>().getReviews(widget.postId,"sort_by");
+    context.read<RatingProvider>().getReviews(widget.postId, "sort_by");
   }
 
   @override
@@ -78,13 +77,13 @@ class _ListReviewsState extends State<ListReviews> {
                             ),
                             Spacer(),
                             InkWell(
-                              onTap: (){
+                              onTap: () {
                                 ratingProvider.filterData(widget.postId);
                               },
-                              child: Transform.rotate(
-                                angle: 0.0, // 180 degrees in radians (π)
-                                child: Icon(Icons.filter_list, size: 25),
-                              ),
+                              // child: Transform.rotate(
+                              //   angle: 0.0, // 180 degrees in radians (π)
+                              //   child: Icon(Icons.filter_list, size: 25),
+                              // ),
                             ),
                           ],
                         ),

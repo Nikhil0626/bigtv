@@ -214,10 +214,10 @@ class _MovieRatingsState extends State<MovieRatings> {
                               context.read<HomeProvider>().pageChange(isValue: false);
                             },
                             controller: ratingProvider.commentController,
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+                            style: fontStyle(fontSize: 13, fontWeight: FontWeight.w400),
                             decoration: InputDecoration(
                               hintText: "Type your comment here (optional)",
-                              hintStyle: TextStyle(fontSize: 12, color: Colors.black45),
+                              hintStyle: fontStyle(fontSize: 12, color: Colors.black45),
                               contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -233,7 +233,8 @@ class _MovieRatingsState extends State<MovieRatings> {
                               ),
                             ),
                           ),
-                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))height(height: 10),
+                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
+                          height(height: 10),
                         if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
                           GestureDetector(
                             onTap: ratingProvider.selectedStar >= 1

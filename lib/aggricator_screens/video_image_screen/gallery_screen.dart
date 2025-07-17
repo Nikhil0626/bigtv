@@ -164,8 +164,10 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                              EventRepo().addEvent({
                               "like": !settingsProvider.isLikeList.contains(widget.postDetails['id'].toString()),
                               "postId": widget.postDetails['id'].toString()??"000",
-                              "createAt": DateTime.now().toString()
-                            }, "liked_article");
+                              "createAt": DateTime.now().toString(),
+                               "postTitle": widget.postDetails['title'].toString()
+
+                             }, "liked_article");
 
 
                           },
@@ -184,7 +186,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                       onTap: () async {
                         SharedPreferences sp = await SharedPreferences.getInstance();
                         context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                        showComments(context, widget.postDetails['id']);
+                        showComments(context, widget.postDetails['id'],widget.postDetails['title'],);
                       },
                     ),
 
@@ -202,7 +204,9 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                           "share": "news",
                           "postId": widget.postDetails['id'].toString()??"000",   // ✅ postId converted to String
                           "createAt": DateTime.now().toString(),
-                        }, "shared_article");
+                           "postTitle": widget.postDetails['title'].toString()
+
+                         }, "shared_article");
 
 
                         SharedPreferences sp = await SharedPreferences.getInstance();
