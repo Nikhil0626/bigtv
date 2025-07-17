@@ -214,7 +214,13 @@ class HomeProvider extends ChangeNotifier {
     List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
-    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true};
+    Map<String, dynamic> body = {
+      "device_id": deviceId,
+      "postId": postIds,
+      "locationIds": locationIds,
+      "categoriesId": categoriesIds,
+      "userId": userId ?? 0,
+      "isAdManager": true};
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
@@ -596,11 +602,7 @@ class HomeProvider extends ChangeNotifier {
       isComeFromLinkOrNotification = true;
       Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
       getIndividualPost(postId);
-      EventRepo().addEvent({
-        "comeFrom":"Deeplink",
-        "postId": postId.toString()??"000",
-        "createAt": DateTime.now().toString()
-      }, "opened_via_deeplink");
+
       notifyListeners();
     }
   }

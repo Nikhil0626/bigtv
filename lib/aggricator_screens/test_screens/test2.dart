@@ -1,3 +1,4 @@
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter/material.dart';
 
@@ -161,7 +162,7 @@ class _ExamplePageState extends State<Example> {
                                   post[index]["title"] ?? '',
                                   style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
                                 ),
-                                const SizedBox(height: 8),
+                                 height(height: 8),
                                 Text(
                                   post[index]["content"] ?? '',
                                   style: Theme.of(context).textTheme.bodyMedium,

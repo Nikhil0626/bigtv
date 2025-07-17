@@ -114,7 +114,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                           ],
                         ),
                         if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty) Divider(),
-                        SizedBox(height: 4),
+                        height(height: 4),
                         if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty)
                           SizedBox(
                             height: widget.article['externalRatings'].length * 30.0, // approx height per item
@@ -141,7 +141,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                         child: Row(
                                           children: [
                                             Icon(Icons.star, size: 16, color: AppColors.ratingColor),
-                                            SizedBox(width: 10),
+                                            width(width: 10),
                                             Text(
                                               "${rating['platform_rating']}",
                                               style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
@@ -214,10 +214,10 @@ class _MovieRatingsState extends State<MovieRatings> {
                               context.read<HomeProvider>().pageChange(isValue: false);
                             },
                             controller: ratingProvider.commentController,
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w400),
+                            style: fontStyle(fontSize: 13, fontWeight: FontWeight.w400),
                             decoration: InputDecoration(
                               hintText: "Type your comment here (optional)",
-                              hintStyle: TextStyle(fontSize: 12, color: Colors.black45),
+                              hintStyle: fontStyle(fontSize: 12, color: Colors.black45),
                               contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(10),
@@ -233,7 +233,8 @@ class _MovieRatingsState extends State<MovieRatings> {
                               ),
                             ),
                           ),
-                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))height(height: 10),
+                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
+                          height(height: 10),
                         if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
                           GestureDetector(
                             onTap: ratingProvider.selectedStar >= 1

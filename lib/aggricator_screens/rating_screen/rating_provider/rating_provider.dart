@@ -43,7 +43,7 @@ class RatingProvider extends ChangeNotifier {
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
-      "post_id": int.parse(article.toString()) ?? 0,
+      "post_id": article.toString()?? 0,
       "user_id": userId ?? "",
       "rating": selectedStar,
       "comment": commentController.text,
@@ -64,7 +64,8 @@ class RatingProvider extends ChangeNotifier {
       CustomToast.showErrorToast(msg: "something went wrong");
       log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
-      log("Hello siva catch $e --- $st");;
+      log("Hello siva catch $e --- $st");
+      ;
     } finally {
       notifyListeners();
     }

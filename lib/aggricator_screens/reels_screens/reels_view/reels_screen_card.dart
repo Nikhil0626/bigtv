@@ -281,8 +281,15 @@ class _EachReelCardState extends State<EachReelCard> {
                               widget.reelsProvider.isLikePost(widget.reel);
                               log("Like");
                               EventRepo().addEvent(
-                                  {"like": !widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()), "postId": widget.reel.id.toString() ?? "000", "createAt": DateTime.now().toString()},
-                                  "liked_article");
+                                  {
+                                    "like": !widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
+                                    "postId": widget.reel.id.toString() ?? "000",
+                                    "createAt": DateTime.now().toString(),
+                                    "postTitle": widget.reel.title.toString(),
+
+                                  },
+
+                              "liked_article");
                             },
                           ),
                           BottomActions(
@@ -293,7 +300,7 @@ class _EachReelCardState extends State<EachReelCard> {
                             onTap: () async {
                               context.read<AuthenticationProvider>().sendEvent("CommentPage");
 
-                              showComments(context, widget.reel.id.toString());
+                              showComments(context, widget.reel.id.toString(),widget.reel.title.toString());
                             },
                           ),
                           Spacer(),
@@ -310,7 +317,13 @@ class _EachReelCardState extends State<EachReelCard> {
                               String? userId = sp.getString("userId");
 
                               // ✅ Now it's safe to use userId
-                              EventRepo().addEvent({"share": "reels", "postId": widget.reel.id.toString() ?? "000", "createAt": DateTime.now().toString()}, "shared_article");
+                              EventRepo().addEvent({
+                                "share": "reels",
+                                "postId": widget.reel.id.toString() ?? "000",
+                                "createAt": DateTime.now().toString(),
+                                "postTitle": widget.reel.title.toString(),
+                              },
+                                  "shared_article");
 
                               sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
 

@@ -57,7 +57,7 @@ class _AdsLoadingScreenState extends State<AdsLoadingScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(width: 10),
+                             width(width: 10),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,7 +71,7 @@ class _AdsLoadingScreenState extends State<AdsLoadingScreen> {
                                       color: Colors.grey,
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
+                                   height(height: 6),
                                   Row(
                                     children: [
                                       Shimmer.fromColors(
@@ -86,7 +86,7 @@ class _AdsLoadingScreenState extends State<AdsLoadingScreen> {
                                           ),
                                         ),
                                       ),
-                                      const SizedBox(width: 6),
+                                       width(width: 6),
                                       Shimmer.fromColors(
                                         baseColor: Colors.grey.shade300,
                                         highlightColor: Colors.grey.shade100,

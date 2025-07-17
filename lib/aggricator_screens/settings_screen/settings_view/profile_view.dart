@@ -311,18 +311,18 @@ class _ProfileViewState extends State<ProfileView> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
-                                      SizedBox(height: 12),
+                                      height(height: 12),
                                       Text(
                                         "Delete Account?",
                                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                       ),
-                                      SizedBox(height: 8),
+                                      height(height: 8),
                                       Text(
                                         "Are you sure you want to delete your account? This action cannot be undone.",
                                         textAlign: TextAlign.center,
                                         style: TextStyle(fontSize: 14, color: Colors.black87),
                                       ),
-                                      SizedBox(height: 24),
+                                      height(height: 24),
                                       Row(
                                         children: [
                                           Expanded(
@@ -334,7 +334,7 @@ class _ProfileViewState extends State<ProfileView> {
                                               ),
                                             ),
                                           ),
-                                          SizedBox(width: 12),
+                                          width(width: 12),
                                           Expanded(
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
@@ -374,7 +374,7 @@ class _ProfileViewState extends State<ProfileView> {
                                           ),
                                         ],
                                       ),
-                                      SizedBox(height: 10),
+                                      height(height: 10),
                                     ],
                                   ),
                                 );

@@ -42,7 +42,7 @@ class _TermsConditionsState extends State<TermsConditions> {
         ),
         title: Row(
           children: [
-            const SizedBox(width: 2),
+             width(width: 2),
             Padding(
               padding: const EdgeInsets.only(top: 1),
               child: Text(

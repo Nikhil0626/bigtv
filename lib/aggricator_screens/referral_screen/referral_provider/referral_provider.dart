@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../globel_keys/globel_keys.dart';
 import '../../../utils/app_toasts.dart';
 import '../referral_repo/referral_repo.dart';
 
@@ -31,7 +32,7 @@ class ReferralProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         referralData = data;
-        progress = int.parse(referralData['downloads'].toString()) / (int.parse(referralData['needed'].toString()) + int.parse(referralData['downloads'].toString()));
+        progress = int.parse(referralData['downloads'].toString()) / (int.parse(referralData['needed'].toString()));
         difference = int.parse(referralData['needed'].toString()) - int.parse(referralData['downloads'].toString());
         progress = progress.clamp(0.0, 1.0);
       } else {
@@ -112,13 +113,21 @@ class ReferralProvider extends ChangeNotifier {
       log("Rewards posted successfully: ${response.data}");
       if (response.statusCode == 200) {
         referralRewardsClaimed.addAll(response.data);
+        getReferralStats();
+        if(!isRecharge) {
+          Navigator.pop(mainNavigatorKey.currentContext!);
+        }
+        CustomToast.showSuccessToast(msg: "Reward Claimed Successfully");
         log("Rewards list updated: $referralRewardsClaimed items");
       } else {
+        CustomToast.showErrorToast(msg: "${response.data["detail"] }", timeDuration: 3);
         log("Failed to post Rewards: ${response.statusCode}");
       }
     } on DioException catch (e, st) {
+      CustomToast.showErrorToast(msg: e.toString());
       log("Dio error while posting Rewards: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
+      CustomToast.showErrorToast(msg: e.toString());
       log("Unexpected error while posting Rewards: ${e.toString()} ---- ${st.toString()}");
     } finally {
       isLoading = false;

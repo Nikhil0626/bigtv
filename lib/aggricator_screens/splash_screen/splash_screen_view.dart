@@ -58,6 +58,8 @@ class _SplashScreenState extends State<SplashScreen> {
     }
     await Future.delayed(Duration(seconds: showGif ? 5 : 2));
     context.read<AuthenticationProvider>().isPageNavigation(context);
+
+    // Navigator.push(context, MaterialPageRoute(builder : (BuildContext context) => PollsComments()));
   }
 
   @override

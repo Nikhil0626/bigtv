@@ -70,8 +70,8 @@ class BaseUrls {
   static const String aiTagsById = "/aitag/content";
 
   ///Rating
-  static const String postRating = "/reviews/submit";
-  static const String getReviewsById = "/reviews/";
+  static const String postRating = "/moviereviews/submit";
+  static const String getReviewsById = "/moviereviews/";
   static const String postPoll ="/polls/submit";
   static const String getPollCommentsById = "/polls/";
   static const String postProcessReferral = "/process-referral";

@@ -115,6 +115,7 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
             EventRepo().addEvent({
               "postid": reelsProviders.getAllReelsList[value].id,
               "createAt": DateTime.now().toString(),
+              "postTitle": reelsProviders.getAllReelsList[value].title.toString(),
             }, "reel_viewed");
           },
           itemBuilder: (context, index) {
@@ -204,7 +205,9 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                   EventRepo().addEvent({
                     "like": !context.read<ReelsProviders>().isLikeList.contains(widget.reelCard.id.toString()),
                     "postId": widget.reelCard.id.toString() ?? "000",
-                    "createAt": DateTime.now().toString()
+                    "createAt": DateTime.now().toString(),
+                    "postTitle": widget.reelCard.title.toString()
+
                   }, "liked_article");
                 },
               ),
@@ -220,7 +223,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                   String? deviceId = sp.getString("deviceId");
                   context.read<AuthenticationProvider>().sendEvent("CommentPage");
 
-                  showComments(context, widget.reelCard.id.toString());
+                  showComments(context, widget.reelCard.id.toString(),widget.reelCard.title.toString(),);
                 },
               ),
               height(height: 20),
@@ -236,6 +239,8 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                     "share": "reels",
                     "postId": widget.reelCard.id.toString() ?? "000", // ✅ postId converted to String
                     "createAt": DateTime.now().toString(),
+                    "postTitle": widget.reelCard.title.toString()
+
                   }, "shared_article");
 
                   SharedPreferences sp = await SharedPreferences.getInstance();

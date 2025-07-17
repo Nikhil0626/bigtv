@@ -13,6 +13,7 @@ import 'package:provider/provider.dart';
 import '../../../services/app_update_servuce.dart';
 import '../../../services/permission_handler_services.dart';
 import '../../../services/webengage_notification.dart';
+import '../../events_data/event_repo.dart';
 import '../../settings_screen/settings_view/settings_view.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_card.dart';
@@ -113,8 +114,31 @@ class _HomeViewState extends State<HomeView> {
                                 homeProvider.isTabChange();
                                 homeProvider.homePageController.jumpToPage(index);
                                 homeProvider.pageChange(isValue: true);
-                                if (homeProvider.selectedIndex == 0) {
+                                if (index == 0) {
                                   context.read<HomeProvider>().setSelectedTagId(0);
+                                  EventRepo().addEvent({
+                                    "aiTagName": "news",
+                                    "aiTagId": "-1",
+                                    "createAt": DateTime.now().toString(),
+                                  }, "ai_tag_click");
+                                } else if (index == 1) {
+                                  EventRepo().addEvent({
+                                    "aiTagName": "ePaper",
+                                    "aiTagId": "-2",
+                                    "createAt": DateTime.now().toString(),
+                                  }, "ai_tag_click");
+                                } else if (index == 2) {
+                                  EventRepo().addEvent({
+                                    "aiTagName": "reels",
+                                    "aiTagId": "-3",
+                                    "createAt": DateTime.now().toString(),
+                                  }, "ai_tag_click");
+                                } else if (index == 3) {
+                                  EventRepo().addEvent({
+                                    "aiTagName": "more",
+                                    "aiTagId": "-4",
+                                    "createAt": DateTime.now().toString(),
+                                  }, "ai_tag_click");
                                 }
                                 setState(() {});
                               },

@@ -145,7 +145,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                 onTap: () async {
                                                                   if (context.mounted) {
                                                                     context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                                    showComments(context, article['id']);
+                                                                    showComments(context, article['id'],article['title']);
                                                                   }
                                                                 },
                                                               ),
@@ -159,8 +159,10 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                    EventRepo().addEvent({
                                                                     "share": "news",
                                                                     "postId": article['id'].toString()??"000",
-                                                                    "createAt": DateTime.now().toString()
-                                                                  }, "shared_article");
+                                                                    "createAt": DateTime.now().toString(),
+                                                                     "postTitle": article['title'].toString()
+
+                                                                   }, "shared_article");
 
 
                                                                   sendShareDetails(userId, article['id'], article['content'].toString());
@@ -389,7 +391,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                                     height: 1, // Ensures proper line height
                                                                                   ),
                                                                                 ),
-                                                                                SizedBox(width: 5.sp),
+                                                                                width(width: 5.sp),
                                                                                 // Space between bullet & text
                                                                                 Expanded(
                                                                                   child: Text(
@@ -543,8 +545,10 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                EventRepo().addEvent({
                                                                 "like": !settingsProvider.isLikeList.contains(article['id'].toString()),
                                                                 "postId": article['id'].toString()??"000",
-                                                                "createAt": DateTime.now().toString()
-                                                              }, "liked_article");
+                                                                "createAt": DateTime.now().toString(),
+                                                                 "postTitle": article['title'].toString()
+
+                                                               }, "liked_article");
 
 
 
@@ -564,7 +568,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                             log("Comment...");
                                                             if (context.mounted) {
                                                               context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                              showComments(context, article['id']);
+                                                              showComments(context, article['id'],article['title']);
                                                             }
                                                           },
                                                           child: SizedBox(

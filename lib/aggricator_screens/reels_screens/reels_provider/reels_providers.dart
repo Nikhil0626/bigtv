@@ -84,7 +84,11 @@ class ReelsProviders extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {"deviceId": deviceId, "postId": postId, "userId": userId, "isLiked": isLike};
+    Map<String, dynamic> body = {
+      "deviceId": deviceId,
+      "postId": postId,
+      "userId": userId,
+      "isLiked": isLike};
     try {
       log("body $body");
       Response response = await SettingsRepo().liked(body);

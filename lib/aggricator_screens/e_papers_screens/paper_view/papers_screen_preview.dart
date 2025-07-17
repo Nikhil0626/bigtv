@@ -195,8 +195,13 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                                                    EventRepo().addEvent({
                                                     "share": "Epaper",
                                                     "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex],
-                                                    "createAt": DateTime.now().toString()
-                                                  }, "shared_article");
+                                                    "createAt": DateTime.now().toString(),
+                                                     "postTitle":"",
+
+
+
+
+                                                   }, "shared_article");
                                                 } catch (e) {
                                                   print("Error capturing image: $e");
                                                 }

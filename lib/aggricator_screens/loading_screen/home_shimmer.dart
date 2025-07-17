@@ -1,3 +1,4 @@
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -25,7 +26,7 @@ class  HomeShimmer extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              const SizedBox(height: 20),
+               height(height: 20),
 
 
 
@@ -34,40 +35,40 @@ class  HomeShimmer extends StatelessWidget {
                 width: double.infinity,
                 color: Colors.white,
               ),
-              const SizedBox(height: 8),   Container(
+               height(height: 8),   Container(
                 height: 20,
                 width: double.infinity,
                 color: Colors.white,
               ),
-              const SizedBox(height: 8),   Container(
+               height(height: 8),   Container(
                 height: 20,
                 width: double.infinity,
                 color: Colors.white,
               ),
-              const SizedBox(height: 8),
+               height(height: 8),
               Container(
                 height: 20,
                 width: double.infinity,
                 color: Colors.white,
               ),
-              const SizedBox(height: 8),
+               height(height: 8),
               Container(
                 height: 20,
                 width: MediaQuery.of(context).size.width * 0.7,
                 color: Colors.white,
               ),
-              const SizedBox(height: 8),
+               height(height: 8),
               Container(
                 height: 20,
                 width: 200,
                 color: Colors.white,
               ),
-              const SizedBox(height: 8), Container(
+               height(height: 8), Container(
                 height: 20,
                 width: 150,
                 color: Colors.white,
               ),
-              const SizedBox(height: 8),
+               height(height: 8),
 
               // Subtitle
               Container(
@@ -75,7 +76,7 @@ class  HomeShimmer extends StatelessWidget {
                 width: 100,
                 color: Colors.white,
               ),
-              const SizedBox(height: 16),
+               height(height: 16),
             ],
           ),
         ),

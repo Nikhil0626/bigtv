@@ -92,7 +92,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                     ),
                                     textAlign: TextAlign.center,
                                   ),
-                                  SizedBox(height: 8),
+                                  height(height: 8),
                                   Row(
                                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: List.generate(5, (index) {
@@ -110,7 +110,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                       );
                                     }),
                                   ),
-                                  SizedBox(height: 3),
+                                  height(height: 3),
                                   Text(
                                     feedbackMessage,
                                     style: newAppFont(
@@ -125,7 +125,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 16),
+                        height(height: 16),
                         SizedBox(
                           width: double.infinity,
                           child: Card(

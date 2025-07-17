@@ -1,3 +1,4 @@
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -188,7 +189,7 @@ class _LoopingStackedSwiperState extends State<LoopingStackedSwiper> with Ticker
               fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: 16),
+           height(height: 16),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(

@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../aggricator_screens/events_data/event_repo.dart';
 import 'date_format.dart';
-void showComments(BuildContext context, postId) {
+void showComments(BuildContext context, postId,postTitle) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true, // Allows BottomSheet to resize with keyboard
@@ -23,15 +23,16 @@ void showComments(BuildContext context, postId) {
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom, // Push above keyboard
         ),
-        child: CommentSection(postId: postId),
+        child: CommentSection(postId: postId, postTitle: postTitle,),
       );
     },
   );
 }
 class CommentSection extends StatefulWidget {
   final postId;
+  final postTitle;
 
-  const CommentSection({super.key, required this.postId});
+  const CommentSection({super.key, required this.postId,required this.postTitle});
 
   @override
   State<CommentSection> createState() => _CommentSectionState();
@@ -221,7 +222,7 @@ class _CommentSectionState extends State<CommentSection> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
+                       width(width: 8),
                       IconButton(
                         icon: const Icon(Icons.send, color: Colors.blue),
                         onPressed: () async {
@@ -233,8 +234,10 @@ class _CommentSectionState extends State<CommentSection> {
                                EventRepo().addEvent({
                                 "commented": controller.text,
                                 "postId": widget.postId.toString()??"000",
-                                "createAt": DateTime.now().toString()
-                              }, "commented_article");
+                                "createAt": DateTime.now().toString(),
+                                 "postTitle": widget.postTitle.toString()??""
+
+                               }, "commented_article");
                               newsPostsProvider.sendCommentsOnPost(widget.postId, controller.text).then(
                                     (value) => controller.text = '',
                                   );
