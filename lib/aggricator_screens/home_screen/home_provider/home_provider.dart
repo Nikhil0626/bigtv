@@ -123,7 +123,7 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future getIndividualPost(postId, {bool isAds = false}) async {
+  Future getIndividualPost(postId, {bool isAds = false, bool isLink = false}) async {
     log("getIndividualPost ${postId}");
     if (isAds != true) {
       getAllPostList = [];
@@ -137,13 +137,47 @@ class HomeProvider extends ChangeNotifier {
         if (isAds == false) {
           getAllPostList.add(response.data['data']);
           Future.delayed(
-            Duration(milliseconds: 300),
+            Duration(milliseconds: 100),
             () {
               getAllPost(isGetAllPost: true);
+              if (isLink) {
+                EventRepo().addEvent({
+                  "platform": Platform.isIOS ? "iOS" : "Android",
+                  "comeFrom": "Notification",
+                  "postId": postId.toString() ?? "000",
+                  "postTitle": response.data['data']['title'] ?? "",
+                  "createAt": DateTime.now().toString()
+                }, "opened_via_notification");
+              } else {
+                EventRepo().addEvent({
+                  "platform": Platform.isIOS ? "iOS" : "Android",
+                  "comeFrom": "Deeplink",
+                  "postId": postId.toString() ?? "000",
+                  "postTitle": response.data['data']['title'] ?? "",
+                  "createAt": DateTime.now().toString()
+                }, "opened_via_deeplink");
+              }
             },
           );
         } else {
           getSinglePostList = response.data['data'];
+          if (isLink) {
+            EventRepo().addEvent({
+              "platform": Platform.isIOS ? "iOS" : "Android",
+              "comeFrom": "Notification",
+              "postId": postId.toString() ?? "000",
+              "postTitle": getSinglePostList['title'] ?? "",
+              "createAt": DateTime.now().toString()
+            }, "opened_via_notification");
+          } else {
+            EventRepo().addEvent({
+              "platform": Platform.isIOS ? "iOS" : "Android",
+              "comeFrom": "Deeplink",
+              "postId": postId.toString() ?? "000",
+              "postTitle": getSinglePostList['title'] ?? "",
+              "createAt": DateTime.now().toString()
+            }, "opened_via_deeplink");
+          }
         }
       }
     } on DioException catch (e, st) {
@@ -180,13 +214,12 @@ class HomeProvider extends ChangeNotifier {
   PageController? pageController = PageController();
   String? allPostLastId = "0";
 
-
   void scrollListener() {
     if (pageController!.position.atEdge) {
       bool isEnd = pageController!.position.pixels != 0;
       if (isEnd) {
         log("po)stId.toString()   $postId");
-        if (!isAiTagDataLoaded && allPostLastId !="0") {
+        if (!isAiTagDataLoaded && allPostLastId != "0") {
           postId = "0";
           getAllPost(postIds: allPostLastId ?? "0");
         }
@@ -202,7 +235,7 @@ class HomeProvider extends ChangeNotifier {
     isBookMark = [];
     isWebView = false;
     webUrl = "";
-    allPostLastId ="0";
+    allPostLastId = "0";
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
@@ -214,13 +247,7 @@ class HomeProvider extends ChangeNotifier {
     List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
-    Map<String, dynamic> body = {
-      "device_id": deviceId,
-      "postId": postIds,
-      "locationIds": locationIds,
-      "categoriesId": categoriesIds,
-      "userId": userId ?? 0,
-      "isAdManager": true};
+    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true};
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
@@ -510,7 +537,6 @@ class HomeProvider extends ChangeNotifier {
       //   notifyListeners();
       // }
       _handleNotificationTap(event.payload);
-
     });
   }
 
@@ -520,20 +546,8 @@ class HomeProvider extends ChangeNotifier {
     // Extract post ID from notification payload
     if (Platform.isIOS) {
       postId = messagePayload?['data']['customData'][0]['value'] ?? "0";
-      EventRepo().addEvent({
-        "platform":"iOS",
-        "comeFrom":"Notification",
-        "postId": postId.toString()??"000",
-        "createAt": DateTime.now().toString()
-      }, "opened_via_notification");
     } else {
       postId = messagePayload?["postId"] ?? "0";
-      EventRepo().addEvent({
-        "platform":"Android",
-        "comeFrom":"Notification",
-        "postId": postId.toString()??"000",
-        "createAt": DateTime.now().toString()
-      }, "opened_via_notification");
     }
 
     if (postId == "0") return;
@@ -562,7 +576,7 @@ class HomeProvider extends ChangeNotifier {
     // await Future.delayed(const Duration(milliseconds: 100));
     //
     // // Load and display the post
-    await getIndividualPost(postId);
+    await getIndividualPost(postId, isLink: true);
 
     // Additional delay to ensure UI is ready
     // await Future.delayed(const Duration(milliseconds: 300));
@@ -601,7 +615,7 @@ class HomeProvider extends ChangeNotifier {
       postId = id;
       isComeFromLinkOrNotification = true;
       Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
-      getIndividualPost(postId);
+      getIndividualPost(postId, isLink: false);
 
       notifyListeners();
     }

@@ -1,7 +1,7 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -30,12 +30,13 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   NativeAd? _adMobNativeAd;
   AdManagerBannerAd? _bannerAd;
   BannerAd? _bannerAd1;
-
+  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   bool _isBannerLoaded = false;
   bool _isAdMObLoaded = false;
   bool _isAdShown = false;
   bool _adLoadFailed = false;
-  // bool _hasTriedLoadingAds = false;
+
+
 
   String? source = '';
 
@@ -54,7 +55,7 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   @override
   void initState() {
     super.initState();
-    source="";
+    source = "";
     bannerAdsLoading = BannerAdsLoading.loading;
     _loadAllAds(context);
   }
@@ -72,42 +73,53 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   void _loadAdManagerNativeAd(BuildContext context) {
     String? adUnitId = context.read<HomeProvider>().adManagerNativeId; // Replace with your logic
 
-
     from = DateTime.now().toString();
 
     _adManagerNativeAd = NativeAd(
       adUnitId: adUnitId,
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(
-        onAdImpression: (ad) {
+        onAdImpression: (ad) async{
           impressionLogged = DateTime.now();
+          await analytics.logEvent(
+            name: "onAdImpression",
+            parameters: {
+              "onAdImpression": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
           _logLatencyMetrics();
-          EventRepo().addEvent({
-            "onAdImpression": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdImpression");
         },
-        onAdClicked: (ad) {
-          EventRepo().addEvent({
-            "onAdClicked": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClicked");
+        onAdClicked: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClicked",
+            parameters: {
+              "onAdClicked": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdClosed: (ad) {
-          EventRepo().addEvent({
-            "onAdClosed": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClosed");
+        onAdClosed: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClosed",
+            parameters: {
+              "onAdClosed": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdOpened: (ad) {
-          EventRepo().addEvent({
-            "onAdOpened": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdOpened");
+        onAdOpened: (ad) async{
+          await analytics.logEvent(
+            name: "onAdOpened",
+            parameters: {
+              "onAdOpened": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
         onAdLoaded: (ad) {
           source = "Adm_Native";
@@ -129,40 +141,51 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
     String? adUnitId = context.read<HomeProvider>().adMobNativeId;
     // String? adUnitId = "	ca-app-pub-3940256099942544/2247696110";
 
-
     _adMobNativeAd = NativeAd(
       adUnitId: adUnitId,
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(
-        onAdImpression: (ad) {
+        onAdImpression: (ad) async{
           impressionLogged = DateTime.now();
+          await analytics.logEvent(
+            name: "onAdImpression",
+            parameters: {
+              "onAdImpression": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
           _logLatencyMetrics();
-          EventRepo().addEvent({
-            "onAdImpression": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdImpression");
         },
-        onAdClicked: (ad) {
-          EventRepo().addEvent({
-            "onAdClicked": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClicked");
+        onAdClicked: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClicked",
+            parameters: {
+              "onAdClicked": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdClosed: (ad) {
-          EventRepo().addEvent({
-            "onAdClosed": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClosed");
+        onAdClosed: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClosed",
+            parameters: {
+              "onAdClosed": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdOpened: (ad) {
-          EventRepo().addEvent({
-            "onAdOpened": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdOpened");
+        onAdOpened: (ad) async{
+          await analytics.logEvent(
+            name: "onAdOpened",
+            parameters: {
+              "onAdOpened": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
         onAdLoaded: (ad) {
           _isAdMObLoaded = true;
@@ -181,14 +204,14 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
     )..load();
   }
 
-  void _loadBannerAd(BuildContext context) async{
+  void _loadBannerAd(BuildContext context) async {
     String? adUnitId = context.read<HomeProvider>().adManagerBannerId; // Replace with your logic
     // String? adUnitId = "/21775744923/example/adaptive-banner"; // Replace with your logic
 
     _bannerAd = AdManagerBannerAd(
       adUnitId: adUnitId,
       request: const AdManagerAdRequest(),
-      sizes: <AdSize>[AdSize.mediumRectangle,AdSize.fluid,AdSize.largeBanner],
+      sizes: <AdSize>[AdSize.mediumRectangle, AdSize.fluid, AdSize.largeBanner],
       listener: AdManagerBannerAdListener(
         onAdLoaded: (ad) {
           _isBannerLoaded = true;
@@ -197,11 +220,52 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
           _onAdLoaded(ad, AdWidget(ad: ad as BannerAd));
         },
         onAdFailedToLoad: (ad, error) {
-
           ad.dispose();
           source = "Adm_banner_fail";
           print('Banner failed: $error');
           _checkIfAllAdsFailed(error);
+        },
+        onAdImpression: (ad) async{
+          impressionLogged = DateTime.now();
+          await analytics.logEvent(
+            name: "onAdImpression",
+            parameters: {
+              "onAdImpression": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
+          _logLatencyMetrics();
+        },
+        onAdClicked: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClicked",
+            parameters: {
+              "onAdClicked": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse":"",
+            },
+          );
+        },
+        onAdClosed: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClosed",
+            parameters: {
+              "onAdClosed": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
+        },
+        onAdOpened: (ad) async{
+          await analytics.logEvent(
+            name: "onAdOpened",
+            parameters: {
+              "onAdOpened": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
       ),
     )..load();
@@ -209,7 +273,6 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
 
   void _onAdLoaded(dynamic ad, Widget adWidget) async {
     to = DateTime.now().toString();
-
 
     if (_isAdShown) {
       ad.dispose();
@@ -237,29 +300,39 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
       _bannerAd?.dispose();
       _bannerAd = null;
     }
- if (ad != _bannerAd1) {
+    if (ad != _bannerAd1) {
       _bannerAd1?.dispose();
       _bannerAd1 = null;
     }
 
-    bool noAdUnits = (_adManagerNativeAd == null && _adMobNativeAd == null && _bannerAd == null&& _bannerAd1 == null);
+    bool noAdUnits = (_adManagerNativeAd == null && _adMobNativeAd == null && _bannerAd == null && _bannerAd1 == null);
 
     if (noAdUnits) {
       setState(() {
         _adLoadFailed = true;
       });
     }
-
-
-    EventRepo().addEvent({
-      "adSource": source,
-      "sdkRequestStartTime": requestInitiated.toString(),
-      "sdkRequestReceivedTime": responseReceived.toString(),
-      "adsRenderingTime": responseReceived!.difference(requestInitiated!).inMilliseconds.toString(),
-      "createAt": DateTime.now().toString(),
-      "adResponse": ad.responseInfo.toString(),
-    }, "ads_success");
+    await analytics.logEvent(
+      name: "ads_success",
+      parameters: {
+        "adSource": source.toString(),
+        "sdkRequestStartTime": requestInitiated.toString(),
+        "sdkRequestReceivedTime": responseReceived.toString(),
+        "adsRenderingTime":"0",
+        "createAt": DateTime.now().toString(),
+        "adResponse": "",
+      },
+    );
+    // EventRepo().addEvent({
+    //   "adSource": source,
+    //   "sdkRequestStartTime": requestInitiated.toString(),
+    //   "sdkRequestReceivedTime": responseReceived.toString(),
+    //   "adsRenderingTime": responseReceived!.difference(requestInitiated!).inMilliseconds.toString(),
+    //   "createAt": DateTime.now().toString(),
+    //   "adResponse": ad.responseInfo.toString(),
+    // }, "ads_success");
   }
+
   void _loadBannerAdMob(BuildContext context) {
     final adUnitId = context.read<HomeProvider>().adMobBannerId;
     // final adUnitId ="ca-app-pub-3940256099942544/6300978111";
@@ -279,39 +352,52 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
           source = "Adm_banner";
           _checkIfAllAdsFailed(error);
         },
-        onAdImpression: (ad) {
+        onAdImpression: (ad) async{
           impressionLogged = DateTime.now();
+          await analytics.logEvent(
+            name: "onAdImpression",
+            parameters: {
+              "onAdImpression": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
           _logLatencyMetrics();
-          EventRepo().addEvent({
-            "onAdImpression": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdImpression");
         },
-        onAdClicked: (ad) {
-          EventRepo().addEvent({
-            "onAdClicked": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClicked");
+        onAdClicked: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClicked",
+            parameters: {
+              "onAdClicked": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdClosed: (ad) {
-          EventRepo().addEvent({
-            "onAdClosed": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClosed");
+        onAdClosed: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClosed",
+            parameters: {
+              "onAdClosed": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdOpened: (ad) {
-          EventRepo().addEvent({
-            "onAdOpened": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdOpened");
+        onAdOpened: (ad) async{
+          await analytics.logEvent(
+            name: "onAdOpened",
+            parameters: {
+              "onAdOpened": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
       ),
     )..load();
   }
+
   void _loadBannerAdMob1(BuildContext context) {
     final adUnitId = context.read<HomeProvider>().adMobBannerId;
     // final adUnitId ="ca-app-pub-3940256099942544/6300978111";
@@ -331,77 +417,148 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
           source = "Adm_banner";
           _checkIfAllAdsFailed(error);
         },
-        onAdImpression: (ad) {
+        onAdImpression: (ad) async{
           impressionLogged = DateTime.now();
+          await analytics.logEvent(
+            name: "onAdImpression",
+            parameters: {
+              "onAdImpression": true,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
           _logLatencyMetrics();
-          EventRepo().addEvent({
-            "onAdImpression": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdImpression");
         },
-        onAdClicked: (ad) {
-          EventRepo().addEvent({
-            "onAdClicked": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClicked");
+        onAdClicked: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClicked",
+            parameters: {
+              "onAdClicked": true,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdClosed: (ad) {
-          EventRepo().addEvent({
-            "onAdClosed": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClosed");
+        onAdClosed: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClosed",
+            parameters: {
+              "onAdClosed": true,
+              "createAt": DateTime.now().toString(),
+              "adResponse":"",
+            },
+          );
         },
-        onAdOpened: (ad) {
-          EventRepo().addEvent({
-            "onAdOpened": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdOpened");
+        onAdOpened: (ad) async{
+          await analytics.logEvent(
+            name: "onAdOpened",
+            parameters: {
+              "onAdOpened": true,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
+        // onAdImpression: (ad) {
+        //   impressionLogged = DateTime.now();
+        //   _logLatencyMetrics();
+        //   EventRepo().addEvent({
+        //     "onAdImpression": true,
+        //     "createAt": DateTime.now().toString(),
+        //     "adResponse": ad.toString(),
+        //   }, "onAdImpression");
+        // },
+        // onAdClicked: (ad) {
+        //   EventRepo().addEvent({
+        //     "onAdClicked": true,
+        //     "createAt": DateTime.now().toString(),
+        //     "adResponse": ad.toString(),
+        //   }, "onAdClicked");
+        // },
+        // onAdClosed: (ad) {
+        //   EventRepo().addEvent({
+        //     "onAdClosed": true,
+        //     "createAt": DateTime.now().toString(),
+        //     "adResponse": ad.toString(),
+        //   }, "onAdClosed");
+        // },
+        // onAdOpened: (ad) {
+        //   EventRepo().addEvent({
+        //     "onAdOpened": true,
+        //     "createAt": DateTime.now().toString(),
+        //     "adResponse": ad.toString(),
+        //   }, "onAdOpened");
+        // },
       ),
     )..load();
   }
 
-  void _checkIfAllAdsFailed(LoadAdError error)async {
-
+  void _checkIfAllAdsFailed(LoadAdError error) async {
     bannerAdsLoading = BannerAdsLoading.fail;
 
     setState(() {
       _adLoadFailed = true;
     });
-    EventRepo().addEvent({
-      "adSource": source,
-      "sdkRequestStartTime": requestInitiated.toString(),
-      "sdkRequestReceivedTime": responseReceived.toString(),
-      "adsRenderingTime": "0",
-      "createAt": DateTime.now().toString(),
-      "adResponse": error.responseInfo.toString(),
-    }, "ads_failure");
+
+    await analytics.logEvent(
+      name: "ads_failure",
+      parameters: {
+        "adSource": source.toString(),
+        "sdkRequestStartTime": requestInitiated.toString(),
+        "sdkRequestReceivedTime": responseReceived.toString(),
+        "adsRenderingTime": "0",
+        "createAt": DateTime.now().toString(),
+        "adResponse": error.responseInfo.toString(),
+      },
+    );
+    // EventRepo().addEvent({
+    //   "adSource": source,
+    //   "sdkRequestStartTime": requestInitiated.toString(),
+    //   "sdkRequestReceivedTime": responseReceived.toString(),
+    //   "adsRenderingTime": "0",
+    //   "createAt": DateTime.now().toString(),
+    //   "adResponse": error.responseInfo.toString(),
+    // }, "ads_failure");
   }
-  void _logLatencyMetrics() {
+
+  void _logLatencyMetrics() async{
     if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
       final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
       final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
       final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
       final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
-      EventRepo().addEvent({
-        "adSource": source,
-        "requestInitiated": requestInitiated.toString(),
-        "responseReceived": responseReceived.toString(),
-        "adCreativeDownloaded": adCreativeDownloaded.toString(),
-        "adRendered": adRendered.toString(),
-        "impressionLogged": impressionLogged.toString(),
-        "latency_request": requestLatency.toString(),
-        "latency_load": loadLatency.toString(),
-        "latency_render": renderLatency.toString(),
-        "latency_total": totalLatency.toString(),
-        "createAt": DateTime.now().toString(),
-      }, "ad_latency_metrics");
+      // EventRepo().addEvent({
+      //   "adSource": source,
+      //   "requestInitiated": requestInitiated.toString(),
+      //   "responseReceived": responseReceived.toString(),
+      //   "adCreativeDownloaded": adCreativeDownloaded.toString(),
+      //   "adRendered": adRendered.toString(),
+      //   "impressionLogged": impressionLogged.toString(),
+      //   "latency_request": requestLatency.toString(),
+      //   "latency_load": loadLatency.toString(),
+      //   "latency_render": renderLatency.toString(),
+      //   "latency_total": totalLatency.toString(),
+      //   "createAt": DateTime.now().toString(),
+      // }, "ad_latency_metrics");
+      await analytics.logEvent(
+        name: "ad_latency_metrics",
+        parameters: {
+          "adSource": source.toString(),
+          "requestInitiated": requestInitiated.toString(),
+          "responseReceived": responseReceived.toString(),
+          "adCreativeDownloaded": adCreativeDownloaded.toString(),
+          "adRendered": adRendered.toString(),
+          "impressionLogged": impressionLogged.toString(),
+          "latency_request": requestLatency.toString(),
+          "latency_load": loadLatency.toString(),
+          "latency_render": renderLatency.toString(),
+          "latency_total": totalLatency.toString(),
+          "createAt": DateTime.now().toString(),
+        },
+      );
     }
   }
+
   @override
   void dispose() {
     _adManagerNativeAd?.dispose();
@@ -413,18 +570,16 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
 
   @override
   Widget build(BuildContext context) {
-
-
     if (_adWidget != null) {
       return Scaffold(
         body: _isAdMObLoaded
             ? _adWidget!
             : Column(
-          children: [
-            Expanded(flex:1,child: Center(child: Container(color:Colors.teal.shade200,height: 250,width: 300, child: _adWidget!))),
-            Expanded(flex:1, child: _buildRecommendedNews(context)),
-          ],
-        ),
+                children: [
+                  Expanded(flex: 1, child: Center(child: Container(color: Colors.teal.shade200, height: 250, width: 300, child: _adWidget!))),
+                  Expanded(flex: 1, child: _buildRecommendedNews(context)),
+                ],
+              ),
       );
     }
 
@@ -432,22 +587,28 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
       return Scaffold(
         body: Column(
           children: [
-            SizedBox(height: 300,width: 250,child: AdWidget(ad: _bannerAd!,)),
-            Expanded(child: _buildRecommendedNews(context)),
-          ],
-        ),
-      );
-    } if (_isBannerLoaded && _bannerAd1 != null) {
-      return Scaffold(
-        body: Column(
-          children: [
-            SizedBox(height: 300,width: 250,child: AdWidget(ad: _bannerAd1!)),
+            SizedBox(
+                height: 300,
+                width: 250,
+                child: AdWidget(
+                  ad: _bannerAd!,
+                )),
             Expanded(child: _buildRecommendedNews(context)),
           ],
         ),
       );
     }
-    if (bannerAdsLoading == BannerAdsLoading.loading ) {
+    if (_isBannerLoaded && _bannerAd1 != null) {
+      return Scaffold(
+        body: Column(
+          children: [
+            SizedBox(height: 300, width: 250, child: AdWidget(ad: _bannerAd1!)),
+            Expanded(child: _buildRecommendedNews(context)),
+          ],
+        ),
+      );
+    }
+    if (bannerAdsLoading == BannerAdsLoading.loading) {
       return AdsLoadingScreen();
     }
 
@@ -462,8 +623,8 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
                 child: widget.article['adType'] == "rating card"
                     ? RateYourApp()
                     : widget.article['adType'] == "share card"
-                    ? ShareYourApp()
-                    : ShareYourApp(),
+                        ? ShareYourApp()
+                        : ShareYourApp(),
               ),
               Expanded(flex: 1, child: _buildRecommendedNews(context)),
             ],
@@ -551,15 +712,15 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
                                 index == 0
                                     ? SvgPicture.asset("assets/svg/like.svg", height: 16, width: 16)
                                     : index == 2
-                                    ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
-                                    : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
+                                        ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
+                                        : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
                                 width(width: 6),
                                 Text(
                                   index == 0
                                       ? "టాప్ లైక్స్"
                                       : index == 2
-                                      ? "టాప్ షేర్‌డ్"
-                                      : "టాప్ వ్యూడ్",
+                                          ? "టాప్ షేర్‌డ్"
+                                          : "టాప్ వ్యూడ్",
                                   style: fontStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textColor),
                                 ),
                               ],
@@ -578,7 +739,3 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
     );
   }
 }
-
-
-
-

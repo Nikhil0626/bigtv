@@ -1,4 +1,4 @@
-import 'dart:developer';
+
 import 'dart:io';
 import 'package:android_play_install_referrer/android_play_install_referrer.dart';
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
@@ -188,21 +188,17 @@ Future<void> getReferrerFromPlayStore() async {
     }, "referral");
 
     final uri = Uri.parse("https://dummy.com/?$referrerUrl");
-    log("📦 Referrer URL: $referrerUrl");
-    final source = uri.queryParameters['utm_source'];
-    final campaign = uri.queryParameters['utm_campaign'];
-    final refCode = uri.queryParameters['user_id'];
     sharedPreferences.setString("referralCode", uri.queryParameters['user_id'].toString().split("=").last.toString() ?? "chota123");
   } catch (e) {
-    EventRepo().addEvent({
-      "shareApp": Platform.isIOS ? "iOS" : "Android",
-      "userId": userId ?? "0",
-      'referrerUrl': "",
-      'clickTimestamp': "",
-      'installTimestamp': "",
-      "createAt": DateTime.now().toString(),
-      "error": e.toString(),
-      "isSharedUser": false
-    }, "referral");
+    // EventRepo().addEvent({
+    //   "shareApp": Platform.isIOS ? "iOS" : "Android",
+    //   "userId": userId ?? "0",
+    //   'referrerUrl': "",
+    //   'clickTimestamp': "",
+    //   'installTimestamp': "",
+    //   "createAt": DateTime.now().toString(),
+    //   "error": e.toString(),
+    //   "isSharedUser": false
+    // }, "referral");
   }
 }

@@ -10,7 +10,7 @@ import 'package:chotanews/utils/app_life_cycle.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+// import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,7 +60,7 @@ Future<void> main() async {
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
 
-  FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+  // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {

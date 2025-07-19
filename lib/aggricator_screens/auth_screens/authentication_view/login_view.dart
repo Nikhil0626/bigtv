@@ -89,14 +89,7 @@ class _LoginViewState extends State<LoginView> {
         child: Form(
           key: _formKey,
           child: Column(
-            children: [Text(
-              'Get Code $siva',
-              style: newAppFont(
-                fontSize: 11.sp,
-                color: Colors.black,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            children: [
               height(height: 10.h),
               Container(
                 height: 40.h,
