@@ -137,7 +137,7 @@ class _MyAppState extends State<MyApp> {
             useMaterial3: true,
           ),
           routes: {
-            '/': (context) => BannerListPage(),
+            '/': (context) => SplashScreen(),
             '/settings': (context) => SettingsView(),
           },
 
