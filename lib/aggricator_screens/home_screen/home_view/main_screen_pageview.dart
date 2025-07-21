@@ -2,13 +2,14 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:ui';
 
+import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/analytics_service.dart';
 import '../../ad_manager_screen/ad_provider/banner_ads_provider.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
-
+///This widgets help in stopping the build
 class MainScreenPageView extends StatefulWidget {
   final int startIndex;
   final bool isAiTags;
@@ -96,7 +97,9 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                         });
                       },
                       itemBuilder: (context, index) {
-                        return Container(
+                        return KeepAlivePage(
+                          keepAlive: true,
+                          child: Container(
                           color: Colors.white,
                           child: MainScreenBytView(
                             article: homeProvider.getAllPostList[index],
@@ -105,7 +108,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                             index: index,
                             aiTagName: "",
                           ),
-                        );
+                        ),);
                       },
                     ),
                   ),

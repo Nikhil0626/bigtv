@@ -33,7 +33,7 @@ class _InAppWebViewScreenState extends State<InAppWebViewScreen> {
           style: TextStyle(color: AppColors.textColor, fontSize: 18, fontWeight: FontWeight.w600),
         ),
       ),
-      body: Container(
+      body: SizedBox(
         height: widget.isHome?MediaQuery.of(context).size.height*.56:MediaQuery.of(context).size.height,
         child: InAppWebView(
           initialUrlRequest: URLRequest(url: WebUri(widget.webUrl.toString())),

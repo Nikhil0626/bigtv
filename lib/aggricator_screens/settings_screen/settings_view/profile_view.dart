@@ -61,7 +61,8 @@ class _ProfileViewState extends State<ProfileView> {
           padding: const EdgeInsets.only(right: 4),
           child: Text(
             "Profile",
-            style: newAppFont(color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
+            style: newAppFont(
+                color: Colors.black, fontSize: 18, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -73,7 +74,8 @@ class _ProfileViewState extends State<ProfileView> {
                   children: [
                     SingleChildScrollView(
                       physics: ClampingScrollPhysics(),
-                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                      keyboardDismissBehavior:
+                          ScrollViewKeyboardDismissBehavior.onDrag,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
                         child: Column(
@@ -86,7 +88,8 @@ class _ProfileViewState extends State<ProfileView> {
                                     height: 100,
                                     width: 100,
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(50)),
                                       child: profileProvider.isProfileLoading
                                           ? AppLoadingScreen()
                                           : profileProvider.uploadImageUrl == ""
@@ -95,7 +98,8 @@ class _ProfileViewState extends State<ProfileView> {
                                                   size: 100,
                                                 )
                                               : Image.network(
-                                                  profileProvider.uploadImageUrl,
+                                                  profileProvider
+                                                      .uploadImageUrl,
                                                   fit: BoxFit.fill,
                                                 ),
                                     ),
@@ -110,7 +114,8 @@ class _ProfileViewState extends State<ProfileView> {
                                       child: CircleAvatar(
                                         radius: 15.r,
                                         backgroundColor: Colors.grey.shade400,
-                                        child: Icon(Icons.edit, size: 18, color: Colors.black),
+                                        child: Icon(Icons.edit,
+                                            size: 18, color: Colors.black),
                                       ),
                                     ),
                                   ),
@@ -120,12 +125,22 @@ class _ProfileViewState extends State<ProfileView> {
                             height(height: 10.h),
                             Center(
                               child: Text(
-                                profileProvider.profileData != null ? profileProvider.profileData['profile']['name'] ?? "" : "user",
-                                style: newAppFont(fontSize: 20.sp, fontWeight: FontWeight.w500),
+                                profileProvider.profileData != null
+                                    ? profileProvider.profileData['profile']
+                                            ['name'] ??
+                                        ""
+                                    : "user",
+                                style: newAppFont(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.w500),
                               ),
                             ),
                             height(height: 20.h),
-                            Text(" Name", style: newAppFont(fontSize: 12.sp, fontWeight: FontWeight.w500, color: Colors.black87)),
+                            Text(" Name",
+                                style: newAppFont(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black87)),
                             height(height: 5.h),
                             TextField(
                               controller: profileProvider.nameController,
@@ -139,7 +154,11 @@ class _ProfileViewState extends State<ProfileView> {
                               ),
                             ),
                             height(height: 20.h),
-                            Text("Date of Birth", style: newAppFont(fontSize: 12.sp, fontWeight: FontWeight.w500, color: Colors.black87)),
+                            Text("Date of Birth",
+                                style: newAppFont(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black87)),
                             height(height: 5.h),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -163,7 +182,8 @@ class _ProfileViewState extends State<ProfileView> {
                                     ),
                                     onChanged: (value) {
                                       if (value.length == 2) {
-                                        FocusScope.of(context).requestFocus(monthFocusNode);
+                                        FocusScope.of(context)
+                                            .requestFocus(monthFocusNode);
                                       }
                                     },
                                   ),
@@ -182,13 +202,15 @@ class _ProfileViewState extends State<ProfileView> {
                                       filled: true,
                                       fillColor: AppColors.cardBackgroundColor,
                                       border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10.r),
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
                                         borderSide: BorderSide.none,
                                       ),
                                     ),
                                     onChanged: (value) {
                                       if (value.length == 2) {
-                                        FocusScope.of(context).requestFocus(yearFocusNode);
+                                        FocusScope.of(context)
+                                            .requestFocus(yearFocusNode);
                                       }
                                     },
                                   ),
@@ -207,7 +229,8 @@ class _ProfileViewState extends State<ProfileView> {
                                       filled: true,
                                       fillColor: AppColors.cardBackgroundColor,
                                       border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(10.r),
+                                        borderRadius:
+                                            BorderRadius.circular(10.r),
                                         borderSide: BorderSide.none,
                                       ),
                                     ),
@@ -216,7 +239,11 @@ class _ProfileViewState extends State<ProfileView> {
                               ],
                             ),
                             height(height: 20.h),
-                            Text("Mobile Number", style: newAppFont(fontSize: 12.sp, fontWeight: FontWeight.w500, color: Colors.black87)),
+                            Text("Mobile Number",
+                                style: newAppFont(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.black87)),
                             height(height: 5.h),
                             Container(
                               height: 55.h,
@@ -230,27 +257,35 @@ class _ProfileViewState extends State<ProfileView> {
                                   Container(
                                     height: 38.h,
                                     width: 90.w,
-                                    margin: EdgeInsets.symmetric(horizontal: 10),
+                                    margin:
+                                        EdgeInsets.symmetric(horizontal: 10),
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10.r),
                                       color: Colors.white,
                                     ),
                                     child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
                                         SizedBox(
                                           height: 18.h,
                                           width: 24.w,
-                                          child: SvgPicture.asset('assets/svg/indianFlag.svg', fit: BoxFit.contain),
+                                          child: SvgPicture.asset(
+                                              'assets/svg/indianFlag.svg',
+                                              fit: BoxFit.contain),
                                         ),
                                         width(width: 4.w),
-                                        Text("+91", style: newAppFont(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                                        Text("+91",
+                                            style: newAppFont(
+                                                fontSize: 16.sp,
+                                                fontWeight: FontWeight.bold)),
                                       ],
                                     ),
                                   ),
                                   Expanded(
                                     child: TextFormField(
-                                      controller: profileProvider.phoneController,
+                                      controller:
+                                          profileProvider.phoneController,
                                       keyboardType: TextInputType.phone,
                                       readOnly: true,
                                       maxLength: 10,
@@ -258,8 +293,10 @@ class _ProfileViewState extends State<ProfileView> {
                                         border: InputBorder.none,
                                         counterText: "",
                                         hintText: "",
-                                        fillColor: AppColors.cardBackgroundColor,
-                                        contentPadding: EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+                                        fillColor:
+                                            AppColors.cardBackgroundColor,
+                                        contentPadding: EdgeInsets.symmetric(
+                                            vertical: 18, horizontal: 10),
                                       ),
                                     ),
                                   ),
@@ -272,7 +309,8 @@ class _ProfileViewState extends State<ProfileView> {
                     ),
                     Spacer(),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 6),
                       child: InkWell(
                         onTap: () {
                           if (profileProvider.isProfileLoading) {
@@ -288,13 +326,20 @@ class _ProfileViewState extends State<ProfileView> {
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                           child: Center(
-                            child: profileProvider.isProfileLoading ? AppLoadingScreen() : Text('Update', style: newAppFont(fontSize: 16.sp, color: Colors.white, fontWeight: FontWeight.w600)),
+                            child: profileProvider.isProfileLoading
+                                ? AppLoadingScreen()
+                                : Text('Update',
+                                    style: newAppFont(
+                                        fontSize: 16.sp,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600)),
                           ),
                         ),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 6),
                       child: InkWell(
                         onTap: () {
                           if (!profileProvider.isProfileLoading) {
@@ -302,35 +347,47 @@ class _ProfileViewState extends State<ProfileView> {
                               context: context,
                               backgroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(16)),
                               ),
                               builder: (BuildContext context1) {
                                 return Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 24.0),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 20.0, vertical: 24.0),
                                   child: Column(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.warning_amber_rounded, color: Colors.red, size: 40),
+                                      Icon(Icons.warning_amber_rounded,
+                                          color: Colors.red, size: 40),
                                       height(height: 12),
                                       Text(
                                         "Delete Account?",
-                                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold),
                                       ),
                                       height(height: 8),
                                       Text(
                                         "Are you sure you want to delete your account? This action cannot be undone.",
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(fontSize: 14, color: Colors.black87),
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.black87),
                                       ),
                                       height(height: 24),
                                       Row(
                                         children: [
                                           Expanded(
                                             child: OutlinedButton(
-                                              onPressed: () => Navigator.pop(context),
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
                                               child: Text(
                                                 "Cancel",
-                                                style: fontStyle(color: Colors.black, fontSize: 16, fontWeight: FontWeight.w600),
+                                                style: fontStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.w600),
                                               ),
                                             ),
                                           ),
@@ -342,25 +399,41 @@ class _ProfileViewState extends State<ProfileView> {
                                               ),
                                               onPressed: () async {
                                                 Navigator.pop(context);
-                                                SharedPreferences preferences = await SharedPreferences.getInstance();
-                                                profileProvider.deleteAccount().then(
+                                                SharedPreferences preferences =
+                                                    await SharedPreferences
+                                                        .getInstance();
+                                                profileProvider
+                                                    .deleteAccount()
+                                                    .then(
                                                   (value) {
                                                     closeSubscribe();
 
-                                                    String? deviceId = preferences.getString("deviceId");
-                                                    String? userId = preferences.getString("userId");
+                                                    String? deviceId =
+                                                        preferences.getString(
+                                                            "deviceId");
+                                                    String? userId = preferences
+                                                        .getString("userId");
 
-                                                    WebEngagePlugin.trackEvent('logout_user', {
+                                                    WebEngagePlugin.trackEvent(
+                                                        'logout_user', {
                                                       "device_id": "$deviceId",
-                                                      "date_time": DateTime.now().toString(),
+                                                      "date_time":
+                                                          DateTime.now()
+                                                              .toString(),
                                                       "user_id": userId ?? "",
                                                     });
-                                                    WebEngagePlugin.userLogout();
-                                                    context.read<AuthenticationProvider>().setLogOutStatus(context, false);
+                                                    WebEngagePlugin
+                                                        .userLogout();
+                                                    context
+                                                        .read<
+                                                            AuthenticationProvider>()
+                                                        .setLogOutStatus(
+                                                            context, false);
                                                     EventRepo().addEvent({
                                                       "loginType": "Delete",
                                                       "mobileNumber": "",
-                                                      "createAt": DateTime.now().toString(),
+                                                      "createAt": DateTime.now()
+                                                          .toString(),
                                                     }, "delete_account");
                                                     preferences.clear();
                                                   },
@@ -368,7 +441,11 @@ class _ProfileViewState extends State<ProfileView> {
                                               },
                                               child: Text(
                                                 "Delete",
-                                                style: fontStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
+                                                style: fontStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                    fontWeight:
+                                                        FontWeight.w600),
                                               ),
                                             ),
                                           ),
@@ -385,9 +462,18 @@ class _ProfileViewState extends State<ProfileView> {
                         child: Container(
                           width: double.infinity,
                           height: 35.h,
-                          decoration: BoxDecoration(color: AppColors.cardBackgroundColor, borderRadius: BorderRadius.circular(8.r), border: Border.all(color: Colors.blue, width: 1)),
+                          decoration: BoxDecoration(
+                              color: AppColors.cardBackgroundColor,
+                              borderRadius: BorderRadius.circular(8.r),
+                              border: Border.all(color: Colors.blue, width: 1)),
                           child: Center(
-                            child: profileProvider.isProfileLoading ? AppLoadingScreen() : Text('Delete account', style: newAppFont(fontSize: 16, color: Colors.blue, fontWeight: FontWeight.w600)),
+                            child: profileProvider.isProfileLoading
+                                ? AppLoadingScreen()
+                                : Text('Delete account',
+                                    style: newAppFont(
+                                        fontSize: 16,
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.w600)),
                           ),
                         ),
                       ),

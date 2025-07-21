@@ -263,6 +263,7 @@ class HomeProvider extends ChangeNotifier {
       adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
 
       if (isWebView) {
+
         getAllPostList.insert(0, {
           "id": 000000,
           "postOrder": 00000,
