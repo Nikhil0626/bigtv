@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-
+///This widgets help in stopping the build
 class KeepAlivePage extends StatefulWidget {
   const KeepAlivePage({
     super.key,

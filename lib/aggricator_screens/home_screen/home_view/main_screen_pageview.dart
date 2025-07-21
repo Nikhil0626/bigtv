@@ -9,7 +9,7 @@ import '../../../services/analytics_service.dart';
 import '../../ad_manager_screen/ad_provider/banner_ads_provider.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
-
+///This widgets help in stopping the build
 class MainScreenPageView extends StatefulWidget {
   final int startIndex;
   final bool isAiTags;

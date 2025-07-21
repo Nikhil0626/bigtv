@@ -18,7 +18,7 @@ import '../../events_data/event_repo.dart';
 import '../../settings_screen/settings_view/settings_view.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_card.dart';
-
+///This widgets help in stopping the build
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
 
