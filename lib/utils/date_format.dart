@@ -22,7 +22,7 @@ String formatTimeDifference(String inputTime,{bool isComment= false} ) {
        date.toString();
     }
   } catch (e) {
-    print(e.toString());
+    log(e.toString());
     return "Invalid date ";
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:ui';
 
+import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/analytics_service.dart';
@@ -96,7 +97,9 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                         });
                       },
                       itemBuilder: (context, index) {
-                        return Container(
+                        return KeepAlivePage(
+                          keepAlive: true,
+                          child: Container(
                           color: Colors.white,
                           child: MainScreenBytView(
                             article: homeProvider.getAllPostList[index],
@@ -105,7 +108,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                             index: index,
                             aiTagName: "",
                           ),
-                        );
+                        ),);
                       },
                     ),
                   ),

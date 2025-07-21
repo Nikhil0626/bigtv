@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
+import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_card.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
@@ -83,7 +84,7 @@ class _HomeViewState extends State<HomeView> {
                     onPageChanged: (index) {
                       homeProvider.onItemTapped(index);
                     },
-                    children: [MainScreenCard(), PapersScreenCard(), ReelsScreen(), SettingsView()],
+                    children: [MainScreenCard(), PapersScreenCard(), ReelsScreen(), KeepAlivePage(keepAlive: true, child: SettingsView())],
                   ),
                   if (homeProvider.isBottomEnable && context.watch<SettingsProvider>().bannerAdsLoading != BannerAdsLoading.success)
                     Positioned(
