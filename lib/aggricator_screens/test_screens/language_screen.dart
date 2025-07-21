@@ -1,480 +1,316 @@
-import 'dart:io';
-
+// import 'package:flutter/material.dart';
+// import 'package:google_mobile_ads/google_mobile_ads.dart';
+//
+// class BannerAdWidget extends StatefulWidget {
+//   const BannerAdWidget({super.key});
+//
+//   @override
+//   State<BannerAdWidget> createState() => _BannerAdWidgetState();
+// }
+//
+// class _BannerAdWidgetState extends State<BannerAdWidget> {
+//   late BannerAd _bannerAd;
+//   bool _isLoaded = false;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _bannerAd = BannerAd(
+//       adUnitId: "ca-app-pub-3940256099942544/6300978111", // ✅ Test Ad Unit ID
+//       size: AdSize.banner,
+//       request: const AdRequest(),
+//       listener: BannerAdListener(
+//         onAdLoaded: (_) {
+//           setState(() {
+//             _isLoaded = true;
+//           });
+//         },
+//         onAdFailedToLoad: (ad, error) {
+//           debugPrint('❌ Failed to load banner ad: $error');
+//           ad.dispose();
+//         },
+//       ),
+//     )..load();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return _isLoaded
+//         ? SizedBox(
+//       width: _bannerAd.size.width.toDouble(),
+//       height: _bannerAd.size.height.toDouble(),
+//       child: AdWidget(ad: _bannerAd),
+//     )
+//         : const SizedBox(height: 50); // Placeholder height
+//   }
+//
+//   @override
+//   void dispose() {
+//     _bannerAd.dispose();
+//     super.dispose();
+//   }
+// }
+//
+//
+//
+//
+//
+// class BannerListPage extends StatelessWidget {
+//   BannerListPage({super.key});
+//
+//   final List<String> items = List.generate(50, (index) => 'Item ${index + 1}');
+//
+//   bool _isAdIndex(int index) => (index + 1) % 4 == 0;
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     final int adCount = (items.length /4).floor();
+//     final int totalListItems = items.length + adCount;
+//
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('Banner Ad ListView')),
+//       body: ListView.builder(
+//         itemCount: totalListItems,
+//         itemBuilder: (context, index) {
+//           if (_isAdIndex(index)) {
+//             return const Padding(
+//               padding: EdgeInsets.symmetric(vertical: 10),
+//               child: BannerAdWidget(),
+//             );
+//           } else {
+//             // Calculate actual index in items list
+//             final int actualIndex = index - (index ~/ 4);
+//             return ListTile(
+//               title: Text(items[actualIndex]),
+//               leading: const Icon(Icons.label_outline),
+//             );
+//           }
+//         },
+//       ),
+//     );
+//   }
+// }
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:flutter/services.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
-import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
-class _MyApp11State extends State<MyApp11> {
-  late WebEngagePlugin _webEngagePlugin;
-  late String os;
 
-  void _onPushClick(Map<String, dynamic>? message, String? s) {
-    print("This is a push click callback from native to flutter. Payload " +
-        message.toString());
+class BannerAdService {
+  static final BannerAdService _instance = BannerAdService._internal();
+  factory BannerAdService() => _instance;
+
+  BannerAdService._internal();
+
+  final Map<int, BannerAd> _adInstances = {};
+  final Map<int, bool> _adLoaded = {};
+
+  BannerAd? getAdForIndex(int index) {
+    return _adInstances[index];
   }
 
-  void _onPushActionClick(Map<String, dynamic>? message, String? s) {
-    print(
-        "This is a Push action click callback from native to flutter. Payload " +
-            message.toString());
-    print(
-        "This is a Push action click callback from native to flutter. SelectedId " +
-            s.toString());
+  bool isAdLoaded(int index) => _adLoaded[index] ?? false;
+
+  void loadAdForIndex(int index, VoidCallback onAdLoaded) {
+    if (_adInstances.containsKey(index)) return;
+
+    final ad = BannerAd(
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111', // Test Ad ID
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          _adLoaded[index] = true;
+          onAdLoaded();
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint("❌ Failed to load ad at $index: $error");
+          ad.dispose();
+        },
+      ),
+    );
+
+    ad.load();
+    _adInstances[index] = ad;
   }
 
-  void _onInAppPrepared(Map<String, dynamic>? message) {
-    print("This is a inapp prepared callback from native to flutter. Payload " +
-        message.toString());
+  void disposeAll() {
+    for (var ad in _adInstances.values) {
+      ad.dispose();
+    }
+    _adInstances.clear();
+    _adLoaded.clear();
   }
+}
 
-  void _onInAppClick(Map<String, dynamic>? message, String? s) {
-    print("This is a inapp click callback from native to flutter. Payload " +
-        message.toString());
-  }
 
-  void _onInAppShown(Map<String, dynamic>? message) {
-    print("This is a callback on inapp shown from native to flutter. Payload " +
-        message.toString());
-  }
+class BannerAdHolder extends StatefulWidget {
+  final int index;
+  const BannerAdHolder({super.key, required this.index});
 
-  void _onInAppDismiss(Map<String, dynamic>? message) {
-    print(
-        "This is a callback on inapp dismiss from native to flutter. Payload " +
-            message.toString());
-  }
+  @override
+  State<BannerAdHolder> createState() => _BannerAdHolderState();
+}
 
+class _BannerAdHolderState extends State<BannerAdHolder>
+    with AutomaticKeepAliveClientMixin {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
-    initWebEngage();
-  }
-
-  void initWebEngage() {
-    _webEngagePlugin = new WebEngagePlugin();
-    _webEngagePlugin.setUpPushCallbacks(_onPushClick, _onPushActionClick);
-    _webEngagePlugin.setUpInAppCallbacks(
-        _onInAppClick, _onInAppShown, _onInAppDismiss, _onInAppPrepared);
-    _webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
-    subscribeToPushCallbacks();
-    subscribeToTrackDeeplink();
-    subscribeToAnonymousIDCallback();
-    _listenToAnonymousID();
-  }
-
-  var data = "";
-
-  void _onTokenInvalidated(Map<String, dynamic>? message) {
-    print("tokenInvalidated callback received " + message.toString());
-    // Reset with new Security Token in the callback
-    WebEngagePlugin.setSecureToken("USER_NAME", "REPLACE_JWT_TOKEN_HERE");
-  }
-
-  void _listenToAnonymousID() {
-    _webEngagePlugin.anonymousActionStream.listen((event) {
-      setState(() {
-        data = "${event}";
-      });
+    final provider = Provider.of<AdProvider>(context, listen: false);
+    provider.loadAd(widget.index, () {
+      if (mounted) setState(() {});
     });
-  }
-
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    if (Platform.isAndroid) {
-      if (await Permission.notification.request().isGranted) {
-        // Either the permission was already granted before or the user just granted it.
-        print("notification Permission is granted");
-        WebEngagePlugin.setUserDevicePushOptIn(true);
-      } else {
-        print("notification Permission is denied.");
-        WebEngagePlugin.setUserDevicePushOptIn(false);
-      }
-    }
-  }
-
-  var anonymousId = "null";
-
-  void _openLoginModal() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        String username = "";
-        String secureToken = "";
-
-        return AlertDialog(
-          title: Text("Login"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                onChanged: (value) {
-                  username = value;
-                },
-                decoration: InputDecoration(labelText: "Username"),
-              ),
-              TextField(
-                onChanged: (value) {
-                  secureToken = value;
-                },
-                decoration: InputDecoration(labelText: "Token"),
-                obscureText: true,
-              ),
-            ],
-          ),
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                if (username.isEmpty) {
-                  print("Please Enter valid UserName");
-                } else {
-                  if (secureToken.isEmpty) {
-                    // login
-                    print("WebEngage: Login");
-                    WebEngagePlugin.userLogin(username);
-                  } else {
-                    // loginWithsecureToken
-                    print("WebEngage: Login with secureToken");
-                    WebEngagePlugin.userLogin(username, secureToken);
-                  }
-                }
-                Navigator.of(context).pop();
-              },
-              child: Text("Login"),
-            ),
-          ],
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    data = data;
-    print("build");
-    return MaterialApp(
-      navigatorKey: navigatorKey,
-      home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Plugin example app'),
-          ),
-          body: ListView(
-            children: <Widget>[
-              new ListTile(
-                title: Text("$data"),
-                onTap: () {
-                  setState(() {
-                    data = data;
-                  });
-                },
-              ),
-              new ListTile(
-                title: Text("Login "),
-                onTap: () {
-                  String userName = "REPLACE_YOUR_USERNAME";
-                  WebEngagePlugin.userLogin(userName);
-                  showToast("Login-" + userName);
-                },
-              ),
-              new ListTile(title: Text("Login Modal"), onTap: _openLoginModal),
-              new ListTile(
-                title: Text("Login With secureToken "),
-                onTap: () {
-                  String userName = "REPLACE_YOUR_USERNAME";
-                  String secureToken = "REPLACE_YOUR_TOKEN_HERE";
-                  WebEngagePlugin.userLogin(userName, secureToken);
-                },
-              ),
-              new ListTile(
-                title: Text("Logout"),
-                onTap: () {
-                  WebEngagePlugin.userLogout();
-                  showToast("Logout");
-                },
-              ),
-              new ListTile(
-                title: Text("Set FirstName"),
-                onTap: () {
-                  WebEngagePlugin.setUserFirstName('Sourabh');
-                  showToast("User FirstName- Sourabh");
-                },
-              ),
-              new ListTile(
-                title: Text("Set LastName"),
-                onTap: () {
-                  WebEngagePlugin.setUserLastName('Gupta');
-                  showToast("LastName Gupta");
-                },
-              ),
-              new ListTile(
-                title: Text("Set UserEmail"),
-                onTap: () {
-                  WebEngagePlugin.setUserEmail('ram@gmail.com');
-                  showToast("Email - ram@gmail.com");
-                },
-              ),
-              new ListTile(
-                title: Text("Set UserHashedEmail"),
-                onTap: () {
-                  WebEngagePlugin.setUserHashedEmail(
-                      '144e0424883546e07dcd727057fd3b62');
-                  showToast("HashedEmail - 144e0424883546e07dcd727057fd3b62");
-                },
-              ),
-              new ListTile(
-                title: Text("Set UserPhone"),
-                onTap: () {
-                  WebEngagePlugin.setUserPhone('+919999900000');
-                  showToast("Phone - +919999900000");
-                },
-              ),
-              new ListTile(
-                title: Text("Set UserHashedPhone"),
-                onTap: () {
-                  WebEngagePlugin.setUserHashedPhone(
-                      'e0ec043b3f9e198ec09041687e4d4e8d');
-                  showToast("HashedPhone - e0ec043b3f9e198ec09041687e4d4e8d");
-                },
-              ),
-              new ListTile(
-                title: Text("Set UserCompany"),
-                onTap: () {
-                  WebEngagePlugin.setUserCompany('WebEngage');
-                  showToast("Company - WebEngage");
-                },
-              ),
-              new ListTile(
-                title: Text("Set UserBirthDate"),
-                onTap: () {
-                  WebEngagePlugin.setUserBirthDate('1994-05-24');
-                  showToast("BirthDate - 1994-05-24");
-                },
-              ),
-              new ListTile(
-                title: Text("Set User Gender"),
-                onTap: () {
-                  WebEngagePlugin.setUserGender('male');
-                  showToast("Gender - Male");
-                },
-              ),
-              new ListTile(
-                title: Text("Set User Location"),
-                onTap: () {
-                  WebEngagePlugin.setUserLocation(19.25, 72.45);
-                  showToast("Location - 19.25, 72.45");
-                },
-              ),
-              new ListTile(
-                title: Text("Track Event with no attributes"),
-                onTap: () {
-                  WebEngagePlugin.trackEvent('Added to Cart');
-                  showToast("Added to Cart tracked ");
-                },
-              ),
-              new ListTile(
-                title: Text("Opt-In  Push, InApp,email,sms, whatsapp, viber"),
-                onTap: () {
-                  WebEngagePlugin.setUserOptIn('in_app', true);
-                  WebEngagePlugin.setUserOptIn('sms', true);
-                  WebEngagePlugin.setUserOptIn('push', true);
-                  WebEngagePlugin.setUserOptIn('email', true);
-                  WebEngagePlugin.setUserOptIn('whatsapp', true);
-                  WebEngagePlugin.setUserOptIn('viber', true);
-                  showToast("Opt-In  Push, InApp,email,sms, whatsapp, viber ");
-                },
-              ),
-              new ListTile(
-                title: Text("Opt-Out  Push, InApp,email,sms, whatsapp, viber"),
-                onTap: () {
-                  WebEngagePlugin.setUserOptIn('in_app', false);
-                  WebEngagePlugin.setUserOptIn('sms', false);
-                  WebEngagePlugin.setUserOptIn('push', false);
-                  WebEngagePlugin.setUserOptIn('email', false);
-                  WebEngagePlugin.setUserOptIn('whatsapp', false);
-                  WebEngagePlugin.setUserOptIn('viber', false);
+    super.build(context);
+    final provider = Provider.of<AdProvider>(context);
+    final ad = provider.getAd(widget.index);
+    final loaded = provider.isAdLoaded(widget.index);
 
-                  showToast("Opt-Out  Push, InApp,email,sms, whatsapp, viber ");
-                },
-              ),
-              new ListTile(
-                title: Text("Track event with attributes"),
-                onTap: () {
-                  WebEngagePlugin.trackEvent(
-                      'Order Placed', {'Amount': 808.48});
-                  showToast("Order Placed tracked Amount: 808.48");
-                },
-              ),
-              new ListTile(
-                title: Text("Track Screen"),
-                onTap: () {
-                  WebEngagePlugin.trackScreen('Home Page');
-                  showToast("Track Screen :Home Page");
-                },
-              ),
-              new ListTile(
-                title: Text("Track Screen with data"),
-                onTap: () {
-                  WebEngagePlugin.trackScreen(
-                      'Product Page', {'Product Id': 'UHUH799'});
-                  showToast(
-                      "Track Screen :Product Page', {'Product Id': 'UHUH799'}");
-                },
-              ),
-              new ListTile(
-                title: Text("Set User attribute with string value "),
-                onTap: () {
-                  WebEngagePlugin.setUserAttribute(
-                      "twitterusename", "saurav12994");
-                  showToast("twitterusename:saurav12994");
-                },
-              ),
-              // WebEngagePlugin.setUserAttribute("twitterusename", "saurav12994");
-              // WebEngagePlugin.setUserAttribute("Subscribed to email", true);
-              // WebEngagePlugin.setUserAttribute("Points earned", 2626);
-              // WebEngagePlugin.setUserAttribute("Dollar Spent", 123.44);
-              new ListTile(
-                title: Text("Set User attribute with Double value "),
-                onTap: () {
-                  WebEngagePlugin.setUserAttribute("Dollar Spent", 123.44);
-                  showToast("Dollar Spent:123.44");
-                },
-              ),
-              new ListTile(
-                title: Text("Set User attribute with Boolean value "),
-                onTap: () {
-                  WebEngagePlugin.setUserAttribute("Subscribed to email", true);
-                  showToast("Subscribed to email:true");
-                },
-              ),
-              new ListTile(
-                title: Text("Set User attribute with Integer value "),
-                onTap: () {
-                  WebEngagePlugin.setUserAttribute("Points earned", 2626);
-                  showToast("Points earned:2626");
-                },
-              ),
-              new ListTile(
-                title: Text("Set User attribute with Map value "),
-                onTap: () {
-                  var details = {'Username': 'tom', 'Password': 'pass@123'};
+    if (ad != null && loaded) {
+      return SizedBox(
+        width: 320,
+        height: 50,
+        child: AdWidget(ad: ad),
+      );
+    }
 
-                  WebEngagePlugin.setUserAttributes(details);
-                  showToast("Username':'tom','Password':'pass@123");
-                },
-              ),
-              new ListTile(
-                title: Text("Track Date"),
-                onTap: () {
-                  final DateTime now = DateTime.now();
-                  final DateFormat formatter =
-                  DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-                  WebEngagePlugin.trackEvent(
-                      'Register', {'Registered On': formatter.format(now)});
-                  showToast("Track ${formatter.format(now)}");
-                },
-              ),
-              new ListTile(
-                title: Text("Set User Device Push Opt in"),
-                onTap: () {
-                  WebEngagePlugin.setUserDevicePushOptIn(true);
-                  showToast("UserDevice Push OptIn set to true");
-                },
-              ),
-              new ListTile(
-                title: Text("Start GAID Tracking"),
-                onTap: () {
-                  WebEngagePlugin.startGAIDTracking();
-                  showToast("Started GAID Tracking");
-                },
-              ),
-            ],
-          )),
+    return const SizedBox(
+      height: 50,
+      child: Center(child: CircularProgressIndicator(strokeWidth: 1)),
     );
   }
 
-  void showToast(String msg) {
-    // Fluttertoast.showToast(
-    //     msg: msg,
-    //     toastLength: Toast.LENGTH_SHORT,
-    //     gravity: ToastGravity.CENTER,
-    //     timeInSecForIosWeb: 1,
-    //     backgroundColor: Colors.red,
-    //     textColor: Colors.white,
-    //     fontSize: 16.0);
+  @override
+  bool get wantKeepAlive => true;
+}
+
+
+
+
+
+class BannerListPage extends StatefulWidget {
+  const BannerListPage({super.key});
+
+  @override
+  State<BannerListPage> createState() => _BannerListPageState();
+}
+
+class _BannerListPageState extends State<BannerListPage> {
+  final List<String> _sampleItems = List.generate(50, (i) => 'Item ${i + 1}');
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<AdProvider>(context, listen: false).setItems(_sampleItems);
+    });
   }
 
   @override
   void dispose() {
-    _webEngagePlugin.pushSink.close();
-    _webEngagePlugin.pushActionSink.close();
-    _webEngagePlugin.trackDeeplinkURLStreamSink.close();
+    Provider.of<AdProvider>(context, listen: false).disposeAds();
     super.dispose();
   }
 
-  void subscribeToPushCallbacks() async {
-    //Push click stream listener
-    _webEngagePlugin.pushStream.listen((event) {
-      String? deepLink = event.deepLink;
-      Map<String, dynamic> messagePayload = event.payload!;
-      showDialogWithMessage("Push click callback: " + event.toString());
-    });
+  @override
+  Widget build(BuildContext context) {
+    final adProvider = Provider.of<AdProvider>(context);
 
-    //Push action click listener
-    _webEngagePlugin.pushActionStream.listen((event) {
-      print("pushActionStream:" + event.toString());
-      String? deepLink = event.deepLink;
-      Map<String, dynamic>? messagePayload = event.payload;
-      showDialogWithMessage("PushAction click callback: " + event.toString());
-    });
-  }
-
-  void subscribeToTrackDeeplink() {
-    _webEngagePlugin.trackDeeplinkStream.listen((location) {
-      //Location URL
-    });
-  }
-
-  void subscribeToAnonymousIDCallback() {
-    // _webEngagePlugin.anonymousActionStream.listen((event) {
-    //   //  var message = event as Map<String,dynamic>;
-    //   this.setState(() {
-    //     anonymousId  =  "${event}";
-    //   });
-    // });
-  }
-
-  final navigatorKey = GlobalKey<NavigatorState>();
-
-  void showDialogWithMessage(String msg) {
-    showDialog(
-        context: navigatorKey.currentState!.overlay!.context,
-        builder: (BuildContext context) {
-          return Dialog(
-              insetPadding: EdgeInsets.all(5.0),
-              child: new Container(
-                // padding: new EdgeInsets.all(10.0),
-                decoration: new BoxDecoration(
-                  color: Colors.white,
-                ),
-                child: new Text(
-                  msg,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18.0,
-                    fontFamily: 'helvetica_neue_light',
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ));
-        });
+    return Scaffold(
+      appBar: AppBar(title: const Text('ListView with Banner Ads')),
+      body: ListView.builder(
+        itemCount: adProvider.totalItemCount,
+        itemBuilder: (context, index) {
+          if (adProvider.isAdIndex(index)) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: BannerAdHolder(index: index),
+            );
+          } else {
+            final actualIndex = adProvider.actualItemIndex(index);
+            return ListTile(
+              title: Text(adProvider.items[actualIndex]),
+              leading: const Icon(Icons.article),
+            );
+          }
+        },
+      ),
+    );
   }
 }
 
 
 
-class MyApp11 extends StatefulWidget {
-  @override
-  _MyApp11State createState() => _MyApp11State();
+
+
+class AdProvider extends ChangeNotifier {
+  final int adInterval;
+  final String adUnitId;
+  List<String> _items = [];
+
+  final Map<int, BannerAd> _adCache = {};
+  final Map<int, bool> _adLoaded = {};
+
+  AdProvider({
+    this.adInterval = 2,
+    // this.adUnitId = 'ca-app-pub-3940256099942544/6300978111', // Test ID
+    this.adUnitId = 'ca-app-pub-2405357352181832/9297875326', // Test ID
+  });
+
+  // Setup your content list
+  void setItems(List<String> items) {
+    _items = items;
+    notifyListeners();
+  }
+
+  List<String> get items => _items;
+
+  // Index utilities
+  bool isAdIndex(int index) => (index + 1) % adInterval == 0;
+
+  int get adCount => (_items.length / adInterval).floor();
+
+  int get totalItemCount => _items.length + adCount;
+
+  int actualItemIndex(int index) => index - (index ~/ adInterval);
+
+  // Ad loading & caching
+  BannerAd? getAd(int index) => _adCache[index];
+
+  bool isAdLoaded(int index) => _adLoaded[index] ?? false;
+
+  void loadAd(int index, VoidCallback onLoaded) {
+    if (_adCache.containsKey(index)) return;
+
+    final ad = BannerAd(
+      adUnitId: adUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          _adLoaded[index] = true;
+          notifyListeners();
+          onLoaded();
+        },
+        onAdFailedToLoad: (ad, error) {
+          debugPrint('❌ Ad failed at $index: $error');
+          ad.dispose();
+        },
+      ),
+    );
+
+    ad.load();
+    _adCache[index] = ad;
+  }
+
+  void disposeAds() {
+    for (final ad in _adCache.values) {
+      ad.dispose();
+    }
+    _adCache.clear();
+    _adLoaded.clear();
+  }
 }

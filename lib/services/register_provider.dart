@@ -12,6 +12,7 @@ import '../aggricator_screens/reels_screens/reels_provider/reels_providers.dart'
 import '../aggricator_screens/referral_screen/referral_provider/referral_provider.dart';
 import '../aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import '../aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import '../aggricator_screens/test_screens/language_screen.dart';
 
 
 
@@ -28,5 +29,6 @@ class AppProviders {
     ChangeNotifierProvider<RatingProvider>(create: (_) => RatingProvider()),
     ChangeNotifierProvider<BannerAdsProvider>(create: (_) => BannerAdsProvider()),
     ChangeNotifierProvider<PollProvider>(create: (_) => PollProvider()),
+    ChangeNotifierProvider<AdProvider>(create: (_) => AdProvider()),
   ];
 }
