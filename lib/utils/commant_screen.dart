@@ -275,10 +275,10 @@ class ExpandableTextWidget extends StatefulWidget {
   const ExpandableTextWidget({super.key, required this.text});
 
   @override
-  _ExpandableTextWidgetState createState() => _ExpandableTextWidgetState();
+  ExpandableTextWidgetState createState() => ExpandableTextWidgetState();
 }
 
-class _ExpandableTextWidgetState extends State<ExpandableTextWidget> {
+class ExpandableTextWidgetState extends State<ExpandableTextWidget> {
   bool isExpanded = false;
   bool isOverflowing = false;
 

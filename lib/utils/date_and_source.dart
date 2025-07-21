@@ -5,7 +5,7 @@ import 'app_fonts.dart';
 import 'date_format.dart';
 
 class DateAndSource extends StatelessWidget {
- final data;
+ final dynamic data;
   const DateAndSource({super.key,required this.data});
 
   @override
