@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -32,7 +33,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   BannerAd? _bannerAd1;
   Widget? _adWidget;
   String? source = '';
-
+  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   bool _adDisplayed = false;
   int _failCount = 0;
   bool _hasTriedLoadingAds = false;
@@ -96,35 +97,47 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           adRendered = DateTime.now();
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
-        onAdImpression: (ad) {
+        onAdImpression: (ad) async{
           impressionLogged = DateTime.now();
+          await analytics.logEvent(
+            name: "onAdImpression",
+            parameters: {
+              "onAdImpression": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
           _logLatencyMetrics();
-          EventRepo().addEvent({
-            "onAdImpression": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdImpression");
         },
-        onAdClicked: (ad) {
-          EventRepo().addEvent({
-            "onAdClicked": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClicked");
+        onAdClicked: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClicked",
+            parameters: {
+              "onAdClicked":true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdClosed: (ad) {
-          EventRepo().addEvent({
-            "onAdClosed": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClosed");
+        onAdClosed: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClosed",
+            parameters: {
+              "onAdClosed": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdOpened: (ad) {
-          EventRepo().addEvent({
-            "onAdOpened": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdOpened");
+        onAdOpened: (ad) async{
+          await analytics.logEvent(
+            name: "onAdOpened",
+            parameters: {
+              "onAdOpened": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
@@ -149,35 +162,47 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           adRendered = DateTime.now();
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
-        onAdImpression: (ad) {
+        onAdImpression: (ad) async{
           impressionLogged = DateTime.now();
+          await analytics.logEvent(
+            name: "onAdImpression",
+            parameters: {
+              "onAdImpression": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
           _logLatencyMetrics();
-          EventRepo().addEvent({
-            "onAdImpression": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdImpression");
         },
-        onAdClicked: (ad) {
-          EventRepo().addEvent({
-            "onAdClicked": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClicked");
+        onAdClicked: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClicked",
+            parameters: {
+              "onAdClicked": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdClosed: (ad) {
-          EventRepo().addEvent({
-            "onAdClosed": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClosed");
+        onAdClosed: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClosed",
+            parameters: {
+              "onAdClosed": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdOpened: (ad) {
-          EventRepo().addEvent({
-            "onAdOpened": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdOpened");
+        onAdOpened: (ad) async{
+          await analytics.logEvent(
+            name: "onAdOpened",
+            parameters: {
+              "onAdOpened": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
@@ -234,35 +259,47 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           ad.dispose();
           _checkIfAllAdsFailed(error);
         },
-        onAdImpression: (ad) {
+        onAdImpression: (ad) async{
           impressionLogged = DateTime.now();
+          await analytics.logEvent(
+            name: "onAdImpression",
+            parameters: {
+              "onAdImpression":true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
           _logLatencyMetrics();
-          EventRepo().addEvent({
-            "onAdImpression": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdImpression");
         },
-        onAdClicked: (ad) {
-          EventRepo().addEvent({
-            "onAdClicked": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClicked");
+        onAdClicked: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClicked",
+            parameters: {
+              "onAdClicked": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdClosed: (ad) {
-          EventRepo().addEvent({
-            "onAdClosed": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClosed");
+        onAdClosed: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClosed",
+            parameters: {
+              "onAdClosed": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdOpened: (ad) {
-          EventRepo().addEvent({
-            "onAdOpened": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdOpened");
+        onAdOpened: (ad) async{
+          await analytics.logEvent(
+            name: "onAdOpened",
+            parameters: {
+              "onAdOpened": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
       ),
     )..load();
@@ -285,35 +322,47 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           ad.dispose();
           _checkIfAllAdsFailed(error);
         },
-        onAdImpression: (ad) {
+        onAdImpression: (ad) async{
           impressionLogged = DateTime.now();
+          await analytics.logEvent(
+            name: "onAdImpression",
+            parameters: {
+              "onAdImpression": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
           _logLatencyMetrics();
-          EventRepo().addEvent({
-            "onAdImpression": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdImpression");
         },
-        onAdClicked: (ad) {
-          EventRepo().addEvent({
-            "onAdClicked": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClicked");
+        onAdClicked: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClicked",
+            parameters: {
+              "onAdClicked": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdClosed: (ad) {
-          EventRepo().addEvent({
-            "onAdClosed": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdClosed");
+        onAdClosed: (ad) async{
+          await analytics.logEvent(
+            name: "onAdClosed",
+            parameters: {
+              "onAdClosed": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
-        onAdOpened: (ad) {
-          EventRepo().addEvent({
-            "onAdOpened": true,
-            "createAt": DateTime.now().toString(),
-            "adResponse": ad.toString(),
-          }, "onAdOpened");
+        onAdOpened: (ad) async{
+          await analytics.logEvent(
+            name: "onAdOpened",
+            parameters: {
+              "onAdOpened": true ? 1 : 0,
+              "createAt": DateTime.now().toString(),
+              "adResponse": "",
+            },
+          );
         },
       ),
     )..load();
@@ -329,7 +378,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     return true; // For objects or primitives
   }
 
-  void _onAdLoaded(dynamic ad, Widget adWidget) {
+  Future<void> _onAdLoaded(dynamic ad, Widget adWidget) async{
     if (_adDisplayed) {
       ad.dispose();
       return;
@@ -347,18 +396,23 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
       _adWidget = wrappedAdWidget;
       _hasTriedLoadingAds = false;
     });
-    EventRepo().addEvent({
-      "adSource": source,
-      "sdkRequestStartTime": requestInitiated.toString(),
-      "sdkRequestReceivedTime": responseReceived.toString(),
-      "adsRenderingTime": responseReceived!.difference(requestInitiated!).inMilliseconds.toString(),
-      "createAt": DateTime.now().toString(),
-      "adResponse": ad.responseInfo.toString(),
-    }, "ads_success");
+    await analytics.logEvent(
+      name: "ads_success",
+      parameters: {
+        "adSource": source.toString(),
+        "sdkRequestStartTime": requestInitiated.toString(),
+        "sdkRequestReceivedTime": responseReceived.toString(),
+        "adsRenderingTime": responseReceived!.difference(requestInitiated!).inMilliseconds.toString(),
+        "createAt": DateTime.now().toString(),
+        "adResponse": "",
+      },
+    );
+
+    // EventRepo().addEvent(, "");
     _disposeOtherAds(except: ad);
   }
 
-  void _checkIfAllAdsFailed(LoadAdError error) {
+  Future<void> _checkIfAllAdsFailed(LoadAdError error) async{
     _failCount++;
     if (_adDisplayed) return;
     if (_failCount >= 4) {
@@ -367,14 +421,18 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         _hasTriedLoadingAds = false;
       });
     }
-    EventRepo().addEvent({
-      "adSource": source,
-      "sdkRequestStartTime": requestInitiated.toString(),
-      "sdkRequestReceivedTime": responseReceived.toString(),
-      "adsRenderingTime": "0",
-      "createAt": DateTime.now().toString(),
-      "adResponse": error.responseInfo.toString(),
-    }, "ads_failure");
+    await analytics.logEvent(
+      name: "ads_failure",
+      parameters: {
+        "adSource": source.toString(),
+        "sdkRequestStartTime": requestInitiated.toString(),
+        "sdkRequestReceivedTime": responseReceived.toString(),
+        "adsRenderingTime": "0",
+        "createAt": DateTime.now().toString(),
+        "adResponse": error.responseInfo.toString(),
+      },
+    );
+    // EventRepo().addEvent(, "");
   }
 
   void _disposeOtherAds({required dynamic except}) {
@@ -384,25 +442,30 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     if (_bannerAd1 != null && _bannerAd1 != except) _bannerAd1?.dispose();
   }
 
-  void _logLatencyMetrics() {
+  void _logLatencyMetrics() async{
     if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
       final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
       final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
       final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
       final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
-      EventRepo().addEvent({
-        "adSource": source,
-        "requestInitiated": requestInitiated.toString(),
-        "responseReceived": responseReceived.toString(),
-        "adCreativeDownloaded": adCreativeDownloaded.toString(),
-        "adRendered": adRendered.toString(),
-        "impressionLogged": impressionLogged.toString(),
-        "latency_request": requestLatency.toString(),
-        "latency_load": loadLatency.toString(),
-        "latency_render": renderLatency.toString(),
-        "latency_total": totalLatency.toString(),
-        "createAt": DateTime.now().toString(),
-      }, "ad_latency_metrics");
+      // EventRepo().addEvent(, "");
+
+      await analytics.logEvent(
+        name: "ad_latency_metrics",
+        parameters: {
+          "adSource": source.toString(),
+          "requestInitiated": requestInitiated.toString(),
+          "responseReceived": responseReceived.toString(),
+          "adCreativeDownloaded": adCreativeDownloaded.toString(),
+          "adRendered": adRendered.toString(),
+          "impressionLogged": impressionLogged.toString(),
+          "latency_request": requestLatency.toString(),
+          "latency_load": loadLatency.toString(),
+          "latency_render": renderLatency.toString(),
+          "latency_total": totalLatency.toString(),
+          "createAt": DateTime.now().toString(),
+        },
+      );
     }
   }
 

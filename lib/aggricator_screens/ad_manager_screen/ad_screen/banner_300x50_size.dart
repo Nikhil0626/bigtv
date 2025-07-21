@@ -302,6 +302,7 @@
 //
 
 import 'dart:developer';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
@@ -324,6 +325,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
   BannerAdsLoading _loadingState = BannerAdsLoading.loading;
   bool _adMobFailed = false;
   bool _adManagerFailed = false;
+  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
   @override
   void initState() {
@@ -345,10 +347,10 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       size: AdSize(width: 320, height: 50),
       request: const AdRequest(),
       listener: BannerAdListener(
-        onAdClosed: _logAdEvent("onAdClosed"),
-        onAdOpened: _logAdEvent("onAdOpened"),
-        onAdImpression: _logAdEvent("onAdImpression"),
-        onAdClicked: _logAdEvent("onAdClicked"),
+        onAdClosed: (ad) => _logAdEvent("onAdClosed",""),
+        onAdOpened: (ad) => _logAdEvent("onAdOpened",""),
+        onAdImpression: (ad) => _logAdEvent("onAdImpression",""),
+        onAdClicked:  (ad) => _logAdEvent("onAdClicked",""),
         onAdLoaded: (ad) => _handleAdLoaded(ad as BannerAd, "AdMob", fromTime),
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
@@ -368,10 +370,10 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       size: AdSize.banner,
       request: const AdManagerAdRequest(),
       listener: BannerAdListener(
-        onAdClosed: _logAdEvent("onAdClosed"),
-        onAdOpened: _logAdEvent("onAdOpened"),
-        onAdImpression: _logAdEvent("onAdImpression"),
-        onAdClicked: _logAdEvent("onAdClicked"),
+        onAdClosed: (ad) => _logAdEvent("onAdClosed",""),
+        onAdOpened: (ad) => _logAdEvent("onAdOpened",""),
+        onAdImpression: (ad) => _logAdEvent("onAdImpression",""),
+        onAdClicked:  (ad) => _logAdEvent("onAdClicked",""),
         onAdLoaded: (ad) => _handleAdLoaded(ad as BannerAd, "AdManager", fromTime),
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
@@ -382,15 +384,19 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
     )..load();
   }
 
-  _logAdEvent(String eventType) => (ad) {
-        EventRepo().addEvent({
-          eventType: true,
-          "createAt": DateTime.now().toString(),
-          "adResponse": ad.toString(),
-        }, eventType);
-      };
 
-  void _handleAdLoaded(BannerAd ad, String source, String fromTime) {
+  Future<void> _logAdEvent(eventType,ads)async{
+    await analytics.logEvent(
+      name: "$eventType",
+      parameters: {
+        "${eventType}": true ? 1 : 0,
+        "createAt": DateTime.now().toString(),
+        "adResponse": ads.toString(),
+      },
+    );
+  }
+
+  void _handleAdLoaded(BannerAd ad, String source, String fromTime) async{
     if (_displayedAd == null && mounted) {
       final toTime = DateTime.now().toString();
 
@@ -408,30 +414,38 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
         _adMobBanner = null;
       }
 
-      EventRepo().addEvent({
-        "sdkRequestStartTime": fromTime.toString(),
-        "sdkRequestReceivedTime": toTime.toString(),
-        "adsRenderingTime": DateTime.now().difference(DateTime.parse(toTime)).inMicroseconds.toString(),
-        "createAt": DateTime.now().toString(),
-        "adSource": source,
-        "adResponse": ad.responseInfo.toString(),
-      }, "ads_success");
+      await analytics.logEvent(
+        name: 'ads_success',
+        parameters: {
+          "sdkRequestStartTime": fromTime.toString(),
+          "sdkRequestReceivedTime": toTime.toString(),
+          "adsRenderingTime": DateTime.now().difference(DateTime.parse(toTime)).inMicroseconds.toString(),
+          "createAt": DateTime.now().toString(),
+          "adSource": source,
+          "adResponse": "",
+        },
+      );
+
     } else {
       ad.dispose();
     }
   }
 
-  void _handleAdFailed(String source, String response, String fromTime) {
+  void _handleAdFailed(String source, String response, String fromTime) async{
     final toTime = DateTime.now().toString();
 
-    EventRepo().addEvent({
-      "sdkRequestStartTime": fromTime.toString(),
-      "sdkRequestReceivedTime": toTime.toString(),
-      "adsRenderingTime": "0",
-      "createAt": DateTime.now().toString(),
-      "adSource": source,
-      "adResponse": response.toString(),
-    }, "ads_failure");
+    await analytics.logEvent(
+      name: 'ads_failure',
+      parameters: {
+        "sdkRequestStartTime": fromTime.toString(),
+        "sdkRequestReceivedTime": toTime.toString(),
+        "adsRenderingTime": "0",
+        "createAt": DateTime.now().toString(),
+        "adSource": source,
+        "adResponse": response.toString(),
+      },
+    );
+
 
     if (_adMobFailed && _adManagerFailed && _displayedAd == null) {
       setState(() {

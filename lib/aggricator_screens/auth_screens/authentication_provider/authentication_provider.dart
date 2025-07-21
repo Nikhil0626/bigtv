@@ -171,7 +171,7 @@ class AuthenticationProvider extends ChangeNotifier {
         saveUserid("");
         preferences.setString("userName", "User${phoneController.text.substring(phoneController.text.length - 4)}");
         preferences.setString("referralCode", "");
-        EventRepo().addEvent({"otpStatus": "complete", "mobileNumber": otpController.text ?? "", "otp": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
+        EventRepo().addEvent({"otpStatus": "complete", "otp": otpController.text ?? "", "mobileNumber": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
         phoneController.text = "";
         notifyListeners();
       }
@@ -183,12 +183,12 @@ class AuthenticationProvider extends ChangeNotifier {
       CustomToast.showErrorToast(msg: e.message);
       log("error dio ${e.toString()}");
       log("error dio  ${st.toString()}");
-      EventRepo().addEvent({"otpStatus": "fail", "mobileNumber": otpController.text ?? "", "otp": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
+      EventRepo().addEvent({"otpStatus": "fail", "otp": otpController.text ?? "", "mobileNumber": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
     } catch (e, st) {
       log("error  ${e.toString()}");
       log("error  ${st.toString()}");
       CustomToast.showErrorToast(msg: "Something went wrong");
-      EventRepo().addEvent({"otpStatus": "fail", "mobileNumber": otpController.text ?? "", "otp": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
+      EventRepo().addEvent({"otpStatus": "fail", "otp": otpController.text ?? "", "mobileNumber": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
     } finally {
       isVerifyLoading = false;
       notifyListeners();
@@ -316,7 +316,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
         selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.districtName.toString()).toList();
         log(getAllLocationList.first.districtName.toString());
-
+        log("response.data.toString123 $selectedLocations");
         String result = selectedLocations.toSet().join(',');
         preferences.setString("locationId", result);
       }
@@ -357,6 +357,7 @@ class AuthenticationProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     String result = selectedCategoryIds.toSet().join(',');
     preferences.setString("locationId", result);
+    preferences.setString("locationNames", nameOfDistrict);
 
     Map<String, dynamic> body = {
       "device_id": deviceId,

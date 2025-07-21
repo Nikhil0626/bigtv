@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
+
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
@@ -15,6 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
+
 import '../../../services/webengage_notification.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
@@ -23,6 +25,7 @@ import '../../chota_info_screens/advertise_with_us.dart';
 import '../../chota_info_screens/privacy_policy.dart';
 import '../../chota_info_screens/terms_conditions.dart';
 import '../../events_data/event_repo.dart';
+import '../../home_screen/home_provider/home_provider.dart';
 import 'filters_screen/filter_view.dart';
 import 'profile_view.dart';
 import 'feedback_view.dart';
@@ -33,10 +36,10 @@ class SettingsView extends StatefulWidget {
   });
 
   @override
-  SettingsViewState createState() => SettingsViewState();
+  _SettingsViewState createState() => _SettingsViewState();
 }
 
-class SettingsViewState extends State<SettingsView> {
+class _SettingsViewState extends State<SettingsView> {
   NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
   bool isNotificationsEnabled = false;
   String appVersion = "";
@@ -56,15 +59,13 @@ class SettingsViewState extends State<SettingsView> {
   Future getLogin() async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     appVersion = sp.getString("app_version") ?? "";
-    isNotificationsEnabled =
-        sp.getString("loginType") == "login" ? true : false;
+    isNotificationsEnabled = sp.getString("loginType") == "login" ? true : false;
     log(isNotificationsEnabled.toString());
-    // setState(() {});
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
-    print('RK => Page Build');
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.all(20),
@@ -72,14 +73,13 @@ class SettingsViewState extends State<SettingsView> {
           children: [
             _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
               EventRepo().addEvent({
-                "visitPageName": "Edit Profile",
+                "visitPageName":"Edit Profile",
                 "createAt": DateTime.now().toString(),
               }, "compliance_section");
               if (isNotificationsEnabled == false) {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => LoginBackgroundView()),
+                  MaterialPageRoute(builder: (context) => LoginBackgroundView()),
                 );
               } else if (isNotificationsEnabled == true) {
                 Navigator.push(
@@ -93,20 +93,17 @@ class SettingsViewState extends State<SettingsView> {
 
             height(height: 5.h),
             _buildSettingsRow(context, "Filter.svg", "Filter", () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => FilterView()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
             }),
             height(height: 5.h),
 
-            _buildSettingsRow(context, "Share_our_app.svg", "Share Our App",
-                () async {
+            _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () async {
               _showShareBottomSheet(context);
             }),
 
             height(height: 5.h),
 
-            _buildSettingsRow(context, "Help_support.svg", "Help & Support",
-                () {
+            _buildSettingsRow(context, "Help_support.svg", "Help & Support", () {
               EventRepo().addEvent({
                 "visitPageName": "Help & Support",
                 "createAt": DateTime.now().toString(),
@@ -120,8 +117,7 @@ class SettingsViewState extends State<SettingsView> {
             }),
 
             height(height: 5.h),
-            _buildSettingsRow(
-                context, "Advertise_icon.svg", "Advertise With Us", () {
+            _buildSettingsRow(context, "Advertise_icon.svg", "Advertise With Us", () {
               EventRepo().addEvent({
                 "visitPageName": "Advertise With Us",
                 "createAt": DateTime.now().toString(),
@@ -135,8 +131,7 @@ class SettingsViewState extends State<SettingsView> {
             }),
 
             height(height: 5.h),
-            _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions",
-                () {
+            _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
               EventRepo().addEvent({
                 "visitPageName": "Terms & Conditions",
                 "createAt": DateTime.now().toString(),
@@ -148,29 +143,26 @@ class SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
+            // height(height: 5.h),
+            // _buildSettingsRow(context, "Terms_icon.svg", "Refer And Earn", () {
+            //   // EventRepo().addEvent({
+            //   //   "visitPageName": "Terms & Conditions",
+            //   //   "createAt": DateTime.now().toString(),
+            //   // }, "compliance_section");
+            //   if(!isNotificationsEnabled ){
+            //     CustomToast.showErrorToast(msg: "Your currently using your application in guest mode please login and join your Refer & Earn contest",timeDuration: 3);
+            //   }else{
+            //     Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => ReferEarn(),
+            //       ),
+            //     );
+            //   }
+            //
+            // }),
             height(height: 5.h),
-            _buildSettingsRow(context, "Terms_icon.svg", "Refer And Earn", () {
-              // EventRepo().addEvent({
-              //   "visitPageName": "Terms & Conditions",
-              //   "createAt": DateTime.now().toString(),
-              // }, "compliance_section");
-              if (!isNotificationsEnabled) {
-                CustomToast.showErrorToast(
-                    msg:
-                        "Your currently using your application in guest mode please login and join your Refer & Earn contest",
-                    timeDuration: 3);
-              } else {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ReferEarn(),
-                  ),
-                );
-              }
-            }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy",
-                () {
+            _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy", () {
               EventRepo().addEvent({
                 "visitPageName": "Privacy Policy",
                 "createAt": DateTime.now().toString(),
@@ -188,40 +180,30 @@ class SettingsViewState extends State<SettingsView> {
                 "visitPageName": "Feedback",
                 "createAt": DateTime.now().toString(),
               }, "compliance_section");
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => FeedbackForm()));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
             }),
             height(height: 5.h),
-            _buildSettingsRow(context, "Signout.svg",
-                !isNotificationsEnabled ? "Login" : "Logout", () async {
+            _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () async {
               closeSubscribe();
-              SharedPreferences preferences =
-                  await SharedPreferences.getInstance();
+              SharedPreferences preferences = await SharedPreferences.getInstance();
               String? deviceId = preferences.getString("deviceId");
               String? userId = preferences.getString("userId");
 
               WebEngagePlugin.trackEvent('logout_user', {
-                "device_id": "$deviceId",
+                "device_id": "${deviceId}",
                 "date_time": DateTime.now().toString(),
                 "user_id": userId ?? "",
               });
-
               WebEngagePlugin.userLogout();
-              context
-                  .read<AuthenticationProvider>()
-                  .setLogOutStatus(context, false);
-
-              EventRepo().addEvent({
+              context.read<AuthenticationProvider>().setLogOutStatus(context, false);
+               EventRepo().addEvent({
                 "loginType": "logout",
                 "mobileNumber": "",
                 "createAt": DateTime.now().toString(),
               }, "login_event");
             }),
             height(height: 10),
-            context.watch<SettingsProvider>().bannerAdsLoading ==
-                    BannerAdsLoading.fail
-                ? SizedBox.shrink()
-                : Banner300x50Size(),
+            context.watch<SettingsProvider>().bannerAdsLoading == BannerAdsLoading.fail ? SizedBox.shrink() : Banner300x50Size(),
 
             Spacer(),
             Padding(
@@ -255,10 +237,7 @@ class SettingsViewState extends State<SettingsView> {
               children: [
                 Text(
                   "Share Our App",
-                  style: homeScreenFontStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
+                  style: homeScreenFontStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
                 ),
                 height(height: 10),
                 Divider(
@@ -292,7 +271,7 @@ class SettingsViewState extends State<SettingsView> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withValues(alpha: 0.3),
+                                    color: Colors.grey.withOpacity(0.3),
                                     blurRadius: 5,
                                     spreadRadius: 2,
                                   ),
@@ -308,9 +287,7 @@ class SettingsViewState extends State<SettingsView> {
                             height(height: 8),
                             Text(
                               "App Store",
-                              style: newAppFont(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.headerTextColor),
+                              style: newAppFont(fontWeight: FontWeight.w600, color: AppColors.headerTextColor),
                             ),
                           ],
                         ),
@@ -336,7 +313,7 @@ class SettingsViewState extends State<SettingsView> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withValues(alpha: 0.3),
+                                    color: Colors.grey.withOpacity(0.3),
                                     blurRadius: 5,
                                     spreadRadius: 2,
                                   ),
@@ -352,9 +329,7 @@ class SettingsViewState extends State<SettingsView> {
                             height(height: 8),
                             Text(
                               "Play Store",
-                              style: newAppFont(
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.headerTextColor),
+                              style: newAppFont(fontWeight: FontWeight.w600, color: AppColors.headerTextColor),
                             ),
                           ],
                         ),
@@ -378,8 +353,7 @@ class SettingsViewState extends State<SettingsView> {
                     child: Center(
                       child: Text(
                         'Cancel',
-                        style: newAppFont(
-                            color: Colors.white, fontWeight: FontWeight.w500),
+                        style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
                       ),
                     ),
                   ),
@@ -393,13 +367,11 @@ class SettingsViewState extends State<SettingsView> {
     );
   }
 
-  Widget _buildSettingsRow(
-      BuildContext context, String iconName, String title, VoidCallback onTap) {
+  Widget _buildSettingsRow(BuildContext context, String iconName, String title, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration:
-            BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
+        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
         width: MediaQuery.of(context).size.width,
         padding: EdgeInsets.symmetric(
           vertical: 10,
@@ -409,8 +381,7 @@ class SettingsViewState extends State<SettingsView> {
             width(width: 10.w),
             SvgPicture.asset('assets/svg/$iconName', height: 20.w, width: 20.w),
             width(width: 20.w),
-            Text(title,
-                style: newAppFont(fontSize: 14.sp, color: AppColors.textColor)),
+            Text(title, style: newAppFont(fontSize: 14.sp, color: AppColors.textColor)),
           ],
         ),
       ),

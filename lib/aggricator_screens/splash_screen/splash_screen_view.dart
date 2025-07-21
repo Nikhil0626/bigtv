@@ -33,33 +33,23 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<void> checkLastShownDate() async {
-    final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? lastDate = prefs.getString('last_shown_date');
+    String? locationNames = prefs.getString("locationNames");
     String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
 
     if (lastDate == today) {
-      log("hbejberjhgbherjb");
       setState(() {
         showGif = true;
       });
       await prefs.setString('last_shown_date', today);
-      await analytics.logEvent(
-        name: 'chota_app_opened',
-        parameters: {
-          "platform": Platform.isIOS ? "iOS" : "android", // actual int (not string)
-          'createAt': DateTime.now().toString() // ISO format preferred
-        },
-      );
       EventRepo().addEvent(
-        {"createAt": DateTime.now().toString(), "platform": Platform.isIOS ? "iOS" : "android"},
+        {"createAt": DateTime.now().toString(), "platform": Platform.isIOS ? "iOS" : "android",    "districtNames": locationNames??"",},
         "opened_app",
       );
     }
     await Future.delayed(Duration(seconds: showGif ? 5 : 2));
     context.read<AuthenticationProvider>().isPageNavigation(context);
-
-    // Navigator.push(context, MaterialPageRoute(builder : (BuildContext context) => PollsComments()));
   }
 
   @override
@@ -98,3 +88,7 @@ class _SplashScreenState extends State<SplashScreen> {
     );
   }
 }
+
+
+
+///   From which districts how many active users per day and live users in each district

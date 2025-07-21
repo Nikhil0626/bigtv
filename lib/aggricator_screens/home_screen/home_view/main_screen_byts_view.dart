@@ -108,15 +108,17 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         : SizedBox(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
-            child: (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString() == "Polls")
-                ? PollsScreen(
-                    article: widget.article,
-                  )
-                : (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString() == "Reviews")
-                    ? MovieRatings(
-                        article: widget.article,
-                      )
-                    : InkWell(
+            child:
+            // (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString() == "Polls")
+            //     ? PollsScreen(
+            //         article: widget.article,
+            //       )
+            //     : (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString() == "Reviews")
+            //         ? MovieRatings(
+            //             article: widget.article,
+            //           )
+            //         :
+            InkWell(
                         onTap: () {
                           context.read<HomeProvider>().pageChange(isValue: !context.read<HomeProvider>().isBottomEnable);
                         },
