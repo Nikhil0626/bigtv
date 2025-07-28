@@ -437,7 +437,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                           ],
                                                                         ),
                                                                       ),
-                                                                      if (article['subType'] != "BigBlackStandard") Banner300x50Size()
+                                                                      // if (article['subType'] != "BigBlackStandard") Banner300x50Size()
                                                                     ],
                                                                   )
                                                                 : RichText(
@@ -473,7 +473,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                                     ),
                                                                   ),
                                                           ),
-                                                          if (article['subType'] != "BigBlackStandard") Banner300x50Size()
+                                                          // if (article['subType'] != "BigBlackStandard") Banner300x50Size()
                                                         ],
                                                       ),
                                                     ),

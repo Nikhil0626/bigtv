@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/polls_screens/poll_repo.dart';
@@ -9,8 +10,12 @@ import '../../utils/app_toasts.dart';
 
 class PollProvider with ChangeNotifier {
   final TextEditingController commentController = TextEditingController();
-  int? selectedIndex;
+  var selectedIndex;
   List<int> votes = [];
+  List listOfComments = [];
+
+  bool isCommentPost = false;
+  Map<String, List<Map<String, dynamic>>> commentsByPostId = {};
 
   void initialPollData(List<dynamic> votesList) {
     if (votes.isEmpty) {
@@ -24,12 +29,26 @@ class PollProvider with ChangeNotifier {
     notifyListeners();
   }
 
-
-
   Set<int> ratedArticleIds = {};
 
   void markAsRated(int articleId) {
     ratedArticleIds.add(articleId);
+    notifyListeners();
+  }
+
+  void addAllComments(articleComments, postId) {
+
+    for (var s in articleComments) {
+
+      listOfComments.add({"postId": postId ?? 0, "data": s});
+    }
+     isCommentPost = listOfComments.any((e) => e['postId'] == postId);
+    listOfComments = listOfComments
+        .map((e) => jsonEncode(e)) // Convert each map to string
+        .toSet() // Remove duplicates
+        .map((e) => jsonDecode(e)) // Convert back to map
+        .toList();
+    log("Add All Comments $listOfComments");
     notifyListeners();
   }
 
@@ -40,6 +59,7 @@ class PollProvider with ChangeNotifier {
   Future<void> submitPolls(int postId, int index, pollsOptions, {VoidCallback? onSuccess}) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
+    String? userName = sp.getString("userName");
 
     final body = {
       "post_id": postId,
@@ -55,11 +75,28 @@ class PollProvider with ChangeNotifier {
       log("Response: ${response.data}");
 
       if (response.statusCode == 200) {
+
+        final commentBody = {
+          "userName": userName ?? "user",
+          "userPhoto": null,
+          "comment": commentController.text.trim(),
+          "createdAt": DateTime.now().toIso8601String(),
+        };
+        if(commentController.text.isNotEmpty) {
+          listOfComments.insert(0, {"postId": postId ?? 0, "data": commentBody});
+          isCommentPost = true;
+          log("comments list data $listOfComments");
+          listOfComments = listOfComments
+              .map((e) => jsonEncode(e)) // Convert each map to string
+              .toSet() // Remove duplicates
+              .map((e) => jsonDecode(e)) // Convert back to map
+              .toList();
+        }
         markAsRated(int.tryParse(postId.toString()) ?? 0);
         initialPollData(pollsOptions);
         updatePollData(index);
         commentController.clear();
-        await getAllPollComments(postId.toString(), "sort_by");
+        // await getAllPollComments(postId.toString(), "sort_by");
 
         CustomToast.showSuccessToast(msg: "Poll submitted successfully!");
 

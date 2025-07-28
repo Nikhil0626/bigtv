@@ -3,10 +3,12 @@ import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_comments.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
+import '../../../utils/app_toasts.dart';
 
 class PollsScreen extends StatefulWidget {
   const PollsScreen({super.key, required this.article});
@@ -28,9 +30,13 @@ class _PollsScreenState extends State<PollsScreen> {
 
     optionsPolls = widget.article['pollData']['options'];
     hasVoted = widget.article['pollData']['userHasVoted'] ?? false;
+
     Future.delayed(Duration.zero, () {
       context.read<PollProvider>().votes = [];
+      context.read<PollProvider>().selectedIndex = null;
+      context.read<PollProvider>().isCommentPost =false;
       context.read<PollProvider>().initialPollData(optionsPolls);
+      context.read<PollProvider>().addAllComments(widget.article['topComments'],widget.article['id']);
     });
   }
 
@@ -125,14 +131,14 @@ class _PollsScreenState extends State<PollsScreen> {
                         return GestureDetector(
                           onTap: hasVoted ? null : () => pollProvider.setSelectedIndex(index),
                           child: Padding(
-                            padding:  EdgeInsets.symmetric(vertical: 4),
+                            padding: const EdgeInsets.symmetric(vertical: 4),
                             child: Stack(
                               children: [
                                 // background card
                                 Container(
                                   height: 50,
-                                  width: MediaQuery.of(context).size.width,
-                                  decoration: BoxDecoration(
+                                  width: double.infinity,
+                                   decoration: BoxDecoration(
                                     color: Colors.grey.shade900,
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(color: Colors.grey.shade400),
@@ -141,23 +147,34 @@ class _PollsScreenState extends State<PollsScreen> {
 
                                 // filled bar when user has voted
                                 if (hasVoted)
-                                  Container(
-                                    height: 50,
-                                    width: MediaQuery.of(context).size.width * (percentage / 100),
-                                    decoration: BoxDecoration(
-                                      color: Colors.lightBlue,
-                                      borderRadius: BorderRadius.circular(10),
+                                  ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: FractionallySizedBox(
+                                        widthFactor: percentage / 100, // max = 1.0
+                                        child: Container(
+                                          height: 50,
+                                          color: Colors.lightBlue,
+                                        ),
+                                      ),
                                     ),
                                   ),
 
-                                // foreground row: option text + results
+                                // text row on top
                                 Container(
                                   height: 50,
-                                  padding:  EdgeInsets.symmetric(horizontal: 16),
+                                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                                  decoration: BoxDecoration(
+                                    color: (hasVoted && optionVotes > 0) || isSelected
+                                        ? Colors.lightBlue // make it transparent so bar shows behind
+                                        : Colors.grey.shade900,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
                                   alignment: Alignment.centerLeft,
                                   child: Row(
                                     children: [
-                                      // option label
+                                      // Option text
                                       Expanded(
                                         child: Text(
                                           optionsPolls[index]['text'],
@@ -170,7 +187,7 @@ class _PollsScreenState extends State<PollsScreen> {
                                           ),
                                         ),
                                       ),
-                                      // percentage + vote count
+                                      // Percentage and vote count
                                       if (hasVoted)
                                         Text(
                                           '${percentage.toStringAsFixed(1)}% • '
@@ -188,6 +205,7 @@ class _PollsScreenState extends State<PollsScreen> {
                             ),
                           ),
                         );
+
                       },
                     ),
 
@@ -226,15 +244,24 @@ class _PollsScreenState extends State<PollsScreen> {
                         height: 46,
                         child: InkWell(
                           onTap: pollProvider.selectedIndex != null
-                              ? () {
-                            pollProvider.submitPolls(
-                              widget.article['id'],
-                              pollProvider.selectedIndex!,
-                              optionsPolls,
-                              onSuccess: () {
-                                setState(() => hasVoted = true);
-                              },
-                            );
+                              ? ()async {
+
+                            SharedPreferences sp = await SharedPreferences.getInstance();
+                            bool isLogin = sp.getString("loginType") != "login" ? true : false;
+
+                            if (isLogin) {
+                              CustomToast.showErrorToast(msg: "Your a guest user, Pleas login to submit poll");
+                            } else {
+                              pollProvider.submitPolls(
+                                widget.article['id'],
+                                pollProvider.selectedIndex!,
+                                optionsPolls,
+                                onSuccess: () {
+                                  setState(() => hasVoted = true);
+                                },
+                              );
+                            }
+
                           }
                               : null,
                           child: Container(
@@ -249,8 +276,8 @@ class _PollsScreenState extends State<PollsScreen> {
                       ),
                     ],
 
-                    /// Top Comments
-                    if (widget.article['topComments'].isNotEmpty) ...[
+
+                    if (pollProvider.listOfComments.isNotEmpty || pollProvider.isCommentPost ) ...[
                       height(height: 20),
                       Row(
                         children: [
@@ -287,52 +314,59 @@ class _PollsScreenState extends State<PollsScreen> {
                       ),
                       height(height: 6),
                       SizedBox(
-                        height: 100,
+                        height:pollProvider.isCommentPost? 100:0,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: widget.article['topComments'].length,
+                          itemCount: pollProvider.listOfComments.length,
                           itemBuilder: (context, index) {
-                            final comment = widget.article['topComments'][index];
-                            return Container(
-                              width: MediaQuery.of(context).size.width - 100,
-                              margin:  EdgeInsets.only(right: 8),
-                              padding:  EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.grey),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                       Icon(Icons.account_circle, size: 20),
-                                      width(width: 5),
-                                      Text(comment["userName"] ?? "", style:  fontStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                                    ],
-                                  ),
-                                  height(height: 4),
-                                  Text(
-                                    comment["comment"] ?? "",
-                                    style:  fontStyle(fontSize: 13, color: Colors.black87),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  height(height: 4),
-                                  Text(
-                                    "a few moments ago",
-                                    style: fontStyle(color: Colors.grey.shade600, fontSize: 11),
-                                  ),
-                                ],
-                              ),
-                            );
+                            final comment = pollProvider.listOfComments[index];
+                            if(comment['postId'] != widget.article['id']){
+                              return SizedBox.shrink();
+                            }else {
+                              return Container(
+                                width: MediaQuery
+                                    .of(context)
+                                    .size
+                                    .width - 100,
+                                margin: EdgeInsets.only(right: 8),
+                                padding: EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: Colors.grey),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(Icons.account_circle, size: 20),
+                                        width(width: 5),
+                                        Text(comment['data']["userName"] ?? "", style: fontStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                                      ],
+                                    ),
+                                    height(height: 4),
+                                    Text(
+                                      comment['data']["comment"] ?? "",
+                                      style: fontStyle(fontSize: 13, color: Colors.black87),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    height(height: 4),
+                                    Text(
+                                      "a few moments ago",
+                                      style: fontStyle(color: Colors.grey.shade600, fontSize: 11),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }
                           },
                         ),
                       ),
                     ],
-                    if(widget.article['topComments'].isEmpty)
-                    height(height: 55),
+                    if(pollProvider.listOfComments.isEmpty)
+                    height(height: 0),
                   ],
                 ),
               );

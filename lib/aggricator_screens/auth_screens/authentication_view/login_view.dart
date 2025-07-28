@@ -7,6 +7,7 @@ import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+// import 'package:flutter_invitereferrals/flutter_invitereferrals.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +38,8 @@ class _LoginViewState extends State<LoginView> {
     authenticationProvider!.phoneController.text = "";
     authenticationProvider!.isButtonEnabled = false;
     getMobileNumber();
-    getData();
+    getReferralCode();
+
 
     // context.read<AuthProvider>().sendEvent("WellComePage");
     super.initState();
@@ -90,6 +92,7 @@ class _LoginViewState extends State<LoginView> {
           key: _formKey,
           child: Column(
             children: [
+              // Text("$siva"),
               height(height: 10.h),
               Container(
                 height: 40.h,
@@ -301,9 +304,20 @@ class _LoginViewState extends State<LoginView> {
   void getData() async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-    siva = sharedPreferences.getString("Nikil")??"hello raja";
+    siva = sharedPreferences.getString("Nikil1")??"hello raja";
     setState(() {
 
     });
+  }
+  void getReferralCode() async {
+    try {
+      // String code = await Invitereferrals.shared.getReferrerCode();
+      // SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+      // sharedPreferences.setString("Nikil1",code.toString())??"hello raja";
+      getData();
+      // print("Referral Code for IOS: $code");
+    } catch (e) {
+      print("Failed to get referral code: $e");
+    }
   }
 }

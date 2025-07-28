@@ -30,7 +30,11 @@ class _MovieRatingsState extends State<MovieRatings> {
   @override
   void initState() {
     context.read<RatingProvider>().commentController.text = "";
-    context.read<RatingProvider>().selectedStar = widget.article['userRating'] ?? 0;
+    if(widget.article['userHasReviewed'] == false && context.read<RatingProvider>().isArticleRated(widget.article['id'])) {
+      context.read<RatingProvider>().selectedStar = 0;
+    }else{
+      context.read<RatingProvider>().ratingUpdate(widget.article['userRating']??0, widget.article['id']);
+    }
     super.initState();
   }
 
@@ -167,15 +171,17 @@ class _MovieRatingsState extends State<MovieRatings> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: List.generate(5, (index) {
-                            return widget.article['userHasReviewed'] == false
+                            return (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
                                 ? GestureDetector(
                                     onTap: () {
-                                      ratingProvider.ratingUpdate(index + 1);
+                                      FocusScope.of(context).unfocus(); // dismiss keyboard if open
+                                      ratingProvider.ratingUpdate(index + 1, widget.article['id']);
+                                      // ratingProvider.ratingUpdate(index + 1, widget.article['id']);
                                     },
                                     child: Stack(
                                       alignment: Alignment.center,
                                       children: [
-                                        if (index < ratingProvider.selectedStar)
+                                        if (index < ratingProvider.getPostRating(widget.article['id']) )
                                           Icon(
                                             Icons.star,
                                             color: AppColors.ratingColor,
@@ -183,7 +189,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                           ),
                                         Icon(
                                           Icons.star_outline_outlined,
-                                          color: index < ratingProvider.selectedStar ? AppColors.ratingColor : Colors.grey,
+                                          color: index < ratingProvider.getPostRating(widget.article['id'])  ? AppColors.ratingColor : Colors.grey,
                                           size: 36,
                                         ),
                                       ],
@@ -192,7 +198,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                 : Stack(
                                     alignment: Alignment.center,
                                     children: [
-                                      if (index < ratingProvider.selectedStar)
+                                      if (index < ratingProvider.getPostRating(widget.article['id']) )
                                         Icon(
                                           Icons.star,
                                           color: AppColors.ratingColor,
@@ -200,7 +206,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                         ),
                                       Icon(
                                         Icons.star_outline_outlined,
-                                        color: index < ratingProvider.selectedStar ? AppColors.ratingColor : Colors.grey,
+                                        color: index < ratingProvider.getPostRating(widget.article['id'])  ? AppColors.ratingColor : Colors.grey,
                                         size: 36,
                                       ),
                                     ],
@@ -233,8 +239,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                               ),
                             ),
                           ),
-                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
-                          height(height: 10),
+                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id'])) height(height: 10),
                         if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
                           GestureDetector(
                             onTap: ratingProvider.selectedStar >= 1

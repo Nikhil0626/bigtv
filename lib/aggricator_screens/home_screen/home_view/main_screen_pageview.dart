@@ -97,18 +97,16 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                         });
                       },
                       itemBuilder: (context, index) {
-                        return KeepAlivePage(
-                          keepAlive: true,
-                          child: Container(
-                          color: Colors.white,
-                          child: MainScreenBytView(
-                            article: homeProvider.getAllPostList[index],
-                            pageController: homeProvider.pageController!,
-                            length: homeProvider.getAllPostList.length,
-                            index: index,
-                            aiTagName: "",
-                          ),
-                        ),);
+                        return Container(
+                        color: Colors.white,
+                        child: MainScreenBytView(
+                          article: homeProvider.getAllPostList[index],
+                          pageController: homeProvider.pageController!,
+                          length: homeProvider.getAllPostList.length,
+                          index: index,
+                          aiTagName: "",
+                        ),
+                                                );
                       },
                     ),
                   ),

@@ -145,7 +145,7 @@ Future<void> createAndSharePdf(BuildContext context, article ) async {
 
     print("PDF saved at: $filePath");
 
-    await Share.shareXFiles([XFile(filePath)], text: "https://apps.signitivessoft.com/individualPage");
+    await Share.shareXFiles([XFile(filePath)], text: "${article['id']}");
 
   } catch (e) {
     print("Error: $e");

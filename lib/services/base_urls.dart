@@ -49,13 +49,13 @@ class BaseUrls {
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
   /// Python apis
-  static const String ePaperBaseUrlAws = "https://aggregator.chotanews.com";
-  static const String baseUrlAwsDev = "https://api.chotanews.com";
+  // static const String ePaperBaseUrlAws = "https://aggregator.chotanews.com";
+  // static const String baseUrlAwsDev = "https://api.chotanews.com";
 
 
   /// Python Dev Apis
-  // static const String ePaperBaseUrlAws = "http://devaggregator.chotanews.com";
-  // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
+  static const String ePaperBaseUrlAws = "http://devaggregator.chotanews.com";
+  static const String baseUrlAwsDev = "https://devapi.chotanews.com";
 
   ///Login login
   static const String sendOtpPy = "/send-otp";

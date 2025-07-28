@@ -335,7 +335,6 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
 
   void _loadBothAdsInParallel() {
     _loadAdManagerBanner();
-    _loadAdMobBanner();
   }
 
   void _loadAdMobBanner() {
@@ -347,15 +346,17 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       size: AdSize(width: 320, height: 50),
       request: const AdRequest(),
       listener: BannerAdListener(
-        onAdClosed: (ad) => _logAdEvent("onAdClosed",""),
-        onAdOpened: (ad) => _logAdEvent("onAdOpened",""),
-        onAdImpression: (ad) => _logAdEvent("onAdImpression",""),
-        onAdClicked:  (ad) => _logAdEvent("onAdClicked",""),
+        onAdClosed: (ad) => _logAdEvent("onAdClosed", ""),
+        onAdOpened: (ad) => _logAdEvent("onAdOpened", ""),
+        onAdImpression: (ad) => _logAdEvent("onAdImpression", ""),
+        onAdClicked: (ad) => _logAdEvent("onAdClicked", ""),
         onAdLoaded: (ad) => _handleAdLoaded(ad as BannerAd, "AdMob", fromTime),
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
           _adMobFailed = true;
+
           _handleAdFailed("AdMob", error.responseInfo?.toString() ?? 'No info', fromTime);
+          _loadAdManagerBanner();
         },
       ),
     )..load();
@@ -370,22 +371,22 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       size: AdSize.banner,
       request: const AdManagerAdRequest(),
       listener: BannerAdListener(
-        onAdClosed: (ad) => _logAdEvent("onAdClosed",""),
-        onAdOpened: (ad) => _logAdEvent("onAdOpened",""),
-        onAdImpression: (ad) => _logAdEvent("onAdImpression",""),
-        onAdClicked:  (ad) => _logAdEvent("onAdClicked",""),
+        onAdClosed: (ad) => _logAdEvent("onAdClosed", ""),
+        onAdOpened: (ad) => _logAdEvent("onAdOpened", ""),
+        onAdImpression: (ad) => _logAdEvent("onAdImpression", ""),
+        onAdClicked: (ad) => _logAdEvent("onAdClicked", ""),
         onAdLoaded: (ad) => _handleAdLoaded(ad as BannerAd, "AdManager", fromTime),
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
           _adManagerFailed = true;
           _handleAdFailed("AdManager", error.responseInfo?.toString() ?? 'No info', fromTime);
+          _loadAdMobBanner();
         },
       ),
     )..load();
   }
 
-
-  Future<void> _logAdEvent(eventType,ads)async{
+  Future<void> _logAdEvent(eventType, ads) async {
     await analytics.logEvent(
       name: "$eventType",
       parameters: {
@@ -396,7 +397,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
     );
   }
 
-  void _handleAdLoaded(BannerAd ad, String source, String fromTime) async{
+  void _handleAdLoaded(BannerAd ad, String source, String fromTime) async {
     if (_displayedAd == null && mounted) {
       final toTime = DateTime.now().toString();
 
@@ -425,13 +426,12 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
           "adResponse": "",
         },
       );
-
     } else {
       ad.dispose();
     }
   }
 
-  void _handleAdFailed(String source, String response, String fromTime) async{
+  void _handleAdFailed(String source, String response, String fromTime) async {
     final toTime = DateTime.now().toString();
 
     await analytics.logEvent(
@@ -445,7 +445,6 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
         "adResponse": response.toString(),
       },
     );
-
 
     if (_adMobFailed && _adManagerFailed && _displayedAd == null) {
       setState(() {
@@ -464,7 +463,6 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
 
   @override
   Widget build(BuildContext context) {
-
     switch (_loadingState) {
       case BannerAdsLoading.loading:
         return const Center(child: Banner300x50sizeLoading());

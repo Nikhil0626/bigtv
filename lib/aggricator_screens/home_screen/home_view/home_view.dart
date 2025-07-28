@@ -1,3 +1,4 @@
+import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/banner_300x50_size.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_card.dart';
@@ -203,6 +204,9 @@ class _HomeViewState extends State<HomeView> {
                     ),
                 ],
               ),
+              bottomNavigationBar:  KeepAlivePage(keepAlive: true, child:SizedBox(
+                  height: 50,
+                  child: Banner300x50Size())),
             );
           },
         ),

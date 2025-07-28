@@ -3,6 +3,8 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
+import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
+import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
@@ -228,6 +230,8 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
+    mainNavigatorKey.currentContext?.read<PollProvider>().listOfComments =[];
+    mainNavigatorKey.currentContext?.read<RatingProvider>().ratingsList =[];
     isHomeLoading = true;
     if (isGetAllPost == false && postIds == "0") {
       getAllPostList = [];
