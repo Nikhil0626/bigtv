@@ -1,70 +1,132 @@
-import 'package:click_to_copy/click_to_copy.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-
-class ClipboardToTextDemo extends StatefulWidget {
-  const ClipboardToTextDemo({super.key});
+class DeviceInfoPage extends StatefulWidget {
+  const DeviceInfoPage({super.key});
 
   @override
-  _ClipboardToTextDemoState createState() => _ClipboardToTextDemoState();
+  State<DeviceInfoPage> createState() => _DeviceInfoPageState();
 }
 
-class _ClipboardToTextDemoState extends State<ClipboardToTextDemo> {
-  String _pastedText = 'No content pasted yet';
+class _DeviceInfoPageState extends State<DeviceInfoPage> {
+  String? ipAddress;
+  String? deviceName;
+  String? os;
 
-  Future<void> _pasteText() async {
-    await ClickToCopy.paste().then((value) {
-      if (value.isNotEmpty) {
-        _pastedText = value.toString();
-        setState(() {
-
-        });
-      }
-    });
-    // ClipboardData? data = await Clipboard.getData('text/plain');
-    // if (data != null && data.text != null) {
-    //   setState(() {
-    //     _pastedText = data.text!;
-    //   });
-    // }
-  }
+  bool loading = true;
+  String? error;
 
   @override
   void initState() {
     super.initState();
-    // Auto-paste when widget initializes
-    _pasteText();
+    fetchDeviceInfo();
+  }
+
+  Future<void> fetchDeviceInfo() async {
+    try {
+      final deviceInfoPlugin = DeviceInfoPlugin();
+
+      // Get OS and device name
+      String? _deviceName;
+      String? _os;
+
+      if (Platform.isAndroid) {
+        final androidInfo = await deviceInfoPlugin.androidInfo;
+        _deviceName = "${androidInfo.brand} ${androidInfo.model}";
+        _os = "Android ${androidInfo.version.release}";
+      } else if (Platform.isIOS) {
+        final iosInfo = await deviceInfoPlugin.iosInfo;
+        _deviceName = iosInfo.name ?? iosInfo.model;
+        _os = "iOS ${iosInfo.systemVersion}";
+      } else {
+        _deviceName = "Unknown";
+        _os = Platform.operatingSystem;
+      }
+
+      // Get IP address (public IP via web)
+      // You can use any other IP service if you like
+      final ipRes = await http.get(Uri.parse('https://api.ipify.org?format=json'));
+      String? _ip;
+      if (ipRes.statusCode == 200) {
+        _ip = jsonDecode(ipRes.body)['ip'] ?? "Unavailable";
+      } else {
+        _ip = "Unavailable";
+      }
+
+      setState(() {
+        deviceName = _deviceName;
+        os = _os;
+        ipAddress = _ip;
+        loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        error = e.toString();
+        loading = false;
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Clipboard to Text')),
+      appBar: AppBar(title: Text("Device Info")),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Text widget displaying clipboard content
-            Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: SelectableText(
-                _pastedText,
-                style: TextStyle(fontSize: 16),
-              ),
+        child: loading
+            ? CircularProgressIndicator()
+            : error != null
+            ? Text("Error: $error")
+            : Padding(
+          padding: const EdgeInsets.all(20),
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 8,
+                  offset: Offset(0, 4),
+                ),
+              ],
             ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _pasteText,
-              child: Text('Refresh Clipboard Content'),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _infoRow("IP Address", ipAddress ?? ""),
+                SizedBox(height: 12),
+                _infoRow("Device Name", deviceName ?? ""),
+                SizedBox(height: 12),
+                _infoRow("OS", os ?? ""),
+              ],
             ),
-          ],
+          ),
         ),
       ),
+      backgroundColor: Color(0xFFF5F5F5),
     );
   }
+
+  Widget _infoRow(String title, String value) => Row(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        "$title:",
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+      ),
+      SizedBox(width: 10),
+      Expanded(
+        child: Text(
+          value,
+          style: TextStyle(fontSize: 16),
+        ),
+      ),
+    ],
+  );
 }
+

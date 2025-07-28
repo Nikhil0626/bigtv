@@ -140,7 +140,6 @@ class _MyAppState extends State<MyApp> {
             '/': (context) => SplashScreen(),
             '/settings': (context) => SettingsView(),
           },
-
           debugShowCheckedModeBanner: false,
         ),
       ),
