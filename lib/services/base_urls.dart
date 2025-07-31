@@ -104,6 +104,7 @@ class BaseUrls {
 
   ///Referral Apis
   static const String getReferralStats = "/referral/stats";
+  static const String deviceInfoIOS = "/device-info";
   static const String getAvailableRewards = "/rewards/available";
   static const String getClaimedReward = "/rewards/claim";
   static const String serviceProviders = "/service_providers";

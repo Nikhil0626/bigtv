@@ -1,11 +1,11 @@
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
-import 'package:facebook_app_events/facebook_app_events.dart';
+// import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:hive/hive.dart';
+// import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:workmanager/workmanager.dart';
+// import 'package:workmanager/workmanager.dart';
 
 class AnalyticsService {
   static final FirebaseAnalytics _analytics = FirebaseAnalytics.instance;
@@ -17,7 +17,7 @@ class AnalyticsService {
         name: name,
       );
       // KochavaMeasurement.instance.sendEvent(name,);
-      await FacebookAppEvents().logEvent(name: name);
+      // await FacebookAppEvents().logEvent(name: name);
 
       log("Event sent successfully.  $name");
     } catch (e) {

@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
 
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
@@ -24,6 +25,8 @@ import '../../../utils/commant_screen.dart';
 
 import '../../utils/botton_actions.dart';
 import '../events_data/event_repo.dart';
+
+
 
 class FullPageCarousel extends StatefulWidget {
   final List<dynamic> imageUrls;
@@ -93,7 +96,8 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                   height: MediaQuery.of(context).size.height,
                   viewportFraction: 1.0,
                   enableInfiniteScroll: true,
-                  autoPlay: false,
+                  pageSnapping: true,
+                  autoPlay: true,
                   onPageChanged: (index, reason) {
                     setState(() {
                       _currentIndex = index;
@@ -376,3 +380,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
     );
   }
 }
+
+
+
+

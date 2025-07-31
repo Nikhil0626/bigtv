@@ -29,7 +29,7 @@ class _FullStandardVideoViewState extends State<FullStandardVideoView> {
     ytController = YoutubePlayerController(
       initialVideoId: YoutubePlayer.convertUrlToId("https://www.youtube.com/watch?v=${widget.rellData['reel_video_code']}")!,
       flags: const YoutubePlayerFlags(
-        autoPlay: false,
+        autoPlay: true,
         mute: false,
         forceHD: false,
         loop: false,
@@ -56,13 +56,20 @@ class _FullStandardVideoViewState extends State<FullStandardVideoView> {
             child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
               return GestureDetector(
                 onVerticalDragUpdate: (details) {
-                  // ytController?.pause();
                   final controller = context.read<HomeProvider>().pageController!;
-                  // controller.position.moveTo(controller.position.pixels - details.delta.dy);
-                  controller.nextPage(
-                    duration: Duration(milliseconds: 600),
-                    curve: Curves.easeIn,
-                  );
+
+                  if (details.delta.dy < -10) {
+                    controller.nextPage(
+                      duration: Duration(milliseconds: 600),
+                      curve: Curves.easeIn,
+                    );
+                  }
+                  else if (details.delta.dy > 10) {
+                    controller.previousPage(
+                      duration: Duration(milliseconds: 600),
+                      curve: Curves.easeIn,
+                    );
+                  }
                 },
                 child: YoutubePlayer(
                   controller: ytController!,

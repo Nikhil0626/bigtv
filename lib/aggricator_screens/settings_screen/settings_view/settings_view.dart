@@ -143,24 +143,24 @@ class _SettingsViewState extends State<SettingsView> {
                 ),
               );
             }),
-            // height(height: 5.h),
-            // _buildSettingsRow(context, "Terms_icon.svg", "Refer And Earn", () {
-            //   // EventRepo().addEvent({
-            //   //   "visitPageName": "Terms & Conditions",
-            //   //   "createAt": DateTime.now().toString(),
-            //   // }, "compliance_section");
-            //   if(!isNotificationsEnabled ){
-            //     CustomToast.showErrorToast(msg: "Your currently using your application in guest mode please login and join your Refer & Earn contest",timeDuration: 3);
-            //   }else{
-            //     Navigator.push(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => ReferEarn(),
-            //       ),
-            //     );
-            //   }
-            //
-            // }),
+            height(height: 5.h),
+            _buildSettingsRow(context, "Terms_icon.svg", "Refer And Earn", () {
+              // EventRepo().addEvent({
+              //   "visitPageName": "Terms & Conditions",
+              //   "createAt": DateTime.now().toString(),
+              // }, "compliance_section");
+              if(!isNotificationsEnabled ){
+                CustomToast.showErrorToast(msg: "Your currently using your application in guest mode please login and join your Refer & Earn contest",timeDuration: 3);
+              }else{
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReferEarn(),
+                  ),
+                );
+              }
+
+            }),
             height(height: 5.h),
             _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy", () {
               EventRepo().addEvent({

@@ -6,6 +6,7 @@ import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../services/analytics_service.dart';
+import '../../../utils/app_no_data.dart';
 import '../../ad_manager_screen/ad_provider/banner_ads_provider.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
@@ -61,7 +62,11 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                         PointerDeviceKind.mouse,
                       },
                     ),
-                    child: PageView.builder(
+                    child:context.read<HomeProvider>().getAllPostList.isEmpty
+                        ? Center(
+                      child: AppNoData(),
+                    )
+                        :  PageView.builder(
                       physics: const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
                       controller: homeProvider.pageController!,
                       scrollDirection: Axis.vertical,

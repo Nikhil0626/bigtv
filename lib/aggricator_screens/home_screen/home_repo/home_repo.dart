@@ -19,8 +19,8 @@ class HomeRepo extends BaseService{
     // log(response.data.toString());
     return response;
   }
-  Future getAllAiTags() async{
-    Response  response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.aiTags,method: RequestType.get);
+  Future getAllAiTags(Map<String, dynamic> body) async{
+    Response  response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.aiTags,method: RequestType.get,queryParameters: body);
     return response;
   }
 

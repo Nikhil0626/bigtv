@@ -11,6 +11,11 @@ class AuthenticationRepo extends BaseService {
     return response;
   }
 
+  Future sendIOSRef( body) async {
+    Response response = await makeRequest( baseUrl: BaseUrls.baseUrlAwsDev,url: BaseUrls.deviceInfoIOS, method: RequestType.post, body: body,);
+    return response;
+  }
+
   Future validateOtp(body) async {
     Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.validateOtpPy, method: RequestType.post, body: body);
 

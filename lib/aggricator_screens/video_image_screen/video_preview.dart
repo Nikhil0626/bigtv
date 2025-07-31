@@ -33,68 +33,77 @@ class _VideoPreview extends State<VideoPreview> {
   @override
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-      return homeProvider.isPlaying
-          ? Container(
-              width: MediaQuery.of(context).size.width,
-              decoration: BoxDecoration(color: Colors.white),
-              child: Stack(
-                children: [
-                  Positioned.fill(
-                    child: YoutubePlayerBuilder(
-                      player: YoutubePlayer(
-                        controller: homeProvider.controller,
-                        showVideoProgressIndicator: false,
-                        onReady: () => debugPrint("YouTube Player Ready"),
-                        onEnded: (metaData) {
-                          homeProvider.isPlayingYoutube(false);
-                        },
-                        bottomActions: [
-                          CurrentPosition(),
-                          ProgressBar(isExpanded: true),
-                          RemainingDuration(),
-                          IconButton(
-                            icon: Icon(homeProvider.isMuted ? Icons.volume_off : Icons.volume_up),
-                            onPressed: () {
-                              if (homeProvider.isMuted) {
-                                homeProvider.controller.unMute();
-                              } else {
-                                homeProvider.controller.mute();
-                              }
-                              homeProvider.toggleMute();
-                            },
-                          ),
-                        ],
-                      ),
-                      builder: (context, player) => player,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Image.network(
-                    height: 330,
-                    width: MediaQuery.of(context).size.width,
-                    widget.imageUrl,
-                    fit: BoxFit.fill,
-                  ),
-                  IconButton(
-                    icon: SvgPicture.asset(
-                      "assets/svg/play_circle.svg",
-                      height: 58,
-                      width: 58,
-                    ),
-                    onPressed: () {
-                      homeProvider.isPlayingYoutube(true);
-                    },
-                  ),
-                ],
-              ),
+      return GestureDetector(
+        onVerticalDragUpdate: (details) {
+          final controller = context.read<HomeProvider>().pageController!;
+
+          if (details.delta.dy < -10) {
+            controller.nextPage(
+              duration: Duration(milliseconds: 600),
+              curve: Curves.easeIn,
             );
+          } else if (details.delta.dy > 10) {
+            controller.previousPage(
+              duration: Duration(milliseconds: 600),
+              curve: Curves.easeIn,
+            );
+          }
+        },
+        child: homeProvider.isPlaying
+            ? Positioned.fill(
+                child: YoutubePlayerBuilder(
+                  player: YoutubePlayer(
+                    controller: homeProvider.controller,
+                    showVideoProgressIndicator: false,
+                    onReady: () => debugPrint("YouTube Player Ready"),
+                    onEnded: (metaData) {
+                      homeProvider.isPlayingYoutube(false);
+                    },
+                    bottomActions: [
+                      CurrentPosition(),
+                      ProgressBar(isExpanded: true),
+                      RemainingDuration(),
+                      IconButton(
+                        icon: Icon(homeProvider.isMuted ? Icons.volume_off : Icons.volume_up),
+                        onPressed: () {
+                          if (homeProvider.isMuted) {
+                            homeProvider.controller.unMute();
+                          } else {
+                            homeProvider.controller.mute();
+                          }
+                          homeProvider.toggleMute();
+                        },
+                      ),
+                    ],
+                  ),
+                  builder: (context, player) => player,
+                ),
+              )
+            : ClipRRect(
+                borderRadius: BorderRadiusGeometry.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Image.network(
+                      height: 330,
+                      width: MediaQuery.of(context).size.width,
+                      widget.imageUrl,
+                      fit: BoxFit.fill,
+                    ),
+                    IconButton(
+                      icon: SvgPicture.asset(
+                        "assets/svg/play_circle.svg",
+                        height: 58,
+                        width: 58,
+                      ),
+                      onPressed: () {
+                        homeProvider.isPlayingYoutube(true);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+      );
     });
   }
 }

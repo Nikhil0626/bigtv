@@ -1,13 +1,16 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_spaces.dart';
 import '../../events_data/event_repo.dart';
 import '../../loading_screen/home_shimmer.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
+import '../../video_image_screen/small_cube.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_pageview.dart';
 
@@ -64,11 +67,9 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
         child: Center(
           child: homeProvider.isHomeLoading
               ? HomeShimmer()
-              : context.read<HomeProvider>().getAllPostList.isEmpty
-                  ? Center(
-                      child: AppNoData(),
-                    )
-                  : Column(
+              : Stack(
+                  children: [
+                    Column(
                       children: [
                         homeProvider.getAllAiTagsList.isEmpty
                             ? SizedBox.shrink()
@@ -127,6 +128,49 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                         Expanded(child: MainScreenPageView()),
                       ],
                     ),
+                    (homeProvider.getAllPostList.isNotEmpty && !homeProvider.isImageAdClose)
+                        ? Positioned(
+                            bottom: 64,
+                            right: 10,
+                            child: GestureDetector(
+                              onTap: () async {
+                                if (await canLaunchUrl(Uri.parse(homeProvider.getImageAdsList[0]['source_url'].toString()))) {
+                                  await launchUrl(Uri.parse(homeProvider.getImageAdsList[0]['source_url'].toString()));
+                                } else {
+                                  throw 'Could not launch ${homeProvider.getImageAdsList[0]['source_url']}';
+                                }
+                              },
+                              child: Stack(
+                                children: [
+                                  Container(
+                                    height: 220,
+                                    width: 150,
+                                    color: Colors.transparent,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: SmallCube(),
+                                    ),
+                                  ),
+                                  InkWell(
+                                    onTap: () {
+                                      homeProvider.isImageAd();
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: Colors.black54,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      padding: EdgeInsets.all(4),
+                                      child: Icon(Icons.close, color: Colors.white, size: 18),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                        : SizedBox.shrink()
+                  ],
+                ),
         ),
       );
     });

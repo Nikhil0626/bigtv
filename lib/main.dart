@@ -8,9 +8,7 @@ import 'package:chotanews/services/register_provider.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 
 import 'package:easy_localization/easy_localization.dart';
-import 'package:facebook_app_events/facebook_app_events.dart';
 import 'package:firebase_core/firebase_core.dart';
-// import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,10 +24,7 @@ import 'package:workmanager/workmanager.dart';
 import 'aggricator_screens/events_data/event_repo.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import 'aggricator_screens/splash_screen/splash_screen_view.dart';
-import 'aggricator_screens/test_screens/language_screen.dart';
 import 'globel_keys/globel_keys.dart';
-
-final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
 
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -52,7 +47,6 @@ Future<void> main() async {
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
   ));
-  await facebookAppEvents.setAdvertiserTracking(enabled: true);
   checkForUpdate();
   unawaited(MobileAds.instance.initialize());
   await Firebase.initializeApp();
@@ -61,14 +55,10 @@ Future<void> main() async {
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
 
-  // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     WebEngagePlugin.onPushMessageReceive(message.data);
-
-    print(message.data);
-    print("push data receive   &&& ${message.data}");
   });
 
   SystemChrome.setPreferredOrientations([
@@ -100,8 +90,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  final FacebookAppEvents facebookAppEvents = FacebookAppEvents();
-
   Locale? _locale;
 
   @override

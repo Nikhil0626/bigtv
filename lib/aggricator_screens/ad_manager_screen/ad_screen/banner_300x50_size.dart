@@ -335,6 +335,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
 
   void _loadBothAdsInParallel() {
     _loadAdManagerBanner();
+    _loadAdMobBanner();
   }
 
   void _loadAdMobBanner() {
@@ -356,7 +357,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
           _adMobFailed = true;
 
           _handleAdFailed("AdMob", error.responseInfo?.toString() ?? 'No info', fromTime);
-          _loadAdManagerBanner();
+          // _loadAdManagerBanner();
         },
       ),
     )..load();
@@ -380,7 +381,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
           ad.dispose();
           _adManagerFailed = true;
           _handleAdFailed("AdManager", error.responseInfo?.toString() ?? 'No info', fromTime);
-          _loadAdMobBanner();
+          // _loadAdMobBanner();
         },
       ),
     )..load();

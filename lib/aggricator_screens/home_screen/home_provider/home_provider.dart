@@ -27,6 +27,7 @@ class HomeProvider extends ChangeNotifier {
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
   List getAllSurveyDataList = [];
+  List getImageAdsList =[];
 
   String adManageId = "";
   String adManagerNativeId = "";
@@ -44,6 +45,7 @@ class HomeProvider extends ChangeNotifier {
   bool isPlaying = false;
   bool isPostLoading = false;
   bool isMuted = false;
+  bool isImageAdClose = false;
   late YoutubePlayerController controller;
   int? _selectedTagId;
 
@@ -51,6 +53,11 @@ class HomeProvider extends ChangeNotifier {
 
   void onItemTapped(int index) {
     selectedIndex = index;
+    notifyListeners();
+  }
+
+  void isImageAd() {
+    isImageAdClose = true;
     notifyListeners();
   }
 
@@ -95,7 +102,7 @@ class HomeProvider extends ChangeNotifier {
     controller = YoutubePlayerController(
       initialVideoId: url, // Example YouTube video ID
       flags: const YoutubePlayerFlags(
-        autoPlay: false,
+        autoPlay: true,
         enableCaption: false,
         forceHD: false,
         disableDragSeek: true,
@@ -265,6 +272,7 @@ class HomeProvider extends ChangeNotifier {
       adManagerBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerbannerid'] : response.data['adUnits']['android']['admanagerbannerid'];
       adMobNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admobnativeid'] : response.data['adUnits']['android']['admobnativeid'];
       adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
+      getImageAdsList.addAll(response.data['ads_list']);
 
       if (isWebView) {
 
@@ -332,7 +340,7 @@ class HomeProvider extends ChangeNotifier {
   int currentIndex = 0;
 
   Future getAllPostsByAiId(postId) async {
-    log("sbvjdshgurhgiurehiouerjgjer");
+
     isBookMark = [];
     getAllPostList = [];
     // getAllAiTagsPostList = [];
@@ -371,9 +379,16 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllAiTags() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? deviceId = preferences.getString("deviceId");
+    String? userId = preferences.getString("userId");
     getAllAiTagsList = [];
+    Map<String, dynamic> body = {
+      "deviceid": deviceId ?? "",
+      "user_id": userId ?? "",
+    };
     try {
-      Response response = await HomeRepo().getAllAiTags();
+      Response response = await HomeRepo().getAllAiTags(body);
       getAllAiTagsList.addAll(response.data);
       log(getAllAiTagsList.toString());
     } on DioException catch (e, st) {

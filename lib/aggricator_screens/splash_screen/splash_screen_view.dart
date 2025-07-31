@@ -1,16 +1,13 @@
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../polls_screens/polls_view/polls_comments.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -91,4 +88,3 @@ class _SplashScreenState extends State<SplashScreen> {
 
 
 
-///   From which districts how many active users per day and live users in each district
