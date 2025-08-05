@@ -7,6 +7,8 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_spaces.dart';
+import '../../../utils/keep_alive_page.dart';
+import '../../ad_manager_screen/ad_screen/banner_300x50_size.dart';
 import '../../events_data/event_repo.dart';
 import '../../loading_screen/home_shimmer.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
@@ -62,116 +64,79 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
+    context.read<HomeProvider>().isBannerAdLoaded(false);
     return Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
-      return SafeArea(
-        child: Center(
-          child: homeProvider.isHomeLoading
-              ? HomeShimmer()
-              : Stack(
-                  children: [
-                    Column(
-                      children: [
-                        homeProvider.getAllAiTagsList.isEmpty
-                            ? SizedBox.shrink()
-                            : SizedBox(
-                                height: 50,
-                                child: ListView.builder(
-                                  controller: homeProvider.aiTagScrollController,
-                                  scrollDirection: Axis.horizontal,
-                                  itemCount: homeProvider.getAllAiTagsList.length,
-                                  itemBuilder: (context, index) {
-                                    // Ensure key exists
-                                    if (!homeProvider.aiTagKeys.containsKey(index)) {
-                                      homeProvider.aiTagKeys[index] = GlobalKey();
-                                    }
+      return Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: homeProvider.isHomeLoading
+                ? HomeShimmer()
+                : Stack(
+                    children: [
+                      Column(
+                        children: [
+                          homeProvider.getAllAiTagsList.isEmpty
+                              ? SizedBox.shrink()
+                              : SizedBox(
+                                  height: 50,
+                                  child: ListView.builder(
+                                    controller: homeProvider.aiTagScrollController,
+                                    scrollDirection: Axis.horizontal,
+                                    itemCount: homeProvider.getAllAiTagsList.length,
+                                    itemBuilder: (context, index) {
+                                      // Ensure key exists
+                                      if (!homeProvider.aiTagKeys.containsKey(index)) {
+                                        homeProvider.aiTagKeys[index] = GlobalKey();
+                                      }
 
-                                    final tag = homeProvider.getAllAiTagsList[index];
-                                    final tagId = tag['aitagid'];
+                                      final tag = homeProvider.getAllAiTagsList[index];
+                                      final tagId = tag['aitagid'];
 
-                                    return InkWell(
-                                      key: homeProvider.aiTagKeys[index],
-                                      onTap: () async {
-                                        homeProvider.setSelectedTagId(tagId);
-                                        homeProvider.getAllPostsByAiId(tagId.toString());
-                                        homeProvider.aiTagDataLoaded(true);
-                                        homeProvider.aiTagsScrollToCenter(index);
-                                        EventRepo().addEvent({
-                                          "aiTagName": tag['aitagname'].toString(),
-                                          "aiTagId": tag['aitagid'].toString(),
-                                          "createAt": DateTime.now().toString(),
-                                        }, "ai_tag_click");
-                                      },
-                                      child: Container(
-                                        height: 30,
-                                        margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
-                                        decoration: BoxDecoration(
-                                          color: homeProvider.selectedTagId == tagId ? AppColors.appButtonColor : AppColors.cardBackgroundColor,
-                                          borderRadius: BorderRadius.circular(12.r),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                                          child: Text(
-                                            tag['aitagname'].toString(),
-                                            textAlign: TextAlign.center,
-                                            style: homeScreenFontStyle(
-                                              color: homeProvider.selectedTagId == tagId ? Colors.white : AppColors.textColor,
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.w500,
+                                      return InkWell(
+                                        key: homeProvider.aiTagKeys[index],
+                                        onTap: () async {
+                                          homeProvider.setSelectedTagId(tagId);
+                                          homeProvider.getAllPostsByAiId(tagId.toString());
+                                          homeProvider.aiTagDataLoaded(true);
+                                          homeProvider.aiTagsScrollToCenter(index);
+                                          EventRepo().addEvent({
+                                            "aiTagName": tag['aitagname'].toString(),
+                                            "aiTagId": tag['aitagid'].toString(),
+                                            "createAt": DateTime.now().toString(),
+                                          }, "ai_tag_click");
+                                        },
+                                        child: Container(
+                                          height: 30,
+                                          margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+                                          decoration: BoxDecoration(
+                                            color: homeProvider.selectedTagId == tagId ? AppColors.appButtonColor : AppColors.cardBackgroundColor,
+                                            borderRadius: BorderRadius.circular(12.r),
+                                          ),
+                                          alignment: Alignment.center,
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+                                            child: Text(
+                                              tag['aitagname'].toString(),
+                                              textAlign: TextAlign.center,
+                                              style: homeScreenFontStyle(
+                                                color: homeProvider.selectedTagId == tagId ? Colors.white : AppColors.textColor,
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w500,
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
-                                )),
-                        Expanded(child: MainScreenPageView()),
-                      ],
-                    ),
-                    (homeProvider.getAllPostList.isNotEmpty && !homeProvider.isImageAdClose)
-                        ? Positioned(
-                            bottom: 64,
-                            right: 10,
-                            child: GestureDetector(
-                              onTap: () async {
-                                if (await canLaunchUrl(Uri.parse(homeProvider.getImageAdsList[0]['source_url'].toString()))) {
-                                  await launchUrl(Uri.parse(homeProvider.getImageAdsList[0]['source_url'].toString()));
-                                } else {
-                                  throw 'Could not launch ${homeProvider.getImageAdsList[0]['source_url']}';
-                                }
-                              },
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    height: 220,
-                                    width: 150,
-                                    color: Colors.transparent,
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: SmallCube(),
-                                    ),
-                                  ),
-                                  InkWell(
-                                    onTap: () {
-                                      homeProvider.isImageAd();
+                                      );
                                     },
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Colors.black54,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      padding: EdgeInsets.all(4),
-                                      child: Icon(Icons.close, color: Colors.white, size: 18),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : SizedBox.shrink()
-                  ],
-                ),
+                                  )),
+                          Expanded(child: MainScreenPageView()),
+                        ],
+                      ),
+                    ],
+                  ),
+          ),
         ),
+
       );
     });
   }

@@ -1,60 +1,78 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_comments.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timeago/timeago.dart' as timeago;
 
+import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/date_format.dart';
+import '../../events_data/event_repo.dart';
 
-class PollsScreen extends StatefulWidget {
-  const PollsScreen({super.key, required this.article});
-
-  final dynamic article;
+class PollScreenDesign extends StatefulWidget {
+  final dynamic artical;
+  final int? index; // Changed to dynamic since the type isn't specified
+  const PollScreenDesign({super.key, required this.artical, required this.index});
 
   @override
-  State<PollsScreen> createState() => _PollsScreenState();
+  State<PollScreenDesign> createState() => _PollScreenDesignState();
 }
 
-class _PollsScreenState extends State<PollsScreen> {
-  late List optionsPolls;
-  bool hasVoted = false;
+class _PollScreenDesignState extends State<PollScreenDesign> {
+  int? selectId;
+  ScreenshotController adsScreenshotController = ScreenshotController();
 
   @override
   void initState() {
     super.initState();
 
-    optionsPolls = widget.article['pollData']['options'];
-    hasVoted = widget.article['pollData']['userHasVoted'] ?? false;
-
-    Future.delayed(Duration.zero, () {
-      context.read<PollProvider>().votes = [];
-      context.read<PollProvider>().selectedIndex = null;
-      context.read<PollProvider>().isCommentPost = false;
-      context.read<PollProvider>().initialPollData(optionsPolls);
-      context.read<PollProvider>().addAllComments(widget.article['topComments'], widget.article['id']);
-    });
+    context.read<PollProvider>().addData(widget.artical);
   }
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<PollProvider>(builder: (_, pollProvider, __) {
+      final article = pollProvider.localArticle;
+
+      final pollData = article['pollData'];
+
+      if (article == null || pollData == null) {
+        return AppLoadingScreen();
+      }
+
+      final hasVoted = pollData['userHasVoted'] == true;
+
+      return Screenshot(
+        controller: adsScreenshotController,
+        child: hasVoted ? _buildResultsView(pollProvider, adsScreenshotController) : _buildVotingView(pollProvider, adsScreenshotController),
+      );
+    });
+  }
+
+  Widget _buildVotingView(PollProvider pollProvider, ScreenshotController adsScreenshotController) {
+    final options = pollProvider.localArticle['pollData']['options'] as List;
     return Stack(
       children: [
         Positioned.fill(
           child: CachedNetworkImage(
-            imageUrl: widget.article['image_url'] ?? "",
+            imageUrl: pollProvider.localArticle['image_url'] ?? "",
             fit: BoxFit.fill,
             placeholder: (context, url) => Container(color: AppColors.borderColor.withOpacity(.2)),
             errorWidget: (context, url, error) => Center(child: Icon(Icons.image, size: 80, color: Colors.grey.shade300)),
           ),
         ),
-
         Positioned(
           top: 9,
           right: 5,
@@ -64,593 +82,243 @@ class _PollsScreenState extends State<PollsScreen> {
               decoration: BoxDecoration(color: Colors.black.withOpacity(0.9), shape: BoxShape.circle),
               child: IconButton(
                 icon: Icon(Icons.ios_share_outlined, color: Colors.white, size: 22),
-                onPressed: () {
-                  // Handle share
+                onPressed: () async {
+                  SharedPreferences sp = await SharedPreferences.getInstance();
+                  String? userId = sp.getString("userId");
+
+                  sendShareDetails(userId, pollProvider.localArticle['id'], pollProvider.localArticle['content'].toString());
+
+                  if (pollProvider.localArticle['type'] == "Standard" || pollProvider.localArticle['type'] == "Video" || pollProvider.localArticle['type'] == "Image") {
+                    try {
+                      final image = await adsScreenshotController.capture(
+                        pixelRatio: 2.0,
+                      );
+                      if (image != null) {
+                        final directory = await getTemporaryDirectory();
+                        final imagePath = '${directory.path}/${pollProvider.localArticle['id']}.png';
+                        final imageFile = File(imagePath);
+                        await imageFile.writeAsBytes(image);
+
+                        Share.shareXFiles([XFile(imageFile.path)], text: pollProvider.localArticle['linkURLAndroid'].toString());
+                      } else {
+                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                      }
+                    } catch (e) {
+                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                    }
+                  }
+                  EventRepo().addEvent(
+                      {"share": "news", "postId": pollProvider.localArticle['id'].toString(), "createAt": DateTime.now().toString(), "postTitle": pollProvider.localArticle['title'].toString()},
+                      "shared_article");
                 },
               ),
             ),
           ),
         ),
         Positioned(
-          bottom: 0,
           left: 0,
           right: 0,
-          child: Consumer<PollProvider>(
-            builder: (_, pollProvider, __) {
-              final int totalVotes = pollProvider.votes.isNotEmpty ? pollProvider.votes.reduce((a, b) => a + b) : 0;
-
-              return Container(
-                padding: EdgeInsets.symmetric( vertical: 16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-
-                      Colors.black.withOpacity(.4),
-                      Colors.black],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+          bottom: 0,
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.black.withOpacity(.4), Colors.black],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Text(
+                    pollProvider.localArticle['title'],
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Text(
-                        widget.article['title'] ?? '',
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: fontStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: options.length,
+                  itemBuilder: (context, index) {
+                    final option = options[index];
+                    final bool isSelected = pollProvider.tempSelectedOptionId == option['id'];
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          pollProvider.tempSelectedOptionId = option['id'];
+                          selectId = index;
+                        });
+                      },
+                      child: Container(
+                        height: 50,
+                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        decoration: BoxDecoration(
+                          color: isSelected ? Colors.blue.withOpacity(0.8) : Colors.grey.shade900,
+                          borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: isSelected ? Colors.blue : Colors.grey.shade700),
                         ),
-                      ),
-                    ),
-                    height(height: 12),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        itemCount: optionsPolls.length,
-                        itemBuilder: (context, index) {
-                          // ――― poll state ―――
-                          final bool isSelected = pollProvider.selectedIndex == index;
-                          final votes = pollProvider.votes;
-                          final int optionVotes = (index < votes.length) ? votes[index] : 0;
-                          final double percentage = totalVotes > 0 ? (optionVotes / totalVotes) * 100 : 0.0;
-
-                          // helper: “vote” vs. “votes”
-                          String voteLabel(int v) => v == 1 ? 'vote' : 'votes';
-
-                          return GestureDetector(
-                            onTap: hasVoted ? null : () => pollProvider.setSelectedIndex(index),
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 4),
-                              child: Stack(
-                                children: [
-                                  // background card
-                                  Container(
-                                    height: 50,
-                                    width: double.infinity,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade900,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: Colors.white),
-                                    ),
-                                  ),
-
-                                  // filled bar when user has voted
-                                  if (hasVoted)
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(10),
-                                      child: Align(
-                                        alignment: Alignment.centerLeft,
-                                        child: FractionallySizedBox(
-                                          widthFactor: percentage / 100, // max = 1.0
-                                          child: Container(
-                                            height: 50,
-                                            color: Colors.lightBlue,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-
-                                  // text row on top
-                                  Container(
-                                    height: 50,
-                                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                                    decoration: BoxDecoration(
-                                      color: isSelected
-                                          ? Colors.lightBlue // make it transparent so bar shows behind
-                                          : Colors.grey.shade900,
-                                      borderRadius: BorderRadius.circular(10),
-                                      border: Border.all(color: Colors.grey),
-                                    ),
-                                    alignment: Alignment.centerLeft,
-                                    child: Row(
-                                      children: [
-                                        // Option text
-                                        Expanded(
-                                          child: Text(
-                                            optionsPolls[index]['text'],
-                                            style: fontStyle(
-                                              color: hasVoted || isSelected ? Colors.white : Colors.grey,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                        // Percentage and vote count
-                                        if (hasVoted)
-                                          Text(
-                                            '${percentage.toStringAsFixed(1)}% • '
-                                            '$optionVotes ${voteLabel(optionVotes)}',
-                                            style: fontStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    if (!hasVoted && !pollProvider.isArticleRated(widget.article['id'])) ...[
-                      height(height: 12),
-
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: TextFormField(
-                          controller: pollProvider.commentController,
-                          style: fontStyle(fontSize: 14, color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: "Type your comment here (optional)",
-                            hintStyle: fontStyle(color: Colors.white70),
-                            filled: true,
-                            fillColor: Colors.grey.shade900,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.grey),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      height(height: 12),
-
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: SizedBox(
-                          width: double.infinity,
-                          height: 46,
-                          child: InkWell(
-                            onTap: pollProvider.selectedIndex != null
-                                ? () async {
-                                    SharedPreferences sp = await SharedPreferences.getInstance();
-                                    bool isLogin = sp.getString("loginType") != "login" ? true : false;
-
-                                    if (isLogin) {
-                                      CustomToast.showErrorToast(msg: "Your a guest user, Pleas login to submit poll");
-                                    } else {
-                                      pollProvider.submitPolls(
-                                        widget.article['id'],
-                                        pollProvider.selectedIndex!,
-                                        optionsPolls,
-                                        onSuccess: () {
-                                          setState(() => hasVoted = true);
-                                        },
-                                      );
-                                    }
-                                  }
-                                : null,
-                            child: Container(
-                              alignment: Alignment.center,
-                              decoration: BoxDecoration(
-                                color: pollProvider.selectedIndex != null ? Colors.lightBlue : Colors.grey.shade800,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text("Submit", style: fontStyle(color: Colors.white)),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                    if (pollProvider.listOfComments.isNotEmpty || pollProvider.isCommentPost) ...[
-                      height(height: 20),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
                         child: Row(
                           children: [
-                            Text("Top Comments", style: fontStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                            Spacer(),
-                            InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PollsComments(postId: widget.article["id"].toString()),
-                                    ),
-                                  );
-                                },
-                                child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => PollsComments(postId: widget.article["id"].toString()),
-                                      ),
-                                    );
-                                  },
-                                  child: Text(
-                                    "More >",
-                                    style: fontStyle(
-                                      color: Colors.lightBlue,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                )),
+                            Expanded(
+                              child: Text(
+                                option['text'],
+                                style: TextStyle(
+                                  color: isSelected ? Colors.black : Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            // if (isSelected) const Icon(Icons.check_circle, color: Colors.black),
                           ],
                         ),
                       ),
-                      height(height: 6),
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                        child: SizedBox(
-                          height: pollProvider.isCommentPost ? 100 : 0,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: pollProvider.listOfComments.length,
-                            itemBuilder: (context, index) {
-                              final comment = pollProvider.listOfComments[index];
-                              if (comment['postId'] != widget.article['id']) {
-                                return SizedBox.shrink();
-                              } else {
-                                return Container(
-                                  width: MediaQuery.of(context).size.width - 40,
-                                  margin: EdgeInsets.only(right: 8),
-                                  padding: EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(.6),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(Icons.account_circle, size: 20),
-                                          width(width: 5),
-                                          Text(comment['data']["userName"] ?? "", style: fontStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                                        ],
-                                      ),
-                                      height(height: 4),
-                                      Text(
-                                        comment['data']["comment"] ?? "",
-                                        style: fontStyle(fontSize: 13, color: Colors.black),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      height(height: 4),
-                                      Text(
-                              " ${formatTimeDifference(comment['data']["createdAt".toString()])}",
-                                        style: fontStyle(color: Colors.black, fontSize: 11),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
+                    );
+                  },
                 ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-}
-/*import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
-import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_comments.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../../utils/app_colors.dart';
-import '../../../utils/app_fonts.dart';
-import '../../../utils/app_spaces.dart';
-
-class PollsScreen extends StatefulWidget {
-  const PollsScreen({super.key, required this.article});
-
-  final dynamic article;
-
-  @override
-  State<PollsScreen> createState() => _PollsScreenState();
-}
-
-class _PollsScreenState extends State<PollsScreen> {
-  late List optionsPolls;
-  late bool hasVoted;
-
-  @override
-  void initState() {
-    super.initState();
-    optionsPolls = widget.article['pollData']['options'];
-    hasVoted = widget.article['pollData']['userHasVoted'] ?? false;
-
-    Future.delayed(Duration.zero, () {
-      context.read<PollProvider>().initialPollData(
-            optionsPolls,
-            widget.article['id'],
-            hasVoted,
-          );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: CachedNetworkImage(
-            imageUrl: widget.article['image_url'] ?? "",
-            fit: BoxFit.cover,
-            placeholder: (context, url) => Container(color: AppColors.borderColor.withOpacity(.2)),
-            errorWidget: (context, url, error) => Center(child: Icon(Icons.image, size: 80, color: Colors.grey.shade300)),
-          ),
-        ),
-         Positioned(
-          top: 9,
-          right: 5,
-          child: Padding(
-            padding: EdgeInsets.only(top: 8, right: 12),
-            child: Container(
-              decoration: BoxDecoration(color: Colors.black.withOpacity(0.6), shape: BoxShape.circle),
-              child: IconButton(
-                icon: Icon(Icons.ios_share_outlined, color: Colors.white, size: 22),
-                onPressed: () {
-                  // Handle share
-                },
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: Consumer<PollProvider>(
-            builder: (_, pollProvider, __) {
-              final int totalVotes = pollProvider.votes.isNotEmpty ? pollProvider.votes.reduce((a, b) => a + b) : 0;
-
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.transparent, Colors.black.withOpacity(0.9)],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
+                // const SizedBox(height: 12),
+                // Padding(
+                //   padding: const EdgeInsets.symmetric(horizontal: 10),
+                //   child: SizedBox(
+                //     width: double.infinity,
+                //     height: 46,
+                //     child: ElevatedButton(
+                //       onPressed: pollProvider.tempSelectedOptionId == null
+                //           ? null
+                //           : () async {
+                //               pollProvider.submitPolls(widget.artical['id'], selectId!, pollProvider.tempSelectedOptionId);
+                //             },
+                //       style: ElevatedButton.styleFrom(
+                //         backgroundColor: Colors.lightBlue,
+                //         disabledBackgroundColor: Colors.grey.shade800,
+                //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                //       ),
+                //       child: const Text("Submit", style: TextStyle(color: Colors.white)),
+                //     ),
+                //   ),
+                // ),
+                height(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: TextFormField(
+                    controller: pollProvider.commentController,
+                    style: fontStyle(fontSize: 14, color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Type your comment here (optional)",
+                      hintStyle: fontStyle(color: Colors.white70),
+                      filled: true,
+                      fillColor: Colors.grey.shade900,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                    ),
                   ),
                 ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.article['title'] ?? '',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: fontStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                height(height: 12),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: InkWell(
+                      onTap: pollProvider.tempSelectedOptionId != null
+                          ? () async {
+                              SharedPreferences sp = await SharedPreferences.getInstance();
+                              bool isLogin = sp.getString("loginType") != "login" ? true : false;
+
+                              if (isLogin) {
+                                CustomToast.showErrorToast(msg: "Your a guest user, Please login to submit poll");
+                              } else {
+                                pollProvider.submitPolls(
+                                  pollProvider.localArticle['id'],
+                                  selectId!,
+                                  pollProvider.localArticle['pollData']['options'][selectId]['id'],
+                                );
+                              }
+                            }
+                          : null,
+                      child: Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: pollProvider.tempSelectedOptionId != null ? Colors.lightBlue : Colors.grey.shade800,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text("Submit", style: fontStyle(color: Colors.white)),
                       ),
                     ),
-
-                    height(height: 12),
-
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemCount: optionsPolls.length,
-                      itemBuilder: (context, index) {
-                        final bool isSelected = pollProvider.selectedIndex == index;
-                        final votes = pollProvider.votes;
-                        final int optionVotes = (index < votes.length) ? votes[index] : 0;
-                        final double percentage = totalVotes > 0 ? (optionVotes / totalVotes) * 100 : 0.0;
-
-                        String voteLabel(int v) => v == 1 ? 'vote' : 'votes';
-
-                        return GestureDetector(
-                          onTap: hasVoted ? null : () => pollProvider.setSelectedIndex(index),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4),
-                            child: Stack(
-                              children: [
-                                // Background card
-                                Container(
-                                  height: 50,
-                                  width: MediaQuery.of(context).size.width,
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade900,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey.shade400),
-                                  ),
-                                ),
-
-                                // Filled bar when voted
-                                if (hasVoted)
-                                  Container(
-                                    height: 50,
-                                    width: MediaQuery.of(context).size.width * (percentage / 100),
-                                    decoration: BoxDecoration(
-                                      color: Colors.lightBlue,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                  ),
-
-                                // Foreground content
-                                Container(
-                                  height: 50,
-                                  padding: EdgeInsets.symmetric(horizontal: 16),
-                                  alignment: Alignment.centerLeft,
-                                  child: Row(
-                                    children: [
-                                      // Option label
-                                      Expanded(
-                                        child: Text(
-                                          optionsPolls[index]['text'],
-                                          style: fontStyle(
-                                            color: hasVoted || isSelected ? Colors.white : Colors.grey,
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      // Percentage + votes
-                                      if (hasVoted)
-                                        Text(
-                                          '${percentage.toStringAsFixed(1)}% • '
-                                          '$optionVotes ${voteLabel(optionVotes)}',
-                                          style: fontStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                    if (!hasVoted && !pollProvider.isArticleRated(widget.article['id'])) ...[
-                      height(height: 12),
-
-                      // Comment input
-                      TextFormField(
-                        controller: pollProvider.commentController,
-                        style: fontStyle(fontSize: 14, color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: "Type your comment here (optional)",
-                          hintStyle: fontStyle(color: Colors.white70),
-                          filled: true,
-                          fillColor: Colors.grey.shade900,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                        ),
-                      ),
-
-                      height(height: 12),
-
-                      // Submit button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 46,
-                        child: InkWell(
-                          onTap: pollProvider.selectedIndex != null
-                              ? () {
-                                  pollProvider.submitPolls(
-                                    widget.article['id'],
-                                    pollProvider.selectedIndex!,
-                                    optionsPolls,
-                                    onSuccess: () {
-                                      setState(() => hasVoted = true);
-                                    },
-                                  );
-                                }
-                              : null,
-                          child: Container(
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: pollProvider.selectedIndex != null ? Colors.lightBlue : Colors.grey.shade800,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text("Submit", style: fontStyle(color: Colors.white)),
-                          ),
-                        ),
-                      ),
-                    ],
-
-                    // Top Comments
-                    if (widget.article['topComments'].isNotEmpty) ...[
-                      height(height: 20),
-                      Row(
-                        children: [
-                          Text("Top Comments", style: fontStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                          Spacer(),
-                          InkWell(
+                  ),
+                ),
+                if (pollProvider.localArticle['topComments'].isNotEmpty) ...[
+                  height(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        Text("Top Comments", style: fontStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                        Spacer(),
+                        InkWell(
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => PollsComments(postId: widget.article["id"].toString()),
+                                  builder: (context) => PollsComments(postId: pollProvider.localArticle['id'].toString()),
                                 ),
                               );
                             },
-                            child: Text(
-                              "More >",
-                              style: fontStyle(
-                                color: Colors.lightBlue,
-                                fontWeight: FontWeight.bold,
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PollsComments(postId: pollProvider.localArticle['id'].toString()),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "More >",
+                                style: fontStyle(
+                                  color: Colors.lightBlue,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      height(height: 6),
-                      SizedBox(
+                            )),
+                      ],
+                    ),
+                  ),
+                  height(height: 6),
+                  if (pollProvider.localArticle['topComments'].isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: SizedBox(
                         height: 100,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
-                          itemCount: widget.article['topComments'].length,
+                          itemCount: pollProvider.localArticle['topComments'].length,
                           itemBuilder: (context, index) {
-                            final comment = widget.article['topComments'][index];
+                            final comment = pollProvider.localArticle['topComments'][index];
                             return Container(
-                              width: MediaQuery.of(context).size.width - 100,
+                              width: MediaQuery.of(context).size.width - 40,
+                              height: 80,
                               margin: EdgeInsets.only(right: 8),
                               padding: EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: Colors.white.withOpacity(.5),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(color: Colors.grey),
                               ),
@@ -667,14 +335,14 @@ class _PollsScreenState extends State<PollsScreen> {
                                   height(height: 4),
                                   Text(
                                     comment["comment"] ?? "",
-                                    style: fontStyle(fontSize: 13, color: Colors.black87),
+                                    style: fontStyle(fontSize: 13, color: Colors.black),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                   height(height: 4),
                                   Text(
-                                    "a few moments ago",
-                                    style: fontStyle(color: Colors.grey.shade600, fontSize: 11),
+                                    " ${formatTimeDifference(comment["createdAt"].toString())}",
+                                    style: fontStyle(color: Colors.black, fontSize: 11),
                                   ),
                                 ],
                               ),
@@ -682,15 +350,260 @@ class _PollsScreenState extends State<PollsScreen> {
                           },
                         ),
                       ),
-                    ],
-                    if (widget.article['topComments'].isEmpty) height(height: 55),
-                  ],
-                ),
-              );
-            },
+                    ),
+                ],
+                if (widget.index == 0) height(height: 60),
+              ],
+            ),
           ),
         ),
       ],
     );
   }
-}*/
+
+  Widget _buildResultsView(PollProvider pollProvider, ScreenshotController adsScreenshotController) {
+    final options = pollProvider.localArticle['pollData']['options'] as List;
+    final totalVotes = pollProvider.localArticle['pollData']['totalVotes'] ?? 0;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: CachedNetworkImage(
+            imageUrl: pollProvider.localArticle['image_url'] ?? "",
+            fit: BoxFit.fill,
+            placeholder: (context, url) => Container(color: AppColors.borderColor.withOpacity(.2)),
+            errorWidget: (context, url, error) => Center(child: Icon(Icons.image, size: 80, color: Colors.grey.shade300)),
+          ),
+        ),
+        Positioned(
+          top: 9,
+          right: 5,
+          child: Padding(
+            padding: EdgeInsets.only(top: 8, right: 12),
+            child: Container(
+              decoration: BoxDecoration(color: Colors.black.withOpacity(0.9), shape: BoxShape.circle),
+              child: IconButton(
+                icon: Icon(Icons.ios_share_outlined, color: Colors.white, size: 22),
+                onPressed: () async {
+                  SharedPreferences sp = await SharedPreferences.getInstance();
+                  String? userId = sp.getString("userId");
+
+                  sendShareDetails(userId, pollProvider.localArticle['id'], pollProvider.localArticle['content'].toString());
+
+                  if (pollProvider.localArticle['type'] == "Standard" || pollProvider.localArticle['type'] == "Video" || pollProvider.localArticle['type'] == "Image") {
+                    try {
+                      final image = await adsScreenshotController.capture(
+                        pixelRatio: 2.0,
+                      );
+                      if (image != null) {
+                        final directory = await getTemporaryDirectory();
+                        final imagePath = '${directory.path}/${pollProvider.localArticle['id']}.png';
+                        final imageFile = File(imagePath);
+                        await imageFile.writeAsBytes(image);
+
+                        Share.shareXFiles([XFile(imageFile.path)], text: pollProvider.localArticle['linkURLAndroid'].toString());
+                      } else {
+                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                      }
+                    } catch (e) {
+                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                    }
+                  }
+                  EventRepo().addEvent(
+                      {"share": "news", "postId": pollProvider.localArticle['id'].toString(), "createAt": DateTime.now().toString(), "postTitle": pollProvider.localArticle['title'].toString()},
+                      "shared_article");
+                },
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 0,
+          right: 0,
+          bottom: 0,
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.black.withOpacity(.4), Colors.black],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Text(
+                    pollProvider.localArticle['title'],
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: options.length,
+                  itemBuilder: (context, index) {
+                    final option = options[index];
+                    final double percentage = (option['percentage'] ?? 0.0).toDouble();
+                    final bool isVotedOption = option['id'] == pollProvider.userVotedOptionId;
+
+                    return Container(
+                      height: 50,
+                      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: isVotedOption ? Colors.blue : Colors.black
+                          ..withOpacity(.1),
+                        border: Border.all(
+                          color: isVotedOption ? Colors.blue : Colors.grey.shade700,
+                          width: isVotedOption ? 2.0 : 1.0,
+                        ),
+                      ),
+                      child: Stack(
+                        alignment: Alignment.centerLeft,
+                        children: [
+                          FractionallySizedBox(
+                            widthFactor: percentage / 100,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.blue,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  option['text'],
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: isVotedOption ? FontWeight.bold : FontWeight.normal,
+                                  ),
+                                ),
+                                Row(
+                                  children: [
+                                    Text(
+                                      "${percentage.toStringAsFixed(1)}%",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: isVotedOption ? FontWeight.bold : FontWeight.normal,
+                                      ),
+                                    ),
+                                    // if (isVotedOption) const SizedBox(width: 8),
+                                    // if (isVotedOption)
+                                    //   const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+                if (pollProvider.localArticle['topComments'].isNotEmpty) ...[
+                  height(height: 20),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Row(
+                      children: [
+                        Text("Top Comments", style: fontStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                        Spacer(),
+                        InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => PollsComments(postId: pollProvider.localArticle['id'].toString()),
+                                ),
+                              );
+                            },
+                            child: InkWell(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => PollsComments(postId: pollProvider.localArticle['id'].toString()),
+                                  ),
+                                );
+                              },
+                              child: Text(
+                                "More >",
+                                style: fontStyle(
+                                  color: Colors.lightBlue,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            )),
+                      ],
+                    ),
+                  ),
+                  height(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10),
+                    child: SizedBox(
+                      height: 100,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: pollProvider.localArticle['topComments'].length,
+                        itemBuilder: (context, index) {
+                          final comment = pollProvider.localArticle['topComments'][index];
+                          return Container(
+                            width: MediaQuery.of(context).size.width - 40,
+                            height: 80,
+                            margin: EdgeInsets.only(right: 8),
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(.5),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: Colors.grey),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Icon(Icons.account_circle, size: 20),
+                                    width(width: 5),
+                                    Text(comment["userName"] ?? "", style: fontStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                                  ],
+                                ),
+                                height(height: 4),
+                                Text(
+                                  comment["comment"] ?? "",
+                                  style: fontStyle(fontSize: 13, color: Colors.black),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                height(height: 4),
+                                Text(
+                                  " ${formatTimeDifference(comment["createdAt"].toString())}",
+                                  style: fontStyle(color: Colors.black, fontSize: 11),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+                if (widget.index == 0) height(height: 60),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}

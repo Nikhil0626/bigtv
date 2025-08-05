@@ -108,6 +108,9 @@ class BaseUrls {
   static const String getAvailableRewards = "/rewards/available";
   static const String getClaimedReward = "/rewards/claim";
   static const String serviceProviders = "/service_providers";
+  static const String contestClick = "/contest/click";
+  static const String adContestClick = "/contest/participation/";
+  static const String test = "/test";
 }
 
 

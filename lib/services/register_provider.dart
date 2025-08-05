@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../aggricator_screens/ad_manager_screen/ad_provider/banner_ads_provider.dart';
 import '../aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import '../aggricator_screens/contest_screen/contest_provider.dart';
 import '../aggricator_screens/e_papers_screens/paper_provider/epapers_provider.dart';
 import '../aggricator_screens/home_screen/home_provider/home_provider.dart';
 import '../aggricator_screens/home_screen/home_provider/news_posts_provider.dart';
@@ -30,5 +31,6 @@ class AppProviders {
     ChangeNotifierProvider<BannerAdsProvider>(create: (_) => BannerAdsProvider()),
     ChangeNotifierProvider<PollProvider>(create: (_) => PollProvider()),
     ChangeNotifierProvider<AdProvider>(create: (_) => AdProvider()),
+    ChangeNotifierProvider<AdsContestProvider>(create: (_) => AdsContestProvider()),
   ];
 }

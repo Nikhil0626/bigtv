@@ -7,6 +7,7 @@ import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 
+import '../../../globel_keys/globel_keys.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
@@ -14,6 +15,7 @@ import '../../../utils/app_spaces.dart';
 import '../../home_screen/home_provider/home_provider.dart';
 import '../../individual_post_details/individual_post_view.dart';
 import '../../loading_screen/ads_loading_screen.dart';
+import '../../test_screens/ads_test_data.dart';
 import 'google_ads_view.dart';
 
 // class IosAdsWidgetScreen extends StatefulWidget {
@@ -582,6 +584,11 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
 
   DateTime? impressionLogged;
 
+  DateTime? requestInitiated;
+  DateTime? responseReceived;
+  DateTime? adCreativeDownloaded;
+  DateTime? adRendered;
+
   @override
   void initState() {
     super.initState();
@@ -590,9 +597,9 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
 
   void _loadAllAds(BuildContext context) {
     _loadAdManagerNativeAd(context);
-    // _loadAdMobNativeAd(context);
-    // _loadBannerAd(context);
-    // _loadBannerAdMob(context);
+    _loadAdMobNativeAd(context);
+    _loadBannerAd(context);
+    _loadBannerAdMob(context);
   }
 
   void _onAdLoaded(Ad ad, Widget adWidget) {
@@ -617,48 +624,48 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   }
 
   void _loadAdManagerNativeAd(BuildContext context) {
-    // final adUnitId = context.read<HomeProvider>().adManagerNativeId;
-    String adUnitId = "/21775744923/test_native_ad";
-    _adManagerNativeAd = NativeAd(
-      adUnitId: "/21775744923/test_native_ad",
-      factoryId: 'adFactoryExample',
-      listener: NativeAdListener(
-          onAdLoaded: (ad) {
-            print("✅ AdManager native loaded");
-            _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
-          },
-          onAdFailedToLoad: (ad, error) {
-            print("❌ AdManager native failed: $error");
-            ad.dispose();
-            _checkIfAllAdsFailed(error);
-          },
-      ),
-      request: AdManagerAdRequest(), // ✅ Required for GAM ads
-    )..load();
-
-
+    final adUnitId = context.read<HomeProvider>().adManagerNativeId;
     // _adManagerNativeAd = NativeAd(
     //   adUnitId: adUnitId,
     //   factoryId: 'adFactoryExample',
     //   listener: NativeAdListener(
-    //     onAdLoaded: (ad) {
-    //       source ="Native Manager";
-    //       _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
-    //     },
-    //     onAdFailedToLoad: (ad, error) {
-    //       ad.dispose();
-    //       _checkIfAllAdsFailed(error);
-    //     },
-    //     onAdImpression: (ad) async {
-    //       impressionLogged = DateTime.now();
-    //       await _logEvent("onAdImpression");
-    //     },
-    //     onAdClicked: (ad) async => await _logEvent("onAdClicked"),
-    //     onAdClosed: (ad) async => await _logEvent("onAdClosed"),
-    //     onAdOpened: (ad) async => await _logEvent("onAdOpened"),
+    //       onAdLoaded: (ad) {
+    //         print("AdManager native loaded");
+    //         _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
+    //       },
+    //       onAdFailedToLoad: (ad, error) {
+    //         print("AdManager native failed: $error");
+    //         ad.dispose();
+    //         _checkIfAllAdsFailed(error);
+    //       },
     //   ),
-    //   request: AdRequest(),
+    //   request: AdManagerAdRequest(), // ✅ Required for GAM ads
     // )..load();
+
+
+    _adManagerNativeAd = NativeAd(
+      adUnitId: adUnitId,
+      factoryId: 'adFactoryExample',
+      listener: NativeAdListener(
+        onAdLoaded: (ad) {
+          source ="Native Manager";
+          _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          _checkIfAllAdsFailed(error);
+        },
+        onAdImpression: (ad) async {
+          impressionLogged = DateTime.now();
+          await _logEvent("onAdImpression");
+          _logLatencyMetrics(ad);
+        },
+        onAdClicked: (ad) async => await _logEvent("onAdClicked"),
+        onAdClosed: (ad) async => await _logEvent("onAdClosed"),
+        onAdOpened: (ad) async => await _logEvent("onAdOpened"),
+      ),
+      request: AdRequest(),
+    )..load();
   }
 
   void _loadAdMobNativeAd(BuildContext context) {
@@ -679,6 +686,7 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
         onAdImpression: (ad) async {
           impressionLogged = DateTime.now();
           await _logEvent("onAdImpression");
+          _logLatencyMetrics( ad);
         },
         onAdClicked: (ad) async => await _logEvent("onAdClicked"),
         onAdClosed: (ad) async => await _logEvent("onAdClosed"),
@@ -689,7 +697,8 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   }
 
   void _loadBannerAd(BuildContext context) {
-    final adUnitId = context.read<HomeProvider>().adManagerBannerId;
+    // final adUnitId = context.read<HomeProvider>().adManagerBannerId;
+    final adUnitId = "/6499/example/banner";
 
     _bannerAd = AdManagerBannerAd(
       adUnitId: adUnitId,
@@ -707,6 +716,7 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
         onAdImpression: (ad) async {
           impressionLogged = DateTime.now();
           await _logEvent("onAdImpression");
+          _logLatencyMetrics( ad);
         },
         onAdClicked: (ad) async => await _logEvent("onAdClicked"),
         onAdClosed: (ad) async => await _logEvent("onAdClosed"),
@@ -734,6 +744,7 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
         onAdImpression: (ad) async {
           impressionLogged = DateTime.now();
           await _logEvent("onAdImpression");
+          _logLatencyMetrics( ad);
         },
         onAdClicked: (ad) async => await _logEvent("onAdClicked"),
         onAdClosed: (ad) async => await _logEvent("onAdClosed"),
@@ -747,6 +758,35 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
       "event": name,
       "timestamp": DateTime.now().toString(),
     });
+  }
+
+  void _logLatencyMetrics(Ad ad) async {
+    if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
+      final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
+      final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+      final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+      final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+      // EventRepo().addEvent(, "");
+      mainNavigatorKey.currentContext!.read<HomeProvider>().sendDataToads(
+          {"request_time": requestLatency.toString(), "response_time": loadLatency.toString(), "render_time": renderLatency.toString(), "data": "${ad.responseInfo}"}
+      );
+      await analytics.logEvent(
+        name: "ad_latency_metrics",
+        parameters: {
+          "adSource": source.toString(),
+          "requestInitiated": requestInitiated.toString(),
+          "responseReceived": responseReceived.toString(),
+          "adCreativeDownloaded": adCreativeDownloaded.toString(),
+          "adRendered": adRendered.toString(),
+          "impressionLogged": impressionLogged.toString(),
+          "latency_request": requestLatency.toString(),
+          "latency_load": loadLatency.toString(),
+          "latency_render": renderLatency.toString(),
+          "latency_total": totalLatency.toString(),
+          "createAt": DateTime.now().toString(),
+        },
+      );
+    }
   }
 
   @override
@@ -784,7 +824,11 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   Widget buildRecommendedNews(BuildContext context) {
     return Column(
       children: [
-        Text("Recommended News $source", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
+        InkWell(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context) => AdsTestData(),));
+            },
+            child: Text("Show ads response click here", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor))),
         Expanded(
           child: ListView.builder(
             itemCount: 3,

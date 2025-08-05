@@ -204,9 +204,7 @@ class _HomeViewState extends State<HomeView> {
                     ),
                 ],
               ),
-              bottomNavigationBar:  KeepAlivePage(keepAlive: true, child:SizedBox(
-                  height: 50,
-                  child: Banner300x50Size())),
+
             );
           },
         ),

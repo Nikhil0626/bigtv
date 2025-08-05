@@ -405,7 +405,7 @@ class ShareYourApp extends StatelessWidget {
                 height(height: 4.h),
                 Text(
                   "Share the ChotaNewsApp_\nStay updated,with your \n friends & family!",
-                  style: newAppFont(fontSize: 16, fontWeight: FontWeight.w400),
+                  style: newAppFont(fontSize: 14, fontWeight: FontWeight.w400),
                   textAlign: TextAlign.center,
                 ),
                 height(height: 12.h),

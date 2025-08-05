@@ -3,14 +3,20 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
+import 'package:chotanews/aggricator_screens/contest_screen/contest_screen.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
+import 'package:chotanews/services/base_service.dart';
+import 'package:chotanews/services/base_urls.dart';
+import 'package:chotanews/utils/app_enums.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -18,6 +24,7 @@ import '../../../globel_keys/globel_keys.dart';
 import '../../../services/analytics_service.dart';
 import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
+import '../../contest_screen/contest_provider.dart';
 import '../../events_data/event_repo.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
 import '../home_repo/home_repo.dart';
@@ -27,7 +34,7 @@ class HomeProvider extends ChangeNotifier {
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
   List getAllSurveyDataList = [];
-  List getImageAdsList =[];
+  List getImageAdsList = [];
 
   String adManageId = "";
   String adManagerNativeId = "";
@@ -237,8 +244,8 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
-    mainNavigatorKey.currentContext?.read<PollProvider>().listOfComments =[];
-    mainNavigatorKey.currentContext?.read<RatingProvider>().ratingsList =[];
+    mainNavigatorKey.currentContext?.read<RatingProvider>().ratingsList = [];
+    mainNavigatorKey.currentContext?.read<PollProvider>().clearData();
     isHomeLoading = true;
     if (isGetAllPost == false && postIds == "0") {
       getAllPostList = [];
@@ -275,7 +282,6 @@ class HomeProvider extends ChangeNotifier {
       getImageAdsList.addAll(response.data['ads_list']);
 
       if (isWebView) {
-
         getAllPostList.insert(0, {
           "id": 000000,
           "postOrder": 00000,
@@ -340,7 +346,6 @@ class HomeProvider extends ChangeNotifier {
   int currentIndex = 0;
 
   Future getAllPostsByAiId(postId) async {
-
     isBookMark = [];
     getAllPostList = [];
     // getAllAiTagsPostList = [];
@@ -634,7 +639,9 @@ class HomeProvider extends ChangeNotifier {
     if (id != null) {
       postId = id;
       isComeFromLinkOrNotification = true;
-      Navigator.of(context, rootNavigator: true).popUntil((route) => route.isFirst);
+      mainNavigatorKey.currentState?.popUntil((route) => route.isFirst);
+      //
+      Navigator.of(mainNavigatorKey.currentContext!, rootNavigator: true).popUntil((route) => route.isFirst);
       getIndividualPost(postId, isLink: false);
 
       notifyListeners();
@@ -686,6 +693,74 @@ class HomeProvider extends ChangeNotifier {
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
+    }
+  }
+
+  void sendAdsDataSend(postId, title, postImage, isComeContest,sourceUrl) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString("userId");
+    Map<String, dynamic> body = {"user_id": userId, "post_id": postId, "post_title": "$title", "contest_image_url": postImage,};
+
+    log(body.toString());
+    try {
+      Response response = await HomeRepo().imageAdsSendData(body);
+      if (response.statusCode == 200) {
+        log("send data ${response.data}");
+        if (isComeContest) {
+          mainNavigatorKey.currentContext!.read<AdsContestProvider>().getContestList();
+        }else{
+          Navigator.push(mainNavigatorKey.currentContext!, MaterialPageRoute(builder: (context) => ContestScreen(),));
+        }
+        if (await canLaunchUrl(Uri.parse(sourceUrl))) {
+          await launchUrl(Uri.parse(sourceUrl));
+        } else {
+          throw 'Could not launch $sourceUrl';
+        }
+
+        CustomToast.showSuccessToast(msg: "Your Successfully Joined The Contest");
+      }
+    } on DioException catch (e, st) {
+      log("ad post imager send data $e  --- $st");
+    } catch (e, st) {
+      log("ad post imager send data $e  --- $st");
+    }
+  }
+
+  Future sendDataToads(body) async {
+    try {
+      Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,url: BaseUrls.test,method: RequestType.post,body: body);
+    } on DioException catch (e, st) {
+      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+    } catch (e, st) {
+      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+    }
+  }
+  List getAdsDataList = [];
+  bool isAdsDataLoading = false;
+
+  Future getAdsSaveData() async {
+    isAdsDataLoading = true;
+    getAdsDataList = [];
+    try {
+      Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,url: BaseUrls.test,method: RequestType.get,);
+
+      if(response.statusCode == 200){
+        getAdsDataList.addAll(response.data);
+      }
+    } on DioException catch (e, st) {
+      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+    } catch (e, st) {
+      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+    }finally{
+      isAdsDataLoading = false;
+      notifyListeners();
+    }
+  }
+  bool isAdLoaded = true;
+  void isBannerAdLoaded(value){
+    isAdLoaded = value;
+    if(value == true) {
+      notifyListeners();
     }
   }
 }

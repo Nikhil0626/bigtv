@@ -24,6 +24,7 @@ import '../../ad_manager_screen/ad_screen/banner_300x50_size.dart';
 import '../../chota_info_screens/advertise_with_us.dart';
 import '../../chota_info_screens/privacy_policy.dart';
 import '../../chota_info_screens/terms_conditions.dart';
+import '../../contest_screen/contest_screen.dart';
 import '../../events_data/event_repo.dart';
 import '../../home_screen/home_provider/home_provider.dart';
 import 'filters_screen/filter_view.dart';
@@ -95,11 +96,11 @@ class _SettingsViewState extends State<SettingsView> {
             _buildSettingsRow(context, "Filter.svg", "Filter", () {
               Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
             }),
-            height(height: 5.h),
-
-            _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () async {
-              _showShareBottomSheet(context);
-            }),
+            // height(height: 5.h),
+            //
+            // _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () async {
+            //   _showShareBottomSheet(context);
+            // }),
 
             height(height: 5.h),
 
@@ -144,7 +145,7 @@ class _SettingsViewState extends State<SettingsView> {
               );
             }),
             height(height: 5.h),
-            _buildSettingsRow(context, "Terms_icon.svg", "Refer And Earn", () {
+            _buildSettingsRow(context, "Share_our_app.svg", "Refer And Earn", () {
               // EventRepo().addEvent({
               //   "visitPageName": "Terms & Conditions",
               //   "createAt": DateTime.now().toString(),
@@ -181,6 +182,14 @@ class _SettingsViewState extends State<SettingsView> {
                 "createAt": DateTime.now().toString(),
               }, "compliance_section");
               Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
+            }),
+            height(height: 5.h),
+            _buildSettingsRow(context, "contest.svg", "Ads Contest", () {
+              EventRepo().addEvent({
+                "visitPageName": "Contest",
+                "createAt": DateTime.now().toString(),
+              }, "compliance_section");
+              Navigator.push(context, MaterialPageRoute(builder: (context) => ContestScreen()));
             }),
             height(height: 5.h),
             _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () async {

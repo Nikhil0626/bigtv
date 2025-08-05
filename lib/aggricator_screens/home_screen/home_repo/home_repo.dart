@@ -16,7 +16,6 @@ class HomeRepo extends BaseService{
   Future getAllPosts(queryParams) async{
     Response  response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.getAllPost,method: RequestType.post,body: queryParams);
 
-    // log(response.data.toString());
     return response;
   }
   Future getAllAiTags(Map<String, dynamic> body) async{
@@ -32,6 +31,10 @@ class HomeRepo extends BaseService{
 
   Future surveyApi() async{
     Response  response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.surveyApi,method: RequestType.get,);
+    return response;
+  }
+  Future imageAdsSendData(body) async{
+    Response  response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.contestClick,method: RequestType.post,body:body );
     return response;
   }
 }

@@ -115,7 +115,6 @@
 //   }
 // }
 
-
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -138,7 +137,7 @@ class RatingProvider extends ChangeNotifier {
     String postId = article.toString();
 
     final existingIndex = ratingsList.indexWhere(
-          (element) => element['postId'].toString() == postId,
+      (element) => element['postId'].toString() == postId,
     );
 
     if (existingIndex != -1) {
@@ -148,13 +147,13 @@ class RatingProvider extends ChangeNotifier {
     }
 
     selectedStar = rating;
-    notifyListeners();
+    // notifyListeners();
   }
 
   // ✅ Updated: Safe getPostRating without errors
   int getPostRating(dynamic article) {
     final ratingEntry = ratingsList.firstWhere(
-          (element) => element['postId'].toString() == article.toString(),
+      (element) => element['postId'].toString() == article.toString(),
       orElse: () => {},
     );
 
@@ -223,11 +222,13 @@ class RatingProvider extends ChangeNotifier {
     getReviews(rating, isFilterData ? "highest_rated" : "lowest_rated");
   }
 
+  bool isLoadingComments = false;
+
   Future getReviews(String postId, name) async {
     Map<String, dynamic> body = {
       "sort_by": name,
     };
-
+    isLoadingComments = true;
     try {
       Response response = await RatingRepo().getReviews(postId, body);
       if (response.statusCode == 200) {
@@ -236,6 +237,9 @@ class RatingProvider extends ChangeNotifier {
       }
     } catch (e, st) {
       log("Review fetch error: $e --- $st");
+    } finally {
+      isLoadingComments = false;
+      notifyListeners();
     }
   }
 }

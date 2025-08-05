@@ -92,7 +92,7 @@ class _LoginViewState extends State<LoginView> {
           key: _formKey,
           child: Column(
             children: [
-              // Text("$siva"),
+              Text("$siva"),
               height(height: 10.h),
               Container(
                 height: 40.h,
@@ -304,7 +304,7 @@ class _LoginViewState extends State<LoginView> {
   void getData() async{
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
-    siva = sharedPreferences.getString("Nikil1")??"hello raja";
+    siva = sharedPreferences.getString("referralCode")??"hello raja";
     setState(() {
 
     });

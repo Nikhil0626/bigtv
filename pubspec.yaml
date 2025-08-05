@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 5.0.7+2162
+version: 5.0.7+2163
 environment:
   sdk: ^3.5.4
 dependencies:
@@ -110,6 +110,7 @@ flutter:
     - assets/svg/Profile.svg
     - assets/svg/new_refresh.svg
     - assets/svg/new_comment.svg
+    - assets/svg/no_data/
     - shorebird.yaml
 
 

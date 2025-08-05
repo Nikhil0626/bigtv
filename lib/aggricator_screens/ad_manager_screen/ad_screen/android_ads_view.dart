@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -15,6 +16,7 @@ import '../../events_data/event_repo.dart';
 import '../../home_screen/home_provider/home_provider.dart';
 import '../../individual_post_details/individual_post_view.dart';
 import '../../loading_screen/ads_loading_screen.dart';
+import '../../test_screens/ads_test_data.dart';
 import 'google_ads_view.dart';
 
 class FullScreenNativeAd extends StatefulWidget {
@@ -29,7 +31,7 @@ class FullScreenNativeAd extends StatefulWidget {
 class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   NativeAd? _adManagerNativeAd;
   NativeAd? _adMobNativeAd;
-  BannerAd? _bannerAd;
+  AdManagerBannerAd? _bannerAd;
   BannerAd? _bannerAd1;
   Widget? _adWidget;
   String? source = '';
@@ -62,6 +64,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
   void _loadAdManagerNativeAd(BuildContext context) {
     String? adUnitId = context.read<HomeProvider>().adManagerNativeId;
+    // String? adUnitId = "/21775744923/example/native";
     requestInitiated = DateTime.now();
 
     _adManagerNativeAd = NativeAd(
@@ -97,7 +100,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           adRendered = DateTime.now();
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
-        onAdImpression: (ad) async{
+        onAdImpression: (ad) async {
           impressionLogged = DateTime.now();
           await analytics.logEvent(
             name: "onAdImpression",
@@ -107,19 +110,19 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
               "adResponse": "",
             },
           );
-          _logLatencyMetrics();
+          _logLatencyMetrics(ad);
         },
-        onAdClicked: (ad) async{
+        onAdClicked: (ad) async {
           await analytics.logEvent(
             name: "onAdClicked",
             parameters: {
-              "onAdClicked":true ? 1 : 0,
+              "onAdClicked": true ? 1 : 0,
               "createAt": DateTime.now().toString(),
               "adResponse": "",
             },
           );
         },
-        onAdClosed: (ad) async{
+        onAdClosed: (ad) async {
           await analytics.logEvent(
             name: "onAdClosed",
             parameters: {
@@ -129,7 +132,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
             },
           );
         },
-        onAdOpened: (ad) async{
+        onAdOpened: (ad) async {
           await analytics.logEvent(
             name: "onAdOpened",
             parameters: {
@@ -162,7 +165,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           adRendered = DateTime.now();
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
-        onAdImpression: (ad) async{
+        onAdImpression: (ad) async {
           impressionLogged = DateTime.now();
           await analytics.logEvent(
             name: "onAdImpression",
@@ -172,9 +175,9 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
               "adResponse": "",
             },
           );
-          _logLatencyMetrics();
+          _logLatencyMetrics(ad);
         },
-        onAdClicked: (ad) async{
+        onAdClicked: (ad) async {
           await analytics.logEvent(
             name: "onAdClicked",
             parameters: {
@@ -184,7 +187,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
             },
           );
         },
-        onAdClosed: (ad) async{
+        onAdClosed: (ad) async {
           await analytics.logEvent(
             name: "onAdClosed",
             parameters: {
@@ -194,7 +197,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
             },
           );
         },
-        onAdOpened: (ad) async{
+        onAdOpened: (ad) async {
           await analytics.logEvent(
             name: "onAdOpened",
             parameters: {
@@ -244,65 +247,66 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
 
   void _loadBannerAd(BuildContext context) {
     final adUnitId = context.read<HomeProvider>().adManagerBannerId;
+    // final adUnitId = "/21775744923/example/fixed-size-banner";
     requestInitiated = DateTime.now();
-    _bannerAd = BannerAd(
-      adUnitId: adUnitId,
-      size: AdSize.mediumRectangle,
-      request: const AdManagerAdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          source = "Adm_Banner";
-          responseReceived = DateTime.now();
-          _onAdLoaded(ad, AdWidget(ad: ad as BannerAd));
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-          _checkIfAllAdsFailed(error);
-        },
-        onAdImpression: (ad) async{
-          impressionLogged = DateTime.now();
-          await analytics.logEvent(
-            name: "onAdImpression",
-            parameters: {
-              "onAdImpression":true ? 1 : 0,
-              "createAt": DateTime.now().toString(),
-              "adResponse": "",
-            },
-          );
-          _logLatencyMetrics();
-        },
-        onAdClicked: (ad) async{
-          await analytics.logEvent(
-            name: "onAdClicked",
-            parameters: {
-              "onAdClicked": true ? 1 : 0,
-              "createAt": DateTime.now().toString(),
-              "adResponse": "",
-            },
-          );
-        },
-        onAdClosed: (ad) async{
-          await analytics.logEvent(
-            name: "onAdClosed",
-            parameters: {
-              "onAdClosed": true ? 1 : 0,
-              "createAt": DateTime.now().toString(),
-              "adResponse": "",
-            },
-          );
-        },
-        onAdOpened: (ad) async{
-          await analytics.logEvent(
-            name: "onAdOpened",
-            parameters: {
-              "onAdOpened": true ? 1 : 0,
-              "createAt": DateTime.now().toString(),
-              "adResponse": "",
-            },
-          );
-        },
-      ),
-    )..load();
+    _bannerAd = AdManagerBannerAd(
+        adUnitId: adUnitId,
+        sizes: [AdSize.mediumRectangle],
+        request: const AdManagerAdRequest(),
+        listener: AdManagerBannerAdListener(
+          onAdLoaded: (ad) {
+            source = "Adm_Banner";
+            responseReceived = DateTime.now();
+            _onAdLoaded(ad, AdWidget(ad: ad as BannerAd));
+          },
+          onAdFailedToLoad: (ad, error) {
+            ad.dispose();
+            _checkIfAllAdsFailed(error);
+          },
+          onAdImpression: (ad) async {
+            impressionLogged = DateTime.now();
+            await analytics.logEvent(
+              name: "onAdImpression",
+              parameters: {
+                "onAdImpression": true ? 1 : 0,
+                "createAt": DateTime.now().toString(),
+                "adResponse": "",
+              },
+            );
+            _logLatencyMetrics(ad);
+          },
+          onAdClicked: (ad) async {
+            await analytics.logEvent(
+              name: "onAdClicked",
+              parameters: {
+                "onAdClicked": true ? 1 : 0,
+                "createAt": DateTime.now().toString(),
+                "adResponse": "",
+              },
+            );
+          },
+          onAdClosed: (ad) async {
+            await analytics.logEvent(
+              name: "onAdClosed",
+              parameters: {
+                "onAdClosed": true ? 1 : 0,
+                "createAt": DateTime.now().toString(),
+                "adResponse": "",
+              },
+            );
+          },
+          onAdOpened: (ad) async {
+            await analytics.logEvent(
+              name: "onAdOpened",
+              parameters: {
+                "onAdOpened": true ? 1 : 0,
+                "createAt": DateTime.now().toString(),
+                "adResponse": "",
+              },
+            );
+          },
+        ))
+      ..load();
   }
 
   void _loadBannerAdMob(BuildContext context) {
@@ -322,7 +326,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
           ad.dispose();
           _checkIfAllAdsFailed(error);
         },
-        onAdImpression: (ad) async{
+        onAdImpression: (ad) async {
           impressionLogged = DateTime.now();
           await analytics.logEvent(
             name: "onAdImpression",
@@ -332,9 +336,9 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
               "adResponse": "",
             },
           );
-          _logLatencyMetrics();
+          _logLatencyMetrics(ad);
         },
-        onAdClicked: (ad) async{
+        onAdClicked: (ad) async {
           await analytics.logEvent(
             name: "onAdClicked",
             parameters: {
@@ -344,7 +348,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
             },
           );
         },
-        onAdClosed: (ad) async{
+        onAdClosed: (ad) async {
           await analytics.logEvent(
             name: "onAdClosed",
             parameters: {
@@ -354,7 +358,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
             },
           );
         },
-        onAdOpened: (ad) async{
+        onAdOpened: (ad) async {
           await analytics.logEvent(
             name: "onAdOpened",
             parameters: {
@@ -368,7 +372,9 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     )..load();
   }
 
-  bool adsEmptyCheck( input,) {
+  bool adsEmptyCheck(
+    input,
+  ) {
     if (input == null) return false;
 
     if (input is Iterable || input is Map || input is String) {
@@ -378,7 +384,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     return true; // For objects or primitives
   }
 
-  Future<void> _onAdLoaded(dynamic ad, Widget adWidget) async{
+  Future<void> _onAdLoaded(dynamic ad, Widget adWidget) async {
     if (_adDisplayed) {
       ad.dispose();
       return;
@@ -412,7 +418,7 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     _disposeOtherAds(except: ad);
   }
 
-  Future<void> _checkIfAllAdsFailed(LoadAdError error) async{
+  Future<void> _checkIfAllAdsFailed(LoadAdError error) async {
     _failCount++;
     if (_adDisplayed) return;
     if (_failCount >= 4) {
@@ -442,14 +448,16 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
     if (_bannerAd1 != null && _bannerAd1 != except) _bannerAd1?.dispose();
   }
 
-  void _logLatencyMetrics() async{
+  void _logLatencyMetrics(Ad ad) async {
     if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
       final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
       final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
       final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
       final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
       // EventRepo().addEvent(, "");
-
+      mainNavigatorKey.currentContext!.read<HomeProvider>().sendDataToads(
+        {"request_time": requestLatency.toString(), "response_time": loadLatency.toString(), "render_time": renderLatency.toString(), "data": "${ad.responseInfo}"}
+      );
       await analytics.logEvent(
         name: "ad_latency_metrics",
         parameters: {
@@ -499,18 +507,13 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height,
                         child: _bannerAd != null
-                            ? Container(
-                                color: Platform.isIOS ? Colors.transparent : Colors.white,
-                                alignment: Alignment.center,
-                                width: _bannerAd!.size.width.toDouble(),
-                                height: _bannerAd!.size.height.toDouble(),
-                                child: _adWidget)
+                            ? Container(color: Platform.isIOS ? Colors.transparent : Colors.white, alignment: Alignment.center, width: 300, height: 250, child: _adWidget)
                             : _bannerAd1 != null
                                 ? Container(
                                     color: Platform.isIOS ? Colors.transparent : Colors.white,
                                     alignment: Alignment.center,
-                                    width: _bannerAd!.size.width.toDouble(),
-                                    height: _bannerAd!.size.height.toDouble(),
+                                    width: _bannerAd1!.size.width.toDouble(),
+                                    height: _bannerAd1!.size.height.toDouble(),
                                     child: _adWidget)
                                 : Padding(
                                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -534,7 +537,11 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   Widget _buildRecommendedNews(BuildContext context) {
     return Column(
       children: [
-        Text("Recommended News ", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
+        InkWell(
+            onTap: (){
+              Navigator.push(context, MaterialPageRoute(builder: (context) => AdsTestData(),));
+            },
+            child: Text("Show ads response click here", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor))),
         height(height: 10),
         Expanded(
           child: ListView.builder(

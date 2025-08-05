@@ -38,6 +38,7 @@ Future<void> main() async {
   final appDocumentDir = await getApplicationDocumentsDirectory();
   Hive.init(appDocumentDir.path);
   await Hive.openBox('events');
+  await Hive.openBox('pollBox');
   EventCron().start();
   MobileAds.instance.initialize();
   initPlugin();

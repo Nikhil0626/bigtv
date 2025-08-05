@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -31,15 +32,16 @@ class _PollsCommentsState extends State<PollsComments> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
+        centerTitle: true,
         leading: const BackButton(color: Colors.black),
         title: Text(
-          "Poll Review Comments",
+          "Poll Comments",
           style: fontStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
         ),
       ),
       body: Consumer<PollProvider>(
         builder: (_, pollProvider, __) {
-          return pollProvider.getAllPollCommentsList.isEmpty
+          return pollProvider.isLoading?AppLoadingScreen():pollProvider.getAllPollCommentsList.isEmpty
               ? const Center(child: AppNoData())
               : Column(
                   children: [
@@ -53,7 +55,6 @@ class _PollsCommentsState extends State<PollsComments> {
                       ),
                     ),
 
-                    // ───────────── Poll‑result icons (centred) ─────────────
                     SizedBox(
                       height: 150,
                       child: Builder(
@@ -192,7 +193,6 @@ class _PollsCommentsState extends State<PollsComments> {
                         },
                       ),
                     ),
-                    // ───────────────────────────────────────────────────────
 
                     height(height: 10.h),
 
@@ -205,13 +205,10 @@ class _PollsCommentsState extends State<PollsComments> {
                             style: fontStyle(fontSize: 16.sp, fontWeight: FontWeight.w600),
                           ),
                           const Spacer(),
-                          const Icon(Icons.filter_list_rounded, size: 25),
                         ],
                       ),
                     ),
                     height(height: 15),
-
-                    // ───────────── Reviews list ─────────────
                     Expanded(
                       child: ListView.builder(
                         itemCount: pollProvider.getAllPollCommentsList['comments'].length,

@@ -16,6 +16,7 @@ class ReferralProvider extends ChangeNotifier {
   List<ProvidersNamesModel> allProvidersRechargeList = [];
   List<ProvidersNamesModel> allProvidersOttList = [];
   var referralRewardsClaimed = {};
+  int totalRewards = 0;
 
   double progress = 0.0;
   String selectedOperator = "";
@@ -32,9 +33,18 @@ class ReferralProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = response.data as Map<String, dynamic>;
         referralData = data;
-        progress = int.parse(referralData['downloads'].toString()) / (int.parse(referralData['needed'].toString()));
+        progress = int.parse(referralData['balance_points'].toString()) / (int.parse(referralData['needed'].toString()) + int.parse(referralData['balance_points'].toString()));
         difference = int.parse(referralData['needed'].toString()) - int.parse(referralData['downloads'].toString());
+        totalRewards = int.parse(referralData['balance_points'].toString()) + int.parse(referralData['needed'].toString());
         progress = progress.clamp(0.0, 1.0);
+      // Response response = await ReferralRepo().getReferralStats(userId);
+      //
+      // if (response.statusCode == 200) {
+      //   final data = response.data as Map<String, dynamic>;
+      //   referralData = data;
+      //   progress = int.parse(referralData['downloads'].toString()) / (int.parse(referralData['needed'].toString()));
+      //   difference = int.parse(referralData['needed'].toString()) - int.parse(referralData['downloads'].toString());
+      //   progress = progress.clamp(0.0, 1.0);
       } else {
         log("Failed to post referral: ${response.statusCode}");
       }

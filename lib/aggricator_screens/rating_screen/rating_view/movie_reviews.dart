@@ -13,7 +13,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/app_colors.dart';
-import '../../../utils/app_loading_screen.dart';
 import '../../events_data/event_repo.dart';
 import '../../home_screen/home_provider/home_provider.dart';
 import '../../home_screen/home_support_widgets/image_preview.dart';
@@ -198,7 +197,7 @@ class _MovieRatingsState extends State<MovieRatings> {
           ),
 
           Container(
-            height: MediaQuery.of(context).size.height*.50,
+            height: MediaQuery.of(context).size.height*.55,
             width: MediaQuery.of(context).size.width,
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             decoration: BoxDecoration(
@@ -365,7 +364,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                   bool isLogin = sp.getString("loginType") != "login" ? true : false;
 
                                   if (isLogin) {
-                                    CustomToast.showErrorToast(msg: "Your a guest user, Pleas login to give a rating");
+                                    CustomToast.showErrorToast(msg: "Your a guest user, Please login to give a rating");
                                   } else {
                                     ratingProvider.postSubmitRating(widget.article['id'], widget.article['userHasReviewed']);
                                   }
@@ -409,6 +408,8 @@ class _MovieRatingsState extends State<MovieRatings> {
                         child: Text("More >", style: fontStyle(color: Colors.lightBlue, fontSize: 14, fontWeight: FontWeight.w600))),
                   ],
                 ),
+                height(height: 50)
+
               ],
             ),
           ),
