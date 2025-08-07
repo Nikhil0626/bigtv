@@ -166,7 +166,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       if (isLogin) {
                                                         CustomToast.showErrorToast(msg: "Your a guest user, Please login to submit poll");
                                                       } else {
-                                                        context.read<HomeProvider>().sendAdsDataSend(widget.article['id'], widget.article['title'], widget.article['image_url'],false,widget.article['postUrl']);
+                                                        context
+                                                            .read<HomeProvider>()
+                                                            .sendAdsDataSend(widget.article['id'], widget.article['title'], widget.article['image_url'], false, widget.article['postUrl']);
                                                       }
                                                     },
                                               child: Stack(
@@ -357,13 +359,10 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                               ? SizedBox(
                                                                   height: MediaQuery.of(context).size.height * .33,
                                                                   width: MediaQuery.of(context).size.width,
-                                                                  child: Align(
-                                                                    alignment: Alignment.topCenter,
-                                                                    child: VideoPreview(
-                                                                      imageUrl: widget.article['image_url'],
-                                                                      url: widget.article['video_url'] ?? "",
-                                                                      isFoldable: false,
-                                                                    ),
+                                                                  child: VideoPreview(
+                                                                    imageUrl: widget.article['image_url'],
+                                                                    url: widget.article['video_url'] ?? "",
+                                                                    isFoldable: false,
                                                                   ),
                                                                 )
                                                               : InkWell(

@@ -12,13 +12,12 @@ import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../../../globel_keys/globel_keys.dart';
 import '../../../services/analytics_service.dart';
@@ -105,26 +104,23 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void youtubeInitial(url) {
+  void youtubeInitial(String videoId) {
     controller = YoutubePlayerController(
-      initialVideoId: url, // Example YouTube video ID
-      flags: const YoutubePlayerFlags(
-        autoPlay: true,
-        enableCaption: false,
-        forceHD: false,
-        disableDragSeek: true,
-        isLive: false,
+      params: const YoutubePlayerParams(
+        showControls: false,
+        mute: false,
+        showFullscreenButton: true,
+        loop: false,
 
-        showLiveFullscreenButton: false,
-        // hideControls: true,
       ),
     );
+    controller.loadVideoById(videoId: videoId);
     // notifyListeners();
   }
 
   void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
-    controller.dispose();
+    controller.close();
     notifyListeners();
   }
 
@@ -390,7 +386,7 @@ class HomeProvider extends ChangeNotifier {
     getAllAiTagsList = [];
     Map<String, dynamic> body = {
       "deviceid": deviceId ?? "",
-      "user_id": userId ?? "",
+      "userid": userId ?? "",
     };
     try {
       Response response = await HomeRepo().getAllAiTags(body);
@@ -696,10 +692,15 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  void sendAdsDataSend(postId, title, postImage, isComeContest,sourceUrl) async {
+  void sendAdsDataSend(postId, title, postImage, isComeContest, sourceUrl) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
-    Map<String, dynamic> body = {"user_id": userId, "post_id": postId, "post_title": "$title", "contest_image_url": postImage,};
+    Map<String, dynamic> body = {
+      "user_id": userId,
+      "post_id": postId,
+      "post_title": "$title",
+      "contest_image_url": postImage,
+    };
 
     log(body.toString());
     try {
@@ -708,8 +709,12 @@ class HomeProvider extends ChangeNotifier {
         log("send data ${response.data}");
         if (isComeContest) {
           mainNavigatorKey.currentContext!.read<AdsContestProvider>().getContestList();
-        }else{
-          Navigator.push(mainNavigatorKey.currentContext!, MaterialPageRoute(builder: (context) => ContestScreen(),));
+        } else {
+          Navigator.push(
+              mainNavigatorKey.currentContext!,
+              MaterialPageRoute(
+                builder: (context) => ContestScreen(),
+              ));
         }
         if (await canLaunchUrl(Uri.parse(sourceUrl))) {
           await launchUrl(Uri.parse(sourceUrl));
@@ -728,13 +733,14 @@ class HomeProvider extends ChangeNotifier {
 
   Future sendDataToads(body) async {
     try {
-      Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,url: BaseUrls.test,method: RequestType.post,body: body);
+      Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
     } on DioException catch (e, st) {
       log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
     } catch (e, st) {
       log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
     }
   }
+
   List getAdsDataList = [];
   bool isAdsDataLoading = false;
 
@@ -742,24 +748,30 @@ class HomeProvider extends ChangeNotifier {
     isAdsDataLoading = true;
     getAdsDataList = [];
     try {
-      Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,url: BaseUrls.test,method: RequestType.get,);
+      Response response = await BaseService().makeRequest(
+        baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.test,
+        method: RequestType.get,
+      );
 
-      if(response.statusCode == 200){
+      if (response.statusCode == 200) {
         getAdsDataList.addAll(response.data);
       }
     } on DioException catch (e, st) {
       log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
     } catch (e, st) {
       log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
-    }finally{
+    } finally {
       isAdsDataLoading = false;
       notifyListeners();
     }
   }
+
   bool isAdLoaded = true;
-  void isBannerAdLoaded(value){
+
+  void isBannerAdLoaded(value) {
     isAdLoaded = value;
-    if(value == true) {
+    if (value == true) {
       notifyListeners();
     }
   }

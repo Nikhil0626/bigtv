@@ -221,25 +221,26 @@ Future<void> getReferrerFromPlayStore() async {
   } else {
     try {
       final ReferrerDetails referrerDetails = await AndroidPlayInstallReferrer.installReferrer;
-      final uri = Uri.parse(referrerDetails.installReferrer.toString());
 
-      // Case 1: If referrer is part of query parameters like ?referrer=CODE
-      final referrerFromQuery = uri.queryParameters['referrer'];
-      if (referrerFromQuery != null) {
-        print("Referral Code from query: $referrerFromQuery");
-      } else {
-        // Case 2: If referrer is part of path like /referrer=CODE
-        final segments = uri.pathSegments;
-        for (String segment in segments) {
-          if (segment.contains('referrer=')) {
-            final code = segment.split('referrer=').last;
-            print("Referral Code from path: $code");
-            sharedPreferences.setString("referralCode", code ?? "chota123");
-          }
-        }
-      }
-    } catch (e) {
-      print("Error parsing referral code: $e");
+      final String? referrerUrl = referrerDetails.installReferrer;
+      final int clickTimestamp = referrerDetails.referrerClickTimestampSeconds;
+      final int installTimestamp = referrerDetails.installBeginTimestampSeconds;
+      EventRepo().addEvent({
+        "shareApp": Platform.isIOS ? "iOS" : "Android",
+        "userId": userId ?? "0",
+        'referrerUrl': referrerUrl,
+        'clickTimestamp': clickTimestamp,
+        'installTimestamp': installTimestamp,
+        "createAt": DateTime.now().toString(),
+        "error": "",
+        "osType": "Android",
+        "isSharedUser": false
+      }, "referral");
+      // log("ios referral ${e.toString()} $st");
+      final uri = Uri.parse("https://dummy.com/?$referrerUrl");
+      sharedPreferences.setString("referralCode",  referrerUrl?? "chota123");
+    } catch (e, st) {
+      log("ios referral ${e.toString()} $st");
     }
   }
 }

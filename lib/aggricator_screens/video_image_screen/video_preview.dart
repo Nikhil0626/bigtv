@@ -1,7 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
 import '../home_screen/home_provider/home_provider.dart';
 
@@ -23,10 +25,12 @@ class _VideoPreview extends State<VideoPreview> {
   void initState() {
     super.initState();
     context.read<HomeProvider>().youtubeInitial(widget.url);
+    log("asfdsgsdgds ${widget.url}");
   }
 
   @override
   void dispose() {
+    context.read<HomeProvider>().youtubeDispose();
     super.dispose();
   }
 
@@ -50,60 +54,44 @@ class _VideoPreview extends State<VideoPreview> {
           }
         },
         child: homeProvider.isPlaying
-            ? Positioned.fill(
-                child: YoutubePlayerBuilder(
-                  player: YoutubePlayer(
-                    controller: homeProvider.controller,
-                    showVideoProgressIndicator: false,
-                    onReady: () => debugPrint("YouTube Player Ready"),
-                    onEnded: (metaData) {
-                      homeProvider.isPlayingYoutube(false);
-                    },
-                    bottomActions: [
-                      CurrentPosition(),
-                      ProgressBar(isExpanded: true),
-                      RemainingDuration(),
-                      IconButton(
-                        icon: Icon(homeProvider.isMuted ? Icons.volume_off : Icons.volume_up),
-                        onPressed: () {
-                          if (homeProvider.isMuted) {
-                            homeProvider.controller.unMute();
-                          } else {
-                            homeProvider.controller.mute();
-                          }
-                          homeProvider.toggleMute();
-                        },
-                      ),
-                    ],
-                  ),
-                  builder: (context, player) => player,
-                ),
-              )
+            ? YoutubePlayerScaffold(
+          controller: context.read<HomeProvider>().controller,
+          builder: (context, player) {
+            return Container(
+              height: 330,
+              width: MediaQuery.of(context).size.width,
+              child: player,
+            );
+          },
+        )
             : ClipRRect(
-                borderRadius: BorderRadiusGeometry.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Image.network(
-                      height: 330,
-                      width: MediaQuery.of(context).size.width,
-                      widget.imageUrl,
-                      fit: BoxFit.fill,
-                    ),
-                    IconButton(
-                      icon: SvgPicture.asset(
-                        "assets/svg/play_circle.svg",
-                        height: 58,
-                        width: 58,
-                      ),
-                      onPressed: () {
-                        homeProvider.isPlayingYoutube(true);
-                      },
-                    ),
-                  ],
-                ),
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Image.network(
+                height: 330,
+                width: MediaQuery.of(context).size.width,
+                widget.imageUrl,
+                fit: BoxFit.fill,
               ),
+              IconButton(
+                icon: SvgPicture.asset(
+                  "assets/svg/play_circle.svg",
+                  height: 58,
+                  width: 58,
+                ),
+                onPressed: () {
+                  homeProvider.isPlayingYoutube(true);
+                },
+              ),
+            ],
+          ),
+        ),
       );
     });
   }
 }
+
+
+
