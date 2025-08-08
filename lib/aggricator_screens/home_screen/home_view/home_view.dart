@@ -206,7 +206,7 @@ class _HomeViewState extends State<HomeView> {
               ),
               bottomNavigationBar: KeepAlivePage(
                   child: SizedBox(
-                      height: 50,
+                      height: 56,
                       child: Banner300x50Size())),
 
             );

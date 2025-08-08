@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../utils/botton_actions.dart';
 import '../../events_data/event_repo.dart';
@@ -48,42 +48,34 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
 
     _controllers = List.generate(
       reelsList.length,
-      (index) {
-        // final controller = YoutubePlayerController(
-        //   initialVideoId: YoutubePlayer.convertUrlToId(reelsList[index].videoUrl)!,
-        //   flags: const YoutubePlayerFlags(
-        //     autoPlay: true,
-        //     mute: false,
-        //     forceHD: true,
-        //     loop: false,
-        //     disableDragSeek: true,
-        //     enableCaption: false,
-        //     controlsVisibleAtStart: true,
-        //   ),
-        // );
-
+          (index) {
         final controller = YoutubePlayerController(
-
-          params: const YoutubePlayerParams(
-            showControls: false,
+          initialVideoId: YoutubePlayer.convertUrlToId(reelsList[index].videoUrl)!,
+          flags: const YoutubePlayerFlags(
+            autoPlay: true,
             mute: false,
-            showFullscreenButton: true,
+            forceHD: true,
             loop: false,
+            disableDragSeek: true,
             enableCaption: false,
-            showVideoAnnotations: false,
-            strictRelatedVideos: false,
-            interfaceLanguage: 'en',
+            controlsVisibleAtStart: true,
           ),
         );
-        controller.loadVideoById(videoId: reelsList[index].videoUrl.toString().split("=").last.toString());
 
-        controller.listen((event) {
-          if (event.playerState == PlayerState.ended) {
+        controller.addListener(() {
+
+          final playerState = controller.value.playerState;
+          if (playerState == PlayerState.ended) {
+
+            // Play next video
             if (index < reelsList.length - 1) {
               _pageController.nextPage(
+
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeIn,
+
               );
+
             }
           }
         });
@@ -115,9 +107,9 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
             log(currentIndex.toString());
             for (var i = 0; i < _controllers.length; i++) {
               if (i == value) {
-                _controllers[i].playVideo();
+                _controllers[i].play();
               } else {
-                _controllers[i].pauseVideo();
+                _controllers[i].pause();
               }
             }
             EventRepo().addEvent({
@@ -129,9 +121,7 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 50),
-              child: ReelsCardView(
-
-                  youtubePlayerController: _controllers[index], reelCard: reelsProviders.getAllReelsList[index]),
+              child: ReelsCardView(youtubePlayerController: _controllers[index], reelCard: reelsProviders.getAllReelsList[index]),
             );
           },
         );
@@ -170,30 +160,30 @@ class _ReelsCardViewState extends State<ReelsCardView> {
               return YoutubePlayer(
                 controller: widget.youtubePlayerController,
                 // showVideoProgressIndicator: true,
-                // bottomActions: [
-                //   CurrentPosition(),
-                //   ProgressBar(
-                //     isExpanded: true,
-                //     colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
-                //   ),
-                //   RemainingDuration(),
-                //
-                //   IconButton(
-                //     icon: Icon(
-                //       homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
-                //       color: Colors.white,
-                //     ),
-                //     onPressed: () {
-                //       if (homeProvider.isMuted) {
-                //         widget.youtubePlayerController.unMute();
-                //
-                //       } else {
-                //         widget.youtubePlayerController.mute();
-                //       }
-                //       homeProvider.toggleMute(); // Update your isMuted state
-                //     },
-                //   ), // ✅ Show remaining time
-                // ],
+                bottomActions: [
+                  CurrentPosition(),
+                  ProgressBar(
+                    isExpanded: true,
+                    colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
+                  ),
+                  RemainingDuration(),
+
+                  IconButton(
+                    icon: Icon(
+                      homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      if (homeProvider.isMuted) {
+                        widget.youtubePlayerController.unMute();
+
+                      } else {
+                        widget.youtubePlayerController.mute();
+                      }
+                      homeProvider.toggleMute(); // Update your isMuted state
+                    },
+                  ), // ✅ Show remaining time
+                ],
               );
             }),
           ),
@@ -217,6 +207,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                     "postId": widget.reelCard.id.toString() ?? "000",
                     "createAt": DateTime.now().toString(),
                     "postTitle": widget.reelCard.title.toString()
+
                   }, "liked_article");
                 },
               ),
@@ -232,11 +223,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                   String? deviceId = sp.getString("deviceId");
                   context.read<AuthenticationProvider>().sendEvent("CommentPage");
 
-                  showComments(
-                    context,
-                    widget.reelCard.id.toString(),
-                    widget.reelCard.title.toString(),
-                  );
+                  showComments(context, widget.reelCard.id.toString(),widget.reelCard.title.toString(),);
                 },
               ),
               height(height: 20),
@@ -253,6 +240,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                     "postId": widget.reelCard.id.toString() ?? "000", // ✅ postId converted to String
                     "createAt": DateTime.now().toString(),
                     "postTitle": widget.reelCard.title.toString()
+
                   }, "shared_article");
 
                   SharedPreferences sp = await SharedPreferences.getInstance();
@@ -293,15 +281,15 @@ class _ReelsCardViewState extends State<ReelsCardView> {
               padding: EdgeInsets.only(right: 12.w, left: 12.w),
               width: MediaQuery.of(context).size.width - 100,
               decoration: BoxDecoration(
-                  // gradient: LinearGradient(
-                  //   begin: Alignment.bottomCenter,
-                  //   end: Alignment.topCenter,
-                  //   colors: [
-                  //     Colors.black.withOpacity(0.7),
-                  //     Colors.transparent,
-                  //   ],
-                  // ),
-                  ),
+                // gradient: LinearGradient(
+                //   begin: Alignment.bottomCenter,
+                //   end: Alignment.topCenter,
+                //   colors: [
+                //     Colors.black.withOpacity(0.7),
+                //     Colors.transparent,
+                //   ],
+                // ),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,

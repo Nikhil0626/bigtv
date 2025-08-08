@@ -17,7 +17,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
-import 'package:youtube_player_iframe/youtube_player_iframe.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../../../globel_keys/globel_keys.dart';
 import '../../../services/analytics_service.dart';
@@ -104,25 +104,29 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void youtubeInitial(String videoId) {
-    controller = YoutubePlayerController(
-      params: const YoutubePlayerParams(
-        showControls: false,
-        mute: false,
-        showFullscreenButton: true,
-        loop: false,
 
+
+  void youtubeInitial(url) {
+    controller = YoutubePlayerController(
+      initialVideoId: url, // Example YouTube video ID
+      flags: const YoutubePlayerFlags(
+        autoPlay: true,
+        enableCaption: false,
+        forceHD: false,
+        disableDragSeek: true,
+        isLive: false,
+        showLiveFullscreenButton: false,
+        // hideControls: true,
       ),
     );
-    controller.loadVideoById(videoId: videoId);
     // notifyListeners();
   }
-
   void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
-    controller.close();
+    controller.dispose();
     notifyListeners();
   }
+
 
   void setSelectedTagId(int id) {
     _selectedTagId = id;

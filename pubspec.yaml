@@ -48,7 +48,7 @@ dependencies:
   app_links: ^6.4.0
   image_picker: ^1.1.2
   easy_localization: ^3.0.7+1
-  flutter_inappwebview: ^6.1.5
+#  flutter_inappwebview: ^6.1.5
   app_tracking_transparency: ^2.0.6+1
   shimmer: ^3.0.0
   go_router: ^14.8.1
@@ -74,7 +74,7 @@ dependencies:
   android_play_install_referrer: ^0.4.0
   network_info_plus: ^6.1.4
   flutter_carousel_slider: ^1.1.0
-  youtube_player_iframe: ^5.2.1
+  webview_flutter: ^4.13.0
 #  click_to_copy: ^0.0.1
 #  flutter_invitereferrals: ^1.2.1
 
