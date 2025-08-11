@@ -783,41 +783,24 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     log(    "ad_source : $source",);
-    final jsgfjweugf= {
-      "user_id": userId.toString(),
-      "latency_request": responseReceived!.difference(requestInitiated!).inMilliseconds.toString(),
-      "latency_load": adCreativeDownloaded!.difference(responseReceived!).inMilliseconds.toString(),
-      "latency_render": adRendered!.difference(adCreativeDownloaded!).inMilliseconds.toString(),
-      "latency_total": impressionLogged!.difference(requestInitiated!).inMilliseconds.toString(),
-      "ad_source": source.toString(),
-      "data": "${ad.responseInfo}"
-    };
-    log("kjfbwekjfueifhbew ${jsgfjweugf.toString()}");
-    // if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
-      final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
-      final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
-      final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
-      final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
-      log({
-        "user_id": userId.toString(),
-        "latency_request": requestLatency.toString(),
-        "latency_load": loadLatency.toString(),
-        "latency_render": renderLatency.toString(),
-        "latency_total": totalLatency.toString(),
-        "ad_source": source.toString(),
-        "data": "${ad.responseInfo}"
-      }.toString());
-      mainNavigatorKey.currentContext!.read<HomeProvider>().sendDataToads(
-          {
-            "user_id": userId.toString(),
-            "latency_request": requestLatency.toString(),
-            "latency_load": loadLatency.toString(),
-            "latency_render": renderLatency.toString(),
-            "latency_total": totalLatency.toString(),
-            "ad_source": source.toString(),
-            "data": "${ad.responseInfo}"
-          }
-      );
+    final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
+    final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+    // final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+    // final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+    final sdkReadyLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
+    final creativeDownloadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+    final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+    final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+
+    mainNavigatorKey.currentContext!
+        .read<HomeProvider>()
+        .sendDataToads({
+      "sdk_ready_time": sdkReadyLatency.toString(),
+      "creative_download": creativeDownloadLatency.toString(),
+      "render_time": renderLatency.toString(),
+      "total_time": totalLatency.toString(),
+      "data": "${ad.responseInfo}",
+    });
       await analytics.logEvent(
         name: "ad_latency_metrics",
         parameters: {

@@ -513,10 +513,22 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
       final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
       final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+      final sdkReadyLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
+      final creativeDownloadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+      // final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+      // final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+
       mainNavigatorKey.currentContext!
           .read<HomeProvider>()
-          .sendDataToads({"request_time": requestLatency.toString(), "response_time": loadLatency.toString(), "render_time": renderLatency.toString(), "data": "${ad.responseInfo}"});
-      await analytics.logEvent(
+          .sendDataToads({
+        "sdk_ready_time": sdkReadyLatency.toString(),
+        "creative_download": creativeDownloadLatency.toString(),
+        "render_time": renderLatency.toString(),
+        "total_time": totalLatency.toString(),
+        "data": "${ad.responseInfo}",
+      });
+
+     await analytics.logEvent(
         name: "ad_latency_metrics",
         parameters: {
           "adSource": "Banner 320x50",
@@ -534,6 +546,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       );
     }
   }
+
 
   @override
   void dispose() {
