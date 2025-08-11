@@ -33,7 +33,7 @@ class _VideoPreview extends State<VideoPreview> {
 
   @override
   void dispose() {
-    context.read<HomeProvider>().controller.dispose();
+    // context.read<HomeProvider>().controller.dispose();
     super.dispose();
   }
 
@@ -58,36 +58,34 @@ class _VideoPreview extends State<VideoPreview> {
         child: homeProvider.isPlaying
             ? Stack(
           children: [
-            Positioned.fill(
-              child: YoutubePlayerBuilder(
-                player: YoutubePlayer(
-                  controller: homeProvider.controller,
-                  showVideoProgressIndicator: true,
-                  onReady: () => debugPrint("YouTube Player Ready"),
-                  onEnded: (metaData) {
-                    homeProvider.isPlayingYoutube(false);
-                  },
-                  bottomActions: [
-                    CurrentPosition(),
-                    ProgressBar(isExpanded: true),
-                    RemainingDuration(),
-                    IconButton(
-                      icon: Icon(
-                        homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
-                      ),
-                      onPressed: () {
-                        if (homeProvider.isMuted) {
-                          homeProvider.controller.unMute();
-                        } else {
-                          homeProvider.controller.mute();
-                        }
-                        homeProvider.toggleMute();
-                      },
+            YoutubePlayerBuilder(
+              player: YoutubePlayer(
+                controller: homeProvider.controller,
+                showVideoProgressIndicator: true,
+                onReady: () => debugPrint("YouTube Player Ready"),
+                onEnded: (metaData) {
+                  homeProvider.isPlayingYoutube(false);
+                },
+                bottomActions: [
+                  CurrentPosition(),
+                  ProgressBar(isExpanded: true),
+                  RemainingDuration(),
+                  IconButton(
+                    icon: Icon(
+                      homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
                     ),
-                  ],
-                ),
-                builder: (context, player) => player,
+                    onPressed: () {
+                      if (homeProvider.isMuted) {
+                        homeProvider.controller.unMute();
+                      } else {
+                        homeProvider.controller.mute();
+                      }
+                      homeProvider.toggleMute();
+                    },
+                  ),
+                ],
               ),
+              builder: (context, player) => player,
             ),
           ],
         )

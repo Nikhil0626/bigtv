@@ -36,15 +36,34 @@ class _AdsTestDataState extends State<AdsTestData> {
                     child: Text("$index", style: const TextStyle(color: Colors.white)),
                   ),
                   title: Text(
-                    item["id"].toString() ?? "Hello",
+                    item["user_id"].toString(),
                     style: const TextStyle(fontSize: 16, color: Colors.black),
                   ),
-                  // subtitle: Text(item["tags"], style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   initiallyExpanded: false,
                   children: [
                     Text(
-                      item["data"] ?? "Why",
-                      style: const TextStyle(fontSize: 14, color: Colors.black),
+                      "Ads Source -- ${item["ad_source"]}",
+                      style: const TextStyle(fontSize: 14, color: Colors.teal),
+                    ),
+                    Text(
+                      "Latency Request -- ${item["latency_request"]}",
+                      style: const TextStyle(fontSize: 14, color: Colors.orange),
+                    ),
+                    Text(
+                      "Latency Load -- ${item["latency_load"]}",
+                      style: const TextStyle(fontSize: 14, color: Colors.blue),
+                    ),
+                    Text(
+                      "Latency Render -- ${item["latency_render"]}",
+                      style: const TextStyle(fontSize: 14, color: Colors.purple),
+                    ),
+                    Text(
+                      "Latency Total -- ${item["latency_total"]}",
+                      style: const TextStyle(fontSize: 14, color: Colors.green),
+                    ),
+                    Text(
+                      "Ads Data -- ${item["data"]}",
+                      style: const TextStyle(fontSize: 14, color: Colors.red),
                     ),
                   ],
                   onExpansionChanged: (bool expanded) {
@@ -53,6 +72,7 @@ class _AdsTestDataState extends State<AdsTestData> {
                     });
                   },
                 ),
+
               );
             },
           ),

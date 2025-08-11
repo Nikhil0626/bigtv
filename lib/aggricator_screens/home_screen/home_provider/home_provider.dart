@@ -751,9 +751,12 @@ class HomeProvider extends ChangeNotifier {
   Future getAdsSaveData() async {
     isAdsDataLoading = true;
     getAdsDataList = [];
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString("userId");
     try {
       Response response = await BaseService().makeRequest(
         baseUrl: BaseUrls.baseUrlAwsDev,
+        queryParameters: {"user_id": userId},
         url: BaseUrls.test,
         method: RequestType.get,
       );

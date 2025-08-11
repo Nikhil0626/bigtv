@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../globel_keys/globel_keys.dart';
 import '../../../utils/app_colors.dart';
@@ -596,11 +597,13 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   }
 
   void _loadAllAds(BuildContext context) {
+    requestInitiated = DateTime.now();
     _loadAdManagerNativeAd(context);
     _loadAdMobNativeAd(context);
     _loadBannerAd(context);
     _loadBannerAdMob(context);
   }
+
 
   void _onAdLoaded(Ad ad, Widget adWidget) {
     if (adDisplayState != 'adReady') {
@@ -624,6 +627,7 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   }
 
   void _loadAdManagerNativeAd(BuildContext context) {
+    requestInitiated = DateTime.now();
     final adUnitId = context.read<HomeProvider>().adManagerNativeId;
     // _adManagerNativeAd = NativeAd(
     //   adUnitId: adUnitId,
@@ -648,6 +652,9 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(
         onAdLoaded: (ad) {
+          responseReceived = DateTime.now();
+          adCreativeDownloaded = DateTime.now();
+          adRendered = DateTime.now();
           source ="Native Manager";
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
@@ -669,13 +676,17 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   }
 
   void _loadAdMobNativeAd(BuildContext context) {
-    // final adUnitId = context.read<HomeProvider>().adMobNativeId;
-    String? adUnitId = "ca-app-pub-3940256099942544/2247696110";
+    requestInitiated = DateTime.now();
+    final adUnitId = context.read<HomeProvider>().adMobNativeId;
+    // String? adUnitId = "ca-app-pub-3940256099942544/2247696110";
     _adMobNativeAd = NativeAd(
       adUnitId: adUnitId,
       factoryId: 'adFactoryExample',
       listener: NativeAdListener(
         onAdLoaded: (ad) {
+          responseReceived = DateTime.now();
+          adCreativeDownloaded = DateTime.now();
+          adRendered = DateTime.now();
           source ="Native Mob";
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
@@ -697,8 +708,9 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   }
 
   void _loadBannerAd(BuildContext context) {
-    // final adUnitId = context.read<HomeProvider>().adManagerBannerId;
-    final adUnitId = "/6499/example/banner";
+    requestInitiated = DateTime.now();
+    final adUnitId = context.read<HomeProvider>().adManagerBannerId;
+    // final adUnitId = "/6499/example/banner";
 
     _bannerAd = AdManagerBannerAd(
       adUnitId: adUnitId,
@@ -706,6 +718,9 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
       sizes: [AdSize.mediumRectangle],
       listener: AdManagerBannerAdListener(
         onAdLoaded: (ad) {
+          responseReceived = DateTime.now();
+          adCreativeDownloaded = DateTime.now();
+          adRendered = DateTime.now();
           source ="Banner Manager";
           _onAdLoaded(ad, AdWidget(ad: ad as AdManagerBannerAd));
         },
@@ -726,6 +741,7 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   }
 
   void _loadBannerAdMob(BuildContext context) {
+    requestInitiated = DateTime.now();
     final adUnitId = context.read<HomeProvider>().adMobBannerId;
 
     _bannerAd1 = BannerAd(
@@ -734,6 +750,9 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
       request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
+          responseReceived = DateTime.now();
+          adCreativeDownloaded = DateTime.now();
+          adRendered = DateTime.now();
           source ="Banner MOb";
           _onAdLoaded(ad, AdWidget(ad: ad as BannerAd));
         },
@@ -761,14 +780,43 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   }
 
   void _logLatencyMetrics(Ad ad) async {
-    if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString("userId");
+    log(    "ad_source : $source",);
+    final jsgfjweugf= {
+      "user_id": userId.toString(),
+      "latency_request": responseReceived!.difference(requestInitiated!).inMilliseconds.toString(),
+      "latency_load": adCreativeDownloaded!.difference(responseReceived!).inMilliseconds.toString(),
+      "latency_render": adRendered!.difference(adCreativeDownloaded!).inMilliseconds.toString(),
+      "latency_total": impressionLogged!.difference(requestInitiated!).inMilliseconds.toString(),
+      "ad_source": source.toString(),
+      "data": "${ad.responseInfo}"
+    };
+    log("kjfbwekjfueifhbew ${jsgfjweugf.toString()}");
+    // if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
       final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
       final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
       final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
       final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
-      // EventRepo().addEvent(, "");
+      log({
+        "user_id": userId.toString(),
+        "latency_request": requestLatency.toString(),
+        "latency_load": loadLatency.toString(),
+        "latency_render": renderLatency.toString(),
+        "latency_total": totalLatency.toString(),
+        "ad_source": source.toString(),
+        "data": "${ad.responseInfo}"
+      }.toString());
       mainNavigatorKey.currentContext!.read<HomeProvider>().sendDataToads(
-          {"request_time": requestLatency.toString(), "response_time": loadLatency.toString(), "render_time": renderLatency.toString(), "data": "${ad.responseInfo}"}
+          {
+            "user_id": userId.toString(),
+            "latency_request": requestLatency.toString(),
+            "latency_load": loadLatency.toString(),
+            "latency_render": renderLatency.toString(),
+            "latency_total": totalLatency.toString(),
+            "ad_source": source.toString(),
+            "data": "${ad.responseInfo}"
+          }
       );
       await analytics.logEvent(
         name: "ad_latency_metrics",
@@ -786,7 +834,7 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
           "createAt": DateTime.now().toString(),
         },
       );
-    }
+    // }
   }
 
   @override

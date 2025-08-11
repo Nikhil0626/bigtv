@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_enums.dart';
@@ -63,8 +65,8 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _loadAdManagerNativeAd(BuildContext context) {
-    String? adUnitId = context.read<HomeProvider>().adManagerNativeId;
-    // String? adUnitId = "/21775744923/example/native";
+    // String? adUnitId = context.read<HomeProvider>().adManagerNativeId;
+    String? adUnitId = "/21775744923/example/native";
     requestInitiated = DateTime.now();
 
     _adManagerNativeAd = NativeAd(
@@ -96,11 +98,11 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
         onAdLoaded: (ad) {
           source = "Adm_Native";
           responseReceived = DateTime.now();
-          adCreativeDownloaded = DateTime.now();
-          adRendered = DateTime.now();
+
           _onAdLoaded(ad, AdWidget(ad: ad as NativeAd));
         },
         onAdImpression: (ad) async {
+          adRendered = DateTime.now();
           impressionLogged = DateTime.now();
           await analytics.logEvent(
             name: "onAdImpression",
@@ -246,8 +248,8 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _loadBannerAd(BuildContext context) {
-    final adUnitId = context.read<HomeProvider>().adManagerBannerId;
-    // final adUnitId = "/21775744923/example/fixed-size-banner";
+    // final adUnitId = context.read<HomeProvider>().adManagerBannerId;
+    final adUnitId = "/21775744923/example/fixed-size-banner";
     requestInitiated = DateTime.now();
     _bannerAd = AdManagerBannerAd(
         adUnitId: adUnitId,
@@ -449,14 +451,34 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
   }
 
   void _logLatencyMetrics(Ad ad) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString("userId");
     if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
       final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
       final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
       final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
       final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
-      // EventRepo().addEvent(, "");
+      final kejnfewnfoew={
+        "user_id": userId.toString(),
+        "latency_request": requestLatency.toString(),
+        "latency_load": loadLatency.toString(),
+        "latency_render": renderLatency.toString(),
+        "latency_total": totalLatency.toString(),
+        "ad_source": source.toString(),
+        "data": "${ad.responseInfo}"
+      };
+
+      log("ad_source :  $kejnfewnfoew");
       mainNavigatorKey.currentContext!.read<HomeProvider>().sendDataToads(
-        {"request_time": requestLatency.toString(), "response_time": loadLatency.toString(), "render_time": renderLatency.toString(), "data": "${ad.responseInfo}"}
+          {
+            "user_id": userId.toString(),
+            "latency_request": requestLatency.toString(),
+            "latency_load": loadLatency.toString(),
+            "latency_render": renderLatency.toString(),
+            "latency_total": totalLatency.toString(),
+            "ad_source": source.toString(),
+            "data": "${ad.responseInfo}"
+          }
       );
       await analytics.logEvent(
         name: "ad_latency_metrics",
