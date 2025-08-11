@@ -466,6 +466,8 @@ class _FullScreenNativeAdState extends State<FullScreenNativeAd> {
       mainNavigatorKey.currentContext!
           .read<HomeProvider>()
           .sendDataToads({
+        "ad_source": source.toString(),
+        "user_id":userId.toString(),
         "sdk_ready_time": sdkReadyLatency.toString(),
         "creative_download": creativeDownloadLatency.toString(),
         "render_time": renderLatency.toString(),
