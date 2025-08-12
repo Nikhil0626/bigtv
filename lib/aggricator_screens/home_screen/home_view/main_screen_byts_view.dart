@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/banner_300x50_size.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_support_widgets/image_preview.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -18,7 +17,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../utils/keep_alive_page.dart';
-import '../../ad_manager_screen/ad_screen/ios_ads_view.dart';
 import '../../auth_screens/authentication_provider/authentication_provider.dart';
 import '../../../utils/botton_actions.dart';
 import '../../events_data/event_repo.dart';
@@ -134,11 +132,10 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 )
                               : widget.article['type'] == "GoogleAds"
                                   ? Platform.isIOS
-                                      ? KeepAlivePage(
-                                          keepAlive: true,
-                                          child: IosAdsWidgetScreen(
-                                            article: widget.article,
-                                          ),
+                                      ? Container(
+                                          width: 444,
+                                          height: 444,
+                                          color: Colors.amber,
                                         )
                                       : KeepAlivePage(
                                           keepAlive: true,

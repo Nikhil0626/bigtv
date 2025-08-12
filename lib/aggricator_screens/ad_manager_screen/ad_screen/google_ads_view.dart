@@ -1,10 +1,10 @@
-import 'dart:developer';
-import 'dart:io';
 
-import 'package:chotanews/services/analytics_service.dart';
+import 'dart:developer';
+
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
@@ -14,218 +14,106 @@ import '../../home_screen/home_provider/home_provider.dart';
 import '../../settings_screen/settings_view/feedback_view.dart';
 import '../../../utils/app_colors.dart';
 
-class GoogleAdsView extends StatefulWidget {
-  final article;
-  final HomeProvider flipProvider;
-  final isFoldable;
-  bool isList;
-  int index;
 
-  GoogleAdsView({
-    super.key,
-    required this.article,
-    required this.flipProvider,
-    required this.isFoldable,
-    this.isList = false,
-    this.index = 0,
-  });
+import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+class Ad300x250Widget extends StatefulWidget {
+  const Ad300x250Widget({super.key});
 
   @override
-  State<GoogleAdsView> createState() => _GoogleAdsViewState();
+  State<Ad300x250Widget> createState() => _Ad300x250WidgetState();
 }
 
-class _GoogleAdsViewState extends State<GoogleAdsView> {
-  NativeAd? _nativeAd;
+class _Ad300x250WidgetState extends State<Ad300x250Widget> {
+  BannerAd? _bannerAd;
   bool _isAdLoaded = false;
+
+  DateTime? requestInitiated;
+  DateTime? responseReceived;
+  DateTime? adCreativeDownloaded;
+  DateTime? adRendered;
+  DateTime? impressionLogged;
 
   @override
   void initState() {
     super.initState();
-    // loadAd();
+    _loadAd();
   }
 
-  void loadAd() {
-    _nativeAd = NativeAd(
-      adUnitId: Platform.isIOS ? "ca-app-pub-2405357352181832/7643871122" : 'ca-app-pub-2405357352181832/9820571770', // Your Ad Unit ID
-      request: const AdRequest(),
-      listener: NativeAdListener(
-        onAdLoaded: (ad) {
-          if (mounted) {
-            setState(() {
-              _isAdLoaded = true;
-            });
-          }
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-          if (mounted) {
-            setState(() {
-              _isAdLoaded = false;
-              _nativeAd = null;
+  void _loadAd() {
+    requestInitiated = DateTime.now();
 
-            });
-          }
-          print('Ad failed to load: $error');
+    _bannerAd = BannerAd(
+      size: const AdSize(width: 300, height: 250), // ✅ 300×250 size
+      // adUnitId: "ca-app-pub-3940256099942544/2934735716", // ✅ Test Ad Unit
+      adUnitId: "ca-app-pub-2405357352181832/9414144917", // ✅ Test Ad Unit
+      // adUnitId:  context.read<HomeProvider>().adMobBannerId, // ✅ Test Ad Unit
+      // adUnitId:     context.read<HomeProvider>().adManagerBannerId,// ✅ Test Ad Unit
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          responseReceived ??= DateTime.now();
+          adCreativeDownloaded ??= DateTime.now();
+          adRendered = DateTime.now();
+
+          setState(() => _isAdLoaded = true);
+          // _logLatencies();
+        },
+
+        onAdFailedToLoad: (ad, error) {
+          debugPrint("❌ Ad failed to load: $error");
+          ad.dispose();
+        },
+        onAdImpression: (ad) {
+          impressionLogged = DateTime.now();
+          _logLatencies(ad);
         },
       ),
-      nativeTemplateStyle: NativeTemplateStyle(templateType: TemplateType.medium),
-    )
-      ..load();
-    if (_nativeAd != null) {
-      AnalyticsService.logEvent2("ads_available");
-    }
-    setState(() {});
+      request: const AdRequest(),
+    )..load();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Expanded(
-        //   flex: 1,
-        //   // child: context.read<HomeProvider>().adWidgets[5]!,
-        //   // child: !_isAdLoaded || _nativeAd == null
-        //   //     ?widget.article['adType']=="rating card"?RateYourApp():widget.article['adType']=="share card"?ShareYourApp():ShareYourApp()
-        //   //     : Padding(
-        //   //   padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16),
-        //   //   child: AdWidget(ad: _nativeAd!),
-        //   // ),
-        // ),
-        if (widget.isList)
-          Expanded(
-            flex: 1,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 6),
-              child: Column(
-                children: [
-                  Text(
-                    "Recommended News",
-                    maxLines: 1,
-                    style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor),
-                  ),
-                  // height(height: 10),
-                  // Expanded(
-                  //   child: Container(
-                  //     alignment: Alignment.center,
-                  //     child: ListView.builder(
-                  //       itemCount: 3,
-                  //       physics: NeverScrollableScrollPhysics(),
-                  //       itemBuilder: (context, index) {
-                  //         return InkWell(
-                  //           onTap: () {
-                  //             Navigator.push(
-                  //                 context,
-                  //                 MaterialPageRoute(
-                  //                   builder: (context) => IndividualPostView1(postId: widget.article["isHomeScreen"]![index]['id'].toString(),isComeFrom: true,),
-                  //                 ));
-                  //           },
-                  //           child: Center(
-                  //             child: Container(
-                  //               width: MediaQuery
-                  //                   .of(context)
-                  //                   .size
-                  //                   .width,
-                  //               margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
-                  //               padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
-                  //               decoration: BoxDecoration(
-                  //                 color: AppColors.wColor,
-                  //                 border: Border.all(width: 2, color: AppColors.wColor),
-                  //                 borderRadius: BorderRadius.all(Radius.circular(10)),
-                  //               ),
-                  //               child: Row(
-                  //                 children: [
-                  //                   ClipRRect(
-                  //                     borderRadius: BorderRadius.circular(8),
-                  //                     child: CachedNetworkImage(
-                  //                       imageUrl: widget.article["isHomeScreen"]![index]['image_url'].toString(),
-                  //                       height: 50,
-                  //                       width: 50,
-                  //                       fit: BoxFit.cover,
-                  //                       placeholder: (context, url) =>
-                  //                           Container(
-                  //                             height: 50,
-                  //                             width: 50,
-                  //                             decoration: BoxDecoration(
-                  //                               color: AppColors.borderColor.withOpacity(.2),
-                  //                               borderRadius: BorderRadius.circular(8),
-                  //                             ),
-                  //                           ),
-                  //                       errorWidget: (context, url, error) =>
-                  //                           Container(
-                  //                             height: 40,
-                  //                             width: 40,
-                  //                             decoration: BoxDecoration(
-                  //                               borderRadius: BorderRadius.circular(8),
-                  //                               color: Colors.grey.shade300,
-                  //                             ),
-                  //                             child: Center(
-                  //                               child: Icon(
-                  //                                 Icons.image,
-                  //                                 size: 30,
-                  //                                 color: Colors.white,
-                  //                               ),
-                  //                             ),
-                  //                           ),
-                  //                     ),
-                  //                   ),
-                  //                   width(width: 10),
-                  //                   Expanded(
-                  //                     child: Column(
-                  //                       mainAxisAlignment: MainAxisAlignment.start,
-                  //                       crossAxisAlignment: CrossAxisAlignment.start,
-                  //                       children: [
-                  //                         Text(
-                  //                           "${widget.article["homepage"][index]["title"]}",
-                  //                           maxLines: 1,
-                  //                           overflow: TextOverflow.ellipsis,
-                  //                           style: fontStyle(
-                  //                             fontSize: 14,
-                  //                             fontWeight: FontWeight.w700,
-                  //                             color: AppColors.textColor,
-                  //                           ),
-                  //                         ),
-                  //                         height(height: 2),
-                  //                         Row(
-                  //                           children: [
-                  //                             index==0?SvgPicture.asset("assets/svg/like.svg",height: 16,width: 16,): index==2?SvgPicture.asset("assets/svg/share.svg",height: 16,width: 16,):SvgPicture.asset("assets/svg/eye.svg",height: 16,width: 16,),
-                  //                             width(width: 6),
-                  //                             Text(
-                  //                               index ==0?"టాప్ లైక్స్":index == 2?"టాప్ షేర్‌డ్": "టాప్ వ్యూడ్",
-                  //                               style: fontStyle(
-                  //                                 fontSize: 12,
-                  //                                 fontWeight: FontWeight.w400,
-                  //                                 color: AppColors.textColor,
-                  //                               ),
-                  //                             ),
-                  //                           ],
-                  //                         ),
-                  //                       ],
-                  //                     ),
-                  //                   ),
-                  //                 ],
-                  //               ),
-                  //             ),
-                  //           ),
-                  //         );
-                  //       },
-                  //     ),
-                  //   ),
-                  // ),
-                ],
-              ),
-            ),
-          ),
-      ],
-    );
+  void _logLatencies(Ad ad) {
+    Clipboard.setData(ClipboardData(text: ad.responseInfo.toString()));
+    if (requestInitiated != null) {
+      debugPrint("📊 Ad Latency Metrics:");
+      if (responseReceived != null) {
+        debugPrint("⏱ Request Latency: ${responseReceived!.difference(requestInitiated!).inMilliseconds} ms");
+      }
+      if (adCreativeDownloaded != null && responseReceived != null) {
+        debugPrint("⏱ Load Latency: ${adCreativeDownloaded!.difference(responseReceived!).inMilliseconds} ms");
+      }
+      if (adRendered != null && adCreativeDownloaded != null) {
+
+        debugPrint("⏱ Render Latency: ${adRendered!.difference(adCreativeDownloaded!).inMilliseconds} ms");
+      }
+      if (impressionLogged != null) {
+        debugPrint("⏱ Total Latency: ${impressionLogged!.difference(requestInitiated!).inMilliseconds} ms");
+      }
+
+    }
   }
 
   @override
   void dispose() {
-    log("hello siva ads close");
-    _nativeAd?.dispose();
+    _bannerAd?.dispose();
     super.dispose();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: _isAdLoaded
+          ? SizedBox(
+        width: 300,
+        height: 250,
+        child: AdWidget(ad: _bannerAd!),
+      )
+          : const CircularProgressIndicator(),
+    );
+  }
 }
+
 
 
 class RateYourApp extends StatelessWidget {
@@ -434,44 +322,79 @@ class ShareYourApp extends StatelessWidget {
 
 
 
-// class GAMBannerAdWidget extends StatefulWidget {
-//   const GAMBannerAdWidget({super.key});
+// class Ad300x250Widget extends StatefulWidget {
+//   const Ad300x250Widget({super.key});
 //
 //   @override
-//   State<GAMBannerAdWidget> createState() => _GAMBannerAdWidgetState();
+//   State<Ad300x250Widget> createState() => _AdManagerNative300x250State();
 // }
 //
-// class _GAMBannerAdWidgetState extends State<GAMBannerAdWidget> {
-//   late AdManagerBannerAd _ad;
+// class _AdManagerNative300x250State extends State<Ad300x250Widget> {
+//   AdManagerBannerAd? _bannerAd;
 //   bool _isAdLoaded = false;
+//
+//   DateTime? requestInitiated;
+//   DateTime? responseReceived;
+//   DateTime? adCreativeDownloaded;
+//   DateTime? adRendered;
+//   DateTime? impressionLogged;
 //
 //   @override
 //   void initState() {
 //     super.initState();
+//     _loadAd();
+//   }
 //
-//     _ad = AdManagerBannerAd(
-//       adUnitId: '/6499/example/banner', // ✅ Replace with your GAM banner ad unit
-//       sizes: [AdSize.mediumRectangle],
-//       request: AdManagerAdRequest(),
+//   void _loadAd() {
+//     requestInitiated = DateTime.now();
+//
+//     _bannerAd = AdManagerBannerAd(
+//       adUnitId: "ca-app-pub-2405357352181832/7643871122", // ✅ Your Ad Manager native ad unit ID
+//       sizes: [AdSize(width: 300, height: 250)], // Fixed 300×250 size
 //       listener: AdManagerBannerAdListener(
 //         onAdLoaded: (ad) {
-//           setState(() {
-//             _isAdLoaded = true;
-//           });
+//           responseReceived ??= DateTime.now();
+//           adCreativeDownloaded ??= DateTime.now();
+//           adRendered = DateTime.now();
+//
+//           setState(() => _isAdLoaded = true);
 //         },
 //         onAdFailedToLoad: (ad, error) {
+//           debugPrint("❌ Ad failed to load: $error");
 //           ad.dispose();
-//           print('Ad failed to load: $error');
+//         },
+//         onAdImpression: (ad) {
+//           impressionLogged = DateTime.now();
+//           _logLatencies(ad);
 //         },
 //       ),
-//     );
+//       request: const AdManagerAdRequest(),
+//     )..load();
+//   }
 //
-//     _ad.load();
+//   void _logLatencies(Ad ad) {
+//     Clipboard.setData(ClipboardData(text: ad.responseInfo.toString()));
+//
+//     if (requestInitiated != null) {
+//       debugPrint("📊 Ad Latency Metrics:");
+//       if (responseReceived != null) {
+//         debugPrint("⏱ Request Latency: ${responseReceived!.difference(requestInitiated!).inMilliseconds} ms");
+//       }
+//       if (adCreativeDownloaded != null && responseReceived != null) {
+//         debugPrint("⏱ Load Latency: ${adCreativeDownloaded!.difference(responseReceived!).inMilliseconds} ms");
+//       }
+//       if (adRendered != null && adCreativeDownloaded != null) {
+//         debugPrint("⏱ Render Latency: ${adRendered!.difference(adCreativeDownloaded!).inMilliseconds} ms");
+//       }
+//       if (impressionLogged != null) {
+//         debugPrint("⏱ Total Latency: ${impressionLogged!.difference(requestInitiated!).inMilliseconds} ms");
+//       }
+//     }
 //   }
 //
 //   @override
 //   void dispose() {
-//     _ad.dispose();
+//     _bannerAd?.dispose();
 //     super.dispose();
 //   }
 //
@@ -479,91 +402,12 @@ class ShareYourApp extends StatelessWidget {
 //   Widget build(BuildContext context) {
 //     return Center(
 //       child: _isAdLoaded
-//           ? Container(
-//         width: _ad.sizes[0].width.toDouble(),
-//         height: _ad.sizes[0].height.toDouble(),
-//         child: AdWidget(ad: _ad),
+//           ? SizedBox(
+//         width: 300,
+//         height: 250,
+//         child: AdWidget(ad: _bannerAd!),
 //       )
 //           : const CircularProgressIndicator(),
-//     );
-//   }
-// }
-
-// class BannerAds extends StatefulWidget {
-//   final article;
-//
-//   const BannerAds({super.key, required this.article});
-//
-//   @override
-//   _BannerAdsState createState() => _BannerAdsState();
-// }
-
-// class _BannerAdsState extends State<BannerAds> {
-//   late BannerAd _bannerAd;
-//   bool _isAdLoaded = false;
-//   BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     loadBannerAd();
-//   }
-//
-//   @override
-//   void didChangeDependencies() {
-//     super.didChangeDependencies();
-//     // You can safely access context or ancestors here if needed.
-//   }
-//
-//   @override
-//   void dispose() {
-//     // Ensure the banner ad is disposed only if it is loaded
-//     if (_isAdLoaded) {
-//       _bannerAd.dispose();
-//     }
-//     super.dispose();
-//   }
-//
-//   void loadBannerAd() {
-//     bannerAdsLoading = BannerAdsLoading.loading;
-//     setState(() {});
-//     final AdSize customAdSize = AdSize(width: 300, height: 250);
-//     _bannerAd = BannerAd(
-//       adUnitId: context.read<HomeProvider>().adManagerBannerId, // Dummy test Ad Unit ID (valid test ID from Google)
-//       // adUnitId: '/21775744923/example/fixed-size-bannerpppp', // Dummy test Ad Unit ID (valid test ID from Google)
-//       size: customAdSize,
-//       request: const AdManagerAdRequest(),
-//       listener: BannerAdListener(onAdLoaded: (ad) {
-//         setState(() {
-//           bannerAdsLoading = BannerAdsLoading.success;
-//           _isAdLoaded = true;
-//         });
-//         print('Banner ad loaded.');
-//       }, onAdFailedToLoad: (ad, error) {
-//         bannerAdsLoading = BannerAdsLoading.fail;
-//         ad.dispose();
-//         setState(() {});
-//       }),
-//     );
-//     _bannerAd.load();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Center(
-//         child: bannerAdsLoading == BannerAdsLoading.loading
-//             ? Center(
-//           child: BannerAdsLoadingScreen(),
-//         )
-//             : bannerAdsLoading == BannerAdsLoading.success
-//             ? AdWidget(ad: _bannerAd)
-//             : widget.article['adType'] == "rating card"
-//             ? RateYourApp()
-//             : widget.article['adType'] == "share card"
-//             ? ShareYourApp()
-//             : ShareYourApp(),
-//       ),
 //     );
 //   }
 // }

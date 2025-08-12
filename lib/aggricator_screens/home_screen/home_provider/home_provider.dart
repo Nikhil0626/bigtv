@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/contest_screen/contest_screen.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
@@ -13,6 +14,7 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -23,6 +25,7 @@ import '../../../globel_keys/globel_keys.dart';
 import '../../../services/analytics_service.dart';
 import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
+import '../../ad_manager_screen/ad_provider/ad_manager_native_provider.dart';
 import '../../contest_screen/contest_provider.dart';
 import '../../events_data/event_repo.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
@@ -30,6 +33,7 @@ import '../home_repo/home_repo.dart';
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
+  List getRecommendedPostList = [];
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
   List getAllSurveyDataList = [];
@@ -105,7 +109,6 @@ class HomeProvider extends ChangeNotifier {
   }
 
 
-
   void youtubeInitial(url) {
     controller = YoutubePlayerController(
       initialVideoId: url, // Example YouTube video ID
@@ -121,6 +124,7 @@ class HomeProvider extends ChangeNotifier {
     );
     // notifyListeners();
   }
+
   void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
     controller.dispose();
@@ -154,7 +158,7 @@ class HomeProvider extends ChangeNotifier {
           getAllPostList.add(response.data['data']);
           Future.delayed(
             Duration(milliseconds: 100),
-            () {
+                () {
               getAllPost(isGetAllPost: true);
               if (isLink) {
                 EventRepo().addEvent({
@@ -202,7 +206,7 @@ class HomeProvider extends ChangeNotifier {
       // getAllPostList = [];
       Future.delayed(
         Duration(milliseconds: 300),
-        () {
+            () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -214,7 +218,7 @@ class HomeProvider extends ChangeNotifier {
       // getAllPostList = [];
       Future.delayed(
         Duration(milliseconds: 300),
-        () {
+            () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -244,13 +248,16 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
-    mainNavigatorKey.currentContext?.read<RatingProvider>().ratingsList = [];
+    mainNavigatorKey.currentContext
+        ?.read<RatingProvider>()
+        .ratingsList = [];
     mainNavigatorKey.currentContext?.read<PollProvider>().clearData();
     isHomeLoading = true;
     if (isGetAllPost == false && postIds == "0") {
       getAllPostList = [];
     }
     isBookMark = [];
+    getRecommendedPostList = [];
     isWebView = false;
     webUrl = "";
     allPostLastId = "0";
@@ -258,14 +265,20 @@ class HomeProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
-    List<int> locationIds = locationId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+    List<int> locationIds = locationId.split(',').where((e) =>
+    e
+        .trim()
+        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Location IDs: $locationIds ==== ${getAllPostList.length}');
 
     String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+    List<int> categoriesIds = categoriesId.split(',').where((e) =>
+    e
+        .trim()
+        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
-    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true};
+    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": false};
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
@@ -280,6 +293,7 @@ class HomeProvider extends ChangeNotifier {
       adMobNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admobnativeid'] : response.data['adUnits']['android']['admobnativeid'];
       adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
       getImageAdsList.addAll(response.data['ads_list']);
+      getRecommendedPostList.addAll(response.data['ad_homepage_data']);
 
       if (isWebView) {
         getAllPostList.insert(0, {
@@ -316,17 +330,24 @@ class HomeProvider extends ChangeNotifier {
           "isBookmarked": 0
         });
       }
-
-      // final seen = <String>{};
-      // final deduplicated = data.where((map) {
-      //   final key = jsonEncode(map);
-      //   return seen.add(key);
-      // }).toList();
-
       getAllPostList.addAll(data);
-      // log(getAllPostList.length.toString());
-      // getAllPostList = getAllPostList.toSet().toList();
-      log(getAllPostList.length.toString());
+
+      for (int index = 0; index < getAllPostList.length; index++) {
+        if ((index + 1) % 5 == 0) { // Every 5th item
+          final position = index + 1; // Convert to 1-based index
+
+          if (position % 15 == 5) {
+            await mainNavigatorKey.currentContext!.read<AdMobBannerProvider>().loadAd(index, AdSize.mediumRectangle);
+          }
+          else if (position % 15 == 10) {
+            await mainNavigatorKey.currentContext!.read<AdManagerNativeProvider>().loadAd(index, AdSize.mediumRectangle);
+          }
+          else if (position % 15 == 0) {
+            await mainNavigatorKey.currentContext!.read<AdManagerNativeProvider>().loadAd(index, AdSize.mediumRectangle);
+          }
+        }
+      }
+
 
       isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {

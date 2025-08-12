@@ -306,6 +306,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../globel_keys/globel_keys.dart';
 import '../../../utils/app_enums.dart';
 import '../../events_data/event_repo.dart';
@@ -508,6 +509,9 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
   }
 
   void _logLatencyMetrics(Ad ad) async {
+
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString("userId");
     if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
       final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
       final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
@@ -521,7 +525,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       mainNavigatorKey.currentContext!
           .read<HomeProvider>()
           .sendDataToads({
-        "ad_source": source.toString(),
+        "ad_source": "banner320X50",
         "user_id":userId.toString(),
         "sdk_ready_time": sdkReadyLatency.toString(),
         "creative_download": creativeDownloadLatency.toString(),
