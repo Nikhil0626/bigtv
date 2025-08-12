@@ -8,7 +8,8 @@ class AdMobBannerProvider with ChangeNotifier {
   final Map<int, AdLatencyData> adLatencyData = {};
   final Map<int, AdSize> adSizes = {};
   final Map<int, String> adErrors = {};
-
+  // final String adUnitId =  'ca-app-pub-2405357352181832/9414144917';
+  final String adUnitId =  'ca-app-pub-3940256099942544/6300978111';
   void loadAds(int index) {
     // Clear existing ads first
     ads.forEach((index, ad) => ad?.dispose());
@@ -42,7 +43,7 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
 
       final ad = BannerAd(
-        adUnitId: 'ca-app-pub-2405357352181832/9414144917',
+        adUnitId:adUnitId,
         size: size,
         request: const AdRequest(),
         listener: BannerAdListener(

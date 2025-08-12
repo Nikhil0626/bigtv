@@ -45,8 +45,8 @@ class AdManagerNativeProvider with ChangeNotifier {
       adsLoaded[index] = false;
       adErrors.remove(index);
 
-      // String? adUnitId = "/21775744923/example/native";
-      String? adUnitId = "/22387492205,23277683599/id1631068092.Native1.1747829152";
+      String? adUnitId = "/21775744923/example/native";
+      // String? adUnitId = "/22387492205,23277683599/id1631068092.Native1.1747829152";
 
      NativeAd ad = NativeAd(
         adUnitId: adUnitId,

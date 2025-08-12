@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_native_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -59,8 +60,8 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer4<HomeProvider, AdManagerNativeProvider, AdMobBannerProvider,AdManagerNativeProvider>(
-        builder: (_, homeProvider, adManagerBannerProvider, adMobBannerProvider,adManagerNativeProvider, __) {
+      body: Consumer5<HomeProvider, AdManagerNativeProvider, AdMobBannerProvider, AdManagerNativeProvider, AdMobNativeProvider>(
+        builder: (_, homeProvider, adManagerBannerProvider, adMobBannerProvider, adManagerNativeProvider, adMobNativeProvider, __) {
           return Column(
             children: [
               Expanded(
@@ -116,8 +117,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                               if ((index + 1) % 5 == 0) {
                                 final position = index + 1; // Convert to 1-based index
 
-                                // Type 1 (Positions 5, 20, 35, 50...)
-                                if (position % 15 == 5) {
+                                if (position % 20 == 5) {
                                   if (adMobBannerProvider.adsLoaded[index] == true) {
                                     final ad = adMobBannerProvider.ads[index];
                                     if (ad != null) {
@@ -127,12 +127,15 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            SizedBox(
-                                              height: 250,
-                                              width: 300,
-                                              child: AdWidget(ad: ad),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                              child: SizedBox(
+                                                height: 250,
+                                                width: 300,
+                                                child: AdWidget(ad: ad),
+                                              ),
                                             ),
-                                            Expanded(flex: 1, child: buildRecommendedNews(context,homeProvider)),
+                                            Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                           ],
                                         ),
                                       );
@@ -147,13 +150,10 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                           child: ShareYourApp(),
                                         ),
                                       ),
-                                      Expanded(flex: 1, child: buildRecommendedNews(context,homeProvider)),
+                                      Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                     ],
                                   );
-                                }
-
-                                // Type 2 (Positions 10, 25, 40, 55...)
-                                else if (position % 15 == 10) {
+                                } else if (position % 20 == 10) {
                                   if (adManagerBannerProvider.adsLoaded[index] == true) {
                                     final ad = adManagerBannerProvider.ads[index];
                                     if (ad != null) {
@@ -163,12 +163,15 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            SizedBox(
-                                              height: 250,
-                                              width: 300,
-                                              child: AdWidget(ad: ad),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                              child: SizedBox(
+                                                height: 250,
+                                                width: 300,
+                                                child: AdWidget(ad: ad),
+                                              ),
                                             ),
-                                            Expanded(flex: 1, child: buildRecommendedNews(context,homeProvider)),
+                                            Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                           ],
                                         ),
                                       );
@@ -183,13 +186,10 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                           child: RateYourApp(),
                                         ),
                                       ),
-                                      Expanded(flex: 1, child: buildRecommendedNews(context,homeProvider)),
+                                      Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                     ],
                                   );
-                                }
-
-                                // Type 3 (Positions 15, 30, 45, 60...)
-                                else if (position % 15 == 0) {
+                                } else if (position % 20 == 15) {
                                   if (adManagerNativeProvider.adsLoaded[index] == true) {
                                     final ad = adManagerNativeProvider.ads[index];
                                     if (ad != null) {
@@ -199,12 +199,15 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            SizedBox(
-                                              height: 350,
-                                              width: 350,
-                                              child: AdWidget(ad: ad),
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                              child: SizedBox(
+                                                height: 350,
+                                                width: 350,
+                                                child: AdWidget(ad: ad),
+                                              ),
                                             ),
-                                            Expanded(flex: 1, child: buildRecommendedNews(context,homeProvider)),
+                                            Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                           ],
                                         ),
                                       );
@@ -219,7 +222,43 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                           child: ShareYourApp(),
                                         ),
                                       ),
-                                      Expanded(flex: 1, child: buildRecommendedNews(context,homeProvider)),
+                                      Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
+                                    ],
+                                  );
+                                } else if (position % 20 == 0) {
+                                  if (adMobNativeProvider.adsLoaded[index] == true) {
+                                    final ad = adMobNativeProvider.nativeAds[index];
+                                    if (ad != null) {
+                                      return Container(
+                                        color: Colors.grey[200],
+                                        alignment: Alignment.center,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                              child: SizedBox(
+                                                height: 350,
+                                                width: 350,
+                                                child: AdWidget(ad: ad),
+                                              ),
+                                            ),
+                                            Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  }
+                                  return Column(
+                                    children: [
+                                      Expanded(
+                                        flex: 1,
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(20.0),
+                                          child: ShareYourApp(),
+                                        ),
+                                      ),
+                                      Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                     ],
                                   );
                                 }
@@ -274,8 +313,12 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
     return Column(
       children: [
         InkWell(
-            onTap: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AdsTestData(),));
+            onTap: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AdsTestData(),
+                  ));
             },
             child: Text("Show ads response click here", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor))),
         height(height: 10),
@@ -347,15 +390,15 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                 index == 0
                                     ? SvgPicture.asset("assets/svg/like.svg", height: 16, width: 16)
                                     : index == 2
-                                    ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
-                                    : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
+                                        ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
+                                        : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
                                 width(width: 6),
                                 Text(
                                   index == 0
                                       ? "టాప్ లైక్స్"
                                       : index == 2
-                                      ? "టాప్ షేర్‌డ్"
-                                      : "టాప్ వ్యూడ్",
+                                          ? "టాప్ షేర్‌డ్"
+                                          : "టాప్ వ్యూడ్",
                                   style: fontStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textColor),
                                 ),
                               ],

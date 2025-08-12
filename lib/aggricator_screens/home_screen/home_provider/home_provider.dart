@@ -26,6 +26,7 @@ import '../../../services/analytics_service.dart';
 import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../ad_manager_screen/ad_provider/ad_manager_native_provider.dart';
+import '../../ad_manager_screen/ad_provider/ad_mob_native_provider.dart';
 import '../../contest_screen/contest_provider.dart';
 import '../../events_data/event_repo.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
@@ -108,7 +109,6 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
   void youtubeInitial(url) {
     controller = YoutubePlayerController(
       initialVideoId: url, // Example YouTube video ID
@@ -130,7 +130,6 @@ class HomeProvider extends ChangeNotifier {
     controller.dispose();
     notifyListeners();
   }
-
 
   void setSelectedTagId(int id) {
     _selectedTagId = id;
@@ -158,7 +157,7 @@ class HomeProvider extends ChangeNotifier {
           getAllPostList.add(response.data['data']);
           Future.delayed(
             Duration(milliseconds: 100),
-                () {
+            () {
               getAllPost(isGetAllPost: true);
               if (isLink) {
                 EventRepo().addEvent({
@@ -206,7 +205,7 @@ class HomeProvider extends ChangeNotifier {
       // getAllPostList = [];
       Future.delayed(
         Duration(milliseconds: 300),
-            () {
+        () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -218,7 +217,7 @@ class HomeProvider extends ChangeNotifier {
       // getAllPostList = [];
       Future.delayed(
         Duration(milliseconds: 300),
-            () {
+        () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -248,9 +247,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
-    mainNavigatorKey.currentContext
-        ?.read<RatingProvider>()
-        .ratingsList = [];
+    mainNavigatorKey.currentContext?.read<RatingProvider>().ratingsList = [];
     mainNavigatorKey.currentContext?.read<PollProvider>().clearData();
     isHomeLoading = true;
     if (isGetAllPost == false && postIds == "0") {
@@ -265,17 +262,11 @@ class HomeProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
-    List<int> locationIds = locationId.split(',').where((e) =>
-    e
-        .trim()
-        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+    List<int> locationIds = locationId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Location IDs: $locationIds ==== ${getAllPostList.length}');
 
     String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<int> categoriesIds = categoriesId.split(',').where((e) =>
-    e
-        .trim()
-        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+    List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
     Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": false};
@@ -333,21 +324,25 @@ class HomeProvider extends ChangeNotifier {
       getAllPostList.addAll(data);
 
       for (int index = 0; index < getAllPostList.length; index++) {
-        if ((index + 1) % 5 == 0) { // Every 5th item
+        if ((index + 1) % 5 == 0) {
+          // Every 5th item
           final position = index + 1; // Convert to 1-based index
 
-          if (position % 15 == 5) {
+          if (position % 20 == 5) {
+            /// Ad Mob Banner
             await mainNavigatorKey.currentContext!.read<AdMobBannerProvider>().loadAd(index, AdSize.mediumRectangle);
-          }
-          else if (position % 15 == 10) {
+          } else if (position % 20 == 10) {
+            /// Ad Manager Banner
             await mainNavigatorKey.currentContext!.read<AdManagerNativeProvider>().loadAd(index, AdSize.mediumRectangle);
-          }
-          else if (position % 15 == 0) {
+          } else if (position % 20 == 15) {
+            /// Ad Manager Native
             await mainNavigatorKey.currentContext!.read<AdManagerNativeProvider>().loadAd(index, AdSize.mediumRectangle);
+          } else if (position % 20 == 0) {
+            /// Ad Mob Native
+            await mainNavigatorKey.currentContext!.read<AdMobNativeProvider>().loadAd(index, AdSize.mediumRectangle);
           }
         }
       }
-
 
       isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {

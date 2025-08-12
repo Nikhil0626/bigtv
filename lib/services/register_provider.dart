@@ -4,6 +4,7 @@ import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mo
 import 'package:provider/provider.dart';
 
 import '../aggricator_screens/ad_manager_screen/ad_provider/ad_manager_native_provider.dart';
+import '../aggricator_screens/ad_manager_screen/ad_provider/ad_mob_native_provider.dart';
 import '../aggricator_screens/ad_manager_screen/ad_provider/banner_ads_provider.dart';
 import '../aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import '../aggricator_screens/contest_screen/contest_provider.dart';
@@ -38,5 +39,6 @@ class AppProviders {
     ChangeNotifierProvider<AdMobBannerProvider>(create: (_) => AdMobBannerProvider()),
     ChangeNotifierProvider<AdManagerBannerProvider>(create: (_) => AdManagerBannerProvider()),
     ChangeNotifierProvider<AdManagerNativeProvider>(create: (_) => AdManagerNativeProvider()),
+    ChangeNotifierProvider<AdMobNativeProvider>(create: (_) => AdMobNativeProvider()),
   ];
 }
