@@ -16,6 +16,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../utils/image_view_ads.dart';
 import '../../../utils/keep_alive_page.dart';
 import '../../auth_screens/authentication_provider/authentication_provider.dart';
 import '../../../utils/botton_actions.dart';
@@ -153,11 +154,164 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                       ? FullStandardVideoView(
                                           rellData: widget.article,
                                         )
-                                      : widget.article['type'] == "Image"
+                                      : (widget.article['type'] == "Image"  &&  widget.article['subType'] != "ImageAd")
+                                          ? Stack(
+                                            children: [
+                                              Image.network(
+                                                widget.article['image_url'] ?? "",
+                                                width: MediaQuery.of(context).size.width,
+                                                height: MediaQuery.of(context).size.height,
+                                                fit: BoxFit.fill,
+                                              ),
+                                                Positioned(
+                                                  bottom: 0,
+                                                  child: Padding(
+                                                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 6),
+                                                    child: Container(
+                                                      height: 45.sp,
+                                                      color: Colors.transparent,
+                                                      width: MediaQuery.of(context).size.width,
+                                                      child: Column(
+                                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                                        children: [
+                                                          Padding(
+                                                            padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
+                                                            child: Row(
+                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                              children: [
+                                                                Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                                                  return BottomActions(
+                                                                    postType: widget.article['subType'] ?? "",
+                                                                    icon:
+                                                                        settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                                                    label: 'లైక్',
+                                                                    // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
+                                                                    isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                                                    onTap: () async {
+                                                                      log("Like");
+                                                                      settingsProvider.isLikePost(widget.article);
+                                                                      EventRepo().addEvent({
+                                                                        "like": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                                                        "postId": widget.article['id'].toString() ?? '000',
+                                                                        "createAt": DateTime.now().toString(),
+                                                                        "postTitle": widget.article['title'].toString()
+                                                                      }, "liked_article");
+
+                                                                      // settingsProvider.isLikePost(widget.article);
+                                                                    },
+                                                                  );
+                                                                }),
+                                                                width(width: 6),
+                                                                BottomActions(
+                                                                  postType: widget.article['subType'].toString() ?? "",
+                                                                  icon: "assets/svg/new_comment.svg",
+                                                                  label: 'కామెంట్',
+                                                                  onTap: () async {
+                                                                    if (context.mounted) {
+                                                                      context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                                                      showComments(context, widget.article['id'], widget.article['title']);
+                                                                    }
+                                                                  },
+                                                                ),
+                                                                Spacer(),
+                                                                InkWell(
+                                                                  onTap: () async {
+                                                                    SharedPreferences sp = await SharedPreferences.getInstance();
+                                                                    String? userId = sp.getString("userId");
+                                                                    EventRepo().addEvent({
+                                                                      "share": "news",
+                                                                      "postId": widget.article['id'].toString(),
+                                                                      "createAt": DateTime.now().toString(),
+                                                                      "postTitle": widget.article['title'].toString()
+                                                                    }, "shared_article");
+
+                                                                    sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
+
+                                                                    if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                                                                      try {
+                                                                        final image = await adsScreenshotController.capture(
+                                                                          pixelRatio: 2.0,
+                                                                        );
+                                                                        if (image != null) {
+                                                                          final directory = await getTemporaryDirectory();
+                                                                          final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                                                          final imageFile = File(imagePath);
+                                                                          await imageFile.writeAsBytes(image);
+
+                                                                          Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                                                                        } else {
+                                                                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                                                        }
+                                                                      } catch (e) {
+                                                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                                                      }
+                                                                    } else if (widget.article['type'] == "Gallery") {
+                                                                      createAndSharePdfs(context, widget.article);
+                                                                    }
+                                                                    EventRepo().addEvent({
+                                                                      "share": "news",
+                                                                      "postId": widget.article['id'].toString(),
+                                                                      "createAt": DateTime.now().toString(),
+                                                                      "postTitle": widget.article['title'].toString()
+                                                                    }, "shared_article");
+                                                                  },
+                                                                  child: isSending
+                                                                      ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                                                      : SvgPicture.asset(
+                                                                          "assets/svg/share.svg",
+                                                                          height: 20,
+                                                                          width: 20,
+                                                                          color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                                                        ),
+                                                                ),
+                                                                width(width: 20),
+                                                                Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                                                  return SizedBox(
+                                                                    height: 24,
+                                                                    width: 24,
+                                                                    child: InkWell(
+                                                                      onTap: () async {
+                                                                        log("Refresh");
+
+                                                                        homeProvide.isReloadData();
+                                                                        if (widget.isaiTags) {
+                                                                          EventRepo().addEvent({"refresh": false, "createAt": DateTime.now().toString()}, "reload_article");
+                                                                          homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
+                                                                            (value) {
+                                                                              homeProvide.isReloadFalse();
+                                                                            },
+                                                                          );
+                                                                        } else {
+                                                                          homeProvide.getAllPostList = [];
+                                                                          homeProvide.getAllPost();
+                                                                          EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
+                                                                        }
+                                                                      },
+                                                                      child: context.read<HomeProvider>().isReload
+                                                                          ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                                                          : SvgPicture.asset(
+                                                                              "assets/svg/new_refresh.svg",
+                                                                              height: 22,
+                                                                              width: 22,
+                                                                              color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                                                            ),
+                                                                    ),
+                                                                  );
+                                                                }),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          )
+                                      : (widget.article['type'] == "Image" &&  widget.article['subType'] == "ImageAd")
                                           ? InkWell(
-                                              onTap: widget.article['subType'] != "ImageAd"
-                                                  ? null
-                                                  : () async {
+                                              onTap: () async {
                                                       SharedPreferences sp = await SharedPreferences.getInstance();
                                                       bool isLogin = sp.getString("loginType") != "login" ? true : false;
                                                       if (isLogin) {
@@ -168,161 +322,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                             .sendAdsDataSend(widget.article['id'], widget.article['title'], widget.article['image_url'], false, widget.article['postUrl']);
                                                       }
                                                     },
-                                              child: Stack(
-                                                children: [
-                                                  Image.network(
-                                                    widget.article['image_url'] ?? "",
-                                                    width: MediaQuery.of(context).size.width,
-                                                    height: MediaQuery.of(context).size.height,
-                                                    fit: BoxFit.fill,
-                                                  ),
-                                                  if (widget.article['subType'] != "ImageAd")
-                                                    Positioned(
-                                                      bottom: 0,
-                                                      child: Padding(
-                                                        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 6),
-                                                        child: Container(
-                                                          height: 45.sp,
-                                                          color: Colors.transparent,
-                                                          width: MediaQuery.of(context).size.width,
-                                                          child: Column(
-                                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                                            children: [
-                                                              Padding(
-                                                                padding: EdgeInsets.symmetric(horizontal: 16.0.sp, vertical: 5.sp),
-                                                                child: Row(
-                                                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                  children: [
-                                                                    Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                                                      return BottomActions(
-                                                                        postType: widget.article['subType'] ?? "",
-                                                                        icon:
-                                                                            settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                                                        label: 'లైక్',
-                                                                        // isLike: flipProvider.isLikeList.contains(widget.article.id.toString()),
-                                                                        isLike: settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                                        onTap: () async {
-                                                                          log("Like");
-                                                                          settingsProvider.isLikePost(widget.article);
-                                                                          EventRepo().addEvent({
-                                                                            "like": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                                            "postId": widget.article['id'].toString() ?? '000',
-                                                                            "createAt": DateTime.now().toString(),
-                                                                            "postTitle": widget.article['title'].toString()
-                                                                          }, "liked_article");
-
-                                                                          // settingsProvider.isLikePost(widget.article);
-                                                                        },
-                                                                      );
-                                                                    }),
-                                                                    width(width: 6),
-                                                                    BottomActions(
-                                                                      postType: widget.article['subType'].toString() ?? "",
-                                                                      icon: "assets/svg/new_comment.svg",
-                                                                      label: 'కామెంట్',
-                                                                      onTap: () async {
-                                                                        if (context.mounted) {
-                                                                          context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                                          showComments(context, widget.article['id'], widget.article['title']);
-                                                                        }
-                                                                      },
-                                                                    ),
-                                                                    Spacer(),
-                                                                    InkWell(
-                                                                      onTap: () async {
-                                                                        SharedPreferences sp = await SharedPreferences.getInstance();
-                                                                        String? userId = sp.getString("userId");
-                                                                        EventRepo().addEvent({
-                                                                          "share": "news",
-                                                                          "postId": widget.article['id'].toString(),
-                                                                          "createAt": DateTime.now().toString(),
-                                                                          "postTitle": widget.article['title'].toString()
-                                                                        }, "shared_article");
-
-                                                                        sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
-
-                                                                        if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
-                                                                          try {
-                                                                            final image = await adsScreenshotController.capture(
-                                                                              pixelRatio: 2.0,
-                                                                            );
-                                                                            if (image != null) {
-                                                                              final directory = await getTemporaryDirectory();
-                                                                              final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                                                              final imageFile = File(imagePath);
-                                                                              await imageFile.writeAsBytes(image);
-
-                                                                              Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
-                                                                            } else {
-                                                                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                                                            }
-                                                                          } catch (e) {
-                                                                            CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                                                          }
-                                                                        } else if (widget.article['type'] == "Gallery") {
-                                                                          createAndSharePdfs(context, widget.article);
-                                                                        }
-                                                                        EventRepo().addEvent({
-                                                                          "share": "news",
-                                                                          "postId": widget.article['id'].toString(),
-                                                                          "createAt": DateTime.now().toString(),
-                                                                          "postTitle": widget.article['title'].toString()
-                                                                        }, "shared_article");
-                                                                      },
-                                                                      child: isSending
-                                                                          ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                                                          : SvgPicture.asset(
-                                                                              "assets/svg/share.svg",
-                                                                              height: 20,
-                                                                              width: 20,
-                                                                              color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                                                            ),
-                                                                    ),
-                                                                    width(width: 20),
-                                                                    Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                                                                      return SizedBox(
-                                                                        height: 24,
-                                                                        width: 24,
-                                                                        child: InkWell(
-                                                                          onTap: () async {
-                                                                            log("Refresh");
-
-                                                                            homeProvide.isReloadData();
-                                                                            if (widget.isaiTags) {
-                                                                              EventRepo().addEvent({"refresh": false, "createAt": DateTime.now().toString()}, "reload_article");
-                                                                              homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
-                                                                                (value) {
-                                                                                  homeProvide.isReloadFalse();
-                                                                                },
-                                                                              );
-                                                                            } else {
-                                                                              homeProvide.getAllPostList = [];
-                                                                              homeProvide.getAllPost();
-                                                                              EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
-                                                                            }
-                                                                          },
-                                                                          child: context.read<HomeProvider>().isReload
-                                                                              ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                                                              : SvgPicture.asset(
-                                                                                  "assets/svg/new_refresh.svg",
-                                                                                  height: 22,
-                                                                                  width: 22,
-                                                                                  color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                                                                ),
-                                                                        ),
-                                                                      );
-                                                                    }),
-                                                                  ],
-                                                                ),
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                ],
-                                              ),
+                                              child: ImagePostSlider(imageUrl: widget.article['ad_images'],)
                                             )
                                           : widget.article['type'] == "Gallery"
                                               ? KeepAlivePage(

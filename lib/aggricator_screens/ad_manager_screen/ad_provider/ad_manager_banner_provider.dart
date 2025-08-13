@@ -59,6 +59,8 @@ class AdManagerBannerProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+
 }
 
 class AdLatencyData {

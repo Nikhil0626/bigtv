@@ -358,7 +358,9 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
       adUnitId: adUnitId, // Use real AdMob ID in production
       size: AdSize.banner,
       request: const AdRequest(),
+
       listener: BannerAdListener(
+
         onAdLoaded: (Ad ad) {
           _handleAdLoaded(ad as BannerAd, "AdMob", fromTime);
         },
@@ -405,6 +407,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
     _adManagerBanner?.dispose();
 
     _adManagerBanner = AdManagerBannerAd(
+
       // adUnitId: "/6499/example/banner", // Replace with your real ad unit in production
       adUnitId: context.read<HomeProvider>().adManagerBannerId,
       sizes:[AdSize.banner],

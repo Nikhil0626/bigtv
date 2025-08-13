@@ -284,7 +284,7 @@ class HomeProvider extends ChangeNotifier {
       adMobNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admobnativeid'] : response.data['adUnits']['android']['admobnativeid'];
       adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
       getImageAdsList.addAll(response.data['ads_list']);
-      getRecommendedPostList.addAll(response.data['ad_homepage_data']);
+      // getRecommendedPostList.addAll(response.data['ad_homepage_data']);
 
       if (isWebView) {
         getAllPostList.insert(0, {
