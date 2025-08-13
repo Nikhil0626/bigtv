@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 5.0.7+2169
+version: 5.0.7+2170
 environment:
   sdk: ^3.5.4
 dependencies:
