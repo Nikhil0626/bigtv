@@ -754,6 +754,7 @@ class HomeProvider extends ChangeNotifier {
   Future sendDataToads(body) async {
     try {
       Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
+      log("RK RES ${response.data}");
     } on DioException catch (e, st) {
       log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
     } catch (e, st) {
@@ -779,6 +780,7 @@ class HomeProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         getAdsDataList.addAll(response.data);
+        log("LogsData ${getAdsDataList.length}");
       }
     } on DioException catch (e, st) {
       log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");

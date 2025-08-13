@@ -331,7 +331,6 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
   int count = 0;
 
   DateTime? impressionLogged;
-
   DateTime? requestInitiated;
   DateTime? responseReceived;
   DateTime? adCreativeDownloaded;

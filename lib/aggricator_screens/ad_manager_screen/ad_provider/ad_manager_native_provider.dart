@@ -1,7 +1,10 @@
 
+import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../home_screen/home_provider/home_provider.dart';
+import 'package:provider/provider.dart';
 
 class AdManagerNativeProvider with ChangeNotifier {
 
@@ -14,6 +17,11 @@ class AdManagerNativeProvider with ChangeNotifier {
   final Map<int, AdLatencyData> adLatencyData = {};
   final Map<int, AdSize> adSizes = {};
   final Map<int, String> adErrors = {};
+  DateTime? impressionLogged;
+  DateTime? requestInitiated;
+  DateTime? responseReceived;
+  DateTime? adCreativeDownloaded;
+  DateTime? adRendered;
   //
   // void loadAds(int index) {
   //   ads.forEach((index, ad) => ad?.dispose());
@@ -36,6 +44,8 @@ class AdManagerNativeProvider with ChangeNotifier {
 
   Future<void> loadAd(int index, AdSize size) async {
     try {
+      requestInitiated = DateTime.now();
+
       // Clean up existing ad at this index
       ads[index]?.dispose();
 
@@ -84,6 +94,9 @@ class AdManagerNativeProvider with ChangeNotifier {
           onAdLoaded: (ad) {
             ads[index] = ad as NativeAd;
             adsLoaded[index] = true;
+            responseReceived = DateTime.now();
+            adCreativeDownloaded = DateTime.now();
+            adRendered = DateTime.now();
             debugPrint('✅ Ad loaded at $index (${size.width}x${size.height})');
             notifyListeners();
           },
@@ -94,7 +107,10 @@ class AdManagerNativeProvider with ChangeNotifier {
             adErrors[index] = 'Failed: ${error.code} - ${error.message}';
             debugPrint('❌ Ad failed at $index: ${error.message}');
             notifyListeners();
-
+          },
+          onAdImpression: (ad) async {
+            impressionLogged = DateTime.now();
+            _logLatencyMetrics(ad);
           },
         ),
         request: AdRequest(),
@@ -109,6 +125,33 @@ class AdManagerNativeProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+  void _logLatencyMetrics(Ad ad) async {
+
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString("userId");
+    if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
+      final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
+      final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+      final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+      final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+      final sdkReadyLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
+      final creativeDownloadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+      // final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+      // final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+
+      mainNavigatorKey.currentContext!.read<HomeProvider>()
+          .sendDataToads({
+        "ad_source": "AdManagerNativeProvider",
+        "user_id":userId.toString(),
+        "sdk_ready_time": sdkReadyLatency.toString(),
+        "creative_download": creativeDownloadLatency.toString(),
+        "render_time": renderLatency.toString(),
+        "total_time": totalLatency.toString(),
+        "data": "${ad.responseInfo}",
+      });
+    }
+  }
+
 }
 
 class AdLatencyData {

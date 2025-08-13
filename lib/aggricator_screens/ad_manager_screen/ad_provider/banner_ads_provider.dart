@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 import 'dart:async';
@@ -21,7 +22,11 @@ class BannerAdsProvider with ChangeNotifier {
   bool _isLoading = false;
   int _currentAdIndex = 0;
   BuildContext? _context;
-
+  DateTime? requestInitiated;
+  DateTime? responseReceived;
+  DateTime? adCreativeDownloaded;
+  DateTime? adRendered;
+  DateTime? impressionLogged;
   void setContext(BuildContext context) {
     _context = context;
   }
@@ -34,6 +39,8 @@ class BannerAdsProvider with ChangeNotifier {
     required String adUnitId,
     bool isAdManager = false,
   }) async {
+    requestInitiated = DateTime.now();
+
     if (_isLoading || _loadedAds.length >= _maxCachedAds) return;
 
     _isLoading = true;
@@ -48,6 +55,7 @@ class BannerAdsProvider with ChangeNotifier {
         onAdLoaded: (ad) {
           _loadedAds.add(ad as BannerAd);
           _isLoading = false;
+          responseReceived = DateTime.now();
           notifyListeners();
 
           // Pre-load next ads if needed
@@ -75,7 +83,13 @@ class BannerAdsProvider with ChangeNotifier {
           );
         },
         onAdClosed: (ad) => ad.dispose(),
-        onAdImpression: (ad) => _logAdImpression(ad as BannerAd, isAdManager),
+        onAdImpression: (ad){
+          adRendered = DateTime.now();
+          impressionLogged = DateTime.now();
+          _logAdImpression(ad as BannerAd, isAdManager);
+          _logLatencyMetrics(ad);
+
+        },
       ),
     );
 
@@ -129,5 +143,32 @@ class BannerAdsProvider with ChangeNotifier {
       "adUnitId": ad.adUnitId,
       "impressionTime": DateTime.now().toString(),
     }, "ad_impression");
+  }
+
+  void _logLatencyMetrics(Ad ad) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString("userId");
+    if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
+      final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
+      final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+      // final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+      // final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+      final sdkReadyLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
+      final creativeDownloadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+      final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+      final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
+
+      mainNavigatorKey.currentContext!
+          .read<HomeProvider>()
+          .sendDataToads({
+        "ad_source": 'BannerAdsProvider',
+        "user_id":userId.toString(),
+        "sdk_ready_time": sdkReadyLatency.toString(),
+        "creative_download": creativeDownloadLatency.toString(),
+        "render_time": renderLatency.toString(),
+        "total_time": totalLatency.toString(),
+        "data": "${ad.responseInfo}",
+      });
+    }
   }
 }

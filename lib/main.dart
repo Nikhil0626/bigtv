@@ -66,9 +66,13 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) {
-    runApp(EasyLocalization(supportedLocales: [
-      Locale('te'),
-    ], path: 'assets/translations', fallbackLocale: Locale("te"), child: AppLifecycleManager(child: MyApp())));
+    runApp(EasyLocalization(
+        supportedLocales: [
+          Locale('te'),
+        ],
+        path: 'assets/translations',
+        fallbackLocale: Locale("te"),
+        child: AppLifecycleManager(child: MyApp())));
   });
 }
 
