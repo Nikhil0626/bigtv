@@ -1,5 +1,6 @@
 import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/banner_300x50_size.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
+import 'package:chotanews/aggricator_screens/referral_screen/referral_view/refer_earn.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_card.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
@@ -16,6 +17,7 @@ import '../../../services/app_update_servuce.dart';
 import '../../../services/permission_handler_services.dart';
 import '../../../services/webengage_notification.dart';
 import '../../events_data/event_repo.dart';
+import '../../referral_screen/referral_provider/referral_provider.dart';
 import '../../settings_screen/settings_view/settings_view.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_card.dart';
@@ -38,6 +40,11 @@ class _HomeViewState extends State<HomeView> {
       AppUpdateService.checkForUpdate(context);
       requestNotificationPermission();
       homeProvider?.getMobileNumber();
+    });
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Future.delayed(Duration(seconds: 1), () {
+        checkAndShowPopup();
+      });
     });
     homeProvider?.initDeepLinks(context);
     homeProvider?.subscribeToPushCallbacks();
@@ -213,6 +220,79 @@ class _HomeViewState extends State<HomeView> {
           },
         ),
       ),
+    );
+  }
+
+  void checkAndShowPopup() {
+    final referralProvider = context.read<ReferralProvider>();
+    final int downloads = int.tryParse(referralProvider.referralData['downloads']?.toString() ?? "0") ?? 0;
+
+    if (downloads < 10) {
+      showAdPopup(context);
+    }
+  }
+
+  void showAdPopup(BuildContext context) {
+    showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 180),
+              backgroundColor: Colors.transparent,
+              child: Stack(
+                children: [
+                  Container(
+                    width: 335,
+                    height: 335,
+                    decoration: BoxDecoration(
+                      color: Colors.transparent,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 10.0,top: 10),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: InkWell(
+                          onTap: (){
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => ReferEarn(),));
+                          },
+                          child: Image.asset(
+                            'assets/svg/ios_ref.jpeg',
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  ),
+                  Positioned(
+                      top: 1,
+                      right: 0,
+                      child: InkWell(
+                        onTap: (){
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.grey
+                          ),
+                          child: Icon(
+                            Icons.close,
+                            color: Colors.black,
+                            size: 15,
+                          ),
+                        ),
+                      )
+                  ),
+
+                ],
+              )
+          );
+        }
     );
   }
 }

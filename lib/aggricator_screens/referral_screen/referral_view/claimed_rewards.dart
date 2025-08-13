@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/no_claimed_rewards.dart';
+import 'package:chotanews/aggricator_screens/referral_screen/referral_view/redeemCupons.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_toasts.dart';
@@ -49,6 +52,8 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
         elevation: 0,
       ),
       body: Consumer<ReferralProvider>(builder: (_, referralProvider, __) {
+        log("Rewardssss ${referralProvider.referralRewardsClaimed.isNotEmpty}");
+        log("Rewardssss ${referralProvider.referralRewardsClaimed.toString()}");
         return referralProvider.isLoading
             ? AppLoadingScreen()
             : Column(
@@ -314,6 +319,13 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                   },
                 ),
               ),
+            ),
+            Padding(padding: EdgeInsets.all(16.0), child: GestureDetector(
+              onTap: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context) => RedeemAmazonCoupons()));
+              },
+              child: Text("How to redeem coupons?", style: TextStyle(color: Colors.blue),),
+            ),
             )
           ],
         );

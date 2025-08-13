@@ -342,6 +342,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
   void initState() {
     super.initState();
     count = 0;
+    _loadBothAdsInParallel();
     _cron.schedule(Schedule.parse('*/1 * * * *'), () async {
       log("loadBothAdsInParallel");
       _loadBothAdsInParallel();

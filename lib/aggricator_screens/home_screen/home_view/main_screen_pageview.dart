@@ -310,16 +310,17 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
   }
 
   Widget buildRecommendedNews(BuildContext context, HomeProvider homeProvider) {
+    log("nikhil ${homeProvider.getRecommendedPostList.length}");
     return Column(
       children: [
         InkWell(
-            // onTap: () {
-            //   Navigator.push(
-            //       context,
-            //       MaterialPageRoute(
-            //         builder: (context) => AdsTestData(),
-            //       ));
-            // },
+        //     // onTap: () {
+        //     //   Navigator.push(
+        //     //       context,
+        //     //       MaterialPageRoute(
+        //     //         builder: (context) => AdsTestData(),
+        //     //       ));
+        //     // },
             child: Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor))),
         height(height: 10),
         Expanded(
