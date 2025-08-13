@@ -313,14 +313,14 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
     return Column(
       children: [
         InkWell(
-            onTap: () {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AdsTestData(),
-                  ));
-            },
-            child: Text("Show ads response click here", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor))),
+            // onTap: () {
+            //   Navigator.push(
+            //       context,
+            //       MaterialPageRoute(
+            //         builder: (context) => AdsTestData(),
+            //       ));
+            // },
+            child: Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor))),
         height(height: 10),
         Expanded(
           child: ListView.builder(

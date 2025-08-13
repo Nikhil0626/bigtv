@@ -302,6 +302,7 @@
 //
 
 import 'dart:developer';
+import 'package:cron/cron.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -329,7 +330,8 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
   bool _adManagerFailed = false;
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   int count = 0;
-
+  String? mySource;
+  final _cron = Cron();
   DateTime? impressionLogged;
   DateTime? requestInitiated;
   DateTime? responseReceived;
@@ -340,7 +342,10 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
   void initState() {
     super.initState();
     count = 0;
-    _loadBothAdsInParallel();
+    _cron.schedule(Schedule.parse('*/1 * * * *'), () async {
+      log("loadBothAdsInParallel");
+      _loadBothAdsInParallel();
+    });
   }
 
   void _loadBothAdsInParallel() {
@@ -406,7 +411,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
     _adManagerBanner = AdManagerBannerAd(
       // adUnitId: "/6499/example/banner", // Replace with your real ad unit in production
       adUnitId: context.read<HomeProvider>().adManagerBannerId,
-      sizes:[AdSize.banner],
+      sizes: [AdSize.banner],
       request: const AdManagerAdRequest(),
       listener: AdManagerBannerAdListener(
         onAdClosed: (ad) {
@@ -421,12 +426,13 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
         },
         onAdClicked: (ad) => _logAdEvent("onAdClicked", ""),
         onAdLoaded: (ad) {
-          _handleAdLoaded(ad , "AdManager", fromTime);
+          _handleAdLoaded(ad, "AdManager", fromTime);
         },
         onAdFailedToLoad: (ad, error) {
           ad.dispose();
           _adManagerFailed = true;
-          _handleAdFailed("AdManager", error.responseInfo?.toString() ?? 'No info', fromTime);
+          _handleAdFailed("AdManager",
+              error.responseInfo?.toString() ?? 'No info', fromTime);
           Future.delayed(
             const Duration(seconds: 5),
                 () {
@@ -439,7 +445,6 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
     )..load();
   }
 
-
   Future<void> _logAdEvent(eventType, ads) async {
     await analytics.logEvent(
       name: "$eventType",
@@ -451,30 +456,37 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
     );
   }
 
-  void _handleAdLoaded( ad, String source, String fromTime) async {
+  void _handleAdLoaded(ad, String source, String fromTime) async {
     if (_displayedAd == null && mounted) {
       final toTime = DateTime.now().toString();
       context.read<HomeProvider>().isBannerAdLoaded(true);
-      setState(() {
-        _displayedAd = ad;
-        _loadingState = BannerAdsLoading.success;
-      });
+
+      mySource = source;
 
       // Dispose the other one
       if (source == "AdMob") {
+        _displayedAd = ad;
         _adManagerBanner?.dispose();
         _adManagerBanner = null;
+        log("Success AdMob");
       } else {
+        _adManagerBanner = ad;
         _adMobBanner?.dispose();
         _adMobBanner = null;
+        log("Success Ad Manager");
       }
-
+      setState(() {
+        _loadingState = BannerAdsLoading.success;
+      });
       await analytics.logEvent(
         name: 'ads_success',
         parameters: {
           "sdkRequestStartTime": fromTime.toString(),
           "sdkRequestReceivedTime": toTime.toString(),
-          "adsRenderingTime": DateTime.now().difference(DateTime.parse(toTime)).inMicroseconds.toString(),
+          "adsRenderingTime": DateTime.now()
+              .difference(DateTime.parse(toTime))
+              .inMicroseconds
+              .toString(),
           "createAt": DateTime.now().toString(),
           "adSource": source,
           "adResponse": "",
@@ -508,24 +520,31 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
   }
 
   void _logLatencyMetrics(Ad ad) async {
-
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
-    if (requestInitiated != null && responseReceived != null && adCreativeDownloaded != null && adRendered != null && impressionLogged != null) {
-      final requestLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
-      final loadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
-      final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
-      final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
-      final sdkReadyLatency = responseReceived!.difference(requestInitiated!).inMilliseconds;
-      final creativeDownloadLatency = adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+    if (requestInitiated != null &&
+        responseReceived != null &&
+        adCreativeDownloaded != null &&
+        adRendered != null &&
+        impressionLogged != null) {
+      final requestLatency =
+          responseReceived!.difference(requestInitiated!).inMilliseconds;
+      final loadLatency =
+          adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
+      final renderLatency =
+          adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
+      final totalLatency =
+          impressionLogged!.difference(requestInitiated!).inMilliseconds;
+      final sdkReadyLatency =
+          responseReceived!.difference(requestInitiated!).inMilliseconds;
+      final creativeDownloadLatency =
+          adCreativeDownloaded!.difference(responseReceived!).inMilliseconds;
       // final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
       // final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
 
-      mainNavigatorKey.currentContext!
-          .read<HomeProvider>()
-          .sendDataToads({
+      mainNavigatorKey.currentContext!.read<HomeProvider>().sendDataToads({
         "ad_source": "banner320X50",
-        "user_id":userId.toString(),
+        "user_id": userId.toString(),
         "sdk_ready_time": sdkReadyLatency.toString(),
         "creative_download": creativeDownloadLatency.toString(),
         "render_time": renderLatency.toString(),
@@ -533,7 +552,7 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
         "data": "${ad.responseInfo}",
       });
 
-     await analytics.logEvent(
+      await analytics.logEvent(
         name: "ad_latency_metrics",
         parameters: {
           "adSource": "Banner 320x50",
@@ -552,9 +571,9 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
     }
   }
 
-
   @override
   void dispose() {
+    _cron.close();
     _adMobBanner?.dispose();
     _adManagerBanner?.dispose();
     _displayedAd?.dispose();
@@ -563,11 +582,22 @@ class _Banner300x50SizeState extends State<Banner300x50Size> {
 
   @override
   Widget build(BuildContext context) {
+    log("RK Ad Rebuild $mySource ${_loadingState.name}");
     switch (_loadingState) {
       case BannerAdsLoading.loading:
         return const Center(child: Banner300x50sizeLoading());
       case BannerAdsLoading.success:
-        return Center(child: SizedBox(width: 320, height: 50, child: _displayedAd != null ? Center(child: AdWidget(ad: _displayedAd!)) : const SizedBox.shrink()));
+        return Center(
+            child: SizedBox(
+                width: 320,
+                height: 50,
+                child: _displayedAd != null || _adManagerBanner != null
+                    ? Center(
+                    child: AdWidget(
+                        ad: mySource == "AdMob"
+                            ? _displayedAd!
+                            : _adManagerBanner!))
+                    : const SizedBox.shrink()));
       case BannerAdsLoading.fail:
         return const SizedBox.shrink();
     }

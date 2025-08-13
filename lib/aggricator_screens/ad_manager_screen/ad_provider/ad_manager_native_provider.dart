@@ -14,7 +14,6 @@ class AdManagerNativeProvider with ChangeNotifier {
 
   final Map<int, NativeAd?> ads = {};
   final Map<int, bool> adsLoaded = {};
-  final Map<int, AdLatencyData> adLatencyData = {};
   final Map<int, AdSize> adSizes = {};
   final Map<int, String> adErrors = {};
   DateTime? impressionLogged;
@@ -49,8 +48,8 @@ class AdManagerNativeProvider with ChangeNotifier {
       // Clean up existing ad at this index
       ads[index]?.dispose();
 
-      final latencyData = AdLatencyData()..requestInitiated = DateTime.now();
-      adLatencyData[index] = latencyData;
+      // final latencyData = AdLatencyData()..requestInitiated = DateTime.now();
+      // adLatencyData[index] = latencyData;
       adSizes[index] = size;
       adsLoaded[index] = false;
       adErrors.remove(index);
@@ -154,9 +153,9 @@ class AdManagerNativeProvider with ChangeNotifier {
 
 }
 
-class AdLatencyData {
-  DateTime? requestInitiated;
-  DateTime? responseReceived;
-  DateTime? adCreativeDownloaded;
-  DateTime? adRendered;
-}
+// class AdLatencyData {
+//   DateTime? requestInitiated;
+//   DateTime? responseReceived;
+//   DateTime? adCreativeDownloaded;
+//   DateTime? adRendered;
+// }

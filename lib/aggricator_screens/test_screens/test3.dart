@@ -102,3 +102,117 @@
 //     super.dispose();
 //   }
 // }
+
+import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   await MobileAds.instance.initialize();
+//   runApp(const MyApp());
+// }
+//
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'Swipe News with Ads',
+//       debugShowCheckedModeBanner: false,
+//       home: const NewsSwipeScreen(),
+//     );
+//   }
+// }
+
+class BannerAdController {
+  late BannerAd _bannerAd;
+  bool isAdLoaded = false;
+
+  void init() {
+    _bannerAd = BannerAd(
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111', // Test ID
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          isAdLoaded = true;
+          debugPrint('✅ Banner preloaded');
+        },
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint('❌ Failed to load banner: $error');
+        },
+      ),
+    )..load();
+  }
+
+  BannerAd? get ad => isAdLoaded ? _bannerAd : null;
+
+  void dispose() {
+    _bannerAd.dispose();
+  }
+}
+
+class NewsSwipeScreen extends StatefulWidget {
+  const NewsSwipeScreen({super.key});
+
+  @override
+  State<NewsSwipeScreen> createState() => _NewsSwipeScreenState();
+}
+
+class _NewsSwipeScreenState extends State<NewsSwipeScreen> {
+  final BannerAdController adController = BannerAdController();
+  final List<String> articles = List.generate(
+    10,
+        (index) => "News Article ${index + 1}\n\n" +
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. " * 4,
+  );
+
+  @override
+  void initState() {
+    super.initState();
+    adController.init(); // Preload ad at start
+  }
+
+  @override
+  void dispose() {
+    adController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView.builder(
+      itemCount: articles.length + 1, // Extra for ad page
+      itemBuilder: (context, index) {
+        if (index == 4) {
+          // Show ad on 5th page
+          return Scaffold(
+            appBar: AppBar(title: const Text("Sponsored")),
+            body: Center(
+              child: adController.ad != null
+                  ? AdWidget(ad: adController.ad!)
+                  : const CircularProgressIndicator(),
+            ),
+          );
+        } else {
+          // Show article
+          int articleIndex = index > 4 ? index - 1 : index; // Adjust index after ad
+          return Scaffold(
+            appBar: AppBar(title: Text("Article ${articleIndex + 1}")),
+            body: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SingleChildScrollView(
+                child: Text(
+                  articles[articleIndex],
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
+}

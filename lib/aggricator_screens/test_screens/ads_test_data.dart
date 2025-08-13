@@ -46,19 +46,19 @@ class _AdsTestDataState extends State<AdsTestData> {
                       style: const TextStyle(fontSize: 14, color: Colors.teal),
                     ),
                     Text(
-                      "Latency Request -- ${item["latency_request"]}",
+                      "sdk_ready_time -- ${item["sdk_ready_time"]}",
                       style: const TextStyle(fontSize: 14, color: Colors.orange),
                     ),
                     Text(
-                      "Latency Load -- ${item["latency_load"]}",
+                      "creative_download -- ${item["creative_download"]}",
                       style: const TextStyle(fontSize: 14, color: Colors.blue),
                     ),
                     Text(
-                      "Latency Render -- ${item["latency_render"]}",
+                      "render_time -- ${item["render_time"]}",
                       style: const TextStyle(fontSize: 14, color: Colors.purple),
                     ),
                     Text(
-                      "Latency Total -- ${item["latency_total"]}",
+                      "total_time -- ${item["total_time"]}",
                       style: const TextStyle(fontSize: 14, color: Colors.green),
                     ),
                     Text(
