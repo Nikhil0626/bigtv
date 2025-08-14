@@ -344,7 +344,6 @@ class HomeProvider extends ChangeNotifier {
           }
         }
       }
-
       isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");

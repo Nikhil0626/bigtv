@@ -195,21 +195,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                     if (ad != null) {
                                       return Container(
                                         color: Colors.grey[200],
-                                        alignment: Alignment.center,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                              child: SizedBox(
-                                                height: 350,
-                                                width: 350,
-                                                child: AdWidget(ad: ad),
-                                              ),
-                                            ),
-                                            Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
-                                          ],
-                                        ),
+                                        child: AdWidget(ad: ad),
                                       );
                                     }
                                   }
@@ -243,7 +229,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                                 child: AdWidget(ad: ad),
                                               ),
                                             ),
-                                            Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
+                                           Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                           ],
                                         ),
                                       );
