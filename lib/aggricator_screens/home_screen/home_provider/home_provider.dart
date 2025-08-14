@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_manager_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/contest_screen/contest_screen.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
@@ -333,7 +334,7 @@ class HomeProvider extends ChangeNotifier {
             await mainNavigatorKey.currentContext!.read<AdMobBannerProvider>().loadAd(index, AdSize.mediumRectangle);
           } else if (position % 20 == 10) {
             /// Ad Manager Banner
-            await mainNavigatorKey.currentContext!.read<AdManagerNativeProvider>().loadAd(index, AdSize.mediumRectangle);
+            await mainNavigatorKey.currentContext!.read<AdManagerBannerProvider>().loadAd(index, AdSize.mediumRectangle);
           } else if (position % 20 == 15) {
             /// Ad Manager Native
             await mainNavigatorKey.currentContext!.read<AdManagerNativeProvider>().loadAd(index, AdSize.mediumRectangle);

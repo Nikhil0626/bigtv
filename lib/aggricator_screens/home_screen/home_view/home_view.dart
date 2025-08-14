@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/banner_300x50_size.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/refer_earn.dart';
@@ -232,7 +234,7 @@ class _HomeViewState extends State<HomeView> {
     }
   }
 
-  void showAdPopup(BuildContext context) {
+  void showAdPopup(BuildContext context, ) {
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -288,11 +290,13 @@ class _HomeViewState extends State<HomeView> {
                         ),
                       )
                   ),
-
                 ],
-              )
+              ),
           );
         }
     );
+    Timer(Duration(seconds: 5), () {
+      Navigator.of(context, rootNavigator: true).pop();
+    });
   }
 }
