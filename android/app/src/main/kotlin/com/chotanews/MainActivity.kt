@@ -41,7 +41,6 @@ class NativeAdFactoryExample: NativeAdFactory {
         val adView = layoutInflater.inflate(R.layout.my_native_ad, null) as NativeAdView
 
         adView.mediaView = adView.findViewById(R.id.ad_media)
-
         adView.headlineView = adView.findViewById(R.id.ad_headline)
         adView.bodyView = adView.findViewById(R.id.ad_body)
         adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
@@ -68,6 +67,7 @@ class NativeAdFactoryExample: NativeAdFactory {
         }
 
         return adView
+
     }
 }
 
