@@ -16,9 +16,11 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		DD37A0E82E4E3710005FE451 /* SwiftUIView.xib in Resources */ = {isa = PBXBuildFile; fileRef = DD37A0E72E4E3710005FE451 /* SwiftUIView.xib */; };
 		DD3DCAF42DCFA44B004AB175 /* NativeAdView.xib in Resources */ = {isa = PBXBuildFile; fileRef = DD3DCAF32DCFA438004AB175 /* NativeAdView.xib */; };
 		DD5111062D4FB979000A5861 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DD5111052D4FB979000A5861 /* GoogleService-Info.plist */; };
 		DD931E272DCF995100C7EEEB /* NativeAdFactoryExample.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD931E262DCF994E00C7EEEB /* NativeAdFactoryExample.swift */; };
+		DDF795082E4E0A7F00BB83E6 /* GameOfWarScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = DDF795072E4E0A7F00BB83E6 /* GameOfWarScreen.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -54,6 +56,7 @@
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A86C6ABF00C23C2EFEFC865D /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AE7F48880F94D4B943225847 /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		DD37A0E72E4E3710005FE451 /* SwiftUIView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = SwiftUIView.xib; sourceTree = "<group>"; };
 		DD3DCAF32DCFA438004AB175 /* NativeAdView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NativeAdView.xib; sourceTree = "<group>"; };
 		DD5111052D4FB979000A5861 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DD931E262DCF994E00C7EEEB /* NativeAdFactoryExample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAdFactoryExample.swift; sourceTree = "<group>"; };
@@ -71,6 +74,7 @@
 		DD9364342D5C8D9900EFEC5C /* WELocation.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WELocation.xcframework; sourceTree = "<group>"; };
 		DDAB80C22D461EC4008D0B68 /* RunnerDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerDebug.entitlements; sourceTree = "<group>"; };
 		DDAB80C32D461F8F008D0B68 /* RunnerRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerRelease.entitlements; sourceTree = "<group>"; };
+		DDF795072E4E0A7F00BB83E6 /* GameOfWarScreen.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GameOfWarScreen.xib; sourceTree = "<group>"; };
 		E57601C5D93D550CDF24014B /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -150,6 +154,7 @@
 		97C146F01CF9000F007C117D /* Runner */ = {
 			isa = PBXGroup;
 			children = (
+				DDF795072E4E0A7F00BB83E6 /* GameOfWarScreen.xib */,
 				DD3DCAF32DCFA438004AB175 /* NativeAdView.xib */,
 				DD931E262DCF994E00C7EEEB /* NativeAdFactoryExample.swift */,
 				DDAB80C32D461F8F008D0B68 /* RunnerRelease.entitlements */,
@@ -163,6 +168,7 @@
 				74858FAE1ED2DC5600515810 /* AppDelegate.swift */,
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				DD5111052D4FB979000A5861 /* GoogleService-Info.plist */,
+				DD37A0E72E4E3710005FE451 /* SwiftUIView.xib */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -316,8 +322,10 @@
 				97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */,
 				3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */,
 				DD5111062D4FB979000A5861 /* GoogleService-Info.plist in Resources */,
+				DDF795082E4E0A7F00BB83E6 /* GameOfWarScreen.xib in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				DD3DCAF42DCFA44B004AB175 /* NativeAdView.xib in Resources */,
+				DD37A0E82E4E3710005FE451 /* SwiftUIView.xib in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
