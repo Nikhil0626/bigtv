@@ -133,7 +133,6 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                             itemBuilder: (context, index) {
                               if ((index + 1) % 5 == 0) {
                                 final position = index + 1; // Convert to 1-based index
-
                                 if (position % 20 == 5) {
                                   if (adMobBannerProvider.adsLoaded[index] == true) {
                                     final ad = adMobBannerProvider.ads[index];

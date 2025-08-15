@@ -60,13 +60,9 @@ class AdMobBannerProvider with ChangeNotifier {
         adUnitId:adUnitId,
         size: size,
         request: AdRequest(
-          keywords: ['vertical', 'horizontal','news', 'sports'], // List of targeting keywords
-          contentUrl: 'https://www.example.com', // Optional content URL for better targeting
+          keywords: ['vertical'], // List of targeting keywords
+          // contentUrl: 'https://www.example.com', // Optional content URL for better targeting
           nonPersonalizedAds: false, // Set true if user opted out of personalized ads
-          extras: <String, String>{ // Additional parameters as key-value pairs
-            'npa': '1', // Non-personalized ads (same as above)
-            'color_bg': '#FFFFFF', // Example custom parameter for some ad networks
-          },
           httpTimeoutMillis: 5000, // Optional: HTTP request timeout in milliseconds
         ),
 

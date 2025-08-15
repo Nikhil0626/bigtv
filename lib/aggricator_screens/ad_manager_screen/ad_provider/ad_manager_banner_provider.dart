@@ -41,20 +41,16 @@ class AdManagerBannerProvider with ChangeNotifier {
         adUnitId: adUnitId,
         sizes: [size],
         request: AdManagerAdRequest(
-          keywords: ['vertical', 'horizontal', 'news'], // Include horizontal keyword
-          contentUrl: 'https://www.chotanews.com',
+          keywords: ['vertical', ], // Include horizontal keyword
+          // contentUrl: 'https://www.chotanews.com',
           customTargeting: {
-            'orientation': 'horizontal', // Orientation targeting
-            'user_segment': 'loyal',
-            'region': 'IN',
+            'orientation': 'vertical',
           },
           customTargetingLists: {
-            'interests': ['sports', 'politics', 'tech'],
+            // 'interests': ['sports', 'politics', 'tech'],
           },
           nonPersonalizedAds: false,
-          extras: {
-            'app_version': '1.0.0',
-          },
+
           httpTimeoutMillis: 5000,
         ),
         listener: AdManagerBannerAdListener(
