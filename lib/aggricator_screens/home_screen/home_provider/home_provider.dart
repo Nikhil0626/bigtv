@@ -331,6 +331,7 @@ class HomeProvider extends ChangeNotifier {
 
           if (position % 20 == 5) {
             /// Ad Mob Banner
+            /// ///
             await mainNavigatorKey.currentContext!.read<AdMobBannerProvider>().loadAd(index, AdSize.mediumRectangle);
           } else if (position % 20 == 10) {
             /// Ad Manager Banner

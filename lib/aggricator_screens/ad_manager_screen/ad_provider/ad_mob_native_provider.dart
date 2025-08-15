@@ -18,6 +18,7 @@ class AdMobNativeProvider with ChangeNotifier {
   DateTime? impressionLogged;
   final String adUnitId =  'ca-app-pub-2405357352181832/7643871122';
   // final String adUnitId =  'ca-app-pub-3940256099942544/2247696110';
+  ///
   Future<void> loadAd(int index, AdSize mediumRectangle) async {
     try {
       requestInitiated = DateTime.now();

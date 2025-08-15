@@ -18,7 +18,6 @@ import '../../ad_manager_screen/ad_provider/ad_manager_native_provider.dart';
 import '../../ad_manager_screen/ad_provider/banner_ads_provider.dart';
 import '../../ad_manager_screen/ad_screen/google_ads_view.dart';
 import '../../individual_post_details/individual_post_view.dart';
-import '../../test_screens/ads_test_data.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
 
@@ -56,7 +55,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
     homeProvider?.pageController?.addListener(homeProvider!.scrollListener);
     _pageStartTime = DateTime.now();
   }
-
+///
   @override
   Widget build(BuildContext context) {
     return Scaffold(
