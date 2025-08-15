@@ -31,7 +31,7 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace = "com.chotanews"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = "26.3.11579264"
+    ndkVersion = '26.1.10909125'
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
@@ -62,13 +62,31 @@ android {
         }
     }
     buildTypes {
-
         release {
-            ndk {
-                debugSymbolLevel = 'none'
-            }
+            // TODO: Add your own signing config for the release build.
+            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.release
-//            signingConfig = signingConfigs.debug
+
+            minifyEnabled true              // obfuscate code and remove unused code
+            shrinkResources true            // shrink and remove unused resources
+//            useProguard true                // apply proguard
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+//            ndk {
+//                debugSymbolLevel 'FULL'
+//            }
+            debuggable false                // make app non-debuggable
+            crunchPngs true                 // shrink images
+            jniDebuggable false
+            renderscriptDebuggable false
+            pseudoLocalesEnabled false
+            zipAlignEnabled true
+//            ndk {
+//                debugSymbolLevel 'FULL'
+//            }
+//            shrinkResources false
+//            minifyEnabled false
+//            signingConfig signingConfigs.release
         }
     }
 

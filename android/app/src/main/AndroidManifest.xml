@@ -47,6 +47,7 @@
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:hardwareAccelerated="true"
+
         android:theme="@style/LaunchTheme"
         android:windowSoftInputMode="adjustResize">
         <meta-data
@@ -101,6 +102,7 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
+            android:enableOnBackInvokedCallback="true"
             android:theme="@style/LaunchTheme">
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
