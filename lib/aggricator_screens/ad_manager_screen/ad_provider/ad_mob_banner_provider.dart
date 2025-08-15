@@ -19,6 +19,7 @@ class AdMobBannerProvider with ChangeNotifier {
   DateTime? impressionLogged;
   final String adUnitId =  'ca-app-pub-2405357352181832/9414144917';
   ///
+  final String adUnitId =  'ca-app-pub-2405357352181832/9297875326';
   // final String adUnitId =  'ca-app-pub-3940256099942544/6300978111';
   void loadAds(int index) {
 

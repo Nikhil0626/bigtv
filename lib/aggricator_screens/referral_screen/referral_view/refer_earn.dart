@@ -820,11 +820,6 @@ class _ReferEarnState extends State<ReferEarn> {
     context.read<ReferralProvider>().getReferralStats();
     context.read<ReferralProvider>().getAvailableRewards();
     getData();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(seconds: 1), () {
-        checkAndShowPopup();
-      });
-    });
   }
 
   String? myReferralCode;
@@ -1505,75 +1500,6 @@ class _ReferEarnState extends State<ReferEarn> {
     );
   }
 
-  void checkAndShowPopup() {
-    final referralProvider = context.read<ReferralProvider>();
-    final int downloads = int.tryParse(referralProvider.referralData['downloads']?.toString() ?? "0") ?? 0;
-
-    if (downloads > 10) {
-      showAdPopup(context);
-    }
-  }
-
-  void showAdPopup(BuildContext context) {
-    showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return Dialog(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 180),
-              backgroundColor: Colors.transparent,
-              child: Stack(
-
-                children: [
-
-                  Container(
-                    width: 335,
-                    height: 335,
-                    decoration: BoxDecoration(
-                      color: Colors.transparent,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 10.0,top: 10),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Image.asset(
-                          'assets/svg/ios_ref.jpeg',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
-                    ),
-
-                  ),
-                  Positioned(
-                      top: 1,
-                      right: 0,
-                      child: InkWell(
-                        onTap: (){
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(6),
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.grey
-                          ),
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.black,
-                            size: 30,
-                          ),
-                        ),
-                      )
-                  ),
-
-                ],
-              )
-          );
-        }
-    );
-  }
 }
 
 class InvitedCardScreen extends StatelessWidget {
