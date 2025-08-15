@@ -324,27 +324,6 @@ class HomeProvider extends ChangeNotifier {
       }
       getAllPostList.addAll(data);
 
-      for (int index = 0; index < getAllPostList.length; index++) {
-        if ((index + 1) % 5 == 0) {
-          // Every 5th item
-          final position = index + 1; // Convert to 1-based index
-
-          if (position % 20 == 5) {
-            /// Ad Mob Banner
-            /// ///
-            await mainNavigatorKey.currentContext!.read<AdMobBannerProvider>().loadAd(index, AdSize.mediumRectangle);
-          } else if (position % 20 == 10) {
-            /// Ad Manager Banner
-            await mainNavigatorKey.currentContext!.read<AdManagerBannerProvider>().loadAd(index, AdSize.mediumRectangle);
-          } else if (position % 20 == 15) {
-            /// Ad Manager Native
-            await mainNavigatorKey.currentContext!.read<AdManagerNativeProvider>().loadAd(index, AdSize.mediumRectangle);
-          } else if (position % 20 == 0) {
-            /// Ad Mob Native
-            await mainNavigatorKey.currentContext!.read<AdMobNativeProvider>().loadAd(index, AdSize.mediumRectangle);
-          }
-        }
-      }
       isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");

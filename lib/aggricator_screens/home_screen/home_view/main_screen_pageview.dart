@@ -56,12 +56,11 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
     homeProvider?.pageController?.addListener(homeProvider!.scrollListener);
     _pageStartTime = DateTime.now();
   }
-///
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer5<HomeProvider, AdManagerBannerProvider, AdMobBannerProvider, AdManagerNativeProvider, AdMobNativeProvider>(
-        builder: (_, homeProvider, adManagerBannerProvider, adMobBannerProvider, adManagerNativeProvider, adMobNativeProvider, __) {
+      body: Consumer5<HomeProvider, AdMobBannerProvider, AdManagerBannerProvider, AdMobNativeProvider, AdManagerNativeProvider>(
+        builder: (_, homeProvider, adMobBannerProvider, adManagerBannerProvider, adMobNativeProvider, adManagerNativeProvider, __) {
           return Column(
             children: [
               Expanded(
@@ -89,6 +88,24 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                               if (homeProvider.isBottomEnable) {
                                 homeProvider.pageChange(isValue: false);
                               }
+
+                                if ((value + 3) % 5 == 0) {
+                                  final position = value + 3; // Convert to 1-based index
+
+                                  if (position % 20 == 5) {
+                                    /// Ad Mob Banner
+                                  adMobBannerProvider.loadAd(value, AdSize.mediumRectangle);
+                                  } else if (position % 20 == 10) {
+                                    /// Ad Manager Banner
+                                    adManagerBannerProvider.loadAd(value, AdSize.mediumRectangle);
+                                  } else if (position % 20 == 15) {
+                                    /// Ad Manager Native
+                                    adManagerBannerProvider.loadAd(value, AdSize.mediumRectangle);
+                                  } else if (position % 20 == 0) {
+                                    /// Ad Mob Native
+                                    adManagerBannerProvider.loadAd(value, AdSize.mediumRectangle);
+                                  }
+                                }
                               if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
                                 Future.delayed(
                                   Duration(milliseconds: 2000),
@@ -153,7 +170,8 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                       Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                     ],
                                   );
-                                } else if (position % 20 == 10) {
+                                }
+                                else if (position % 20 == 10) {
                                   if (adManagerBannerProvider.adsLoaded[index] == true) {
                                     final ad = adManagerBannerProvider.ads[index];
                                     if (ad != null) {
@@ -189,14 +207,12 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                       Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                     ],
                                   );
-                                } else if (position % 20 == 15) {
-                                  if (adManagerNativeProvider.adsLoaded[index] == true) {
-                                    final ad = adManagerNativeProvider.ads[index];
+                                }
+                                else if (position % 20 == 15) {
+                                  if (adMobNativeProvider.adsLoaded[index] == true) {
+                                    final ad = adMobNativeProvider.nativeAds[index];
                                     if (ad != null) {
-                                      return Container(
-                                        color: Colors.grey[200],
-                                        child: AdWidget(ad: ad),
-                                      );
+                                      return AdWidget(ad: ad);
                                     }
                                   }
                                   return Column(
@@ -211,9 +227,10 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                       Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
                                     ],
                                   );
-                                } else if (position % 20 == 0) {
-                                  if (adMobNativeProvider.adsLoaded[index] == true) {
-                                    final ad = adMobNativeProvider.nativeAds[index];
+                                }
+                                else if (position % 20 == 0) {
+                                  if (adManagerNativeProvider.adsLoaded[index] == true) {
+                                    final ad = adManagerNativeProvider.ads[index];
                                     if (ad != null) {
                                       return AdWidget(ad: ad);
                                     }
@@ -224,7 +241,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                         flex: 1,
                                         child: Padding(
                                           padding: const EdgeInsets.all(20.0),
-                                          child: ShareYourApp(),
+                                          child: RateYourApp(),
                                         ),
                                       ),
                                       Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),

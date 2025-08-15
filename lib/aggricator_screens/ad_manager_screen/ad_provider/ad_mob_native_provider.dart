@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:flutter/cupertino.dart';
@@ -6,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AdMobNativeProvider with ChangeNotifier {
-
   final Map<int, NativeAd?> nativeAds = {};
   final Map<int, bool> adsLoaded = {};
   final Map<int, AdLatencyData> adLatencyData = {};
@@ -16,10 +17,10 @@ class AdMobNativeProvider with ChangeNotifier {
   DateTime? adCreativeDownloaded;
   DateTime? adRendered;
   DateTime? impressionLogged;
-  final String adUnitId =  'ca-app-pub-2405357352181832/9820571770';
-  // final String adUnitId =  'ca-app-pub-3940256099942544/2247696110';
-  ///
+  final String adUnitId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId;
+
   Future<void> loadAd(int index, AdSize mediumRectangle) async {
+    log(" ad id show $adUnitId");
     try {
       requestInitiated = DateTime.now();
 
@@ -33,7 +34,17 @@ class AdMobNativeProvider with ChangeNotifier {
       final ad = NativeAd(
         adUnitId: adUnitId, // Replace with your own
         factoryId: "adFactoryExample",
-        request: const AdRequest(),
+        request: AdRequest(
+          keywords: ['vertical','horizontal', 'news', 'sports'], // List of targeting keywords
+          contentUrl: 'https://www.example.com', // Optional content URL for better targeting
+          nonPersonalizedAds: false, // Set true if user opted out of personalized ads
+          extras: <String, String>{ // Additional parameters as key-value pairs
+            'npa': '1', // Non-personalized ads (same as above)
+            'color_bg': '#FFFFFF', // Example custom parameter for some ad networks
+          },
+          httpTimeoutMillis: 5000, // Optional: HTTP request timeout in milliseconds
+        ),
+
         listener: NativeAdListener(
           onAdLoaded: (ad) {
             latencyData
@@ -59,7 +70,7 @@ class AdMobNativeProvider with ChangeNotifier {
             if (error.code != 3) {
               Future.delayed(
                 const Duration(seconds: 5),
-                    () => loadAd(index,mediumRectangle),
+                () => loadAd(index, mediumRectangle),
               );
             }
           },
@@ -82,6 +93,7 @@ class AdMobNativeProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
   void _logLatencyMetrics(Ad ad) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
@@ -95,11 +107,9 @@ class AdMobNativeProvider with ChangeNotifier {
       final renderLatency = adRendered!.difference(adCreativeDownloaded!).inMilliseconds;
       final totalLatency = impressionLogged!.difference(requestInitiated!).inMilliseconds;
 
-      mainNavigatorKey.currentContext!
-          .read<HomeProvider>()
-          .sendDataToads({
+      mainNavigatorKey.currentContext!.read<HomeProvider>().sendDataToads({
         "ad_source": "AdMobNative",
-        "user_id":userId.toString(),
+        "user_id": userId.toString(),
         "sdk_ready_time": sdkReadyLatency.toString(),
         "creative_download": creativeDownloadLatency.toString(),
         "render_time": renderLatency.toString(),
@@ -116,6 +126,3 @@ class AdLatencyData {
   DateTime? adCreativeDownloaded;
   DateTime? adRendered;
 }
-
-
- 

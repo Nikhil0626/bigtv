@@ -36,7 +36,7 @@ import webengage_flutter
         let nativeAdFactory = NativeAdFactoryExample()
         FLTGoogleMobileAdsPlugin.registerNativeAdFactory(
             self,
-            factoryId: "sivaAds",
+            factoryId: "adFactoryExample",
             nativeAdFactory: nativeAdFactory as! FLTNativeAdFactory
         )
 

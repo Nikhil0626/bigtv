@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,9 +8,7 @@ import '../../home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 
 class AdManagerNativeProvider with ChangeNotifier {
-  final String adUnitId = '/22387492205,23277683599/id1631068092.Banner0.1747829228';
-  ///
-  final String adUnitId = '/22387492205,23277683599/com.chotanews.Native1.1747720256';
+  final String adUnitId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId;
 
   final Map<int, NativeAd?> ads = {};
   final Map<int, bool> adsLoaded = {};
@@ -30,6 +30,7 @@ class AdManagerNativeProvider with ChangeNotifier {
 
   /// Load a single ad at given index
   Future<void> loadAd(int index, AdSize size) async {
+    log(" ad id show $adUnitId");
     try {
       requestInitiatedMap[index] = DateTime.now();
 
@@ -43,7 +44,16 @@ class AdManagerNativeProvider with ChangeNotifier {
       final NativeAd ad = NativeAd(
         adUnitId: adUnitId,
         factoryId: 'adFactoryExample',
-        request: const AdRequest(),
+        request: AdManagerAdRequest(
+          keywords: ['vertical'],
+          customTargeting: {
+            'orientation': 'vertical',
+          },
+          customTargetingLists: {
+          },
+          nonPersonalizedAds: false,
+          httpTimeoutMillis: 5000,
+        ),
         listener: NativeAdListener(
           onAdLoaded: (ad) {
             ads[index] = ad as NativeAd;

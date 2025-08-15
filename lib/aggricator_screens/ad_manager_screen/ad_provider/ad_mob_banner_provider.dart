@@ -1,3 +1,6 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:flutter/cupertino.dart';
@@ -17,10 +20,7 @@ class AdMobBannerProvider with ChangeNotifier {
   DateTime? adCreativeDownloaded;
   DateTime? adRendered;
   DateTime? impressionLogged;
-  final String adUnitId =  'ca-app-pub-2405357352181832/9414144917';
-  ///
-  final String adUnitId =  'ca-app-pub-2405357352181832/9297875326';
-  // final String adUnitId =  'ca-app-pub-3940256099942544/6300978111';
+  final String adUnitId =  mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId;
   void loadAds(int index) {
 
     // Clear existing ads first
@@ -45,7 +45,7 @@ class AdMobBannerProvider with ChangeNotifier {
 
   Future<void> loadAd(int index, AdSize size) async {
     requestInitiated = DateTime.now();
-
+    log(" ad id show $adUnitId");
     try {
       // Clean up existing ad at this index
       ads[index]?.dispose();
@@ -59,7 +59,18 @@ class AdMobBannerProvider with ChangeNotifier {
       final ad = BannerAd(
         adUnitId:adUnitId,
         size: size,
-        request: const AdRequest(),
+        request: AdRequest(
+          keywords: ['vertical', 'horizontal','news', 'sports'], // List of targeting keywords
+          contentUrl: 'https://www.example.com', // Optional content URL for better targeting
+          nonPersonalizedAds: false, // Set true if user opted out of personalized ads
+          extras: <String, String>{ // Additional parameters as key-value pairs
+            'npa': '1', // Non-personalized ads (same as above)
+            'color_bg': '#FFFFFF', // Example custom parameter for some ad networks
+          },
+          httpTimeoutMillis: 5000, // Optional: HTTP request timeout in milliseconds
+        ),
+
+
         listener: BannerAdListener(
           onAdLoaded: (ad) {
             responseReceived = DateTime.now();

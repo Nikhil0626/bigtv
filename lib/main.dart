@@ -41,7 +41,8 @@ Future<void> main() async {
   await Hive.openBox('pollBox');
   EventCron().start();
   MobileAds.instance.initialize();
-  // MobileAds.instance.updateRequestConfiguration(RequestConfiguration(testDeviceIds: ['D487DB57F02DB6E2A93E37ABECD779E3']));
+
+  MobileAds.instance.updateRequestConfiguration(RequestConfiguration(testDeviceIds: ['D487DB57F02DB6E2A93E37ABECD779E3']));
   initPlugin();
   getReferrerFromPlayStore();
   await EasyLocalization.ensureInitialized();

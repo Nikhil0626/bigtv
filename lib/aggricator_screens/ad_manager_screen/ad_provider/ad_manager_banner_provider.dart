@@ -1,4 +1,6 @@
 
+import 'dart:developer';
+
 import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
@@ -8,13 +10,7 @@ import '../../home_screen/home_provider/home_provider.dart';
 import 'package:provider/provider.dart';
 
 class AdManagerBannerProvider with ChangeNotifier {
-
-
-  final String adUnitId = '/22387492205,23277683599/id1631068092.Banner0.1747829228';
-  ///
-  final String adUnitId = '/22387492205,23277683599/com.chotanews.Banner0.1747720224';
-  // final String adUnitId = '/6499/example/banner';
-
+  final String adUnitId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId;
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
   final Map<int, AdManagerBannerAd?> ads = {};
@@ -29,9 +25,10 @@ class AdManagerBannerProvider with ChangeNotifier {
   DateTime? adRendered;
 
   Future<void> loadAd(int index, AdSize size) async {
+
+    log(" ad id show $adUnitId");
     try {
       requestInitiated = DateTime.now();
-      // Clean up existing ad at this index
       ads[index]?.dispose();
 
       final latencyData = AdLatencyData()..requestInitiated = DateTime.now();
@@ -43,7 +40,23 @@ class AdManagerBannerProvider with ChangeNotifier {
       final ad = AdManagerBannerAd(
         adUnitId: adUnitId,
         sizes: [size],
-        request: const AdManagerAdRequest(),
+        request: AdManagerAdRequest(
+          keywords: ['vertical', 'horizontal', 'news'], // Include horizontal keyword
+          contentUrl: 'https://www.chotanews.com',
+          customTargeting: {
+            'orientation': 'horizontal', // Orientation targeting
+            'user_segment': 'loyal',
+            'region': 'IN',
+          },
+          customTargetingLists: {
+            'interests': ['sports', 'politics', 'tech'],
+          },
+          nonPersonalizedAds: false,
+          extras: {
+            'app_version': '1.0.0',
+          },
+          httpTimeoutMillis: 5000,
+        ),
         listener: AdManagerBannerAdListener(
           onAdLoaded: (ad) {
             ads[index] = ad as AdManagerBannerAd;
