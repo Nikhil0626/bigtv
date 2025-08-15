@@ -33,6 +33,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   HomeProvider? homeProvider;
+  bool closed = false;
 
   @override
   void initState() {
@@ -234,8 +235,13 @@ class _HomeViewState extends State<HomeView> {
     }
   }
 
-  void showAdPopup(BuildContext context, ) {
-    showDialog(
+  void showAdPopup(BuildContext context, ) async{
+    Timer(Duration(seconds: 5), () {
+      if (!closed) {
+        Navigator.of(context).pop(true);
+      }
+    });
+     closed = await showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
@@ -274,7 +280,7 @@ class _HomeViewState extends State<HomeView> {
                       right: 0,
                       child: InkWell(
                         onTap: (){
-                          Navigator.pop(context);
+                          Navigator.pop(context, true);
                         },
                         child: Container(
                           padding: EdgeInsets.all(6),
@@ -295,8 +301,5 @@ class _HomeViewState extends State<HomeView> {
           );
         }
     );
-    Timer(Duration(seconds: 5), () {
-      Navigator.of(context, rootNavigator: true).pop();
-    });
   }
 }

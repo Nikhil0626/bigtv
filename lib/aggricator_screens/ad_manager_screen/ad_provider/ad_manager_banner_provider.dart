@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 class AdManagerBannerProvider with ChangeNotifier {
 
 
-  final String adUnitId = '/22387492205,23277683599/id1631068092.Banner0.1747829228';
+  final String adUnitId = '/22387492205,23277683599/com.chotanews.Banner0.1747720224';
   // final String adUnitId = '/6499/example/banner';
 
   final FirebaseAnalytics analytics = FirebaseAnalytics.instance;

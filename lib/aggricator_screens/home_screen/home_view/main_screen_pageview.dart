@@ -14,6 +14,7 @@ import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_no_data.dart';
 import '../../../utils/app_spaces.dart';
+import '../../ad_manager_screen/ad_provider/ad_manager_banner_provider.dart';
 import '../../ad_manager_screen/ad_provider/ad_manager_native_provider.dart';
 import '../../ad_manager_screen/ad_provider/banner_ads_provider.dart';
 import '../../ad_manager_screen/ad_screen/google_ads_view.dart';
@@ -60,7 +61,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer5<HomeProvider, AdManagerNativeProvider, AdMobBannerProvider, AdManagerNativeProvider, AdMobNativeProvider>(
+      body: Consumer5<HomeProvider, AdManagerBannerProvider, AdMobBannerProvider, AdManagerNativeProvider, AdMobNativeProvider>(
         builder: (_, homeProvider, adManagerBannerProvider, adMobBannerProvider, adManagerNativeProvider, adMobNativeProvider, __) {
           return Column(
             children: [
@@ -215,24 +216,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                   if (adMobNativeProvider.adsLoaded[index] == true) {
                                     final ad = adMobNativeProvider.nativeAds[index];
                                     if (ad != null) {
-                                      return Container(
-                                        color: Colors.grey[200],
-                                        alignment: Alignment.center,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                              child: SizedBox(
-                                                height: 350,
-                                                width: 350,
-                                                child: AdWidget(ad: ad),
-                                              ),
-                                            ),
-                                           Expanded(flex: 1, child: buildRecommendedNews(context, homeProvider)),
-                                          ],
-                                        ),
-                                      );
+                                      return AdWidget(ad: ad);
                                     }
                                   }
                                   return Column(

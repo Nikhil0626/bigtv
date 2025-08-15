@@ -6,7 +6,7 @@ import '../../home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 
 class AdManagerNativeProvider with ChangeNotifier {
-  final String adUnitId = '/22387492205,23277683599/id1631068092.Banner0.1747829228';
+  final String adUnitId = '/22387492205,23277683599/com.chotanews.Native1.1747720256';
 
   final Map<int, NativeAd?> ads = {};
   final Map<int, bool> adsLoaded = {};
