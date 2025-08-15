@@ -1,0 +1,2 @@
+D:/live/ChotaNewsMobile/android/app/.cxx/Debug/u5a2f174/x86_64/CMakeFiles/edit_cache.dir
+D:/live/ChotaNewsMobile/android/app/.cxx/Debug/u5a2f174/x86_64/CMakeFiles/rebuild_cache.dir
