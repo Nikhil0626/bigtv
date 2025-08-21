@@ -9,6 +9,7 @@ class AppColors {
   static const Color appButtonColor = Color(0xFF00A8ff);
   static const Color newAppButtonColor = Color(0xFFDBDDE1);
   static const Color settingsPageBackgroundColor = Color(0xFFF9F9F9);
+  static const Color  referEarnColor= Color(0xFF01385F);
 
   ///New App Colors
   static const Color iconColors = Color(0xFF6B7180);

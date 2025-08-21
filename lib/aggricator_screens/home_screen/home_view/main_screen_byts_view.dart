@@ -108,12 +108,12 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         : SizedBox(
             height: MediaQuery.of(context).size.height,
             width: MediaQuery.of(context).size.width,
-            child: (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString() == "Polls")
+            child: (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString().toLowerCase() == "polls")
                 ? PollScreenDesign(
                     artical: widget.article,
                     index: widget.index,
                   )
-                : (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString() == "Reviews")
+                : (widget.article['type'].toString() == "Standard" && widget.article['subType'].toString().toLowerCase() == "reviews")
                     ? MovieRatings(
                         article: widget.article,
                       )
@@ -345,7 +345,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                           children: [
                                                             Container(
                                                               height:
-                                                                  widget.article['subType'] == "BigBlackStandard" ? MediaQuery.of(context).size.height * .52 : MediaQuery.of(context).size.height * .30,
+                                                                  widget.article['subType'] == "BigBlackStandard" ? MediaQuery.of(context).size.height * .52 : MediaQuery.of(context).size.height * .33,
                                                               decoration: BoxDecoration(
                                                                 borderRadius: BorderRadius.only(
                                                                   topRight: Radius.circular(16.r),

@@ -58,34 +58,37 @@ class _VideoPreview extends State<VideoPreview> {
         child: homeProvider.isPlaying
             ? Stack(
           children: [
-            YoutubePlayerBuilder(
-              player: YoutubePlayer(
-                controller: homeProvider.controller,
-                showVideoProgressIndicator: true,
-                onReady: () => debugPrint("YouTube Player Ready"),
-                onEnded: (metaData) {
-                  homeProvider.isPlayingYoutube(false);
-                },
-                bottomActions: [
-                  CurrentPosition(),
-                  ProgressBar(isExpanded: true),
-                  RemainingDuration(),
-                  IconButton(
-                    icon: Icon(
-                      homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
+            SizedBox(
+              height: 330,
+              child: YoutubePlayerBuilder(
+                player: YoutubePlayer(
+                  controller: homeProvider.controller,
+                  showVideoProgressIndicator: true,
+                  onReady: () => debugPrint("YouTube Player Ready"),
+                  onEnded: (metaData) {
+                    homeProvider.isPlayingYoutube(false);
+                  },
+                  bottomActions: [
+                    CurrentPosition(),
+                    ProgressBar(isExpanded: true),
+                    RemainingDuration(),
+                    IconButton(
+                      icon: Icon(
+                        homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
+                      ),
+                      onPressed: () {
+                        if (homeProvider.isMuted) {
+                          homeProvider.controller.unMute();
+                        } else {
+                          homeProvider.controller.mute();
+                        }
+                        homeProvider.toggleMute();
+                      },
                     ),
-                    onPressed: () {
-                      if (homeProvider.isMuted) {
-                        homeProvider.controller.unMute();
-                      } else {
-                        homeProvider.controller.mute();
-                      }
-                      homeProvider.toggleMute();
-                    },
-                  ),
-                ],
+                  ],
+                ),
+                builder: (context, player) => player,
               ),
-              builder: (context, player) => player,
             ),
           ],
         )
