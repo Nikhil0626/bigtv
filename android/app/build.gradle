@@ -67,25 +67,10 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig signingConfigs.release
 
-            minifyEnabled true              // obfuscate code and remove unused code
-            shrinkResources true            // shrink and remove unused resources
-//            useProguard true                // apply proguard
 
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-//            ndk {
-//                debugSymbolLevel 'FULL'
-//            }
-            debuggable false                // make app non-debuggable
-            crunchPngs true                 // shrink images
-            jniDebuggable false
-            renderscriptDebuggable false
-            pseudoLocalesEnabled false
-            zipAlignEnabled true
-//            ndk {
-//                debugSymbolLevel 'FULL'
-//            }
-//            shrinkResources false
-//            minifyEnabled false
+
+
+//
 //            signingConfig signingConfigs.release
         }
     }

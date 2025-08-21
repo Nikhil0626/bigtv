@@ -1,0 +1,2 @@
+D:/live/ChotaNewsMobile/android/app/.cxx/RelWithDebInfo/4v324o4n/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/live/ChotaNewsMobile/android/app/.cxx/RelWithDebInfo/4v324o4n/armeabi-v7a/CMakeFiles/rebuild_cache.dir

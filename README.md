@@ -30,8 +30,8 @@ swipeable, visually engaging format.
 ## 🚀 Installation
 
 ```bash
-git clone https://github.com/bigtvsignitives/ChotaNewsMobile.git
-cd ChotaNewsMobile
+git clone https://github.com/bigtvsignitives/chotanews_application.git
+cd chotanews_application
 flutter pub get
 flutter run
 ```
