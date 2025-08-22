@@ -3,8 +3,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:app_links/app_links.dart';
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_manager_banner_provider.dart';
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/contest_screen/contest_screen.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
@@ -26,8 +24,6 @@ import '../../../globel_keys/globel_keys.dart';
 import '../../../services/analytics_service.dart';
 import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
-import '../../ad_manager_screen/ad_provider/ad_manager_native_provider.dart';
-import '../../ad_manager_screen/ad_provider/ad_mob_native_provider.dart';
 import '../../contest_screen/contest_provider.dart';
 import '../../events_data/event_repo.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
@@ -270,7 +266,7 @@ class HomeProvider extends ChangeNotifier {
     List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
-    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": false};
+    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true};
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);

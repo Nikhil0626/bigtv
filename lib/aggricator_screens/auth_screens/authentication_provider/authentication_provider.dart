@@ -347,7 +347,11 @@ class AuthenticationProvider extends ChangeNotifier {
   Future sendLocationsToServer(BuildContext context, {bool isFilter = false}) async {
     isLocationSendingLoading = true;
     notifyListeners();
-    List<int> selectedCategoryIds = getAllLocationList.where((item) => selectedLocations.contains(item.districtName.toString())).map((item) => item.districtId).toList();
+    List<int> selectedCategoryIds = selectedLocations
+        .map((name) => getAllLocationList
+        .firstWhere((item) => item.districtName == name)
+        .districtId)
+        .toList();
     log("selkhvgbkjegjke ${selectedCategoryIds}");
     log("Selected District Names: $selectedLocations");
     String nameOfDistrict = selectedLocations.toSet().join(',');

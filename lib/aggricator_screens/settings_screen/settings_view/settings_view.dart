@@ -72,149 +72,155 @@ class _SettingsViewState extends State<SettingsView> {
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
-            _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
-              EventRepo().addEvent({
-                "visitPageName":"Edit Profile",
-                "createAt": DateTime.now().toString(),
-              }, "compliance_section");
-              if (isNotificationsEnabled == false) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => LoginBackgroundView()),
-                );
-              } else if (isNotificationsEnabled == true) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ProfileView()),
-                );
-              }
-            }),
-            // else
-            SizedBox.shrink(),
+            Expanded(child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
+                    EventRepo().addEvent({
+                      "visitPageName":"Edit Profile",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    if (isNotificationsEnabled == false) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => LoginBackgroundView()),
+                      );
+                    } else if (isNotificationsEnabled == true) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProfileView()),
+                      );
+                    }
+                  }),
+                  // else
+                  SizedBox.shrink(),
 
-            height(height: 5.h),
-            _buildSettingsRow(context, "Filter.svg", "Filter", () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
-            }),
-            // height(height: 5.h),
-            //
-            // _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () async {
-            //   _showShareBottomSheet(context);
-            // }),
+                  height(height: 5.h),
+                  _buildSettingsRow(context, "Filter.svg", "Filter", () {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
+                  }),
+                  // height(height: 5.h),
+                  //
+                  // _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () async {
+                  //   _showShareBottomSheet(context);
+                  // }),
 
-            height(height: 5.h),
+                  height(height: 5.h),
 
-            _buildSettingsRow(context, "Help_support.svg", "Help & Support", () {
-              EventRepo().addEvent({
-                "visitPageName": "Help & Support",
-                "createAt": DateTime.now().toString(),
-              }, "compliance_section");
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AboutUs(),
-                ),
-              );
-            }),
+                  _buildSettingsRow(context, "Help_support.svg", "Help & Support", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Help & Support",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AboutUs(),
+                      ),
+                    );
+                  }),
 
-            height(height: 5.h),
-            _buildSettingsRow(context, "Advertise_icon.svg", "Advertise With Us", () {
-              EventRepo().addEvent({
-                "visitPageName": "Advertise With Us",
-                "createAt": DateTime.now().toString(),
-              }, "compliance_section");
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AdvertiseWithUs(),
-                ),
-              );
-            }),
+                  height(height: 5.h),
+                  _buildSettingsRow(context, "Advertise_icon.svg", "Advertise With Us", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Advertise With Us",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AdvertiseWithUs(),
+                      ),
+                    );
+                  }),
 
-            height(height: 5.h),
-            _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
-              EventRepo().addEvent({
-                "visitPageName": "Terms & Conditions",
-                "createAt": DateTime.now().toString(),
-              }, "compliance_section");
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => TermsConditions(),
-                ),
-              );
-            }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "Share_our_app.svg", "Refer And Earn", () {
-              // EventRepo().addEvent({
-              //   "visitPageName": "Terms & Conditions",
-              //   "createAt": DateTime.now().toString(),
-              // }, "compliance_section");
-              if(!isNotificationsEnabled ){
-                CustomToast.showErrorToast(msg: "Your currently using your application in guest mode please login and join your Refer & Earn contest",timeDuration: 3);
-              }else{
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ReferEarn(),
-                  ),
-                );
-              }
+                  height(height: 5.h),
+                  _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Terms & Conditions",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TermsConditions(),
+                      ),
+                    );
+                  }),
+                  height(height: 5.h),
+                  _buildSettingsRow(context, "Share_our_app.svg", "Refer And Earn", () {
+                    // EventRepo().addEvent({
+                    //   "visitPageName": "Terms & Conditions",
+                    //   "createAt": DateTime.now().toString(),
+                    // }, "compliance_section");
+                    if(!isNotificationsEnabled ){
+                      CustomToast.showErrorToast(msg: "Your currently using your application in guest mode please login and join your Refer & Earn contest",timeDuration: 3);
+                    }else{
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReferEarn(),
+                        ),
+                      );
+                    }
 
-            }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy", () {
-              EventRepo().addEvent({
-                "visitPageName": "Privacy Policy",
-                "createAt": DateTime.now().toString(),
-              }, "compliance_section");
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => PrivacyPolicy(),
-                ),
-              );
-            }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "Feedback.svg", "Feedback", () {
-              EventRepo().addEvent({
-                "visitPageName": "Feedback",
-                "createAt": DateTime.now().toString(),
-              }, "compliance_section");
-              Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
-            }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "contest.svg", "Ads Contest", () {
-              EventRepo().addEvent({
-                "visitPageName": "Contest",
-                "createAt": DateTime.now().toString(),
-              }, "compliance_section");
-              Navigator.push(context, MaterialPageRoute(builder: (context) => ContestScreen()));
-            }),
-            height(height: 5.h),
-            _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () async {
-              closeSubscribe();
-              SharedPreferences preferences = await SharedPreferences.getInstance();
-              String? deviceId = preferences.getString("deviceId");
-              String? userId = preferences.getString("userId");
+                  }),
+                  height(height: 5.h),
+                  _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Privacy Policy",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PrivacyPolicy(),
+                      ),
+                    );
+                  }),
+                  height(height: 5.h),
+                  _buildSettingsRow(context, "Feedback.svg", "Feedback", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Feedback",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
+                  }),
+                  height(height: 5.h),
+                  _buildSettingsRow(context, "contest.svg", "Ads Contest", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Contest",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => ContestScreen()));
+                  }),
+                  height(height: 5.h),
+                  _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () async {
+                    closeSubscribe();
+                    SharedPreferences preferences = await SharedPreferences.getInstance();
+                    String? deviceId = preferences.getString("deviceId");
+                    String? userId = preferences.getString("userId");
 
-              WebEngagePlugin.trackEvent('logout_user', {
-                "device_id": "${deviceId}",
-                "date_time": DateTime.now().toString(),
-                "user_id": userId ?? "",
-              });
-              WebEngagePlugin.userLogout();
-              context.read<AuthenticationProvider>().setLogOutStatus(context, false);
-               EventRepo().addEvent({
-                "loginType": "logout",
-                "mobileNumber": "",
-                "createAt": DateTime.now().toString(),
-              }, "login_event");
-            }),
-            height(height: 10),
-            context.watch<SettingsProvider>().bannerAdsLoading == BannerAdsLoading.fail ? SizedBox.shrink() : Banner300x50Size(),
+                    WebEngagePlugin.trackEvent('logout_user', {
+                      "device_id": "${deviceId}",
+                      "date_time": DateTime.now().toString(),
+                      "user_id": userId ?? "",
+                    });
+                    WebEngagePlugin.userLogout();
+                    context.read<AuthenticationProvider>().setLogOutStatus(context, false);
+                    EventRepo().addEvent({
+                      "loginType": "logout",
+                      "mobileNumber": "",
+                      "createAt": DateTime.now().toString(),
+                    }, "login_event");
+                  }),
+                  height(height: 10),
+                ],
+              ),
+            ),),
+            //context.watch<SettingsProvider>().bannerAdsLoading == BannerAdsLoading.fail ? SizedBox.shrink() : Banner300x50Size(),
 
-            Spacer(),
+            //Spacer(),
             Padding(
               padding: const EdgeInsets.only(bottom: 70.0),
               child: Text(
