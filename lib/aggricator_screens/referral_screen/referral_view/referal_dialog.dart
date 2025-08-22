@@ -1,9 +1,11 @@
+import 'package:chotanews/aggricator_screens/referral_screen/referral_provider/referral_provider.dart';
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/refer_earn.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -197,6 +199,7 @@ class ReferralDialog extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   child: InkWell(
                     onTap: () async {
+                      context.read<ReferralProvider>().postProcessReferral();
                       SharedPreferences sp = await SharedPreferences.getInstance();
                       bool isNotificationsEnabled =
                       sp.getString("loginType") == "login" ? true : false;
