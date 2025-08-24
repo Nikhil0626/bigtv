@@ -82,9 +82,12 @@ flutter clean
 flutter pub get
 cd ios
 pod install
-#open Runner.xcworkspace
+flutter build ios --release --config-only
+open Runner.xcworkspace
 ```
-
+```bash
+open Runner.xcworkspace
+```
 ### 📲 Build iOS (Release)
 
 ```bash

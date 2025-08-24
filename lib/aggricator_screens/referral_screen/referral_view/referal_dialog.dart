@@ -1,5 +1,6 @@
 import 'package:chotanews/aggricator_screens/referral_screen/referral_provider/referral_provider.dart';
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/refer_earn.dart';
+import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_toasts.dart';
@@ -199,6 +200,7 @@ class ReferralDialog extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   child: InkWell(
                     onTap: () async {
+
                       context.read<ReferralProvider>().postProcessReferral();
                       SharedPreferences sp = await SharedPreferences.getInstance();
                       bool isNotificationsEnabled =
@@ -213,8 +215,8 @@ class ReferralDialog extends StatelessWidget {
                         String myReferralLink = sp.getString("myReferralLink") ?? "N/A";
                         ShareResult result = await Share.share(myReferralLink);
                         if(result.status == ShareResultStatus.success){
-                          Navigator.pop(context);
-                          Navigator.push(context, MaterialPageRoute(builder: (context) => ReferEarn(),));
+                          Navigator.pop(mainNavigatorKey.currentContext!);
+                          Navigator.push(mainNavigatorKey.currentContext!, MaterialPageRoute(builder: (context) => ReferEarn(),));
                         }
                       }
                       

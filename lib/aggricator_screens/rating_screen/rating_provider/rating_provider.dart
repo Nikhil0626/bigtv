@@ -133,7 +133,7 @@ class RatingProvider extends ChangeNotifier {
   List<Map<String, dynamic>> ratingsList = [];
 
   // ✅ Updated: Add or update rating properly
-  void ratingUpdate(int rating, dynamic article) {
+  void ratingUpdate(int rating, dynamic article,{bool isNew = false}) {
     String postId = article.toString();
 
     final existingIndex = ratingsList.indexWhere(
@@ -147,7 +147,9 @@ class RatingProvider extends ChangeNotifier {
     }
 
     selectedStar = rating;
-    // notifyListeners();
+    if(!isNew) {
+      notifyListeners();
+    }
   }
 
   // ✅ Updated: Safe getPostRating without errors
