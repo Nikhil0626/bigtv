@@ -35,7 +35,7 @@ class _VideoPreview extends State<VideoPreview> {
 
   @override
   void dispose() {
-    context.read<HomeProvider>().controller.dispose();
+    // context.read<HomeProvider>().controller.dispose();
     super.dispose();
   }
 
@@ -45,7 +45,6 @@ class _VideoPreview extends State<VideoPreview> {
       return GestureDetector(
         onVerticalDragUpdate: (details) {
           final controller = context.read<HomeProvider>().pageController!;
-          // homeProvider.isPlayingYoutube(false);
           if (details.delta.dy < -10) {
 
             log("jhvjhbhjbjhhijhiu");
