@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/ios_ads_view.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_support_widgets/image_preview.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -133,11 +134,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                 )
                               : widget.article['type'] == "GoogleAds"
                                   ? Platform.isIOS
-                                      ? Container(
-                                          width: 444,
-                                          height: 444,
-                                          color: Colors.amber,
-                                        )
+                                      ? KeepAlivePage(keepAlive: true, child: IosAdsWidgetScreen(article: widget.article))
                                       : KeepAlivePage(
                                           keepAlive: true,
                                           child: Container(
@@ -316,14 +313,24 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                     if (isLogin) {
                                                       CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
                                                     } else {
-                                                      context
-                                                          .read<HomeProvider>()
-                                                          .sendAdsDataSend(widget.article['id'], widget.article['title'], widget.article['image_url'], false, widget.article['postUrl']);
+                                                      if (widget.article['postUrl'] == "" || widget.article['postUrl'].isEmpty()) {
+                                                      } else {
+                                                        context
+                                                            .read<HomeProvider>()
+                                                            .sendAdsDataSend(widget.article['id'], widget.article['title'], widget.article['image_url'], false, widget.article['postUrl']);
+                                                      }
                                                     }
                                                   },
-                                                  child: ImagePostSlider(
-                                                    imageUrl: widget.article['ad_images'],
-                                                  ))
+                                                  child: widget.article['image_url'].length == 1
+                                                      ? Image.network(
+                                                          widget.article['image_url'][0] ?? "",
+                                                          width: MediaQuery.of(context).size.width,
+                                                          height: MediaQuery.of(context).size.height,
+                                                          fit: BoxFit.fill,
+                                                        )
+                                                      : ImagePostSlider(
+                                                          imageUrl: widget.article['image_url'],
+                                                        ))
                                               : widget.article['type'] == "Gallery"
                                                   ? KeepAlivePage(
                                                       keepAlive: true,
@@ -460,7 +467,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                               ),
                                                           ],
                                                         ),
-
                                                         Expanded(
                                                           child: Container(
                                                             // height: widget.article['subType'] == "BigBlackStandard"
@@ -487,8 +493,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                             height: 20,
                                                                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
                                                                             decoration: BoxDecoration(color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white
-                                                                              // borderRadius: BorderRadius.circular(20),
-                                                                            ),
+                                                                                // borderRadius: BorderRadius.circular(20),
+                                                                                ),
                                                                             child: Center(
                                                                               child: Text.rich(
                                                                                 TextSpan(
@@ -546,7 +552,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                               : "assets/svg/like.svg",
                                                                                           height: 18,
                                                                                           width: 18,
-                                                                                          color: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? Colors.lightBlue : Colors.grey),
+                                                                                          color:
+                                                                                              settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? Colors.lightBlue : Colors.grey),
                                                                                     ),
                                                                                   );
                                                                                 }),
@@ -570,7 +577,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
                                                                                     sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
 
-                                                                                    if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                                                                                    if (widget.article['type'] == "Standard" ||
+                                                                                        widget.article['type'] == "Video" ||
+                                                                                        widget.article['type'] == "Image") {
                                                                                       try {
                                                                                         final image = await adsScreenshotController.capture(
                                                                                           pixelRatio: 2.0,
@@ -601,14 +610,14 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                   child: isSending
                                                                                       ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
                                                                                       : SizedBox(
-                                                                                    width: 24,
-                                                                                    child: SvgPicture.asset(
-                                                                                      "assets/svg/share.svg",
-                                                                                      height: 18,
-                                                                                      width: 18,
-                                                                                      color: Colors.grey,
-                                                                                    ),
-                                                                                  ),
+                                                                                          width: 24,
+                                                                                          child: SvgPicture.asset(
+                                                                                            "assets/svg/share.svg",
+                                                                                            height: 18,
+                                                                                            width: 18,
+                                                                                            color: Colors.grey,
+                                                                                          ),
+                                                                                        ),
                                                                                 ),
                                                                               ],
                                                                             ),

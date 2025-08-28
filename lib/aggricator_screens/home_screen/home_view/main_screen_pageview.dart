@@ -69,7 +69,9 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                       onPageChanged: (value) {
                         BannerAdsProvider().disposeAllAds();
                         log("IndividualPostView  $autoIndex--- $value");
+                        homeProvider.isPlayingYoutube(false);
                         if (homeProvider.isBottomEnable) {
+
                           homeProvider.pageChange(isValue: false);
                         }
                         if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {

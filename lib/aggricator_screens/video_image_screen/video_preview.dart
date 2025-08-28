@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -44,11 +46,16 @@ class _VideoPreview extends State<VideoPreview> {
         onVerticalDragUpdate: (details) {
           final controller = context.read<HomeProvider>().pageController!;
           if (details.delta.dy < -10) {
+
+            log("jhvjhbhjbjhhijhiu");
+            homeProvider.isPlayingYoutube(false);
             controller.nextPage(
               duration: Duration(milliseconds: 600),
               curve: Curves.easeIn,
             );
           } else if (details.delta.dy > 10) {
+            log("jhvjhbhjbjhhijhiu000");
+            homeProvider.isPlayingYoutube(false);
             controller.previousPage(
               duration: Duration(milliseconds: 600),
               curve: Curves.easeIn,

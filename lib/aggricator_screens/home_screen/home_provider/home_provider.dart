@@ -245,6 +245,7 @@ class HomeProvider extends ChangeNotifier {
 
   Future getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
     mainNavigatorKey.currentContext?.read<RatingProvider>().ratingsList = [];
+    mainNavigatorKey.currentContext?.read<RatingProvider>().ratedArticleIds = {};
     mainNavigatorKey.currentContext?.read<PollProvider>().clearData();
     isHomeLoading = true;
     if (isGetAllPost == false && postIds == "0") {

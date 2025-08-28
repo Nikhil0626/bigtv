@@ -576,8 +576,13 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
         body: _isAdMObLoaded
             ? _adWidget!
             : Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Expanded(flex: 1, child: Center(child: Container(color: Colors.teal.shade200, height: 250, width: 300, child: _adWidget!))),
+            Expanded(flex: 1, child: Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: _adWidget!,
+            )),
             Expanded(flex: 1, child: _buildRecommendedNews(context)),
           ],
         ),
@@ -585,28 +590,35 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
     }
 
     if (_isBannerLoaded && _bannerAd != null) {
-      return Scaffold(
-        body: Column(
-          children: [
-            SizedBox(
-                height: 300,
-                width: 250,
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: SizedBox(
+                width: _bannerAd!.sizes[0].width.toDouble(),
+                height: _bannerAd!.sizes[0].height.toDouble(),
                 child: AdWidget(
                   ad: _bannerAd!,
                 )),
-            Expanded(child: _buildRecommendedNews(context)),
-          ],
-        ),
+          ),
+          Expanded(child: _buildRecommendedNews(context)),
+        ],
       );
     }
     if (_isBannerLoaded && _bannerAd1 != null) {
-      return Scaffold(
-        body: Column(
-          children: [
-            SizedBox(height: 300, width: 250, child: AdWidget(ad: _bannerAd1!)),
-            Expanded(child: _buildRecommendedNews(context)),
-          ],
-        ),
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: SizedBox( width: _bannerAd1!.size.width.toDouble(),
+                height: _bannerAd1!.size.height.toDouble(), child: Center(child: AdWidget(ad: _bannerAd1!))),
+          ),
+          Expanded(child: _buildRecommendedNews(context)),
+        ],
       );
     }
     if (bannerAdsLoading == BannerAdsLoading.loading) {
@@ -639,7 +651,7 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
   Widget _buildRecommendedNews(BuildContext context) {
     return Column(
       children: [
-        Text("Recommended News ", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
+        Text("Recommended News $source", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
         Expanded(
           child: ListView.builder(
             itemCount: 3,

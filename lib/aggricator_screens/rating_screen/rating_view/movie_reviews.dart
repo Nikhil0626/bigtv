@@ -37,7 +37,7 @@ class _MovieRatingsState extends State<MovieRatings> {
     if(widget.article['userHasReviewed'] == false && context.read<RatingProvider>().isArticleRated(widget.article['id'])) {
       context.read<RatingProvider>().selectedStar = 0;
     }else{
-      context.read<RatingProvider>().ratingUpdate(widget.article['userRating']??0, widget.article['id']);
+      context.read<RatingProvider>().ratingUpdate(widget.article['userRating']??0, widget.article['id'],isNew: true);
     }
     super.initState();
   }
@@ -364,7 +364,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                   bool isLogin = sp.getString("loginType") != "login" ? true : false;
 
                                   if (isLogin) {
-                                    CustomToast.showErrorToast(msg: "Your a guest user, Please login to give a rating");
+                                    CustomToast.showErrorToast(msg: "Your a guest user, please login to give a rating");
                                   } else {
                                     ratingProvider.postSubmitRating(widget.article['id'], widget.article['userHasReviewed']);
                                   }
