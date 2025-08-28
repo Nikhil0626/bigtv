@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 5.0.7+2175
+version: 5.0.7+2177
 environment:
   sdk: ^3.5.4
 dependencies:
@@ -75,6 +75,7 @@ dependencies:
   network_info_plus: ^6.1.4
   flutter_carousel_slider: ^1.1.0
   webview_flutter: ^4.13.0
+  dotted_border: ^3.1.0
 #  click_to_copy: ^0.0.1
 #  flutter_invitereferrals: ^1.2.1
 
