@@ -1,17 +1,31 @@
-import 'package:chotanews/aggricator_screens/referral_screen/referral_provider/referral_provider.dart';
+import 'dart:async';
+
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/refer_earn.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class ReferralDialog extends StatelessWidget {
+class ReferralDialog extends StatefulWidget {
   const ReferralDialog({super.key});
 
+  @override
+  State<ReferralDialog> createState() => _ReferralDialogState();
+}
+
+class _ReferralDialogState extends State<ReferralDialog> {
+  late Timer closeTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    closeTimer=Timer(Duration(seconds: 5),(){
+      Navigator.pop(context);
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -199,7 +213,6 @@ class ReferralDialog extends StatelessWidget {
                   width: MediaQuery.of(context).size.width,
                   child: InkWell(
                     onTap: () async {
-                      context.read<ReferralProvider>().postProcessReferral();
                       SharedPreferences sp = await SharedPreferences.getInstance();
                       bool isNotificationsEnabled =
                       sp.getString("loginType") == "login" ? true : false;
@@ -217,7 +230,7 @@ class ReferralDialog extends StatelessWidget {
                           Navigator.push(context, MaterialPageRoute(builder: (context) => ReferEarn(),));
                         }
                       }
-                      
+
                     },
                     child: Container(
                       height: 40,
@@ -256,6 +269,7 @@ class ReferralDialog extends StatelessWidget {
             right: 0,
             child: IconButton(
               onPressed: () {
+                closeTimer.cancel();
                 Navigator.pop(context);
               },
               icon: Icon(
@@ -267,5 +281,11 @@ class ReferralDialog extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    closeTimer.cancel();
+    super.dispose();
   }
 }
