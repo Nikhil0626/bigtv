@@ -647,3 +647,74 @@
 // }
 //
 //
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
+
+class IpScreen extends StatefulWidget {
+  const IpScreen({super.key});
+
+  @override
+  State<IpScreen> createState() => _IpScreenState();
+}
+
+class _IpScreenState extends State<IpScreen> {
+  String? ipAddress;
+  bool isLoading = false;
+
+  Future<void> fetchIp() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final url = Uri.parse("https://ipapi.co/json/");
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        setState(() {
+          ipAddress = data['ip']; // 👈 Extract the IP
+        });
+      } else {
+        setState(() {
+          ipAddress = "Failed to get IP";
+        });
+      }
+    } catch (e) {
+      setState(() {
+        ipAddress = "Error: $e";
+      });
+    }
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchIp(); // 👈 Fetch IP when screen loads
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("Public IP Finder")),
+      body: Center(
+        child: isLoading
+            ? const CircularProgressIndicator()
+            : Text(
+          ipAddress ?? "No IP yet",
+          style: const TextStyle(fontSize: 20),
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: fetchIp,
+        child: const Icon(Icons.refresh),
+      ),
+    );
+  }
+}

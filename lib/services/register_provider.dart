@@ -1,4 +1,3 @@
-
 import 'package:provider/provider.dart';
 
 import '../aggricator_screens/ad_manager_screen/ad_provider/banner_ads_provider.dart';

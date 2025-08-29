@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../services/app_update_servuce.dart';
 import '../../../services/daily_dialog_manager.dart';
@@ -46,9 +47,19 @@ class _HomeViewState extends State<HomeView> {
       homeProvider?.getMobileNumber();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(seconds: 1), () {
+      Future.delayed(Duration(seconds: 1), () async{
         // checkAndShowPopup();
-        DailyDialog.showReferDialog(context: context);
+        SharedPreferences preferences = await SharedPreferences.getInstance();
+        String? myReferralLink = preferences.getString("myReferralLink") ?? "N/A";
+        if(myReferralLink != "N/A" && myReferralLink != null && myReferralLink.isNotEmpty) {
+          DailyDialog.showReferDialog(context: context);
+        } else {
+          context.read<ReferralProvider>().getReferralStats().then((value){
+            Future.delayed(Duration(seconds: 1), () {
+              DailyDialog.showReferDialog(context: context);
+            } );
+          });
+        }
       });
     });
     homeProvider?.initDeepLinks(context);
