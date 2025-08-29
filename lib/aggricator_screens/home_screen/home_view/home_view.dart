@@ -218,7 +218,8 @@ class _HomeViewState extends State<HomeView> {
                 ],
               ),
               bottomNavigationBar: KeepAlivePage(
-                  child: SizedBox(
+                  child: Container(
+                    width: MediaQuery.of(context).size.width,
                       height: 56,
                       child: Banner300x50Size())),
 
