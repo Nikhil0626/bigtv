@@ -819,21 +819,13 @@ class _ReferEarnState extends State<ReferEarn> {
     super.initState();
     context.read<ReferralProvider>().getReferralStats();
     context.read<ReferralProvider>().getAvailableRewards();
-    getData();
   }
 
-  String? myReferralCode;
-  String? myReferralLink;
-  String? userId;
+  // String? myReferralCode;
+  // String? myReferralLink;
+  // String? userId;
 
-  void getData() async {
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-    myReferralCode = sharedPreferences.getString("myReferralCode") ?? "N/A";
-    myReferralLink = sharedPreferences.getString("myReferralLink") ?? "N/A";
-    userId = sharedPreferences.getString("userId") ?? "N/A";
-    log("get code $myReferralCode /////  get my link $myReferralLink");
-    setState(() {});
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -914,7 +906,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           padding: EdgeInsets.symmetric(horizontal: 16),
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            "$myReferralCode",
+                            "${referralProvider.referralData['referral_code']}",
                             style: fontStyle(
                               color: Colors.lightBlue,
                               fontSize: 14,
@@ -930,8 +922,8 @@ class _ReferEarnState extends State<ReferEarn> {
                               context.read<ReferralProvider>().postProcessReferral();
                               EventRepo().addEvent({
                                 "shareApp": Platform.isIOS ? "iOS" : "Android",
-                                "userId": userId ?? "0",
-                                'referrerUrl': myReferralLink,
+                                "userId": referralProvider.userId ?? "0",
+                                'referrerUrl': referralProvider.myReferralLink,
                                 'clickTimestamp': DateTime.now().toString(),
                                 'installTimestamp': "",
                                 "createAt": DateTime.now().toString(),
@@ -939,7 +931,7 @@ class _ReferEarnState extends State<ReferEarn> {
                                 "isSharedUser": true
                               }, "referral");
                               Share.share(
-                                "Click link and get bonus: $myReferralLink",
+                                "Click link and get bonus: ${referralProvider.referralData['referral_link']}",
                               );
                             },
                             child: Container(

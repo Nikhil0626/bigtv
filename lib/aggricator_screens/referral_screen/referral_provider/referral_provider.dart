@@ -22,6 +22,18 @@ class ReferralProvider extends ChangeNotifier {
   String selectedOperator = "";
   int difference = 0;
 
+  void getData(SharedPreferences? preferences) async {
+    myReferralCode = preferences!.getString("myReferralCode") ?? "N/A";
+    myReferralLink = preferences!.getString("myReferralLink") ?? "N/A";
+    userId = preferences!.getString("userId") ?? "N/A";
+    log("get code $myReferralCode /////  get my link $myReferralLink");
+    notifyListeners();
+  }
+
+  String? myReferralCode;
+  String? myReferralLink;
+  String? userId;
+
   Future getReferralStats() async {
     isDataLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -37,6 +49,11 @@ class ReferralProvider extends ChangeNotifier {
         difference = int.parse(referralData['needed'].toString()) - int.parse(referralData['downloads'].toString());
         totalRewards = int.parse(referralData['balance_points'].toString()) + int.parse(referralData['needed'].toString());
         progress = progress.clamp(0.0, 1.0);
+        log("Nikhil Goud: ${referralData['referral_code']}");
+        log("Nikhil Goud k: ${referralData['referral_link']}");
+        preferences.setString("myReferralCode", referralData['referral_code'].toString() ?? "");
+        preferences.setString("myReferralLink", referralData['referral_link'].toString() ?? "");
+        getData(preferences);
       // Response response = await ReferralRepo().getReferralStats(userId);
       //
       // if (response.statusCode == 200) {
