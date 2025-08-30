@@ -1,15 +1,24 @@
-
 import 'dart:async';
 import 'dart:developer';
 import 'dart:ui';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import '../../../services/analytics_service.dart';
-import '../../ad_manager_screen/ad_provider/banner_ads_provider.dart';
+import '../../../utils/app_colors.dart';
+import '../../../utils/app_fonts.dart';
+import '../../../utils/app_no_data.dart';
+import '../../../utils/app_spaces.dart';
+import '../../../utils/keep_alive_page.dart';
+import '../../ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
+import '../../individual_post_details/individual_post_view.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
 
+///This widgets help in stopping the build
 class MainScreenPageView extends StatefulWidget {
   final int startIndex;
   final bool isAiTags;
@@ -37,11 +46,21 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
   @override
   void initState() {
+    AdMobBannerProvider  bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
+    bannerAdsProvider.adsLoad();
+
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
     autoIndex = 0;
     super.initState();
     homeProvider?.pageController?.addListener(homeProvider!.scrollListener);
     _pageStartTime = DateTime.now();
+
+    Future.delayed(
+      Duration(seconds: 10),
+          () {
+        log("Hello Siva ${context.read<AdMobBannerProvider>().ads}");
+      },
+    );
   }
 
   @override
@@ -61,19 +80,50 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                         PointerDeviceKind.mouse,
                       },
                     ),
-                    child: PageView.builder(
+                    child: context.read<HomeProvider>().getAllPostList.isEmpty
+                        ? Center(
+                      child: AppNoData(),
+                    )
+                        : PageView.builder(
                       physics: const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
                       controller: homeProvider.pageController!,
                       scrollDirection: Axis.vertical,
                       itemCount: homeProvider.getAllPostList.length,
                       onPageChanged: (value) {
-                        BannerAdsProvider().disposeAllAds();
-                        log("IndividualPostView  $autoIndex--- $value");
-                        homeProvider.isPlayingYoutube(false);
-                        if (homeProvider.isBottomEnable) {
+                        final adKeys = context.read<AdMobBannerProvider>().ads.length;
 
-                          homeProvider.pageChange(isValue: false);
+                        log(" Last Index of ads data $adKeys ----- $value --- ${adKeys * 5}");
+                        if (value == (adKeys * 5)) {
+                          int? lastKey = context.read<AdMobBannerProvider>().ads.keys.isNotEmpty ? context.read<AdMobBannerProvider>().ads.keys.last : adKeys;
+                          context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
+                          context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
+                          context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                          context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
+                          Future.delayed(
+                            Duration(seconds: 10),
+                                () {
+                              log("Hello Siva ${context.read<AdMobBannerProvider>().ads}");
+                            },
+                          );
+                        } else if (value == 3 && context.read<AdMobBannerProvider>().ads.isEmpty) {
+                          int? lastKey = 0;
+                          context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
+                          context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
+                          context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                          context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
+                          Future.delayed(
+                            Duration(seconds: 10),
+                                () {
+                              log("Hello Siva ${context.read<AdMobBannerProvider>().ads}");
+                            },
+                          );
                         }
+
+                        // BannerAdsProvider().disposeAllAds();
+                        log("IndividualPostView  $autoIndex--- $value");
+                        // if (homeProvider.isBottomEnable) {
+                        //   homeProvider.pageChange(isValue: false);
+                        // }
                         if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
                           Future.delayed(
                             Duration(milliseconds: 2000),
@@ -86,7 +136,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                           );
                         }
 
-                        context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
+                        // context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
                         autoIndex = value;
 
                         final now = DateTime.now();
@@ -94,11 +144,117 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
                         AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
 
-                        setState(() {
-                          _pageStartTime = now;
-                        });
+                        // setState(() {
+                        //   _pageStartTime = now;
+                        // });
                       },
                       itemBuilder: (context, index) {
+                        if ((index + 1) % 5 == 0) {
+                          int adIndex = ((index + 1) ~/ 5) - 1;
+                          log("current index new view $index --- $adIndex");
+                          return Consumer<AdMobBannerProvider>(
+                            builder: (context, adMobBannerProvider, child) {
+                              final adsList = adMobBannerProvider.ads.values.toList();
+
+
+                              if (adIndex < adsList.length) {
+                                final ad = adsList[adIndex];
+                                if (ad != null) {
+                                  if (ad is BannerAd) {
+                                    return KeepAlivePage(
+
+                                      child: Container(
+                                        color: Colors.grey[200],
+                                        alignment: Alignment.center,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Expanded(
+                                              flex: 1,
+                                              child: Center(
+                                                child: AdWidget(ad: ad),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: buildRecommendedNews(context, homeProvider),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  } else if (ad is NativeAd) {
+                                    return KeepAlivePage(
+                                      child: Container(
+                                        color: Colors.grey[200],
+                                        alignment: Alignment.center,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Expanded(
+                                              flex: 1,
+                                              child: Center(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                                  child: AdWidget(ad: ad),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: buildRecommendedNews(context, homeProvider),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  } else if (ad is AdManagerBannerAd) {
+                                    return KeepAlivePage(
+
+                                      child: Container(
+                                        color: Colors.grey[200],
+                                        alignment: Alignment.center,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Expanded(
+                                              flex: 1,
+                                              child: Center(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                                  child: AdWidget(ad: ad),
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(
+                                              flex: 1,
+                                              child: buildRecommendedNews(context, homeProvider),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }
+
+
+                                }
+                              }
+
+                              // Fallback if no ad is available for this slot
+                              return Container(
+                                color: Colors.white,
+                                child: MainScreenBytView(
+                                  article: homeProvider.getAllPostList[index],
+                                  pageController: homeProvider.pageController!,
+                                  length: homeProvider.getAllPostList.length,
+                                  index: index,
+                                  aiTagName: "",
+                                ),
+                              );
+                            },
+                          );
+                        }
+
                         return Container(
                           color: Colors.white,
                           child: MainScreenBytView(
@@ -141,6 +297,114 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
           );
         },
       ),
+    );
+  }
+
+  Widget buildRecommendedNews(BuildContext context, HomeProvider homeProvider) {
+    return Column(
+      children: [
+        InkWell(
+          //     // onTap: () {
+          //     //   Navigator.push(
+          //     //       context,
+          //     //       MaterialPageRoute(
+          //     //         builder: (context) => AdsTestData(),
+          //     //       ));
+          //     // },
+            child: Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor))),
+        height(height: 10),
+        Expanded(
+          child: ListView.builder(
+            itemCount: homeProvider.getRecommendedPostList.length,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final post = homeProvider.getRecommendedPostList[index];
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => IndividualPostView1(
+                        postId: post['id'].toString(),
+                        isComeFrom: true,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.wColor,
+                    border: Border.all(width: 2, color: AppColors.wColor),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CachedNetworkImage(
+                          imageUrl: post['image_url'].toString(),
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            height: 50,
+                            width: 50,
+                            color: AppColors.borderColor.withOpacity(.2),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.image, size: 30, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      width(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              post["title"],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor),
+                            ),
+                            height(height: 2),
+                            Row(
+                              children: [
+                                index == 0
+                                    ? SvgPicture.asset("assets/svg/like.svg", height: 16, width: 16)
+                                    : index == 2
+                                    ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
+                                    : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
+                                width(width: 6),
+                                Text(
+                                  index == 0
+                                      ? "టాప్ లైక్స్"
+                                      : index == 2
+                                      ? "టాప్ షేర్‌డ్"
+                                      : "టాప్ వ్యూడ్",
+                                  style: fontStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textColor),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }

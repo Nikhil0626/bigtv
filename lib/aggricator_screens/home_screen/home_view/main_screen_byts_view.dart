@@ -132,21 +132,21 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     title: '',
                                   ),
                                 )
-                              : widget.article['type'] == "GoogleAds"
-                                  ? Platform.isIOS
-                                      ? KeepAlivePage(keepAlive: true, child: IosAdsWidgetScreen(article: widget.article))
-                                      : KeepAlivePage(
-                                          keepAlive: true,
-                                          child: Container(
-                                            color: Colors.white,
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: FullScreenNativeAd(
-                                                article: widget.article,
-                                              ),
-                                            ),
-                                          ),
-                                        )
+                              // : widget.article['type'] == "GoogleAds"
+                              //     ? Platform.isIOS
+                              //         ? KeepAlivePage(keepAlive: true, child: IosAdsWidgetScreen(article: widget.article))
+                              //         : KeepAlivePage(
+                              //             keepAlive: true,
+                              //             child: Container(
+                              //               color: Colors.white,
+                              //               child: Padding(
+                              //                 padding: const EdgeInsets.all(8.0),
+                              //                 child: FullScreenNativeAd(
+                              //                   article: widget.article,
+                              //                 ),
+                              //               ),
+                              //             ),
+                              //           )
                                   : widget.article['type'] == "Reel"
                                       ? FullStandardVideoView(
                                           rellData: widget.article,
