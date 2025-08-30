@@ -1198,6 +1198,7 @@ class _ReferEarnState extends State<ReferEarn> {
                             "ప్రముఖ బహుమతులు",
                             style: fontStyle(fontSize: 16, fontWeight: FontWeight.bold),
                           ),
+                          referralProvider.referralRewardsList.length > 4?
                           InkWell(
                             onTap: () {
                               Navigator.push(
@@ -1214,7 +1215,8 @@ class _ReferEarnState extends State<ReferEarn> {
                                 style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.lightBlue),
                               ),
                             ),
-                          ),
+                          )
+                          : SizedBox.shrink(),
                         ],
                       ),
                     ),

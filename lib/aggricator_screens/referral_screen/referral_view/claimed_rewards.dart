@@ -45,7 +45,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
           ),
         ),
         title: Text(
-          "Claimed Rewards",
+          "అందుకోబడిన బహుమతులు ",
           style: TextStyle(color: Colors.black, fontSize: 18.sp, fontWeight: FontWeight.w800),
         ),
         backgroundColor: Colors.white,
@@ -103,7 +103,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                           ),
                           height(height: 4.h),
                           Text(
-                            "Downloads",
+                            "డౌన్లోడ్స్",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.sp,
@@ -143,7 +143,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                           ),
                           height(height: 4.h),
                           Text(
-                            "Claimed",
+                            "క్లేమెడ్",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.sp,
@@ -184,7 +184,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                           ),
                           height(height: 4.h),
                           Text(
-                            "Balance",
+                            "బ్యాలెన్స్",
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 12.sp,
@@ -205,7 +205,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
-                  "Transactions History",
+                  "పూర్వం అందుకోబడిన బహుమతులు",
                   style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w700),
                 ),
               ),
@@ -324,7 +324,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
               onTap: (){
                 Navigator.push(context, MaterialPageRoute(builder: (context) => RedeemAmazonCoupons()));
               },
-              child: Text("How to redeem coupons?", style: TextStyle(color: Colors.blue),),
+              child: Text("కూపన్‌ను ఎలా రీడీమ్ చేసుకోవాలి?", style: TextStyle(color: Colors.blue),),
             ),
             )
           ],
