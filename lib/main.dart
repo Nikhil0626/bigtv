@@ -24,6 +24,7 @@ import 'package:workmanager/workmanager.dart';
 import 'aggricator_screens/events_data/event_repo.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import 'aggricator_screens/splash_screen/splash_screen_view.dart';
+import 'aggricator_screens/test_screens/testing_screen/test3.dart';
 import 'globel_keys/globel_keys.dart';
 
 void callbackDispatcher() {

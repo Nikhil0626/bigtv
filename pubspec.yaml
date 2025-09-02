@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 5.0.8+2183
+version: 5.0.8+2186
 environment:
   sdk: ^3.5.4
 dependencies:
@@ -13,7 +13,7 @@ dependencies:
   flutter_svg: ^2.0.17
   flutter_screenutil: ^5.9.3
   dio: ^5.8.0+1
-  intl: ^0.20.2
+  intl: ^0.19.0
   video_player: ^2.9.2
   youtube_player_flutter: ^9.1.1
   carousel_slider: ^5.0.0

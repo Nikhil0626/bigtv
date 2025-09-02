@@ -178,36 +178,36 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
       final ad = NativeAd(
         adUnitId: adMobNativeId, // Use test ID: 'ca-app-pub-3940256099942544/2247696110'
-
-        nativeTemplateStyle: NativeTemplateStyle(
-          templateType: TemplateType.medium,
-          mainBackgroundColor: AppColors.cardBackgroundColor,
-          cornerRadius: 10.0,
-          callToActionTextStyle: NativeTemplateTextStyle(
-            textColor: Colors.black,
-            backgroundColor: AppColors.cardBackgroundColor,
-            style: NativeTemplateFontStyle.monospace,
-            size: 16.0,
-          ),
-          primaryTextStyle: NativeTemplateTextStyle(
-            textColor: Colors.black,
-            backgroundColor: AppColors.cardBackgroundColor,
-            style: NativeTemplateFontStyle.italic,
-            size: 16.0,
-          ),
-          secondaryTextStyle: NativeTemplateTextStyle(
-            textColor: Colors.black,
-            backgroundColor: AppColors.cardBackgroundColor,
-            style: NativeTemplateFontStyle.bold,
-            size: 16.0,
-          ),
-          tertiaryTextStyle: NativeTemplateTextStyle(
-            textColor: Colors.black,
-            backgroundColor: AppColors.cardBackgroundColor,
-            style: NativeTemplateFontStyle.normal,
-            size: 16.0,
-          ),
-        ),
+        factoryId: "adFactoryExample",
+        // nativeTemplateStyle: NativeTemplateStyle(
+        //   templateType: TemplateType.medium,
+        //   mainBackgroundColor: AppColors.cardBackgroundColor,
+        //   cornerRadius: 10.0,
+        //   callToActionTextStyle: NativeTemplateTextStyle(
+        //     textColor: Colors.black,
+        //     backgroundColor: AppColors.cardBackgroundColor,
+        //     style: NativeTemplateFontStyle.monospace,
+        //     size: 16.0,
+        //   ),
+        //   primaryTextStyle: NativeTemplateTextStyle(
+        //     textColor: Colors.black,
+        //     backgroundColor: AppColors.cardBackgroundColor,
+        //     style: NativeTemplateFontStyle.italic,
+        //     size: 16.0,
+        //   ),
+        //   secondaryTextStyle: NativeTemplateTextStyle(
+        //     textColor: Colors.black,
+        //     backgroundColor: AppColors.cardBackgroundColor,
+        //     style: NativeTemplateFontStyle.bold,
+        //     size: 16.0,
+        //   ),
+        //   tertiaryTextStyle: NativeTemplateTextStyle(
+        //     textColor: Colors.black,
+        //     backgroundColor: AppColors.cardBackgroundColor,
+        //     style: NativeTemplateFontStyle.normal,
+        //     size: 16.0,
+        //   ),
+        // ),
 
         request: AdRequest(),
 
@@ -266,11 +266,12 @@ class AdMobBannerProvider with ChangeNotifier {
       );
       final NativeAd ad = NativeAd(
         adUnitId: adManagerNativeId,
-        nativeTemplateStyle: NativeTemplateStyle(
-          templateType: TemplateType.medium,
-          mainBackgroundColor: Colors.white,
-          cornerRadius: 10.0,
-        ),
+        factoryId: "adFactoryExample",
+        // nativeTemplateStyle: NativeTemplateStyle(
+        //   templateType: TemplateType.medium,
+        //   mainBackgroundColor: Colors.white,
+        //   cornerRadius: 10.0,
+        // ),
         nativeAdOptions: nativeAdOptions,
         request: const AdManagerAdRequest(),
         listener: NativeAdListener(

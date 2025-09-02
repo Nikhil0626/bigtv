@@ -121,9 +121,9 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
                         // BannerAdsProvider().disposeAllAds();
                         log("IndividualPostView  $autoIndex--- $value");
-                        // if (homeProvider.isBottomEnable) {
-                        //   homeProvider.pageChange(isValue: false);
-                        // }
+                        if (homeProvider.isBottomEnable) {
+                          homeProvider.pageChange(isValue: false);
+                        }
                         if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
                           Future.delayed(
                             Duration(milliseconds: 2000),
@@ -136,7 +136,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                           );
                         }
 
-                        // context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
+                        context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
                         autoIndex = value;
 
                         final now = DateTime.now();
@@ -144,9 +144,9 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
                         AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
 
-                        // setState(() {
-                        //   _pageStartTime = now;
-                        // });
+                        setState(() {
+                          _pageStartTime = now;
+                        });
                       },
                       itemBuilder: (context, index) {
                         if ((index + 1) % 5 == 0) {
@@ -170,13 +170,16 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Expanded(
-                                              flex: 1,
+                                              flex: 6,
                                               child: Center(
-                                                child: AdWidget(ad: ad),
+                                                child: Padding(
+                                                  padding: const EdgeInsets.only(bottom: 25),
+                                                  child: AdWidget(ad: ad),
+                                                ),
                                               ),
                                             ),
                                             Expanded(
-                                              flex: 1,
+                                              flex: 4,
                                               child: buildRecommendedNews(context, homeProvider),
                                             ),
                                           ],
@@ -185,28 +188,29 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                     );
                                   } else if (ad is NativeAd) {
                                     return KeepAlivePage(
-                                      child: Container(
-                                        color: Colors.grey[200],
-                                        alignment: Alignment.center,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Expanded(
-                                              flex: 1,
-                                              child: Center(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                                  child: AdWidget(ad: ad),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 1,
-                                              child: buildRecommendedNews(context, homeProvider),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
+                                      child: AdWidget(ad: ad)
+                                      // Container(
+                                      //   color: Colors.grey[200],
+                                      //   alignment: Alignment.center,
+                                      //   child: Column(
+                                      //     mainAxisSize: MainAxisSize.min,
+                                      //     children: [
+                                      //       Expanded(
+                                      //         flex: 6,
+                                      //         child: Center(
+                                      //           child: Padding(
+                                      //             padding: const EdgeInsets.only(bottom: 25),
+                                      //             child: AdWidget(ad: ad),
+                                      //           ),
+                                      //         ),
+                                      //       ),
+                                      //       Expanded(
+                                      //         flex: 4,
+                                      //         child: buildRecommendedNews(context, homeProvider),
+                                      //       ),
+                                      //     ],
+                                      //   ),
+                                      // ),
                                     );
                                   } else if (ad is AdManagerBannerAd) {
                                     return KeepAlivePage(
@@ -221,7 +225,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                               flex: 1,
                                               child: Center(
                                                 child: Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                                  padding: const EdgeInsets.only(bottom: 25),
                                                   child: AdWidget(ad: ad),
                                                 ),
                                               ),
