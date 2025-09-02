@@ -817,7 +817,7 @@ class _ReferEarnState extends State<ReferEarn> {
   @override
   void initState() {
     super.initState();
-    context.read<ReferralProvider>().getReferralStats();
+    context.read<ReferralProvider>().getReferralStats(context);
     context.read<ReferralProvider>().getAvailableRewards();
   }
 
@@ -919,7 +919,7 @@ class _ReferEarnState extends State<ReferEarn> {
                           width: MediaQuery.of(context).size.width,
                           child: InkWell(
                             onTap: () {
-                              context.read<ReferralProvider>().postProcessReferral();
+                              context.read<ReferralProvider>().postProcessReferral(context);
                               EventRepo().addEvent({
                                 "shareApp": Platform.isIOS ? "iOS" : "Android",
                                 "userId": referralProvider.userId ?? "0",

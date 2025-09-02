@@ -647,74 +647,89 @@
 // }
 //
 //
-import 'dart:convert';
+
+
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 
-class IpScreen extends StatefulWidget {
-  const IpScreen({super.key});
+class NativeAdsPageView extends StatefulWidget {
+  const NativeAdsPageView({super.key});
 
   @override
-  State<IpScreen> createState() => _IpScreenState();
+  State<NativeAdsPageView> createState() => _NativeAdsPageViewState();
 }
 
-class _IpScreenState extends State<IpScreen> {
-  String? ipAddress;
-  bool isLoading = false;
-
-  Future<void> fetchIp() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      final url = Uri.parse("https://ipapi.co/json/");
-      final response = await http.get(url);
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        setState(() {
-          ipAddress = data['ip']; // 👈 Extract the IP
-        });
-      } else {
-        setState(() {
-          ipAddress = "Failed to get IP";
-        });
-      }
-    } catch (e) {
-      setState(() {
-        ipAddress = "Error: $e";
-      });
-    }
-
-    setState(() {
-      isLoading = false;
-    });
-  }
+class _NativeAdsPageViewState extends State<NativeAdsPageView> {
+  final PageController _pageController = PageController();
+  final List<NativeAd> _nativeAds = [];
+  final int _adCount = 5; // Number of ads to preload
+  final List<bool> _isLoaded = [];
 
   @override
   void initState() {
     super.initState();
-    fetchIp(); // 👈 Fetch IP when screen loads
+    _loadNativeAds();
+  }
+
+  void _loadNativeAds() {
+    for (int i = 0; i < _adCount; i++) {
+      final nativeAd = NativeAd(
+        adUnitId: 'ca-app-pub-3940256099942544/2247696110', // Replace with your AdUnit
+        factoryId: 'adFactoryExample', // Make sure to register this factory in iOS & Android
+        request: const AdRequest(),
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            debugPrint("Native Ad $i loaded");
+            setState(() {
+              _isLoaded[i] = true;
+            });
+          },
+          onAdFailedToLoad: (ad, error) {
+            debugPrint("Native Ad $i failed: $error");
+            ad.dispose();
+          },
+        ),
+      );
+
+      _nativeAds.add(nativeAd);
+      _isLoaded.add(false);
+      nativeAd.load();
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var ad in _nativeAds) {
+      ad.dispose();
+    }
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Public IP Finder")),
-      body: Center(
-        child: isLoading
-            ? const CircularProgressIndicator()
-            : Text(
-          ipAddress ?? "No IP yet",
-          style: const TextStyle(fontSize: 20),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: fetchIp,
-        child: const Icon(Icons.refresh),
+      appBar: AppBar(title: const Text("Native Ads in PageView")),
+      body: PageView.builder(
+        controller: _pageController,
+        scrollDirection: Axis.horizontal, // change to Axis.vertical for vertical scroll
+        itemCount: _nativeAds.length,
+        itemBuilder: (context, index) {
+          if (!_isLoaded[index]) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: AspectRatio(
+              aspectRatio: 16 / 9, // 👈 Adjust to 1/1, 3/4, 16/9 dynamically if needed
+              child: AdWidget(ad: _nativeAds[index]),
+            ),
+          );
+        },
       ),
     );
   }
 }
+

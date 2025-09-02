@@ -1,7 +1,12 @@
+import 'dart:async';
 import 'dart:developer';
 
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
+import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../globel_keys/globel_keys.dart';
@@ -21,6 +26,24 @@ class ReferralProvider extends ChangeNotifier {
   double progress = 0.0;
   String selectedOperator = "";
   int difference = 0;
+  int _timercount = 10;
+  Timer? _timer;
+
+  void startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (_timercount == 0) {
+        _timer!.cancel();
+      } else {
+        _timercount--;
+        if(_timercount == 0){
+          Navigator.pop(mainNavigatorKey.currentContext!);
+          Navigator.pushAndRemoveUntil(mainNavigatorKey.currentContext!, MaterialPageRoute(builder: (contexts) => LoginBackgroundView()), (route) => false);
+
+        }
+        notifyListeners();
+      }
+    });
+  }
 
   void getData(SharedPreferences? preferences) async {
     myReferralCode = preferences!.getString("myReferralCode") ?? "N/A";
@@ -34,7 +57,7 @@ class ReferralProvider extends ChangeNotifier {
   String? myReferralLink;
   String? userId;
 
-  Future getReferralStats() async {
+  Future getReferralStats(context) async {
     isDataLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
@@ -64,8 +87,14 @@ class ReferralProvider extends ChangeNotifier {
       //   progress = progress.clamp(0.0, 1.0);
       } else {
         log("Failed to post referral: ${response.statusCode}");
+        if(response.statusCode == 404){
+          referralData = {};
+          startTimer();
+          showUserInvalidPopUp(context);
+        }
       }
     } on DioException catch (e, st) {
+      log("Failed to post referral: ${e.response?.statusCode}");
       log("Dio error while posting referral: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
       log("Unexpected error while posting referral: ${e.toString()} ---- ${st.toString()}");
@@ -124,7 +153,7 @@ class ReferralProvider extends ChangeNotifier {
     }
   }
 
-  Future postClaimedRewards(reward, providerName, {bool isRecharge = false}) async {
+  Future postClaimedRewards(reward, providerName, {bool isRecharge = false} ) async {
     referralRewardsClaimed.clear();
     isLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -140,7 +169,7 @@ class ReferralProvider extends ChangeNotifier {
       log("Rewards posted successfully: ${response.data}");
       if (response.statusCode == 200) {
         referralRewardsClaimed.addAll(response.data);
-        getReferralStats();
+        getReferralStats(mainNavigatorKey.currentContext!);
         if(!isRecharge) {
           Navigator.pop(mainNavigatorKey.currentContext!);
         }
@@ -183,7 +212,7 @@ class ReferralProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> postProcessReferral() async {
+  Future<void> postProcessReferral(context) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? myReferralCode = preferences.getString("myReferralCode");
     String? userId = preferences.getString("userId");
@@ -196,7 +225,7 @@ class ReferralProvider extends ChangeNotifier {
       Response response = await ReferralRepo().postProcessReferral(body);
       log(response.data.toString());
       if (response.statusCode == 200) {
-        getReferralStats();
+        getReferralStats(context);
       } else {}
     } on DioException catch (e, st) {
       CustomToast.showErrorToast(msg: "something went wrong");
@@ -212,6 +241,78 @@ class ReferralProvider extends ChangeNotifier {
   void updateProvider(value) {
     selectedOperator = value;
     notifyListeners();
+  }
+
+  void showUserInvalidPopUp(contexti) {
+    showModalBottomSheet(
+      context: contexti,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext contexts) {
+        return Container(
+          padding: EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 60,
+              ),
+              SizedBox(height: 16),
+              Text(
+                "Referral Program Unavailable",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.red,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 16),
+              Text(
+                "The referral program is currently not available. Please try logging in again and joining the contest.",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey[700],
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 24),
+              Consumer<ReferralProvider>(
+                  builder: (context,referralProvider,__) {
+                  return ElevatedButton(
+                    onPressed: () {
+
+                      Navigator.pop(contexts);
+                      Navigator.pushAndRemoveUntil(contexts, MaterialPageRoute(builder: (contexts) => LoginBackgroundView()), (route) => false);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      minimumSize: Size(double.infinity, 50),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      "Go to Login $_timercount",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    )
+                  );
+                }
+              ),
+              SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 

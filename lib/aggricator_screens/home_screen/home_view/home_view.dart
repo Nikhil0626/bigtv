@@ -59,7 +59,7 @@ class _HomeViewState extends State<HomeView> {
         if(myReferralLink != "N/A" && myReferralLink != null && myReferralLink.isNotEmpty) {
           DailyDialog.showReferDialog(context: context);
         } else {
-          context.read<ReferralProvider>().getReferralStats().then((value){
+          context.read<ReferralProvider>().getReferralStats(context).then((value){
             Future.delayed(Duration(seconds: 1), () {
               DailyDialog.showReferDialog(context: context);
             } );

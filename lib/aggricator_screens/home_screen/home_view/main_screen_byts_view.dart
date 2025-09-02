@@ -482,148 +482,144 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 mainAxisAlignment: MainAxisAlignment.start,
                                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                                 children: [
-                                                                  Container(
-                                                                    color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
-                                                                    height: 40,
-                                                                    child: Padding(
-                                                                      padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 10),
-                                                                      child: Row(
-                                                                        children: [
-                                                                          Container(
-                                                                            height: 20,
-                                                                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                                                                            decoration: BoxDecoration(color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white
-                                                                                // borderRadius: BorderRadius.circular(20),
-                                                                                ),
-                                                                            child: Center(
-                                                                              child: Text.rich(
-                                                                                TextSpan(
-                                                                                  children: [
-                                                                                    TextSpan(
-                                                                                      text: "Chota ",
-                                                                                      style: fontStyle(
-                                                                                        fontSize: Platform.isIOS ? 16 : 16,
-                                                                                        fontWeight: FontWeight.bold,
-                                                                                        color: widget.article['subType'] != "BigBlackStandard" ? Colors.black : Colors.white,
-                                                                                      ),
+                                                                  Padding(
+                                                                    padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 0),
+                                                                    child: Row(
+                                                                      children: [
+                                                                        Container(
+                                                                          height: 20,
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                                                                          decoration: BoxDecoration(color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white
+                                                                              // borderRadius: BorderRadius.circular(20),
+                                                                              ),
+                                                                          child: Center(
+                                                                            child: Text.rich(
+                                                                              TextSpan(
+                                                                                children: [
+                                                                                  TextSpan(
+                                                                                    text: "Chota ",
+                                                                                    style: fontStyle(
+                                                                                      fontSize: Platform.isIOS ? 16 : 16,
+                                                                                      fontWeight: FontWeight.bold,
+                                                                                      color: widget.article['subType'] != "BigBlackStandard" ? Colors.black : Colors.white,
                                                                                     ),
-                                                                                    TextSpan(
-                                                                                      text: "News",
-                                                                                      style: fontStyle(
-                                                                                        fontSize: Platform.isIOS ? 16 : 16,
-                                                                                        fontWeight: FontWeight.bold,
-                                                                                        color: Color(0xff00A8FF),
-                                                                                      ),
+                                                                                  ),
+                                                                                  TextSpan(
+                                                                                    text: "News",
+                                                                                    style: fontStyle(
+                                                                                      fontSize: Platform.isIOS ? 16 : 16,
+                                                                                      fontWeight: FontWeight.bold,
+                                                                                      color: Color(0xff00A8FF),
                                                                                     ),
-                                                                                  ],
-                                                                                ),
+                                                                                  ),
+                                                                                ],
                                                                               ),
                                                                             ),
                                                                           ),
-                                                                          Spacer(),
-                                                                          Container(
-                                                                            height: 40,
-                                                                            width: 120,
-                                                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
-                                                                            decoration: BoxDecoration(
-                                                                              color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
-                                                                              borderRadius: BorderRadius.circular(20),
-                                                                            ),
-                                                                            child: Row(
-                                                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                              children: [
-                                                                                Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                                                                  return InkWell(
-                                                                                    onTap: () async {
-                                                                                      log("Like");
-                                                                                      settingsProvider.isLikePost(widget.article);
-                                                                                      EventRepo().addEvent({
-                                                                                        "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                                                        "postId": widget.article['id'].toString() ?? "000",
-                                                                                        "createAt": DateTime.now().toString(),
-                                                                                        "postTitle": widget.article['title'].toString()
-                                                                                      }, "liked_article");
-                                                                                    },
-                                                                                    child: SizedBox(
-                                                                                      width: 24,
-                                                                                      child: SvgPicture.asset(
-                                                                                          settingsProvider.isLikeList.contains(widget.article['id'].toString())
-                                                                                              ? "assets/svg/like_full.svg"
-                                                                                              : "assets/svg/like.svg",
-                                                                                          height: 18,
-                                                                                          width: 18,
-                                                                                          color:
-                                                                                              settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? Colors.lightBlue : Colors.grey),
-                                                                                    ),
-                                                                                  );
-                                                                                }),
-                                                                                InkWell(
-                                                                                  onTap: () {
-                                                                                    log("Comment...");
-                                                                                    if (context.mounted) {
-                                                                                      context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                                                      showComments(context, widget.article['id'], widget.article['title']);
-                                                                                    }
+                                                                        ),
+                                                                        Spacer(),
+                                                                        Container(
+                                                                          height: 40,
+                                                                          width: 120,
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                                                                          decoration: BoxDecoration(
+                                                                            color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
+                                                                            borderRadius: BorderRadius.circular(20),
+                                                                          ),
+                                                                          child: Row(
+                                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                            children: [
+                                                                              Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                                                                return InkWell(
+                                                                                  onTap: () async {
+                                                                                    log("Like");
+                                                                                    settingsProvider.isLikePost(widget.article);
+                                                                                    EventRepo().addEvent({
+                                                                                      "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                                                                      "postId": widget.article['id'].toString() ?? "000",
+                                                                                      "createAt": DateTime.now().toString(),
+                                                                                      "postTitle": widget.article['title'].toString()
+                                                                                    }, "liked_article");
                                                                                   },
                                                                                   child: SizedBox(
                                                                                     width: 24,
-                                                                                    child: SvgPicture.asset("assets/svg/new_comment.svg", height: 20, width: 20, color: Colors.grey),
+                                                                                    child: SvgPicture.asset(
+                                                                                        settingsProvider.isLikeList.contains(widget.article['id'].toString())
+                                                                                            ? "assets/svg/like_full.svg"
+                                                                                            : "assets/svg/like.svg",
+                                                                                        height: 18,
+                                                                                        width: 18,
+                                                                                        color:
+                                                                                            settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? Colors.lightBlue : Colors.grey),
                                                                                   ),
+                                                                                );
+                                                                              }),
+                                                                              InkWell(
+                                                                                onTap: () {
+                                                                                  log("Comment...");
+                                                                                  if (context.mounted) {
+                                                                                    context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                                                                    showComments(context, widget.article['id'], widget.article['title']);
+                                                                                  }
+                                                                                },
+                                                                                child: SizedBox(
+                                                                                  width: 24,
+                                                                                  child: SvgPicture.asset("assets/svg/new_comment.svg", height: 20, width: 20, color: Colors.grey),
                                                                                 ),
-                                                                                InkWell(
-                                                                                  onTap: () async {
-                                                                                    SharedPreferences sp = await SharedPreferences.getInstance();
-                                                                                    String? userId = sp.getString("userId");
+                                                                              ),
+                                                                              InkWell(
+                                                                                onTap: () async {
+                                                                                  SharedPreferences sp = await SharedPreferences.getInstance();
+                                                                                  String? userId = sp.getString("userId");
 
-                                                                                    sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
+                                                                                  sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
 
-                                                                                    if (widget.article['type'] == "Standard" ||
-                                                                                        widget.article['type'] == "Video" ||
-                                                                                        widget.article['type'] == "Image") {
-                                                                                      try {
-                                                                                        final image = await adsScreenshotController.capture(
-                                                                                          pixelRatio: 2.0,
-                                                                                        );
-                                                                                        if (image != null) {
-                                                                                          final directory = await getTemporaryDirectory();
-                                                                                          final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                                                                          final imageFile = File(imagePath);
-                                                                                          await imageFile.writeAsBytes(image);
+                                                                                  if (widget.article['type'] == "Standard" ||
+                                                                                      widget.article['type'] == "Video" ||
+                                                                                      widget.article['type'] == "Image") {
+                                                                                    try {
+                                                                                      final image = await adsScreenshotController.capture(
+                                                                                        pixelRatio: 2.0,
+                                                                                      );
+                                                                                      if (image != null) {
+                                                                                        final directory = await getTemporaryDirectory();
+                                                                                        final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                                                                        final imageFile = File(imagePath);
+                                                                                        await imageFile.writeAsBytes(image);
 
-                                                                                          Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
-                                                                                        } else {
-                                                                                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                                                                        }
-                                                                                      } catch (e) {
-                                                                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                                                                        Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                                                                                      } else {
+                                                                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                                                                                       }
-                                                                                    } else if (widget.article['type'] == "Gallery") {
-                                                                                      createAndSharePdfs(context, widget.article);
+                                                                                    } catch (e) {
+                                                                                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                                                                                     }
-                                                                                    EventRepo().addEvent({
-                                                                                      "share": "news",
-                                                                                      "postId": widget.article['id'].toString(),
-                                                                                      "createAt": DateTime.now().toString(),
-                                                                                      "postTitle": widget.article['title'].toString()
-                                                                                    }, "shared_article");
-                                                                                  },
-                                                                                  child: isSending
-                                                                                      ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
-                                                                                      : SizedBox(
-                                                                                          width: 24,
-                                                                                          child: SvgPicture.asset(
-                                                                                            "assets/svg/share.svg",
-                                                                                            height: 18,
-                                                                                            width: 18,
-                                                                                            color: Colors.grey,
-                                                                                          ),
+                                                                                  } else if (widget.article['type'] == "Gallery") {
+                                                                                    createAndSharePdfs(context, widget.article);
+                                                                                  }
+                                                                                  EventRepo().addEvent({
+                                                                                    "share": "news",
+                                                                                    "postId": widget.article['id'].toString(),
+                                                                                    "createAt": DateTime.now().toString(),
+                                                                                    "postTitle": widget.article['title'].toString()
+                                                                                  }, "shared_article");
+                                                                                },
+                                                                                child: isSending
+                                                                                    ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
+                                                                                    : SizedBox(
+                                                                                        width: 24,
+                                                                                        child: SvgPicture.asset(
+                                                                                          "assets/svg/share.svg",
+                                                                                          height: 18,
+                                                                                          width: 18,
+                                                                                          color: Colors.grey,
                                                                                         ),
-                                                                                ),
-                                                                              ],
-                                                                            ),
+                                                                                      ),
+                                                                              ),
+                                                                            ],
                                                                           ),
-                                                                        ],
-                                                                      ),
+                                                                        ),
+                                                                      ],
                                                                     ),
                                                                   ),
                                                                   height(height: 0),

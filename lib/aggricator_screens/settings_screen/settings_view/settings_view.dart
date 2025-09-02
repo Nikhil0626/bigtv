@@ -75,7 +75,7 @@ class _SettingsViewState extends State<SettingsView> {
             Expanded(child: SingleChildScrollView(
               child: Column(
                 children: [
-                  _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
+                  _buildSettingsRow(context, "Profile.svg", "Edit Profile", () {
                     EventRepo().addEvent({
                       "visitPageName":"Edit Profile",
                       "createAt": DateTime.now().toString(),
