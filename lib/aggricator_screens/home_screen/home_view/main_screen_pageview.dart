@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../services/analytics_service.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
@@ -99,31 +100,28 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                           context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
                           context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
                           context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
-                          Future.delayed(
-                            Duration(seconds: 10),
-                                () {
-                              log("Hello Siva ${context.read<AdMobBannerProvider>().ads}");
-                            },
-                          );
+
                         } else if (value == 3 && context.read<AdMobBannerProvider>().ads.isEmpty) {
                           int? lastKey = 0;
                           context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
                           context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
                           context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
                           context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
-                          Future.delayed(
-                            Duration(seconds: 10),
-                                () {
-                              log("Hello Siva ${context.read<AdMobBannerProvider>().ads}");
-                            },
-                          );
+
+                        }else if (value == 5 && context.read<AdMobBannerProvider>().ads.isEmpty) {
+                          int? lastKey = 0;
+                          context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
+                          context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
+                          context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                          context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
+
                         }
 
                         // BannerAdsProvider().disposeAllAds();
                         log("IndividualPostView  $autoIndex--- $value");
-                        // if (homeProvider.isBottomEnable) {
-                        //   homeProvider.pageChange(isValue: false);
-                        // }
+                        if (homeProvider.isBottomEnable) {
+                          homeProvider.pageChange(isValue: false);
+                        }
                         if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
                           Future.delayed(
                             Duration(milliseconds: 2000),
@@ -136,7 +134,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                           );
                         }
 
-                        // context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
+                        context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
                         autoIndex = value;
 
                         final now = DateTime.now();
@@ -144,9 +142,9 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
                         AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
 
-                        // setState(() {
-                        //   _pageStartTime = now;
-                        // });
+                        setState(() {
+                          _pageStartTime = now;
+                        });
                       },
                       itemBuilder: (context, index) {
                         if ((index + 1) % 5 == 0) {
@@ -155,48 +153,33 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                           return Consumer<AdMobBannerProvider>(
                             builder: (context, adMobBannerProvider, child) {
                               final adsList = adMobBannerProvider.ads.values.toList();
-
+                              final adsLoadedList = adMobBannerProvider.adsLoaded.values.toList();
 
                               if (adIndex < adsList.length) {
                                 final ad = adsList[adIndex];
+                                final adList = adsLoadedList[adIndex];
                                 if (ad != null) {
                                   if (ad is BannerAd) {
                                     return KeepAlivePage(
-
                                       child: Container(
                                         color: Colors.grey[200],
                                         alignment: Alignment.center,
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
                                             Expanded(
                                               flex: 1,
-                                              child: Center(
+                                              child:  adList
+                                                  ? Center(
                                                 child: AdWidget(ad: ad),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 1,
-                                              child: buildRecommendedNews(context, homeProvider),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  } else if (ad is NativeAd) {
-                                    return KeepAlivePage(
-                                      child: Container(
-                                        color: Colors.grey[200],
-                                        alignment: Alignment.center,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            Expanded(
-                                              flex: 1,
-                                              child: Center(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
-                                                  child: AdWidget(ad: ad),
+                                              )
+                                                  : Shimmer.fromColors(
+                                                baseColor: Colors.grey[300]!,
+                                                highlightColor: Colors.grey[100]!,
+                                                child: Container(
+                                                  color: Colors.white,
                                                 ),
                                               ),
                                             ),
@@ -208,6 +191,16 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                         ),
                                       ),
                                     );
+                                  }
+                                  else if (ad is NativeAd) {
+                                    return KeepAlivePage(
+                                      child: Container(
+                                        color: Colors.white,
+                                        width: MediaQuery.of(context).size.width,
+                                        height: MediaQuery.of(context).size.height,
+                                        child: AdWidget(ad: ad),
+                                      ),
+                                    );
                                   } else if (ad is AdManagerBannerAd) {
                                     return KeepAlivePage(
 
@@ -216,12 +209,14 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                         alignment: Alignment.center,
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
                                           children: [
                                             Expanded(
                                               flex: 1,
                                               child: Center(
                                                 child: Padding(
-                                                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                                                  padding: const EdgeInsets.only(bottom:20),
                                                   child: AdWidget(ad: ad),
                                                 ),
                                               ),
@@ -297,21 +292,37 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
           );
         },
       ),
+      bottomNavigationBar: Consumer2<AdMobBannerProvider, HomeProvider>(
+        builder: (_, adMobBannerProvider, homeProvider, __) {
+          final currentIndex = autoIndex; // You need to track current page index
+          final adsList = adMobBannerProvider.adsBanner320x50.values
+              .where((ad) => ad != null)
+              .toList();
+
+          // Don't show ad if current position is multiple of 5 or no ads available
+          if (adsList.isEmpty || (currentIndex + 1) % 5 == 0) {
+          return const SizedBox.shrink();
+          }
+
+          return Container(
+          height: 56,
+          width: 320,
+          color: Colors.grey.shade300,
+          alignment: Alignment.center,
+          child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2.0),
+          child: Center(child: AdWidget(ad: adsList.first)),
+          ),
+          );
+        },
+      ),
     );
   }
 
   Widget buildRecommendedNews(BuildContext context, HomeProvider homeProvider) {
     return Column(
       children: [
-        InkWell(
-          //     // onTap: () {
-          //     //   Navigator.push(
-          //     //       context,
-          //     //       MaterialPageRoute(
-          //     //         builder: (context) => AdsTestData(),
-          //     //       ));
-          //     // },
-            child: Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor))),
+        Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
         height(height: 10),
         Expanded(
           child: ListView.builder(

@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/banner_300x50_size.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
-import 'package:chotanews/aggricator_screens/referral_screen/referral_view/refer_earn.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_card.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
@@ -13,6 +13,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -35,11 +36,14 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   HomeProvider? homeProvider;
-  // bool closed = false;
+  AdMobBannerProvider?  bannerAdsProvider;
+
 
   @override
   void initState() {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
+    bannerAdsProvider!.autoBannerCall();
     homeProvider?.isHomeScreen = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppUpdateService.checkForUpdate(context);
@@ -115,7 +119,7 @@ class _HomeViewState extends State<HomeView> {
                     Positioned(
                       left: 16,
                       right: 16,
-                      bottom: 6,
+                      bottom: 58,
                       child: SafeArea(
                         child: Container(
                           height: 58, // reduced height
@@ -228,95 +232,10 @@ class _HomeViewState extends State<HomeView> {
                     ),
                 ],
               ),
-              bottomNavigationBar: KeepAlivePage(
-                  child: Container(
-                    width: MediaQuery.of(context).size.width,
-                      height: 56,
-                      child: Banner300x50Size())),
-
             );
           },
         ),
       ),
     );
   }
-
-  // void checkAndShowPopup() {
-  //   final referralProvider = context.read<ReferralProvider>();
-  //   final int downloads = int.tryParse(referralProvider.referralData['downloads']?.toString() ?? "0") ?? 0;
-  //
-  //   if (downloads < 10) {
-  //     showAdPopup(context);
-  //   }
-  // }
-  //
-  // void showAdPopup(BuildContext context, ) async{
-  //   Timer? closeTimer = Timer(Duration(seconds: 5), () {
-  //     if (!closed) {
-  //       Navigator.of(context).pop(true);
-  //     }
-  //   });
-  //    closed = await showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (BuildContext context) {
-  //         return Dialog(
-  //             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  //             insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 180),
-  //             backgroundColor: Colors.transparent,
-  //             child: Stack(
-  //               children: [
-  //                 Container(
-  //                   width: 335,
-  //                   height: 335,
-  //                   decoration: BoxDecoration(
-  //                     color: Colors.transparent,
-  //                     borderRadius: BorderRadius.circular(16),
-  //                   ),
-  //                   child: Padding(
-  //                     padding: const EdgeInsets.only(right: 10.0,top: 10),
-  //                     child: ClipRRect(
-  //                       borderRadius: BorderRadius.circular(16),
-  //                       child: InkWell(
-  //                         onTap: (){
-  //                           closeTimer.cancel();
-  //                           Navigator.pop(context);
-  //                           Navigator.push(context, MaterialPageRoute(builder: (context) => ReferEarn(),));
-  //                         },
-  //                         child: Image.asset(
-  //                           'assets/svg/ios_ref.jpeg',
-  //                           fit: BoxFit.cover,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ),
-  //
-  //                 ),
-  //                 Positioned(
-  //                     top: 1,
-  //                     right: 0,
-  //                     child: InkWell(
-  //                       onTap: (){
-  //                         Navigator.pop(context, true);
-  //                       },
-  //                       child: Container(
-  //                         padding: EdgeInsets.all(6),
-  //                         decoration: BoxDecoration(
-  //                             shape: BoxShape.circle,
-  //                             color: Colors.grey
-  //                         ),
-  //                         child: Icon(
-  //                           Icons.close,
-  //                           color: Colors.black,
-  //                           size: 15,
-  //                         ),
-  //                       ),
-  //                     )
-  //                 ),
-  //               ],
-  //             ),
-  //         );
-  //       }
-  //   );
-  // }
 }

@@ -15,20 +15,9 @@ class Banner320x50view extends StatefulWidget {
 class _Banner320x50viewState extends State<Banner320x50view> {
   @override
   Widget build(BuildContext context) {
-
-
-    return Scaffold(body: KeepAlivePage(
-
-      child: Consumer<AdMobBannerProvider>(
-        builder: (_,adMobBannerProvider,__) {
-          final adsList = adMobBannerProvider.ads.values.toList();
-          return Container(
-            color: Colors.grey[200],
-            alignment: Alignment.center,
-            child:  AdWidget(ad: adsList[0]),
-          );
-        }
-      ),
-    ));
+    return Consumer<AdMobBannerProvider>(builder: (_, adMobBannerProvider, __) {
+      final adsList = adMobBannerProvider.ads.values.toList();
+      return adsList[0] != null?AdWidget(ad: adsList[0]):SizedBox.shrink();
+    });
   }
 }

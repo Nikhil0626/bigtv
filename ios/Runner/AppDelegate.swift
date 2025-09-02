@@ -20,17 +20,6 @@ import webengage_flutter
         WebEngage.sharedInstance().application(
             application, didFinishLaunchingWithOptions: launchOptions)
         GeneratedPluginRegistrant.register(with: self)
-
-        //    let listTileFactory = ListTileNativeAdFactory()
-        //        FLTGoogleMobileAdsPlugin.registerNativeAdFactory(
-        //            self, factoryId: "listTile", nativeAdFactory: listTileFactory)
-
-        //        let nativeAdFactory = NativeAdFactoryExample()
-        //        FLTGoogleMobileAdsPlugin.registerNativeAdFactory(
-        //            registry: registrar,
-        //            factoryId: "adFactoryExample",
-        //            nativeAdFactory: nativeAdFactory
-        //        )
         GADMobileAds.sharedInstance().start(completionHandler: nil)
 
         let nativeAdFactory = NativeAdFactoryExample()
