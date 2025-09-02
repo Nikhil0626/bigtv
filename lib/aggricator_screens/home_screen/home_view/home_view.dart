@@ -43,6 +43,7 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
     bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
+    bannerAdsProvider!. loadAd320x50MobBanner(bannerAdsProvider!.autoupdate??0, AdSize.banner);
     bannerAdsProvider!.autoBannerCall();
     homeProvider?.isHomeScreen = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -119,7 +120,7 @@ class _HomeViewState extends State<HomeView> {
                     Positioned(
                       left: 16,
                       right: 16,
-                      bottom: 58,
+                      bottom: 6,
                       child: SafeArea(
                         child: Container(
                           height: 58, // reduced height
@@ -232,10 +233,120 @@ class _HomeViewState extends State<HomeView> {
                     ),
                 ],
               ),
+              bottomNavigationBar: Container(
+                height: 56,
+                width: MediaQuery.of(context).size.width,
+                color: Colors.grey.shade300,
+                alignment: Alignment.center,
+                child: Consumer<AdMobBannerProvider>(
+                  builder: (_, adMobBannerProvider, __) {
+                    final currentIndex = adMobBannerProvider.currentPageIndex; // You need to track current page index
+                    final adsList = adMobBannerProvider.adsBanner320x50.values
+                        .where((ad) => ad != null)
+                        .toList();
+
+                    // Don't show ad if current position is multiple of 5 or no ads available
+                    if (adsList.isEmpty || (currentIndex + 1) % 5 == 0) {
+                      return const SizedBox.shrink();
+                    }
+
+                    return Container(
+                      height: 56,
+                      width: 320,
+                      color: Colors.grey.shade300,
+                      alignment: Alignment.center,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2.0),
+                        child: Center(child: AdWidget(ad: adsList.first)),
+                      ),
+                    );
+                  },
+                ),
+              ),
+
             );
           },
         ),
       ),
     );
   }
+
+  // void checkAndShowPopup() {
+  //   final referralProvider = context.read<ReferralProvider>();
+  //   final int downloads = int.tryParse(referralProvider.referralData['downloads']?.toString() ?? "0") ?? 0;
+  //
+  //   if (downloads < 10) {
+  //     showAdPopup(context);
+  //   }
+  // }
+  //
+  // void showAdPopup(BuildContext context, ) async{
+  //   Timer? closeTimer = Timer(Duration(seconds: 5), () {
+  //     if (!closed) {
+  //       Navigator.of(context).pop(true);
+  //     }
+  //   });
+  //    closed = await showDialog(
+  //       context: context,
+  //       barrierDismissible: false,
+  //       builder: (BuildContext context) {
+  //         return Dialog(
+  //             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+  //             insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 180),
+  //             backgroundColor: Colors.transparent,
+  //             child: Stack(
+  //               children: [
+  //                 Container(
+  //                   width: 335,
+  //                   height: 335,
+  //                   decoration: BoxDecoration(
+  //                     color: Colors.transparent,
+  //                     borderRadius: BorderRadius.circular(16),
+  //                   ),
+  //                   child: Padding(
+  //                     padding: const EdgeInsets.only(right: 10.0,top: 10),
+  //                     child: ClipRRect(
+  //                       borderRadius: BorderRadius.circular(16),
+  //                       child: InkWell(
+  //                         onTap: (){
+  //                           closeTimer.cancel();
+  //                           Navigator.pop(context);
+  //                           Navigator.push(context, MaterialPageRoute(builder: (context) => ReferEarn(),));
+  //                         },
+  //                         child: Image.asset(
+  //                           'assets/svg/ios_ref.jpeg',
+  //                           fit: BoxFit.cover,
+  //                         ),
+  //                       ),
+  //                     ),
+  //                   ),
+  //
+  //                 ),
+  //                 Positioned(
+  //                     top: 1,
+  //                     right: 0,
+  //                     child: InkWell(
+  //                       onTap: (){
+  //                         Navigator.pop(context, true);
+  //                       },
+  //                       child: Container(
+  //                         padding: EdgeInsets.all(6),
+  //                         decoration: BoxDecoration(
+  //                             shape: BoxShape.circle,
+  //                             color: Colors.grey
+  //                         ),
+  //                         child: Icon(
+  //                           Icons.close,
+  //                           color: Colors.black,
+  //                           size: 15,
+  //                         ),
+  //                       ),
+  //                     )
+  //                 ),
+  //               ],
+  //             ),
+  //         );
+  //       }
+  //   );
+  // }
 }

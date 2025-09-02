@@ -92,6 +92,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                       itemCount: homeProvider.getAllPostList.length,
                       onPageChanged: (value) {
                         final adKeys = context.read<AdMobBannerProvider>().ads.length;
+                        context.read<AdMobBannerProvider>().changePageIndex(value);
 
                         log(" Last Index of ads data $adKeys ----- $value --- ${adKeys * 5}");
                         if (value == (adKeys * 5)) {
@@ -292,30 +293,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
           );
         },
       ),
-      bottomNavigationBar: Consumer2<AdMobBannerProvider, HomeProvider>(
-        builder: (_, adMobBannerProvider, homeProvider, __) {
-          final currentIndex = autoIndex; // You need to track current page index
-          final adsList = adMobBannerProvider.adsBanner320x50.values
-              .where((ad) => ad != null)
-              .toList();
 
-          // Don't show ad if current position is multiple of 5 or no ads available
-          if (adsList.isEmpty || (currentIndex + 1) % 5 == 0) {
-          return const SizedBox.shrink();
-          }
-
-          return Container(
-          height: 56,
-          width: 320,
-          color: Colors.grey.shade300,
-          alignment: Alignment.center,
-          child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2.0),
-          child: Center(child: AdWidget(ad: adsList.first)),
-          ),
-          );
-        },
-      ),
     );
   }
 

@@ -29,6 +29,13 @@ class AdMobBannerProvider with ChangeNotifier {
 
   int lastIndex = 0;
 
+  int currentPageIndex = 0;
+
+  void changePageIndex (val){
+    currentPageIndex = val ;
+    notifyListeners();
+  }
+
   /// live ad units
   // final String adMobBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId;
   // final String adManagerBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId;
@@ -381,12 +388,6 @@ class AdMobBannerProvider with ChangeNotifier {
       log("loadBothAdsInParallel");
       loadAd320x50MobBanner(autoupdate!, AdSize.banner);
     });
-
-    // if (autoupdate == adsBanner320x50.length) {
-    //
-    // } else {
-    //   // loadAd320x50MobBanner(autoupdate!, AdSize.banner);
-    // }
   }
 
   void _logLatencyMetrics(Ad ad) async {
