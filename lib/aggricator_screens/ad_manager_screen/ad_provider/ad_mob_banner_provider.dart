@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
+import 'package:cron/cron.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -29,16 +30,16 @@ class AdMobBannerProvider with ChangeNotifier {
   int lastIndex = 0;
 
   /// live ad units
-  final String adMobBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId;
-  final String adManagerBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId;
-  final String adMobNativeId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId;
-  final String adManagerNativeId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId;
+  // final String adMobBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId;
+  // final String adManagerBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId;
+  // final String adMobNativeId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId;
+  // final String adManagerNativeId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId;
 
   /// test ad units
-  // final String adMobBannerId = "ca-app-pub-3940256099942544/6300978111";
-  // final String adManagerBannerId = "/6499/example/banner";
-  // final String adMobNativeId = "ca-app-pub-3940256099942544/2247696110";
-  // final String adManagerNativeId = "/6499/example/native";
+  final String adMobBannerId = "ca-app-pub-3940256099942544/6300978111";
+  final String adManagerBannerId = "/6499/example/banner";
+  final String adMobNativeId = "ca-app-pub-3940256099942544/2247696110";
+  final String adManagerNativeId = "/6499/example/native";
 
   int? getIndex() {
     int? lastKey = ads.keys.isNotEmpty ? ads.keys.last : null;
@@ -101,6 +102,7 @@ class AdMobBannerProvider with ChangeNotifier {
       );
 
       if (ad != null) {
+        debugPrint('🔄 ⚠️index $index');
         ads[index] = ad;
         await ad.load();
       }
@@ -126,7 +128,7 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
 
       final ad = AdManagerBannerAd(
-        adUnitId: '/6499/example/banner', // ✅ Ad Manager test ad unit
+        adUnitId: adManagerBannerId, // ✅ Ad Manager test ad unit
         sizes: [AdSize.mediumRectangle], // ✅ Ad Manager expects a list
         request: AdManagerAdRequest(), // ✅ Correct request type
         listener: AdManagerBannerAdListener(
@@ -177,70 +179,37 @@ class AdMobBannerProvider with ChangeNotifier {
       adsLoaded[index] = false;
       adErrors.remove(index);
       final ad = NativeAd(
-        adUnitId: adMobNativeId, // Use test ID: 'ca-app-pub-3940256099942544/2247696110'
-        factoryId: "adFactoryExample",
-        // nativeTemplateStyle: NativeTemplateStyle(
-        //   templateType: TemplateType.medium,
-        //   mainBackgroundColor: AppColors.cardBackgroundColor,
-        //   cornerRadius: 10.0,
-        //   callToActionTextStyle: NativeTemplateTextStyle(
-        //     textColor: Colors.black,
-        //     backgroundColor: AppColors.cardBackgroundColor,
-        //     style: NativeTemplateFontStyle.monospace,
-        //     size: 16.0,
-        //   ),
-        //   primaryTextStyle: NativeTemplateTextStyle(
-        //     textColor: Colors.black,
-        //     backgroundColor: AppColors.cardBackgroundColor,
-        //     style: NativeTemplateFontStyle.italic,
-        //     size: 16.0,
-        //   ),
-        //   secondaryTextStyle: NativeTemplateTextStyle(
-        //     textColor: Colors.black,
-        //     backgroundColor: AppColors.cardBackgroundColor,
-        //     style: NativeTemplateFontStyle.bold,
-        //     size: 16.0,
-        //   ),
-        //   tertiaryTextStyle: NativeTemplateTextStyle(
-        //     textColor: Colors.black,
-        //     backgroundColor: AppColors.cardBackgroundColor,
-        //     style: NativeTemplateFontStyle.normal,
-        //     size: 16.0,
-        //   ),
-        // ),
+        adUnitId: adMobNativeId,
+        nativeAdOptions: NativeAdOptions(
+          mediaAspectRatio: MediaAspectRatio.any,
+        ),
+        factoryId: 'adFactoryExample',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            responseReceived = DateTime.now();
+            adCreativeDownloaded = DateTime.now();
+            adRendered = DateTime.now();
+            if (ad != null) {
+              ads[index] = ad as NativeAd;
+              adsLoaded[index] = true;
+            }
 
+          },
+          onAdFailedToLoad: (ad, error) {
+            ad.dispose();
+            ads[index] = null;
+            adsLoaded[index] = false;
+            adErrors[index] = 'Failed: ${error.code} - ${error.message}';
+            debugPrint('❌ Ad failed at $index: ${error.message}');
+            notifyListeners();
+          },
+          onAdImpression: (ad) async {
+
+          },
+        ),
         request: AdRequest(),
-
-        listener: NativeAdListener(onAdLoaded: (Ad ad) {
-          latencyData
-            ..responseReceived = DateTime.now()
-            ..adCreativeDownloaded = DateTime.now()
-            ..adRendered = DateTime.now();
-          responseReceived = DateTime.now();
-          if (ad != null) {
-            ads[index] = ad as NativeAd;
-            adsLoaded[index] = true;
-          }
-          ads.removeWhere((key, value) => value == null);
-          debugPrint('✅ AdMobNative loaded at index $index');
-          notifyListeners();
-        }, onAdFailedToLoad: (Ad ad, LoadAdError error) {
-          latencyData.responseReceived = DateTime.now();
-          ad.dispose();
-          ads[index] = null;
-          adsLoaded[index] = false;
-          adErrors[index] = 'Failed: ${error.code} - ${error.message}';
-          debugPrint('❌ AdMobNative Failed to load at index $index: ${error.message}');
-          notifyListeners();
-          ad.dispose();
-        }, onAdImpression: (ad) {
-          latencyData.adRendered = DateTime.now();
-          adRendered = DateTime.now();
-          impressionLogged = DateTime.now();
-          _logLatencyMetrics(ad);
-          notifyListeners();
-        }),
       );
+
 
       if (ad != null) {
         ads[index] = ad;
@@ -262,40 +231,36 @@ class AdMobBannerProvider with ChangeNotifier {
       adsLoaded[index] = false;
       adErrors.remove(index);
       NativeAdOptions nativeAdOptions = NativeAdOptions(
-        mediaAspectRatio: MediaAspectRatio.portrait,
+        mediaAspectRatio: MediaAspectRatio.any,
       );
-      final NativeAd ad = NativeAd(
+      final ad = NativeAd(
         adUnitId: adManagerNativeId,
-        factoryId: "adFactoryExample",
-        // nativeTemplateStyle: NativeTemplateStyle(
-        //   templateType: TemplateType.medium,
-        //   mainBackgroundColor: Colors.white,
-        //   cornerRadius: 10.0,
-        // ),
         nativeAdOptions: nativeAdOptions,
-        request: const AdManagerAdRequest(),
+        factoryId: 'adFactoryExample',
         listener: NativeAdListener(
           onAdLoaded: (ad) {
+            responseReceived = DateTime.now();
+            adCreativeDownloaded = DateTime.now();
+            adRendered = DateTime.now();
             if (ad != null) {
               ads[index] = ad as NativeAd;
               adsLoaded[index] = true;
             }
 
-            debugPrint('✅ Ad Manager Native loaded at index $index');
-            ads.removeWhere((key, value) => value == null);
-
-            notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
             ads[index] = null;
             adsLoaded[index] = false;
             adErrors[index] = 'Failed: ${error.code} - ${error.message}';
-            debugPrint('❌ Ad Manager Native failed at index $index: ${error.message}');
+            debugPrint('❌ Ad failed at $index: ${error.message}');
             notifyListeners();
           },
-          onAdImpression: (ad) {},
+          onAdImpression: (ad) async {
+
+          },
         ),
+        request: AdRequest(),
       );
       if (ad != null) {
         ads[index] = ad;
@@ -309,59 +274,52 @@ class AdMobBannerProvider with ChangeNotifier {
     }
   }
 
+
+
   Future<void> loadAd320x50MobBanner(int index, AdSize size) async {
     try {
+      // Dispose both types of ads to avoid conflicts
       adsBanner320x50[index]?.dispose();
 
       adsLoaded320x50[index] = false;
       adErrors320x50.remove(index);
 
       final ad = BannerAd(
-        adUnitId: adMobBannerId,
+        adUnitId: adMobBannerId, // Make sure this is a AdMob unit ID (starts with ca-app-pub-)
         size: size,
-        request: AdRequest(
-          keywords: ['vertical'], // Optional content URL for better targeting
-          nonPersonalizedAds: false, // Set true if user opted out of personalized ads
-          httpTimeoutMillis: 5000, // Optional: HTTP request timeout in milliseconds
-        ),
+        request: AdRequest(),
         listener: BannerAdListener(
           onAdLoaded: (ad) {
             responseReceived = DateTime.now();
-
-            if (ad != null) {
-              adsBanner320x50[index] = ad as BannerAd;
-              adsLoaded320x50[index] = true;
-            }
-            ads.removeWhere((key, value) => value == null);
-            debugPrint('✅ 320x50 Ad loaded successfully at index $index');
+            adsBanner320x50[index] = ad as BannerAd;
+            adsLoaded320x50[index] = true;
+            debugPrint('✅ AdMob 320x50 Ad loaded successfully at index $index');
             notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
-
             ad.dispose();
-            adsBanner320x50[index] = null;
+            adsBanner320x50.remove(index);
             adsLoaded320x50[index] = false;
             adErrors320x50[index] = 'Failed: ${error.code} - ${error.message}';
-            debugPrint('❌ 320x50 Ad failed at index $index: ${error.message}');
-            loadAd320x50ManagerBanner(autoupdate!,size);
+            debugPrint('❌ AdMob 320x50 Ad failed at index $index: ${error.message}');
+
+            // Fallback to Ad Manager
+            loadAd320x50ManagerBanner(index, size);
             notifyListeners();
           },
           onAdImpression: (ad) {
             adRendered = DateTime.now();
             impressionLogged = DateTime.now();
             _logLatencyMetrics(ad);
-
             notifyListeners();
           },
         ),
       );
-      if (ad != null) {
-        adsBanner320x50[index] = ad;
-        await ad.load();
-      }
-      debugPrint('🔄 320x50 Started loading ad at index $index');
+
+      await ad.load();
+      debugPrint('🔄 AdMob 320x50 Started loading ad at index $index');
     } catch (e) {
-      debugPrint('⚠️ 320x50 Exception loading ad at index $index: $e');
+      debugPrint('⚠️ AdMob 320x50 Exception loading ad at index $index: $e');
       adErrors320x50[index] = 'Exception: ${e.toString()}';
       notifyListeners();
     }
@@ -369,69 +327,66 @@ class AdMobBannerProvider with ChangeNotifier {
 
   Future<void> loadAd320x50ManagerBanner(int index, AdSize size) async {
     try {
+      // Dispose both types of ads
       adsBanner320x50[index]?.dispose();
+
 
       adsLoaded320x50[index] = false;
       adErrors320x50.remove(index);
 
       final ad = AdManagerBannerAd(
-        adUnitId: '/6499/example/banner', // ✅ Ad Manager test ad unit
-        sizes: [AdSize.banner], // ✅ Ad Manager expects a list
-        request: AdManagerAdRequest(), // ✅ Correct request type
+        adUnitId: adManagerBannerId, // Make sure this is an Ad Manager unit ID (/...)
+        sizes: [size],
+        request: AdManagerAdRequest(),
         listener: AdManagerBannerAdListener(
           onAdLoaded: (ad) {
             responseReceived = DateTime.now();
-
-            if (ad != null) {
-              adsBanner320x50[index] = ad as BannerAd;
-              adsLoaded320x50[index] = true;
-            }
-            ads.removeWhere((key, value) => value == null);
-            debugPrint('✅  320x50 Ad loaded successfully at index $index');
+            adsBanner320x50[index] = ad as AdManagerBannerAd;
+            adsLoaded320x50[index] = true;
+            debugPrint('✅ Ad Manager 320x50 Ad loaded successfully at index $index');
             notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
-            adsBanner320x50[index] = null;
+            adsBanner320x50.remove(index);
             adsLoaded320x50[index] = false;
             adErrors320x50[index] = 'Failed: ${error.code} - ${error.message}';
-            debugPrint('❌ 320x50 Ad failed at index $index: ${error.message}');
-            autoBannerCall();
+            debugPrint('❌ Ad Manager 320x50 Ad failed at index $index: ${error.message}');
+            // autoBannerCall();
             notifyListeners();
           },
           onAdImpression: (ad) {
             adRendered = DateTime.now();
             impressionLogged = DateTime.now();
             _logLatencyMetrics(ad);
-
             notifyListeners();
           },
         ),
       );
-      if (ad != null) {
-        adsBanner320x50[index] = ad;
-        await ad.load();
-      }
-      debugPrint('🔄 320x50 Started loading ad at index $index');
+
+      await ad.load();
+      debugPrint('🔄 Ad Manager 320x50 Started loading ad at index $index');
     } catch (e) {
-      debugPrint('⚠️ 320x50 Exception loading ad at index $index: $e');
+      debugPrint('⚠️ Ad Manager 320x50 Exception loading ad at index $index: $e');
       adErrors320x50[index] = 'Exception: ${e.toString()}';
       notifyListeners();
     }
   }
 
   int? autoupdate;
-
+  final _cron = Cron();
   Future<void> autoBannerCall() async {
     autoupdate = (adsBanner320x50.length) + 1;
-    Future.delayed(Duration(seconds: 30), () {
+    _cron.schedule(Schedule.parse('*/30 * * * * *'), () async {
+      log("loadBothAdsInParallel");
       loadAd320x50MobBanner(autoupdate!, AdSize.banner);
     });
-    if (autoupdate == adsBanner320x50.length) {
 
-    } else {
-      // loadAd320x50MobBanner(autoupdate!, AdSize.banner);
-    }
+    // if (autoupdate == adsBanner320x50.length) {
+    //
+    // } else {
+    //   // loadAd320x50MobBanner(autoupdate!, AdSize.banner);
+    // }
   }
 
   void _logLatencyMetrics(Ad ad) async {
