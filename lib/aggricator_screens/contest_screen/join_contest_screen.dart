@@ -1,11 +1,12 @@
-import 'package:chotanews/aggricator_screens/contest_screen/contest_provider.dart';
-import 'package:chotanews/utils/app_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../utils/app_spaces.dart';
+import '../../utils/app_fonts.dart';
+import 'contest_provider.dart';
 import '../home_screen/home_provider/home_provider.dart';
-import 'contest_screen.dart';
+import '../contest_screen/contest_screen.dart';
 
 class JoinContestScreen extends StatefulWidget {
   const JoinContestScreen({super.key});
@@ -18,6 +19,19 @@ class _JoinContestScreenState extends State<JoinContestScreen> {
   @override
   Widget build(BuildContext context) {
     return Consumer<AdsContestProvider>(builder: (_, contestProvider, __) {
+      if (contestProvider.joinedContestsList.isEmpty) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              SvgPicture.asset(
+                'assets/svg/no_contest.svg',
+              ),
+            ],
+          ),
+        );
+      }
+
       return ListView.separated(
         padding: const EdgeInsets.all(15.0),
         itemCount: contestProvider.joinedContestsList.length,
@@ -38,21 +52,20 @@ class _JoinContestScreenState extends State<JoinContestScreen> {
                   borderRadius: BorderRadius.circular(12),
                   child: item.contestImageUrl != null
                       ? Image.network(
-                          item.contestImageUrl,
-                          height: 50,
-                          width: 50,
-                          fit: BoxFit.fill,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.image),
-                        )
+                    item.contestImageUrl,
+                    height: 50,
+                    width: 50,
+                    fit: BoxFit.fill,
+                    errorBuilder: (_, __, ___) => const Icon(Icons.image),
+                  )
                       : Container(
-                          height: 50,
-                          width: 50,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.image),
-                        ),
+                    height: 50,
+                    width: 50,
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.image),
+                  ),
                 ),
                 width(width: 12),
-
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -103,22 +116,6 @@ class _JoinContestScreenState extends State<JoinContestScreen> {
                     ],
                   ),
                 ),
-
-                // Container(
-                //   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                //   decoration: BoxDecoration(
-                //     color: isWinner ? Colors.lightBlue.withOpacity(0.15) : Colors.green.withOpacity(0.15),
-                //     borderRadius: BorderRadius.circular(8),
-                //   ),
-                //   child: Text(
-                //     tag,
-                //     style: TextStyle(
-                //       fontSize: 12,
-                //       color: isWinner ? Colors.blue : Colors.green.shade700,
-                //       fontWeight: FontWeight.w500,
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           );

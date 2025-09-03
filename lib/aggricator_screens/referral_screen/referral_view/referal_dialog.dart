@@ -1,8 +1,11 @@
+import 'dart:developer';
+
 import 'package:chotanews/aggricator_screens/referral_screen/referral_provider/referral_provider.dart';
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/refer_earn.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,7 +23,7 @@ class ReferralDialog extends StatefulWidget {
 class _ReferralDialogState extends State<ReferralDialog> {
   @override
   void initState() {
-    context.read<ReferralProvider>().getReferralStats(context);
+
     super.initState();
   }
   @override
@@ -115,7 +118,7 @@ class _ReferralDialogState extends State<ReferralDialog> {
                         ),
                       ],
                     ),
-                    SizedBox(
+                    height(
                       height: 4,
                     ),
                     Row(
@@ -125,9 +128,7 @@ class _ReferralDialogState extends State<ReferralDialog> {
                           size: 8,
                           color: AppColors.wColor,
                         ),
-                        SizedBox(
-                          width: 8,
-                        ),
+                        width(width: 4),
                         Expanded(
                           child: RichText(
                             text: TextSpan(
@@ -160,7 +161,7 @@ class _ReferralDialogState extends State<ReferralDialog> {
                         ),
                       ],
                     ),
-                    SizedBox(
+                    height(
                       height: 8,
                     ),
                     Row(
@@ -170,7 +171,7 @@ class _ReferralDialogState extends State<ReferralDialog> {
                           size: 8,
                           color: AppColors.wColor,
                         ),
-                        SizedBox(
+                        width(
                           width: 8,
                         ),
                         Expanded(
@@ -205,7 +206,7 @@ class _ReferralDialogState extends State<ReferralDialog> {
                         ),
                       ],
                     ),
-                    SizedBox(
+                    height(
                       height: 16,
                     ),
                     SizedBox(
@@ -213,7 +214,7 @@ class _ReferralDialogState extends State<ReferralDialog> {
                       child: InkWell(
                         onTap: () async {
 
-                          context.read<ReferralProvider>().postProcessReferral(context);
+
                           SharedPreferences sp = await SharedPreferences.getInstance();
                           bool isNotificationsEnabled =
                           sp.getString("loginType") == "login" ? true : false;
@@ -223,13 +224,42 @@ class _ReferralDialogState extends State<ReferralDialog> {
                                 "Your currently using your application in guest mode please login and join your Refer & Earn contest",
                                 timeDuration: 3);
                           } else {
-                            String myReferralLink = referralProvider.referralData['referral_link']?? "N/A";
-                            String myReferralCode = sp.getString("myReferralCode") ?? "N/A";
-                            // String myReferralLink = sp.getString("myReferralLink") ?? "N/A";
-                            ShareResult result = await Share.share(myReferralLink);
-                            if(result.status == ShareResultStatus.success){
-                              Navigator.pop(mainNavigatorKey.currentContext!);
-                              Navigator.push(mainNavigatorKey.currentContext!, MaterialPageRoute(builder: (context) => ReferEarn(),));
+                            Navigator.pop(mainNavigatorKey.currentContext!);
+
+                            String myReferralLink = referralProvider.referralData['referral_link'] ?? "N/A";
+                            String myReferralCode = referralProvider.referralData['referral_code'] ?? "N/A";
+                            log("hai1");
+                            // if(myReferralLink == "N/A"){
+                            //   referralProvider.getReferralStats(mainNavigatorKey.currentContext);
+                            // }
+                            // else if(myReferralLink == null) {
+                            //   log("hai2");
+                            //   referralProvider.getReferralStats(mainNavigatorKey.currentContext!).then((val)async{
+                            //     ShareResult result = await Share.share(myReferralLink);
+                            //     if (result.status == ShareResultStatus.success) {
+                            //
+                            //       context.read<ReferralProvider>().postProcessReferral(context);
+                            //       Navigator.push(
+                            //         mainNavigatorKey.currentContext!,
+                            //         MaterialPageRoute(builder: (context) => ReferEarn()),
+                            //       );
+                            //     }
+                            //   });
+                            // }
+                            if (myReferralLink == "N/A" || myReferralLink == "Null" || myReferralLink == null || myReferralLink.isEmpty) {
+                              log("hai2");
+                              referralProvider.getReferralStats(mainNavigatorKey.currentContext!,isHome:true);
+                            } else {
+                              log("hai3");
+                              ShareResult result = await Share.share(myReferralLink);
+                              if (result.status == ShareResultStatus.success) {
+
+                                  context.read<ReferralProvider>().postProcessReferral(context);
+                                  Navigator.push(
+                                    mainNavigatorKey.currentContext!,
+                                    MaterialPageRoute(builder: (context) => ReferEarn()),
+                                  );
+                              }
                             }
                           }
 
