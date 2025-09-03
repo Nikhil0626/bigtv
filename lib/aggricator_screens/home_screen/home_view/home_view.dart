@@ -26,7 +26,6 @@ import '../../referral_screen/referral_provider/referral_provider.dart';
 import '../../settings_screen/settings_view/settings_view.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_card.dart';
-
 ///This widgets help in stopping the build
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -49,19 +48,9 @@ class _HomeViewState extends State<HomeView> {
       homeProvider?.getMobileNumber();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(seconds: 1), () async {
+      Future.delayed(Duration(seconds: 1), () {
         // checkAndShowPopup();
-        SharedPreferences preferences = await SharedPreferences.getInstance();
-        String? myReferralLink = preferences.getString("myReferralLink") ?? "N/A";
-        if (myReferralLink != "N/A" && myReferralLink != null && myReferralLink.isNotEmpty) {
-          DailyDialog.showReferDialog(context: context);
-        } else {
-          context.read<ReferralProvider>().getReferralStats(context).then((value) {
-            Future.delayed(Duration(seconds: 1), () {
-              DailyDialog.showReferDialog(context: context);
-            });
-          });
-        }
+        DailyDialog.showReferDialog(context: context);
       });
     });
     homeProvider?.initDeepLinks(context);
@@ -236,31 +225,31 @@ class _HomeViewState extends State<HomeView> {
                   final adsList = adMobBannerProvider.adsBanner320x50.values
                       .where((ad) => ad != null)
                       .toList();
+                  final adsLoaded = adMobBannerProvider.adsLoaded320x50;
 
                   // Hide the bottom bar entirely if empty or every 5th page
                   if (adsList.isEmpty || (currentIndex + 1) % 5 == 0) {
                     return const SizedBox.shrink();
                   }
 
-                  return Container(
+                  return adsLoaded[adsList.length-1]==true? Container(
                     height: 56,
                     width: MediaQuery.of(context).size.width,
-                    color: Colors.grey.shade300,
+                    color: Colors.white,
                     alignment: Alignment.center,
                     child: Container(
                       height: 56,
                       width: 320,
-                      color: Colors.grey.shade300,
+                      color: Colors.white,
                       alignment: Alignment.center,
-                      child: Padding(
+                      child:Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.0),
                         child: Center(child: AdWidget(ad: adsList.last)),
                       ),
                     ),
-                  );
+                  ):SizedBox.shrink();
                 },
               ),
-
             );
           },
         ),

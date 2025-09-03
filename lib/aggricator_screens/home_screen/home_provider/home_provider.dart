@@ -704,7 +704,7 @@ class HomeProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         log("send data ${response.data}");
         if (isComeContest) {
-          mainNavigatorKey.currentContext!.read<AdsContestProvider>().getContestList();
+          mainNavigatorKey.currentContext!.read<AdsContestProvider>().getContestList(mainNavigatorKey.currentContext);
         } else {
           Navigator.push(
               mainNavigatorKey.currentContext!,

@@ -6,13 +6,16 @@ import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/lo
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../globel_keys/globel_keys.dart';
 import '../../../utils/app_toasts.dart';
 import '../../events_data/event_repo.dart';
 import '../referral_repo/referral_repo.dart';
+import '../referral_view/refer_earn.dart';
 
 class ReferralProvider extends ChangeNotifier {
   bool isLoading = false;
@@ -39,7 +42,6 @@ class ReferralProvider extends ChangeNotifier {
         if(_timercount == 0){
           Navigator.pop(mainNavigatorKey.currentContext!);
           Navigator.pushAndRemoveUntil(mainNavigatorKey.currentContext!, MaterialPageRoute(builder: (contexts) => LoginBackgroundView()), (route) => false);
-
         }
         notifyListeners();
       }
@@ -58,7 +60,8 @@ class ReferralProvider extends ChangeNotifier {
   String? myReferralLink;
   String? userId;
 
-  Future getReferralStats(context) async {
+  Future getReferralStats(context,{bool isHome = false}) async {
+    _timercount = 10;
     isDataLoading = true;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
@@ -78,17 +81,19 @@ class ReferralProvider extends ChangeNotifier {
         preferences.setString("myReferralCode", referralData['referral_code'].toString() ?? "");
         preferences.setString("myReferralLink", referralData['referral_link'].toString() ?? "");
         getData(preferences);
-      // Response response = await ReferralRepo().getReferralStats(userId);
-      //
-      // if (response.statusCode == 200) {
-      //   final data = response.data as Map<String, dynamic>;
-      //   referralData = data;
-      //   progress = int.parse(referralData['downloads'].toString()) / (int.parse(referralData['needed'].toString()));
-      //   difference = int.parse(referralData['needed'].toString()) - int.parse(referralData['downloads'].toString());
-      //   progress = progress.clamp(0.0, 1.0);
+        if(isHome){
+        ShareResult result = await Share.share(referralData['referral_link']);
+        if (result.status == ShareResultStatus.success) {
+          postProcessReferral(context);
+          Navigator.push(
+            (context),
+            MaterialPageRoute(builder: (context) => ReferEarn()),
+          );
+        }
+        }
       } else {
         log("Failed to post referral: ${response.statusCode}");
-        if(response.statusCode == 404){
+        if(response.statusCode == 404 && response.data['detail'] == "user not found or may be logged out,please login again"){
           referralData = {};
           startTimer();
           showUserInvalidPopUp(context);
@@ -264,75 +269,97 @@ class ReferralProvider extends ChangeNotifier {
   }
 
   void showUserInvalidPopUp(contexti) {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
     showModalBottomSheet(
       context: contexti,
+      isDismissible: false,
+      enableDrag: false,
       isScrollControlled: true,
+      barrierColor: Colors.black.withOpacity(0.7), // Optional: darker backdrop
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext contexts) {
-        return Container(
-          padding: EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              SizedBox(height: 16),
-              Text(
-                "Referral Program Unavailable",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+        return PopScope(
+          canPop: false, // Prevent back button
+          child: Container(
+            padding: EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.error_outline,
                   color: Colors.red,
+                  size: 60,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 16),
-              Text(
-                "The referral program is currently not available. Please try logging in again and joining the contest.",
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey[700],
+                SizedBox(height: 16),
+                Text(
+                  "Referral Program Unavailable",
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 24),
-              Consumer<ReferralProvider>(
-                  builder: (context,referralProvider,__) {
-                  return ElevatedButton(
-                    onPressed: () {
-
-                      Navigator.pop(contexts);
-                      Navigator.pushAndRemoveUntil(contexts, MaterialPageRoute(builder: (contexts) => LoginBackgroundView()), (route) => false);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      minimumSize: Size(double.infinity, 50),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      "Go to Login $_timercount",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    )
-                  );
-                }
-              ),
-              SizedBox(height: 16),
-            ],
+                SizedBox(height: 16),
+                Text(
+                  "The referral program is currently not available. Please try logging in again and joining the contest.",
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[700],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 24),
+                Consumer<ReferralProvider>(
+                    builder: (context,referralProvider,__) {
+                      return ElevatedButton(
+                          onPressed: () {
+                            // Restore system UI when navigating away
+                            SystemChrome.setEnabledSystemUIMode(
+                              SystemUiMode.edgeToEdge, // Restore normal UI mode
+                            );
+                            Navigator.pop(contexts);
+                            Navigator.pushAndRemoveUntil(
+                                contexts,
+                                MaterialPageRoute(builder: (contexts) => LoginBackgroundView()),
+                                    (route) => false
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            minimumSize: Size(double.infinity, 50),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            "Go to Login $_timercount",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          )
+                      );
+                    }
+                ),
+                SizedBox(height: 16),
+              ],
+            ),
           ),
         );
       },
-    );
+    ).then((_) {
+      // Ensure system UI is restored even if modal is dismissed unexpectedly
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    });
   }
 }
 

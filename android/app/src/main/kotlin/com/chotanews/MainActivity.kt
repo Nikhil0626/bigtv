@@ -47,10 +47,10 @@ class NativeAdFactoryExample: NativeAdFactory {
         adView.headlineView = adView.findViewById(R.id.ad_headline)
         adView.bodyView = adView.findViewById(R.id.ad_body)
         adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
-        adView.iconView = adView.findViewById(R.id.ad_app_icon)
-//    adView.priceView = adView.findViewById(R.id.ad_price)
-        adView.starRatingView = adView.findViewById(R.id.ad_stars)
-//    adView.storeView = adView.findViewById(R.id.ad_store)
+//        adView.iconView = adView.findViewById(R.id.ad_app_icon)
+        adView.priceView = adView.findViewById(R.id.ad_price)
+//        adView.starRatingView = adView.findViewById(R.id.ad_stars)
+        adView.storeView = adView.findViewById(R.id.ad_store)
         adView.advertiserView = adView.findViewById(R.id.ad_advertiser)
 
         // The headline and mediaContent are guaranteed to be in every NativeAd.
@@ -73,33 +73,33 @@ class NativeAdFactoryExample: NativeAdFactory {
             (adView.callToActionView as Button).text = nativeAd.callToAction
         }
 
-        if (nativeAd?.icon == null) {
-            adView.iconView?.visibility = View.GONE
+//        if (nativeAd?.icon == null) {
+//            adView.iconView?.visibility = View.GONE
+//        } else {
+//            (adView.iconView as ImageView).setImageDrawable(nativeAd.icon!!.drawable)
+//            adView.iconView?.visibility = View.VISIBLE
+//        }
+
+        if (nativeAd?.price == null) {
+            adView.priceView?.visibility = View.INVISIBLE
         } else {
-            (adView.iconView as ImageView).setImageDrawable(nativeAd.icon!!.drawable)
-            adView.iconView?.visibility = View.VISIBLE
+            adView.priceView?.visibility = View.VISIBLE
+            (adView.priceView as TextView).text = nativeAd.price
         }
 
-//    if (nativeAd?.price == null) {
-//      adView.priceView?.visibility = View.INVISIBLE
-//    } else {
-//      adView.priceView?.visibility = View.VISIBLE
-//      (adView.priceView as TextView).text = nativeAd.price
-//    }
-
-//    if (nativeAd?.store == null) {
-//      adView.storeView?.visibility = View.INVISIBLE
-//    } else {
-//      adView.storeView?.visibility = View.VISIBLE
-//      (adView.storeView as TextView).text = nativeAd.store
-//    }
-
-        if (nativeAd?.starRating == null) {
-            adView.starRatingView?.visibility = View.INVISIBLE
+        if (nativeAd?.store == null) {
+            adView.storeView?.visibility = View.INVISIBLE
         } else {
-            (adView.starRatingView as RatingBar).rating = nativeAd.starRating!!.toFloat()
-            adView.starRatingView?.visibility = View.VISIBLE
+            adView.storeView?.visibility = View.VISIBLE
+            (adView.storeView as TextView).text = nativeAd.store
         }
+
+//        if (nativeAd?.starRating == null) {
+//            adView.starRatingView?.visibility = View.INVISIBLE
+//        } else {
+//            (adView.starRatingView as RatingBar).rating = nativeAd.starRating!!.toFloat()
+//            adView.starRatingView?.visibility = View.VISIBLE
+//        }
 
         if (nativeAd?.advertiser == null) {
             adView.advertiserView?.visibility = View.INVISIBLE

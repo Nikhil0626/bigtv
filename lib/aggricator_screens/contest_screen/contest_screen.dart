@@ -28,7 +28,7 @@ class _ContestScreenState extends State<ContestScreen> with SingleTickerProvider
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    context.read<AdsContestProvider>().getContestList();
+    context.read<AdsContestProvider>().getContestList(context);
   }
 
   @override
