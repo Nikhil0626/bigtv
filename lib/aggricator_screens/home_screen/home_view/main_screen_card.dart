@@ -3,11 +3,13 @@ import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../utils/app_colors.dart';
 import '../../../utils/app_spaces.dart';
 import '../../../utils/keep_alive_page.dart';
+import '../../ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import '../../ad_manager_screen/ad_screen/banner_300x50_size.dart';
 import '../../events_data/event_repo.dart';
 import '../../loading_screen/home_shimmer.dart';
@@ -29,6 +31,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   List<Map<String, dynamic>> removedCards = [];
   Offset slideOffset = Offset.zero;
   bool isAnimating = false;
+  AdMobBannerProvider? bannerAdsProvider;
 
   @override
   void initState() {
@@ -36,7 +39,13 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
 
     context.read<HomeProvider>().getAllAiTags();
     if (context.read<HomeProvider>().postId.toString() == "0") {
-      context.read<HomeProvider>().getAllPost();
+      context.read<HomeProvider>().getAllPost().then((value) {
+        bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
+        bannerAdsProvider?. loadAd320x50MobBanner(bannerAdsProvider!.autoupdate??0, AdSize.banner);
+        bannerAdsProvider?.autoBannerCall();
+        bannerAdsProvider?.adsLoad();
+      },);
+
     }
   }
 

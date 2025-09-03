@@ -154,7 +154,7 @@ class HomeProvider extends ChangeNotifier {
           getAllPostList.add(response.data['data']);
           Future.delayed(
             Duration(milliseconds: 100),
-                () {
+            () {
               getAllPost(isGetAllPost: true);
               if (isLink) {
                 EventRepo().addEvent({
@@ -202,7 +202,7 @@ class HomeProvider extends ChangeNotifier {
       // getAllPostList = [];
       Future.delayed(
         Duration(milliseconds: 300),
-            () {
+        () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -214,7 +214,7 @@ class HomeProvider extends ChangeNotifier {
       // getAllPostList = [];
       Future.delayed(
         Duration(milliseconds: 300),
-            () {
+        () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -283,7 +283,7 @@ class HomeProvider extends ChangeNotifier {
       adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
       getImageAdsList.addAll(response.data['ads_list']);
       getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
-
+      log(" hello hai ${adMobBannerId.toString()} --- $adMobNativeId");
       if (isWebView) {
         getAllPostList.insert(0, {
           "id": 000000,
@@ -320,8 +320,7 @@ class HomeProvider extends ChangeNotifier {
         });
       }
       getAllPostList.addAll(data);
-
-      isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
+      notifyListeners();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
