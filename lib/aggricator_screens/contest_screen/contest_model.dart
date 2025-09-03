@@ -95,13 +95,13 @@ class JoinDataModel {
 class WinnerDataModel {
   final int userId;
   final bool isParticipated;
-  final String userName;
-  final String postUrl;
-  final String? userPic;
+  final dynamic userName;
+  final dynamic postUrl;
+  final dynamic userPic;
   final DateTime dateOfContest;
-  final String contestName;
-  final String statusOfContest;
-  final String contestImageUrl;
+  final dynamic contestName;
+  final dynamic statusOfContest;
+  final dynamic contestImageUrl;
 
   WinnerDataModel({
     required this.userId,

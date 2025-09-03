@@ -249,6 +249,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                                   pollProvider.localArticle['id'],
                                   selectId!,
                                   pollProvider.localArticle['pollData']['options'][selectId]['id'],
+                                  pollProvider.localArticle['title'],
                                 );
                               }
                             }

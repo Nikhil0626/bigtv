@@ -692,10 +692,10 @@ class HomeProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
-      "user_id": userId,
-      "post_id": postId,
+      "user_id": userId.toString(),
+      "post_id": postId.toString(),
       "post_title": "$title",
-      "contest_image_url": postImage,
+      "contest_image_url": postImage.toString(),
     };
 
     log(body.toString());
@@ -717,8 +717,16 @@ class HomeProvider extends ChangeNotifier {
         } else {
           throw 'Could not launch $sourceUrl';
         }
-
         CustomToast.showSuccessToast(msg: "Your Successfully Joined The Contest");
+        EventRepo().addEvent({
+          "user_id": userId,
+          "post_id": postId,
+          "post_title": "$title",
+          "contest_image_url": postImage,
+        }, "submit_contest");
+      } else {
+        log("send data ${response.data}");
+        CustomToast.showErrorToast(msg: "${response.data['detail']}");
       }
     } on DioException catch (e, st) {
       log("ad post imager send data $e  --- $st");
@@ -757,6 +765,7 @@ class HomeProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         getAdsDataList.addAll(response.data);
         log("LogsData ${getAdsDataList.length}");
+        EventRepo().addEvent({"user_id": userId, "isCheck": true}, "check_contest");
       }
     } on DioException catch (e, st) {
       log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");

@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../globel_keys/globel_keys.dart';
 import '../../../utils/app_toasts.dart';
+import '../../events_data/event_repo.dart';
 import '../referral_repo/referral_repo.dart';
 
 class ReferralProvider extends ChangeNotifier {
@@ -93,6 +94,10 @@ class ReferralProvider extends ChangeNotifier {
           showUserInvalidPopUp(context);
         }
       }
+      EventRepo().addEvent({
+        "user_id": userId??"0",
+        "referral_code": "${referralData['referral_code']}"
+      }, "check_referral");
     } on DioException catch (e, st) {
       log("Failed to post referral: ${e.response?.statusCode}");
       log("Dio error while posting referral: ${e.toString()} ---- ${st.toString()}");
@@ -116,6 +121,7 @@ class ReferralProvider extends ChangeNotifier {
       } else {
         log("Failed to post Rewards: ${response.statusCode}");
       }
+
     } on DioException catch (e, st) {
       log("Dio error while posting Rewards: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
@@ -143,6 +149,11 @@ class ReferralProvider extends ChangeNotifier {
       } else {
         log("Failed to Get Rewards: ${response.statusCode}");
       }
+
+      EventRepo().addEvent({
+        "user_id": userId??"0",
+        "referral_code": "${referralData['referral_code']}"
+      }, "check_claimed_rewards");
     } on DioException catch (e, st) {
       log("Dio error while getting Rewards: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
@@ -179,6 +190,11 @@ class ReferralProvider extends ChangeNotifier {
         CustomToast.showErrorToast(msg: "${response.data["detail"] }", timeDuration: 3);
         log("Failed to post Rewards: ${response.statusCode}");
       }
+      EventRepo().addEvent({
+        "user_id": userId,
+        "reward_id": reward['id'],
+        "provider_id": isRecharge ? providerName : selectedOperator,
+      }, "claimed_rewards");
     } on DioException catch (e, st) {
       CustomToast.showErrorToast(msg: e.toString());
       log("Dio error while posting Rewards: ${e.toString()} ---- ${st.toString()}");
@@ -227,6 +243,10 @@ class ReferralProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         getReferralStats(context);
       } else {}
+      EventRepo().addEvent({
+        "user_id": userId??"0",
+        "referral_code": "$myReferralCode"
+      }, "send_referral");
     } on DioException catch (e, st) {
       CustomToast.showErrorToast(msg: "something went wrong");
       log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");

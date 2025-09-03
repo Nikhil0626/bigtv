@@ -920,16 +920,16 @@ class _ReferEarnState extends State<ReferEarn> {
                           child: InkWell(
                             onTap: () {
                               context.read<ReferralProvider>().postProcessReferral(context);
-                              EventRepo().addEvent({
-                                "shareApp": Platform.isIOS ? "iOS" : "Android",
-                                "userId": referralProvider.userId ?? "0",
-                                'referrerUrl': referralProvider.myReferralLink,
-                                'clickTimestamp': DateTime.now().toString(),
-                                'installTimestamp': "",
-                                "createAt": DateTime.now().toString(),
-                                "error": "",
-                                "isSharedUser": true
-                              }, "referral");
+                              // EventRepo().addEvent({
+                              //   "shareApp": Platform.isIOS ? "iOS" : "Android",
+                              //   "userId": referralProvider.userId ?? "0",
+                              //   'referrerUrl': referralProvider.myReferralLink,
+                              //   'clickTimestamp': DateTime.now().toString(),
+                              //   'installTimestamp': "",
+                              //   "createAt": DateTime.now().toString(),
+                              //   "error": "",
+                              //   "isSharedUser": true
+                              // }, "referral");
                               Share.share(
                                 "Click link and get bonus: ${referralProvider.referralData['referral_link']}",
                               );

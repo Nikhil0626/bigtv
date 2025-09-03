@@ -122,82 +122,10 @@ class _MovieRatingsState extends State<MovieRatings> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 10),
-            child: Row(
-              children: [
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Chota ",
-                        style: fontStyle(
-                          fontSize: Platform.isIOS ? 16 : 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "News",
-                        style: fontStyle(
-                          fontSize: Platform.isIOS ? 16 : 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xff00A8FF),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Spacer(),
-                InkWell(
-                  onTap: () async {
-                    SharedPreferences sp = await SharedPreferences.getInstance();
-                    String? userId = sp.getString("userId");
 
-                    sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
-
-                    if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
-                      try {
-                        final image = await adsScreenshotController.capture(
-                          pixelRatio: 2.0,
-                        );
-                        if (image != null) {
-                          final directory = await getTemporaryDirectory();
-                          final imagePath = '${directory.path}/${widget.article['id']}.png';
-                          final imageFile = File(imagePath);
-                          await imageFile.writeAsBytes(image);
-
-                          Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
-                        } else {
-                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                        }
-                      } catch (e) {
-                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                      }
-                    }
-                    EventRepo().addEvent({
-                      "share": "news",
-                      "postId": widget.article['id'].toString(),
-                      "createAt": DateTime.now().toString(),
-                      "postTitle": widget.article['title'].toString()
-                    }, "shared_article");
-                  },
-                  child: SizedBox(
-                    width: 24,
-                    child: SvgPicture.asset(
-                      "assets/svg/share.svg",
-                      height: 18,
-                      width: 18,
-                      color: Colors.grey,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
 
           Container(
-            height: MediaQuery.of(context).size.height*.55,
+            height: MediaQuery.of(context).size.height*.52,
             width: MediaQuery.of(context).size.width,
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
             decoration: BoxDecoration(
@@ -213,6 +141,80 @@ class _MovieRatingsState extends State<MovieRatings> {
               padding: EdgeInsets.zero,
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               children: [
+                height(height: 10),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 6),
+                  child: Row(
+                    children: [
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Chota ",
+                              style: fontStyle(
+                                fontSize: Platform.isIOS ? 16 : 14,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "News",
+                              style: fontStyle(
+                                fontSize: Platform.isIOS ? 16 : 14,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xff00A8FF),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Spacer(),
+                      InkWell(
+                        onTap: () async {
+                          SharedPreferences sp = await SharedPreferences.getInstance();
+                          String? userId = sp.getString("userId");
+
+                          sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
+
+                          if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                            try {
+                              final image = await adsScreenshotController.capture(
+                                pixelRatio: 2.0,
+                              );
+                              if (image != null) {
+                                final directory = await getTemporaryDirectory();
+                                final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                final imageFile = File(imagePath);
+                                await imageFile.writeAsBytes(image);
+
+                                Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                              } else {
+                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                              }
+                            } catch (e) {
+                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                            }
+                          }
+                          EventRepo().addEvent({
+                            "share": "news",
+                            "postId": widget.article['id'].toString(),
+                            "createAt": DateTime.now().toString(),
+                            "postTitle": widget.article['title'].toString()
+                          }, "shared_article");
+                        },
+                        child: SizedBox(
+                          width: 24,
+                          child: SvgPicture.asset(
+                            "assets/svg/share.svg",
+                            height: 18,
+                            width: 18,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 height(height: 10),
                 Container(
                   width: MediaQuery.of(context).size.width,
@@ -366,7 +368,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                                   if (isLogin) {
                                     CustomToast.showErrorToast(msg: "Your a guest user, please login to give a rating");
                                   } else {
-                                    ratingProvider.postSubmitRating(widget.article['id'], widget.article['userHasReviewed']);
+                                    ratingProvider.postSubmitRating(widget.article['id'], widget.article['userHasReviewed'],widget.article['title']);
                                   }
                                 }
                               : null,

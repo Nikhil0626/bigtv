@@ -204,7 +204,7 @@ Future<void> getReferrerFromPlayStore() async {
         EventRepo().addEvent({
           "shareApp": Platform.isIOS ? "iOS" : "Android",
           "userId": userId ?? "0",
-          'referrerUrl': "",
+          'referrerUrl': "$referredCode",
           'clickTimestamp': DateTime.now().toString(),
           'installTimestamp': DateTime.now().toString(),
           "createAt": DateTime.now().toString(),

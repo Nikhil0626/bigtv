@@ -116,112 +116,115 @@ class _PapersScreenPreviewState extends State<PapersScreenPreview> {
                               itemCount: widget.imageUrls.length,
                               itemBuilder: (context, index) {
                                 final imageUrl = widget.imageUrls[index].imageUrl;
-                                return InteractiveViewer(
-                                  transformationController: _controllers[index],
-                                  minScale: 1.0,
-                                  maxScale: 6.0,
-                                  panEnabled: true,
-                                  child: RepaintBoundary(
-                                    key: _repaintKey,
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width,
-                                      height: MediaQuery.of(context).size.height,
-                                      child: Stack(
-                                        children: [
-                                          ExtendedImage.network(
-                                            imageUrl.toString(),
-                                            fit: BoxFit.fill,
-                                            width: MediaQuery.of(context).size.width,
-                                            height: MediaQuery.of(context).size.height,
-                                            loadStateChanged: (state) {
-                                              switch (state.extendedImageLoadState) {
-                                                case LoadState.loading:
-                                                  return const Center(child: CircularProgressIndicator());
-                                                case LoadState.completed:
-                                                  return state.completedWidget;
-                                                case LoadState.failed:
-                                                  return const Center(
-                                                    child: Text(
-                                                      'Failed to load image',
-                                                      style: TextStyle(color: Colors.white),
-                                                    ),
-                                                  );
-                                              }
-                                            },
-                                          ),
-                                          Positioned(
-                                            top: 20,
-                                            right: 20,
-                                            child: InkWell(
-                                              onTap: () async {
-                                                // final url = 'https://enewspapers.s3.amazonaws.com/swetcha/2025-05-03/telangana/page_001.webp';
-                                                // final filename = 'page_001.webp';
-                                                //
-                                                // final dir = await getTemporaryDirectory();
-                                                // final filePath = '${dir.path}/$filename';
-                                                // final file = File(filePath);
-                                                //
-                                                // // Download only if not cached
-                                                // if (!await file.exists()) {
-                                                //   final response = await http.get(Uri.parse(url));
-                                                //   await file.writeAsBytes(response.bodyBytes);
-                                                // }
-                                                //
-                                                // // Share the cached or newly downloaded file
-                                                // Share.shareXFiles(
-                                                //   [XFile(file.path)],
-                                                //   text: 'Check out today’s front page!${url}',
-                                                // );
-
-                                                final prefs = await SharedPreferences.getInstance();
-                                                final userId = prefs.getString("userId");
-
-                                                sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].id, "");
-
-                                                try {
-                                                  RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
-                                                  var image = await boundary.toImage(pixelRatio: 3.0);
-                                                  ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
-                                                  Uint8List pngBytes = byteData!.buffer.asUint8List();
-
-                                                  final directory = await getTemporaryDirectory();
-                                                  final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].id.toString()}.png');
-                                                  await imagePath.writeAsBytes(pngBytes);
-
-                                                  await Share.shareXFiles(
-                                                    [XFile(imagePath.path)],
-                                                    text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].imageUrl}',
-                                                  );
-                                                   EventRepo().addEvent({
-                                                    "share": "Epaper",
-                                                    "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex],
-                                                    "createAt": DateTime.now().toString(),
-                                                     "postTitle":"",
-
-
-
-
-                                                   }, "shared_article");
-                                                } catch (e) {
-                                                  print("Error capturing image: $e");
+                                return KeepAlive(
+                                  keepAlive: true,
+                                  child: InteractiveViewer(
+                                    transformationController: _controllers[index],
+                                    minScale: 1.0,
+                                    maxScale: 6.0,
+                                    panEnabled: true,
+                                    child: RepaintBoundary(
+                                      key: _repaintKey,
+                                      child: SizedBox(
+                                        width: MediaQuery.of(context).size.width,
+                                        height: MediaQuery.of(context).size.height,
+                                        child: Stack(
+                                          children: [
+                                            ExtendedImage.network(
+                                              imageUrl.toString(),
+                                              fit: BoxFit.fill,
+                                              width: MediaQuery.of(context).size.width,
+                                              height: MediaQuery.of(context).size.height,
+                                              loadStateChanged: (state) {
+                                                switch (state.extendedImageLoadState) {
+                                                  case LoadState.loading:
+                                                    return const Center(child: CircularProgressIndicator());
+                                                  case LoadState.completed:
+                                                    return state.completedWidget;
+                                                  case LoadState.failed:
+                                                    return const Center(
+                                                      child: Text(
+                                                        'Failed to load image',
+                                                        style: TextStyle(color: Colors.white),
+                                                      ),
+                                                    );
                                                 }
                                               },
-                                              child: Container(
-                                                padding: const EdgeInsets.all(10),
-                                                decoration: const BoxDecoration(
-                                                  color: Colors.black54,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                                child: SvgPicture.asset(
-                                                  "assets/svg/share.svg",
-                                                  height: 16,
-                                                  width: 16,
-                                                  color: Colors.white,
+                                            ),
+                                            Positioned(
+                                              top: 20,
+                                              right: 20,
+                                              child: InkWell(
+                                                onTap: () async {
+                                                  // final url = 'https://enewspapers.s3.amazonaws.com/swetcha/2025-05-03/telangana/page_001.webp';
+                                                  // final filename = 'page_001.webp';
+                                                  //
+                                                  // final dir = await getTemporaryDirectory();
+                                                  // final filePath = '${dir.path}/$filename';
+                                                  // final file = File(filePath);
+                                                  //
+                                                  // // Download only if not cached
+                                                  // if (!await file.exists()) {
+                                                  //   final response = await http.get(Uri.parse(url));
+                                                  //   await file.writeAsBytes(response.bodyBytes);
+                                                  // }
+                                                  //
+                                                  // // Share the cached or newly downloaded file
+                                                  // Share.shareXFiles(
+                                                  //   [XFile(file.path)],
+                                                  //   text: 'Check out today’s front page!${url}',
+                                                  // );
+
+                                                  final prefs = await SharedPreferences.getInstance();
+                                                  final userId = prefs.getString("userId");
+
+                                                  sendShareDetails(userId, widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].id, "");
+
+                                                  try {
+                                                    RenderRepaintBoundary boundary = _repaintKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+                                                    var image = await boundary.toImage(pixelRatio: 3.0);
+                                                    ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+                                                    Uint8List pngBytes = byteData!.buffer.asUint8List();
+
+                                                    final directory = await getTemporaryDirectory();
+                                                    final imagePath = File('${directory.path}/${widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].id.toString()}.png');
+                                                    await imagePath.writeAsBytes(pngBytes);
+
+                                                    await Share.shareXFiles(
+                                                      [XFile(imagePath.path)],
+                                                      text: '${widget.imageUrls[newsPostsProvider.currentPaperIndex + 1].imageUrl}',
+                                                    );
+                                                     EventRepo().addEvent({
+                                                      "share": "Epaper",
+                                                      "postId": widget.imageUrls[newsPostsProvider.currentPaperIndex],
+                                                      "createAt": DateTime.now().toString(),
+                                                       "postTitle":"",
+
+
+
+
+                                                     }, "shared_article");
+                                                  } catch (e) {
+                                                    print("Error capturing image: $e");
+                                                  }
+                                                },
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(10),
+                                                  decoration: const BoxDecoration(
+                                                    color: Colors.black54,
+                                                    shape: BoxShape.circle,
+                                                  ),
+                                                  child: SvgPicture.asset(
+                                                    "assets/svg/share.svg",
+                                                    height: 16,
+                                                    width: 16,
+                                                    color: Colors.white,
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),

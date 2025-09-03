@@ -1,6 +1,8 @@
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +11,8 @@ import '../../../../services/base_urls.dart';
 import '../../../../utils/app_enums.dart';
 
 class EventRepo extends BaseService {
+
+
   Future sendEvent(body) async {
     log("event body --- ${body}");
     Response response = await makeRequest(url: BaseUrls.eventUrl, baseUrl: BaseUrls.baseUrlAwsDev, method: RequestType.post, body: body);
@@ -17,6 +21,7 @@ class EventRepo extends BaseService {
   }
 
   Future<void> addEvent(Map<String, dynamic> eventData, eventName) async {
+    final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
 
     String? userId = sharedPreferences.getString("userId");
@@ -27,11 +32,20 @@ class EventRepo extends BaseService {
       'eventData': eventData,
       'userId': userId ?? "guest",
       'deviceId': deviceId ?? "12345",
+      "platform": Platform.isIOS?"iOS":"Android"
     };
     log("event body --- $newEvent");
 
+
     final box = Hive.box('events');
     await box.add(newEvent);
+
+    await analytics.logEvent(name: eventName, parameters: {
+      'key': eventName,
+      'eventData': eventData,
+      'userId': userId ?? "guest",
+      'deviceId': deviceId ?? "12345",
+    });
   }
 
   Future<void> processAndPushEvents() async {

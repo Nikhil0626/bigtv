@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/contest_screen/winners_screen.dart';
+import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/date_format.dart';
@@ -60,7 +61,9 @@ class _ContestScreenState extends State<ContestScreen> with SingleTickerProvider
       elevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back_outlined, size: 24.sp, color: Colors.black),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () {
+          Navigator.pop(context);
+        }
       ),
       title: Text(
         "Contest",

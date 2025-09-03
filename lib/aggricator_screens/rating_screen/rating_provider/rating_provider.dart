@@ -117,14 +117,17 @@
 
 import 'dart:developer';
 import 'package:dio/dio.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../utils/app_toasts.dart';
+import '../../events_data/event_repo.dart';
 import '../rating_repo/rating_repo.dart';
 
 class RatingProvider extends ChangeNotifier {
   final TextEditingController commentController = TextEditingController();
   final FocusNode commentFocusNode = FocusNode();
+  final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
   int selectedStar = 0;
   int selectedOption = 0;
@@ -176,7 +179,7 @@ class RatingProvider extends ChangeNotifier {
     return ratedArticleIds.contains(articleId);
   }
 
-  Future<void> postSubmitRating(article, rated) async {
+  Future<void> postSubmitRating(article, rated, title) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
@@ -188,6 +191,8 @@ class RatingProvider extends ChangeNotifier {
       "comment": commentController.text,
       "device_id": deviceId,
     };
+
+
 
     log("Submitting rating: $body");
 
@@ -203,6 +208,14 @@ class RatingProvider extends ChangeNotifier {
         commentController.clear();
 
         CustomToast.showSuccessToast(msg: response.data["message"]);
+        EventRepo().addEvent({
+          "post_id": article.toString(),
+          "user_id": userId ?? "",
+          "post_title": title ?? "",
+          "rating": selectedStar,
+          "comment": commentController.text,
+          "device_id": deviceId.toString(),
+        }, "submit_rating");
       }
     } on DioException catch (e, st) {
       CustomToast.showErrorToast(msg: "Something went wrong");

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../utils/app_spaces.dart';
 import '../home_screen/home_provider/home_provider.dart';
+import '../individual_post_details/individual_post_view.dart';
 import 'contest_screen.dart';
 
 class JoinContestScreen extends StatefulWidget {
@@ -80,7 +81,22 @@ class _JoinContestScreenState extends State<JoinContestScreen> {
                           Spacer(),
                           InkWell(
                             onTap: () {
-                              context.read<HomeProvider>().sendAdsDataSend(item.postId, item.contestName, item.contestImageUrl, true, "");
+                              if(item.isParticipated == true ){
+
+                              }else{
+                                // Navigator.pop(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => IndividualPostView1(
+                                      postId: item.postId.toString(),
+                                      isComeFrom: true,
+                                    ),
+                                  ),
+                                );
+                                // context.read<HomeProvider>().sendAdsDataSend(item.postId, item.contestName, item.contestImageUrl, true, "");
+
+                              }
                             },
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),

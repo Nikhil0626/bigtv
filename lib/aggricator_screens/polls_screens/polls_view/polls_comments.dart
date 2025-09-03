@@ -215,7 +215,7 @@ class _PollsCommentsState extends State<PollsComments> {
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         itemBuilder: (context, index) {
                           final review = pollProvider.getAllPollCommentsList['comments'][index];
-                          final String userName = review['user']?['name'] ?? "Anonymous";
+                          final String userName = review['userName'] ?? "Anonymous";
                           final String comment = review['comment'] ?? "";
                           final timeAgo = formatTimeDifference(review['createdAt']?.toString() ?? "");
 

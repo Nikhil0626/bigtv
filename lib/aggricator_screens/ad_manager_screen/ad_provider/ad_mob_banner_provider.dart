@@ -175,114 +175,114 @@ class AdMobBannerProvider with ChangeNotifier {
     }
   }
 
-  Future<void> loadAdMobNative(int index, AdSize mediumRectangle) async {
-    log(" Load AdMob Native ${ mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId} -- $index ");
-    try {
-      requestInitiated = DateTime.now();
+  // Future<void> loadAdMobNative(int index, AdSize mediumRectangle) async {
+  //   log(" Load AdMob Native ${ mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId} -- $index ");
+  //   try {
+  //     requestInitiated = DateTime.now();
+  //
+  //     ads[index]?.dispose();
+  //
+  //     final latencyData = AdLatencyData()..requestInitiated = DateTime.now();
+  //     adLatencyData[index] = latencyData;
+  //     adsLoaded[index] = false;
+  //     adErrors.remove(index);
+  //     final ad = NativeAd(
+  //       adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId,
+  //       nativeAdOptions: NativeAdOptions(
+  //         mediaAspectRatio: MediaAspectRatio.any,
+  //       ),
+  //       factoryId: 'adFactoryExample',
+  //       listener: NativeAdListener(
+  //         onAdLoaded: (ad) {
+  //           responseReceived = DateTime.now();
+  //           adCreativeDownloaded = DateTime.now();
+  //           adRendered = DateTime.now();
+  //           if (ad != null) {
+  //             ads[index] = ad as NativeAd;
+  //             adsLoaded[index] = true;
+  //           }
+  //           ads.removeWhere((key, value) => value == null);
+  //           notifyListeners();
+  //         },
+  //         onAdFailedToLoad: (ad, error) {
+  //           ad.dispose();
+  //           ads[index] = null;
+  //           adsLoaded[index] = false;
+  //           adErrors[index] = 'Failed: ${error.code} - ${error.message}';
+  //           debugPrint('❌ Ad failed at $index: ${error.message}');
+  //           notifyListeners();
+  //         },
+  //         onAdImpression: (ad) async {
+  //
+  //         },
+  //       ),
+  //       request: AdRequest(),
+  //     );
+  //
+  //
+  //     if (ad != null) {
+  //       ads[index] = ad;
+  //       await ad.load();
+  //     }
+  //
+  //     debugPrint('🔄 Started loading native template ad at index $index');
+  //   } catch (e) {
+  //     debugPrint('⚠️ Exception loading native ad at $index: $e');
+  //     adErrors[index] = 'Exception: $e';
+  //     notifyListeners();
+  //   }
+  // }
 
-      ads[index]?.dispose();
-
-      final latencyData = AdLatencyData()..requestInitiated = DateTime.now();
-      adLatencyData[index] = latencyData;
-      adsLoaded[index] = false;
-      adErrors.remove(index);
-      final ad = NativeAd(
-        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId,
-        nativeAdOptions: NativeAdOptions(
-          mediaAspectRatio: MediaAspectRatio.any,
-        ),
-        factoryId: 'adFactoryExample',
-        listener: NativeAdListener(
-          onAdLoaded: (ad) {
-            responseReceived = DateTime.now();
-            adCreativeDownloaded = DateTime.now();
-            adRendered = DateTime.now();
-            if (ad != null) {
-              ads[index] = ad as NativeAd;
-              adsLoaded[index] = true;
-            }
-            ads.removeWhere((key, value) => value == null);
-            notifyListeners();
-          },
-          onAdFailedToLoad: (ad, error) {
-            ad.dispose();
-            ads[index] = null;
-            adsLoaded[index] = false;
-            adErrors[index] = 'Failed: ${error.code} - ${error.message}';
-            debugPrint('❌ Ad failed at $index: ${error.message}');
-            notifyListeners();
-          },
-          onAdImpression: (ad) async {
-
-          },
-        ),
-        request: AdRequest(),
-      );
-
-
-      if (ad != null) {
-        ads[index] = ad;
-        await ad.load();
-      }
-
-      debugPrint('🔄 Started loading native template ad at index $index');
-    } catch (e) {
-      debugPrint('⚠️ Exception loading native ad at $index: $e');
-      adErrors[index] = 'Exception: $e';
-      notifyListeners();
-    }
-  }
-
-  Future<void> loadAdManagerNative(int index, AdSize size) async {
-    try {
-      ads[index]?.dispose();
-
-      adsLoaded[index] = false;
-      adErrors.remove(index);
-      NativeAdOptions nativeAdOptions = NativeAdOptions(
-        mediaAspectRatio: MediaAspectRatio.any,
-      );
-      final ad = NativeAd(
-        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId,
-        nativeAdOptions: nativeAdOptions,
-        factoryId: 'adFactoryExample',
-        listener: NativeAdListener(
-          onAdLoaded: (ad) {
-            responseReceived = DateTime.now();
-            adCreativeDownloaded = DateTime.now();
-            adRendered = DateTime.now();
-            if (ad != null) {
-              ads[index] = ad as NativeAd;
-              adsLoaded[index] = true;
-            }
-            ads.removeWhere((key, value) => value == null);
-            notifyListeners();
-          },
-          onAdFailedToLoad: (ad, error) {
-            ad.dispose();
-            ads[index] = null;
-            adsLoaded[index] = false;
-            adErrors[index] = 'Failed: ${error.code} - ${error.message}';
-            debugPrint('❌ Ad failed at $index: ${error.message}');
-            notifyListeners();
-          },
-          onAdImpression: (ad) async {
-
-          },
-        ),
-        request: AdRequest(),
-      );
-      if (ad != null) {
-        ads[index] = ad;
-        await ad.load();
-      }
-      debugPrint('🔄 Started loading ad at index $index');
-    } catch (e) {
-      debugPrint('⚠️ Exception loading ad at index $index: $e');
-      adErrors[index] = 'Exception: ${e.toString()}';
-      notifyListeners();
-    }
-  }
+  // Future<void> loadAdManagerNative(int index, AdSize size) async {
+  //   try {
+  //     ads[index]?.dispose();
+  //
+  //     adsLoaded[index] = false;
+  //     adErrors.remove(index);
+  //     NativeAdOptions nativeAdOptions = NativeAdOptions(
+  //       mediaAspectRatio: MediaAspectRatio.any,
+  //     );
+  //     final ad = NativeAd(
+  //       adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId,
+  //       nativeAdOptions: nativeAdOptions,
+  //       factoryId: 'adFactoryExample',
+  //       listener: NativeAdListener(
+  //         onAdLoaded: (ad) {
+  //           responseReceived = DateTime.now();
+  //           adCreativeDownloaded = DateTime.now();
+  //           adRendered = DateTime.now();
+  //           if (ad != null) {
+  //             ads[index] = ad as NativeAd;
+  //             adsLoaded[index] = true;
+  //           }
+  //           ads.removeWhere((key, value) => value == null);
+  //           notifyListeners();
+  //         },
+  //         onAdFailedToLoad: (ad, error) {
+  //           ad.dispose();
+  //           ads[index] = null;
+  //           adsLoaded[index] = false;
+  //           adErrors[index] = 'Failed: ${error.code} - ${error.message}';
+  //           debugPrint('❌ Ad failed at $index: ${error.message}');
+  //           notifyListeners();
+  //         },
+  //         onAdImpression: (ad) async {
+  //
+  //         },
+  //       ),
+  //       request: AdRequest(),
+  //     );
+  //     if (ad != null) {
+  //       ads[index] = ad;
+  //       await ad.load();
+  //     }
+  //     debugPrint('🔄 Started loading ad at index $index');
+  //   } catch (e) {
+  //     debugPrint('⚠️ Exception loading ad at index $index: $e');
+  //     adErrors[index] = 'Exception: ${e.toString()}';
+  //     notifyListeners();
+  //   }
+  // }
 
 
 
@@ -425,8 +425,8 @@ class AdMobBannerProvider with ChangeNotifier {
   void adsLoad() {
     loadAdMobBanner(1, AdSize.mediumRectangle);
     loadAdManagerBanner(2, AdSize.mediumRectangle);
-    loadAdMobNative(3, AdSize.mediumRectangle);
-    loadAdManagerNative(4, AdSize.mediumRectangle);
+    // loadAdMobNative(3, AdSize.mediumRectangle);
+    // loadAdManagerNative(4, AdSize.mediumRectangle);
   }
 }
 

@@ -8,6 +8,7 @@ import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../utils/app_toasts.dart';
+import '../events_data/event_repo.dart';
 
 class PollProvider with ChangeNotifier {
 
@@ -136,7 +137,7 @@ class PollProvider with ChangeNotifier {
     }
   }
 
-  Future<void> submitPolls(int postId, int index, pollsOptions, {VoidCallback? onSuccess}) async {
+  Future<void> submitPolls(int postId, int index, pollsOptions, localArticle, {VoidCallback? onSuccess}) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
     String? userName = sp.getString("userName");
@@ -154,7 +155,8 @@ class PollProvider with ChangeNotifier {
       Response response = await PollRepo().submitPolls(body);
       log("Response: ${response.data}");
       final formatter = DateFormat("yyyy-MM-dd'T'HH:mm:ss");
-      if (response.statusCode == 200) {
+      if (response.statusCode == 201) {
+
         final commentBody = {
           "userName": userName ?? "user",
           "userPhoto": null,
@@ -166,7 +168,13 @@ class PollProvider with ChangeNotifier {
           updatePollVoteInHive(optionId: pollsOptions, postId: postId,commentBody: commentController.text.isNotEmpty?commentBody:{});
 
         CustomToast.showSuccessToast(msg: "Poll submitted successfully!");
-
+        EventRepo().addEvent({
+          "post_id": postId,
+          "user_id": userId ?? "0",
+          "post_title": localArticle ?? "",
+          "selected_option": pollsOptions,
+          "comment": commentController.text.trim(),
+        }, "submit_poll");
         if (onSuccess != null) onSuccess();
       } else {
         final errorMessage = response.data['message'] ?? "Something went wrong!";

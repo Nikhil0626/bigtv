@@ -313,7 +313,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                     if (isLogin) {
                                                       CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
                                                     } else {
-                                                      if (widget.article['postUrl'] == "" || widget.article['postUrl'].isEmpty()) {
+                                                      if (widget.article['postUrl'] == "" || widget.article['postUrl'] == null) {
+
                                                       } else {
                                                         context
                                                             .read<HomeProvider>()
@@ -322,12 +323,23 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                     }
                                                   },
                                                   child: widget.article['image_url'].length == 1
-                                                      ? Image.network(
-                                                          widget.article['image_url'][0] ?? "",
-                                                          width: MediaQuery.of(context).size.width,
-                                                          height: MediaQuery.of(context).size.height,
-                                                          fit: BoxFit.fill,
-                                                        )
+                                                      ? CachedNetworkImage(
+                                                    imageUrl: widget.article['image_url'][0] ?? "",
+                                                    width: MediaQuery.of(context).size.width,
+                                                    height: MediaQuery.of(context).size.height,
+                                                    fit: BoxFit.fill,
+                                                    placeholder: (context, url) => Container(
+                                                      color: AppColors.borderColor.withOpacity(.2),
+                                                    ),
+                                                    errorWidget: (context, url, error) => Center(
+                                                      child: Icon(
+                                                        Icons.image,
+                                                        size: 100,
+                                                        color: Colors.grey.shade300,
+                                                      ),
+                                                    ),
+                                                  )
+
                                                       : ImagePostSlider(
                                                           imageUrl: widget.article['image_url'],
                                                         ))
