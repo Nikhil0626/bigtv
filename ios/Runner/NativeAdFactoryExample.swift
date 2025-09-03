@@ -16,10 +16,15 @@ class NativeAdFactoryExample: NSObject, FLTNativeAdFactory {
             headlineLabel.text = nativeAd.headline
         }
 
-        if let bodyLabel = adView.bodyView as? UILabel {
-            bodyLabel.text = nativeAd.body
-            adView.bodyView?.isHidden = nativeAd.body == nil
-        }
+      if let bodyLabel = adView.bodyView as? UILabel {
+          if let adBody = nativeAd.body, !adBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+              bodyLabel.text = adBody
+          } else {
+              bodyLabel.text = "Check out this amazing offer! " // ✅ Dummy text
+          }
+          adView.bodyView?.isHidden = false // ✅ Always show since we provide fallback
+      }
+
 
         if let ctaButton = adView.callToActionView as? UIButton {
             ctaButton.setTitle(nativeAd.callToAction, for: .normal)

@@ -4,7 +4,6 @@
     <dependencies>
         <deployment version="2048" identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="23721"/>
-        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -14,13 +13,10 @@
             <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
-                <!-- Media View - Positioned at top, not full screen -->
                 <view contentMode="scaleAspectFill" translatesAutoresizingMaskIntoConstraints="NO" id="mediaView" customClass="GADMediaView">
-                    <rect key="frame" x="0.0" y="24" width="375" height="500"/>
+                    <rect key="frame" x="0.0" y="0.0" width="375" height="666"/>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                 </view>
-
-                <!-- Info Bar (AD badge) -->
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="infoBar">
                     <rect key="frame" x="0.0" y="0.0" width="375" height="24"/>
                     <subviews>
@@ -39,71 +35,74 @@
                         <constraint firstAttribute="height" constant="24" id="infoBar-height"/>
                     </constraints>
                 </view>
-
-                <!-- Content below media view -->
-                <label contentMode="scaleToFill" text="Headline" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="headline">
-                    <rect key="frame" x="88" y="547" width="271" height="24"/>
-                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                    <color key="textColor" systemColor="darkTextColor"/>
-                </label>
-                <label contentMode="scaleToFill" text="Body text goes here and can be long." lineBreakMode="tailTruncation" numberOfLines="0" translatesAutoresizingMaskIntoConstraints="NO" id="body">
-                    <rect key="frame" x="88" y="575" width="271" height="17"/>
-                    <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                    <color key="textColor" white="0.3333333" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                </label>
-                <imageView contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" id="icon">
-                    <rect key="frame" x="16" y="575" width="60" height="60"/>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="contentContainer">
+                    <rect key="frame" x="0.0" y="547" width="375" height="120"/>
+                    <subviews>
+                        <label contentMode="scaleToFill" text="Headline" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="headline">
+                            <rect key="frame" x="66" y="8" width="307" height="24"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        </label>
+                        <label contentMode="scaleToFill" text="Body text goes here and can be long." lineBreakMode="tailTruncation" numberOfLines="0" translatesAutoresizingMaskIntoConstraints="NO" id="body">
+                            <rect key="frame" x="66" y="34" width="307" height="17"/>
+                            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                            <color key="textColor" white="0.90000000000000002" alpha="1" colorSpace="calibratedWhite"/>
+                        </label>
+                        <button contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ctaButton">
+                            <rect key="frame" x="20" y="76" width="335" height="30"/>
+                            <color key="backgroundColor" red="0.0" green="0.5" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                            <state key="normal" title="INSTALL">
+                                <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            </state>
+                            <userDefinedRuntimeAttributes>
+                                <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                                    <integer key="value" value="0"/>
+                                </userDefinedRuntimeAttribute>
+                                <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/>
+                            </userDefinedRuntimeAttributes>
+                        </button>
+                        <imageView contentMode="scaleAspectFit" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="icon">
+                            <rect key="frame" x="8" y="13" width="50" height="50"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="50" id="icon-height"/>
+                                <constraint firstAttribute="width" constant="50" id="icon-width"/>
+                            </constraints>
+                        </imageView>
+                    </subviews>
+                    <color key="backgroundColor" red="0.29999999999999999" green="0.5" blue="0.80000000000000004" alpha="0.69999999999999996" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
-                        <constraint firstAttribute="height" constant="60" id="icon-height"/>
-                        <constraint firstAttribute="width" constant="60" id="icon-width"/>
+                        <constraint firstItem="body" firstAttribute="leading" secondItem="headline" secondAttribute="leading" id="body-leading"/>
+                        <constraint firstItem="body" firstAttribute="top" secondItem="headline" secondAttribute="bottom" constant="2" id="body-top"/>
+                        <constraint firstAttribute="trailing" secondItem="body" secondAttribute="trailing" constant="2" id="body-trailing"/>
+                        <constraint firstItem="ctaButton" firstAttribute="bottom" secondItem="contentContainer" secondAttribute="bottom" constant="-26" id="cta-bottom"/>
+                        <constraint firstItem="ctaButton" firstAttribute="height" constant="30" id="cta-height"/>
+                        <constraint firstItem="ctaButton" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="20" id="cta-leading"/>
+                        <constraint firstItem="ctaButton" firstAttribute="top" secondItem="icon" secondAttribute="bottom" constant="10" id="cta-top"/>
+                        <constraint firstAttribute="trailing" secondItem="ctaButton" secondAttribute="trailing" constant="20" id="cta-trailing"/>
+                        <constraint firstItem="headline" firstAttribute="leading" secondItem="icon" secondAttribute="trailing" constant="8" id="headline-leading"/>
+                        <constraint firstItem="headline" firstAttribute="top" secondItem="contentContainer" secondAttribute="top" constant="8" id="headline-top"/>
+                        <constraint firstAttribute="trailing" secondItem="headline" secondAttribute="trailing" constant="2" id="headline-trailing"/>
+                        <constraint firstItem="icon" firstAttribute="top" secondItem="contentContainer" secondAttribute="top" id="icon-centerY"/>
+                        <constraint firstItem="icon" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="8" id="icon-leading"/>
                     </constraints>
-                </imageView>
-                <button contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ctaButton">
-                    <rect key="frame" x="0.0" y="617" width="375" height="50"/>
-                    <color key="backgroundColor" red="0.0" green="0.5" blue="1" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
-                    <state key="normal" title="INSTALL">
-                        <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </state>
-                </button>
+                </view>
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
-                <!-- Info Bar Constraints -->
+                <constraint firstItem="contentContainer" firstAttribute="bottom" secondItem="iN0-l3-epB" secondAttribute="bottom" id="container-bottom"/>
+                <constraint firstItem="contentContainer" firstAttribute="height" constant="120" id="container-height"/>
+                <constraint firstItem="contentContainer" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="container-leading"/>
+                <constraint firstAttribute="trailing" secondItem="contentContainer" secondAttribute="trailing" id="container-trailing"/>
                 <constraint firstItem="infoBar" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="infoBar-leading"/>
                 <constraint firstItem="infoBar" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="infoBar-top"/>
                 <constraint firstAttribute="trailing" secondItem="infoBar" secondAttribute="trailing" id="infoBar-trailing"/>
-
-                <!-- Media View Constraints - Positioned below info bar -->
-                <constraint firstItem="mediaView" firstAttribute="top" secondItem="infoBar" secondAttribute="bottom" id="media-top"/>
+                <constraint firstAttribute="bottom" secondItem="mediaView" secondAttribute="bottom" constant="1" id="media-bottom"/>
                 <constraint firstItem="mediaView" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="media-leading"/>
+                <constraint firstItem="mediaView" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" id="media-top"/>
                 <constraint firstAttribute="trailing" secondItem="mediaView" secondAttribute="trailing" id="media-trailing"/>
-                <constraint firstItem="mediaView" firstAttribute="height" relation="greaterThanOrEqual" constant="200" id="media-min-height"/>
-                <constraint firstItem="mediaView" firstAttribute="height" relation="lessThanOrEqual" constant="400" id="media-max-height"/>
-
-                <!-- Content Constraints (positioned below media view) -->
-                <constraint firstItem="icon" firstAttribute="top" secondItem="mediaView" secondAttribute="bottom" constant="16" id="icon-top"/>
-                <constraint firstItem="icon" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" constant="16" id="icon-leading"/>
-                <constraint firstItem="icon" firstAttribute="bottom" secondItem="ctaButton" secondAttribute="top" constant="-16" id="icon-bottom"/>
-
-                <constraint firstItem="headline" firstAttribute="leading" secondItem="icon" secondAttribute="trailing" constant="12" id="headline-leading"/>
-                <constraint firstItem="headline" firstAttribute="top" secondItem="icon" secondAttribute="top" id="headline-top-align"/>
-                <constraint firstAttribute="trailing" secondItem="headline" secondAttribute="trailing" constant="16" id="headline-trailing"/>
-
-                <constraint firstItem="body" firstAttribute="leading" secondItem="headline" secondAttribute="leading" id="body-leading"/>
-                <constraint firstItem="body" firstAttribute="top" secondItem="headline" secondAttribute="bottom" constant="4" id="body-top"/>
-                <constraint firstAttribute="trailing" secondItem="body" secondAttribute="trailing" constant="16" id="body-trailing"/>
-                <constraint firstItem="body" firstAttribute="bottom" secondItem="ctaButton" secondAttribute="top" constant="-16" id="body-bottom"/>
-
-                <constraint firstItem="ctaButton" firstAttribute="top" secondItem="body" secondAttribute="bottom" constant="16" id="cta-top"/>
-                <constraint firstItem="ctaButton" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="cta-leading"/>
-                <constraint firstAttribute="trailing" secondItem="ctaButton" secondAttribute="trailing" id="cta-trailing"/>
-                <constraint firstItem="ctaButton" firstAttribute="height" constant="50" id="cta-height"/>
-                <constraint firstItem="ctaButton" firstAttribute="bottom" secondItem="iN0-l3-epB" secondAttribute="bottom" constant="-16" id="cta-bottom"/>
-
-               </constraints>
-
+            </constraints>
             <connections>
                 <outlet property="bodyView" destination="body" id="body-outlet"/>
                 <outlet property="callToActionView" destination="ctaButton" id="cta-outlet"/>
@@ -111,15 +110,7 @@
                 <outlet property="iconView" destination="icon" id="icon-outlet"/>
                 <outlet property="mediaView" destination="mediaView" id="media-outlet"/>
             </connections>
-            <point key="canvasLocation" x="140" y="19"/>
+            <point key="canvasLocation" x="140" y="18.440779610194905"/>
         </view>
     </objects>
-    <resources>
-        <systemColor name="darkTextColor">
-            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
-        <systemColor name="l">
-            <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
-        </systemColor>
-    </resources>
 </document>

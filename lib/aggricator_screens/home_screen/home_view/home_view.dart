@@ -26,6 +26,7 @@ import '../../referral_screen/referral_provider/referral_provider.dart';
 import '../../settings_screen/settings_view/settings_view.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_card.dart';
+
 ///This widgets help in stopping the build
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -36,15 +37,11 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   HomeProvider? homeProvider;
-  AdMobBannerProvider?  bannerAdsProvider;
-
 
   @override
   void initState() {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
-    bannerAdsProvider!. loadAd320x50MobBanner(bannerAdsProvider!.autoupdate??0, AdSize.banner);
-    bannerAdsProvider!.autoBannerCall();
+
     homeProvider?.isHomeScreen = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppUpdateService.checkForUpdate(context);
@@ -52,17 +49,17 @@ class _HomeViewState extends State<HomeView> {
       homeProvider?.getMobileNumber();
     });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(seconds: 1), () async{
+      Future.delayed(Duration(seconds: 1), () async {
         // checkAndShowPopup();
         SharedPreferences preferences = await SharedPreferences.getInstance();
         String? myReferralLink = preferences.getString("myReferralLink") ?? "N/A";
-        if(myReferralLink != "N/A" && myReferralLink != null && myReferralLink.isNotEmpty) {
+        if (myReferralLink != "N/A" && myReferralLink != null && myReferralLink.isNotEmpty) {
           DailyDialog.showReferDialog(context: context);
         } else {
-          context.read<ReferralProvider>().getReferralStats(context).then((value){
+          context.read<ReferralProvider>().getReferralStats(context).then((value) {
             Future.delayed(Duration(seconds: 1), () {
               DailyDialog.showReferDialog(context: context);
-            } );
+            });
           });
         }
       });
@@ -233,35 +230,35 @@ class _HomeViewState extends State<HomeView> {
                     ),
                 ],
               ),
-              bottomNavigationBar: Container(
-                height: 56,
-                width: MediaQuery.of(context).size.width,
-                color: Colors.grey.shade300,
-                alignment: Alignment.center,
-                child: Consumer<AdMobBannerProvider>(
-                  builder: (_, adMobBannerProvider, __) {
-                    final currentIndex = adMobBannerProvider.currentPageIndex; // You need to track current page index
-                    final adsList = adMobBannerProvider.adsBanner320x50.values
-                        .where((ad) => ad != null)
-                        .toList();
+              bottomNavigationBar: Consumer<AdMobBannerProvider>(
+                builder: (_, adMobBannerProvider, __) {
+                  final currentIndex = adMobBannerProvider.currentPageIndex;
+                  final adsList = adMobBannerProvider.adsBanner320x50.values
+                      .where((ad) => ad != null)
+                      .toList();
 
-                    // Don't show ad if current position is multiple of 5 or no ads available
-                    if (adsList.isEmpty || (currentIndex + 1) % 5 == 0) {
-                      return const SizedBox.shrink();
-                    }
+                  // Hide the bottom bar entirely if empty or every 5th page
+                  if (adsList.isEmpty || (currentIndex + 1) % 5 == 0) {
+                    return const SizedBox.shrink();
+                  }
 
-                    return Container(
+                  return Container(
+                    height: 56,
+                    width: MediaQuery.of(context).size.width,
+                    color: Colors.grey.shade300,
+                    alignment: Alignment.center,
+                    child: Container(
                       height: 56,
                       width: 320,
                       color: Colors.grey.shade300,
                       alignment: Alignment.center,
                       child: Padding(
                         padding: const EdgeInsets.symmetric(vertical: 2.0),
-                        child: Center(child: AdWidget(ad: adsList.first)),
+                        child: Center(child: AdWidget(ad: adsList.last)),
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                },
               ),
 
             );
@@ -271,82 +268,82 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
-  // void checkAndShowPopup() {
-  //   final referralProvider = context.read<ReferralProvider>();
-  //   final int downloads = int.tryParse(referralProvider.referralData['downloads']?.toString() ?? "0") ?? 0;
-  //
-  //   if (downloads < 10) {
-  //     showAdPopup(context);
-  //   }
-  // }
-  //
-  // void showAdPopup(BuildContext context, ) async{
-  //   Timer? closeTimer = Timer(Duration(seconds: 5), () {
-  //     if (!closed) {
-  //       Navigator.of(context).pop(true);
-  //     }
-  //   });
-  //    closed = await showDialog(
-  //       context: context,
-  //       barrierDismissible: false,
-  //       builder: (BuildContext context) {
-  //         return Dialog(
-  //             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-  //             insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 180),
-  //             backgroundColor: Colors.transparent,
-  //             child: Stack(
-  //               children: [
-  //                 Container(
-  //                   width: 335,
-  //                   height: 335,
-  //                   decoration: BoxDecoration(
-  //                     color: Colors.transparent,
-  //                     borderRadius: BorderRadius.circular(16),
-  //                   ),
-  //                   child: Padding(
-  //                     padding: const EdgeInsets.only(right: 10.0,top: 10),
-  //                     child: ClipRRect(
-  //                       borderRadius: BorderRadius.circular(16),
-  //                       child: InkWell(
-  //                         onTap: (){
-  //                           closeTimer.cancel();
-  //                           Navigator.pop(context);
-  //                           Navigator.push(context, MaterialPageRoute(builder: (context) => ReferEarn(),));
-  //                         },
-  //                         child: Image.asset(
-  //                           'assets/svg/ios_ref.jpeg',
-  //                           fit: BoxFit.cover,
-  //                         ),
-  //                       ),
-  //                     ),
-  //                   ),
-  //
-  //                 ),
-  //                 Positioned(
-  //                     top: 1,
-  //                     right: 0,
-  //                     child: InkWell(
-  //                       onTap: (){
-  //                         Navigator.pop(context, true);
-  //                       },
-  //                       child: Container(
-  //                         padding: EdgeInsets.all(6),
-  //                         decoration: BoxDecoration(
-  //                             shape: BoxShape.circle,
-  //                             color: Colors.grey
-  //                         ),
-  //                         child: Icon(
-  //                           Icons.close,
-  //                           color: Colors.black,
-  //                           size: 15,
-  //                         ),
-  //                       ),
-  //                     )
-  //                 ),
-  //               ],
-  //             ),
-  //         );
-  //       }
-  //   );
-  // }
+// void checkAndShowPopup() {
+//   final referralProvider = context.read<ReferralProvider>();
+//   final int downloads = int.tryParse(referralProvider.referralData['downloads']?.toString() ?? "0") ?? 0;
+//
+//   if (downloads < 10) {
+//     showAdPopup(context);
+//   }
+// }
+//
+// void showAdPopup(BuildContext context, ) async{
+//   Timer? closeTimer = Timer(Duration(seconds: 5), () {
+//     if (!closed) {
+//       Navigator.of(context).pop(true);
+//     }
+//   });
+//    closed = await showDialog(
+//       context: context,
+//       barrierDismissible: false,
+//       builder: (BuildContext context) {
+//         return Dialog(
+//             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//             insetPadding: EdgeInsets.symmetric(horizontal: 40, vertical: 180),
+//             backgroundColor: Colors.transparent,
+//             child: Stack(
+//               children: [
+//                 Container(
+//                   width: 335,
+//                   height: 335,
+//                   decoration: BoxDecoration(
+//                     color: Colors.transparent,
+//                     borderRadius: BorderRadius.circular(16),
+//                   ),
+//                   child: Padding(
+//                     padding: const EdgeInsets.only(right: 10.0,top: 10),
+//                     child: ClipRRect(
+//                       borderRadius: BorderRadius.circular(16),
+//                       child: InkWell(
+//                         onTap: (){
+//                           closeTimer.cancel();
+//                           Navigator.pop(context);
+//                           Navigator.push(context, MaterialPageRoute(builder: (context) => ReferEarn(),));
+//                         },
+//                         child: Image.asset(
+//                           'assets/svg/ios_ref.jpeg',
+//                           fit: BoxFit.cover,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//
+//                 ),
+//                 Positioned(
+//                     top: 1,
+//                     right: 0,
+//                     child: InkWell(
+//                       onTap: (){
+//                         Navigator.pop(context, true);
+//                       },
+//                       child: Container(
+//                         padding: EdgeInsets.all(6),
+//                         decoration: BoxDecoration(
+//                             shape: BoxShape.circle,
+//                             color: Colors.grey
+//                         ),
+//                         child: Icon(
+//                           Icons.close,
+//                           color: Colors.black,
+//                           size: 15,
+//                         ),
+//                       ),
+//                     )
+//                 ),
+//               ],
+//             ),
+//         );
+//       }
+//   );
+// }
 }

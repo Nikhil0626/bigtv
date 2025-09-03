@@ -47,9 +47,6 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
   @override
   void initState() {
-    AdMobBannerProvider  bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
-    bannerAdsProvider.adsLoad();
-
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
     autoIndex = 0;
     super.initState();
@@ -58,7 +55,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
     Future.delayed(
       Duration(seconds: 10),
-          () {
+      () {
         log("Hello Siva ${context.read<AdMobBannerProvider>().ads}");
       },
     );
@@ -83,160 +80,163 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                     ),
                     child: context.read<HomeProvider>().getAllPostList.isEmpty
                         ? Center(
-                      child: AppNoData(),
-                    )
+                            child: AppNoData(),
+                          )
                         : PageView.builder(
-                      physics: const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
-                      controller: homeProvider.pageController!,
-                      scrollDirection: Axis.vertical,
-                      itemCount: homeProvider.getAllPostList.length,
-                      onPageChanged: (value) {
-                        final adKeys = context.read<AdMobBannerProvider>().ads.length;
-                        context.read<AdMobBannerProvider>().changePageIndex(value);
+                            physics: const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
+                            controller: homeProvider.pageController!,
+                            scrollDirection: Axis.vertical,
+                            itemCount: homeProvider.getAllPostList.length,
+                            onPageChanged: (value) {
+                              final adKeys = context.read<AdMobBannerProvider>().ads.length;
+                              context.read<AdMobBannerProvider>().changePageIndex(value);
 
-                        log(" Last Index of ads data $adKeys ----- $value --- ${adKeys * 5}");
-                        if (value == (adKeys * 5)) {
-                          int? lastKey = context.read<AdMobBannerProvider>().ads.keys.isNotEmpty ? context.read<AdMobBannerProvider>().ads.keys.last : adKeys;
-                          context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
-                          context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
-                          context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
-                          context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
-
-                        } else if (value == 3 && context.read<AdMobBannerProvider>().ads.isEmpty) {
-                          int? lastKey = 0;
-                          context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
-                          context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
-                          context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
-                          context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
-
-                        }else if (value == 5 && context.read<AdMobBannerProvider>().ads.isEmpty) {
-                          int? lastKey = 0;
-                          context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
-                          context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
-                          context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
-                          context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
-
-                        }
-
-                        // BannerAdsProvider().disposeAllAds();
-                        log("IndividualPostView  $autoIndex--- $value");
-                        if (homeProvider.isBottomEnable) {
-                          homeProvider.pageChange(isValue: false);
-                        }
-                        if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
-                          Future.delayed(
-                            Duration(milliseconds: 2000),
-                                () {
-                              log("IndividualPostView dddd $autoIndex--- $value ==== ");
-                              homeProvider.aiTagDataLoaded(false);
-                              homeProvider.setSelectedTagId(0);
-                              homeProvider.getAllPost(postIds: "0");
-                            },
-                          );
-                        }
-
-                        context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
-                        autoIndex = value;
-
-                        final now = DateTime.now();
-                        final duration = now.difference(_pageStartTime ?? now);
-
-                        AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
-
-                        setState(() {
-                          _pageStartTime = now;
-                        });
-                      },
-                      itemBuilder: (context, index) {
-                        if ((index + 1) % 5 == 0) {
-                          int adIndex = ((index + 1) ~/ 5) - 1;
-                          log("current index new view $index --- $adIndex");
-                          return Consumer<AdMobBannerProvider>(
-                            builder: (context, adMobBannerProvider, child) {
-                              final adsList = adMobBannerProvider.ads.values.toList();
-                              final adsLoadedList = adMobBannerProvider.adsLoaded.values.toList();
-
-                              if (adIndex < adsList.length) {
-                                final ad = adsList[adIndex];
-                                final adList = adsLoadedList[adIndex];
-                                if (ad != null) {
-                                  if (ad is BannerAd) {
-                                    return KeepAlivePage(
-                                      child: Container(
-                                        color: Colors.grey[200],
-                                        alignment: Alignment.center,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Expanded(
-                                              flex: 1,
-                                              child:  adList
-                                                  ? Center(
-                                                child: AdWidget(ad: ad),
-                                              )
-                                                  : Shimmer.fromColors(
-                                                baseColor: Colors.grey[300]!,
-                                                highlightColor: Colors.grey[100]!,
-                                                child: Container(
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 1,
-                                              child: buildRecommendedNews(context, homeProvider),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                  else if (ad is NativeAd) {
-                                    return KeepAlivePage(
-                                      child: Container(
-                                        color: Colors.white,
-                                        width: MediaQuery.of(context).size.width,
-                                        height: MediaQuery.of(context).size.height,
-                                        child: AdWidget(ad: ad),
-                                      ),
-                                    );
-                                  } else if (ad is AdManagerBannerAd) {
-                                    return KeepAlivePage(
-
-                                      child: Container(
-                                        color: Colors.grey[200],
-                                        alignment: Alignment.center,
-                                        child: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: [
-                                            Expanded(
-                                              flex: 1,
-                                              child: Center(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.only(bottom:20),
-                                                  child: AdWidget(ad: ad),
-                                                ),
-                                              ),
-                                            ),
-                                            Expanded(
-                                              flex: 1,
-                                              child: buildRecommendedNews(context, homeProvider),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  }
-
-
-                                }
+                              log(" Last Index of ads data $adKeys ----- $value --- ${adKeys * 5} ---${context.read<AdMobBannerProvider>().ads}");
+                              if (value == (adKeys * 5)) {
+                                int? lastKey = context.read<AdMobBannerProvider>().ads.keys.isNotEmpty ? context.read<AdMobBannerProvider>().ads.keys.last : adKeys;
+                                context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
+                              } else if (value == 3 && context.read<AdMobBannerProvider>().ads.isEmpty) {
+                                int? lastKey = 0;
+                                context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
+                              } else if (value == 5 && context.read<AdMobBannerProvider>().ads.isEmpty) {
+                                int? lastKey = 0;
+                                context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
                               }
 
-                              // Fallback if no ad is available for this slot
+                              // BannerAdsProvider().disposeAllAds();
+                              log("IndividualPostView  $autoIndex--- $value");
+                              if (homeProvider.isBottomEnable) {
+                                homeProvider.pageChange(isValue: false);
+                              }
+                              if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
+                                Future.delayed(
+                                  Duration(milliseconds: 2000),
+                                  () {
+                                    log("IndividualPostView dddd $autoIndex--- $value ==== ");
+                                    homeProvider.aiTagDataLoaded(false);
+                                    homeProvider.setSelectedTagId(0);
+                                    homeProvider.getAllPost(postIds: "0");
+                                  },
+                                );
+                              }
+
+                              context.read<HomeProvider>().flipEvent('news', homeProvider.getAllPostList[value]['id'], value > autoIndex ? true : false);
+                              autoIndex = value;
+
+                              final now = DateTime.now();
+                              final duration = now.difference(_pageStartTime ?? now);
+
+                              AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
+
+                              setState(() {
+                                _pageStartTime = now;
+                              });
+                            },
+                            itemBuilder: (context, index) {
+                              if ((index + 1) % 5 == 0) {
+                                int adIndex = ((index + 1) ~/ 5) - 1;
+                                log("current index new view $index --- $adIndex");
+                                return Consumer<AdMobBannerProvider>(
+                                  builder: (context, adMobBannerProvider, child) {
+                                    final adsList = adMobBannerProvider.ads.values.toList();
+
+                                    if (adIndex < adsList.length) {
+                                      final ad = adsList[adIndex];
+                                      if (ad != null) {
+                                        if (ad is BannerAd) {
+
+                                          return KeepAlivePage(
+                                            child: Container(
+                                              color: Colors.grey[200],
+                                              alignment: Alignment.center,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                children: [
+                                                  Expanded(
+                                                      flex: 1,
+                                                      child: Center(
+                                                        child: Container(
+                                                          height: 250,
+                                                          width: 300,
+                                                          alignment: Alignment.center,
+                                                          child: AdWidget(ad: ad),
+                                                        ),
+                                                      )),
+                                                  Expanded(
+                                                    flex: 1,
+                                                    child: buildRecommendedNews(context, homeProvider),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        } else if (ad is NativeAd) {
+                                          return KeepAlivePage(
+                                            child: Container(
+                                              color: Colors.white,
+                                              width: MediaQuery.of(context).size.width,
+                                              height: MediaQuery.of(context).size.height,
+                                              child: AdWidget(ad: ad),
+                                            ),
+                                          );
+                                        } else if (ad is AdManagerBannerAd) {
+                                          return KeepAlivePage(
+                                            child: Container(
+                                              color: Colors.grey[200],
+                                              alignment: Alignment.center,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
+                                                mainAxisAlignment: MainAxisAlignment.center,
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                children: [
+                                                  Expanded(
+                                                      flex: 1,
+                                                      child: Center(
+                                                        child: Container(
+                                                          height: 250,
+                                                          width: 300,
+                                                          alignment: Alignment.center,
+                                                          child: AdWidget(ad: ad),
+                                                        ),
+                                                      )),
+                                                  Expanded(
+                                                    flex: 1,
+                                                    child: buildRecommendedNews(context, homeProvider),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      }
+                                    }
+
+                                    // Fallback if no ad is available for this slot
+                                    return Container(
+                                      color: Colors.white,
+                                      child: MainScreenBytView(
+                                        article: homeProvider.getAllPostList[index],
+                                        pageController: homeProvider.pageController!,
+                                        length: homeProvider.getAllPostList.length,
+                                        index: index,
+                                        aiTagName: "",
+                                      ),
+                                    );
+                                  },
+                                );
+                              }
+
                               return Container(
                                 color: Colors.white,
                                 child: MainScreenBytView(
@@ -248,21 +248,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                 ),
                               );
                             },
-                          );
-                        }
-
-                        return Container(
-                          color: Colors.white,
-                          child: MainScreenBytView(
-                            article: homeProvider.getAllPostList[index],
-                            pageController: homeProvider.pageController!,
-                            length: homeProvider.getAllPostList.length,
-                            index: index,
-                            aiTagName: "",
                           ),
-                        );
-                      },
-                    ),
                   ),
                 ),
               ),
@@ -293,7 +279,6 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
           );
         },
       ),
-
     );
   }
 
@@ -370,15 +355,15 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                 index == 0
                                     ? SvgPicture.asset("assets/svg/like.svg", height: 16, width: 16)
                                     : index == 2
-                                    ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
-                                    : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
+                                        ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
+                                        : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
                                 width(width: 6),
                                 Text(
                                   index == 0
                                       ? "టాప్ లైక్స్"
                                       : index == 2
-                                      ? "టాప్ షేర్‌డ్"
-                                      : "టాప్ వ్యూడ్",
+                                          ? "టాప్ షేర్‌డ్"
+                                          : "టాప్ వ్యూడ్",
                                   style: fontStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textColor),
                                 ),
                               ],

@@ -37,16 +37,16 @@ class AdMobBannerProvider with ChangeNotifier {
   }
 
   /// live ad units
-  // final String adMobBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId;
-  // final String adManagerBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId;
-  // final String adMobNativeId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId;
-  // final String adManagerNativeId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId;
+  final String adMobBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId;
+  final String adManagerBannerId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId;
+  final String adMobNativeId = mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId;
+  final String adManagerNativeId = mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId;
 
   /// test ad units
-  final String adMobBannerId = "ca-app-pub-3940256099942544/6300978111";
-  final String adManagerBannerId = "/6499/example/banner";
-  final String adMobNativeId = "ca-app-pub-3940256099942544/2247696110";
-  final String adManagerNativeId = "/6499/example/native";
+  // final String adMobBannerId = "ca-app-pub-3940256099942544/6300978111";
+  // final String adManagerBannerId = "/6499/example/banner";
+  // final String adMobNativeId = "ca-app-pub-3940256099942544/2247696110";
+  // final String adManagerNativeId = "/6499/example/native";
 
   int? getIndex() {
     int? lastKey = ads.keys.isNotEmpty ? ads.keys.last : null;
@@ -65,7 +65,7 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
 
       final ad = BannerAd(
-        adUnitId: adMobBannerId,
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId,
         size: size,
         request: AdRequest(
           keywords: ['vertical'], // Optional content URL for better targeting
@@ -135,7 +135,7 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
 
       final ad = AdManagerBannerAd(
-        adUnitId: adManagerBannerId, // ✅ Ad Manager test ad unit
+        adUnitId:mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId, // ✅ Ad Manager test ad unit
         sizes: [AdSize.mediumRectangle], // ✅ Ad Manager expects a list
         request: AdManagerAdRequest(), // ✅ Correct request type
         listener: AdManagerBannerAdListener(
@@ -147,6 +147,7 @@ class AdMobBannerProvider with ChangeNotifier {
             responseReceived = DateTime.now();
             adRendered = DateTime.now();
             debugPrint('✅ Ad loaded at $index (${size.width}x${size.height})');
+
             notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
@@ -175,7 +176,7 @@ class AdMobBannerProvider with ChangeNotifier {
   }
 
   Future<void> loadAdMobNative(int index, AdSize mediumRectangle) async {
-    log(" Load AdMob Native $adMobNativeId -- $index ");
+    log(" Load AdMob Native ${ mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId} -- $index ");
     try {
       requestInitiated = DateTime.now();
 
@@ -186,7 +187,7 @@ class AdMobBannerProvider with ChangeNotifier {
       adsLoaded[index] = false;
       adErrors.remove(index);
       final ad = NativeAd(
-        adUnitId: adMobNativeId,
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId,
         nativeAdOptions: NativeAdOptions(
           mediaAspectRatio: MediaAspectRatio.any,
         ),
@@ -200,7 +201,8 @@ class AdMobBannerProvider with ChangeNotifier {
               ads[index] = ad as NativeAd;
               adsLoaded[index] = true;
             }
-
+            ads.removeWhere((key, value) => value == null);
+            notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
@@ -241,7 +243,7 @@ class AdMobBannerProvider with ChangeNotifier {
         mediaAspectRatio: MediaAspectRatio.any,
       );
       final ad = NativeAd(
-        adUnitId: adManagerNativeId,
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId,
         nativeAdOptions: nativeAdOptions,
         factoryId: 'adFactoryExample',
         listener: NativeAdListener(
@@ -253,7 +255,8 @@ class AdMobBannerProvider with ChangeNotifier {
               ads[index] = ad as NativeAd;
               adsLoaded[index] = true;
             }
-
+            ads.removeWhere((key, value) => value == null);
+            notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
@@ -292,7 +295,7 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors320x50.remove(index);
 
       final ad = BannerAd(
-        adUnitId: adMobBannerId, // Make sure this is a AdMob unit ID (starts with ca-app-pub-)
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId, // Make sure this is a AdMob unit ID (starts with ca-app-pub-)
         size: size,
         request: AdRequest(),
         listener: BannerAdListener(
@@ -301,6 +304,7 @@ class AdMobBannerProvider with ChangeNotifier {
             adsBanner320x50[index] = ad as BannerAd;
             adsLoaded320x50[index] = true;
             debugPrint('✅ AdMob 320x50 Ad loaded successfully at index $index');
+            ads.removeWhere((key, value) => value == null);
             notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
@@ -342,7 +346,7 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors320x50.remove(index);
 
       final ad = AdManagerBannerAd(
-        adUnitId: adManagerBannerId, // Make sure this is an Ad Manager unit ID (/...)
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId, // Make sure this is an Ad Manager unit ID (/...)
         sizes: [size],
         request: AdManagerAdRequest(),
         listener: AdManagerBannerAdListener(
@@ -351,6 +355,7 @@ class AdMobBannerProvider with ChangeNotifier {
             adsBanner320x50[index] = ad as AdManagerBannerAd;
             adsLoaded320x50[index] = true;
             debugPrint('✅ Ad Manager 320x50 Ad loaded successfully at index $index');
+            ads.removeWhere((key, value) => value == null);
             notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
@@ -423,6 +428,11 @@ class AdMobBannerProvider with ChangeNotifier {
     loadAdMobNative(3, AdSize.mediumRectangle);
     loadAdManagerNative(4, AdSize.mediumRectangle);
   }
+}
+
+
+void adsClear(){
+
 }
 
 class AdLatencyData {
