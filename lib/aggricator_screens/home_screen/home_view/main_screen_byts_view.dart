@@ -132,21 +132,21 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     title: '',
                                   ),
                                 )
-                              // : widget.article['type'] == "GoogleAds"
-                              //     ? Platform.isIOS
-                              //         ? KeepAlivePage(keepAlive: true, child: IosAdsWidgetScreen(article: widget.article))
-                              //         : KeepAlivePage(
-                              //             keepAlive: true,
-                              //             child: Container(
-                              //               color: Colors.white,
-                              //               child: Padding(
-                              //                 padding: const EdgeInsets.all(8.0),
-                              //                 child: FullScreenNativeAd(
-                              //                   article: widget.article,
-                              //                 ),
-                              //               ),
-                              //             ),
-                              //           )
+                              : widget.article['type'] == "GoogleAds"
+                                  ? Platform.isIOS
+                                      ? KeepAlivePage(keepAlive: true, child: IosAdsWidgetScreen(article: widget.article))
+                                      : KeepAlivePage(
+                                          keepAlive: true,
+                                          child: Container(
+                                            color: Colors.white,
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(8.0),
+                                              child: FullScreenNativeAd(
+                                                article: widget.article,
+                                              ),
+                                            ),
+                                          ),
+                                        )
                                   : widget.article['type'] == "Reel"
                                       ? FullStandardVideoView(
                                           rellData: widget.article,
@@ -495,12 +495,12 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 crossAxisAlignment: CrossAxisAlignment.start,
                                                                 children: [
                                                                   Padding(
-                                                                    padding: const EdgeInsets.symmetric(horizontal: 5.0, vertical: 0),
+                                                                    padding: const EdgeInsets.symmetric(horizontal: 0.0, vertical: 0),
                                                                     child: Row(
                                                                       children: [
                                                                         Container(
                                                                           height: 20,
-                                                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                                                                           decoration: BoxDecoration(color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white
                                                                               // borderRadius: BorderRadius.circular(20),
                                                                               ),
@@ -532,8 +532,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                         Spacer(),
                                                                         Container(
                                                                           height: 40,
-                                                                          width: 120,
-                                                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
+                                                                          width: 90,
+                                                                          padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                                                                           decoration: BoxDecoration(
                                                                             color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
                                                                             borderRadius: BorderRadius.circular(20),

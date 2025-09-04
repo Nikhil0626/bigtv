@@ -11,7 +11,6 @@ import '../../utils/app_toasts.dart';
 import '../events_data/event_repo.dart';
 
 class PollProvider with ChangeNotifier {
-
   final TextEditingController commentController = TextEditingController();
   int? userVotedOptionId;
   int? tempSelectedOptionId;
@@ -67,11 +66,9 @@ class PollProvider with ChangeNotifier {
   }
 
   Future<void> storePostInHive(artical) async {
-
     final box = Hive.box('pollBox');
     final postId = artical['id'];
     if (postId != null) {
-
       List<dynamic> storedPosts = box.get('pollPosts', defaultValue: []);
       final alreadyExists = storedPosts.any((post) => post['id'] == postId);
 
@@ -123,15 +120,14 @@ class PollProvider with ChangeNotifier {
         }
       }
 
-
       storedPosts[postIndex] = post;
       await box.put('pollPosts', storedPosts);
 
       // Update UI state
       // setState(() {
-        localArticle = post;
-        userVotedOptionId = optionId;
-        commentController.text ="";
+      localArticle = post;
+      userVotedOptionId = optionId;
+      commentController.text = "";
       // });
       notifyListeners();
     }
@@ -155,8 +151,7 @@ class PollProvider with ChangeNotifier {
       Response response = await PollRepo().submitPolls(body);
       log("Response: ${response.data}");
       final formatter = DateFormat("yyyy-MM-dd'T'HH:mm:ss");
-      if (response.statusCode == 201) {
-
+      if (response.statusCode == 200) {
         final commentBody = {
           "userName": userName ?? "user",
           "userPhoto": null,
@@ -164,8 +159,7 @@ class PollProvider with ChangeNotifier {
           "createdAt": formatter.format(DateTime.now().add(const Duration(hours: -5, minutes: -30))),
         };
 
-
-          updatePollVoteInHive(optionId: pollsOptions, postId: postId,commentBody: commentController.text.isNotEmpty?commentBody:{});
+        updatePollVoteInHive(optionId: pollsOptions, postId: postId, commentBody: commentController.text.isNotEmpty ? commentBody : {});
 
         CustomToast.showSuccessToast(msg: "Poll submitted successfully!");
         EventRepo().addEvent({
@@ -248,7 +242,8 @@ class PollProvider with ChangeNotifier {
 //
   Map<dynamic, dynamic> getAllPollCommentsList = {};
 
-bool isLoading = false;
+  bool isLoading = false;
+
   Future getAllPollComments(String postId, name) async {
     isLoading = true;
     try {
@@ -261,7 +256,7 @@ bool isLoading = false;
       }
     } catch (e, st) {
       log("Hello siva catch $e --- $st");
-    }finally{
+    } finally {
       isLoading = false;
       notifyListeners();
     }

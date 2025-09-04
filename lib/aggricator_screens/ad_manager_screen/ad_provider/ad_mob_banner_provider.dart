@@ -518,7 +518,8 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
 
       final ad = BannerAd(
-        adUnitId: adMobBannerId,
+        // adUnitId: adMobBannerId,
+        adUnitId: "ca-app-pub-3940256099942544/6300978111",
         size: size,
         request: AdRequest(),
         listener: BannerAdListener(

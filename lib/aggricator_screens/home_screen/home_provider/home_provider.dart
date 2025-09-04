@@ -140,14 +140,16 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getIndividualPost(postId, {bool isAds = false, bool isLink = false}) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
     log("getIndividualPost ${postId}");
     if (isAds != true) {
       getAllPostList = [];
     }
     isPostLoading = true;
-    // notifyListeners();
+    String userId = preferences.getString("userId")??"0";
+    Map<String, dynamic> body = {"user_id": userId.toString()};
     try {
-      Response response = await HomeRepo().getSinglePost(postId);
+      Response response = await HomeRepo().getSinglePost(body,postId);
       log(response.data.toString());
       if (response.statusCode == 200) {
         if (isAds == false) {
@@ -267,7 +269,7 @@ class HomeProvider extends ChangeNotifier {
     List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
-    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": false};
+    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true};
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);

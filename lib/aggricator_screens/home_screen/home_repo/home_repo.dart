@@ -6,9 +6,9 @@ import '../../../services/base_urls.dart';
 import '../../../utils/app_enums.dart';
 
 class HomeRepo extends BaseService{
-  Future getSinglePost(queryParams) async{
+  Future getSinglePost(body,queryParams) async{
 
-    Response response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: "${BaseUrls.getPostById}/$queryParams",method: RequestType.get,);
+    Response response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: "${BaseUrls.getPostById}/$queryParams",method: RequestType.get,queryParameters: body);
 
     return response;
   }

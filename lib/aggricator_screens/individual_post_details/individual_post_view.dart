@@ -53,7 +53,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
 
   @override
   void initState() {
-    log("is come from lin----k${widget.postId}");
+    log("is come from lin----k ${widget.postId}");
     getWebData();
     context.read<HomeProvider>().getIndividualPost(widget.postId, isAds: true);
     super.initState();

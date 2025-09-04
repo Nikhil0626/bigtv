@@ -52,6 +52,7 @@ class _MovieRatingsState extends State<MovieRatings> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
+            flex: 4,
             child: Stack(
               children: [
                 InkWell(
@@ -124,179 +125,198 @@ class _MovieRatingsState extends State<MovieRatings> {
           ),
 
 
-          Container(
-            height: MediaQuery.of(context).size.height*.52,
-            width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(20),
-                topRight: Radius.circular(20),
+          Expanded(
+            flex: 7,
+            child: Container(
+              // height: MediaQuery.of(context).size.height*.52,
+              width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(20),
+                  topRight: Radius.circular(20),
+                ),
               ),
-            ),
-            child: ListView(
-              physics: NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              children: [
-                height(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 6),
-                  child: Row(
-                    children: [
-                      Text.rich(
-                        TextSpan(
+              child: ListView(
+                physics: NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                children: [
+                  height(height: 10),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0,vertical: 6),
+                    child: Row(
+                      children: [
+                        Text.rich(
+                          TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Chota ",
+                                style: fontStyle(
+                                  fontSize: Platform.isIOS ? 16 : 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              TextSpan(
+                                text: "News",
+                                style: fontStyle(
+                                  fontSize: Platform.isIOS ? 16 : 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xff00A8FF),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Spacer(),
+                        InkWell(
+                          onTap: () async {
+                            SharedPreferences sp = await SharedPreferences.getInstance();
+                            String? userId = sp.getString("userId");
+
+                            sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
+
+                            if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                              try {
+                                final image = await adsScreenshotController.capture(
+                                  pixelRatio: 2.0,
+                                );
+                                if (image != null) {
+                                  final directory = await getTemporaryDirectory();
+                                  final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                  final imageFile = File(imagePath);
+                                  await imageFile.writeAsBytes(image);
+
+                                  Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                                } else {
+                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                }
+                              } catch (e) {
+                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                              }
+                            }
+                            EventRepo().addEvent({
+                              "share": "news",
+                              "postId": widget.article['id'].toString(),
+                              "createAt": DateTime.now().toString(),
+                              "postTitle": widget.article['title'].toString()
+                            }, "shared_article");
+                          },
+                          child: SizedBox(
+                            width: 24,
+                            child: SvgPicture.asset(
+                              "assets/svg/share.svg",
+                              height: 18,
+                              width: 18,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  height(height: 10),
+                  Container(
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      color: AppColors.cardBackgroundColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            TextSpan(
-                              text: "Chota ",
-                              style: fontStyle(
-                                fontSize: Platform.isIOS ? 16 : 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                              ),
-                            ),
-                            TextSpan(
-                              text: "News",
-                              style: fontStyle(
-                                fontSize: Platform.isIOS ? 16 : 14,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xff00A8FF),
-                              ),
-                            ),
+                            ratingBlock("Chota Meter", widget.article['chotaMeter']),
+                            ratingBlock("Critic Rating", widget.article['chotarating']),
                           ],
                         ),
-                      ),
-                      Spacer(),
-                      InkWell(
-                        onTap: () async {
-                          SharedPreferences sp = await SharedPreferences.getInstance();
-                          String? userId = sp.getString("userId");
-
-                          sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
-
-                          if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
-                            try {
-                              final image = await adsScreenshotController.capture(
-                                pixelRatio: 2.0,
-                              );
-                              if (image != null) {
-                                final directory = await getTemporaryDirectory();
-                                final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                final imageFile = File(imagePath);
-                                await imageFile.writeAsBytes(image);
-
-                                Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
-                              } else {
-                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                              }
-                            } catch (e) {
-                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                            }
-                          }
-                          EventRepo().addEvent({
-                            "share": "news",
-                            "postId": widget.article['id'].toString(),
-                            "createAt": DateTime.now().toString(),
-                            "postTitle": widget.article['title'].toString()
-                          }, "shared_article");
-                        },
-                        child: SizedBox(
-                          width: 24,
-                          child: SvgPicture.asset(
-                            "assets/svg/share.svg",
-                            height: 18,
-                            width: 18,
-                            color: Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                height(height: 10),
-                Container(
-                  width: MediaQuery.of(context).size.width,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey.shade300),
-                    color: AppColors.cardBackgroundColor,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          ratingBlock("Chota Meter", widget.article['chotaMeter']),
-                          ratingBlock("Critic Rating", widget.article['chotarating']),
-                        ],
-                      ),
-                      if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty) Divider(),
-                      height(height: 4),
-                      if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty)
-                        SizedBox(
-                          height: widget.article['externalRatings'].length * 30.0, // approx height per item
-                          child: ListView.builder(
-                            itemCount: widget.article['externalRatings'].length,
-                            physics: NeverScrollableScrollPhysics(), // prevent scroll inside Column
-                            itemBuilder: (context, index) {
-                              final rating = widget.article['externalRatings'][index];
-                              return Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        "${rating['platform_name']}",
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                        if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty) Divider(),
+                        height(height: 4),
+                        if (widget.article['externalRatings'] != null && widget.article['externalRatings'] is List && widget.article['externalRatings'].isNotEmpty)
+                          SizedBox(
+                            height: widget.article['externalRatings'].length * 30.0, // approx height per item
+                            child: ListView.builder(
+                              itemCount: widget.article['externalRatings'].length,
+                              physics: NeverScrollableScrollPhysics(), // prevent scroll inside Column
+                              itemBuilder: (context, index) {
+                                final rating = widget.article['externalRatings'][index];
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          "${rating['platform_name']}",
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                        ),
                                       ),
-                                    ),
-                                    SizedBox(
-                                      width: 80,
-                                      child: Row(
-                                        children: [
-                                          Icon(Icons.star, size: 16, color: AppColors.ratingColor),
-                                          width(width: 10),
-                                          Text(
-                                            "${rating['platform_rating']}",
-                                            style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                      SizedBox(
+                                        width: 80,
+                                        child: Row(
+                                          children: [
+                                            Icon(Icons.star, size: 16, color: AppColors.ratingColor),
+                                            width(width: 10),
+                                            Text(
+                                              "${rating['platform_rating']}",
+                                              style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  height(height: 10),
+                  Text(widget.article['title'], maxLines: 2, overflow: TextOverflow.ellipsis, style: fontStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                  height(height: 10),
+                  Consumer<RatingProvider>(builder: (_, ratingProvider, __) {
+                    return Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: List.generate(5, (index) {
+                            return (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
+                                ? GestureDetector(
+                                    onTap: () {
+                                      FocusScope.of(context).unfocus(); // dismiss keyboard if open
+                                      ratingProvider.ratingUpdate(index + 1, widget.article['id']);
+                                      // ratingProvider.ratingUpdate(index + 1, widget.article['id']);
+                                    },
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        if (index < ratingProvider.getPostRating(widget.article['id']) )
+                                          Icon(
+                                            Icons.star,
+                                            color: AppColors.ratingColor,
+                                            size: 36,
                                           ),
-                                        ],
-                                      ),
+                                        Icon(
+                                          Icons.star_outline_outlined,
+                                          color: index < ratingProvider.getPostRating(widget.article['id'])  ? AppColors.ratingColor : Colors.grey,
+                                          size: 36,
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-                height(height: 10),
-                Text(widget.article['title'], maxLines: 2, overflow: TextOverflow.ellipsis, style: fontStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-                height(height: 10),
-                Consumer<RatingProvider>(builder: (_, ratingProvider, __) {
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(5, (index) {
-                          return (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
-                              ? GestureDetector(
-                                  onTap: () {
-                                    FocusScope.of(context).unfocus(); // dismiss keyboard if open
-                                    ratingProvider.ratingUpdate(index + 1, widget.article['id']);
-                                    // ratingProvider.ratingUpdate(index + 1, widget.article['id']);
-                                  },
-                                  child: Stack(
+                                  )
+                                : Stack(
                                     alignment: Alignment.center,
                                     children: [
                                       if (index < ratingProvider.getPostRating(widget.article['id']) )
@@ -311,108 +331,92 @@ class _MovieRatingsState extends State<MovieRatings> {
                                         size: 36,
                                       ),
                                     ],
-                                  ),
-                                )
-                              : Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    if (index < ratingProvider.getPostRating(widget.article['id']) )
-                                      Icon(
-                                        Icons.star,
-                                        color: AppColors.ratingColor,
-                                        size: 36,
-                                      ),
-                                    Icon(
-                                      Icons.star_outline_outlined,
-                                      color: index < ratingProvider.getPostRating(widget.article['id'])  ? AppColors.ratingColor : Colors.grey,
-                                      size: 36,
-                                    ),
-                                  ],
-                                );
-                        }),
-                      ),
-                      height(height: 12),
-                      if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
-                        TextFormField(
-                          onTap: () {
-                            context.read<HomeProvider>().pageChange(isValue: false);
-                          },
-                          controller: ratingProvider.commentController,
-                          style: fontStyle(fontSize: 13, fontWeight: FontWeight.w400),
-                          decoration: InputDecoration(
-                            hintText: "Type your comment here (optional)",
-                            hintStyle: fontStyle(fontSize: 12, color: Colors.black45),
-                            contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.lightBlue),
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.lightBlue),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide(color: Colors.lightBlue),
-                            ),
-                          ),
+                                  );
+                          }),
                         ),
-                      if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id'])) height(height: 10),
-                      if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
-                        GestureDetector(
-                          onTap: ratingProvider.selectedStar >= 1
-                              ? () async {
-                                  SharedPreferences sp = await SharedPreferences.getInstance();
-                                  bool isLogin = sp.getString("loginType") != "login" ? true : false;
-
-                                  if (isLogin) {
-                                    CustomToast.showErrorToast(msg: "Your a guest user, please login to give a rating");
-                                  } else {
-                                    ratingProvider.postSubmitRating(widget.article['id'], widget.article['userHasReviewed'],widget.article['title']);
-                                  }
-                                }
-                              : null,
-                          child: Container(
-                            height: 40,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: ratingProvider.selectedStar >= 1 ? Colors.lightBlue : Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              "Submit",
-                              style: fontStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
+                        height(height: 12),
+                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
+                          TextFormField(
+                            onTap: () {
+                              context.read<HomeProvider>().pageChange(isValue: false);
+                            },
+                            controller: ratingProvider.commentController,
+                            style: fontStyle(fontSize: 13, fontWeight: FontWeight.w400),
+                            decoration: InputDecoration(
+                              hintText: "Type your comment here (optional)",
+                              hintStyle: fontStyle(fontSize: 12, color: Colors.black45),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.lightBlue),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.lightBlue),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10),
+                                borderSide: BorderSide(color: Colors.lightBlue),
                               ),
                             ),
                           ),
-                        ),
-                    ],
-                  );
-                }),
-                height(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Critics Reviews", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                    Spacer(),
-                    InkWell(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => ListReviews(
-                                        postId: widget.article["id"].toString(),
-                                      )));
-                        },
-                        child: Text("More >", style: fontStyle(color: Colors.lightBlue, fontSize: 14, fontWeight: FontWeight.w600))),
-                  ],
-                ),
-                height(height: 50)
+                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id'])) height(height: 10),
+                        if (widget.article['userHasReviewed'] == false && !ratingProvider.isArticleRated(widget.article['id']))
+                          GestureDetector(
+                            onTap: ratingProvider.selectedStar >= 1
+                                ? () async {
+                                    SharedPreferences sp = await SharedPreferences.getInstance();
+                                    bool isLogin = sp.getString("loginType") != "login" ? true : false;
 
-              ],
+                                    if (isLogin) {
+                                      CustomToast.showErrorToast(msg: "Your a guest user, please login to give a rating");
+                                    } else {
+                                      ratingProvider.postSubmitRating(widget.article['id'], widget.article['userHasReviewed'],widget.article['title']);
+                                    }
+                                  }
+                                : null,
+                            child: Container(
+                              height: 40,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: ratingProvider.selectedStar >= 1 ? Colors.lightBlue : Colors.grey.shade300,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "Submit",
+                                style: fontStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  }),
+                  height(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Critics Reviews", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                      Spacer(),
+                      InkWell(
+                          onTap: () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ListReviews(
+                                          postId: widget.article["id"].toString(),
+                                        )));
+                          },
+                          child: Text("More >", style: fontStyle(color: Colors.lightBlue, fontSize: 14, fontWeight: FontWeight.w600))),
+                    ],
+                  ),
+                  height(height: 50)
+
+                ],
+              ),
             ),
           ),
 
