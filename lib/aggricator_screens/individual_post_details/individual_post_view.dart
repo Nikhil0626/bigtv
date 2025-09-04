@@ -66,421 +66,390 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
         return false; // Exit app
       },
       child: Scaffold(
-        body: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-          final article = homeProvider.getSinglePostList.isEmpty ? {} : homeProvider.getSinglePostList;
-          return homeProvider.isPostLoading
-              ? AppLoadingScreen()
-              : homeProvider.getSinglePostList.isEmpty
-              ? AppNoData()
-              : Container(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-            child: Screenshot(
-              controller: adsScreenshotController,
-              child: article['type'].toString() == "WebUrl"
-                  ? Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: InAppWebViewScreen(
-                  webUrl: context.read<HomeProvider>().webUrl.toString(),
-                  title: '',
-                ),
-              )
-                  : (article['type'] == "Image" &&article['subType'] == "ImageAd")
-                  ? InkWell(
-                  onTap: () async {
-                    SharedPreferences sp = await SharedPreferences.getInstance();
-                    bool isLogin = sp.getString("loginType") != "login" ? true : false;
-                    if (isLogin) {
-                      CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
-                    } else {
-                      if (article['postUrl'] == "" || article['postUrl'] == null) {
-
+        body: SafeArea(
+          child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+            final article = homeProvider.getSinglePostList.isEmpty ? {} : homeProvider.getSinglePostList;
+            return homeProvider.isPostLoading
+                ? AppLoadingScreen()
+                : homeProvider.getSinglePostList.isEmpty
+                ? AppNoData()
+                : Container(
+              height: MediaQuery.of(context).size.height,
+              width: MediaQuery.of(context).size.width,
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+              child: Screenshot(
+                controller: adsScreenshotController,
+                child: article['type'].toString() == "WebUrl"
+                    ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: InAppWebViewScreen(
+                    webUrl: context.read<HomeProvider>().webUrl.toString(),
+                    title: '',
+                  ),
+                )
+                    : (article['type'] == "Image" &&article['subType'] == "ImageAd")
+                    ? InkWell(
+                    onTap: () async {
+                      SharedPreferences sp = await SharedPreferences.getInstance();
+                      bool isLogin = sp.getString("loginType") != "login" ? true : false;
+                      if (isLogin) {
+                        CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
                       } else {
-                        Navigator.pop(context);
-                        context
-                            .read<HomeProvider>()
-                            .sendAdsDataSend(article['id'], article['title'], article['image_url'], false, article['postUrl']);
-                      }
-                    }
-                  },
-                  child: Stack(
-                    children: [
-                      article['image_url'].length == 1
-                          ? Image.network(
-                       article['image_url'][0] ?? "",
-                        width: MediaQuery.of(context).size.width,
-                        height: MediaQuery.of(context).size.height,
-                        fit: BoxFit.fill,
-                      )
-                          : ImagePostSlider(
-                        imageUrl: article['image_url'],
-                      ),
+                        if (article['postUrl'] == "" || article['postUrl'] == null) {
 
-                      Positioned(
-                        top: 40,
-                        left: 30,
-                        child: InkWell(
+                        } else {
+                          Navigator.pop(context);
+                          context
+                              .read<HomeProvider>()
+                              .sendAdsDataSend(article['id'], article['title'], article['image_url'], false, article['postUrl']);
+                        }
+                      }
+                    },
+                    child: Stack(
+                      children: [
+                        article['image_url'].length == 1
+                            ? Image.network(
+                         article['image_url'][0] ?? "",
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                          fit: BoxFit.fill,
+                        )
+                            : ImagePostSlider(
+                          imageUrl: article['image_url'],
+                        ),
+
+                        Positioned(
+                          top: 40,
+                          left: 30,
+                          child: InkWell(
+                            onTap: () {
+                              log("sfhskjfhewfheawiuhgf");
+                              Navigator.pop(context);
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                              ),
+                              height: 40,
+                              width: 40,
+                              child: Icon(
+                                Icons.arrow_back,
+                                color: Colors.black,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
+                    ))
+                    : article['type'] == "Gallery"
+                    ? Stack(
+                  children: [
+
+                    FullPageCarousel(
+                      isHome: true,
+                      imageUrls: article['gallery'] ?? [],
+                      postDetails: article,
+                    ),
+
+                    // Bottom action bar
+                  ],
+                )
+                    : Column(
+                  children: [
+                    // Image section
+                    Stack(
+                      children: [Container(
+                        height: article['subType'] == "BigBlackStandard"
+                            ? MediaQuery.of(context).size.height * .65
+                            : MediaQuery.of(context).size.height * .40,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(16.r),
+                            topLeft: Radius.circular(16.r),
+                          ),
+                          color: Colors.black,
+                        ),
+                        child: article['type'] == "Video"
+                            ? SizedBox(
+                          height: MediaQuery.of(context).size.height * .31,
+                          width: MediaQuery.of(context).size.width,
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: VideoPreview(
+                              imageUrl: article['image_url'],
+                              url: article['video_url'] ?? "",
+                              isFoldable: false,
+                            ),
+                          ),
+                        )
+                            : InkWell(
                           onTap: () {
-                            log("sfhskjfhewfheawiuhgf");
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ImagePreview(
+                                    imageUrl: article['image_url'],
+                                    title: article['title'],
+                                  ),
+                                ));
+                          },
+                          child: SizedBox(
+                            height: MediaQuery.of(context).size.height * .40,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.only(
+                                topRight: Radius.circular(16.r),
+                                topLeft: Radius.circular(16.r),
+                              ),
+                              child: CachedNetworkImage(
+                                imageUrl: article['image_url'] ?? "fgyhuiiuh",
+                                height: MediaQuery.of(context).size.height * (article['subType'] == "BigBlackStandard" ? .65 : .45),
+                                width: MediaQuery.of(context).size.width,
+                                fit: BoxFit.fill,
+                                placeholder: (context, url) => Container(
+                                  color: AppColors.borderColor.withOpacity(.2),
+                                ),
+                                errorWidget: (context, url, error) => Center(
+                                  child: Icon(
+                                    Icons.image,
+                                    size: 100,
+                                    color: Colors.grey.shade300,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ), Positioned(
+                        top: 10,
+                        left: 14,
+                        child: GestureDetector(
+                          onTap: () {
                             Navigator.pop(context);
                           },
                           child: Container(
                             padding: EdgeInsets.all(7),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: Colors.black54,
                               shape: BoxShape.circle,
                             ),
-                            height: 40,
-                            width: 40,
                             child: Icon(
                               Icons.arrow_back,
-                              color: Colors.black,
+                              color: Colors.white,
                               size: 20,
                             ),
                           ),
                         ),
-                      )
-                    ],
-                  ))
-                  : article['type'] == "Gallery"
-                  ? Stack(
-                children: [
+                      ),],
+                    ),
 
-                  FullPageCarousel(
-                    isHome: true,
-                    imageUrls: article['gallery'] ?? [],
-                    postDetails: article,
-                  ),
-
-                  // Bottom action bar
-                ],
-              )
-                  : Column(
-                children: [
-                  // Image section
-                  Stack(
-                    children: [Container(
-                      height: article['subType'] == "BigBlackStandard"
-                          ? MediaQuery.of(context).size.height * .65
-                          : MediaQuery.of(context).size.height * .40,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(16.r),
-                          topLeft: Radius.circular(16.r),
-                        ),
-                        color: Colors.black,
-                      ),
-                      child: article['type'] == "Video"
-                          ? SizedBox(
-                        height: MediaQuery.of(context).size.height * .31,
-                        width: MediaQuery.of(context).size.width,
-                        child: Align(
-                          alignment: Alignment.topCenter,
-                          child: VideoPreview(
-                            imageUrl: article['image_url'],
-                            url: article['video_url'] ?? "",
-                            isFoldable: false,
-                          ),
-                        ),
-                      )
-                          : InkWell(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ImagePreview(
-                                  imageUrl: article['image_url'],
-                                  title: article['title'],
-                                ),
-                              ));
-                        },
-                        child: SizedBox(
-                          height: MediaQuery.of(context).size.height * .40,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.only(
-                              topRight: Radius.circular(16.r),
-                              topLeft: Radius.circular(16.r),
+                    // Action bar between image and title
+                    Container(
+                      color: article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
+                      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Chota News branding
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
+                              borderRadius: BorderRadius.circular(20),
                             ),
-                            child: CachedNetworkImage(
-                              imageUrl: article['image_url'] ?? "fgyhuiiuh",
-                              height: MediaQuery.of(context).size.height * (article['subType'] == "BigBlackStandard" ? .65 : .45),
-                              width: MediaQuery.of(context).size.width,
-                              fit: BoxFit.fill,
-                              placeholder: (context, url) => Container(
-                                color: AppColors.borderColor.withOpacity(.2),
-                              ),
-                              errorWidget: (context, url, error) => Center(
-                                child: Icon(
-                                  Icons.image,
-                                  size: 100,
-                                  color: Colors.grey.shade300,
-                                ),
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: "Chota ",
+                                    style: fontStyle(
+                                      fontSize: Platform.isIOS ? 16 : 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: article['subType'] == "BigBlackStandard" ? Colors.white : Colors.black,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: "News",
+                                    style: fontStyle(
+                                      fontSize: Platform.isIOS ? 16 : 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xff00A8FF),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ), Positioned(
-                      top: 10,
-                      left: 14,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(7),
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.arrow_back,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                      ),
-                    ),],
-                  ),
 
-                  // Action bar between image and title
-                  Container(
-                    color: article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Chota News branding
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text.rich(
-                            TextSpan(
+                          // Action buttons
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                TextSpan(
-                                  text: "Chota ",
-                                  style: fontStyle(
-                                    fontSize: Platform.isIOS ? 16 : 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: article['subType'] == "BigBlackStandard" ? Colors.white : Colors.black,
+                                Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                  return InkWell(
+                                    onTap: () async {
+                                      log("Like");
+                                      settingsProvider.isLikePost(article);
+                                      EventRepo().addEvent({
+                                        "like": !settingsProvider.isLikeList.contains(article['id'].toString()),
+                                        "postId": article['id'].toString()??"000",
+                                        "createAt": DateTime.now().toString(),
+                                        "postTitle": article['title'].toString()
+                                      }, "liked_article");
+                                    },
+                                    child: SizedBox(
+                                      width: 24,
+                                      child: SvgPicture.asset(
+                                          settingsProvider.isLikeList.contains(article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                          height: 18,
+                                          width: 18,
+                                          color: settingsProvider.isLikeList.contains(article['id'].toString()) ? Colors.lightBlue : Colors.grey),
+                                    ),
+                                  );
+                                }),
+                                SizedBox(width: 16),
+                                InkWell(
+                                  onTap: () {
+                                    log("Comment...");
+                                    if (context.mounted) {
+                                      context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                      showComments(context, article['id'],article['title']);
+                                    }
+                                  },
+                                  child: SizedBox(
+                                    width: 24,
+                                    child: SvgPicture.asset("assets/svg/new_comment.svg", height: 20, width: 20, color: Colors.grey),
                                   ),
                                 ),
-                                TextSpan(
-                                  text: "News",
-                                  style: fontStyle(
-                                    fontSize: Platform.isIOS ? 16 : 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xff00A8FF),
+                                SizedBox(width: 16),
+                                InkWell(
+                                  onTap: () async {
+                                    SharedPreferences sp = await SharedPreferences.getInstance();
+                                    String? userId = sp.getString("userId");
+
+                                    sendShareDetails(userId, article['id'], article['content'].toString());
+
+                                    if (article['type'] == "Standard" || article['type'] == "Video" || article['type'] == "Image") {
+                                      try {
+                                        final image = await adsScreenshotController.capture(
+                                          pixelRatio: 2.0,
+                                        );
+                                        if (image != null) {
+                                          final directory = await getTemporaryDirectory();
+                                          final imagePath = '${directory.path}/${article['id']}.png';
+                                          final imageFile = File(imagePath);
+                                          await imageFile.writeAsBytes(image);
+
+                                          Share.shareXFiles([XFile(imageFile.path)], text: article['linkURLAndroid'].toString());
+                                        } else {
+                                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                        }
+                                      } catch (e) {
+                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                      }
+                                    } else if (article['type'] == "Gallery") {}
+                                  },
+                                  child: SizedBox(
+                                    width: 24,
+                                    child: SvgPicture.asset(
+                                      "assets/svg/share.svg",
+                                      height: 18,
+                                      width: 18,
+                                      color: Colors.grey,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ),
-
-                        // Action buttons
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                return InkWell(
-                                  onTap: () async {
-                                    log("Like");
-                                    settingsProvider.isLikePost(article);
-                                    EventRepo().addEvent({
-                                      "like": !settingsProvider.isLikeList.contains(article['id'].toString()),
-                                      "postId": article['id'].toString()??"000",
-                                      "createAt": DateTime.now().toString(),
-                                      "postTitle": article['title'].toString()
-                                    }, "liked_article");
-                                  },
-                                  child: SizedBox(
-                                    width: 24,
-                                    child: SvgPicture.asset(
-                                        settingsProvider.isLikeList.contains(article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                        height: 18,
-                                        width: 18,
-                                        color: settingsProvider.isLikeList.contains(article['id'].toString()) ? Colors.lightBlue : Colors.grey),
-                                  ),
-                                );
-                              }),
-                              SizedBox(width: 16),
-                              InkWell(
-                                onTap: () {
-                                  log("Comment...");
-                                  if (context.mounted) {
-                                    context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                    showComments(context, article['id'],article['title']);
-                                  }
-                                },
-                                child: SizedBox(
-                                  width: 24,
-                                  child: SvgPicture.asset("assets/svg/new_comment.svg", height: 20, width: 20, color: Colors.grey),
-                                ),
-                              ),
-                              SizedBox(width: 16),
-                              InkWell(
-                                onTap: () async {
-                                  SharedPreferences sp = await SharedPreferences.getInstance();
-                                  String? userId = sp.getString("userId");
-
-                                  sendShareDetails(userId, article['id'], article['content'].toString());
-
-                                  if (article['type'] == "Standard" || article['type'] == "Video" || article['type'] == "Image") {
-                                    try {
-                                      final image = await adsScreenshotController.capture(
-                                        pixelRatio: 2.0,
-                                      );
-                                      if (image != null) {
-                                        final directory = await getTemporaryDirectory();
-                                        final imagePath = '${directory.path}/${article['id']}.png';
-                                        final imageFile = File(imagePath);
-                                        await imageFile.writeAsBytes(image);
-
-                                        Share.shareXFiles([XFile(imageFile.path)], text: article['linkURLAndroid'].toString());
-                                      } else {
-                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                      }
-                                    } catch (e) {
-                                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                    }
-                                  } else if (article['type'] == "Gallery") {}
-                                },
-                                child: SizedBox(
-                                  width: 24,
-                                  child: SvgPicture.asset(
-                                    "assets/svg/share.svg",
-                                    height: 18,
-                                    width: 18,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  // Title and content section
-                  Expanded(
-                    child: Container(
-                      width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        color: article['subType'] == "BigBlackStandard" ? AppColors.textColor : Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(10.sp),
-                          topLeft: Radius.circular(10.sp),
-                        ),
+                        ],
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 8, bottom: 16, right: 16, left: 16),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(article['title'] ?? "No Title",
-                                style: homeScreenFontStyle(
-                                    color: article['subType'] != "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.bold)),
-                            height(height: 8),
-                            Expanded(
-                              child: article['subType'] == "BulletPost"
-                                  ? Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  (article['content'] != "" && article['content'] != null && article['content'].toString().isNotEmpty)
-                                      ? Text(article['content'],
-                                      style: homeScreenFontStyle(
-                                        color: AppColors.textColor,
-                                        fontWeight: FontWeight.w500,
-                                        fontSize: 16.sp,
-                                      ))
-                                      : const SizedBox.shrink(),
-                                  if (article['content'] != "" && article['content'] != null && article['content'].toString().isNotEmpty) height(height: 8),
-                                  Expanded(
-                                    child: ListView(
-                                      physics: const NeverScrollableScrollPhysics(),
-                                      children: article['bulletPoints'].map<Widget>((item) {
-                                        return Row(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              "● ",
-                                              style: TextStyle(
-                                                fontSize: 14.sp,
-                                                color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
-                                                height: 1, // Ensures proper line height
-                                              ),
-                                            ),
-                                            width(width: 5.sp),
-                                            // Space between bullet & text
-                                            Expanded(
-                                              child: Text(
-                                                item,
-                                                strutStyle: StrutStyle(
-                                                  fontSize: 16.sp,
-                                                  height: 1, // Ensures consistent line height
-                                                ),
-                                                style: homeScreenFontStyle(
-                                                  color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
-                                                  fontWeight: FontWeight.w400,
-                                                  fontSize: 16.sp,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        );
-                                      }).toList(), // Ensure it is converted to List<Widget>
-                                    ),
-                                  ),
-                                  RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(text: "\n\n"),
-                                        WidgetSpan(
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
+                    ),
+
+                    // Title and content section
+                    Expanded(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          color: article['subType'] == "BigBlackStandard" ? AppColors.textColor : Colors.white,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(10.sp),
+                            topLeft: Radius.circular(10.sp),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8, bottom: 16, right: 16, left: 16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(article['title'] ?? "No Title",
+                                  style: homeScreenFontStyle(
+                                      color: article['subType'] != "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.bold)),
+                              height(height: 8),
+                              Expanded(
+                                child: article['subType'] == "BulletPost"
+                                    ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    (article['content'] != "" && article['content'] != null && article['content'].toString().isNotEmpty)
+                                        ? Text(article['content'],
+                                        style: homeScreenFontStyle(
+                                          color: AppColors.textColor,
+                                          fontWeight: FontWeight.w500,
+                                          fontSize: 16.sp,
+                                        ))
+                                        : const SizedBox.shrink(),
+                                    if (article['content'] != "" && article['content'] != null && article['content'].toString().isNotEmpty) height(height: 8),
+                                    Expanded(
+                                      child: ListView(
+                                        physics: const NeverScrollableScrollPhysics(),
+                                        children: article['bulletPoints'].map<Widget>((item) {
+                                          return Row(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              if (article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
-                                              if (article['isReporter'] == 1)
-                                                Text(
-                                                  ' ${article['reportedBy']} | ',
-                                                  style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
-                                                ),
-                                              Icon(Icons.access_time, size: 14, color: Colors.grey),
                                               Text(
-                                                " ${formatTimeDifference(article['created'])}",
-                                                style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                "● ",
+                                                style: TextStyle(
+                                                  fontSize: 14.sp,
+                                                  color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
+                                                  height: 1, // Ensures proper line height
+                                                ),
+                                              ),
+                                              width(width: 5.sp),
+                                              // Space between bullet & text
+                                              Expanded(
+                                                child: Text(
+                                                  item,
+                                                  strutStyle: StrutStyle(
+                                                    fontSize: 16.sp,
+                                                    height: 1, // Ensures consistent line height
+                                                  ),
+                                                  style: homeScreenFontStyle(
+                                                    color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 16.sp,
+                                                  ),
+                                                ),
                                               ),
                                             ],
-                                          ),
-                                        ),
-                                      ],
+                                          );
+                                        }).toList(), // Ensure it is converted to List<Widget>
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              )
-                                  : RichText(
-                                text: TextSpan(
-                                  text: '',
-                                  children: [
-                                    ..._parseText(context, article['content'], article['links'], article),
-                                    if (article['isStickyPost'] != 1)
-                                      TextSpan(
+                                    RichText(
+                                      text: TextSpan(
                                         children: [
                                           TextSpan(text: "\n\n"),
                                           WidgetSpan(
@@ -503,20 +472,53 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                           ),
                                         ],
                                       ),
+                                    ),
                                   ],
+                                )
+                                    : RichText(
+                                  text: TextSpan(
+                                    text: '',
+                                    children: [
+                                      ..._parseText(context, article['content'], article['links'], article),
+                                      if (article['isStickyPost'] != 1)
+                                        TextSpan(
+                                          children: [
+                                            TextSpan(text: "\n\n"),
+                                            WidgetSpan(
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  if (article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
+                                                  if (article['isReporter'] == 1)
+                                                    Text(
+                                                      ' ${article['reportedBy']} | ',
+                                                      style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                    ),
+                                                  Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                                  Text(
+                                                    " ${formatTimeDifference(article['created'])}",
+                                                    style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          );
-        }),
+            );
+          }),
+        ),
       ),
     );
   }

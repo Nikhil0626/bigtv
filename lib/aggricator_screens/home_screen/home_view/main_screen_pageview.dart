@@ -226,8 +226,8 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                               //   );
                               // }
 // If it's an ad position
-                              if ((index + 1) % 6 == 0) {
-                                int adIndex = (index ~/ 6); // ad index starts from 0
+                              if ((index + 1) % 5 == 0) {
+                                int adIndex = (index ~/ 5); // ad index starts from 0
                                 return Consumer<AdMobBannerProvider>(
                                   builder: (context, adMobBannerProvider, child) {
                                     final adsList = adMobBannerProvider.ads.values.toList();
@@ -264,7 +264,16 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                     }
 
                                     // Fallback if ad not ready
-                                    return SizedBox.shrink();
+                                    return Container(
+                                      color: Colors.white,
+                                      child: MainScreenBytView(
+                                        article: homeProvider.getAllPostList[index],
+                                        pageController: homeProvider.pageController!,
+                                        length: homeProvider.getAllPostList.length,
+                                        index: index,
+                                        aiTagName: "",
+                                      ),
+                                    );
                                   },
                                 );
                               }

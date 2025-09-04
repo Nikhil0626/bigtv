@@ -20,33 +20,62 @@ class EventRepo extends BaseService {
     return response;
   }
 
-  Future<void> addEvent(Map<String, dynamic> eventData, eventName) async {
-    final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  Future<void> addEvent(Map<String, dynamic> eventData, String eventName) async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final String userId = sharedPreferences.getString("userId") ?? "guest";
+    final String deviceId = sharedPreferences.getString("deviceId") ?? "12345";
 
-    String? userId = sharedPreferences.getString("userId");
-    String? deviceId = sharedPreferences.getString("deviceId");
-
-    Map<String, dynamic> newEvent = {
+    final Map<String, dynamic> newEvent = {
       'key': eventName,
       'eventData': eventData,
-      'userId': userId ?? "guest",
-      'deviceId': deviceId ?? "12345",
-      "platform": Platform.isIOS?"iOS":"Android"
+      'userId': userId,
+      'deviceId': deviceId,
+      'platform': Platform.isIOS ? "iOS" : "Android",
+      'timestamp': DateTime.now().toIso8601String(),
     };
-    log("event body --- $newEvent");
 
+    log("Event Body: $newEvent");
 
     final box = Hive.box('events');
     await box.add(newEvent);
 
-    await analytics.logEvent(name: eventName, parameters: {
-      'key': eventName,
-      'eventData': eventData,
-      'userId': userId ?? "guest",
-      'deviceId': deviceId ?? "12345",
-    });
+    // ✅ Fix: No null values in Firebase params
+    final firebaseParams = <String, Object>{
+      'userId': userId,
+      'deviceId': deviceId,
+      'platform': Platform.isIOS ? "iOS" : "Android",
+      ...eventData.map((k, v) => MapEntry(k, (v ?? '').toString())),
+    };
+
+    await FirebaseAnalytics.instance.logEvent(
+      name: eventName,
+      parameters: firebaseParams,
+    );
   }
+
+
+  // Future<void> addEvent(Map<String, dynamic> eventData, eventName) async {
+  //
+  //   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
+  //
+  //   String? userId = sharedPreferences.getString("userId");
+  //   String? deviceId = sharedPreferences.getString("deviceId");
+  //
+  //   Map<String, dynamic> newEvent = {
+  //     'key': eventName,
+  //     'eventData': eventData,
+  //     'userId': userId ?? "guest",
+  //     'deviceId': deviceId ?? "12345",
+  //     "platform": Platform.isIOS?"iOS":"Android"
+  //   };
+  //   log("event body --- $newEvent");
+  //
+  //
+  //   final box = Hive.box('events');
+  //   await box.add(newEvent);
+  //
+  //   await FirebaseAnalytics.instance.logEvent(name: eventName, parameters: newEvent as Map<String, dynamic>);
+  // }
 
   Future<void> processAndPushEvents() async {
     final box = Hive.box('events');

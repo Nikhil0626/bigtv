@@ -36,16 +36,16 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   @override
   void initState() {
     super.initState();
-
+    bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
+    bannerAdsProvider?.adsDispose();
     context.read<HomeProvider>().getAllAiTags();
     if (context.read<HomeProvider>().postId.toString() == "0") {
       context.read<HomeProvider>().getAllPost().then((value) {
-        bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
+
         bannerAdsProvider?. loadAd320x50MobBanner(bannerAdsProvider!.autoupdate??0, AdSize.banner);
         bannerAdsProvider?.autoBannerCall();
         bannerAdsProvider?.adsLoad();
       },);
-
     }
   }
 
