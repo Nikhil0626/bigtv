@@ -35,63 +35,132 @@
                         <constraint firstAttribute="height" constant="24" id="infoBar-height"/>
                     </constraints>
                 </view>
+
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="contentContainer">
-                    <rect key="frame" x="0.0" y="547" width="375" height="120"/>
+                    <rect key="frame" x="0.0" y="480" width="300" height="180"/>
                     <subviews>
-                        <label contentMode="scaleToFill" text="Headline" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="headline">
-                            <rect key="frame" x="66" y="8" width="307" height="24"/>
+                        <!-- Headline -->
+                        <label contentMode="scaleToFill" text="Headline" translatesAutoresizingMaskIntoConstraints="NO" id="headline">
+                            <rect key="frame" x="8" y="8" width="300" height="24"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
-                            <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                            <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                            <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                            <color key="textColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         </label>
-                        <label contentMode="scaleToFill" text="Body text goes here and can be long." lineBreakMode="tailTruncation" numberOfLines="0" translatesAutoresizingMaskIntoConstraints="NO" id="body">
-                            <rect key="frame" x="66" y="34" width="307" height="17"/>
+
+                        <!-- Body -->
+                        <label contentMode="scaleToFill" text="Body text goes here and can be long." numberOfLines="0" translatesAutoresizingMaskIntoConstraints="NO" id="body">
+                            <rect key="frame" x="8" y="40" width="300" height="32"/>
                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                             <fontDescription key="fontDescription" type="system" pointSize="14"/>
-                            <color key="textColor" white="0.90000000000000002" alpha="1" colorSpace="calibratedWhite"/>
+                            <color key="textColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         </label>
-                        <button contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ctaButton">
-                            <rect key="frame" x="20" y="76" width="335" height="30"/>
+
+                        <!-- CTA Button -->
+                        <button contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" translatesAutoresizingMaskIntoConstraints="NO" id="ctaButton">
+                            <rect key="frame" x="8" y="85" width="300" height="30"/>
                             <color key="backgroundColor" red="0.0" green="0.5" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <state key="normal" title="INSTALL">
                                 <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                             </state>
                             <userDefinedRuntimeAttributes>
                                 <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
-                                    <integer key="value" value="0"/>
+                                    <integer key="value" value="8"/>
                                 </userDefinedRuntimeAttribute>
                                 <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/>
                             </userDefinedRuntimeAttributes>
                         </button>
-                        <imageView contentMode="scaleAspectFit" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="icon">
-                            <rect key="frame" x="8" y="13" width="50" height="50"/>
-                            <constraints>
-                                <constraint firstAttribute="height" constant="50" id="icon-height"/>
-                                <constraint firstAttribute="width" constant="50" id="icon-width"/>
-                            </constraints>
-                        </imageView>
                     </subviews>
+
+                    <!-- Container styling -->
                     <color key="backgroundColor" red="0.3" green="0.5" blue="0.8" alpha="0" colorSpace="custom" customColorSpace="sRGB"/>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius">
+                            <integer key="value" value="12"/>
+                        </userDefinedRuntimeAttribute>
+                        <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/>
+                    </userDefinedRuntimeAttributes>
+
+                    <!-- Constraints -->
                     <constraints>
-                        <constraint firstItem="body" firstAttribute="leading" secondItem="headline" secondAttribute="leading" id="body-leading"/>
-                        <constraint firstItem="body" firstAttribute="top" secondItem="headline" secondAttribute="bottom" constant="2" id="body-top"/>
-                        <constraint firstAttribute="trailing" secondItem="body" secondAttribute="trailing" constant="2" id="body-trailing"/>
-                        <constraint firstItem="ctaButton" firstAttribute="bottom" secondItem="contentContainer" secondAttribute="bottom" constant="-26" id="cta-bottom"/>
-                        <constraint firstItem="ctaButton" firstAttribute="height" constant="30" id="cta-height"/>
-                        <constraint firstItem="ctaButton" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="20" id="cta-leading"/>
-                        <constraint firstItem="ctaButton" firstAttribute="top" secondItem="icon" secondAttribute="bottom" constant="10" id="cta-top"/>
-                        <constraint firstAttribute="trailing" secondItem="ctaButton" secondAttribute="trailing" constant="20" id="cta-trailing"/>
-                        <constraint firstItem="headline" firstAttribute="leading" secondItem="icon" secondAttribute="trailing" constant="8" id="headline-leading"/>
-                        <constraint firstItem="headline" firstAttribute="top" secondItem="contentContainer" secondAttribute="top" constant="8" id="headline-top"/>
-                        <constraint firstAttribute="trailing" secondItem="headline" secondAttribute="trailing" constant="2" id="headline-trailing"/>
-                        <constraint firstItem="icon" firstAttribute="top" secondItem="contentContainer" secondAttribute="top" id="icon-centerY"/>
-                        <constraint firstItem="icon" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="8" id="icon-leading"/>
+                        <!-- Headline -->
+                        <constraint firstItem="headline" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="8"/>
+                        <constraint firstItem="headline" firstAttribute="top" secondItem="contentContainer" secondAttribute="top" constant="8"/>
+                        <constraint firstAttribute="trailing" secondItem="headline" secondAttribute="trailing" constant="-4"/>
+
+                        <!-- Body (directly below headline now) -->
+                        <constraint firstItem="body" firstAttribute="leading" secondItem="headline" secondAttribute="leading"/>
+                        <constraint firstItem="body" firstAttribute="top" secondItem="headline" secondAttribute="bottom" constant="4"/>
+                        <constraint firstAttribute="trailing" secondItem="body" secondAttribute="trailing" constant="-8"/>
+
+                        <!-- CTA Button (with padding from body) -->
+                        <constraint firstItem="ctaButton" firstAttribute="top" secondItem="body" secondAttribute="bottom" constant="12"/>
+                        <constraint firstItem="ctaButton" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="8"/>
+                        <constraint firstAttribute="trailing" secondItem="ctaButton" secondAttribute="trailing" constant="-12"/>
+                        <constraint firstItem="ctaButton" firstAttribute="bottom" secondItem="contentContainer" secondAttribute="bottom" constant="-20"/>
+                        <constraint firstItem="ctaButton" firstAttribute="height" constant="30"/>
                     </constraints>
                 </view>
+
+
+
+
+<!--                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="contentContainer"> -->
+<!--                     <rect key="frame" x="0.0" y="547" width="375" height="120"/> -->
+<!--                     <subviews> -->
+<!--                         <label contentMode="scaleToFill" text="Headline" lineBreakMode="tailTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="headline"> -->
+<!--                             <rect key="frame" x="66" y="8" width="307" height="24"/> -->
+<!--                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/> -->
+<!--                             <fontDescription key="fontDescription" type="system" pointSize="20"/> -->
+<!--                             <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/> -->
+<!--                         </label> -->
+<!--                         <label contentMode="scaleToFill" text="Body text goes here and can be long." lineBreakMode="tailTruncation" numberOfLines="0" translatesAutoresizingMaskIntoConstraints="NO" id="body"> -->
+<!--                             <rect key="frame" x="66" y="34" width="307" height="17"/> -->
+<!--                             <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/> -->
+<!--                             <fontDescription key="fontDescription" type="system" pointSize="14"/> -->
+<!--                             <color key="textColor" white="0.90000000000000002" alpha="1" colorSpace="calibratedWhite"/> -->
+<!--                         </label> -->
+<!--                         <button contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ctaButton"> -->
+<!--                             <rect key="frame" x="20" y="76" width="335" height="30"/> -->
+<!--                             <color key="backgroundColor" red="0.0" green="0.5" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/> -->
+<!--                             <state key="normal" title="INSTALL"> -->
+<!--                                 <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/> -->
+<!--                             </state> -->
+<!--                             <userDefinedRuntimeAttributes> -->
+<!--                                 <userDefinedRuntimeAttribute type="number" keyPath="layer.cornerRadius"> -->
+<!--                                     <integer key="value" value="0"/> -->
+<!--                                 </userDefinedRuntimeAttribute> -->
+<!--                                 <userDefinedRuntimeAttribute type="boolean" keyPath="clipsToBounds" value="YES"/> -->
+<!--                             </userDefinedRuntimeAttributes> -->
+<!--                         </button> -->
+<!--                         <imageView contentMode="scaleAspectFit" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="icon"> -->
+<!--                             <rect key="frame" x="8" y="13" width="50" height="50"/> -->
+<!--                             <constraints> -->
+<!--                                 <constraint firstAttribute="height" constant="50" id="icon-height"/> -->
+<!--                                 <constraint firstAttribute="width" constant="50" id="icon-width"/> -->
+<!--                             </constraints> -->
+<!--                         </imageView> -->
+<!--                     </subviews> -->
+<!--                     <color key="backgroundColor" red="0.3" green="0.5" blue="0.8" alpha="0" colorSpace="custom" customColorSpace="sRGB"/> -->
+<!--                     <constraints> -->
+<!--                         <constraint firstItem="body" firstAttribute="leading" secondItem="headline" secondAttribute="leading" id="body-leading"/> -->
+<!--                         <constraint firstItem="body" firstAttribute="top" secondItem="headline" secondAttribute="bottom" constant="2" id="body-top"/> -->
+<!--                         <constraint firstAttribute="trailing" secondItem="body" secondAttribute="trailing" constant="2" id="body-trailing"/> -->
+<!--                         <constraint firstItem="ctaButton" firstAttribute="bottom" secondItem="contentContainer" secondAttribute="bottom" constant="-26" id="cta-bottom"/> -->
+<!--                         <constraint firstItem="ctaButton" firstAttribute="height" constant="30" id="cta-height"/> -->
+<!--                         <constraint firstItem="ctaButton" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="20" id="cta-leading"/> -->
+<!--                         <constraint firstItem="ctaButton" firstAttribute="top" secondItem="icon" secondAttribute="bottom" constant="10" id="cta-top"/> -->
+<!--                         <constraint firstAttribute="trailing" secondItem="ctaButton" secondAttribute="trailing" constant="20" id="cta-trailing"/> -->
+<!--                         <constraint firstItem="headline" firstAttribute="leading" secondItem="icon" secondAttribute="trailing" constant="8" id="headline-leading"/> -->
+<!--                         <constraint firstItem="headline" firstAttribute="top" secondItem="contentContainer" secondAttribute="top" constant="8" id="headline-top"/> -->
+<!--                         <constraint firstAttribute="trailing" secondItem="headline" secondAttribute="trailing" constant="2" id="headline-trailing"/> -->
+<!--                         <constraint firstItem="icon" firstAttribute="top" secondItem="contentContainer" secondAttribute="top" id="icon-centerY"/> -->
+<!--                         <constraint firstItem="icon" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="8" id="icon-leading"/> -->
+<!--                     </constraints> -->
+<!--                 </view> -->
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
             <constraints>
-                <constraint firstItem="contentContainer" firstAttribute="bottom" secondItem="iN0-l3-epB" secondAttribute="bottom" id="container-bottom"/>
+                <constraint firstItem="contentContainer" firstAttribute="bottom" secondItem="iN0-l3-epB" secondAttribute="bottom" constant="-20" id="container-bottom"/>
                 <constraint firstItem="contentContainer" firstAttribute="height" constant="120" id="container-height"/>
                 <constraint firstItem="contentContainer" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" id="container-leading"/>
                 <constraint firstAttribute="trailing" secondItem="contentContainer" secondAttribute="trailing" id="container-trailing"/>
