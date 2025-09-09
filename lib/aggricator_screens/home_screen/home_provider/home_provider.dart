@@ -705,6 +705,11 @@ class HomeProvider extends ChangeNotifier {
       Response response = await HomeRepo().imageAdsSendData(body);
       if (response.statusCode == 200) {
         log("send data ${response.data}");
+        if (await canLaunchUrl(Uri.parse(sourceUrl))) {
+          await launchUrl(Uri.parse(sourceUrl));
+        } else {
+          throw 'Could not launch $sourceUrl';
+        }
         if (isComeContest) {
           mainNavigatorKey.currentContext!.read<AdsContestProvider>().getContestList(mainNavigatorKey.currentContext);
         } else {
@@ -714,11 +719,7 @@ class HomeProvider extends ChangeNotifier {
                 builder: (context) => ContestScreen(),
               ));
         }
-        if (await canLaunchUrl(Uri.parse(sourceUrl))) {
-          await launchUrl(Uri.parse(sourceUrl));
-        } else {
-          throw 'Could not launch $sourceUrl';
-        }
+
         CustomToast.showSuccessToast(msg: "Your Successfully Joined The Contest");
         EventRepo().addEvent({
           "user_id": userId,

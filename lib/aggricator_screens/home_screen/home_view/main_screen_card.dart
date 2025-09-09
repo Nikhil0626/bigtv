@@ -37,12 +37,11 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   void initState() {
     super.initState();
     bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
-    bannerAdsProvider!.adsDispose();
+    // bannerAdsProvider!.adsDispose();
     context.read<HomeProvider>().getAllAiTags();
     if (context.read<HomeProvider>().postId.toString() == "0") {
       context.read<HomeProvider>().getAllPost().then((value) {
-
-        bannerAdsProvider?. loadAd320x50MobBanner(bannerAdsProvider!.autoupdate??0, AdSize.banner);
+        bannerAdsProvider?.loadAd320x50MobBanner(bannerAdsProvider!.autoupdate??0, AdSize.banner);
         bannerAdsProvider?.autoBannerCall();
         bannerAdsProvider?.adsLoad();
       },);
@@ -118,8 +117,8 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                           height: 30,
                                           margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
                                           decoration: BoxDecoration(
-                                            color: homeProvider.selectedTagId == tagId ? AppColors.appButtonColor : Colors.grey.shade200,
-                                            borderRadius: BorderRadius.circular(12.r),
+                                            color: homeProvider.selectedTagId == tagId ? AppColors.appButtonColor : Colors.grey.shade300,
+                                            borderRadius: BorderRadius.circular(8),
                                           ),
                                           alignment: Alignment.center,
                                           child: Padding(

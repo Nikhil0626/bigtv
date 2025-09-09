@@ -42,7 +42,7 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
         },
           child: Padding(
             padding:  EdgeInsets.symmetric(horizontal: 16.0.sp),
-            child: Icon(Icons.arrow_back_outlined,size: 24.sp,)
+            child: Icon(Icons.arrow_back_ios,size: 24.sp,)
           ),
         ),
         title: Text(

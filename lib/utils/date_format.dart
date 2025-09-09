@@ -27,8 +27,9 @@ String formatTimeDifference(String inputTime,{bool isComment= false} ) {
   }
 
   final difference = now.difference(date);
-
-  if (difference.inSeconds < 60) {
+  if (difference.inSeconds < 0) {
+    return '0 seconds ago';
+  }else if (difference.inSeconds < 60) {
     return '${difference.inSeconds} seconds ago';
   } else if (difference.inMinutes < 60) {
     return difference.inMinutes==1?'${difference.inMinutes} min ago':'${difference.inMinutes} mins ago';

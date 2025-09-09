@@ -199,7 +199,7 @@ class RatingProvider extends ChangeNotifier {
     try {
       Response response = await RatingRepo().postSubmitRating(body);
       log("Submitting rating: ${response.statusCode}");
-      if (response.statusCode == 201) {
+      if (response.statusCode == 200) {
         // ✅ Safely replace or add new entry
         ratingsList.removeWhere((element) => element['postId'].toString() == article.toString());
         ratingsList.add({"postId": article.toString(), "starRating": selectedStar});

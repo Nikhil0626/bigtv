@@ -518,8 +518,8 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
 
       final ad = BannerAd(
-        // adUnitId: adMobBannerId,
-        adUnitId: "ca-app-pub-3940256099942544/6300978111",
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId,
+        // adUnitId: "ca-app-pub-3940256099942544/6300978111",
         size: size,
         request: AdRequest(),
         listener: BannerAdListener(
@@ -572,7 +572,7 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
 
       final ad = AdManagerBannerAd(
-        adUnitId: adManagerBannerId,
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId,
         sizes: [size],
         request: AdManagerAdRequest(),
         listener: AdManagerBannerAdListener(
@@ -614,13 +614,14 @@ class AdMobBannerProvider with ChangeNotifier {
   }
 
   Future<void> loadAd320x50MobBanner(int index, AdSize size) async {
+    log("kbkjhbjkhbkjbkbkbkkgu123");
     try {
       adsBanner320x50[index]?.dispose();
       adsLoaded320x50[index] = false;
       adErrors320x50.remove(index);
 
       final ad = BannerAd(
-        adUnitId: adMobBannerId,
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId,
         size: size,
         request: AdRequest(),
         listener: BannerAdListener(
@@ -662,13 +663,14 @@ class AdMobBannerProvider with ChangeNotifier {
   }
 
   Future<void> loadAd320x50ManagerBanner(int index, AdSize size) async {
+    log("kbkjhbjkhbkjbkbkbkkgu");
     try {
       adsBanner320x50[index]?.dispose();
       adsLoaded320x50[index] = false;
       adErrors320x50.remove(index);
 
       final ad = AdManagerBannerAd(
-        adUnitId: adManagerBannerId,
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId,
         sizes: [size],
         request: AdManagerAdRequest(),
         listener: AdManagerBannerAdListener(
@@ -717,6 +719,7 @@ class AdMobBannerProvider with ChangeNotifier {
   }
 
   Future<void> _checkIfAllAdsFailed(LoadAdError error,index) async {
+    log("error ads imple $error");
     final latency = adLatencyData[index];
 
     final sdkReadyLatency = (latency?.responseReceived != null && latency?.requestInitiated != null)
@@ -735,7 +738,7 @@ class AdMobBannerProvider with ChangeNotifier {
         "sdkRequestReceivedTime": renderLatency.toString(),
         "adsRenderingTime": "0",
         "createAt": DateTime.now().toString(),
-        "adResponse": error.responseInfo.toString(),
+        "adResponse": error.toString(),
       },
     );
     // EventRepo().addEvent(, "");
@@ -787,7 +790,7 @@ class AdMobBannerProvider with ChangeNotifier {
         "sdkRequestReceivedTime": creativeDownloadLatency.toString(),
         "adsRenderingTime": renderLatency?.toString() ?? "",
         "createAt": DateTime.now().toString(),
-        "adResponse": ad.toString(),
+        "adResponse": "success",
       },
     );
     await analytics.logEvent(
@@ -813,7 +816,7 @@ class AdMobBannerProvider with ChangeNotifier {
 
   Future<void> autoBannerCall() async {
     autoupdate = (adsBanner320x50.length) + 1;
-    _cron.schedule(Schedule.parse('*/30 * * * * *'), () async {
+    _cron.schedule(Schedule.parse('*/60 * * * *'), () async {
       loadAd320x50MobBanner(autoupdate!, AdSize.banner);
     });
   }

@@ -136,7 +136,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
                             child: Padding(
                               padding: const EdgeInsets.all(16.0),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Text(
                                     "What should we improve?",
@@ -159,8 +160,8 @@ class _FeedbackFormState extends State<FeedbackForm> {
                                         child: Container(
                                           padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
                                           decoration: BoxDecoration(
-                                            color: isSelected ? AppColors.appButtonColor : AppColors.cardBackgroundColor,
-                                            borderRadius: BorderRadius.circular(15.r),
+                                            color: isSelected ? AppColors.appButtonColor : Colors.grey.shade300,
+                                            borderRadius: BorderRadius.circular(4),
                                           ),
                                           child: Text(
                                             category['optionText'].toString(),

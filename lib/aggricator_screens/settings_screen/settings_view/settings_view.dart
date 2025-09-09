@@ -75,7 +75,7 @@ class _SettingsViewState extends State<SettingsView> {
             Expanded(child: SingleChildScrollView(
               child: Column(
                 children: [
-                  _buildSettingsRow(context, "profile.svg", "Edit Profile", () {
+                  _buildSettingsRow(context, "profile.png", "Edit Profile", () {
                     EventRepo().addEvent({
                       "visitPageName":"Edit Profile",
                       "createAt": DateTime.now().toString(),
@@ -394,7 +394,7 @@ class _SettingsViewState extends State<SettingsView> {
         child: Row(
           children: [
             width(width: 10.w),
-            SvgPicture.asset('assets/svg/$iconName', height: 20.w, width: 20.w),
+            iconName =="profile.png"?Image.asset('assets/svg/$iconName',height: 20.w, width: 20.w): SvgPicture.asset('assets/svg/$iconName', height: 20.w, width: 20.w),
             width(width: 20.w),
             Text(title, style: newAppFont(fontSize: 14.sp, color: AppColors.textColor)),
           ],

@@ -23,7 +23,6 @@ class ReferralDialog extends StatefulWidget {
 class _ReferralDialogState extends State<ReferralDialog> {
   @override
   void initState() {
-
     super.initState();
   }
   @override

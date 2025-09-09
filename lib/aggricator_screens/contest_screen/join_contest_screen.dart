@@ -87,7 +87,7 @@ class _JoinContestScreenState extends State<JoinContestScreen> {
                       Row(
                         children: [
                           Text(
-                            "Valid till: ${formatTimeDifferences(item.dateOfContest.toString())}",
+                            "Created At: ${formatTimeDifferences(item.dateOfContest.toString())}",
                             style: newAppFont(
                               fontSize: 12,
                               color: Colors.black54,
