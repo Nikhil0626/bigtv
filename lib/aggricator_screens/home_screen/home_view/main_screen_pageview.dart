@@ -95,10 +95,14 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
                                 context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
                                 context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
                               } else if (value == 3 && context.read<AdMobBannerProvider>().ads.isEmpty) {
                                 int? lastKey = 0;
                                 context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
                                 context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
                               }
 
                               // your other logic (pageChange, flipEvent, reading time etc.)
@@ -140,6 +144,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                       final ad = adsList[adIndex];
                                       if (ad != null) {
                                         if (ad is BannerAd) {
+
                                           return Container(
                                             color: Colors.grey[200],
                                             alignment: Alignment.center,
@@ -166,14 +171,14 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                             ),
                                           );
                                         }
-                                        // else if (ad is NativeAd) {
-                                        //   return Container(
-                                        //     color: Colors.white,
-                                        //     width: MediaQuery.of(context).size.width,
-                                        //     height: MediaQuery.of(context).size.height,
-                                        //     child: AdWidget(ad: ad),
-                                        //   );
-                                        // }
+                                        else if (ad is NativeAd) {
+                                          return Container(
+                                            color: Colors.white,
+                                            width: MediaQuery.of(context).size.width,
+                                            height: MediaQuery.of(context).size.height,
+                                            child: AdWidget(ad: ad),
+                                          );
+                                        }
                                         else if (ad is AdManagerBannerAd) {
                                           return Container(
                                             color: Colors.grey[200],
@@ -395,94 +400,4 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
   }
 }
 
-// if ((index + 1) % 5 == 0) {
-//   int adIndex = ((index + 1) ~/ 5) - 1;
-//   log("current index new view $index --- $adIndex");
-//   return Consumer<AdMobBannerProvider>(
-//     builder: (context, adMobBannerProvider, child) {
-//       final adsList = adMobBannerProvider.ads.values.toList();
-//
-//       if (adIndex < adsList.length) {
-//         final ad = adsList[adIndex];
-//         if (ad != null) {
-//           if (ad is BannerAd) {
-//
-//             return Container(
-//               color: Colors.grey[200],
-//               alignment: Alignment.center,
-//               child: Column(
-//                 mainAxisSize: MainAxisSize.min,
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 crossAxisAlignment: CrossAxisAlignment.center,
-//                 children: [
-//                   Expanded(
-//                       flex: 1,
-//                       child: Center(
-//                         child: Container(
-//                           height: 250,
-//                           width: 300,
-//                           alignment: Alignment.center,
-//                           child: AdWidget(ad: ad),
-//                         ),
-//                       )),
-//                   Expanded(
-//                     flex: 1,
-//                     child: buildRecommendedNews(context, homeProvider),
-//                   ),
-//                 ],
-//               ),
-//             );
-//           }
-//           // else if (ad is NativeAd) {
-//           //   return Container(
-//           //     color: Colors.white,
-//           //     width: MediaQuery.of(context).size.width,
-//           //     height: MediaQuery.of(context).size.height,
-//           //     child: AdWidget(ad: ad),
-//           //   );
-//           // }
-//           else if (ad is AdManagerBannerAd) {
-//             return Container(
-//               color: Colors.grey[200],
-//               alignment: Alignment.center,
-//               child: Column(
-//                 mainAxisSize: MainAxisSize.min,
-//                 mainAxisAlignment: MainAxisAlignment.center,
-//                 crossAxisAlignment: CrossAxisAlignment.center,
-//                 children: [
-//                   Expanded(
-//                       flex: 1,
-//                       child: Center(
-//                         child: Container(
-//                           height: 250,
-//                           width: 300,
-//                           alignment: Alignment.center,
-//                           child: AdWidget(ad: ad),
-//                         ),
-//                       )),
-//                   Expanded(
-//                     flex: 1,
-//                     child: buildRecommendedNews(context, homeProvider),
-//                   ),
-//                 ],
-//               ),
-//             );
-//           }
-//         }
-//       }
-//
-//       // Fallback if no ad is available for this slot
-//       return Container(
-//         color: Colors.white,
-//         child: MainScreenBytView(
-//           article: homeProvider.getAllPostList[index],
-//           pageController: homeProvider.pageController!,
-//           length: homeProvider.getAllPostList.length,
-//           index: index,
-//           aiTagName: "",
-//         ),
-//       );
-//     },
-//   );
-// }
-// If it's an ad position
+

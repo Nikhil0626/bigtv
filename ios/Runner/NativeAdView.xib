@@ -71,7 +71,7 @@
                             </constraints>
                         </imageView>
                     </subviews>
-                    <color key="backgroundColor" red="0.29999999999999999" green="0.5" blue="0.80000000000000004" alpha="0.69999999999999996" colorSpace="custom" customColorSpace="sRGB"/>
+                    <color key="backgroundColor" red="0.3" green="0.5" blue="0.8" alpha="0" colorSpace="custom" customColorSpace="sRGB"/>
                     <constraints>
                         <constraint firstItem="body" firstAttribute="leading" secondItem="headline" secondAttribute="leading" id="body-leading"/>
                         <constraint firstItem="body" firstAttribute="top" secondItem="headline" secondAttribute="bottom" constant="2" id="body-top"/>
