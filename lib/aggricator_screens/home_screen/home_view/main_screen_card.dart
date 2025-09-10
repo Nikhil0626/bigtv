@@ -37,7 +37,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   void initState() {
     super.initState();
     bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
-    // bannerAdsProvider!.adsDispose();
+    bannerAdsProvider!.adsDispose();
     context.read<HomeProvider>().getAllAiTags();
     if (context.read<HomeProvider>().postId.toString() == "0") {
       context.read<HomeProvider>().getAllPost().then((value) {

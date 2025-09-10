@@ -57,7 +57,7 @@
 
                         <!-- CTA Button -->
                         <button contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" translatesAutoresizingMaskIntoConstraints="NO" id="ctaButton">
-                            <rect key="frame" x="8" y="85" width="300" height="30"/>
+                            <rect key="frame" x="14" y="85" width="375" height="30"/>
                             <color key="backgroundColor" red="0.0" green="0.5" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                             <state key="normal" title="INSTALL">
                                 <color key="titleColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -93,8 +93,8 @@
                         <constraint firstAttribute="trailing" secondItem="body" secondAttribute="trailing" constant="-8"/>
 
                         <!-- CTA Button (with padding from body) -->
-                        <constraint firstItem="ctaButton" firstAttribute="top" secondItem="body" secondAttribute="bottom" constant="12"/>
-                        <constraint firstItem="ctaButton" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="8"/>
+                        <constraint firstItem="ctaButton" firstAttribute="top" secondItem="body" secondAttribute="bottom" constant="-12"/>
+                        <constraint firstItem="ctaButton" firstAttribute="leading" secondItem="contentContainer" secondAttribute="leading" constant="-12"/>
                         <constraint firstAttribute="trailing" secondItem="ctaButton" secondAttribute="trailing" constant="-12"/>
                         <constraint firstItem="ctaButton" firstAttribute="bottom" secondItem="contentContainer" secondAttribute="bottom" constant="-20"/>
                         <constraint firstItem="ctaButton" firstAttribute="height" constant="30"/>

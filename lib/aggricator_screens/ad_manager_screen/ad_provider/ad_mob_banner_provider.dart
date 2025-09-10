@@ -393,11 +393,11 @@ class AdMobBannerProvider with ChangeNotifier {
   final _cron = Cron();
 
   Future<void> autoBannerCall() async {
-    // autoupdate = (adsBanner320x50.length) + 1;
-    // _cron.schedule(Schedule.parse('*/30 * * * * *'), () async {
-    //   log("loadBothAdsInParallel");
-    //   loadAd320x50MobBanner(autoupdate!, AdSize.banner);
-    // });
+    autoupdate = (adsBanner320x50.length) + 1;
+    _cron.schedule(Schedule.parse('*/30 * * * * *'), () async {
+      log("loadBothAdsInParallel");
+      loadAd320x50MobBanner(autoupdate!, AdSize.banner);
+    });
   }
 
   String? source = "";
@@ -461,11 +461,16 @@ class AdMobBannerProvider with ChangeNotifier {
     loadAdMobNative(3, AdSize.mediumRectangle);
     loadAdManagerNative(4, AdSize.mediumRectangle);
   }
+  void adsDispose() {
+    _cron.close();
+    ads.clear();
+    adsBanner320x50.clear();
+  }
+  void cronClose() {
+    _cron.close();
+  }
 }
 
-void adsClear() {
-
-}
 
 class AdLatencyData {
   DateTime? requestInitiated;

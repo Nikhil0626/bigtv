@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
+import '../aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import '../aggricator_screens/home_screen/home_provider/home_provider.dart';
 import '../main.dart';
 import '../services/deviice_details.dart';
@@ -41,10 +42,11 @@ class _AppLifecycleManagerState extends State<AppLifecycleManager> with WidgetsB
     }else if (state == AppLifecycleState.paused) {
       getUniqueDeviceId("close",);
       print('App is in the background.');
+      Provider.of<AdMobBannerProvider>(context, listen: false).cronClose();
 
     } else if (state == AppLifecycleState.resumed) {
       print('App is in the foreground.');
-
+      Provider.of<AdMobBannerProvider>(context, listen: false).autoBannerCall();
       // if( mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() != "0" ) {
       //   log("getIndividualPost in life cycle ${mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString() }");
       //   mainNavigatorKey.currentContext?.read<HomeProvider>().getIndividualPost( mainNavigatorKey.currentContext!.read<HomeProvider>().postId.toString());
