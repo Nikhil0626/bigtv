@@ -226,13 +226,15 @@ class _HomeViewState extends State<HomeView> {
                   final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
                   final adsLoaded = adMobBannerProvider.adsLoaded320x50;
 
-                  // Hide the bottom bar entirely if empty or every 5th page
+                  log("sghksugherkuhgeriuh ${adMobBannerProvider.adsBanner320x50}");
+
                   if (adsList.isEmpty) {
                     return const SizedBox.shrink();
                   } else if ((currentIndex + 1) % 5 == 0) {
                     return const SizedBox.shrink();
                   } else {
-                    return adsLoaded[adsList.length - 1] == true
+                    log("siva new ${adsList.last}");
+                    return adsLoaded[adsList.length-1] == true
                         ? Container(
                             height: 56,
                             width: MediaQuery.of(context).size.width,
@@ -248,8 +250,7 @@ class _HomeViewState extends State<HomeView> {
                                 child: Center(child: AdWidget(ad: adsList.last)),
                               ),
                             ),
-                          )
-                        : SizedBox.shrink();
+                          ):SizedBox.shrink();
                   }
                 },
               ),
@@ -259,5 +260,4 @@ class _HomeViewState extends State<HomeView> {
       ),
     );
   }
-
 }

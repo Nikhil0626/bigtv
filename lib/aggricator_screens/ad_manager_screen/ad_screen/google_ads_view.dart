@@ -18,102 +18,102 @@ import '../../../utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
-class Ad300x250Widget extends StatefulWidget {
-  const Ad300x250Widget({super.key});
-
-  @override
-  State<Ad300x250Widget> createState() => _Ad300x250WidgetState();
-}
-
-class _Ad300x250WidgetState extends State<Ad300x250Widget> {
-  BannerAd? _bannerAd;
-  bool _isAdLoaded = false;
-
-  DateTime? requestInitiated;
-  DateTime? responseReceived;
-  DateTime? adCreativeDownloaded;
-  DateTime? adRendered;
-  DateTime? impressionLogged;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadAd();
-  }
-
-  void _loadAd() {
-    requestInitiated = DateTime.now();
-
-    _bannerAd = BannerAd(
-      size: const AdSize(width: 300, height: 250), // ✅ 300×250 size
-      // adUnitId: "ca-app-pub-3940256099942544/2934735716", // ✅ Test Ad Unit
-      adUnitId: "ca-app-pub-2405357352181832/9414144917", // ✅ Test Ad Unit
-      // adUnitId:  context.read<HomeProvider>().adMobBannerId, // ✅ Test Ad Unit
-      // adUnitId:     context.read<HomeProvider>().adManagerBannerId,// ✅ Test Ad Unit
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          responseReceived ??= DateTime.now();
-          adCreativeDownloaded ??= DateTime.now();
-          adRendered = DateTime.now();
-
-          setState(() => _isAdLoaded = true);
-          // _logLatencies();
-        },
-
-        onAdFailedToLoad: (ad, error) {
-          debugPrint("❌ Ad failed to load: $error");
-          ad.dispose();
-        },
-        onAdImpression: (ad) {
-          impressionLogged = DateTime.now();
-          _logLatencies(ad);
-        },
-      ),
-      request: const AdRequest(),
-    )..load();
-  }
-
-  void _logLatencies(Ad ad) {
-    Clipboard.setData(ClipboardData(text: ad.responseInfo.toString()));
-    if (requestInitiated != null) {
-      debugPrint("📊 Ad Latency Metrics:");
-      if (responseReceived != null) {
-        debugPrint("⏱ Request Latency: ${responseReceived!.difference(requestInitiated!).inMilliseconds} ms");
-      }
-      if (adCreativeDownloaded != null && responseReceived != null) {
-        debugPrint("⏱ Load Latency: ${adCreativeDownloaded!.difference(responseReceived!).inMilliseconds} ms");
-      }
-      if (adRendered != null && adCreativeDownloaded != null) {
-
-        debugPrint("⏱ Render Latency: ${adRendered!.difference(adCreativeDownloaded!).inMilliseconds} ms");
-      }
-      if (impressionLogged != null) {
-        debugPrint("⏱ Total Latency: ${impressionLogged!.difference(requestInitiated!).inMilliseconds} ms");
-      }
-
-    }
-  }
-
-  @override
-  void dispose() {
-    _bannerAd?.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: _isAdLoaded
-          ? SizedBox(
-        width: 300,
-        height: 250,
-        child: AdWidget(ad: _bannerAd!),
-      )
-          : const CircularProgressIndicator(),
-    );
-  }
-}
-
+// class Ad300x250Widget extends StatefulWidget {
+//   const Ad300x250Widget({super.key});
+//
+//   @override
+//   State<Ad300x250Widget> createState() => _Ad300x250WidgetState();
+// }
+//
+// class _Ad300x250WidgetState extends State<Ad300x250Widget> {
+//   BannerAd? _bannerAd;
+//   bool _isAdLoaded = false;
+//
+//   DateTime? requestInitiated;
+//   DateTime? responseReceived;
+//   DateTime? adCreativeDownloaded;
+//   DateTime? adRendered;
+//   DateTime? impressionLogged;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     _loadAd();
+//   }
+//
+//   void _loadAd() {
+//     requestInitiated = DateTime.now();
+//
+//     _bannerAd = BannerAd(
+//       size: const AdSize(width: 300, height: 250), // ✅ 300×250 size
+//       // adUnitId: "ca-app-pub-3940256099942544/2934735716", // ✅ Test Ad Unit
+//       adUnitId: "ca-app-pub-2405357352181832/9414144917", // ✅ Test Ad Unit
+//       // adUnitId:  context.read<HomeProvider>().adMobBannerId, // ✅ Test Ad Unit
+//       // adUnitId:     context.read<HomeProvider>().adManagerBannerId,// ✅ Test Ad Unit
+//       listener: BannerAdListener(
+//         onAdLoaded: (ad) {
+//           responseReceived ??= DateTime.now();
+//           adCreativeDownloaded ??= DateTime.now();
+//           adRendered = DateTime.now();
+//
+//           setState(() => _isAdLoaded = true);
+//           // _logLatencies();
+//         },
+//
+//         onAdFailedToLoad: (ad, error) {
+//           debugPrint("❌ Ad failed to load: $error");
+//           ad.dispose();
+//         },
+//         onAdImpression: (ad) {
+//           impressionLogged = DateTime.now();
+//           _logLatencies(ad);
+//         },
+//       ),
+//       request: const AdRequest(),
+//     )..load();
+//   }
+//
+//   void _logLatencies(Ad ad) {
+//     Clipboard.setData(ClipboardData(text: ad.responseInfo.toString()));
+//     if (requestInitiated != null) {
+//       debugPrint("📊 Ad Latency Metrics:");
+//       if (responseReceived != null) {
+//         debugPrint("⏱ Request Latency: ${responseReceived!.difference(requestInitiated!).inMilliseconds} ms");
+//       }
+//       if (adCreativeDownloaded != null && responseReceived != null) {
+//         debugPrint("⏱ Load Latency: ${adCreativeDownloaded!.difference(responseReceived!).inMilliseconds} ms");
+//       }
+//       if (adRendered != null && adCreativeDownloaded != null) {
+//
+//         debugPrint("⏱ Render Latency: ${adRendered!.difference(adCreativeDownloaded!).inMilliseconds} ms");
+//       }
+//       if (impressionLogged != null) {
+//         debugPrint("⏱ Total Latency: ${impressionLogged!.difference(requestInitiated!).inMilliseconds} ms");
+//       }
+//
+//     }
+//   }
+//
+//   @override
+//   void dispose() {
+//     _bannerAd?.dispose();
+//     super.dispose();
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Center(
+//       child: _isAdLoaded
+//           ? SizedBox(
+//         width: 300,
+//         height: 250,
+//         child: AdWidget(ad: _bannerAd!),
+//       )
+//           : const CircularProgressIndicator(),
+//     );
+//   }
+// }
+//
 
 
 class RateYourApp extends StatelessWidget {

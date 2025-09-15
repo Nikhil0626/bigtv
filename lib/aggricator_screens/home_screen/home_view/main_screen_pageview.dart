@@ -95,14 +95,14 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
                                 context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
                                 context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
+                                // context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                                // context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
                               } else if (value == 3 && context.read<AdMobBannerProvider>().ads.isEmpty) {
                                 int? lastKey = 0;
                                 context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 1, AdSize.mediumRectangle);
                                 context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 2, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
+                                // context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 3, AdSize.mediumRectangle);
+                                // context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 4, AdSize.mediumRectangle);
                               }
 
                               // your other logic (pageChange, flipEvent, reading time etc.)

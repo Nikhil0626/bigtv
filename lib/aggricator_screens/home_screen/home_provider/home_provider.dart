@@ -42,6 +42,8 @@ class HomeProvider extends ChangeNotifier {
   String adManagerBannerId = "";
   String adMobNativeId = "";
   String adMobBannerId = "";
+  String adMobStickBannerId = "";
+  String adManagerStickBannerId = "";
 
   var getSinglePostList = {};
   int aiCurrentPostId = 0;
@@ -283,6 +285,12 @@ class HomeProvider extends ChangeNotifier {
       adManagerBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerbannerid'] : response.data['adUnits']['android']['admanagerbannerid'];
       adMobNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admobnativeid'] : response.data['adUnits']['android']['admobnativeid'];
       adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
+
+     //Stick Ads
+      adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
+      adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
+
+
       getImageAdsList.addAll(response.data['ads_list']);
       getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
       log(" hello hai ${adMobBannerId.toString()} --- $adMobNativeId");
@@ -322,6 +330,13 @@ class HomeProvider extends ChangeNotifier {
         });
       }
       getAllPostList.addAll(data);
+      if(isGetAllPost == true){
+        getAllPostList.removeAt(1);
+      }
+
+      print(getAllPostList);
+
+
       notifyListeners();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
@@ -364,7 +379,7 @@ class HomeProvider extends ChangeNotifier {
 
       getAllPostList.addAll(data);
 
-      isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
+      // isBookMark = getAllPostList.where((e) => e['isBookmarked'] == 1).map((e) => e['id'].toString()).toList();
     } on DioException catch (e, st) {
       log("Get News Api catch error ${st.toString()}");
       log("Get News Api  catch ${st.toString()}");
@@ -741,7 +756,7 @@ class HomeProvider extends ChangeNotifier {
   Future sendDataToads(body) async {
     try {
       Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
-      log("RK RES ${response.data}");
+      // log("RK RES ${response.data}");
     } on DioException catch (e, st) {
       log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
     } catch (e, st) {

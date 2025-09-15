@@ -40,11 +40,19 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
     bannerAdsProvider!.adsDispose();
     context.read<HomeProvider>().getAllAiTags();
     if (context.read<HomeProvider>().postId.toString() == "0") {
-      context.read<HomeProvider>().getAllPost().then((value) {
-        bannerAdsProvider?.loadAd320x50MobBanner(bannerAdsProvider!.autoupdate??0, AdSize.banner);
-        bannerAdsProvider?.autoBannerCall();
-        bannerAdsProvider?.adsLoad();
-      },);
+      context.read<HomeProvider>().getAllPost().then(
+        (value) {
+          bannerAdsProvider?.loadAd320x50MobBanner(bannerAdsProvider!.autoupdate ?? 0, AdSize.banner);
+
+          bannerAdsProvider?.adsLoad();
+          Future.delayed(
+            Duration(seconds: 30),
+            () {
+              bannerAdsProvider?.autoBannerCall();
+            },
+          );
+        },
+      );
     }
   }
 
@@ -144,7 +152,6 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                   ),
           ),
         ),
-
       );
     });
   }
