@@ -42,15 +42,16 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
     if (context.read<HomeProvider>().postId.toString() == "0") {
       context.read<HomeProvider>().getAllPost().then(
         (value) {
-          bannerAdsProvider?.loadAd320x50MobBanner(bannerAdsProvider!.autoupdate ?? 0, AdSize.banner);
+          // bannerAdsProvider?.loadAd320x50MobBanner(1, AdSize.banner);
+          bannerAdsProvider?.loadAd320x50ManagerBanner(1, AdSize.banner);
 
           bannerAdsProvider?.adsLoad();
-          Future.delayed(
-            Duration(seconds: 30),
-            () {
-              bannerAdsProvider?.autoBannerCall();
-            },
-          );
+          // Future.delayed(
+          //   Duration(seconds: 30),
+          //   () {
+          //     bannerAdsProvider?.autoBannerCall();
+          //   },
+          // );
         },
       );
     }

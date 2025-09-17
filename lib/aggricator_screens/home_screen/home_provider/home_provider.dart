@@ -132,6 +132,7 @@ class HomeProvider extends ChangeNotifier {
 
   void setSelectedTagId(int id) {
     _selectedTagId = id;
+
     // final index = getAllAiTagsList.indexWhere((tag) => tag['aitagid'] == id);
     // if (index > 0) {
     //   final selectedTag = getAllAiTagsList.removeAt(index);

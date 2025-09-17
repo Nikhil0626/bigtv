@@ -420,38 +420,38 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                       ),
                                                                     ),
                                                             ),
-                                                            Positioned(
-                                                              top: 12,
-                                                              right: 14,
-                                                              child: Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                                                                return InkWell(
-                                                                  onTap: () async {
-                                                                    log("Refresh");
-                                                                    EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
-                                                                    homeProvide.isReloadData();
-                                                                    if (homeProvide.isAiTagDataLoaded) {
-                                                                      homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
-                                                                    } else {
-                                                                      homeProvide.getAllPostList = [];
-                                                                      homeProvide.getAllPost();
-                                                                      homeProvide.pageChange(isValue: true);
-                                                                    }
-                                                                  },
-                                                                  child: Container(
-                                                                    width: 38,
-                                                                    padding: EdgeInsets.all(7),
-                                                                    decoration: BoxDecoration(
-                                                                      color: (homeProvide.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
-                                                                          ? AppColors.appButtonColor
-                                                                          : Colors.black54,
-                                                                      shape: BoxShape.circle,
-                                                                    ),
-                                                                    child: SvgPicture.asset("assets/svg/new_refresh.svg",
-                                                                        height: 20, width: 20, color: widget.article['subType'] != "BigBlackStandard" ? Colors.white : Colors.grey),
-                                                                  ),
-                                                                );
-                                                              }),
-                                                            ),
+                                                            // Positioned(
+                                                            //   top: 12,
+                                                            //   right: 14,
+                                                            //   child: Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                                            //     return InkWell(
+                                                            //       onTap: () async {
+                                                            //         log("Refresh");
+                                                            //         EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
+                                                            //         homeProvide.isReloadData();
+                                                            //         if (homeProvide.isAiTagDataLoaded) {
+                                                            //           homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
+                                                            //         } else {
+                                                            //           homeProvide.getAllPostList = [];
+                                                            //           homeProvide.getAllPost();
+                                                            //           homeProvide.pageChange(isValue: true);
+                                                            //         }
+                                                            //       },
+                                                            //       child: Container(
+                                                            //         width: 38,
+                                                            //         padding: EdgeInsets.all(7),
+                                                            //         decoration: BoxDecoration(
+                                                            //           color: (homeProvide.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
+                                                            //               ? AppColors.appButtonColor
+                                                            //               : Colors.black54,
+                                                            //           shape: BoxShape.circle,
+                                                            //         ),
+                                                            //         child: SvgPicture.asset("assets/svg/new_refresh.svg",
+                                                            //             height: 20, width: 20, color: widget.article['subType'] != "BigBlackStandard" ? Colors.white : Colors.grey),
+                                                            //       ),
+                                                            //     );
+                                                            //   }),
+                                                            // ),
                                                             if (context.watch<HomeProvider>().isAiTagDataLoaded)
                                                               Positioned(
                                                                 top: 10,
@@ -531,8 +531,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                         ),
                                                                         Spacer(),
                                                                         Container(
-                                                                          height: 40,
-                                                                          width: 90,
+                                                                          height: 50,
+                                                                          width: 120,
                                                                           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 0),
                                                                           decoration: BoxDecoration(
                                                                             color: widget.article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
@@ -628,6 +628,35 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                         ),
                                                                                       ),
                                                                               ),
+                                                                              Consumer<HomeProvider>(
+                                                                                  builder: (_, homeProvide, __) {
+                                                                                    return InkWell(
+                                                                                      onTap: () async {
+                                                                                        log("Refresh");
+                                                                                        EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
+                                                                                        homeProvide.isReloadData();
+                                                                                        if (widget.isaiTags) {
+                                                                                          homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
+                                                                                                (value) {
+                                                                                              homeProvide.isReloadFalse();
+                                                                                            },
+                                                                                          );
+                                                                                        } else {
+                                                                                          homeProvide.getAllPostList = [];
+                                                                                          homeProvide.getAllPost();
+                                                                                        }
+                                                                                      },
+                                                                                      child: homeProvide.isReload
+                                                                                          ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
+                                                                                          : SvgPicture.asset(
+                                                                                          "assets/svg/new_refresh.svg",
+                                                                                          height: 20,
+                                                                                          width: 20,
+                                                                                          color: Colors.grey
+                                                                                      ),
+                                                                                    );
+                                                                                  }
+                                                                              )
                                                                             ],
                                                                           ),
                                                                         ),

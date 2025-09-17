@@ -653,7 +653,7 @@ class AdMobBannerProvider with ChangeNotifier {
           onAdOpened: (ad) async => await _logEvent("onAdOpened"),
         ),
       );
-
+log("nikhil goud ${adsBanner320x50}");
       await ad.load();
     } catch (e) {
       adErrors320x50[autoupdate!] = 'Exception: ${e.toString()}';
@@ -705,7 +705,7 @@ class AdMobBannerProvider with ChangeNotifier {
           onAdOpened: (ad) async => await _logEvent("onAdOpened"),
         ),
       );
-
+      log("nikhil goud ${adsBanner320x50}");
       await ad.load();
     } catch (e) {
       adErrors320x50[index] = 'Exception: ${e.toString()}';
@@ -800,14 +800,14 @@ class AdMobBannerProvider with ChangeNotifier {
 
   Cron? _cron;
 
-  Future<void> autoBannerCall() async {
-
-    _cron ??= Cron();
-
-    _cron!.schedule(Schedule.parse('*/30 * * * * *'), () async {
-      loadAd320x50ManagerBanner(autoupdate!, AdSize.banner);
-    });
-  }
+  // Future<void> autoBannerCall() async {
+  //
+  //   _cron ??= Cron();
+  //
+  //   _cron!.schedule(Schedule.parse('*/30 * * * * *'), () async {
+  //     loadAd320x50ManagerBanner(autoupdate!, AdSize.banner);
+  //   });
+  // }
 
   void cronClose() async {
     await _cron?.close();

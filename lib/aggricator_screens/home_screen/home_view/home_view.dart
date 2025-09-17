@@ -109,6 +109,7 @@ class _HomeViewState extends State<HomeView> {
                       right: 16,
                       bottom: 6,
                       child: SafeArea(
+                        minimum: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
                         child: Container(
                           height: 58, // reduced height
                           decoration: BoxDecoration(
@@ -235,22 +236,25 @@ class _HomeViewState extends State<HomeView> {
                   } else {
                     log("siva new ${adsList.last}");
                     return adsLoaded[adsList.length-1] == true
-                        ? Container(
-                            height: 56,
-                            width: MediaQuery.of(context).size.width,
-                            color: Colors.white,
-                            alignment: Alignment.center,
-                            child: Container(
+                        ? Padding(
+                          padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                          child: Container(
                               height: 56,
-                              width: 320,
+                              width: MediaQuery.of(context).size.width,
                               color: Colors.white,
                               alignment: Alignment.center,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                child: Center(child: AdWidget(ad: adsList.last)),
+                              child: Container(
+                                height: 56,
+                                width: 320,
+                                color: Colors.white,
+                                alignment: Alignment.center,
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                  child: Center(child: AdWidget(ad: adsList.last)),
+                                ),
                               ),
                             ),
-                          ):SizedBox.shrink();
+                        ):SizedBox.shrink();
                   }
                 },
               ),

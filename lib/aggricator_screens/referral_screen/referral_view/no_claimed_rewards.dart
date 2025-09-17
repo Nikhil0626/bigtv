@@ -15,7 +15,7 @@ class _NoClaimedRewardsState extends State<NoClaimedRewards> {
   Widget build(BuildContext context) {
     return Center(
       child: SvgPicture.asset(
-        'assets/images/no_claimed_reward.svg',
+        'assets/images/No_claimed_rewards.svg',
         fit: BoxFit.contain,
       ),
     );
