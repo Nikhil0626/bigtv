@@ -29,10 +29,10 @@ class _FullStandardVideoViewState extends State<FullStandardVideoView> {
     ytController = YoutubePlayerController(
       initialVideoId: YoutubePlayer.convertUrlToId("https://www.youtube.com/watch?v=${widget.rellData['reel_video_code']}")!,
       flags: const YoutubePlayerFlags(
-        autoPlay: true,
+        autoPlay: false,
         mute: false,
         forceHD: false,
-        hideControls: true,
+        hideControls: false,
         loop: false,
         disableDragSeek: false,
         enableCaption: false,

@@ -201,7 +201,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
               SizedBox(
                 height: 40,
                 child: Row(
-                  children: options.map((option) {
+                  children: options.map((option,) {
                     final bool isSelected = pollProvider.tempSelectedOptionId == option['id'];
 
                     return Expanded(
@@ -209,6 +209,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                         onTap: () {
                           setState(() {
                             pollProvider.tempSelectedOptionId = option['id'];
+                            selectId = options.indexOf(option);
                           });
                         },
                         child: Container(
@@ -303,10 +304,10 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                               CustomToast.showErrorToast(msg: "Your a guest user, Please login to submit poll");
                             } else {
                               pollProvider.submitPolls(
-                                pollProvider.localArticle['id'],
+                                pollProvider.localArticle['id'] ?? " ",
                                 selectId!,
-                                pollProvider.localArticle['pollData']['options'][selectId]['id'],
-                                pollProvider.localArticle['title'],
+                                pollProvider.localArticle['pollData']['options'][selectId]['id'] ?? " ",
+                                pollProvider.localArticle['title'] ?? " ",
                               );
                             }
                           }
@@ -607,10 +608,8 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                 height: 50,
                 child: Row(
                   children: options.map((option) {
-                    final bool isSelected = pollProvider.tempSelectedOptionId == option['id'];
                     final bool isVotedOption = option['id'] == pollProvider.userVotedOptionId;
-                    final double percentage = (option['percentage'] ?? 0.0).toDouble();
-
+                    final double percentage = ((option['percentage'] ?? 0.0).toDouble()).clamp(0.0, 100.0);
                     return Expanded(
                       child: GestureDetector(
                         onTap: () {
@@ -624,7 +623,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isSelected || isVotedOption ? Colors.blue : Colors.grey.shade700,
+                              color: isVotedOption ? Colors.blue : Colors.grey.shade700,
                               width: 1.0,
                             ),
                             color: Colors.white,
@@ -632,37 +631,39 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                           child: Stack(
                             alignment: Alignment.centerLeft,
                             children: [
-                              if (isVotedOption)
-                                FractionallySizedBox(
-                                  widthFactor: percentage / 100,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.blue.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
+                              FractionallySizedBox(
+                                widthFactor: percentage / 100,
+                                alignment: Alignment.centerLeft,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.withOpacity(0.6),
+                                    borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
-
+                              ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 8),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(
-                                      option['text'],
-                                      style: TextStyle(
-                                        color: isSelected ? Colors.blue : Colors.black,
-                                        fontWeight: FontWeight.w600,
+                                    Expanded(
+                                      child: Text(
+                                        option['text'],
+                                        style: TextStyle(
+                                          color: isVotedOption ? Colors.blue : Colors.black,
+                                          fontWeight: FontWeight.w600,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        maxLines: 1,
                                       ),
                                     ),
-                                    if (isVotedOption)
-                                      Text(
-                                        "${percentage.toStringAsFixed(1)}%",
-                                        style: TextStyle(
-                                          color: isSelected ? Colors.blue : Colors.black,
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                    Text(
+                                      "${percentage.toStringAsFixed(1)}%",
+                                      style: TextStyle(
+                                        color: isVotedOption ? Colors.blue : Colors.black,
+                                        fontWeight: FontWeight.bold,
                                       ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -674,6 +675,78 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                   }).toList(),
                 ),
               ),
+
+              // SizedBox(
+              //   height: 50,
+              //   child: Row(
+              //     children: options.map((option) {
+              //       // final bool isSelected = pollProvider.tempSelectedOptionId == option['id'];
+              //       final bool isVotedOption = option['id'] == pollProvider.userVotedOptionId;
+              //       final double percentage = (option['percentage'] ?? 0.0).toDouble();
+              //
+              //       return Expanded(
+              //         child: GestureDetector(
+              //           onTap: () {
+              //             setState(() {
+              //               pollProvider.tempSelectedOptionId = option['id'];
+              //             });
+              //           },
+              //           child: Container(
+              //             height: 50,
+              //             margin: const EdgeInsets.symmetric(horizontal: 6),
+              //             decoration: BoxDecoration(
+              //               borderRadius: BorderRadius.circular(8),
+              //               border: Border.all(
+              //                 color: isVotedOption ? Colors.blue : Colors.grey.shade700,
+              //                 width: 1.0,
+              //               ),
+              //               color: Colors.white,
+              //             ),
+              //             child: Stack(
+              //               alignment: Alignment.centerLeft,
+              //               children: [
+              //                 if (isVotedOption)
+              //                   FractionallySizedBox(
+              //                     widthFactor: percentage / 100,
+              //                     child: Container(
+              //                       decoration: BoxDecoration(
+              //                         color: Colors.blue.withOpacity(0.6),
+              //                         borderRadius: BorderRadius.circular(8),
+              //                       ),
+              //                     ),
+              //                   ),
+              //
+              //                 Padding(
+              //                   padding: const EdgeInsets.symmetric(horizontal: 8),
+              //                   child: Row(
+              //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //                     children: [
+              //                       Text(
+              //                         option['text'],
+              //                         style: TextStyle(
+              //                           color: isVotedOption ? Colors.blue : Colors.black,
+              //                           fontWeight: FontWeight.w600,
+              //                         ),
+              //                       ),
+              //                       if (isVotedOption)
+              //                         Text(
+              //                           "${percentage.toStringAsFixed(1)}%",
+              //                           style: TextStyle(
+              //                             color: isVotedOption ? Colors.blue : Colors.black,
+              //                             fontWeight: FontWeight.bold,
+              //                           ),
+              //                         ),
+              //                     ],
+              //                   ),
+              //                 ),
+              //               ],
+              //             ),
+              //           ),
+              //         ),
+              //       );
+              //     }).toList(),
+              //   ),
+              // ),
 
               if (pollProvider.localArticle['topComments'].isNotEmpty) ...[
                     height(height: 20),
@@ -716,43 +789,57 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                     Padding(
                       padding: const EdgeInsets.only(left: 10),
                       child: SizedBox(
-                        height: 100,
+                        height: 70,
                         child: ListView.builder(
                           scrollDirection: Axis.horizontal,
                           itemCount: pollProvider.localArticle['topComments'].length,
                           itemBuilder: (context, index) {
                             final comment = pollProvider.localArticle['topComments'][index];
+
                             return Container(
-                              width: MediaQuery.of(context).size.width - 40,
-                              height: 80,
-                              margin: EdgeInsets.only(right: 8),
-                              padding: EdgeInsets.all(10),
+                              width: MediaQuery.of(context).size.width - 80,
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
                                 color: Colors.white.withOpacity(.5),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(color: Colors.grey),
                               ),
-                              child: Column(
+                              child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    children: [
-                                      Icon(Icons.account_circle, size: 20),
-                                      width(width: 5),
-                                      Text(comment["userName"] ?? "", style: fontStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                                    ],
+                                  const Icon(Icons.account_circle, size: 40),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          comment["userName"] ?? "",
+                                          style: fontStyle(
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 12,
+                                          ),
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        const SizedBox(height: 5),
+                                        Text(
+                                          comment["comment"] ?? "",
+                                          style: fontStyle(fontSize: 13, color: Colors.black),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  height(height: 4),
-                                  Text(
-                                    comment["comment"] ?? "",
-                                    style: fontStyle(fontSize: 13, color: Colors.black),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  height(height: 4),
-                                  Text(
-                                    " ${formatTimeDifference(comment["createdAt"].toString())}",
-                                    style: fontStyle(color: Colors.black, fontSize: 11),
+                                  const SizedBox(width: 5),
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Text(
+                                      " ${formatTimeDifference(comment["createdAt"].toString())}",
+                                      style: fontStyle(color: Colors.black, fontSize: 11),
+                                    ),
                                   ),
                                 ],
                               ),
@@ -760,6 +847,64 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                           },
                         ),
                       ),
+
+                      // child: SizedBox(
+                      //   height: 67,
+                      //   child: ListView.builder(
+                      //     scrollDirection: Axis.horizontal,
+                      //     itemCount: pollProvider.localArticle['topComments'].length,
+                      //     itemBuilder: (context, index) {
+                      //       final comment = pollProvider.localArticle['topComments'][index];
+                      //       return Container(
+                      //         margin: const EdgeInsets.only(right: 8),
+                      //         width: MediaQuery.of(context).size.width - 40,
+                      //         height: 40,
+                      //         // margin: EdgeInsets.only(right: 8),
+                      //         padding: EdgeInsets.all(10),
+                      //         decoration: BoxDecoration(
+                      //           color: Colors.white.withOpacity(.5),
+                      //           borderRadius: BorderRadius.circular(10),
+                      //           border: Border.all(color: Colors.grey),
+                      //         ),
+                      //         child: Row(
+                      //           crossAxisAlignment: CrossAxisAlignment.start,
+                      //           children: [
+                      //             Icon(Icons.account_circle, size: 40),
+                      //             width(width: 5),
+                      //             Column(
+                      //               children: [
+                      //                 // Icon(Icons.account_circle, size: 40),
+                      //                 // width(width: 5),
+                      //                 Text(comment["userName"] ?? "", style: fontStyle(fontWeight: FontWeight.w600, fontSize: 12)),
+                      //                 height(height: 5.0),
+                      //                 Text(
+                      //                   comment["comment"] ?? "",
+                      //                   style: fontStyle(fontSize: 13, color: Colors.black),
+                      //                   maxLines: 2,
+                      //                   overflow: TextOverflow.ellipsis,
+                      //                 ),
+                      //               ],
+                      //             ),
+                      //             // height(height: 4),
+                      //             // Text(
+                      //             //   comment["comment"] ?? "",
+                      //             //   style: fontStyle(fontSize: 13, color: Colors.black),
+                      //             //   maxLines: 2,
+                      //             //   overflow: TextOverflow.ellipsis,
+                      //             // ),
+                      //             width(width: 120),
+                      //             Center(
+                      //               child: Text(
+                      //                 " ${formatTimeDifference(comment["createdAt"].toString())}",
+                      //                 style: fontStyle(color: Colors.black, fontSize: 11),
+                      //               ),
+                      //             ),
+                      //           ],
+                      //         ),
+                      //       );
+                      //     },
+                      //   ),
+                      // ),
                     ),
                   ],
                   if (widget.index == 0) height(height: 60),
