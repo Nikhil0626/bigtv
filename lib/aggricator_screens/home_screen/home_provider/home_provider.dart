@@ -288,12 +288,12 @@ class HomeProvider extends ChangeNotifier {
       adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
 
      //Stick Ads
-      adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
-      adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
+     //  adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
+     //  adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
 
 
-      getImageAdsList.addAll(response.data['ads_list']);
-      getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
+      // getImageAdsList.addAll(response.data['ads_list']);
+      // getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
       log(" hello hai ${adMobBannerId.toString()} --- $adMobNativeId");
       if (isWebView) {
         getAllPostList.insert(0, {
