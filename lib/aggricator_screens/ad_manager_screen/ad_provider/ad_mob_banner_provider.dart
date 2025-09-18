@@ -516,8 +516,8 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
 
       final ad = BannerAd(
-        // adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId,
-        adUnitId: "ca-app-pub-3940256099942544/6300978111",
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId,
+        // adUnitId: "ca-app-pub-3940256099942544/6300978111",
         size: size,
         request: AdRequest(),
         listener: BannerAdListener(
@@ -801,9 +801,7 @@ class AdMobBannerProvider with ChangeNotifier {
   Cron? _cron;
 
   Future<void> autoBannerCall() async {
-
     _cron ??= Cron();
-
     _cron!.schedule(Schedule.parse('*/30 * * * * *'), () async {
       loadAd320x50ManagerBanner(autoupdate!, AdSize.banner);
     });
