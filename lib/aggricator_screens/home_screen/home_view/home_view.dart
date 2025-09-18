@@ -94,10 +94,9 @@ class _HomeViewState extends State<HomeView> {
         },
         child: Consumer<HomeProvider>(
           builder: (_, homeProvider, __) {
-            return Column(
-              children: [
-                Expanded(
-                  child: Stack(
+            return
+                Scaffold(
+                  body: Stack(
                     children: [
                       PageView(
                         controller: homeProvider.homePageController,
@@ -220,44 +219,42 @@ class _HomeViewState extends State<HomeView> {
                               ),
                             ),
                           ),
-                        ),
 
-                    ],
                   ),
-                ),
-                SafeArea(
-                  child: Consumer<AdMobBannerProvider>(
-                    builder: (_, adMobBannerProvider, __) {
-                      final currentIndex = adMobBannerProvider.currentPageIndex;
-                      final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
-                      if (adsList.isEmpty) {
-                        return const SizedBox.shrink();
-                      } else if ((currentIndex + 1) % 5 == 0) {
-                        return const SizedBox.shrink();
-                      } else {
-                        log("siva new ${adsList.last}");
-                        return  Container(
-                          height: 50,
-                          width: MediaQuery.of(context).size.width,
-                          color: Colors.red,
-                          alignment: Alignment.center,
-                          child: Container(
+                                ],
+                              ),
+                  bottomNavigationBar: SafeArea(
+                    child: Consumer<AdMobBannerProvider>(
+                      builder: (_, adMobBannerProvider, __) {
+                        final currentIndex = adMobBannerProvider.currentPageIndex;
+                        final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
+                        if (adsList.isEmpty) {
+                          return const SizedBox.shrink();
+                        } else if ((currentIndex + 1) % 5 == 0) {
+                          return const SizedBox.shrink();
+                        } else {
+                          log("siva new ${adsList.last}");
+                          return  Container(
                             height: 50,
-                            width: 320,
-                            color: Colors.white,
+                            width: MediaQuery.of(context).size.width,
+                            color: Colors.red,
                             alignment: Alignment.center,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2.0),
-                              child: Center(child: AdWidget(ad: adsList[0])),
+                            child: Container(
+                              height: 50,
+                              width: 320,
+                              color: Colors.white,
+                              alignment: Alignment.center,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                child: Center(child: AdWidget(ad: adsList[0])),
+                              ),
                             ),
-                          ),
-                        );
-                      }
-                    },
+                          );
+                        }
+                      },
+                    ),
                   ),
-                ),
-              ],
-            );
+                );
           },
         ),
       ),
