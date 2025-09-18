@@ -479,12 +479,10 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
-import 'package:cron/cron.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AdMobBannerProvider with ChangeNotifier {
   final Map<int, dynamic> ads = {};
@@ -516,8 +514,8 @@ class AdMobBannerProvider with ChangeNotifier {
       adErrors.remove(index);
 
       final ad = BannerAd(
-        // adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId,
-        adUnitId: "ca-app-pub-3940256099942544/6300978111",
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId,
+        // adUnitId: "ca-app-pub-3940256099942544/6300978111",
         size: size,
         request: AdRequest(),
         listener: BannerAdListener(
@@ -569,6 +567,7 @@ class AdMobBannerProvider with ChangeNotifier {
       adsLoaded[index] = false;
       adErrors.remove(index);
 
+
       final ad = AdManagerBannerAd(
         adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId,
         sizes: [size],
@@ -583,6 +582,7 @@ class AdMobBannerProvider with ChangeNotifier {
             ads[index] = ad;
             adsLoaded[index] = true;
             ads.removeWhere((key, value) => value == null);
+            notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
@@ -595,9 +595,15 @@ class AdMobBannerProvider with ChangeNotifier {
             latencyData.impressionLogged = DateTime.now();
             _logLatencyMetrics(ad, index);
           },
-          onAdClicked: (ad) async => await _logEvent("onAdClicked"),
-          onAdClosed: (ad) async => await _logEvent("onAdClosed"),
-          onAdOpened: (ad) async => await _logEvent("onAdOpened"),
+          onAdClicked: (ad) async {
+            await _logEvent("onAdClicked");
+          },
+          onAdClosed: (ad) async {
+            await _logEvent("onAdClosed");
+          },
+          onAdOpened: (ad) async {
+            await _logEvent("onAdOpened");
+          },
         ),
       );
 
@@ -611,118 +617,156 @@ class AdMobBannerProvider with ChangeNotifier {
   }
 
   Future<void> loadAd320x50MobBanner(int index, AdSize size) async {
-    autoupdate = (adsBanner320x50.length) + 1;
-    log("ads date ${DateTime.now().second.toString()}  $autoupdate");
     try {
-      adsBanner320x50[autoupdate]?.dispose();
-      adsLoaded320x50[autoupdate!] = false;
-      adErrors320x50.remove(autoupdate);
+      debugPrint("[AdMob] Disposing existing 320x50 ad at index $index");
+      adsBanner320x50[index]?.dispose();
+      adsLoaded320x50[index] = false;
+      adErrors320x50.remove(index);
+
+      debugPrint("[AdMob] Requesting 320x50 banner at index $index with size: $size");
 
       final ad = BannerAd(
-        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobStickBannerId,
+        adUnitId: "ca-app-pub-3940256099942544/6300978111",
+        // adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobStickBannerId,
         size: size,
         request: AdRequest(),
         listener: BannerAdListener(
           onAdLoaded: (ad) {
+            debugPrint("[AdMob] 320x50 ad loaded at index $index");
             source = "AdMob 320x50 Banner";
-            adLatencyData[autoupdate!] = (AdLatencyData()
+            adLatencyData[index] = (AdLatencyData()
               ..requestInitiated = DateTime.now()
               ..responseReceived = DateTime.now()
               ..adCreativeDownloaded = DateTime.now()
               ..adRendered = DateTime.now());
 
-            adsBanner320x50[autoupdate!] = ad as BannerAd;
-            adsLoaded320x50[autoupdate!] = true;
+            adsBanner320x50[index] = ad as BannerAd;
+            adsLoaded320x50[index] = true;
             adsBanner320x50.removeWhere((key, value) => value == null);
+            notifyListeners();
           },
           onAdFailedToLoad: (ad, error) {
+            debugPrint("[AdMob] 320x50 ad failed at index $index: ${error.code} - ${error.message}");
             ad.dispose();
-            adsBanner320x50.remove(autoupdate!);
-            adsLoaded320x50[autoupdate!] = false;
-            adErrors320x50[autoupdate!] = 'Failed: ${error.code} - ${error.message}';
+            adsBanner320x50.remove(index);
+            adsLoaded320x50[index] = false;
+            adErrors320x50[index] = 'Failed: ${error.code} - ${error.message}';
             adsBanner320x50.removeWhere((key, value) => value == null);
-            _checkIfAllAdsFailed(error, autoupdate!);
+            _checkIfAllAdsFailed(error, index);
             // loadAd320x50ManagerBanner(autoupdate!, size); // ✅ fallback
           },
           onAdImpression: (ad) {
-            adLatencyData[autoupdate!]?.impressionLogged = DateTime.now();
-            _logLatencyMetrics(ad, autoupdate!);
-          },
-          onAdClicked: (ad) async => await _logEvent("onAdClicked"),
-          onAdClosed: (ad) async => await _logEvent("onAdClosed"),
-          onAdOpened: (ad) async => await _logEvent("onAdOpened"),
-        ),
-      );
-log("nikhil goud ${adsBanner320x50}");
-      await ad.load();
-    } catch (e) {
-      adErrors320x50[autoupdate!] = 'Exception: ${e.toString()}';
-    } finally {
-      notifyListeners();
-    }
-  }
-
-  Future<void> loadAd320x50ManagerBanner(int index, AdSize size) async {
-    autoupdate = (adsBanner320x50.length) + 1;
-    log("Hello Hai Siva $autoupdate");
-    try {
-      adsBanner320x50[autoupdate!]?.dispose();
-      adsLoaded320x50[autoupdate!] = false;
-      adErrors320x50.remove(autoupdate);
-
-      final ad = AdManagerBannerAd(
-        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerStickBannerId,
-        sizes: [size],
-        request: AdManagerAdRequest(),
-        listener: AdManagerBannerAdListener(
-          onAdLoaded: (ad) {
-            source = "AdManager 320x50 Banner";
-            adLatencyData[autoupdate!] = (AdLatencyData()
-              ..requestInitiated = DateTime.now()
-              ..responseReceived = DateTime.now()
-              ..adCreativeDownloaded = DateTime.now()
-              ..adRendered = DateTime.now());
-
-            adsBanner320x50[autoupdate!] = ad as AdManagerBannerAd;
-            adsLoaded320x50[autoupdate!] = true;
-            adsBanner320x50.removeWhere((key, value) => value == null);
-          },
-          onAdFailedToLoad: (ad, error) {
-            ad.dispose();
-            adsBanner320x50.remove(autoupdate!);
-            adsLoaded320x50[autoupdate!] = false;
-            adErrors320x50[autoupdate!] = 'Failed: ${error.code} - ${error.message}';
-            adsBanner320x50.removeWhere((key, value) => value == null);
-            loadAd320x50MobBanner(autoupdate!, AdSize.banner);
-            _checkIfAllAdsFailed(error, autoupdate!);
-          },
-          onAdImpression: (ad) {
+            debugPrint("[AdMob] Impression logged at index $index");
             adLatencyData[index]?.impressionLogged = DateTime.now();
-            _logLatencyMetrics(ad, autoupdate!);
+            _logLatencyMetrics(ad, index);
           },
-          onAdClicked: (ad) async => await _logEvent("onAdClicked"),
-          onAdClosed: (ad) async => await _logEvent("onAdClosed"),
-          onAdOpened: (ad) async => await _logEvent("onAdOpened"),
+          onAdClicked: (ad) async {
+            debugPrint("[AdMob] Ad clicked at index $index");
+            await _logEvent("onAdClicked");
+          },
+          onAdClosed: (ad) async {
+            debugPrint("[AdMob] Ad closed at index $index");
+            await _logEvent("onAdClosed");
+          },
+          onAdOpened: (ad) async {
+            debugPrint("[AdMob] Ad opened at index $index");
+            await _logEvent("onAdOpened");
+          },
         ),
       );
-      log("nikhil goud ${adsBanner320x50}");
       await ad.load();
+      debugPrint("[AdMob] Ad load initiated at index $index");
     } catch (e) {
+      debugPrint("[AdMob] Exception at index $index: $e");
       adErrors320x50[index] = 'Exception: ${e.toString()}';
     } finally {
       notifyListeners();
     }
   }
 
+
+  Future<void> loadAd320x50ManagerBanner(int index, AdSize size) async {
+    try {
+      debugPrint("[AdManager 320x50] Disposing existing ad at index $index");
+      adsBanner320x50[index]?.dispose();
+      adsLoaded320x50[index] = false;
+      adErrors320x50.remove(index);
+
+      debugPrint("[AdManager 320x50] Requesting banner at index $index with size: $size");
+
+      final ad = AdManagerBannerAd(
+        adUnitId: "/6499/example/banner",
+        sizes: [size],
+        request: AdManagerAdRequest(),
+        listener: AdManagerBannerAdListener(
+          onAdLoaded: (ad) {
+            debugPrint("[AdManager 320x50] Ad loaded at index $index");
+            source = "AdManager 320x50 Banner";
+            adLatencyData[index] = (AdLatencyData()
+              ..requestInitiated = DateTime.now()
+              ..responseReceived = DateTime.now()
+              ..adCreativeDownloaded = DateTime.now()
+              ..adRendered = DateTime.now());
+
+            adsBanner320x50[index] = ad as AdManagerBannerAd;
+            adsLoaded320x50[index] = true;
+            adsBanner320x50.removeWhere((key, value) => value == null);
+
+            notifyListeners();
+          },
+          onAdFailedToLoad: (ad, error) {
+            debugPrint("[AdManager 320x50] Failed to load at index $index: ${error.code} - ${error.message}");
+            ad.dispose();
+            adsBanner320x50.remove(index);
+            adsLoaded320x50[index] = false;
+            adErrors320x50[index] = 'Failed: ${error.code} - ${error.message}';
+            adsBanner320x50.removeWhere((key, value) => value == null);
+
+            debugPrint("[AdManager 320x50] Falling back to AdMob at index $index");
+            loadAd320x50MobBanner(index, AdSize.banner);
+
+            _checkIfAllAdsFailed(error, index);
+          },
+          onAdImpression: (ad) {
+            debugPrint("[AdManager 320x50] Impression logged at index $index");
+            adLatencyData[index]?.impressionLogged = DateTime.now();
+            _logLatencyMetrics(ad, index);
+          },
+          onAdClicked: (ad) async {
+            debugPrint("[AdManager 320x50] Ad clicked at index $index");
+            await _logEvent("onAdClicked");
+          },
+          onAdClosed: (ad) async {
+            debugPrint("[AdManager 320x50] Ad closed at index $index");
+            await _logEvent("onAdClosed");
+          },
+          onAdOpened: (ad) async {
+            debugPrint("[AdManager 320x50] Ad opened at index $index");
+            await _logEvent("onAdOpened");
+          },
+        ),
+      );
+
+      await ad.load();
+      debugPrint("[AdManager 320x50] Load initiated at index $index");
+    } catch (e) {
+      debugPrint("[AdManager 320x50] Exception at index $index: $e");
+      adErrors320x50[index] = 'Exception: ${e.toString()}';
+    } finally {
+      notifyListeners();
+    }
+  }
+
+
   Future<void> _logEvent(String name) async {
     await FirebaseAnalytics.instance.logEvent(name: name, parameters: {
       "event": name,
-      "platform":Platform.isIOS?"ios":"android",
+      "platform": Platform.isIOS ? "ios" : "android",
       "timestamp": DateTime.now().toString(),
     });
   }
 
-  Future<void> _checkIfAllAdsFailed( error, index) async {
+  Future<void> _checkIfAllAdsFailed(error, index) async {
     log("error ads imple $error");
     final latency = adLatencyData[index];
 
@@ -737,7 +781,7 @@ log("nikhil goud ${adsBanner320x50}");
         "sdkRequestStartTime": sdkReadyLatency.toString(),
         "sdkRequestReceivedTime": renderLatency.toString(),
         "adsRenderingTime": "0",
-        "platform":Platform.isIOS?"ios":"android",
+        "platform": Platform.isIOS ? "ios" : "android",
         "createAt": DateTime.now().toString(),
         "adResponse": error.toString(),
       },
@@ -747,8 +791,6 @@ log("nikhil goud ${adsBanner320x50}");
 
   void _logLatencyMetrics(Ad ad, int index) async {
     final analytics = FirebaseAnalytics.instance;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? userId = prefs.getString("userId");
     final latency = adLatencyData[index];
 
     if (latency == null) {
@@ -764,7 +806,6 @@ log("nikhil goud ${adsBanner320x50}");
 
     final totalLatency = (latency.impressionLogged != null && latency.requestInitiated != null) ? latency.impressionLogged!.difference(latency.requestInitiated!).inMilliseconds : null;
 
-
     await analytics.logEvent(
       name: "ads_success",
       parameters: {
@@ -774,7 +815,7 @@ log("nikhil goud ${adsBanner320x50}");
         "adsRenderingTime": renderLatency?.toString() ?? "",
         "createAt": DateTime.now().toString(),
         "adResponse": "success",
-        "platform":Platform.isIOS?"ios":"android",
+        "platform": Platform.isIOS ? "ios" : "android",
       },
     );
     await analytics.logEvent(
@@ -791,14 +832,12 @@ log("nikhil goud ${adsBanner320x50}");
         "latency_render": renderLatency?.toString() ?? "",
         "latency_total": totalLatency?.toString() ?? "",
         "createdAt": DateTime.now().toIso8601String(),
-        "platform":Platform.isIOS?"ios":"android",
+        "platform": Platform.isIOS ? "ios" : "android",
       },
     );
   }
 
-  int? autoupdate;
-
-  Cron? _cron;
+  // Cron? _cron;
 
   // Future<void> autoBannerCall() async {
   //
@@ -809,10 +848,10 @@ log("nikhil goud ${adsBanner320x50}");
   //   });
   // }
 
-  void cronClose() async {
-    await _cron?.close();
-    _cron = null; // allow restart
-  }
+  // void cronClose() async {
+  //   await _cron?.close();
+  //   _cron = null; // allow restart
+  // }
 
   void adsLoad() {
     loadAdMobBanner(1, AdSize.mediumRectangle);
@@ -821,7 +860,7 @@ log("nikhil goud ${adsBanner320x50}");
 
   void adsDispose() {
     ads.clear();
-    adsBanner320x50.clear();
+    // adsBanner320x50.clear();
   }
 }
 

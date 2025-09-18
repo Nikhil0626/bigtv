@@ -15,14 +15,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../services/app_update_servuce.dart';
 import '../../../services/daily_dialog_manager.dart';
 import '../../../services/permission_handler_services.dart';
 import '../../../services/webengage_notification.dart';
+import '../../ad_manager_screen/ad_provider/banner_ads_provider.dart';
 import '../../events_data/event_repo.dart';
-import '../../referral_screen/referral_provider/referral_provider.dart';
 import '../../settings_screen/settings_view/settings_view.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_card.dart';
@@ -41,6 +40,10 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
+      bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
+    });
 
     homeProvider?.isHomeScreen = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -104,14 +107,12 @@ class _HomeViewState extends State<HomeView> {
                     children: [MainScreenCard(), PapersScreenCard(), ReelsScreen(), KeepAlivePage(keepAlive: true, child: SettingsView())],
                   ),
                   if (homeProvider.isBottomEnable && context.watch<SettingsProvider>().bannerAdsLoading != BannerAdsLoading.success)
-                    Positioned(
-                      left: 16,
-                      right: 16,
-                      bottom: 6,
+                    Align(
+                     alignment: Alignment.bottomCenter,
                       child: SafeArea(
-                        minimum: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                        minimum: EdgeInsets.only(left: 16,right: 16, bottom: 70),
                         child: Container(
-                          height: 58, // reduced height
+                          height: 56, // reduced height
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
@@ -219,44 +220,41 @@ class _HomeViewState extends State<HomeView> {
                         ),
                       ),
                     ),
-                ],
-              ),
-              bottomNavigationBar: Consumer<AdMobBannerProvider>(
-                builder: (_, adMobBannerProvider, __) {
-                  final currentIndex = adMobBannerProvider.currentPageIndex;
-                  final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
-                  final adsLoaded = adMobBannerProvider.adsLoaded320x50;
-
-                  log("sghksugherkuhgeriuh ${adMobBannerProvider.adsBanner320x50}");
-
-                  if (adsList.isEmpty) {
-                    return const SizedBox.shrink();
-                  } else if ((currentIndex + 1) % 5 == 0) {
-                    return const SizedBox.shrink();
-                  } else {
-                    log("siva new ${adsList.last}");
-                    return adsLoaded[adsList.length-1] == true
-                        ? Padding(
-                          padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-                          child: Container(
+                  Positioned(
+                    left: 16,
+                    right: 16,
+                    bottom: 6,
+                    child: Consumer<AdMobBannerProvider>(
+                      builder: (_, adMobBannerProvider, __) {
+                        final currentIndex = adMobBannerProvider.currentPageIndex;
+                        final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
+                        if (adsList.isEmpty) {
+                          return const SizedBox.shrink();
+                        } else if ((currentIndex + 1) % 5 == 0) {
+                          return const SizedBox.shrink();
+                        } else {
+                          log("siva new ${adsList.last}");
+                          return  Container(
+                            height: 56,
+                            width: MediaQuery.of(context).size.width,
+                            color: Colors.white,
+                            alignment: Alignment.center,
+                            child: Container(
                               height: 56,
-                              width: MediaQuery.of(context).size.width,
+                              width: 320,
                               color: Colors.white,
                               alignment: Alignment.center,
-                              child: Container(
-                                height: 56,
-                                width: 320,
-                                color: Colors.white,
-                                alignment: Alignment.center,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                  child: Center(child: AdWidget(ad: adsList.last)),
-                                ),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 2.0),
+                                child: Center(child: AdWidget(ad: adsList[0])),
                               ),
                             ),
-                        ):SizedBox.shrink();
-                  }
-                },
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ],
               ),
             );
           },

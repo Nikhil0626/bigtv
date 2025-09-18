@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_no_data.dart';
@@ -43,7 +45,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
       context.read<HomeProvider>().getAllPost().then(
         (value) {
           // bannerAdsProvider?.loadAd320x50MobBanner(1, AdSize.banner);
-          bannerAdsProvider?.loadAd320x50ManagerBanner(1, AdSize.banner);
+          // bannerAdsProvider?.loadAd320x50ManagerBanner(1, AdSize.banner);
 
           bannerAdsProvider?.adsLoad();
           // Future.delayed(
@@ -82,9 +84,9 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     context.read<HomeProvider>().isBannerAdLoaded(false);
-    return Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
-      return Scaffold(
-        body: SafeArea(
+    return Scaffold(
+      body: Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
+        return SafeArea(
           child: Center(
             child: homeProvider.isHomeLoading
                 ? HomeShimmer()
@@ -152,9 +154,10 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                     ],
                   ),
           ),
-        ),
-      );
-    });
+        );
+      }),
+
+    );
   }
 
   int currentIndexs = 0;
