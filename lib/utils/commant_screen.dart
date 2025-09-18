@@ -14,7 +14,8 @@ import 'date_format.dart';
 void showComments(BuildContext context, postId,postTitle) {
   showModalBottomSheet(
     context: context,
-    isScrollControlled: true, // Allows BottomSheet to resize with keyboard
+    isScrollControlled: true,
+    enableDrag: false,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
     ),

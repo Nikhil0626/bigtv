@@ -77,7 +77,9 @@ class _VideoPreview extends State<VideoPreview> {
                   },
                   bottomActions: [
                     CurrentPosition(),
-                    ProgressBar(isExpanded: true),
+                    ProgressBar(
+                        isExpanded: true,
+                    colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red)),
                     RemainingDuration(),
                     IconButton(
                       icon: Icon(

@@ -85,7 +85,10 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                               if (FocusScope.of(context).hasFocus) {
                                 FocusScope.of(context).unfocus();
                               }
+                              _handlePageChanged(value);
+
                               final adKeys = context.read<AdMobBannerProvider>().ads.length;
+
                               context.read<AdMobBannerProvider>().changePageIndex(value);
 
                               log(" Last Index of ads data $adKeys ----- $value --- ${adKeys * 5} ---${context.read<AdMobBannerProvider>().ads}");
@@ -398,6 +401,35 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
       ],
     );
   }
+
+  void _handlePageChanged(int value) {
+
+    final adMobProvider = context.read<AdMobBannerProvider>();
+    final adStickyKeys = adMobProvider.adsBanner320x50.length;
+
+    adMobProvider.changePageIndex(value);
+
+    log("Last Index of Sticky ads data $adStickyKeys ----- $value --- ${adStickyKeys * 4} --- ${adMobProvider.adsBanner320x50}");
+
+    if (value == (adStickyKeys * 3)) {
+      int? lastStickyKey = adMobProvider.adsBanner320x50.keys.isNotEmpty
+          ? adMobProvider.adsBanner320x50.keys.last
+          : adStickyKeys;
+
+      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 1, AdSize.banner);
+      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 2, AdSize.banner);
+    }
+
+    else if (value == 1 && adMobProvider.adsBanner320x50.isNotEmpty) {
+      int? lastStickyKey = 0;
+      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 1, AdSize.banner);
+      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 2, AdSize.banner);
+
+    }
+  }
 }
+
+
+
 
 

@@ -43,7 +43,7 @@ Future<void> main() async {
   EventCron().start();
   MobileAds.instance.initialize();
 
-  // MobileAds.instance.updateRequestConfiguration(RequestConfiguration(testDeviceIds: ['A8EDF2EE-E323-425A-813D-DFB5DB42F6AF']));
+  MobileAds.instance.updateRequestConfiguration(RequestConfiguration(testDeviceIds: ['E064152FE8CD9699E163CAFE804EB2C7']));
   initPlugin();
   getReferrerFromPlayStore();
   await EasyLocalization.ensureInitialized();

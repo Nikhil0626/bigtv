@@ -148,7 +148,7 @@ class _SettingsViewState extends State<SettingsView> {
                     );
                   }),
                   height(height: 5.h),
-                  _buildSettingsRow(context, "Share_our_app.svg", "Refer And Earn", () {
+                  _buildSettingsRow(context, "HandCoinss.svg", "Refer And Earn", () {
                     // EventRepo().addEvent({
                     //   "visitPageName": "Terms & Conditions",
                     //   "createAt": DateTime.now().toString(),
@@ -163,8 +163,8 @@ class _SettingsViewState extends State<SettingsView> {
                         ),
                       );
                     }
-
-                  }),
+                  }
+                  ),
                   height(height: 5.h),
                   _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy", () {
                     EventRepo().addEvent({
