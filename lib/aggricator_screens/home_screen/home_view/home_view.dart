@@ -94,168 +94,169 @@ class _HomeViewState extends State<HomeView> {
         },
         child: Consumer<HomeProvider>(
           builder: (_, homeProvider, __) {
-            return Scaffold(
-              backgroundColor: Colors.white,
-              body: Stack(
-                children: [
-                  PageView(
-                    controller: homeProvider.homePageController,
-                    physics: NeverScrollableScrollPhysics(),
-                    onPageChanged: (index) {
-                      homeProvider.onItemTapped(index);
-                    },
-                    children: [MainScreenCard(), PapersScreenCard(), ReelsScreen(), KeepAlivePage(keepAlive: true, child: SettingsView())],
-                  ),
-                  if (homeProvider.isBottomEnable && context.watch<SettingsProvider>().bannerAdsLoading != BannerAdsLoading.success)
-                    Align(
-                     alignment: Alignment.bottomCenter,
-                      child: SafeArea(
-                        minimum: EdgeInsets.only(left: 16,right: 16, bottom: 70),
-                        child: Container(
-                          height: 56, // reduced height
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 6,
-                                offset: Offset(0, 2),
+            return Column(
+              children: [
+                Expanded(
+                  child: Stack(
+                    children: [
+                      PageView(
+                        controller: homeProvider.homePageController,
+                        physics: NeverScrollableScrollPhysics(),
+                        onPageChanged: (index) {
+                          homeProvider.onItemTapped(index);
+                        },
+                        children: [MainScreenCard(), PapersScreenCard(), ReelsScreen(), KeepAlivePage(keepAlive: true, child: SettingsView())],
+                      ),
+                      if (homeProvider.isBottomEnable && context.watch<SettingsProvider>().bannerAdsLoading != BannerAdsLoading.success)
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: SafeArea(
+                            minimum: EdgeInsets.only(left: 16,right: 16, bottom:4),
+                            child: Container(
+                              height: 56, // reduced height
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black12,
+                                    blurRadius: 6,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(20),
-                            child: BottomNavigationBar(
-                              backgroundColor: Colors.white,
-                              type: BottomNavigationBarType.fixed,
-                              currentIndex: homeProvider.selectedIndex,
-                              onTap: (index) {
-                                homeProvider.isTabChange();
-                                homeProvider.homePageController.jumpToPage(index);
-                                homeProvider.pageChange(isValue: true);
-                                if (index == 0) {
-                                  context.read<HomeProvider>().setSelectedTagId(0);
-                                  EventRepo().addEvent({
-                                    "aiTagName": "news",
-                                    "aiTagId": "-1",
-                                    "createAt": DateTime.now().toString(),
-                                  }, "ai_tag_click");
-                                } else if (index == 1) {
-                                  EventRepo().addEvent({
-                                    "aiTagName": "ePaper",
-                                    "aiTagId": "-2",
-                                    "createAt": DateTime.now().toString(),
-                                  }, "ai_tag_click");
-                                } else if (index == 2) {
-                                  EventRepo().addEvent({
-                                    "aiTagName": "reels",
-                                    "aiTagId": "-3",
-                                    "createAt": DateTime.now().toString(),
-                                  }, "ai_tag_click");
-                                } else if (index == 3) {
-                                  EventRepo().addEvent({
-                                    "aiTagName": "more",
-                                    "aiTagId": "-4",
-                                    "createAt": DateTime.now().toString(),
-                                  }, "ai_tag_click");
-                                }
-                                setState(() {});
-                              },
-                              selectedItemColor: AppColors.appButtonColor,
-                              unselectedItemColor: AppColors.bodyTextColor,
-                              selectedFontSize: 12,
-                              unselectedFontSize: 12,
-                              iconSize: 22,
-                              showSelectedLabels: true,
-                              showUnselectedLabels: true,
-                              items: [
-                                BottomNavigationBarItem(
-                                  icon: SvgPicture.asset(
-                                    "assets/new_app_icon/bytes.svg",
-                                    height: 22,
-                                    colorFilter: ColorFilter.mode(
-                                      homeProvider.selectedIndex == 0 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                                      BlendMode.srcIn,
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: BottomNavigationBar(
+                                  backgroundColor: Colors.white,
+                                  type: BottomNavigationBarType.fixed,
+                                  currentIndex: homeProvider.selectedIndex,
+                                  onTap: (index) {
+                                    homeProvider.isTabChange();
+                                    homeProvider.homePageController.jumpToPage(index);
+                                    homeProvider.pageChange(isValue: true);
+                                    if (index == 0) {
+                                      context.read<HomeProvider>().setSelectedTagId(0);
+                                      EventRepo().addEvent({
+                                        "aiTagName": "news",
+                                        "aiTagId": "-1",
+                                        "createAt": DateTime.now().toString(),
+                                      }, "ai_tag_click");
+                                    } else if (index == 1) {
+                                      EventRepo().addEvent({
+                                        "aiTagName": "ePaper",
+                                        "aiTagId": "-2",
+                                        "createAt": DateTime.now().toString(),
+                                      }, "ai_tag_click");
+                                    } else if (index == 2) {
+                                      EventRepo().addEvent({
+                                        "aiTagName": "reels",
+                                        "aiTagId": "-3",
+                                        "createAt": DateTime.now().toString(),
+                                      }, "ai_tag_click");
+                                    } else if (index == 3) {
+                                      EventRepo().addEvent({
+                                        "aiTagName": "more",
+                                        "aiTagId": "-4",
+                                        "createAt": DateTime.now().toString(),
+                                      }, "ai_tag_click");
+                                    }
+                                    setState(() {});
+                                  },
+                                  selectedItemColor: AppColors.appButtonColor,
+                                  unselectedItemColor: AppColors.bodyTextColor,
+                                  selectedFontSize: 12,
+                                  unselectedFontSize: 12,
+                                  iconSize: 22,
+                                  showSelectedLabels: true,
+                                  showUnselectedLabels: true,
+                                  items: [
+                                    BottomNavigationBarItem(
+                                      icon: SvgPicture.asset(
+                                        "assets/new_app_icon/bytes.svg",
+                                        height: 22,
+                                        colorFilter: ColorFilter.mode(
+                                          homeProvider.selectedIndex == 0 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                      label: 'news'.tr(),
                                     ),
-                                  ),
-                                  label: 'news'.tr(),
-                                ),
-                                BottomNavigationBarItem(
-                                  icon: SvgPicture.asset(
-                                    "assets/new_app_icon/paper.svg",
-                                    height: 22,
-                                    colorFilter: ColorFilter.mode(
-                                      homeProvider.selectedIndex == 1 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                                      BlendMode.srcIn,
+                                    BottomNavigationBarItem(
+                                      icon: SvgPicture.asset(
+                                        "assets/new_app_icon/paper.svg",
+                                        height: 22,
+                                        colorFilter: ColorFilter.mode(
+                                          homeProvider.selectedIndex == 1 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                      label: 'ePaper'.tr(),
                                     ),
-                                  ),
-                                  label: 'ePaper'.tr(),
-                                ),
-                                BottomNavigationBarItem(
-                                  icon: SvgPicture.asset(
-                                    "assets/new_app_icon/reel.svg",
-                                    height: 22,
-                                    colorFilter: ColorFilter.mode(
-                                      homeProvider.selectedIndex == 2 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                                      BlendMode.srcIn,
+                                    BottomNavigationBarItem(
+                                      icon: SvgPicture.asset(
+                                        "assets/new_app_icon/reel.svg",
+                                        height: 22,
+                                        colorFilter: ColorFilter.mode(
+                                          homeProvider.selectedIndex == 2 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                      label: 'reels'.tr(),
                                     ),
-                                  ),
-                                  label: 'reels'.tr(),
-                                ),
-                                BottomNavigationBarItem(
-                                  icon: SvgPicture.asset(
-                                    "assets/new_app_icon/menu.svg",
-                                    height: 22,
-                                    colorFilter: ColorFilter.mode(
-                                      homeProvider.selectedIndex == 3 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                                      BlendMode.srcIn,
+                                    BottomNavigationBarItem(
+                                      icon: SvgPicture.asset(
+                                        "assets/new_app_icon/menu.svg",
+                                        height: 22,
+                                        colorFilter: ColorFilter.mode(
+                                          homeProvider.selectedIndex == 3 ? AppColors.appButtonColor : AppColors.bodyTextColor,
+                                          BlendMode.srcIn,
+                                        ),
+                                      ),
+                                      label: 'more'.tr(),
                                     ),
-                                  ),
-                                  label: 'more'.tr(),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                  Positioned(
-                    left: 16,
-                    right: 16,
-                    bottom: 6,
-                    child: Consumer<AdMobBannerProvider>(
-                      builder: (_, adMobBannerProvider, __) {
-                        final currentIndex = adMobBannerProvider.currentPageIndex;
-                        final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
-                        if (adsList.isEmpty) {
-                          return const SizedBox.shrink();
-                        } else if ((currentIndex + 1) % 5 == 0) {
-                          return const SizedBox.shrink();
-                        } else {
-                          log("siva new ${adsList.last}");
-                          return  Container(
-                            height: 56,
-                            width: MediaQuery.of(context).size.width,
+
+                    ],
+                  ),
+                ),
+                SafeArea(
+                  child: Consumer<AdMobBannerProvider>(
+                    builder: (_, adMobBannerProvider, __) {
+                      final currentIndex = adMobBannerProvider.currentPageIndex;
+                      final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
+                      if (adsList.isEmpty) {
+                        return const SizedBox.shrink();
+                      } else if ((currentIndex + 1) % 5 == 0) {
+                        return const SizedBox.shrink();
+                      } else {
+                        log("siva new ${adsList.last}");
+                        return  Container(
+                          height: 50,
+                          width: MediaQuery.of(context).size.width,
+                          color: Colors.red,
+                          alignment: Alignment.center,
+                          child: Container(
+                            height: 50,
+                            width: 320,
                             color: Colors.white,
                             alignment: Alignment.center,
-                            child: Container(
-                              height: 56,
-                              width: 320,
-                              color: Colors.white,
-                              alignment: Alignment.center,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                child: Center(child: AdWidget(ad: adsList[0])),
-                              ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2.0),
+                              child: Center(child: AdWidget(ad: adsList[0])),
                             ),
-                          );
-                        }
-                      },
-                    ),
+                          ),
+                        );
+                      }
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         ),
