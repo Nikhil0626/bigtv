@@ -237,7 +237,6 @@ class _HomeViewState extends State<HomeView> {
                           return  Container(
                             height: 50,
                             width: MediaQuery.of(context).size.width,
-                            color: Colors.red,
                             alignment: Alignment.center,
                             child: Container(
                               height: 50,

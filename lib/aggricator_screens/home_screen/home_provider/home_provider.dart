@@ -17,6 +17,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:video_player/video_player.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
@@ -57,6 +58,7 @@ class HomeProvider extends ChangeNotifier {
   bool isMuted = false;
   bool isImageAdClose = false;
   late YoutubePlayerController controller;
+  late VideoPlayerController videoController;
   int? _selectedTagId;
 
   int? get selectedTagId => _selectedTagId;
@@ -124,11 +126,31 @@ class HomeProvider extends ChangeNotifier {
     // notifyListeners();
   }
 
+  // void videoInitial(String url) {
+  //   videoController = VideoPlayerController.network(url)
+  //     ..initialize().then((_) {
+  //       videoController.setVolume(isMuted ? 0.0 : 1.0);
+  //       videoController.setLooping(true);
+  //       notifyListeners();
+  //     })
+  //     ..addListener(() {
+  //       if (videoController.value.isPlaying != isPlaying) {
+  //         isPlaying = videoController.value.isPlaying;
+  //         notifyListeners();
+  //       }
+  //     });
+  // }
+
   void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
     controller.dispose();
     notifyListeners();
   }
+
+  // void videoDispose() {
+  //   videoController.dispose();
+  //   notifyListeners();
+  // }
 
   void setSelectedTagId(int id) {
     _selectedTagId = id;
@@ -288,12 +310,12 @@ class HomeProvider extends ChangeNotifier {
       adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
 
      //Stick Ads
-     //  adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
-     //  adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
+      adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
+      adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
 
 
-      // getImageAdsList.addAll(response.data['ads_list']);
-      // getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
+      getImageAdsList.addAll(response.data['ads_list']);
+      getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
       log(" hello hai ${adMobBannerId.toString()} --- $adMobNativeId");
       if (isWebView) {
         getAllPostList.insert(0, {

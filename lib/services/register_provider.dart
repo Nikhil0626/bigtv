@@ -1,3 +1,4 @@
+import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
@@ -33,5 +34,6 @@ class AppProviders {
     ChangeNotifierProvider<AdProvider>(create: (_) => AdProvider()),
     ChangeNotifierProvider<AdsContestProvider>(create: (_) => AdsContestProvider()),
     ChangeNotifierProvider<AdMobBannerProvider>(create: (_) => AdMobBannerProvider()),
+    ChangeNotifierProvider<VideoProvider>(create: (_) => VideoProvider()),
   ];
 }

@@ -20,6 +20,7 @@ class FilterView extends StatefulWidget {
 
 class _FilterViewState extends State<FilterView> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  List tabNames = ['Topics', 'Regions'];
 
   @override
   void initState() {
@@ -75,22 +76,48 @@ class _FilterViewState extends State<FilterView> with SingleTickerProviderStateM
       ),
       body: Column(
         children: [
+          // TabBar(
+          //   controller: _tabController,
+          //   isScrollable: true,
+          //   padding: EdgeInsets.zero,
+          //   //labelPadding: const EdgeInsets.only(right: 12),
+          //   indicatorPadding: EdgeInsets.zero,
+          //   tabs: [
+          //     Tab(child: Text('Topics'),),
+          //     Tab(child: Text('Regions'),),
+          //   ],
+          //   unselectedLabelStyle: newAppFont(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w400),
+          //   labelStyle: newAppFont(color:AppColors.appButtonColor, fontSize: 14, fontWeight: FontWeight.w600),
+          //   unselectedLabelColor: AppColors.bodyTextColor,
+          //   labelColor: AppColors.appButtonColor,
+          //   indicatorColor: AppColors.appButtonColor,
+          // ),
           TabBar(
-            controller: _tabController,
             isScrollable: true,
+            controller: _tabController,
+            tabAlignment: TabAlignment.start,
             padding: EdgeInsets.zero,
-            //labelPadding: const EdgeInsets.only(right: 12),
-            indicatorPadding: EdgeInsets.zero,
-            tabs: [
-              Tab(child: Text('Topics'),),
-              Tab(child: Text('Regions'),),
-            ],
             unselectedLabelStyle: newAppFont(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w400),
             labelStyle: newAppFont(color:AppColors.appButtonColor, fontSize: 14, fontWeight: FontWeight.w600),
             unselectedLabelColor: AppColors.bodyTextColor,
             labelColor: AppColors.appButtonColor,
             indicatorColor: AppColors.appButtonColor,
+            tabs: List.generate(
+              tabNames.length,
+                  (tIndex) => Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 4.0,
+                  horizontal: 12,
+                ),
+                child: Text(
+                  tabNames[tIndex],
+                  // style: newAppFont(color: Colors.grey, fontSize: 14, fontWeight: FontWeight.w400),
+                ),
+              ),
+            ),
+
           ),
+
           Expanded(child: TabBarView(controller: _tabController, children: [
             UpdateCategoriesView(),
             UpdateRegionsView(),

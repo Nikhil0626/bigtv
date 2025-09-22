@@ -298,7 +298,8 @@
 //       adErrors320x50.remove(index);
 //
 //       final ad = BannerAd(
-//         adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId, // Make sure this is a AdMob unit ID (starts with ca-app-pub-)
+//         // adUnitId: "ca-app-pub-3940256099942544/6300978111",
+//         adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobStickBannerId, // Make sure this is a AdMob unit ID (starts with ca-app-pub-)
 //         size: size,
 //         request: AdRequest(),
 //         listener: BannerAdListener(
@@ -316,7 +317,7 @@
 //             adsBanner320x50.remove(index);
 //             adsLoaded320x50[index] = false;
 //             adErrors320x50[index] = 'Failed: ${error.code} - ${error.message}';
-//             debugPrint('❌ AdMob 320x50 Ad failed at index $index: ${error.message}');
+//             debugPrint('❌ AdMob 320x50 Ad failed at index Nikhil $index: ${error.message}');
 //
 //             // Fallback to Ad Manager
 //             loadAd320x50ManagerBanner(index, size);
@@ -349,7 +350,8 @@
 //       adErrors320x50.remove(index);
 //
 //       final ad = AdManagerBannerAd(
-//         adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId, // Make sure this is an Ad Manager unit ID (/...)
+//         // adUnitId: "	/21775744923/example/fixed-size-banner",
+//         adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerStickBannerId, // Make sure this is an Ad Manager unit ID (/...)
 //         sizes: [size],
 //         request: AdManagerAdRequest(),
 //         listener: AdManagerBannerAdListener(
@@ -367,7 +369,7 @@
 //             adsBanner320x50.remove(index);
 //             adsLoaded320x50[index] = false;
 //             adErrors320x50[index] = 'Failed: ${error.code} - ${error.message}';
-//             debugPrint('❌ Ad Manager 320x50 Ad failed at index $index: ${error.message}');
+//             debugPrint('❌ Ad Manager 320x50 Ad failed at index siva1 $index: ${error.message}');
 //             // autoBannerCall();
 //             notifyListeners();
 //           },
@@ -389,25 +391,27 @@
 //     }
 //   }
 //
-//   int? autoupdate;
-//   Cron? _cron;
 //
-//   Future<void> autoBannerCall() async {
-//     autoupdate = (adsBanner320x50.length) + 1;
 //
-//     // If already closed, create a new instance
-//     _cron ??= Cron();
-//
-//     _cron!.schedule(Schedule.parse('*/30 * * * * *'), () async {
-//       log("loadBothAdsInParallel");
-//       loadAd320x50MobBanner(autoupdate!, AdSize.banner);
-//     });
-//   }
-//
-//   void cronClose() async {
-//     await _cron?.close();
-//     _cron = null; // allow restart
-//   }
+//   // int? autoupdate;
+//   // Cron? _cron;
+//   //
+//   // Future<void> autoBannerCall() async {
+//   //   autoupdate = (adsBanner320x50.length) + 1;
+//   //
+//   //   // If already closed, create a new instance
+//   //   _cron ??= Cron();
+//   //
+//   //   _cron!.schedule(Schedule.parse('*/30 * * * * *'), () async {
+//   //     log("loadBothAdsInParallel");
+//   //     loadAd320x50MobBanner(autoupdate!, AdSize.banner);
+//   //   });
+//   // }
+//   //
+//   // void cronClose() async {
+//   //   await _cron?.close();
+//   //   _cron = null; // allow restart
+//   // }
 //
 //   String? source = "";
 //
@@ -493,6 +497,11 @@ class AdMobBannerProvider with ChangeNotifier {
   final Map<int, AdSize> adSizes = {};
   final Map<int, String> adErrors = {};
   final Map<int, String> adErrors320x50 = {};
+  DateTime? requestInitiated;
+  DateTime? adCreativeDownloaded;
+  DateTime? adRendered;
+  DateTime? responseReceived;
+  DateTime? impressionLogged;
 
   int currentPageIndex = 0;
   String? source = "";
@@ -500,6 +509,116 @@ class AdMobBannerProvider with ChangeNotifier {
   void changePageIndex(int val) {
     currentPageIndex = val;
     notifyListeners();
+  }
+
+  Future<void> loadAdMobNative(int index, AdSize mediumRectangle) async {
+    log(" Load AdMob Native ${ mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId} -- $index ");
+    try {
+      requestInitiated = DateTime.now();
+
+      ads[index]?.dispose();
+
+      final latencyData = AdLatencyData()..requestInitiated = DateTime.now();
+      adLatencyData[index] = latencyData;
+      adsLoaded[index] = false;
+      adErrors.remove(index);
+      final ad = NativeAd(
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId,
+        nativeAdOptions: NativeAdOptions(
+          mediaAspectRatio: MediaAspectRatio.any,
+        ),
+        factoryId: 'adFactoryExample',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            responseReceived = DateTime.now();
+            adCreativeDownloaded = DateTime.now();
+            adRendered = DateTime.now();
+            if (ad != null) {
+              ads[index] = ad as NativeAd;
+              adsLoaded[index] = true;
+            }
+            ads.removeWhere((key, value) => value == null);
+            notifyListeners();
+          },
+          onAdFailedToLoad: (ad, error) {
+            ad.dispose();
+            ads[index] = null;
+            adsLoaded[index] = false;
+            adErrors[index] = 'Failed: ${error.code} - ${error.message}';
+            debugPrint('❌ Ad failed at $index: ${error.message}');
+            notifyListeners();
+          },
+          onAdImpression: (ad) async {
+
+          },
+        ),
+        request: AdRequest(),
+      );
+
+
+      if (ad != null) {
+        ads[index] = ad;
+        await ad.load();
+      }
+
+      debugPrint('🔄 Started loading native template ad at index $index');
+    } catch (e) {
+      debugPrint('⚠️ Exception loading native ad at $index: $e');
+      adErrors[index] = 'Exception: $e';
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadAdManagerNative(int index, AdSize size) async {
+    try {
+      ads[index]?.dispose();
+
+      adsLoaded[index] = false;
+      adErrors.remove(index);
+      NativeAdOptions nativeAdOptions = NativeAdOptions(
+        mediaAspectRatio: MediaAspectRatio.any,
+      );
+      final ad = NativeAd(
+        adUnitId: "/22387492205,23277683599/com.chotanews.Banner1.1747894381",
+        // adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId,
+        nativeAdOptions: nativeAdOptions,
+        factoryId: 'adFactoryExample',
+        listener: NativeAdListener(
+          onAdLoaded: (ad) {
+            responseReceived = DateTime.now();
+            adCreativeDownloaded = DateTime.now();
+            adRendered = DateTime.now();
+            if (ad != null) {
+              ads[index] = ad as NativeAd;
+              adsLoaded[index] = true;
+            }
+            ads.removeWhere((key, value) => value == null);
+            notifyListeners();
+          },
+          onAdFailedToLoad: (ad, error) {
+            ad.dispose();
+            ads[index] = null;
+            adsLoaded[index] = false;
+            adErrors[index] = 'Failed: ${error.code} - ${error.message}';
+            debugPrint('❌ Ad failed at $index: ${error.message}');
+            notifyListeners();
+          },
+          onAdImpression: (ad) async {
+
+          },
+        ),
+        request: AdRequest(),
+      );
+      if (ad != null) {
+        ads[index] = ad;
+        await ad.load();
+      }
+      debugPrint('🔄 Started loading ad at index $index');
+    } catch (e) {
+      debugPrint('⚠️ Exception loading ad at index $index: $e');
+      adErrors[index] = 'Exception: ${e.toString()}';
+      notifyListeners();
+    }
   }
 
   Future<void> loadAdMobBanner(int index, AdSize size) async {
@@ -570,6 +689,7 @@ class AdMobBannerProvider with ChangeNotifier {
 
       final ad = AdManagerBannerAd(
         adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId,
+        // adUnitId: "	/21775744923/example/fixed-size-banner",
         sizes: [size],
         request: AdManagerAdRequest(),
         listener: AdManagerBannerAdListener(
@@ -695,7 +815,8 @@ class AdMobBannerProvider with ChangeNotifier {
       debugPrint("[AdManager 320x50] Requesting banner at index $index with size: $size");
 
       final ad = AdManagerBannerAd(
-        adUnitId: "/6499/example/banner",
+        // adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerStickBannerId,
+        adUnitId: "	/21775744923/example/fixed-size-banner",
         sizes: [size],
         request: AdManagerAdRequest(),
         listener: AdManagerBannerAdListener(
@@ -856,6 +977,8 @@ class AdMobBannerProvider with ChangeNotifier {
   void adsLoad() {
     loadAdMobBanner(1, AdSize.mediumRectangle);
     loadAdManagerBanner(2, AdSize.mediumRectangle);
+    loadAdMobNative(3, AdSize.mediumRectangle);
+    loadAdManagerNative(4, AdSize.mediumRectangle);
   }
 
   void adsDispose() {

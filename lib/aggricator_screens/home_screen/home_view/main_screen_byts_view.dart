@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/ios_ads_view.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_support_widgets/image_preview.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_player.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -372,7 +373,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 ),
                                                                 color: Colors.black,
                                                               ),
-                                                              child: widget.article['type'] == "Video"
+                                                              child: widget.article['type'] == "Video" && widget.article['video_platform'] ==  "Twitter" ? CustomVideoPlayer(url: "https://video.twimg.com/amplify_video/1968885023089770496/vid/avc1/1920x1080/x8Ot_R7lbqt0AKdv.mp4" ?? "", imageUrl: widget.article['image_url'],) :
+                                                               widget.article['type'] == "Video"
                                                                   ? SizedBox(
                                                                       height: MediaQuery.of(context).size.height * .33,
                                                                       width: MediaQuery.of(context).size.width,

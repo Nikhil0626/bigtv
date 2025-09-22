@@ -124,6 +124,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 12, horizontal: 6),
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
                 gradient: LinearGradient(
                   colors: [Colors.black.withOpacity(.4), Colors.black],
                   begin: Alignment.topCenter,
@@ -393,51 +394,64 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                     if (pollProvider.localArticle['topComments'].isNotEmpty)
                       Padding(
                         padding: const EdgeInsets.only(left: 10),
-                        child: SizedBox(
-                          height: 100,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: pollProvider.localArticle['topComments'].length,
-                            itemBuilder: (context, index) {
-                              final comment = pollProvider.localArticle['topComments'][index];
-                              return Container(
-                                width: MediaQuery.of(context).size.width - 40,
-                                height: 80,
-                                margin: EdgeInsets.only(right: 8),
-                                padding: EdgeInsets.all(10),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withOpacity(.5),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(color: Colors.grey),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Icon(Icons.account_circle, size: 20),
-                                        width(width: 5),
-                                        Text(comment["userName"] ?? "", style: fontStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                                      ],
-                                    ),
-                                    height(height: 4),
-                                    Text(
-                                      comment["comment"] ?? "",
-                                      style: fontStyle(fontSize: 13, color: Colors.black),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    height(height: 4),
-                                    Text(
-                                      " ${formatTimeDifference(comment["createdAt"].toString())}",
-                                      style: fontStyle(color: Colors.black, fontSize: 11),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            },
+                          child: SizedBox(
+                            height: 70,
+                            child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: pollProvider.localArticle['topComments'].length,
+                              itemBuilder: (context, index) {
+                                final comment = pollProvider.localArticle['topComments'][index];
+                                return Container(
+                                  width: MediaQuery.of(context).size.width - 80,
+                                  margin: const EdgeInsets.only(right: 8),
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(.5),
+                                    borderRadius: BorderRadius.circular(10),
+                                    border: Border.all(color: Colors.grey),
+                                  ),
+                                  child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.account_circle, size: 40),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              comment["userName"] ?? "",
+                                              style: fontStyle(
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 12,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 5),
+                                            Text(
+                                              comment["comment"] ?? "",
+                                              style: fontStyle(fontSize: 13, color: Colors.black),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Text(
+                                          " ${formatTimeDifference(comment["createdAt"].toString())}",
+                                          style: fontStyle(color: Colors.black, fontSize: 11),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
                           ),
-                        ),
                       ),
                   ],
                   if (widget.index == 0) height(height: 60),
@@ -515,6 +529,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
             child: Container(
               padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
                 gradient: LinearGradient(
                   colors: [Colors.black.withOpacity(.4), Colors.black],
                   begin: Alignment.topCenter,
