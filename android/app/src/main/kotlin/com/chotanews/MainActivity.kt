@@ -47,11 +47,11 @@ class NativeAdFactoryExample: NativeAdFactory {
         adView.headlineView = adView.findViewById(R.id.ad_headline)
         adView.bodyView = adView.findViewById(R.id.ad_body)
         adView.callToActionView = adView.findViewById(R.id.ad_call_to_action)
-//        adView.iconView = adView.findViewById(R.id.ad_app_icon)
+        adView.iconView = adView.findViewById(R.id.ad_app_icon)
         adView.priceView = adView.findViewById(R.id.ad_price)
 //        adView.starRatingView = adView.findViewById(R.id.ad_stars)
         adView.storeView = adView.findViewById(R.id.ad_store)
-        adView.advertiserView = adView.findViewById(R.id.ad_advertiser)
+//        adView.advertiserView = adView.findViewById(R.id.ad_advertiser)
 
         // The headline and mediaContent are guaranteed to be in every NativeAd.
         (adView.headlineView as TextView).text = nativeAd?.headline
@@ -73,12 +73,12 @@ class NativeAdFactoryExample: NativeAdFactory {
             (adView.callToActionView as Button).text = nativeAd.callToAction
         }
 
-//        if (nativeAd?.icon == null) {
-//            adView.iconView?.visibility = View.GONE
-//        } else {
-//            (adView.iconView as ImageView).setImageDrawable(nativeAd.icon!!.drawable)
-//            adView.iconView?.visibility = View.VISIBLE
-//        }
+        if (nativeAd?.icon == null) {
+            adView.iconView?.visibility = View.GONE
+        } else {
+            (adView.iconView as ImageView).setImageDrawable(nativeAd.icon!!.drawable)
+            adView.iconView?.visibility = View.VISIBLE
+        }
 
         if (nativeAd?.price == null) {
             adView.priceView?.visibility = View.INVISIBLE
@@ -101,12 +101,12 @@ class NativeAdFactoryExample: NativeAdFactory {
 //            adView.starRatingView?.visibility = View.VISIBLE
 //        }
 
-        if (nativeAd?.advertiser == null) {
-            adView.advertiserView?.visibility = View.INVISIBLE
-        } else {
-            adView.advertiserView?.visibility = View.VISIBLE
-            (adView.advertiserView as TextView).text = nativeAd.advertiser
-        }
+//        if (nativeAd?.advertiser == null) {
+//            adView.advertiserView?.visibility = View.INVISIBLE
+//        } else {
+//            adView.advertiserView?.visibility = View.VISIBLE
+//            (adView.advertiserView as TextView).text = nativeAd.advertiser
+//        }
 
         // This method tells the Google Mobile Ads SDK that you have finished populating your
         // native ad view with this native ad.

@@ -579,8 +579,8 @@ class AdMobBannerProvider with ChangeNotifier {
         mediaAspectRatio: MediaAspectRatio.any,
       );
       final ad = NativeAd(
-        adUnitId: "/22387492205,23277683599/com.chotanews.Banner1.1747894381",
-        // adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId,
+        // adUnitId: "/22387492205,23277683599/com.chotanews.Banner1.1747894381",
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId,
         nativeAdOptions: nativeAdOptions,
         factoryId: 'adFactoryExample',
         listener: NativeAdListener(
@@ -746,8 +746,8 @@ class AdMobBannerProvider with ChangeNotifier {
       debugPrint("[AdMob] Requesting 320x50 banner at index $index with size: $size");
 
       final ad = BannerAd(
-        adUnitId: "ca-app-pub-3940256099942544/6300978111",
-        // adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobStickBannerId,
+        // adUnitId: "ca-app-pub-3940256099942544/6300978111",
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adMobStickBannerId,
         size: size,
         request: AdRequest(),
         listener: BannerAdListener(
@@ -815,8 +815,8 @@ class AdMobBannerProvider with ChangeNotifier {
       debugPrint("[AdManager 320x50] Requesting banner at index $index with size: $size");
 
       final ad = AdManagerBannerAd(
-        // adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerStickBannerId,
-        adUnitId: "	/21775744923/example/fixed-size-banner",
+        adUnitId: mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerStickBannerId,
+        // adUnitId: "	/21775744923/example/fixed-size-banner",
         sizes: [size],
         request: AdManagerAdRequest(),
         listener: AdManagerBannerAdListener(
@@ -958,21 +958,7 @@ class AdMobBannerProvider with ChangeNotifier {
     );
   }
 
-  // Cron? _cron;
 
-  // Future<void> autoBannerCall() async {
-  //
-  //   _cron ??= Cron();
-  //
-  //   _cron!.schedule(Schedule.parse('*/30 * * * * *'), () async {
-  //     loadAd320x50ManagerBanner(autoupdate!, AdSize.banner);
-  //   });
-  // }
-
-  // void cronClose() async {
-  //   await _cron?.close();
-  //   _cron = null; // allow restart
-  // }
 
   void adsLoad() {
     loadAdMobBanner(1, AdSize.mediumRectangle);

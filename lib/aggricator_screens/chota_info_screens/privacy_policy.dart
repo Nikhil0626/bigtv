@@ -57,7 +57,7 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
               Navigator.pop(context);
             },
             icon: const Icon(
-              Icons.arrow_back_ios_rounded,
+              Icons.arrow_back_outlined,
               color: Colors.white,
               size: 20,
             ),
