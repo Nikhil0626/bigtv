@@ -1,62 +1,57 @@
 import GoogleMobileAds
 import google_mobile_ads
 
+/**
+ * The example NativeAdView.xib can be found at
+ * github.com/googleads/googleads-mobile-flutter/blob/main/packages/google_mobile_ads/
+ *     example/ios/Runner/NativeAdView.xib
+ */
 class NativeAdFactoryExample: NSObject, FLTNativeAdFactory {
-
     func createNativeAd(_ nativeAd: GADNativeAd, customOptions: [AnyHashable : Any]? = nil) -> GADNativeAdView? {
+        // Create and place the ad in the view hierarchy.
+        let adView = Bundle.main.loadNibNamed("NativeAdView", owner: nil, options: nil)?.first as! GADNativeAdView
 
-        // Load the XIB and cast to GADNativeAdView
-        guard let adView = Bundle.main.loadNibNamed("NativeAdView", owner: nil, options: nil)?.first as? GADNativeAdView else {
-            print("❌ Failed to load NativeAdView.xib")
-            return nil
+        // Populate the native ad view with the native ad assets.
+        // The headline is guaranteed to be present in every native ad.
+        if let headline = nativeAd.headline, !headline.isEmpty {
+            (adView.headlineView as? UILabel)?.text = headline
+        } else {
+            (adView.headlineView as? UILabel)?.text = "Check out this amazing offer!"
         }
 
-        // Populate the ad view
-        if let headlineLabel = adView.headlineView as? UILabel {
-            headlineLabel.text = nativeAd.headline
+
+        // These assets are not guaranteed to be present. Check that they are before
+        // showing or hiding them.
+        if let body = nativeAd.body, !body.isEmpty {
+            (adView.bodyView as? UILabel)?.text = body
+            adView.bodyView?.isHidden = false
+        } else {
+            (adView.bodyView as? UILabel)?.text = "Discover amazing products tailored for you."
+            adView.bodyView?.isHidden = false
         }
 
-      if let bodyLabel = adView.bodyView as? UILabel {
-          if let adBody = nativeAd.body, !adBody.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-              bodyLabel.text = adBody
-          } else {
-              bodyLabel.text = "Check out this amazing offer! " // ✅ Dummy text
-          }
-          adView.bodyView?.isHidden = false // ✅ Always show since we provide fallback
-      }
+        (adView.callToActionView as? UIButton)?.setTitle(nativeAd.callToAction, for: .normal)
+        adView.callToActionView?.isHidden = nativeAd.callToAction == nil
+
+        (adView.iconView as? UIImageView)?.image = nativeAd.icon?.image
 
 
-        if let ctaButton = adView.callToActionView as? UIButton {
-            ctaButton.setTitle(nativeAd.callToAction, for: .normal)
-            adView.callToActionView?.isHidden = nativeAd.callToAction == nil
-            adView.callToActionView?.isUserInteractionEnabled = false // Required
-        }
+        (adView.storeView as? UILabel)?.text = nativeAd.store
+        adView.storeView?.isHidden = nativeAd.store == nil
 
-        if let iconImageView = adView.iconView as? UIImageView {
-            iconImageView.image = nativeAd.icon?.image
-            adView.iconView?.isHidden = nativeAd.icon == nil
-        }
+        (adView.priceView as? UILabel)?.text = nativeAd.price
+        adView.priceView?.isHidden = nativeAd.price == nil
 
-        if let storeLabel = adView.storeView as? UILabel {
-            storeLabel.text = nativeAd.store
-            adView.storeView?.isHidden = nativeAd.store == nil
-        }
+        (adView.advertiserView as? UILabel)?.text = nativeAd.advertiser
+        adView.advertiserView?.isHidden = nativeAd.advertiser == nil
 
-        if let priceLabel = adView.priceView as? UILabel {
-            priceLabel.text = nativeAd.price
-            adView.priceView?.isHidden = nativeAd.price == nil
-        }
+        // In order for the SDK to process touch events properly, user interaction
+        // should be disabled.
+        adView.callToActionView?.isUserInteractionEnabled = false
 
-        if let advertiserLabel = adView.advertiserView as? UILabel {
-            advertiserLabel.text = nativeAd.advertiser
-            adView.advertiserView?.isHidden = nativeAd.advertiser == nil
-        }
-
-        if let media = adView.mediaView as? GADMediaView {
-            media.mediaContent = nativeAd.mediaContent
-        }
-
-        // Associate native ad object with the view
+        // Associate the native ad view with the native ad object. This is
+        // required to make the ad clickable.
+        // Note: this should always be done after populating the ad views.
         adView.nativeAd = nativeAd
 
         return adView
