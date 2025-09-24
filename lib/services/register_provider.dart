@@ -15,6 +15,7 @@ import '../aggricator_screens/referral_screen/referral_provider/referral_provide
 import '../aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import '../aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import '../aggricator_screens/test_screens/language_screen.dart';
+import '../aggricator_screens/video_image_screen/video_provider1.dart';
 
 
 

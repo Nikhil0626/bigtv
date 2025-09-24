@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
+import '../home_screen/home_provider/home_provider.dart';
 import 'video_provider.dart';
 
 class CustomVideoPlayer extends StatefulWidget {
@@ -18,42 +19,92 @@ class CustomVideoPlayer extends StatefulWidget {
     required this.imageUrl,
     this.isVideoScreen = false,
     this.isFoldable = false,
-    this.postId = "0",
+    this.postId = '0',
   });
 
   @override
   State<CustomVideoPlayer> createState() => _CustomVideoPlayerState();
 }
 
-class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
+class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    Future.microtask(() {
-      if (widget.url != null) {
-        context.read<VideoProvider>().initializeVideo(widget.url);
-      }
+    WidgetsBinding.instance.addObserver(this);
+    _initializeVideo();
+  }
+
+  @override
+  void didUpdateWidget(CustomVideoPlayer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // If the URL changed, reinitialize the video
+    if (oldWidget.url != widget.url) {
+      _initializeVideo();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // Don't dispose the controller here - let the provider handle it
+    super.dispose();
+  }
+
+  // Handle app lifecycle changes
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final videoProvider = context.read<VideoProvider>();
+
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.detached:
+      case AppLifecycleState.hidden:
+        videoProvider.pauseVideo();
+        break;
+      case AppLifecycleState.resumed:
+      // Don't auto-play on resume
+        break;
+      case AppLifecycleState.inactive:
+        break;
+    }
+  }
+
+  void _initializeVideo() {
+    // Use a small delay to ensure widget is properly mounted
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final videoProvider = context.read<VideoProvider>();
+      videoProvider.initializeVideo(widget.url);
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
-    return Consumer<VideoProvider>(
-      builder: (context, videoProvider, _) {
-        final controller = videoProvider.controller;
-
+    return Consumer2<VideoProvider, HomeProvider>(
+      builder: (context, videoProvider, homeProvider, __) {
         return GestureDetector(
+          onTap: () {
+            // Toggle play/pause on tap
+            videoProvider.togglePlayPause();
+          },
           onVerticalDragUpdate: (details) {
+            final controller = context.read<HomeProvider>().pageController!;
             if (details.delta.dy < -10) {
-              log("Swipe Up: Go to next video");
-              // Example: navigate to next video
+              log("jhvjhbhjbjhhijhiu");
+              videoProvider.pauseVideo();
+              controller.nextPage(
+                duration: Duration(milliseconds: 600),
+                curve: Curves.easeIn,
+              );
             } else if (details.delta.dy > 10) {
-              log("Swipe Down: Go to previous video");
-              // Example: navigate to previous video
+              log("jhvjhbhjbjhhijhiu000");
+              videoProvider.pauseVideo();
+              controller.previousPage(
+                duration: Duration(milliseconds: 600),
+                curve: Curves.easeIn,
+              );
             }
           },
-          child: controller != null && controller.value.isInitialized
+          child: videoProvider.isPlaying
               ? Stack(
             alignment: Alignment.center,
             children: [
@@ -62,8 +113,8 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
                 height: 330,
                 width: MediaQuery.of(context).size.width,
                 child: AspectRatio(
-                  aspectRatio: controller.value.aspectRatio,
-                  child: VideoPlayer(controller),
+                  aspectRatio: videoProvider.controller!.value.aspectRatio,
+                  child: VideoPlayer(videoProvider.controller!),
                 ),
               ),
 
@@ -75,7 +126,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
                     height: 58,
                     width: 58,
                   ),
-                  onPressed: videoProvider.togglePlayPause,
+                  onPressed: () => videoProvider.playVideo(),
                 ),
 
               /// Video Controls
@@ -93,15 +144,15 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
                             : Icons.play_arrow,
                         color: Colors.white,
                       ),
-                      onPressed: videoProvider.togglePlayPause,
+                      onPressed: () => videoProvider.togglePlayPause(),
                     ),
 
                     /// Progress Bar
                     Expanded(
                       child: VideoProgressIndicator(
-                        controller,
+                        videoProvider.controller!,
                         allowScrubbing: true,
-                        colors: VideoProgressColors(
+                        colors: const VideoProgressColors(
                           playedColor: Colors.red,
                           bufferedColor: Colors.grey,
                           backgroundColor: Colors.black26,
@@ -124,8 +175,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
               ),
             ],
           )
-              : /// Show thumbnail before video initializes
-          ClipRRect(
+              : ClipRRect(
             borderRadius: const BorderRadius.only(
               topLeft: Radius.circular(20),
               topRight: Radius.circular(20),
@@ -135,9 +185,15 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
               children: [
                 Image.network(
                   widget.imageUrl,
-                  height: 330,
+                  height: 300,
                   width: MediaQuery.of(context).size.width,
                   fit: BoxFit.fill,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      color: Colors.grey[300],
+                      child: const Icon(Icons.error),
+                    );
+                  },
                 ),
                 IconButton(
                   icon: SvgPicture.asset(
@@ -146,7 +202,9 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
                     width: 58,
                   ),
                   onPressed: () {
-                    videoProvider.togglePlayPause();
+                    videoProvider.initializeVideo(widget.url).then((_) {
+                      videoProvider.playVideo();
+                    });
                   },
                 ),
               ],
@@ -157,52 +215,3 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> {
     );
   }
 }
-
-
-
-// import 'package:flutter/material.dart';
-// import 'package:video_player/video_player.dart';
-//
-// class DirectVideoPlayer extends StatefulWidget {
-//   final String videoUrl;
-//
-//   DirectVideoPlayer({required this.videoUrl});
-//
-//   @override
-//   _DirectVideoPlayerState createState() => _DirectVideoPlayerState();
-// }
-//
-// class _DirectVideoPlayerState extends State<DirectVideoPlayer> {
-//   late VideoPlayerController _controller;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _controller = VideoPlayerController.network(widget.videoUrl)
-//       ..initialize().then((_) {
-//         setState(() {}); // refresh after video initializes
-//         _controller.play();
-//       });
-//   }
-//
-//   @override
-//   void dispose() {
-//     _controller.dispose();
-//     super.dispose();
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       // appBar: AppBar(title: Text("Twitter Video")),
-//       body: Center(
-//         child: _controller.value.isInitialized
-//             ? AspectRatio(
-//           aspectRatio: _controller.value.aspectRatio,
-//           child: VideoPlayer(_controller),
-//         )
-//             : CircularProgressIndicator(),
-//       ),
-//     );
-//   }
-// }

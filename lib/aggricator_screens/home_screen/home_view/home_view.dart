@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:chotanews/aggricator_screens/reels_screens/reels_view/reels_screen_card.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
@@ -40,10 +41,10 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
-      bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   final bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
+    //   bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
+    // });
 
     homeProvider?.isHomeScreen = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -103,6 +104,7 @@ class _HomeViewState extends State<HomeView> {
                         physics: NeverScrollableScrollPhysics(),
                         onPageChanged: (index) {
                           homeProvider.onItemTapped(index);
+                          context.read<VideoProvider>().pauseVideo();
                         },
                         children: [MainScreenCard(), PapersScreenCard(), ReelsScreen(), KeepAlivePage(keepAlive: true, child: SettingsView())],
                       ),

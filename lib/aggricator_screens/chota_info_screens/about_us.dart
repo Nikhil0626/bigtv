@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 
+import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
 import 'contact_us.dart';
@@ -14,22 +15,36 @@ class AboutUs extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          "About Us",
-          style: fontStyle(
-              color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.blue,
-        leading: InkWell(
-          onTap: () {
-            Navigator.pop(context);
-          },
-          child: const Icon(
-            Icons.arrow_back,
-            size: 22,
-            color: Colors.white,
+        backgroundColor: AppColors.appButtonColor,
+        titleSpacing: 0,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 2),
+          child: IconButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            icon: const Icon(
+              Icons.arrow_back,
+              color: Colors.white,
+              size: 20,
+            ),
           ),
+        ),
+        title: Row(
+          children: [
+            width(width: 4),
+            Padding(
+              padding: const EdgeInsets.only(top: 1),
+              child: Text(
+                "Help and support",
+                style: fontStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       body: Padding(
