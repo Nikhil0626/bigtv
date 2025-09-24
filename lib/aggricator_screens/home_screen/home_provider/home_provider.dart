@@ -59,8 +59,11 @@ class HomeProvider extends ChangeNotifier {
   bool isMuted = false;
   bool isImageAdClose = false;
   late YoutubePlayerController controller;
-  late VideoPlayerController videoController;
   int? _selectedTagId;
+
+  bool isVideoPlaying = false;
+  bool isVideosMuted = false;
+  late VideoPlayerController videoController;
 
   int? get selectedTagId => _selectedTagId;
 
@@ -101,6 +104,11 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void isPlayingTweet(val) {
+    isVideoPlaying = val;
+    notifyListeners();
+  }
+
   void toggleMute() {
     isMuted = !isMuted;
     notifyListeners();
@@ -127,20 +135,29 @@ class HomeProvider extends ChangeNotifier {
     // notifyListeners();
   }
 
-  // void videoInitial(String url) {
+  // void videoInitial(url) {
   //   videoController = VideoPlayerController.network(url)
   //     ..initialize().then((_) {
   //       videoController.setVolume(isMuted ? 0.0 : 1.0);
-  //       videoController.setLooping(true);
+  //       // videoController.setLooping(true);
   //       notifyListeners();
-  //     })
-  //     ..addListener(() {
-  //       if (videoController.value.isPlaying != isPlaying) {
-  //         isPlaying = videoController.value.isPlaying;
-  //         notifyListeners();
-  //       }
   //     });
   // }
+
+  void videoInitial(String url) {
+    videoController = VideoPlayerController.network(url)
+      ..initialize().then((_) {
+        videoController.setVolume(isMuted ? 0.0 : 1.0);
+        videoController.setLooping(true);
+        notifyListeners();
+      })
+      ..addListener(() {
+        if (videoController.value.isPlaying != isPlaying) {
+          isPlaying = videoController.value.isPlaying;
+          notifyListeners();
+        }
+      });
+  }
 
   void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
@@ -148,10 +165,10 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // void videoDispose() {
-  //   videoController.dispose();
-  //   notifyListeners();
-  // }
+  void videoDispose() {
+    videoController.dispose();
+    notifyListeners();
+  }
 
   void setSelectedTagId(int id) {
     _selectedTagId = id;
@@ -313,6 +330,10 @@ class HomeProvider extends ChangeNotifier {
      //Stick Ads
       adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
       adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final bannerAdsProvider = Provider.of<AdMobBannerProvider>(mainNavigatorKey.currentContext!, listen: false);
+        bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
+      });
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         final bannerAdsProvider = Provider.of<AdMobBannerProvider>(mainNavigatorKey.currentContext!, listen: false);

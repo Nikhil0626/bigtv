@@ -52,7 +52,6 @@ class _FeedbackFormState extends State<FeedbackForm> {
           "Feedback Form",
           style: TextStyle(fontFamily: 'Poppins', fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
       ),
       body: Consumer<SettingsProvider>(
         builder: (_, settingsProvider, __) {

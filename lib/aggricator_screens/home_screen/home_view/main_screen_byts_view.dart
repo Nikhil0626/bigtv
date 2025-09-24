@@ -40,6 +40,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 
 import '../../video_image_screen/gallery_screen.dart';
+import '../../video_image_screen/video_player1.dart';
 import '../../video_image_screen/video_preview.dart';
 import '../home_support_widgets/full_standed_video_view.dart';
 import '../home_provider/home_provider.dart';
@@ -373,7 +374,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 ),
                                                                 color: Colors.black,
                                                               ),
-                                                              child: widget.article['type'] == "Video" && widget.article['video_platform'] ==  "Twitter" ? CustomVideoPlayer(url: "https://video.twimg.com/amplify_video/1968885023089770496/vid/avc1/1920x1080/x8Ot_R7lbqt0AKdv.mp4" ?? "", imageUrl: widget.article['image_url'],) :
+                                                              child: widget.article['type'] == "Video" && widget.article['video_platform'] ==  "Twitter" ? CustomVideoPlayer(url: widget.article['video_url'], imageUrl: widget.article['image_url'],) :
                                                                widget.article['type'] == "Video"
                                                                   ? SizedBox(
                                                                       height: MediaQuery.of(context).size.height * .33,
@@ -637,17 +638,22 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                         log("Refresh");
                                                                                         EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
                                                                                         homeProvide.isReloadData();
-                                                                                        if (widget.isaiTags) {
-                                                                                          homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
-                                                                                                (value) {
-                                                                                              homeProvide.isReloadFalse();
-                                                                                            },
-                                                                                          );
-                                                                                        } else {
+                                                                                        // if (widget.isaiTags) {
+                                                                                        //   homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
+                                                                                        //         (value) {
+                                                                                        //       homeProvide.isReloadFalse();
+                                                                                        //     },
+                                                                                        //   );
+                                                                                        if (homeProvide.isAiTagDataLoaded) {
+                                                                                                    homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
+                                                                                                    homeProvide.isReloadFalse();
+                                                                                                  }
+                                                                                        else {
                                                                                           homeProvide.getAllPostList = [];
                                                                                           homeProvide.getAllPost();
                                                                                         }
                                                                                       },
+
                                                                                       child: homeProvide.isReload
                                                                                           ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
                                                                                           : SvgPicture.asset(
