@@ -40,10 +40,7 @@ class _HomeViewState extends State<HomeView> {
   @override
   void initState() {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
-      bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
-    });
+
 
     homeProvider?.isHomeScreen = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {

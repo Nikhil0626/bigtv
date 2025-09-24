@@ -514,6 +514,7 @@ class AdMobBannerProvider with ChangeNotifier {
   Future<void> loadAdMobNative(int index, AdSize mediumRectangle) async {
     log(" Load AdMob Native ${ mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId} -- $index ");
     try {
+      debugPrint("AdMobNative ${mainNavigatorKey.currentContext!.read<HomeProvider>().adMobNativeId}");
       requestInitiated = DateTime.now();
 
       ads[index]?.dispose();
@@ -571,6 +572,8 @@ class AdMobBannerProvider with ChangeNotifier {
 
   Future<void> loadAdManagerNative(int index, AdSize size) async {
     try {
+      debugPrint("AdMangerNative ${mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerNativeId}");
+
       ads[index]?.dispose();
 
       adsLoaded[index] = false;
@@ -623,6 +626,8 @@ class AdMobBannerProvider with ChangeNotifier {
 
   Future<void> loadAdMobBanner(int index, AdSize size) async {
     try {
+      debugPrint("AdMobBanner ${mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId}");
+
       ads[index]?.dispose();
 
       final latencyData = AdLatencyData()..requestInitiated = DateTime.now();
@@ -677,6 +682,7 @@ class AdMobBannerProvider with ChangeNotifier {
 
   Future<void> loadAdManagerBanner(int index, AdSize size) async {
     try {
+      debugPrint("AdMangerBanner ${mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerBannerId}");
       ads[index]?.dispose();
 
       final latencyData = AdLatencyData()..requestInitiated = DateTime.now();
@@ -738,7 +744,7 @@ class AdMobBannerProvider with ChangeNotifier {
 
   Future<void> loadAd320x50MobBanner(int index, AdSize size) async {
     try {
-      debugPrint("[AdMob] Disposing existing 320x50 ad at index $index");
+      debugPrint("[AdMob] Disposing existing 320x50 ad at index ${mainNavigatorKey.currentContext!.read<HomeProvider>().adMobStickBannerId}");
       adsBanner320x50[index]?.dispose();
       adsLoaded320x50[index] = false;
       adErrors320x50.remove(index);
@@ -807,7 +813,7 @@ class AdMobBannerProvider with ChangeNotifier {
 
   Future<void> loadAd320x50ManagerBanner(int index, AdSize size) async {
     try {
-      debugPrint("[AdManager 320x50] Disposing existing ad at index $index");
+      debugPrint("[AdManager 320x50] Disposing existing ad at index ${mainNavigatorKey.currentContext!.read<HomeProvider>().adManagerStickBannerId}");
       adsBanner320x50[index]?.dispose();
       adsLoaded320x50[index] = false;
       adErrors320x50.remove(index);

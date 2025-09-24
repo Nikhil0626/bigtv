@@ -25,6 +25,7 @@ import '../../../globel_keys/globel_keys.dart';
 import '../../../services/analytics_service.dart';
 import '../../../services/deviice_details.dart';
 import '../../../services/webengage_event_tracks.dart';
+import '../../ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import '../../contest_screen/contest_provider.dart';
 import '../../events_data/event_repo.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
@@ -313,10 +314,13 @@ class HomeProvider extends ChangeNotifier {
       adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
       adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
 
-
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final bannerAdsProvider = Provider.of<AdMobBannerProvider>(mainNavigatorKey.currentContext!, listen: false);
+        bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
+      });
       getImageAdsList.addAll(response.data['ads_list']);
       getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
-      log(" hello hai ${adMobBannerId.toString()} --- $adMobNativeId");
+      log(" hello hai ${adMobStickBannerId.toString()} --- $adManagerStickBannerId");
       if (isWebView) {
         getAllPostList.insert(0, {
           "id": 000000,
