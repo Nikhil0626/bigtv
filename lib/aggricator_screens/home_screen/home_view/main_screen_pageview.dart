@@ -16,6 +16,7 @@ import '../../../utils/app_spaces.dart';
 import '../../../utils/keep_alive_page.dart';
 import '../../ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import '../../individual_post_details/individual_post_view.dart';
+import '../../video_image_screen/video_provider.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_byts_view.dart';
 
@@ -82,6 +83,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                             itemCount: homeProvider.getAllPostList.length,
                             // add ads count
                             onPageChanged: (value) {
+                              context.read<VideoProvider>().pauseVideo();
                               if (FocusScope.of(context).hasFocus) {
                                 FocusScope.of(context).unfocus();
                               }

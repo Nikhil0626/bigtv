@@ -46,103 +46,105 @@ class _MovieRatingsState extends State<MovieRatings> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     return Screenshot(
-      controller: adsScreenshotController,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Stack(
-              children: [
-                InkWell(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ImagePreview(
-                            imageUrl: widget.article['image_url'],
-                            title: widget.article['title'],
-                          ),
-                        ));
-                  },
-                  child: SizedBox(
-                    height: MediaQuery.of(context).size.height * .35,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(16),
-                        topLeft: Radius.circular(16),
+    controller: adsScreenshotController,
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          flex: 4,
+          child: Stack(
+            children: [
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ImagePreview(
+                          imageUrl: widget.article['image_url'],
+                          title: widget.article['title'],
+                        ),
+                      ));
+                },
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.height * .35,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(16),
+                      topLeft: Radius.circular(16),
+                    ),
+                    child: CachedNetworkImage(
+                      imageUrl: widget.article['image_url'] ?? "",
+                      height: screenHeight * 0.28,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: AppColors.borderColor.withOpacity(.2),
                       ),
-                      child: CachedNetworkImage(
-                        imageUrl: widget.article['image_url'] ?? "",
-                        height: screenHeight * 0.28,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        placeholder: (context, url) => Container(
-                          color: AppColors.borderColor.withOpacity(.2),
-                        ),
-                        errorWidget: (context, url, error) => Center(
-                          child: Icon(Icons.image, size: 80, color: Colors.grey.shade300),
-                        ),
+                      errorWidget: (context, url, error) => Center(
+                        child: Icon(Icons.image, size: 80, color: Colors.grey.shade300),
                       ),
                     ),
                   ),
                 ),
-                Positioned(
-                  top: 12,
-                  right: 14,
-                  child: Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                    return InkWell(
-                      onTap: () async {
-                        log("Refresh");
-                        EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
-                        homeProvide.isReloadData();
-                        if (homeProvide.isAiTagDataLoaded) {
-                          homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
-                        } else {
-                          homeProvide.getAllPostList = [];
-                          homeProvide.getAllPost();
-                          homeProvide.pageChange(isValue: true);
-                        }
-                      },
-                      child: Container(
-                        width: 38,
-                        padding: EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: (homeProvide.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
-                              ? AppColors.appButtonColor
-                              : Colors.black54,
-                          shape: BoxShape.circle,
-                        ),
-                        child: SvgPicture.asset("assets/svg/new_refresh.svg",
-                            height: 20, width: 20, color: widget.article['subType'] != "BigBlackStandard" ? Colors.white : Colors.grey),
-                      ),
-                    );
-                  }),
-                ),
-              ],
-            ),
-          ),
-
-
-          Expanded(
-            flex: 7,
-            child: Container(
-              // height: MediaQuery.of(context).size.height*.52,
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
-                ),
               ),
+              // Positioned(
+              //   top: 12,
+              //   right: 14,
+              //   // child: Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+              //   //   return InkWell(
+              //   //     onTap: () async {
+              //   //       log("Refresh");
+              //   //       EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
+              //   //       homeProvide.isReloadData();
+              //   //       if (homeProvide.isAiTagDataLoaded) {
+              //   //         homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
+              //   //       } else {
+              //   //         homeProvide.getAllPostList = [];
+              //   //         homeProvide.getAllPost();
+              //   //         homeProvide.pageChange(isValue: true);
+              //   //       }
+              //   //     },
+              //   //     child: Container(
+              //   //       width: 38,
+              //   //       padding: EdgeInsets.all(7),
+              //   //       decoration: BoxDecoration(
+              //   //         color: (homeProvide.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
+              //   //             ? AppColors.appButtonColor
+              //   //             : Colors.black54,
+              //   //         shape: BoxShape.circle,
+              //   //       ),
+              //   //       child: SvgPicture.asset("assets/svg/new_refresh.svg",
+              //   //           height: 20, width: 20, color: widget.article['subType'] != "BigBlackStandard" ? Colors.white : Colors.grey),
+              //   //     ),
+              //   //   );
+              //   // }),
+              // ),
+            ],
+          ),
+        ),
+
+
+        Expanded(
+          flex: 8,
+          child: Container(
+            // height: MediaQuery.of(context).size.height*.52,
+            width: MediaQuery.of(context).size.width,
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20),
+                topRight: Radius.circular(20),
+              ),
+            ),
+            child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               child: ListView(
-                physics: NeverScrollableScrollPhysics(),
                 shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                // padding: EdgeInsets.zero,
+                physics: NeverScrollableScrollPhysics(),
+                // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 children: [
                   height(height: 10),
                   Padding(
@@ -172,48 +174,81 @@ class _MovieRatingsState extends State<MovieRatings> {
                           ),
                         ),
                         Spacer(),
-                        InkWell(
-                          onTap: () async {
-                            SharedPreferences sp = await SharedPreferences.getInstance();
-                            String? userId = sp.getString("userId");
+                        Row(
+                          children: [
+                            InkWell(
+                              onTap: () async {
+                                SharedPreferences sp = await SharedPreferences.getInstance();
+                                String? userId = sp.getString("userId");
 
-                            sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
+                                sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
 
-                            if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
-                              try {
-                                final image = await adsScreenshotController.capture(
-                                  pixelRatio: 2.0,
-                                );
-                                if (image != null) {
-                                  final directory = await getTemporaryDirectory();
-                                  final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                  final imageFile = File(imagePath);
-                                  await imageFile.writeAsBytes(image);
+                                if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                                  try {
+                                    final image = await adsScreenshotController.capture(
+                                      pixelRatio: 2.0,
+                                    );
+                                    if (image != null) {
+                                      final directory = await getTemporaryDirectory();
+                                      final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                      final imageFile = File(imagePath);
+                                      await imageFile.writeAsBytes(image);
 
-                                  Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
-                                } else {
-                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                      Share.shareXFiles([XFile(imageFile.path)], text: widget.article['linkURLAndroid'].toString());
+                                    } else {
+                                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                    }
+                                  } catch (e) {
+                                    CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                  }
                                 }
-                              } catch (e) {
-                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                              }
-                            }
-                            EventRepo().addEvent({
-                              "share": "news",
-                              "postId": widget.article['id'].toString(),
-                              "createAt": DateTime.now().toString(),
-                              "postTitle": widget.article['title'].toString()
-                            }, "shared_article");
-                          },
-                          child: SizedBox(
-                            width: 24,
-                            child: SvgPicture.asset(
-                              "assets/svg/share.svg",
-                              height: 18,
-                              width: 18,
-                              color: Colors.grey,
+                                EventRepo().addEvent({
+                                  "share": "news",
+                                  "postId": widget.article['id'].toString(),
+                                  "createAt": DateTime.now().toString(),
+                                  "postTitle": widget.article['title'].toString()
+                                }, "shared_article");
+                              },
+                              child: SizedBox(
+                                width: 24,
+                                child: SvgPicture.asset(
+                                  "assets/svg/share.svg",
+                                  height: 18,
+                                  width: 18,
+                                  color: Colors.grey,
+                                ),
+                              ),
                             ),
-                          ),
+                            width(width: 10),
+                            Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                              return InkWell(
+                                onTap: () async {
+                                  log("Refresh");
+                                  EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
+                                  homeProvide.isReloadData();
+                                  if (homeProvide.isAiTagDataLoaded) {
+                                    homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
+                                  } else {
+                                    homeProvide.getAllPostList = [];
+                                    homeProvide.getAllPost();
+                                    homeProvide.pageChange(isValue: true);
+                                  }
+                                },
+                                child: Container(
+                                  width: 38,
+                                  padding: EdgeInsets.all(7),
+                                  decoration: BoxDecoration(
+                                    color: (homeProvide.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
+                                        ? AppColors.appButtonColor
+                                        : Colors.transparent,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: SvgPicture.asset("assets/svg/new_refresh.svg",
+                                      height: 20, width: 20, color: widget.article['subType'] != "BigBlackStandard" ? Colors.grey : Colors.grey),
+                                ),
+                              );
+                            }),
+                          ],
                         ),
                       ],
                     ),
@@ -419,10 +454,11 @@ class _MovieRatingsState extends State<MovieRatings> {
               ),
             ),
           ),
+        ),
 
-        ],
-      ),
-    );
+      ],
+    ),
+          );
   }
 
   Widget ratingBlock(String label, dynamic value) {

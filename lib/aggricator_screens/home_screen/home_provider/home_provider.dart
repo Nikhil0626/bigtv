@@ -29,6 +29,7 @@ import '../../ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import '../../contest_screen/contest_provider.dart';
 import '../../events_data/event_repo.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
+import '../../video_image_screen/video_provider.dart';
 import '../home_repo/home_repo.dart';
 
 class HomeProvider extends ChangeNotifier {
@@ -104,10 +105,10 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void isPlayingTweet(val) {
-    isVideoPlaying = val;
-    notifyListeners();
-  }
+  // void isPlayingTweet(val) {
+  //   isVideoPlaying = val;
+  //   notifyListeners();
+  // }
 
   void toggleMute() {
     isMuted = !isMuted;
@@ -144,20 +145,20 @@ class HomeProvider extends ChangeNotifier {
   //     });
   // }
 
-  void videoInitial(String url) {
-    videoController = VideoPlayerController.network(url)
-      ..initialize().then((_) {
-        videoController.setVolume(isMuted ? 0.0 : 1.0);
-        videoController.setLooping(true);
-        notifyListeners();
-      })
-      ..addListener(() {
-        if (videoController.value.isPlaying != isPlaying) {
-          isPlaying = videoController.value.isPlaying;
-          notifyListeners();
-        }
-      });
-  }
+  // void videoInitial(String url) {
+  //   videoController = VideoPlayerController.network(url)
+  //     ..initialize().then((_) {
+  //       videoController.setVolume(isMuted ? 0.0 : 1.0);
+  //       videoController.setLooping(true);
+  //       notifyListeners();
+  //     })
+  //     ..addListener(() {
+  //       if (videoController.value.isPlaying != isPlaying) {
+  //         isPlaying = videoController.value.isPlaying;
+  //         notifyListeners();
+  //       }
+  //     });
+  // }
 
   void youtubeDispose() {
     log("sbfjhsfnfdsfjsdbnf  ");
@@ -165,10 +166,10 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void videoDispose() {
-    videoController.dispose();
-    notifyListeners();
-  }
+  // void videoDispose() {
+  //   videoController.dispose();
+  //   notifyListeners();
+  // }
 
   void setSelectedTagId(int id) {
     _selectedTagId = id;
@@ -188,6 +189,9 @@ class HomeProvider extends ChangeNotifier {
     if (isAds != true) {
       getAllPostList = [];
     }
+    // if (isLink = true) {
+    //   getAllPostList.insert(0, getAllPostList);
+    // }
     isPostLoading = true;
     String userId = preferences.getString("userId")??"0";
     Map<String, dynamic> body = {"user_id": userId.toString()};
@@ -279,6 +283,7 @@ class HomeProvider extends ChangeNotifier {
     if (pageController!.position.atEdge) {
       bool isEnd = pageController!.position.pixels != 0;
       if (isEnd) {
+        // _pauseAllVideos();
         log("po)stId.toString()   $postId");
         if (!isAiTagDataLoaded && allPostLastId != "0") {
           postId = "0";
@@ -622,7 +627,6 @@ class HomeProvider extends ChangeNotifier {
   void _handleNotificationTap(Map<String, dynamic>? messagePayload) async {
     log("Notification tapped with payload: $messagePayload");
 
-    // Extract post ID from notification payload
     if (Platform.isIOS) {
       postId = messagePayload?['data']['customData'][0]['value'] ?? "0";
     } else {
@@ -848,4 +852,11 @@ class HomeProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  // void _pauseAllVideos() {
+  //   final videoProvider = mainNavigatorKey.currentContext!.read<VideoProvider>();
+  //   if (videoProvider.isPlaying) {
+  //     videoProvider.pauseVideo();
+  //   }
+  // }
 }
