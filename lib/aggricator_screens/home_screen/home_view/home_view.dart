@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/e_papers_screens/paper_view/papers_screen_card.dart';
@@ -225,7 +226,34 @@ class _HomeViewState extends State<HomeView> {
                   ),
                                 ],
                               ),
-                  bottomNavigationBar: SafeArea(
+                  bottomNavigationBar:Platform.isIOS?Consumer<AdMobBannerProvider>(
+                    builder: (_, adMobBannerProvider, __) {
+                      final currentIndex = adMobBannerProvider.currentPageIndex;
+                      final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
+                      if (adsList.isEmpty) {
+                        return const SizedBox.shrink();
+                      } else if ((currentIndex + 1) % 5 == 0) {
+                        return const SizedBox.shrink();
+                      } else {
+                        log("siva new ${adsList.last}");
+                        return  Container(
+                          height: 50,
+                          width: MediaQuery.of(context).size.width,
+                          alignment: Alignment.center,
+                          child: Container(
+                            height: 50,
+                            width: 320,
+                            color: Colors.white,
+                            alignment: Alignment.center,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 2.0),
+                              child: Center(child: AdWidget(ad: adsList.last)),
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ): SafeArea(
                     child: Consumer<AdMobBannerProvider>(
                       builder: (_, adMobBannerProvider, __) {
                         final currentIndex = adMobBannerProvider.currentPageIndex;
@@ -247,7 +275,7 @@ class _HomeViewState extends State<HomeView> {
                               alignment: Alignment.center,
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                child: Center(child: AdWidget(ad: adsList[0])),
+                                child: Center(child: AdWidget(ad: adsList.last)),
                               ),
                             ),
                           );

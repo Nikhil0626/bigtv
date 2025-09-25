@@ -123,8 +123,6 @@ class _MovieRatingsState extends State<MovieRatings> {
               ],
             ),
           ),
-
-
           Expanded(
             flex: 7,
             child: Container(
@@ -138,11 +136,11 @@ class _MovieRatingsState extends State<MovieRatings> {
                   topRight: Radius.circular(20),
                 ),
               ),
-              child: ListView(
-                physics: NeverScrollableScrollPhysics(),
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+              child: Column(
+                // physics: NeverScrollableScrollPhysics(),
+                // shrinkWrap: true,
+                // padding: EdgeInsets.zero,
+                // keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 children: [
                   height(height: 10),
                   Padding(

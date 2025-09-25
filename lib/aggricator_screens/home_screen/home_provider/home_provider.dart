@@ -8,6 +8,7 @@ import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
 import 'package:chotanews/services/base_service.dart';
 import 'package:chotanews/services/base_urls.dart';
+import 'package:chotanews/services/dynamic_link_service.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
@@ -189,17 +190,17 @@ class HomeProvider extends ChangeNotifier {
       getAllPostList = [];
     }
     isPostLoading = true;
-    String userId = preferences.getString("userId")??"0";
+    String userId = preferences.getString("userId") ?? "0";
     Map<String, dynamic> body = {"user_id": userId.toString()};
     try {
-      Response response = await HomeRepo().getSinglePost(body,postId);
+      Response response = await HomeRepo().getSinglePost(body, postId);
       log(response.data.toString());
       if (response.statusCode == 200) {
         if (isAds == false) {
           getAllPostList.add(response.data['data']);
           Future.delayed(
             Duration(milliseconds: 100),
-            () {
+                () {
               getAllPost(isGetAllPost: true);
               if (isLink) {
                 EventRepo().addEvent({
@@ -247,7 +248,7 @@ class HomeProvider extends ChangeNotifier {
       // getAllPostList = [];
       Future.delayed(
         Duration(milliseconds: 300),
-        () {
+            () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -259,7 +260,7 @@ class HomeProvider extends ChangeNotifier {
       // getAllPostList = [];
       Future.delayed(
         Duration(milliseconds: 300),
-        () {
+            () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -289,8 +290,12 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
-    mainNavigatorKey.currentContext?.read<RatingProvider>().ratingsList = [];
-    mainNavigatorKey.currentContext?.read<RatingProvider>().ratedArticleIds = {};
+    mainNavigatorKey.currentContext
+        ?.read<RatingProvider>()
+        .ratingsList = [];
+    mainNavigatorKey.currentContext
+        ?.read<RatingProvider>()
+        .ratedArticleIds = {};
     mainNavigatorKey.currentContext?.read<PollProvider>().clearData();
     isHomeLoading = true;
     if (isGetAllPost == false && postIds == "0") {
@@ -305,11 +310,17 @@ class HomeProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
-    List<int> locationIds = locationId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+    List<int> locationIds = locationId.split(',').where((e) =>
+    e
+        .trim()
+        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Location IDs: $locationIds ==== ${getAllPostList.length}');
 
     String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<int> categoriesIds = categoriesId.split(',').where((e) => e.trim().isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+    List<int> categoriesIds = categoriesId.split(',').where((e) =>
+    e
+        .trim()
+        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
     Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true};
@@ -327,7 +338,7 @@ class HomeProvider extends ChangeNotifier {
       adMobNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admobnativeid'] : response.data['adUnits']['android']['admobnativeid'];
       adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
 
-     //Stick Ads
+      //Stick Ads
       adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
       adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -378,9 +389,12 @@ class HomeProvider extends ChangeNotifier {
         });
       }
       getAllPostList.addAll(data);
-      if(isGetAllPost == true){
-        getAllPostList.removeAt(1);
-      }
+
+      final seenIds = <int>{};
+      getAllPostList.retainWhere((e) => seenIds.add(e['id']));
+
+      // getAllPostList.retainWhere((element) => element['id']==postIds,);
+
 
       print(getAllPostList);
 
@@ -484,68 +498,12 @@ class HomeProvider extends ChangeNotifier {
 
   List isBookMark = [];
 
-  void isBookMarkPost(val, context) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("userId");
-    String? deviceId = sp.getString("deviceId");
-    log(val['id'].toString());
-    if (!isBookMark.contains(val['id'].toString())) {
-      isBookMark.add(val['id'].toString());
-      Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 1);
-      sendLikeDetails(userId, val, true, val['title'].toString());
-      log(isBookMark.toString());
-    } else {
-      Provider.of<SettingsProvider>(context, listen: false).saveBookmarks(val['id'].toString(), context, 0);
-      isBookMark.remove(val['id'].toString());
-
-      sendLikeDetails(userId, val['id'].toString(), false, val['title'].toString());
-      log(isBookMark.toString());
-    }
-
-    notifyListeners();
-  }
 
   void flipEvent(pageName, id, val) async {
     AnalyticsService().trackArticlesRead();
     notifyListeners();
   }
 
-  void addOneMoreArticle() {
-    final newArticle = {
-      "id": 10101010,
-      "postOrder": 10101010,
-      "author": 0,
-      "title": "Completed",
-      "content": "",
-      "created": "",
-      "guid": "",
-      "post_type": "",
-      "post_name": "",
-      "post_mime_type": "",
-      "totalLikes": 0,
-      "totalViews": 0,
-      "totalComments": 0,
-      "image_url": "",
-      "video_url": "",
-      "downloadUrl": null,
-      "gallery": null,
-      "type": "Completed",
-      "totalShares": 0,
-      "isReporter": 0,
-      "reportedBy": "",
-      "categoryName": "",
-      "postUrl": "",
-      "subType": "",
-      "isStickyPost": null,
-      "adPosition": "",
-      "linkURLAndroid": "",
-      "links": [],
-      "isBookmarked": 0
-    };
-
-    getAllAiTagsPostList.add(newArticle);
-    notifyListeners();
-  }
 
   bool isBottomEnable = true;
 

@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -20,6 +21,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../utils/image_view_ads.dart';
 import '../../../utils/keep_alive_page.dart';
+import '../../ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import '../../auth_screens/authentication_provider/authentication_provider.dart';
 import '../../../utils/botton_actions.dart';
 import '../../events_data/event_repo.dart';
@@ -33,6 +35,7 @@ import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
 import '../../ad_manager_screen/ad_screen/android_ads_view.dart';
+import '../../individual_post_details/individual_post_view.dart';
 import '../../polls_screens/polls_view/polls_screen.dart';
 import '../../rating_screen/rating_view/movie_reviews.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
@@ -135,20 +138,81 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                   ),
                                 )
                               : widget.article['type'] == "GoogleAds"
-                                  ? Platform.isIOS
-                                      ? KeepAlivePage(keepAlive: true, child: IosAdsWidgetScreen(article: widget.article))
-                                      : KeepAlivePage(
-                                          keepAlive: true,
-                                          child: Container(
-                                            color: Colors.white,
-                                            child: Padding(
-                                              padding: const EdgeInsets.all(8.0),
-                                              child: FullScreenNativeAd(
-                                                article: widget.article,
+                                  ? Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+                                      return (widget.index + 1) % 5 == 0
+                                          ? Consumer<AdMobBannerProvider>(
+                                              builder: (context, adMobBannerProvider, child) {
+                                                final adsList = adMobBannerProvider.ads.values.toList();
+                                                int adIndex = ((widget.index + 1) ~/ 5) - 1;
+
+                                                return (adIndex < adsList.length && adsList[adIndex] != null)
+                                                    ? (adsList[adIndex] is BannerAd || adsList[adIndex] is AdManagerBannerAd
+                                                        ? Container(
+                                                            color: Colors.grey[200],
+                                                            alignment: Alignment.center,
+                                                            child: Column(
+                                                              mainAxisSize: MainAxisSize.min,
+                                                              mainAxisAlignment: MainAxisAlignment.center,
+                                                              crossAxisAlignment: CrossAxisAlignment.center,
+                                                              children: [
+                                                                Expanded(
+                                                                  flex: 1,
+                                                                  child: Center(
+                                                                    child: Container(
+                                                                      height: 250,
+                                                                      width: 300,
+                                                                      alignment: Alignment.center,
+                                                                      child: AdWidget(ad: adsList[adIndex]!),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                                Expanded(
+                                                                  flex: 1,
+                                                                  child: buildRecommendedNews(context, homeProvider),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          )
+                                                        : (adsList[adIndex] is NativeAd
+                                                            ? Container(
+                                                                color: Colors.white,
+                                                                width: MediaQuery.of(context).size.width,
+                                                                height: MediaQuery.of(context).size.height,
+                                                                child: AdWidget(ad: adsList[adIndex]!),
+                                                              )
+                                                            : Container(
+                                                                color: Colors.white,
+                                                                child: MainScreenBytView(
+                                                                  article: homeProvider.getAllPostList[widget.index],
+                                                                  pageController: homeProvider.pageController!,
+                                                                  length: homeProvider.getAllPostList.length,
+                                                                  index: widget.index ,
+                                                                  aiTagName: "",
+                                                                ),
+                                                              )))
+                                                    : Container(
+                                                        color: Colors.white,
+                                                        child: MainScreenBytView(
+                                                          article: homeProvider.getAllPostList[widget.index],
+                                                          pageController: homeProvider.pageController!,
+                                                          length: homeProvider.getAllPostList.length,
+                                                          index: widget.index ,
+                                                          aiTagName: "",
+                                                        ),
+                                                      );
+                                              },
+                                            )
+                                          : Container(
+                                              color: Colors.white,
+                                              child: MainScreenBytView(
+                                                article: homeProvider.getAllPostList[widget.index],
+                                                pageController: homeProvider.pageController!,
+                                                length: homeProvider.getAllPostList.length,
+                                                index: widget.index ,
+                                                aiTagName: "",
                                               ),
-                                            ),
-                                          ),
-                                        )
+                                            );
+                                    })
                                   : widget.article['type'] == "Reel"
                                       ? FullStandardVideoView(
                                           rellData: widget.article,
@@ -316,7 +380,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
                                                     } else {
                                                       if (widget.article['postUrl'] == "" || widget.article['postUrl'] == null) {
-
                                                       } else {
                                                         context
                                                             .read<HomeProvider>()
@@ -326,22 +389,21 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                   },
                                                   child: widget.article['image_url'].length == 1
                                                       ? CachedNetworkImage(
-                                                    imageUrl: widget.article['image_url'][0] ?? "",
-                                                    width: MediaQuery.of(context).size.width,
-                                                    height: MediaQuery.of(context).size.height,
-                                                    fit: BoxFit.fill,
-                                                    placeholder: (context, url) => Container(
-                                                      color: AppColors.borderColor.withOpacity(.2),
-                                                    ),
-                                                    errorWidget: (context, url, error) => Center(
-                                                      child: Icon(
-                                                        Icons.image,
-                                                        size: 100,
-                                                        color: Colors.grey.shade300,
-                                                      ),
-                                                    ),
-                                                  )
-
+                                                          imageUrl: widget.article['image_url'][0] ?? "",
+                                                          width: MediaQuery.of(context).size.width,
+                                                          height: MediaQuery.of(context).size.height,
+                                                          fit: BoxFit.fill,
+                                                          placeholder: (context, url) => Container(
+                                                            color: AppColors.borderColor.withOpacity(.2),
+                                                          ),
+                                                          errorWidget: (context, url, error) => Center(
+                                                            child: Icon(
+                                                              Icons.image,
+                                                              size: 100,
+                                                              color: Colors.grey.shade300,
+                                                            ),
+                                                          ),
+                                                        )
                                                       : ImagePostSlider(
                                                           imageUrl: widget.article['image_url'],
                                                         ))
@@ -374,54 +436,58 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 ),
                                                                 color: Colors.black,
                                                               ),
-                                                              child: widget.article['type'] == "Video" && widget.article['video_platform'] ==  "Twitter" ? CustomVideoPlayer(url: widget.article['video_url'], imageUrl: widget.article['image_url'],) :
-                                                               widget.article['type'] == "Video"
-                                                                  ? SizedBox(
-                                                                      height: MediaQuery.of(context).size.height * .33,
-                                                                      width: MediaQuery.of(context).size.width,
-                                                                      child: VideoPreview(
-                                                                        imageUrl: widget.article['image_url'],
-                                                                        url: widget.article['video_url'] ?? "",
-                                                                        isFoldable: false,
-                                                                      ),
+                                                              child: widget.article['type'] == "Video" && widget.article['video_platform'] == "Twitter"
+                                                                  ? CustomVideoPlayer(
+                                                                      url: widget.article['video_url'],
+                                                                      imageUrl: widget.article['image_url'],
                                                                     )
-                                                                  : InkWell(
-                                                                      onTap: () {
-                                                                        Navigator.push(
-                                                                            context,
-                                                                            MaterialPageRoute(
-                                                                              builder: (context) => ImagePreview(
-                                                                                imageUrl: widget.article['image_url'],
-                                                                                title: widget.article['title'],
-                                                                              ),
-                                                                            ));
-                                                                      },
-                                                                      child: SizedBox(
-                                                                        height: MediaQuery.of(context).size.height * .35,
-                                                                        child: ClipRRect(
-                                                                          borderRadius: BorderRadius.only(
-                                                                            topRight: Radius.circular(16.r),
-                                                                            topLeft: Radius.circular(16.r),
+                                                                  : widget.article['type'] == "Video"
+                                                                      ? SizedBox(
+                                                                          height: MediaQuery.of(context).size.height * .33,
+                                                                          width: MediaQuery.of(context).size.width,
+                                                                          child: VideoPreview(
+                                                                            imageUrl: widget.article['image_url'],
+                                                                            url: widget.article['video_url'] ?? "",
+                                                                            isFoldable: false,
                                                                           ),
-                                                                          child: CachedNetworkImage(
-                                                                            imageUrl: widget.article['image_url'] ?? "hello",
-                                                                            height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .65 : .4),
-                                                                            width: MediaQuery.of(context).size.width,
-                                                                            fit: BoxFit.fill,
-                                                                            placeholder: (context, url) => Container(
-                                                                              color: AppColors.borderColor.withOpacity(.2),
-                                                                            ),
-                                                                            errorWidget: (context, url, error) => Center(
-                                                                              child: Icon(
-                                                                                Icons.image,
-                                                                                size: 100,
-                                                                                color: Colors.grey.shade300,
+                                                                        )
+                                                                      : InkWell(
+                                                                          onTap: () {
+                                                                            Navigator.push(
+                                                                                context,
+                                                                                MaterialPageRoute(
+                                                                                  builder: (context) => ImagePreview(
+                                                                                    imageUrl: widget.article['image_url'],
+                                                                                    title: widget.article['title'],
+                                                                                  ),
+                                                                                ));
+                                                                          },
+                                                                          child: SizedBox(
+                                                                            height: MediaQuery.of(context).size.height * .35,
+                                                                            child: ClipRRect(
+                                                                              borderRadius: BorderRadius.only(
+                                                                                topRight: Radius.circular(16.r),
+                                                                                topLeft: Radius.circular(16.r),
+                                                                              ),
+                                                                              child: CachedNetworkImage(
+                                                                                imageUrl: widget.article['image_url'] ?? "hello",
+                                                                                height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .65 : .4),
+                                                                                width: MediaQuery.of(context).size.width,
+                                                                                fit: BoxFit.fill,
+                                                                                placeholder: (context, url) => Container(
+                                                                                  color: AppColors.borderColor.withOpacity(.2),
+                                                                                ),
+                                                                                errorWidget: (context, url, error) => Center(
+                                                                                  child: Icon(
+                                                                                    Icons.image,
+                                                                                    size: 100,
+                                                                                    color: Colors.grey.shade300,
+                                                                                  ),
+                                                                                ),
                                                                               ),
                                                                             ),
                                                                           ),
                                                                         ),
-                                                                      ),
-                                                                    ),
                                                             ),
                                                             // Positioned(
                                                             //   top: 12,
@@ -564,8 +630,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                             : "assets/svg/like.svg",
                                                                                         height: 18,
                                                                                         width: 18,
-                                                                                        color:
-                                                                                            settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? Colors.lightBlue : Colors.grey),
+                                                                                        color: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? Colors.lightBlue : Colors.grey),
                                                                                   ),
                                                                                 );
                                                                               }),
@@ -589,9 +654,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
                                                                                   sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
 
-                                                                                  if (widget.article['type'] == "Standard" ||
-                                                                                      widget.article['type'] == "Video" ||
-                                                                                      widget.article['type'] == "Image") {
+                                                                                  if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
                                                                                     try {
                                                                                       final image = await adsScreenshotController.capture(
                                                                                         pixelRatio: 2.0,
@@ -631,40 +694,31 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                         ),
                                                                                       ),
                                                                               ),
-                                                                              Consumer<HomeProvider>(
-                                                                                  builder: (_, homeProvide, __) {
-                                                                                    return InkWell(
-                                                                                      onTap: () async {
-                                                                                        log("Refresh");
-                                                                                        EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
-                                                                                        homeProvide.isReloadData();
-                                                                                        // if (widget.isaiTags) {
-                                                                                        //   homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
-                                                                                        //         (value) {
-                                                                                        //       homeProvide.isReloadFalse();
-                                                                                        //     },
-                                                                                        //   );
-                                                                                        if (homeProvide.isAiTagDataLoaded) {
-                                                                                                    homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
-                                                                                                    homeProvide.isReloadFalse();
-                                                                                                  }
-                                                                                        else {
-                                                                                          homeProvide.getAllPostList = [];
-                                                                                          homeProvide.getAllPost();
-                                                                                        }
-                                                                                      },
-
-                                                                                      child: homeProvide.isReload
-                                                                                          ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
-                                                                                          : SvgPicture.asset(
-                                                                                          "assets/svg/new_refresh.svg",
-                                                                                          height: 20,
-                                                                                          width: 20,
-                                                                                          color: Colors.grey
-                                                                                      ),
-                                                                                    );
-                                                                                  }
-                                                                              )
+                                                                              Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                                                                return InkWell(
+                                                                                  onTap: () async {
+                                                                                    log("Refresh");
+                                                                                    EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
+                                                                                    homeProvide.isReloadData();
+                                                                                    // if (widget.isaiTags) {
+                                                                                    //   homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
+                                                                                    //         (value) {
+                                                                                    //       homeProvide.isReloadFalse();
+                                                                                    //     },
+                                                                                    //   );
+                                                                                    if (homeProvide.isAiTagDataLoaded) {
+                                                                                      homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
+                                                                                      homeProvide.isReloadFalse();
+                                                                                    } else {
+                                                                                      homeProvide.getAllPostList = [];
+                                                                                      homeProvide.getAllPost();
+                                                                                    }
+                                                                                  },
+                                                                                  child: homeProvide.isReload
+                                                                                      ? const SizedBox(height: 20, width: 20, child: AppLoadingScreen())
+                                                                                      : SvgPicture.asset("assets/svg/new_refresh.svg", height: 20, width: 20, color: Colors.grey),
+                                                                                );
+                                                                              })
                                                                             ],
                                                                           ),
                                                                         ),
@@ -803,6 +857,106 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                         ),
                       ),
           );
+  }
+
+  Widget buildRecommendedNews(BuildContext context, HomeProvider homeProvider) {
+    return Column(
+      children: [
+        Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
+        height(height: 10),
+        Expanded(
+          child: ListView.builder(
+            itemCount: homeProvider.getRecommendedPostList.length > 3 ? 3 : homeProvider.getRecommendedPostList.length,
+            physics: const NeverScrollableScrollPhysics(),
+            itemBuilder: (context, index) {
+              final post = homeProvider.getRecommendedPostList[index];
+              return InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => IndividualPostView1(
+                        postId: post['id'].toString(),
+                        isComeFrom: true,
+                      ),
+                    ),
+                  );
+                },
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: AppColors.wColor,
+                    border: Border.all(width: 2, color: AppColors.wColor),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CachedNetworkImage(
+                          imageUrl: post['image_url'].toString(),
+                          height: 50,
+                          width: 50,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            height: 50,
+                            width: 50,
+                            color: AppColors.borderColor.withOpacity(.2),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade300,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Icon(Icons.image, size: 30, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                      width(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              post["title"],
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor),
+                            ),
+                            height(height: 2),
+                            Row(
+                              children: [
+                                index == 0
+                                    ? SvgPicture.asset("assets/svg/like.svg", height: 16, width: 16)
+                                    : index == 2
+                                        ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
+                                        : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
+                                width(width: 6),
+                                Text(
+                                  index == 0
+                                      ? "టాప్ లైక్స్"
+                                      : index == 2
+                                          ? "టాప్ షేర్‌డ్"
+                                          : "టాప్ వ్యూడ్",
+                                  style: fontStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textColor),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
   }
 
   bool isSending = false;
