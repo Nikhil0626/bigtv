@@ -40,7 +40,7 @@ class VideoProvider extends ChangeNotifier {
 
   /// Play video
   void playVideo() {
-    if (_controller == null || !_controller!.value.isInitialized) return;
+    // if (_controller == null || !_controller!.value.isInitialized) return;
     _controller!.play();
     _isPlaying = true;
     notifyListeners();

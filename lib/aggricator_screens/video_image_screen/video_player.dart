@@ -91,13 +91,14 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
             if (details.delta.dy < -10) {
               log("jhvjhbhjbjhhijhiu");
               videoProvider.pauseVideo();
+              // videoProvider.controller?.pause();
               controller.nextPage(
                 duration: Duration(milliseconds: 600),
                 curve: Curves.easeIn,
               );
             } else if (details.delta.dy > 10) {
               log("jhvjhbhjbjhhijhiu000");
-              videoProvider.pauseVideo();
+              videoProvider.controller?.pause();
               controller.previousPage(
                 duration: Duration(milliseconds: 600),
                 curve: Curves.easeIn,
