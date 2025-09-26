@@ -1,23 +1,15 @@
-import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/recommended_news.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../globel_keys/globel_keys.dart';
 import '../../../utils/app_colors.dart';
-import '../../../utils/app_enums.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
-import '../../home_screen/home_provider/home_provider.dart';
 import '../../individual_post_details/individual_post_view.dart';
-import '../../loading_screen/ads_loading_screen.dart';
 import '../../test_screens/ads_test_data.dart';
-import 'google_ads_view.dart';
+import '../rate_your_app.dart';
+import '../share_app.dart';
 
 // class IosAdsWidgetScreen extends StatefulWidget {
 //   final article;
@@ -577,10 +569,8 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
 
   @override
   void dispose() {
-
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
   return Column(
@@ -588,116 +578,9 @@ class _IosAdsWidgetScreenState extends State<IosAdsWidgetScreen> {
       Expanded(
         child: widget.article['adType'] == "rating card" ? RateYourApp() : ShareYourApp(),
       ),
-      Expanded(child: buildRecommendedNews(context)),
+      Expanded(child: RecommendedNews(rList: widget.article['homepage'] ??[],),)
     ],
   );
   }
 
-  Widget buildRecommendedNews(BuildContext context) {
-    return Column(
-      children: [
-        InkWell(
-            onTap: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AdsTestData(),));
-            },
-            child: Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor))),
-        Expanded(
-          child: ListView.builder(
-            itemCount: 3,
-            physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              final post = widget.article["homepage"]![index];
-              return InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IndividualPostView1(
-                        postId: post['id'].toString(),
-                        isComeFrom: true,
-                      ),
-                    ),
-                  );
-                },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
-                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: AppColors.wColor,
-                    border: Border.all(width: 2, color: AppColors.wColor),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: CachedNetworkImage(
-                          imageUrl: post['image_url'].toString(),
-                          height: 50,
-                          width: 50,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            height: 50,
-                            width: 50,
-                            decoration: BoxDecoration(
-                              color: AppColors.borderColor.withOpacity(.2),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            height: 40,
-                            width: 40,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: Colors.grey.shade300,
-                            ),
-                            child: Center(
-                              child: Icon(Icons.image, size: 30, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                      width(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              post["title"],
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor),
-                            ),
-                            height(height: 2),
-                            Row(
-                              children: [
-                                index == 0
-                                    ? SvgPicture.asset("assets/svg/like.svg", height: 16, width: 16)
-                                    : index == 2
-                                        ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
-                                        : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
-                                width(width: 6),
-                                Text(
-                                  index == 0
-                                      ? "టాప్ లైక్స్"
-                                      : index == 2
-                                          ? "టాప్ షేర్‌డ్"
-                                          : "టాప్ వ్యూడ్",
-                                  style: fontStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textColor),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
 }

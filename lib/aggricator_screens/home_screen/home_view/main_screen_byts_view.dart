@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/ios_ads_view.dart';
 import 'package:chotanews/aggricator_screens/home_screen/home_support_widgets/image_preview.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_player.dart';
 import 'package:flutter/gestures.dart';
@@ -10,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -21,7 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../utils/image_view_ads.dart';
 import '../../../utils/keep_alive_page.dart';
-import '../../ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
+import '../../ad_manager_screen/ad_screen/android_ads_view.dart';
 import '../../auth_screens/authentication_provider/authentication_provider.dart';
 import '../../../utils/botton_actions.dart';
 import '../../events_data/event_repo.dart';
@@ -34,8 +32,6 @@ import '../../../utils/app_spaces.dart';
 import '../../../utils/app_toasts.dart';
 import '../../../utils/commant_screen.dart';
 import '../../../utils/date_format.dart';
-import '../../ad_manager_screen/ad_screen/android_ads_view.dart';
-import '../../individual_post_details/individual_post_view.dart';
 import '../../polls_screens/polls_view/polls_screen.dart';
 import '../../rating_screen/rating_view/movie_reviews.dart';
 import '../../settings_screen/settings_provider/settings_provider.dart';
@@ -43,7 +39,6 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 
 import '../../video_image_screen/gallery_screen.dart';
-import '../../video_image_screen/video_player1.dart';
 import '../../video_image_screen/video_preview.dart';
 import '../home_support_widgets/full_standed_video_view.dart';
 import '../home_provider/home_provider.dart';
@@ -138,81 +133,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                   ),
                                 )
                               : widget.article['type'] == "GoogleAds"
-                                  ? Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-                                      return (widget.index + 1) % 5 == 0
-                                          ? Consumer<AdMobBannerProvider>(
-                                              builder: (context, adMobBannerProvider, child) {
-                                                final adsList = adMobBannerProvider.ads.values.toList();
-                                                int adIndex = ((widget.index + 1) ~/ 5) - 1;
-
-                                                return (adIndex < adsList.length && adsList[adIndex] != null)
-                                                    ? (adsList[adIndex] is BannerAd || adsList[adIndex] is AdManagerBannerAd
-                                                        ? Container(
-                                                            color: Colors.grey[200],
-                                                            alignment: Alignment.center,
-                                                            child: Column(
-                                                              mainAxisSize: MainAxisSize.min,
-                                                              mainAxisAlignment: MainAxisAlignment.center,
-                                                              crossAxisAlignment: CrossAxisAlignment.center,
-                                                              children: [
-                                                                Expanded(
-                                                                  flex: 1,
-                                                                  child: Center(
-                                                                    child: Container(
-                                                                      height: 250,
-                                                                      width: 300,
-                                                                      alignment: Alignment.center,
-                                                                      child: AdWidget(ad: adsList[adIndex]!),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                Expanded(
-                                                                  flex: 1,
-                                                                  child: buildRecommendedNews(context, homeProvider),
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          )
-                                                        : (adsList[adIndex] is NativeAd
-                                                            ? Container(
-                                                                color: Colors.white,
-                                                                width: MediaQuery.of(context).size.width,
-                                                                height: MediaQuery.of(context).size.height,
-                                                                child: AdWidget(ad: adsList[adIndex]!),
-                                                              )
-                                                            : Container(
-                                                                color: Colors.white,
-                                                                child: MainScreenBytView(
-                                                                  article: homeProvider.getAllPostList[widget.index],
-                                                                  pageController: homeProvider.pageController!,
-                                                                  length: homeProvider.getAllPostList.length,
-                                                                  index: widget.index ,
-                                                                  aiTagName: "",
-                                                                ),
-                                                              )))
-                                                    : Container(
-                                                        color: Colors.white,
-                                                        child: MainScreenBytView(
-                                                          article: homeProvider.getAllPostList[widget.index],
-                                                          pageController: homeProvider.pageController!,
-                                                          length: homeProvider.getAllPostList.length,
-                                                          index: widget.index ,
-                                                          aiTagName: "",
-                                                        ),
-                                                      );
-                                              },
-                                            )
-                                          : Container(
-                                              color: Colors.white,
-                                              child: MainScreenBytView(
-                                                article: homeProvider.getAllPostList[widget.index],
-                                                pageController: homeProvider.pageController!,
-                                                length: homeProvider.getAllPostList.length,
-                                                index: widget.index ,
-                                                aiTagName: "",
-                                              ),
-                                            );
-                                    })
+                                  ? AndroidAdsView(article: widget.article, index: widget.index,)
                                   : widget.article['type'] == "Reel"
                                       ? FullStandardVideoView(
                                           rellData: widget.article,
@@ -859,105 +780,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           );
   }
 
-  Widget buildRecommendedNews(BuildContext context, HomeProvider homeProvider) {
-    return Column(
-      children: [
-        Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
-        height(height: 10),
-        Expanded(
-          child: ListView.builder(
-            itemCount: homeProvider.getRecommendedPostList.length > 3 ? 3 : homeProvider.getRecommendedPostList.length,
-            physics: const NeverScrollableScrollPhysics(),
-            itemBuilder: (context, index) {
-              final post = homeProvider.getRecommendedPostList[index];
-              return InkWell(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => IndividualPostView1(
-                        postId: post['id'].toString(),
-                        isComeFrom: true,
-                      ),
-                    ),
-                  );
-                },
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
-                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: AppColors.wColor,
-                    border: Border.all(width: 2, color: AppColors.wColor),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Row(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(8),
-                        child: CachedNetworkImage(
-                          imageUrl: post['image_url'].toString(),
-                          height: 50,
-                          width: 50,
-                          fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(
-                            height: 50,
-                            width: 50,
-                            color: AppColors.borderColor.withOpacity(.2),
-                          ),
-                          errorWidget: (context, url, error) => Container(
-                            height: 40,
-                            width: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.grey.shade300,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Icon(Icons.image, size: 30, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      width(width: 10),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              post["title"],
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor),
-                            ),
-                            height(height: 2),
-                            Row(
-                              children: [
-                                index == 0
-                                    ? SvgPicture.asset("assets/svg/like.svg", height: 16, width: 16)
-                                    : index == 2
-                                        ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
-                                        : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
-                                width(width: 6),
-                                Text(
-                                  index == 0
-                                      ? "టాప్ లైక్స్"
-                                      : index == 2
-                                          ? "టాప్ షేర్‌డ్"
-                                          : "టాప్ వ్యూడ్",
-                                  style: fontStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textColor),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
-    );
-  }
+
 
   bool isSending = false;
 

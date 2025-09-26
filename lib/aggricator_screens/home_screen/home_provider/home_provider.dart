@@ -396,7 +396,17 @@ class HomeProvider extends ChangeNotifier {
       getAllPostList.addAll(data);
 
       final seenIds = <int>{};
-      getAllPostList.retainWhere((e) => seenIds.add(e['id']));
+      getAllPostList.retainWhere((e) {
+        final id = e['id'] as int;
+
+        if (id == 234000) {
+          // Always keep, don't check for duplicates
+          return true;
+        }
+
+        // For all other ids, keep only first occurrence
+        return seenIds.add(id);
+      });
 
       // getAllPostList.retainWhere((element) => element['id']==postIds,);
 
