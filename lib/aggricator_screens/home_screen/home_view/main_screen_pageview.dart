@@ -168,7 +168,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                     child: Slider(
                       value: homeProvider.pageController!.hasClients ? (homeProvider.pageController!.page ?? 0) : 0,
                       min: 0,
-                      max: (homeProvider.getAllPostList.length - 1).toDouble(),
+                      max: (homeProvider.getAllPostList.length -1).toDouble(),
                       onChanged: null, // read-only slider
                     ),
                   ),

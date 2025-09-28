@@ -351,10 +351,10 @@ class HomeProvider extends ChangeNotifier {
         bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
       });
 
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final bannerAdsProvider = Provider.of<AdMobBannerProvider>(mainNavigatorKey.currentContext!, listen: false);
-        bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
-      });
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   final bannerAdsProvider = Provider.of<AdMobBannerProvider>(mainNavigatorKey.currentContext!, listen: false);
+      //   bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
+      // });
       getImageAdsList.addAll(response.data['ads_list']);
       getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
       log(" hello hai ${adMobStickBannerId.toString()} --- $adManagerStickBannerId");
@@ -447,6 +447,7 @@ class HomeProvider extends ChangeNotifier {
       "deviceid": deviceId ?? "",
       "aitagid": postId,
       "user_id": userId ?? "",
+      "isAdManager": "true",
     };
     log(body.toString());
     try {

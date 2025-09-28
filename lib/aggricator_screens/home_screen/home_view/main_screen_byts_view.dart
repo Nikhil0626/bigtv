@@ -40,6 +40,7 @@ import 'package:http/http.dart' as http;
 
 import '../../video_image_screen/gallery_screen.dart';
 import '../../video_image_screen/video_preview.dart';
+import '../../video_image_screen/video_provider.dart';
 import '../home_support_widgets/full_standed_video_view.dart';
 import '../home_provider/home_provider.dart';
 
@@ -448,6 +449,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 left: 14,
                                                                 child: GestureDetector(
                                                                   onTap: () {
+                                                                    context.read<VideoProvider>().pauseVideo();
                                                                     context.read<HomeProvider>().setSelectedTagId(0);
                                                                     context.read<HomeProvider>().aiTagDataLoaded(false);
                                                                     context.read<HomeProvider>().pageChange(isValue: true);

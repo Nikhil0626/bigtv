@@ -20,6 +20,7 @@ class CustomVideoPlayer extends StatefulWidget {
     this.isVideoScreen = false,
     this.isFoldable = false,
     this.postId = '0',
+    bool isLoading = false,
   });
 
   @override
@@ -118,7 +119,17 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
                   child: VideoPlayer(videoProvider.controller!),
                 ),
               ),
-
+              // if (videoProvider.controller?.value.isBuffering == true)
+              //   Container(
+              //     color: Colors.black54,
+              //     height: 330,
+              //     width: MediaQuery.of(context).size.width,
+              //     child: const Center(
+              //       child: CircularProgressIndicator(
+              //         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              //       ),
+              //     ),
+              //   ),
               /// Play / Pause button overlay
               if (!videoProvider.isPlaying)
                 IconButton(
