@@ -216,7 +216,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
     final adMobProvider = context.read<AdMobBannerProvider>();
     final adStickyKeys = adMobProvider.adsBanner320x50.length;
 
-    adMobProvider.changePageIndex(value);
+    // adMobProvider.changePageIndex(value);
 
     log("Last Index of Sticky ads data $adStickyKeys ----- $value --- ${adStickyKeys * 4} --- ${adMobProvider.adsBanner320x50}");
 
