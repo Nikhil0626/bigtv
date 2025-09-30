@@ -19,6 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../utils/image_view_ads.dart';
 import '../../../utils/keep_alive_page.dart';
+import '../../ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import '../../ad_manager_screen/ad_screen/android_ads_view.dart';
 import '../../auth_screens/authentication_provider/authentication_provider.dart';
 import '../../../utils/botton_actions.dart';
@@ -501,7 +502,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                               TextSpan(
                                                                                 children: [
                                                                                   TextSpan(
-                                                                                    text: "Chota ",
+                                                                                    text: "Chota ${context.watch<AdMobBannerProvider>().adsBanner320x50.length} ",
                                                                                     style: fontStyle(
                                                                                       fontSize: Platform.isIOS ? 16 : 16,
                                                                                       fontWeight: FontWeight.bold,

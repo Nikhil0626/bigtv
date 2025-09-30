@@ -268,22 +268,7 @@ class _HomeViewState extends State<HomeView> {
                             height: 50,
                             width: MediaQuery.of(context).size.width,
                             alignment: Alignment.center,
-                            child: Container(
-                              height: 50,
-                              width: 320,
-                              color: Colors.white,
-                              alignment: Alignment.center,
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                        child: Center(child: AdWidget(ad: adsList.last))),
-                                     Text("${adsList.length}")
-                                  ],
-                                ),
-                              ),
-                            ),
+                            child: Center(child: AdWidget(ad: adsList[adsList.length-1])),
                           );
                         }
                       },
