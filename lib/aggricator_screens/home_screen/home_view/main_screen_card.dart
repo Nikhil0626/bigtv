@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
@@ -117,6 +118,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                           homeProvider.setSelectedTagId(tagId);
                                           homeProvider.getAllPostsByAiId(tagId.toString());
                                           homeProvider.aiTagDataLoaded(true);
+                                          context.read<VideoProvider>().pauseVideo();
                                           homeProvider.aiTagsScrollToCenter(index);
                                           EventRepo().addEvent({
                                             "aiTagName": tag['aitagname'].toString(),

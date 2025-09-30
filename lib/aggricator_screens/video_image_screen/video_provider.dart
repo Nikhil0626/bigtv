@@ -6,11 +6,13 @@ class VideoProvider extends ChangeNotifier {
   String _currentUrl = "";
   bool _isPlaying = false;
   bool _isMuted = false;
+  bool _isLoading = false;
 
   VideoPlayerController? get controller => _controller;
   String get currentUrl => _currentUrl;
   bool get isPlaying => _isPlaying;
   bool get isMuted => _isMuted;
+  bool get isLoading => _isLoading;
 
   /// Initialize the video controller
   Future<void> initializeVideo(String url) async {
@@ -25,6 +27,7 @@ class VideoProvider extends ChangeNotifier {
     }
 
     try {
+      _isLoading = true;
       _currentUrl = url;
       _controller = VideoPlayerController.networkUrl(Uri.parse(url));
       await _controller!.initialize();
@@ -53,6 +56,7 @@ class VideoProvider extends ChangeNotifier {
     _isPlaying = false;
     notifyListeners();
   }
+
 
   /// Toggle play/pause
   void togglePlayPause({bool? isPlay}) {
