@@ -226,13 +226,13 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
           : adStickyKeys;
 
       adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 1, AdSize.banner);
-      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 2, AdSize.banner);
+      // adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 2, AdSize.banner);
     }
 
     else if (value == 1 && adMobProvider.adsBanner320x50.isNotEmpty) {
       int? lastStickyKey = 0;
       adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 1, AdSize.banner);
-      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 2, AdSize.banner);
+      // adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 2, AdSize.banner);
 
     }
   }

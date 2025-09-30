@@ -275,7 +275,13 @@ class _HomeViewState extends State<HomeView> {
                               alignment: Alignment.center,
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 2.0),
-                                child: Center(child: AdWidget(ad: adsList.last)),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                        child: Center(child: AdWidget(ad: adsList.last))),
+                                     Text("${adsList.length}")
+                                  ],
+                                ),
                               ),
                             ),
                           );
