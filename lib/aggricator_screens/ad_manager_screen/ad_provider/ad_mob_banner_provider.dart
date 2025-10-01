@@ -483,10 +483,16 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../services/base_service.dart';
+import '../../../services/base_urls.dart';
+import '../../../utils/app_enums.dart';
 
 class AdMobBannerProvider with ChangeNotifier {
   final Map<int, dynamic> ads = {};
@@ -540,6 +546,7 @@ class AdMobBannerProvider with ChangeNotifier {
             }
             ads.removeWhere((key, value) => value == null);
             notifyListeners();
+           adSuccess(ad, index, "AdMob Native");
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
@@ -548,9 +555,11 @@ class AdMobBannerProvider with ChangeNotifier {
             adErrors[index] = 'Failed: ${error.code} - ${error.message}';
             debugPrint('❌ Ad failed at $index: ${error.message}');
             notifyListeners();
+
+            _checkIfAllAdsFailed(error, index, "AdMob Native");
           },
           onAdImpression: (ad) async {
-
+            _logLatencyMetrics(ad, index, "AdMob Native");
           },
         ),
         request: AdRequest(),
@@ -597,6 +606,7 @@ class AdMobBannerProvider with ChangeNotifier {
             }
             ads.removeWhere((key, value) => value == null);
             notifyListeners();
+            adSuccess(ad, index, "AdManager Native");
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
@@ -605,9 +615,10 @@ class AdMobBannerProvider with ChangeNotifier {
             adErrors[index] = 'Failed: ${error.code} - ${error.message}';
             debugPrint('❌ Ad failed at $index: ${error.message}');
             notifyListeners();
+            _checkIfAllAdsFailed(error, index, "AdManager Native");
           },
           onAdImpression: (ad) async {
-
+            _logLatencyMetrics(ad, index, "AdManager Native");
           },
         ),
         request: AdRequest(),
@@ -652,6 +663,8 @@ class AdMobBannerProvider with ChangeNotifier {
             ads[index] = ad as BannerAd;
             adsLoaded[index] = true;
             ads.removeWhere((key, value) => value == null);
+            notifyListeners();
+            adSuccess(ad, index, "AdMob Banner");
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
@@ -659,11 +672,11 @@ class AdMobBannerProvider with ChangeNotifier {
             adsLoaded[index] = false;
             adErrors[index] = 'Failed: ${error.code} - ${error.message}';
 
-            _checkIfAllAdsFailed(error, index);
+            _checkIfAllAdsFailed(error, index, "AdMob Banner");
           },
           onAdImpression: (ad) {
             latencyData.impressionLogged = DateTime.now();
-            _logLatencyMetrics(ad, index);
+            _logLatencyMetrics(ad, index, "AdMob Banner");
           },
           onAdClicked: (ad) async => await _logEvent("onAdClicked"),
           onAdClosed: (ad) async => await _logEvent("onAdClosed"),
@@ -709,17 +722,18 @@ class AdMobBannerProvider with ChangeNotifier {
             adsLoaded[index] = true;
             ads.removeWhere((key, value) => value == null);
             notifyListeners();
+            adSuccess(ad, index, "AdManager Banner");
           },
           onAdFailedToLoad: (ad, error) {
             ad.dispose();
             ads[index] = null;
             adsLoaded[index] = false;
             adErrors[index] = 'Failed: ${error.code} - ${error.message}';
-            _checkIfAllAdsFailed(error, index);
+            _checkIfAllAdsFailed(error, index, "AdManager Banner");
           },
           onAdImpression: (ad) {
             latencyData.impressionLogged = DateTime.now();
-            _logLatencyMetrics(ad, index);
+            _logLatencyMetrics(ad, index, "AdManager Banner");
           },
           onAdClicked: (ad) async {
             await _logEvent("onAdClicked");
@@ -770,6 +784,7 @@ class AdMobBannerProvider with ChangeNotifier {
             adsLoaded320x50[index] = true;
             adsBanner320x50.removeWhere((key, value) => value == null);
             notifyListeners();
+            adSuccess(ad, index, "AdMob 320x50 Banner");
           },
           onAdFailedToLoad: (ad, error) {
             debugPrint("[AdMob] 320x50 ad failed at index $index: ${error.code} - ${error.message}");
@@ -778,13 +793,13 @@ class AdMobBannerProvider with ChangeNotifier {
             adsLoaded320x50[index] = false;
             adErrors320x50[index] = 'Failed: ${error.code} - ${error.message}';
             adsBanner320x50.removeWhere((key, value) => value == null);
-            _checkIfAllAdsFailed(error, index);
+            _checkIfAllAdsFailed(error, index, "AdMob 320x50 Banner");
             // loadAd320x50ManagerBanner(autoupdate!, size); // ✅ fallback
           },
           onAdImpression: (ad) {
             debugPrint("[AdMob] Impression logged at index $index");
             adLatencyData[index]?.impressionLogged = DateTime.now();
-            _logLatencyMetrics(ad, index);
+            _logLatencyMetrics(ad, index, "AdMob 320x50 Banner");
           },
           onAdClicked: (ad) async {
             debugPrint("[AdMob] Ad clicked at index $index");
@@ -840,6 +855,7 @@ class AdMobBannerProvider with ChangeNotifier {
             adsBanner320x50.removeWhere((key, value) => value == null);
 
             notifyListeners();
+            adSuccess(ad, index, "AdManager 320x50 Banner");
           },
           onAdFailedToLoad: (ad, error) {
             debugPrint("[AdManager 320x50] Failed to load at index $index: ${error.code} - ${error.message}");
@@ -852,12 +868,12 @@ class AdMobBannerProvider with ChangeNotifier {
             debugPrint("[AdManager 320x50] Falling back to AdMob at index $index");
             loadAd320x50MobBanner(index, AdSize.banner);
 
-            _checkIfAllAdsFailed(error, index);
+            _checkIfAllAdsFailed(error, index, "AdManager 320x50 Banner");
           },
           onAdImpression: (ad) {
             debugPrint("[AdManager 320x50] Impression logged at index $index");
             adLatencyData[index]?.impressionLogged = DateTime.now();
-            _logLatencyMetrics(ad, index);
+            _logLatencyMetrics(ad, index, "AdManager 320x50 Banner");
           },
           onAdClicked: (ad) async {
             debugPrint("[AdManager 320x50] Ad clicked at index $index");
@@ -893,18 +909,26 @@ class AdMobBannerProvider with ChangeNotifier {
     });
   }
 
-  Future<void> _checkIfAllAdsFailed(error, index) async {
+  Future<void> _checkIfAllAdsFailed(error, index, sources) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
     log("error ads imple $error");
     final latency = adLatencyData[index];
 
     final sdkReadyLatency = (latency?.responseReceived != null && latency?.requestInitiated != null) ? latency?.responseReceived!.difference(latency.requestInitiated!).inMilliseconds : null;
 
     final renderLatency = (latency?.adRendered != null && latency?.adCreativeDownloaded != null) ? latency?.adRendered!.difference(latency.adCreativeDownloaded!).inMilliseconds : null;
-
+    sendDataToads({
+      "event": "AdFailure",
+      "source": sources.toString(),
+      "platform": Platform.isIOS ? "ios" : "android",
+      "adResponse": error.toString(),
+      "deviceId": sp.getString("deviceId"),
+      "timestamp": DateTime.now().toString(),
+    });
     await FirebaseAnalytics.instance.logEvent(
       name: "ads_failure",
       parameters: {
-        "adSource": source.toString(),
+        "adSource": sources.toString(),
         "sdkRequestStartTime": sdkReadyLatency.toString(),
         "sdkRequestReceivedTime": renderLatency.toString(),
         "adsRenderingTime": "0",
@@ -916,7 +940,20 @@ class AdMobBannerProvider with ChangeNotifier {
     // EventRepo().addEvent(, "");
   }
 
-  void _logLatencyMetrics(Ad ad, int index) async {
+  void adSuccess(Ad ad, int index, sources) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    sendDataToads({
+      "event": "AdSuccess",
+      "source": sources.toString(),
+      "platform": Platform.isIOS ? "ios" : "android",
+      "adResponse": "success",
+      "deviceId": sp.getString("deviceId"),
+      "timestamp": DateTime.now().toString(),
+    });
+  }
+
+  void _logLatencyMetrics(Ad ad, int index, sources) async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
     final analytics = FirebaseAnalytics.instance;
     final latency = adLatencyData[index];
 
@@ -936,7 +973,7 @@ class AdMobBannerProvider with ChangeNotifier {
     await analytics.logEvent(
       name: "ads_success",
       parameters: {
-        "adSource": source.toString(),
+        "adSource": sources.toString(),
         "sdkRequestStartTime": sdkReadyLatency?.toString() ?? "",
         "sdkRequestReceivedTime": creativeDownloadLatency.toString(),
         "adsRenderingTime": renderLatency?.toString() ?? "",
@@ -948,7 +985,7 @@ class AdMobBannerProvider with ChangeNotifier {
     await analytics.logEvent(
       name: "ad_latency_metrics",
       parameters: {
-        "adSource": source ?? "unknown",
+        "adSource": sources ?? "unknown",
         "requestInitiated": latency.requestInitiated?.toIso8601String() ?? "",
         "responseReceived": latency.responseReceived?.toIso8601String() ?? "",
         "adCreativeDownloaded": latency.adCreativeDownloaded?.toIso8601String() ?? "",
@@ -963,6 +1000,20 @@ class AdMobBannerProvider with ChangeNotifier {
       },
     );
   }
+
+  Future sendDataToads(body) async {
+    log("test post data $body");
+    try {
+      Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
+      return response.data;
+    } on DioException catch (e, st) {
+      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+    } catch (e, st) {
+      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+    }
+  }
+
+
 
 
 

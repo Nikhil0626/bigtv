@@ -774,16 +774,16 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future sendDataToads(body) async {
-    try {
-      Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
-      // log("RK RES ${response.data}");
-    } on DioException catch (e, st) {
-      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
-    } catch (e, st) {
-      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
-    }
-  }
+  // Future sendDataToads(body) async {
+  //   try {
+  //     Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
+  //     // log("RK RES ${response.data}");
+  //   } on DioException catch (e, st) {
+  //     log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+  //   } catch (e, st) {
+  //     log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+  //   }
+  // }
 
   List getAdsDataList = [];
   bool isAdsDataLoading = false;
