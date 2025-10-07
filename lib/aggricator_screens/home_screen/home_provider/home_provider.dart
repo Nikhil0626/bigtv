@@ -79,6 +79,12 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearSinglePost() {
+    getSinglePostList = {};
+    isPostLoading = true;
+    notifyListeners();
+  }
+
   void isTabChange() {
     isSwitched = false;
     notifyListeners();
@@ -187,7 +193,15 @@ class HomeProvider extends ChangeNotifier {
   Future getIndividualPost(postId, {bool isAds = false, bool isLink = false}) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     log("getIndividualPost ${postId}");
-    if (isAds != true) {
+    // if (isAds != true) {
+    //   getAllPostList = [];
+    // }
+    // if(isAds == true) {
+    //   getSinglePostList.clear();
+    // }
+    if (isAds == true) {
+      clearSinglePost();
+    } else {
       getAllPostList = [];
     }
     // if (isLink = true) {

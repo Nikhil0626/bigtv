@@ -917,14 +917,14 @@ class AdMobBannerProvider with ChangeNotifier {
     final sdkReadyLatency = (latency?.responseReceived != null && latency?.requestInitiated != null) ? latency?.responseReceived!.difference(latency.requestInitiated!).inMilliseconds : null;
 
     final renderLatency = (latency?.adRendered != null && latency?.adCreativeDownloaded != null) ? latency?.adRendered!.difference(latency.adCreativeDownloaded!).inMilliseconds : null;
-    sendDataToads({
-      "event": "AdFailure",
-      "source": sources.toString(),
-      "platform": Platform.isIOS ? "ios" : "android",
-      "adResponse": error.toString(),
-      "deviceId": sp.getString("deviceId"),
-      "timestamp": DateTime.now().toString(),
-    });
+    // sendDataToads({
+    //   "event": "AdFailure",
+    //   "source": sources.toString(),
+    //   "platform": Platform.isIOS ? "ios" : "android",
+    //   "adResponse": error.toString(),
+    //   "deviceId": sp.getString("deviceId"),
+    //   "timestamp": DateTime.now().toString(),
+    // });
     await FirebaseAnalytics.instance.logEvent(
       name: "ads_failure",
       parameters: {
@@ -942,14 +942,14 @@ class AdMobBannerProvider with ChangeNotifier {
 
   void adSuccess(Ad ad, int index, sources) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
-    sendDataToads({
-      "event": "AdSuccess",
-      "source": sources.toString(),
-      "platform": Platform.isIOS ? "ios" : "android",
-      "adResponse": "success",
-      "deviceId": sp.getString("deviceId"),
-      "timestamp": DateTime.now().toString(),
-    });
+    // sendDataToads({
+    //   "event": "AdSuccess",
+    //   "source": sources.toString(),
+    //   "platform": Platform.isIOS ? "ios" : "android",
+    //   "adResponse": "success",
+    //   "deviceId": sp.getString("deviceId"),
+    //   "timestamp": DateTime.now().toString(),
+    // });
   }
 
   void _logLatencyMetrics(Ad ad, int index, sources) async {
@@ -1001,17 +1001,17 @@ class AdMobBannerProvider with ChangeNotifier {
     );
   }
 
-  Future sendDataToads(body) async {
-    log("test post data $body");
-    try {
-      Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
-      return response.data;
-    } on DioException catch (e, st) {
-      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
-    } catch (e, st) {
-      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
-    }
-  }
+  // Future sendDataToads(body) async {
+  //   log("test post data $body");
+  //   try {
+  //     Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
+  //     return response.data;
+  //   } on DioException catch (e, st) {
+  //     log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+  //   } catch (e, st) {
+  //     log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+  //   }
+  // }
 
 
 
