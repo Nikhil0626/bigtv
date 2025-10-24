@@ -16,11 +16,15 @@ class AndroidAdsView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final adsList = context.watch<AdMobBannerProvider>().ads.values.toList();
+    final adsList = context.read<AdMobBannerProvider>().ads.values.toList();
     int adIndex = ((index + 1) ~/ 5) - 1;
 
     log("rdtrdtydyydfydydyyd  $adsList --- $adIndex");
-    return (adsList[adIndex] is BannerAd || adsList[adIndex] is AdManagerBannerAd)
+    return adsList.isEmpty? IosAdsWidgetScreen(
+      article: article,
+    ):
+
+      (adsList[adIndex] is BannerAd || adsList[adIndex] is AdManagerBannerAd)
         ? Container(
       color: Colors.grey[200],
       alignment: Alignment.center,

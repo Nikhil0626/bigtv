@@ -659,7 +659,7 @@ class AdMobBannerProvider with ChangeNotifier {
             adsLoaded[index] = false;
             adErrors[index] = 'Failed: ${error.code} - ${error.message}';
 
-            _checkIfAllAdsFailed(error, index);
+            _checkIfAllAdsFailed(error, index,);
           },
           onAdImpression: (ad) {
             latencyData.impressionLogged = DateTime.now();
@@ -893,7 +893,7 @@ class AdMobBannerProvider with ChangeNotifier {
     });
   }
 
-  Future<void> _checkIfAllAdsFailed(error, index) async {
+  Future<void> _checkIfAllAdsFailed(error, index,) async {
     log("error ads imple $error");
     final latency = adLatencyData[index];
 
@@ -967,10 +967,10 @@ class AdMobBannerProvider with ChangeNotifier {
 
 
   void adsLoad() {
-    loadAdMobBanner(1, AdSize.mediumRectangle);
-    loadAdManagerBanner(2, AdSize.mediumRectangle);
-    loadAdMobNative(3, AdSize.mediumRectangle);
-    loadAdManagerNative(4, AdSize.mediumRectangle);
+    loadAdMobBanner(4, AdSize.mediumRectangle);
+    loadAdManagerBanner(3, AdSize.mediumRectangle);
+    loadAdMobNative(2, AdSize.mediumRectangle);
+    loadAdManagerNative(1, AdSize.mediumRectangle);
   }
 
   void adsDispose() {
