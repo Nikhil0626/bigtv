@@ -38,6 +38,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
   void initState() {
     super.initState();
 
+    context.read<PollProvider>().commentController.text = "";
     context.read<PollProvider>().addData(widget.artical);
   }
 
@@ -215,7 +216,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 8),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 8),
                           decoration: BoxDecoration(
                             color: isSelected ? Colors.blue.withOpacity(0.8) : Colors.white,
                             borderRadius: BorderRadius.circular(8),

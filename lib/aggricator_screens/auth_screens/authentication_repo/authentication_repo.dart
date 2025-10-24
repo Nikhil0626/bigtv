@@ -45,6 +45,12 @@ class AuthenticationRepo extends BaseService {
     log(response.data.toString());
     return response;
   }
+
+  Future getStateLocation(body) async {
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.getStateLocation, method: RequestType.get, queryParameters: body);
+    log(response.data.toString());
+    return response;
+  }
 //
 // Future updateProfile(Map<String,dynamic> body) async {
 //     Response response = await makeRequest(url: BaseUrls.updateProfile,method: RequestType.put,

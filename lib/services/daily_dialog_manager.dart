@@ -19,12 +19,12 @@ class DailyDialog {
     }
 
     // If already shown today → skip
-    if (lastShown != null &&
-        lastShown.year == today.year &&
-        lastShown.month == today.month &&
-        lastShown.day == today.day) {
-      return;
-    }
+    // if (lastShown != null &&
+    //     lastShown.year == today.year &&
+    //     lastShown.month == today.month &&
+    //     lastShown.day == today.day) {
+    //   return;
+    // }
 
     // Save today's date
     await prefs.setString(_lastShownReferEarnKey, today.toIso8601String());

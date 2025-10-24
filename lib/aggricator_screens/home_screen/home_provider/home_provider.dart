@@ -79,6 +79,12 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void clearSinglePost() {
+    getSinglePostList = {};
+    isPostLoading = true;
+    notifyListeners();
+  }
+
   void isTabChange() {
     isSwitched = false;
     notifyListeners();
@@ -187,7 +193,15 @@ class HomeProvider extends ChangeNotifier {
   Future getIndividualPost(postId, {bool isAds = false, bool isLink = false}) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     log("getIndividualPost ${postId}");
-    if (isAds != true) {
+    // if (isAds != true) {
+    //   getAllPostList = [];
+    // }
+    // if(isAds == true) {
+    //   getSinglePostList.clear();
+    // }
+    if (isAds == true) {
+      clearSinglePost();
+    } else {
       getAllPostList = [];
     }
     // if (isLink = true) {
@@ -774,16 +788,16 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future sendDataToads(body) async {
-    try {
-      Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
-      // log("RK RES ${response.data}");
-    } on DioException catch (e, st) {
-      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
-    } catch (e, st) {
-      log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
-    }
-  }
+  // Future sendDataToads(body) async {
+  //   try {
+  //     Response response = await BaseService().makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.test, method: RequestType.post, body: body);
+  //     // log("RK RES ${response.data}");
+  //   } on DioException catch (e, st) {
+  //     log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+  //   } catch (e, st) {
+  //     log("sfjsyfgheyuifaeiyufha $e ksjfkuefh $st");
+  //   }
+  // }
 
   List getAdsDataList = [];
   bool isAdsDataLoading = false;

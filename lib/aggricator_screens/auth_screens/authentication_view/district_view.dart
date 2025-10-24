@@ -169,16 +169,16 @@ class _DistrictViewState extends State<DistrictView> {
                   alignment: Alignment.centerLeft,
                   child: RichText(
                     text: TextSpan(
-                      text: "You have selected ",
+                      text: "Districts to be selected ",
                       style: TextStyle(color: Colors.black87),
                       children: [
                         TextSpan(
-                          text:
-                              "0${authenticationProvider.selectedLocations.length}",
-                          style: homeScreenFontStyle(
-                              color: Colors.blue, fontWeight: FontWeight.bold),
+                          // text:
+                              // "0${authenticationProvider.selectedLocations.length}",
+                          // style: homeScreenFontStyle(
+                          //     color: Colors.blue, fontWeight: FontWeight.bold),
                         ),
-                        TextSpan(text: "/05\n"),
+                        // TextSpan(text: "/05\n"),
                         if (authenticationProvider.selectedLocations.length > 5)
                           TextSpan(
                               text:
@@ -213,41 +213,70 @@ class _DistrictViewState extends State<DistrictView> {
                                           stateId.toString())
                                       .toList();
 
-                              return ExpansionTile(
-                                tilePadding:
-                                    EdgeInsets.symmetric(horizontal: 16),
-                                collapsedBackgroundColor: Colors.transparent,
-                                backgroundColor: Colors.transparent,
-                                childrenPadding: EdgeInsets.zero,
-                                initiallyExpanded: false,
-                                title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(stateName,
-                                        style: homeScreenFontStyle(
-                                            fontWeight: FontWeight.bold)),
-                                    Text("(${districts.length})",
-                                        style: homeScreenFontStyle(
-                                            fontWeight: FontWeight.bold)),
-                                  ],
+                              // return ExpansionTile(
+                              //   tilePadding:
+                              //       EdgeInsets.symmetric(horizontal: 16),
+                              //   collapsedBackgroundColor: Colors.transparent,
+                              //   backgroundColor: Colors.transparent,
+                              //   childrenPadding: EdgeInsets.zero,
+                              //   initiallyExpanded: false,
+                              //   title: Row(
+                              //     mainAxisAlignment:
+                              //         MainAxisAlignment.spaceBetween,
+                              //     children: [
+                              //       Text(stateName,
+                              //           style: homeScreenFontStyle(
+                              //               fontWeight: FontWeight.bold)),
+                              //       Text("(${districts.length})",
+                              //           style: homeScreenFontStyle(
+                              //               fontWeight: FontWeight.bold)),
+                              //     ],
+                              //   ),
+                              //   children: districts.map((district) {
+                              //     bool isSelected = authenticationProvider
+                              //         .selectedLocations
+                              //         .contains(district.districtName);
+                              //     return CheckboxListTile(
+                              //       title: Text(district.districtName,
+                              //           style: homeScreenFontStyle(
+                              //               fontWeight: FontWeight.bold)),
+                              //       value: isSelected,
+                              //       onChanged: (bool? selected) {
+                              //         authenticationProvider
+                              //             .addToSelectedLocations(
+                              //                 district.districtName);
+                              //       },
+                              //     );
+                              //   }).toList(),
+                              // );
+                              return Container(
+                                // decoration: BoxDecoration(
+                                //   border: Border.all(color: Colors.grey.shade300),
+                                //   borderRadius: BorderRadius.circular(4),
+                                // ),
+                                child: CheckboxListTile(
+                                  // tilePadding: EdgeInsets.symmetric(horizontal: 16),
+                                  title: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Text(stateName,
+                                          style: newAppFont(
+                                            fontWeight: FontWeight.w600,
+                                          )),
+                                      // width(width: 10),
+                                      // Text("(${districts.length})",
+                                      //     style: newAppFont(
+                                      //         fontWeight: FontWeight.w300,
+                                      //         color: AppColors.iconColors
+                                      //     )),
+                                    ],
+                                  ),
+                                  value: authenticationProvider.selectedLocations.contains(stateName),
+                                  activeColor: AppColors.appButtonColor,
+                                  onChanged: (bool? selected) {
+                                    authenticationProvider.addToSelectedLocations(stateName);
+                                  },
                                 ),
-                                children: districts.map((district) {
-                                  bool isSelected = authenticationProvider
-                                      .selectedLocations
-                                      .contains(district.districtName);
-                                  return CheckboxListTile(
-                                    title: Text(district.districtName,
-                                        style: homeScreenFontStyle(
-                                            fontWeight: FontWeight.bold)),
-                                    value: isSelected,
-                                    onChanged: (bool? selected) {
-                                      authenticationProvider
-                                          .addToSelectedLocations(
-                                              district.districtName);
-                                    },
-                                  );
-                                }).toList(),
                               );
                             }).toList(),
                           ),
@@ -255,7 +284,7 @@ class _DistrictViewState extends State<DistrictView> {
                 ),
 
                 InkWell(
-                  onTap: authenticationProvider.selectedLocations.length > 1 &&
+                  onTap: authenticationProvider.selectedLocations.length >= 1 &&
                           authenticationProvider.selectedLocations.length <= 5
                       ? () {
                           authenticationProvider
@@ -283,7 +312,7 @@ class _DistrictViewState extends State<DistrictView> {
                       height: 36.h,
                       decoration: BoxDecoration(
                           color:
-                              (authenticationProvider.selectedLocations.length >
+                              (authenticationProvider.selectedLocations.length >=
                                           1 &&
                                       authenticationProvider
                                               .selectedLocations.length <=

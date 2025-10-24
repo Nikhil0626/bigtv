@@ -502,7 +502,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                               TextSpan(
                                                                                 children: [
                                                                                   TextSpan(
-                                                                                    text: "Chota ${context.watch<AdMobBannerProvider>().adsBanner320x50.length} ",
+                                                                                    // text: "Chota ${context.watch<AdMobBannerProvider>().adsBanner320x50.length} ",
+                                                                                    text: "Chota ",
                                                                                     style: fontStyle(
                                                                                       fontSize: Platform.isIOS ? 16 : 16,
                                                                                       fontWeight: FontWeight.bold,
