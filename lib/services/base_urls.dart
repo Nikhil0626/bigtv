@@ -85,6 +85,7 @@ class BaseUrls {
 
   ///Location Apis
   static const String getAllLocation = "/locations";
+  static const String getStateLocation = "/state_locations";
 
   ///Bookmarks Apis
   static const String getAllBookMarks = "/bookmark";

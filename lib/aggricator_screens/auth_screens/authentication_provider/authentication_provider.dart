@@ -271,6 +271,7 @@ class AuthenticationProvider extends ChangeNotifier {
         if (!isFilter) {
           saveLoginState();
           newAppLoginStatus = NewAppLoginStatus.location;
+
         }
         log(response.data.toString());
         EventRepo().addEvent({"listOfCategoriesIds": result ?? "", "listOfCategoriesNames": catNames ?? "", "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_categories");
@@ -302,7 +303,7 @@ class AuthenticationProvider extends ChangeNotifier {
     };
     try {
       log("response.data.toString123");
-      Response response = await AuthenticationRepo().getAllLocations(body);
+      Response response = await AuthenticationRepo().getStateLocation(body);
       if (response.statusCode == 200) {
         List data = response.data['locations'];
         getAllLocationList = data

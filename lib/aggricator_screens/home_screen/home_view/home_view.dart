@@ -53,12 +53,12 @@ class _HomeViewState extends State<HomeView> {
       requestNotificationPermission();
       homeProvider?.getMobileNumber();
     });
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Future.delayed(Duration(seconds: 1), () {
-        // checkAndShowPopup();
-        DailyDialog.showReferDialog(context: context);
-      });
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   Future.delayed(Duration(seconds: 1), () {
+    //     // checkAndShowPopup();
+    //     DailyDialog.showReferDialog(context: context);
+    //   });
+    // });
     homeProvider?.initDeepLinks(context);
     homeProvider?.subscribeToPushCallbacks();
     homeProvider?.selectedIndex = 0;

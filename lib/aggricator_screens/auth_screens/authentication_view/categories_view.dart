@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:chotanews/aggricator_screens/home_screen/home_view/home_view.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -85,6 +86,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                 onTap: authenticationProvider.selectedCategories.isNotEmpty
                     ? () {
                         authenticationProvider.sendCategoriesToServer();
+                     // Navigator.push(context, MaterialPageRoute(builder: (context) => const HomeView()));
                       }
                     : null,
                 child: Container(
@@ -102,16 +104,16 @@ class _CategoriesViewState extends State<CategoriesView> {
                 valueColor: AlwaysStoppedAnimation<Color>(AppColors.appButtonColor),
               ),
               height(height: 8.h),
-              Center(
-                child: Text(
-                  'Step 1/2',
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.appButtonColor,
-                  ),
-                ),
-              ),
+              // Center(
+              //   child: Text(
+              //     'Step 1/2',
+              //     style: TextStyle(
+              //       fontSize: 14.sp,
+              //       fontWeight: FontWeight.w500,
+              //       color: AppColors.appButtonColor,
+              //     ),
+              //   ),
+              // ),
             ],
           ),
         ),
