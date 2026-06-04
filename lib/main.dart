@@ -26,6 +26,8 @@ import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import 'aggricator_screens/splash_screen/splash_screen_view.dart';
 import 'aggricator_screens/test_screens/testing_screen/test3.dart';
 import 'globel_keys/globel_keys.dart';
+import 'core/theme/app_theme.dart';
+import 'core/theme/theme_provider.dart';
 
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -122,21 +124,24 @@ class _MyAppState extends State<MyApp> {
       designSize: const Size(360, 690), // Adjust to your design
       child: MultiProvider(
         providers: AppProviders.all,
-        child: MaterialApp(
-          navigatorKey: mainNavigatorKey,
-          localizationsDelegates: context.localizationDelegates,
-          supportedLocales: const [Locale('te', '')],
-          // Add your locales
-          locale: _locale,
-          theme: ThemeData(
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-            useMaterial3: true,
-          ),
-          routes: {
-            '/': (context) => SplashScreen(),
-            '/settings': (context) => SettingsView(),
+        child: Consumer<ThemeProvider>(
+          builder: (context, themeProvider, child) {
+            return MaterialApp(
+              navigatorKey: mainNavigatorKey,
+              localizationsDelegates: context.localizationDelegates,
+              supportedLocales: const [Locale('te', '')],
+              // Add your locales
+              locale: _locale,
+              themeMode: themeProvider.themeMode,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              routes: {
+                '/': (context) => SplashScreen(),
+                '/settings': (context) => SettingsView(),
+              },
+              debugShowCheckedModeBanner: false,
+            );
           },
-          debugShowCheckedModeBanner: false,
         ),
       ),
     );

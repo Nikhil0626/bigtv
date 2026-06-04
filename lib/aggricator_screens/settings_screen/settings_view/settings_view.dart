@@ -16,6 +16,8 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
+import '../../../core/theme/theme_extensions.dart';
+import '../../../core/theme/theme_provider.dart';
 
 import '../../../services/webengage_notification.dart';
 import '../../../utils/app_enums.dart';
@@ -96,6 +98,9 @@ class _SettingsViewState extends State<SettingsView> {
                   SizedBox.shrink(),
 
                   height(height: 5.h),
+                  _buildThemeToggle(context),
+                  height(height: 5.h),
+
                   _buildSettingsRow(context, "Filter.svg", "Filter", () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
                   }),
@@ -257,7 +262,7 @@ class _SettingsViewState extends State<SettingsView> {
                 height(height: 10),
                 Divider(
                   height: 1,
-                  color: AppColors.borderColor,
+                  color: context.borderColor,
                 ),
                 height(height: 10),
                 Expanded(
@@ -296,14 +301,14 @@ class _SettingsViewState extends State<SettingsView> {
                               child: Icon(
                                 Icons.apple,
                                 size: 50,
-                                color: Colors.black,
+                                color: context.textColor,
                               ),
                             ),
                             height(height: 8),
-                            Text(
-                              "App Store",
-                              style: newAppFont(fontWeight: FontWeight.w600, color: AppColors.headerTextColor),
-                            ),
+                              Text(
+                                "App Store",
+                                style: context.typography.titleMedium,
+                              ),
                           ],
                         ),
                       ),
@@ -324,7 +329,7 @@ class _SettingsViewState extends State<SettingsView> {
                           children: [
                             Container(
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: context.cardColor,
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
@@ -342,10 +347,10 @@ class _SettingsViewState extends State<SettingsView> {
                               ),
                             ),
                             height(height: 8),
-                            Text(
-                              "Play Store",
-                              style: newAppFont(fontWeight: FontWeight.w600, color: AppColors.headerTextColor),
-                            ),
+                              Text(
+                                "Play Store",
+                                style: context.typography.titleMedium,
+                              ),
                           ],
                         ),
                       ),
@@ -362,13 +367,13 @@ class _SettingsViewState extends State<SettingsView> {
                     height: 35.h,
                     // margin: EdgeInsets.only(bottom: 20.h),
                     decoration: BoxDecoration(
-                      color: AppColors.appButtonColor,
+                      color: context.primaryColor,
                       borderRadius: BorderRadius.all(Radius.circular(8.r)),
                     ),
                     child: Center(
                       child: Text(
                         'Cancel',
-                        style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                        style: context.typography.labelLarge?.copyWith(color: Colors.white),
                       ),
                     ),
                   ),
@@ -386,19 +391,51 @@ class _SettingsViewState extends State<SettingsView> {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(1))),
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(
-          vertical: 10,
+        decoration: BoxDecoration(
+          color: context.cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: context.borderColor.withOpacity(0.5)),
         ),
+        margin: EdgeInsets.symmetric(vertical: 4),
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         child: Row(
           children: [
-            width(width: 10.w),
-            iconName =="profile.png"?Image.asset('assets/svg/$iconName',height: 20.w, width: 20.w): SvgPicture.asset('assets/svg/$iconName', height: 20.w, width: 20.w),
-            width(width: 20.w),
-            Text(title, style: newAppFont(fontSize: 14.sp, color: AppColors.textColor)),
+            iconName =="profile.png"?Image.asset('assets/svg/$iconName',height: 24.w, width: 24.w, color: context.iconTheme.color): SvgPicture.asset('assets/svg/$iconName', height: 24.w, width: 24.w, colorFilter: ColorFilter.mode(context.iconTheme.color ?? Colors.grey, BlendMode.srcIn)),
+            width(width: 16.w),
+            Text(title, style: context.typography.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+            Spacer(),
+            Icon(Icons.arrow_forward_ios, size: 16, color: context.subtitleColor),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildThemeToggle(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    return Container(
+      decoration: BoxDecoration(
+        color: context.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: context.borderColor.withOpacity(0.5)),
+      ),
+      margin: EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Row(
+        children: [
+          Icon(Icons.dark_mode, size: 24, color: context.iconTheme.color),
+          width(width: 16.w),
+          Text("Dark Mode", style: context.typography.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+          Spacer(),
+          Switch(
+            value: themeProvider.isDarkMode,
+            activeColor: context.primaryColor,
+            onChanged: (val) {
+              themeProvider.setThemeMode(val ? ThemeMode.dark : ThemeMode.light);
+            },
+          ),
+        ],
       ),
     );
   }

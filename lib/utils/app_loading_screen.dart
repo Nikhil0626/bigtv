@@ -1,9 +1,10 @@
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:flutter/material.dart';
+import '../core/theme/theme_extensions.dart';
 
 class AppLoadingScreen extends StatelessWidget {
-  final Color loadingColor;
-  const AppLoadingScreen({super.key, this.loadingColor = AppColors.appButtonColor});
+  final Color? loadingColor;
+  const AppLoadingScreen({super.key, this.loadingColor});
 
   @override
   Widget build(BuildContext context) {
@@ -11,9 +12,7 @@ class AppLoadingScreen extends StatelessWidget {
       child: SizedBox(
           width: 34,
           height: 34,
-          child: CircularProgressIndicator(color: loadingColor,strokeWidth: 1,)),
-      // child: Lottie.asset(
-      //   "assets/loading.json",height: 50,width: 50,),
+          child: CircularProgressIndicator(color: loadingColor ?? context.primaryColor, strokeWidth: 1,)),
     );
   }
 }

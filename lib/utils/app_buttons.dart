@@ -15,7 +15,7 @@ class CommonButton extends StatelessWidget {
   final Widget? trailingIcon;
 
   const CommonButton({
-    Key? key,
+    super.key,
     required this.text,
     this.fontStyle,
     this.onPressed,
@@ -27,7 +27,7 @@ class CommonButton extends StatelessWidget {
     this.elevation,
     this.leadingIcon,
     this.trailingIcon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

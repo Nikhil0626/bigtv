@@ -19,6 +19,8 @@ import '../aggricator_screens/video_image_screen/video_provider1.dart';
 
 
 
+import '../core/theme/theme_provider.dart';
+
 class AppProviders {
   static List<ChangeNotifierProvider> all = [
     ChangeNotifierProvider<EPapersProvider>(create: (_) => EPapersProvider()),
@@ -36,5 +38,6 @@ class AppProviders {
     ChangeNotifierProvider<AdsContestProvider>(create: (_) => AdsContestProvider()),
     ChangeNotifierProvider<AdMobBannerProvider>(create: (_) => AdMobBannerProvider()),
     ChangeNotifierProvider<VideoProvider>(create: (_) => VideoProvider()),
+    ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
   ];
 }
