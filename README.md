@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 📱 ChotaNews
 
 **ChotaNews** is a lightweight and fast news aggregator app that delivers bite-sized news in a
@@ -110,3 +111,6 @@ build/ios/iphoneos/Runner.app
 ---
 
 Feel free to add screenshots, contributors, or license sections below this!
+=======
+# bigtv
+>>>>>>> 8272ea581eb7cb3a9fe29f9aafbae98c32f3510e
