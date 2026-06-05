@@ -1,4 +1,5 @@
 import 'dart:developer';
+import '../../../core/theme/color_tokens.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
@@ -97,12 +98,23 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                         children: [
                           homeProvider.getAllAiTagsList.isEmpty
                               ? SizedBox.shrink()
-                              : SizedBox(
-                                  height: 50,
-                                  child: ListView.builder(
+                              : Container(
+                                  height: 45.h,
+                                  color: AppColorTokens.aiTagBackground,
+                                  child: ListView.separated(
                                     controller: homeProvider.aiTagScrollController,
                                     scrollDirection: Axis.horizontal,
                                     itemCount: homeProvider.getAllAiTagsList.length,
+                                    separatorBuilder: (context, index) {
+                                      return Padding(
+                                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                                        child: VerticalDivider(
+                                          color: Colors.grey.withOpacity(0.5),
+                                          thickness: 1,
+                                          width: 10.w,
+                                        ),
+                                      );
+                                    },
                                     itemBuilder: (context, index) {
                                       // Ensure key exists
                                       if (!homeProvider.aiTagKeys.containsKey(index)) {
@@ -111,6 +123,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
 
                                       final tag = homeProvider.getAllAiTagsList[index];
                                       final tagId = tag['aitagid'];
+                                      final isSelected = homeProvider.selectedTagId == tagId;
 
                                       return InkWell(
                                         key: homeProvider.aiTagKeys[index],
@@ -127,23 +140,24 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                           }, "ai_tag_click");
                                         },
                                         child: Container(
-                                          height: 30,
-                                          margin: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
-                                          decoration: BoxDecoration(
-                                            color: homeProvider.selectedTagId == tagId ? AppColors.appButtonColor : Colors.grey.shade300,
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
                                           alignment: Alignment.center,
-                                          child: Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                                            child: Text(
-                                              tag['aitagname'].toString(),
-                                              textAlign: TextAlign.center,
-                                              style: homeScreenFontStyle(
-                                                color: homeProvider.selectedTagId == tagId ? Colors.white : AppColors.textColor,
-                                                fontSize: 14.sp,
-                                                fontWeight: FontWeight.w500,
+                                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              bottom: BorderSide(
+                                                color: isSelected ? AppColorTokens.primaryRed : Colors.transparent,
+                                                width: 3,
                                               ),
+                                            ),
+                                          ),
+                                          child: Text(
+                                            tag['aitagname'].toString().toUpperCase(),
+                                            style: TextStyle(
+                                              fontFamily: 'DDTW00-CondensedSemiBold',
+                                              color: AppColors.wColor,
+                                              fontSize: 20.sp,
+                                              fontWeight: FontWeight.w600,
+                                              letterSpacing: 0.5,
                                             ),
                                           ),
                                         ),

@@ -24,6 +24,8 @@ import '../../../services/permission_handler_services.dart';
 import '../../../services/webengage_notification.dart';
 import '../../ad_manager_screen/ad_provider/banner_ads_provider.dart';
 import '../../events_data/event_repo.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/core/theme/theme_extensions.dart';
 import '../../settings_screen/settings_view/settings_view.dart';
 import '../home_provider/home_provider.dart';
 import 'main_screen_card.dart';
@@ -113,7 +115,7 @@ class _HomeViewState extends State<HomeView> {
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: SafeArea(
-                            minimum: EdgeInsets.only(left: 16,right: 16, bottom:4),
+                            // minimum: EdgeInsets.only(left: 16,right: 16, bottom:4),
                             child: Container(
                               height: 56, // reduced height
                               decoration: BoxDecoration(
@@ -128,9 +130,9 @@ class _HomeViewState extends State<HomeView> {
                                 ],
                               ),
                               child: ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
+                                // borderRadius: BorderRadius.circular(20),
                                 child: BottomNavigationBar(
-                                  backgroundColor: Colors.white,
+                                  backgroundColor: AppColorTokens.primaryRed,
                                   type: BottomNavigationBarType.fixed,
                                   currentIndex: homeProvider.selectedIndex,
                                   onTap: (index) {
@@ -138,7 +140,8 @@ class _HomeViewState extends State<HomeView> {
                                     homeProvider.homePageController.jumpToPage(index);
                                     homeProvider.pageChange(isValue: true);
                                     if (index == 0) {
-                                      context.read<HomeProvider>().setSelectedTagId(0);
+                                      homeProvider.getAllPost();
+                                      homeProvider.setSelectedTagId(0);
                                       EventRepo().addEvent({
                                         "aiTagName": "news",
                                         "aiTagId": "-1",
@@ -165,8 +168,8 @@ class _HomeViewState extends State<HomeView> {
                                     }
                                     setState(() {});
                                   },
-                                  selectedItemColor: AppColors.appButtonColor,
-                                  unselectedItemColor: AppColors.bodyTextColor,
+                                  selectedItemColor: Colors.white,
+                                  unselectedItemColor: Colors.white,
                                   selectedFontSize: 12,
                                   unselectedFontSize: 12,
                                   iconSize: 22,
@@ -177,10 +180,7 @@ class _HomeViewState extends State<HomeView> {
                                       icon: SvgPicture.asset(
                                         "assets/new_app_icon/bytes.svg",
                                         height: 22,
-                                        colorFilter: ColorFilter.mode(
-                                          homeProvider.selectedIndex == 0 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                                          BlendMode.srcIn,
-                                        ),
+                                      colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                       ),
                                       label: 'news'.tr(),
                                     ),
@@ -188,10 +188,7 @@ class _HomeViewState extends State<HomeView> {
                                       icon: SvgPicture.asset(
                                         "assets/new_app_icon/paper.svg",
                                         height: 22,
-                                        colorFilter: ColorFilter.mode(
-                                          homeProvider.selectedIndex == 1 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                                          BlendMode.srcIn,
-                                        ),
+                                      colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                       ),
                                       label: 'ePaper'.tr(),
                                     ),
@@ -199,10 +196,7 @@ class _HomeViewState extends State<HomeView> {
                                       icon: SvgPicture.asset(
                                         "assets/new_app_icon/reel.svg",
                                         height: 22,
-                                        colorFilter: ColorFilter.mode(
-                                          homeProvider.selectedIndex == 2 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                                          BlendMode.srcIn,
-                                        ),
+                                      colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                       ),
                                       label: 'reels'.tr(),
                                     ),
@@ -210,10 +204,7 @@ class _HomeViewState extends State<HomeView> {
                                       icon: SvgPicture.asset(
                                         "assets/new_app_icon/menu.svg",
                                         height: 22,
-                                        colorFilter: ColorFilter.mode(
-                                          homeProvider.selectedIndex == 3 ? AppColors.appButtonColor : AppColors.bodyTextColor,
-                                          BlendMode.srcIn,
-                                        ),
+                                      colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                       ),
                                       label: 'more'.tr(),
                                     ),

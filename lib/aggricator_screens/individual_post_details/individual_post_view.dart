@@ -381,8 +381,8 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                         decoration: BoxDecoration(
                           color: article['subType'] == "BigBlackStandard" ? AppColors.textColor : Colors.white,
                           borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(10.sp),
-                            topLeft: Radius.circular(10.sp),
+                            // topRight: Radius.circular(10.sp),
+                            // topLeft: Radius.circular(10.sp),
                           ),
                         ),
                         child: Padding(

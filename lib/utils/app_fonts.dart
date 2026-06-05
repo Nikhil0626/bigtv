@@ -13,14 +13,14 @@ TextStyle homeScreenFontStyle(
   final BuildContext? ctx = mainNavigatorKey.currentContext;
   final defaultColor = ctx?.textColor ?? Colors.black;
 
-  return GoogleFonts.notoSansTelugu(
+  return GoogleFonts.anekTelugu(
     textStyle: TextStyle(
       fontSize: fontSize,
       height: 1.4,
       wordSpacing: 2,
       fontWeight: fontWeight,
       color: color ?? defaultColor,
-    )
+    ),
   );
 }
 

@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 class AppColorTokens {
   // Brand Colors
-  static const Color primaryRed = Color(0xFFF40000);
+  static const Color primaryRed = Color(0xFFE53935);
   static const Color darkRed = Color(0xFFC70000);
+  
+  static const Color aiTagBackground = Color(0xFF3E3E3E);
 
   // Status Colors
   static const Color success = Color(0xFF10B981);
