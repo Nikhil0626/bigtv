@@ -1,8 +1,5 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
-
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
@@ -24,7 +21,7 @@ class ShareYourApp extends StatelessWidget {
             color: Colors.white,
             borderRadius: BorderRadius.circular(8),
           ),
-          padding: EdgeInsets.all(8),
+          padding: const EdgeInsets.all(8),
           child: Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -51,17 +48,19 @@ class ShareYourApp extends StatelessWidget {
                 height(height: 12),
                 ElevatedButton(
                   onPressed: () {
-                    Share.share("Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
+                    Share.share(
+                        "Check out this app: https://play.google.com/store/apps/details?id=com.chotanews");
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.lightBlue,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 26, vertical: 14),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 26, vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text('Share App'),
+                  child: const Text('Share App'),
                 ),
               ],
             ),

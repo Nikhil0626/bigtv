@@ -1,7 +1,4 @@
-
-
 import 'package:flutter/material.dart';
-
 import '../../utils/app_colors.dart';
 import '../../utils/app_spaces.dart';
 import '../settings_screen/settings_view/feedback_view.dart';
@@ -26,7 +23,7 @@ class RateYourApp extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              const Text(
                 'Rate your experience\nwith chota news?',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -40,16 +37,15 @@ class RateYourApp extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   5,
-                      (index) =>
-                      Icon(
-                        Icons.star,
-                        color: AppColors.ratingColor,
-                        size: 40,
-                      ),
+                  (index) =>  Icon(
+                    Icons.star,
+                    color: AppColors.ratingColor,
+                    size: 40,
+                  ),
                 ),
               ),
               height(height: 4),
-              Text(
+              const Text(
                 'Awesome, liked it',
                 style: TextStyle(
                   color: Colors.lightBlue,
@@ -60,17 +56,21 @@ class RateYourApp extends StatelessWidget {
               height(height: 6),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>  FeedbackForm()));
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.lightBlue,
                   foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                child: Text('Submit'),
+                child: const Text('Submit'),
               ),
             ],
           ),

@@ -1,9 +1,6 @@
-
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
@@ -12,13 +9,17 @@ import '../individual_post_details/individual_post_view.dart';
 class RecommendedNews extends StatelessWidget {
   final List rList;
 
-  const RecommendedNews({super.key,required this.rList});
+  const RecommendedNews({super.key, required this.rList});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text("Recommended News", style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor)),
+        Text("Recommended News",
+            style: fontStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textColor)),
         height(height: 10),
         Expanded(
           child: ListView.builder(
@@ -39,8 +40,10 @@ class RecommendedNews extends StatelessWidget {
                   );
                 },
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
-                  padding: const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
+                  margin:
+                      const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
                   decoration: BoxDecoration(
                     color: AppColors.wColor,
                     border: Border.all(width: 2, color: AppColors.wColor),
@@ -58,7 +61,7 @@ class RecommendedNews extends StatelessWidget {
                           placeholder: (context, url) => Container(
                             height: 50,
                             width: 50,
-                            color: AppColors.borderColor.withOpacity(.2),
+                            color: AppColors.borderColor.withAlpha(51), // 0.2 * 255 approx 51
                           ),
                           errorWidget: (context, url, error) => Container(
                             height: 40,
@@ -67,7 +70,8 @@ class RecommendedNews extends StatelessWidget {
                               color: Colors.grey.shade300,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Icon(Icons.image, size: 30, color: Colors.white),
+                            child: const Icon(Icons.image,
+                                size: 30, color: Colors.white),
                           ),
                         ),
                       ),
@@ -77,27 +81,36 @@ class RecommendedNews extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              post["title"],
+                              post["title"] ?? "",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: fontStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textColor),
+                              style: fontStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textColor),
                             ),
                             height(height: 2),
                             Row(
                               children: [
                                 index == 0
-                                    ? SvgPicture.asset("assets/svg/like.svg", height: 16, width: 16)
+                                    ? SvgPicture.asset("assets/svg/like.svg",
+                                        height: 16, width: 16)
                                     : index == 2
-                                    ? SvgPicture.asset("assets/svg/share.svg", height: 16, width: 16)
-                                    : SvgPicture.asset("assets/svg/eye.svg", height: 16, width: 16),
+                                        ? SvgPicture.asset("assets/svg/share.svg",
+                                            height: 16, width: 16)
+                                        : SvgPicture.asset("assets/svg/eye.svg",
+                                            height: 16, width: 16),
                                 width(width: 6),
                                 Text(
                                   index == 0
                                       ? "టాప్ లైక్స్"
                                       : index == 2
-                                      ? "టాప్ షేర్‌డ్"
-                                      : "టాప్ వ్యూడ్",
-                                  style: fontStyle(fontSize: 12, fontWeight: FontWeight.w400, color: AppColors.textColor),
+                                          ? "టాప్ షేర్‌డ్"
+                                          : "టాప్ వ్యూడ్",
+                                  style: fontStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w400,
+                                      color: AppColors.textColor),
                                 ),
                               ],
                             ),

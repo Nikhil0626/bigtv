@@ -20,11 +20,6 @@ class BannerAdsProvider with ChangeNotifier {
   final int _maxCachedAds = 3;
   bool _isLoading = false;
   int _currentAdIndex = 0;
-  BuildContext? _context;
-
-  void setContext(BuildContext context) {
-    _context = context;
-  }
 
   BannerAd? get currentAd => _loadedAds.isNotEmpty ? _loadedAds[_currentAdIndex] : null;
   bool get hasAds => _loadedAds.isNotEmpty;
@@ -41,7 +36,7 @@ class BannerAdsProvider with ChangeNotifier {
     final from = DateTime.now().toString();
 
     final BannerAd ad = BannerAd(
-      adUnitId:  mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId??"" ,
+      adUnitId:  mainNavigatorKey.currentContext!.read<HomeProvider>().adMobBannerId,
       size: AdSize.banner,
       request: const AdRequest(),
       listener: BannerAdListener(

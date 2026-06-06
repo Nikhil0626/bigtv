@@ -90,7 +90,7 @@ class AuthenticationProvider extends ChangeNotifier {
           saveLoginState();
           EventRepo().addEvent({
             "loginType": "mobileNumber",
-            "mobileNumber": phoneController.text ?? "",
+            "mobileNumber": phoneController.text,
             "createAt": DateTime.now().toString(),
           }, "login_event");
           otpController.text = "";
@@ -134,8 +134,8 @@ class AuthenticationProvider extends ChangeNotifier {
       log(response.data.toString());
       if (response.statusCode == 200) {
         sp.setString("loginType", "login");
-        sp.setString("myReferralCode", response.data['user']['referral_code'].toString() ?? "");
-        sp.setString("myReferralLink", response.data['user']['refferal_link'].toString() ?? "");
+        sp.setString("myReferralCode", response.data['user']['referral_code'].toString());
+        sp.setString("myReferralLink", response.data['user']['refferal_link'].toString());
         sp.setString("userId", response.data['user']['id'].toString());
         sp.setString("userName", response.data['user']['name'].toString());
         sp.setString("userStatus", response.data['user']['status'].toString());
@@ -172,7 +172,7 @@ class AuthenticationProvider extends ChangeNotifier {
         saveUserid("");
         preferences.setString("userName", "User${phoneController.text.substring(phoneController.text.length - 4)}");
         preferences.setString("referralCode", "");
-        EventRepo().addEvent({"otpStatus": "complete", "otp": otpController.text ?? "", "mobileNumber": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
+        EventRepo().addEvent({"otpStatus": "complete", "otp": otpController.text, "mobileNumber": phoneController.text, "createAt": DateTime.now().toString()}, "otp_verify");
         phoneController.text = "";
         notifyListeners();
       }
@@ -184,12 +184,12 @@ class AuthenticationProvider extends ChangeNotifier {
       CustomToast.showErrorToast(msg: e.message);
       log("error dio ${e.toString()}");
       log("error dio  ${st.toString()}");
-      EventRepo().addEvent({"otpStatus": "fail", "otp": otpController.text ?? "", "mobileNumber": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
+      EventRepo().addEvent({"otpStatus": "fail", "otp": otpController.text, "mobileNumber": phoneController.text, "createAt": DateTime.now().toString()}, "otp_verify");
     } catch (e, st) {
       log("error  ${e.toString()}");
       log("error  ${st.toString()}");
       CustomToast.showErrorToast(msg: "Something went wrong");
-      EventRepo().addEvent({"otpStatus": "fail", "otp": otpController.text ?? "", "mobileNumber": phoneController.text ?? "", "createAt": DateTime.now().toString()}, "otp_verify");
+      EventRepo().addEvent({"otpStatus": "fail", "otp": otpController.text, "mobileNumber": phoneController.text, "createAt": DateTime.now().toString()}, "otp_verify");
     } finally {
       isVerifyLoading = false;
       notifyListeners();
@@ -274,14 +274,14 @@ class AuthenticationProvider extends ChangeNotifier {
 
         }
         log(response.data.toString());
-        EventRepo().addEvent({"listOfCategoriesIds": result ?? "", "listOfCategoriesNames": catNames ?? "", "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_categories");
+        EventRepo().addEvent({"listOfCategoriesIds": result, "listOfCategoriesNames": catNames, "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_categories");
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
-      EventRepo().addEvent({"listOfCategoriesIds": result ?? "", "listOfCategoriesNames": catNames ?? "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_categories");
+      EventRepo().addEvent({"listOfCategoriesIds": result, "listOfCategoriesNames": catNames, "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_categories");
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
-      EventRepo().addEvent({"listOfCategoriesIds": result ?? "", "listOfCategoriesNames": catNames ?? "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_categories");
+      EventRepo().addEvent({"listOfCategoriesIds": result, "listOfCategoriesNames": catNames, "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_categories");
     } finally {
       isCatSaveLoading = false;
       notifyListeners();
@@ -383,14 +383,14 @@ class AuthenticationProvider extends ChangeNotifier {
         }
 
         log(response.data.toString());
-        EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": nameOfDistrict ?? "", "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_locations");
+        EventRepo().addEvent({"listOfLocationsIds": result, "listOfLocationsNames": nameOfDistrict, "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_locations");
       }
     } on DioException catch (e, st) {
       log("Dio error get all cat --- ${e.toString()} --- ${st.toString()}");
-      EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
+      EventRepo().addEvent({"listOfLocationsIds": result, "listOfLocationsNames": "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
     } catch (e, st) {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
-      EventRepo().addEvent({"listOfLocationsIds": result ?? "", "listOfLocationsNames": "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
+      EventRepo().addEvent({"listOfLocationsIds": result, "listOfLocationsNames": "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
     } finally {
       isLocationSendingLoading = false;
       notifyListeners();
@@ -469,6 +469,5 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   void sendEvent(pageName) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
   }
 }

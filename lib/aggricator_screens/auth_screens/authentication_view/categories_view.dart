@@ -79,17 +79,17 @@ class _CategoriesViewState extends State<CategoriesView> {
                 Text(
                   'CHOOSE YOUR INTERESTS',
                   style: newAppFont(
-                    fontSize: 22.sp,
+                    fontSize: 18.sp,
                     color: const Color(0xFFE50914),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                height(height: 8.h),
+                height(height: 4.h),
                 Text(
-                  'Select the categories you want\nto see in your feed',
+                  'Select the categories you want to see in your feed',
                   textAlign: TextAlign.center,
                   style: newAppFont(
-                    fontSize: 14.sp,
+                    fontSize: 13.sp,
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                     fontWeight: FontWeight.w400,
                   ),

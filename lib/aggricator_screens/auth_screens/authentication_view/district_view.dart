@@ -142,17 +142,17 @@ class _DistrictViewState extends State<DistrictView> {
                 Text(
                   'CHOOSE YOUR LOCATION',
                   style: newAppFont(
-                    fontSize: 22.sp,
+                    fontSize: 18.sp,
                     color: const Color(0xFFE50914),
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                height(height: 8.h),
+                height(height: 4.h),
                 Text(
-                  'Get news and updates from\nyour preferred location',
+                  'Get news and updates from your preferred location',
                   textAlign: TextAlign.center,
                   style: newAppFont(
-                    fontSize: 14.sp,
+                    fontSize: 13.sp,
                     color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                     fontWeight: FontWeight.w400,
                   ),
@@ -292,9 +292,9 @@ class _DistrictViewState extends State<DistrictView> {
                                                   ),
                                                   height(height: 4.h),
                                                   Text(
-                                                    "Local news, events and\nupdates from $stateName",
+                                                    "Local news, events and updates from $stateName",
                                                     style: newAppFont(
-                                                      fontSize: 12.sp,
+                                                      fontSize: 11.sp,
                                                       color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                                                       fontWeight: FontWeight.w400,
                                                     ),
@@ -314,42 +314,11 @@ class _DistrictViewState extends State<DistrictView> {
                         ),
                 ),
 
-                // Bottom Section
+
                 Container(
                   padding: EdgeInsets.only(top: 16.h, bottom: 20.h),
                   child: Column(
                     children: [
-                      // Location Info Text
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          color: isDark ? Colors.grey.shade900 : Colors.grey.shade50,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.location_on,
-                              color: const Color(0xFFE50914),
-                              size: 20.sp,
-                            ),
-                            width(width: 12.w),
-                            Expanded(
-                              child: Text(
-                                "We will use your location to show relevant news and updates",
-                                style: newAppFont(
-                                  fontSize: 12.sp,
-                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      height(height: 16.h),
-                      
-                      // Continue Button
                       InkWell(
                         onTap: authenticationProvider.selectedLocations.isNotEmpty
                             ? () {
@@ -413,7 +382,7 @@ class _DistrictViewState extends State<DistrictView> {
                         ),
                       ),
                       
-                      height(height: 16.h),
+                      height(height: 4.h),
                       
                       // Back Button
                       InkWell(
@@ -441,7 +410,7 @@ class _DistrictViewState extends State<DistrictView> {
                         ),
                       ),
                       
-                      height(height: 16.h),
+                      height(height: 4.h),
                       
                       // Pagination Dots
                       Row(
