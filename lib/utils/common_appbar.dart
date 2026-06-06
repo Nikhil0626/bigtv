@@ -62,7 +62,7 @@ class CommonAppbar extends StatelessWidget implements PreferredSizeWidget {
               ),
             ),
             height(height: 10),
-            const Divider(
+            Divider(
               height: 1,
               color: AppColors.borderColor,
             )
