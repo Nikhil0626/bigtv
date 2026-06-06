@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
@@ -16,13 +15,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 class ProfileView extends StatefulWidget {
-  ProfileView({Key? key}) : super(key: key);
+  const ProfileView({super.key});
 
   @override
-  _ProfileViewState createState() => _ProfileViewState();
+  ProfileViewState createState() => ProfileViewState();
 }
 
-class _ProfileViewState extends State<ProfileView> {
+class ProfileViewState extends State<ProfileView> {
   final FocusNode dayFocusNode = FocusNode();
   final FocusNode monthFocusNode = FocusNode();
   final FocusNode yearFocusNode = FocusNode();
