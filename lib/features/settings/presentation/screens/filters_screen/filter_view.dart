@@ -3,21 +3,18 @@ import 'package:chotanews/aggricator_screens/settings_screen/settings_view/filte
 import 'package:chotanews/aggricator_screens/settings_screen/settings_view/filters_screen/update_regions_view.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:provider/provider.dart';
 
 
 class FilterView extends StatefulWidget {
   const FilterView({super.key});
 
   @override
-  _FilterViewState createState() => _FilterViewState();
+  FilterViewState createState() => FilterViewState();
 }
 
-class _FilterViewState extends State<FilterView> with SingleTickerProviderStateMixin {
+class FilterViewState extends State<FilterView> with SingleTickerProviderStateMixin {
   late TabController _tabController;
   List tabNames = ['Topics', 'Regions'];
 

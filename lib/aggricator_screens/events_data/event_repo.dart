@@ -14,7 +14,7 @@ class EventRepo extends BaseService {
 
 
   Future sendEvent(body) async {
-    log("event body --- ${body}");
+    log("event body --- $body");
     Response response = await makeRequest(url: BaseUrls.eventUrl, baseUrl: BaseUrls.baseUrlAwsDev, method: RequestType.post, body: body);
     log(response.data.toString());
     return response;
@@ -39,7 +39,6 @@ class EventRepo extends BaseService {
     final box = Hive.box('events');
     await box.add(newEvent);
 
-    // ✅ Fix: No null values in Firebase params
     final firebaseParams = <String, Object>{
       'userId': userId,
       'deviceId': deviceId,
@@ -53,35 +52,10 @@ class EventRepo extends BaseService {
     );
   }
 
-
-  // Future<void> addEvent(Map<String, dynamic> eventData, eventName) async {
-  //
-  //   SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-  //
-  //   String? userId = sharedPreferences.getString("userId");
-  //   String? deviceId = sharedPreferences.getString("deviceId");
-  //
-  //   Map<String, dynamic> newEvent = {
-  //     'key': eventName,
-  //     'eventData': eventData,
-  //     'userId': userId ?? "guest",
-  //     'deviceId': deviceId ?? "12345",
-  //     "platform": Platform.isIOS?"iOS":"Android"
-  //   };
-  //   log("event body --- $newEvent");
-  //
-  //
-  //   final box = Hive.box('events');
-  //   await box.add(newEvent);
-  //
-  //   await FirebaseAnalytics.instance.logEvent(name: eventName, parameters: newEvent as Map<String, dynamic>);
-  // }
-
   Future<void> processAndPushEvents() async {
     final box = Hive.box('events');
-    // await box.clear();
     final events = box.values.map((e) => _convertEventToJson(e)).toList();
-    log("Event Data Push ${events}");
+    log("Event Data Push $events");
     if (events.isEmpty) return;
 
     Response response = await makeRequest(
@@ -93,9 +67,9 @@ class EventRepo extends BaseService {
 
     if (response.statusCode == 200) {
       await box.clear();
-      print("Events pushed and cleared successfully.");
+      log("Events pushed and cleared successfully.");
     } else {
-      print("Failed to push events: ${response.statusCode}");
+      log("Failed to push events: ${response.statusCode}");
     }
   }
 

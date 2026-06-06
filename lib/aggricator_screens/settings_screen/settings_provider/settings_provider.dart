@@ -48,7 +48,7 @@ class SettingsProvider extends ChangeNotifier {
         log(response.data.toString());
       }
     } catch (e, st) {
-      log("kjsbdcjksjksdhbcfk${e.toString()} -- ${st}");
+      log("kjsbdcjksjksdhbcfk${e.toString()} -- $st");
     } finally {
       isBookMarkLoading = false;
       notifyListeners();
@@ -239,7 +239,7 @@ class SettingsProvider extends ChangeNotifier {
       listener: BannerAdListener(
         onAdLoaded: (ad) async{
           to =  DateTime.now().toString();
-          print(ad.responseInfo.toString());
+          log(ad.responseInfo.toString());
           bannerAdsLoading = BannerAdsLoading.success;
           Map<String, dynamic> newEvent = {
             "sdkRequestStartTime":from,
@@ -248,7 +248,7 @@ class SettingsProvider extends ChangeNotifier {
             "createAt":DateTime.now().toString(),
             "adResponse":ad.responseInfo.toString(),
           };
-          print("All Events: $newEvent");
+          log("All Events: $newEvent");
            EventRepo().addEvent(newEvent,"ads_success");
 
           notifyListeners();
@@ -266,7 +266,7 @@ class SettingsProvider extends ChangeNotifier {
             "createAt":DateTime.now().toString(),
             "adResponse":error.responseInfo.toString(),
           };
-          print("All Events: ${newEvent}");
+          log("All Events: $newEvent");
           await EventRepo().addEvent(newEvent,"ads_failure");
           ad.dispose();
           notifyListeners();

@@ -1,15 +1,10 @@
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
-import 'package:chotanews/services/webengage_event_tracks.dart';
-import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../globel_keys/global_variables_data.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../events_data/event_repo.dart';
 
 class PrivacyPolicy extends StatefulWidget {
   const PrivacyPolicy({super.key});
@@ -267,11 +262,11 @@ class ContactDetailTile extends StatelessWidget {
   final VoidCallback onEmailTap;
 
   const ContactDetailTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.email,
     required this.onEmailTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

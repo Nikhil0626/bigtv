@@ -1,6 +1,5 @@
 import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
-import 'package:chotanews/core/theme/spacing.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -129,7 +128,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                                   boxShadow: isSelected
                                       ? [
                                           BoxShadow(
-                                            color: colorScheme.primary.withOpacity(0.1),
+                                            color: colorScheme.primary.withValues(alpha: 0.1),
                                             blurRadius: 8,
                                             spreadRadius: 1,
                                           )
@@ -145,7 +144,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                                           Container(
                                             padding: EdgeInsets.all(6.w),
                                             decoration: BoxDecoration(
-                                              color: isSelected ? colorScheme.primary.withOpacity(0.1) : (isDark ? AppColorTokens.darkCard : AppColorTokens.lightCard),
+                                              color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : (isDark ? AppColorTokens.darkCard : AppColorTokens.lightCard),
                                               shape: BoxShape.circle,
                                             ),
                                             child: Image.asset(
@@ -258,13 +257,13 @@ class _CategoriesViewState extends State<CategoriesView> {
                           height: 48.h,
                           decoration: BoxDecoration(
                             color: authenticationProvider.selectedCategories.isEmpty 
-                                ? colorScheme.primary.withOpacity(0.3) 
+                                ? colorScheme.primary.withValues(alpha: 0.3) 
                                 : colorScheme.primary,
                             borderRadius: BorderRadius.circular(8.r),
                             boxShadow: authenticationProvider.selectedCategories.isNotEmpty
                                 ? [
                                     BoxShadow(
-                                      color: colorScheme.primary.withOpacity(0.3),
+                                      color: colorScheme.primary.withValues(alpha: 0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     )

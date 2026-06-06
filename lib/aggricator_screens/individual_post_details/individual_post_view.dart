@@ -203,7 +203,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                 width: MediaQuery.of(context).size.width,
                                 fit: BoxFit.fill,
                                 placeholder: (context, url) => Container(
-                                  color: AppColors.borderColor.withOpacity(.2),
+                                  color: AppColors.borderColor.withValues(alpha: .2),
                                 ),
                                 errorWidget: (context, url, error) => Center(
                                   child: Icon(
@@ -275,15 +275,13 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                     ),
-                                    const SizedBox(width: 6),
-                                    /// Action Icons Container
+                                     width(width: 6),
                                     Container(
                                       padding: const EdgeInsets.all(8.0),
                                       decoration: BoxDecoration(border: BoxBorder.all(color: Color(0xFFED1C24), width: 0.36), borderRadius: BorderRadius.all(Radius.circular(8))),
                                       child: Row(
                                         mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
-                                          /// Like
                                           Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
                                             return InkWell(
                                               onTap: () async {
@@ -304,8 +302,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                               ),
                                             );
                                           }),
-                                          const SizedBox(width: 14),
-                                          /// Comment
+                                           width(width: 14),
                                           InkWell(
                                             onTap: () {
                                               log("Comment...");
@@ -321,8 +318,8 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                               color: Color(0xFFED1C24),
                                             ),
                                           ),
-                                          const SizedBox(width: 14),
-                                          /// Share
+                                         width(width: 14),
+
                                           InkWell(
                                             onTap: () async {
                                               SharedPreferences sp = await SharedPreferences.getInstance();
@@ -385,7 +382,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                 "● ",
                                                 style: TextStyle(
                                                   fontSize: 14.sp,
-                                                  color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
+                                                  color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withValues(alpha: 0.5) : AppColors.textColor,
                                                   height: 1, // Ensures proper line height
                                                 ),
                                               ),
@@ -399,7 +396,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                                     height: 1, // Ensures consistent line height
                                                   ),
                                                   style: homeScreenFontStyle(
-                                                    color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withOpacity(0.5) : AppColors.textColor,
+                                                    color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withValues(alpha: 0.5) : AppColors.textColor,
                                                     fontWeight: FontWeight.w400,
                                                     fontSize: 16.sp,
                                                   ),
@@ -527,7 +524,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
       spans.add(TextSpan(
           text: nonMatch,
           style: homeScreenFontStyle(
-            color: article['subType'] == "BigBlackStandard" ? AppColors.cardBackgroundColor : AppColors.textColor.withOpacity(0.5),
+            color: article['subType'] == "BigBlackStandard" ? AppColors.cardBackgroundColor : AppColors.textColor.withValues(alpha: 0.5),
             fontWeight: FontWeight.w400,
             fontSize: 17.sp,
           )));

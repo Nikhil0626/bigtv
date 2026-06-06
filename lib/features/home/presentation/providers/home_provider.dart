@@ -27,6 +27,11 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'dart:typed_data';
 
 
 
@@ -686,6 +691,63 @@ class HomeProvider extends ChangeNotifier {
   void isBannerAdLoaded(bool value) {
     isAdLoaded = value;
     if (value == true) {
+      notifyListeners();
+    }
+  }
+
+  bool isPdfSending = false;
+
+  Future<void> createAndSharePdfs(BuildContext context, article) async {
+    isPdfSending = true;
+    notifyListeners();
+
+    List imageData = article['gallery'] ?? [];
+    try {
+      final pdf = pw.Document();
+
+      for (var item in imageData) {
+        String imageUrl = item['Url'].toString();
+        log("Pdf $imageUrl");
+        if (imageUrl.isNotEmpty && imageUrl != 'null') {
+          final response = await http.get(Uri.parse(imageUrl));
+
+          if (response.statusCode == 200) {
+            final Uint8List responseData = response.bodyBytes;
+            final pdfImage = pw.MemoryImage(responseData);
+
+            pdf.addPage(
+              pw.Page(
+                build: (pw.Context context) {
+                  return pw.FullPage(
+                    ignoreMargins: true,
+                    child: pw.Image(
+                      pdfImage,
+                      fit: pw.BoxFit.contain,
+                    ),
+                  );
+                },
+              ),
+            );
+          } else {
+            log("Failed to load image: $imageUrl");
+          }
+        }
+      }
+
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = "${directory.path}/${article['id']}.pdf";
+      final file = File(filePath);
+      await file.writeAsBytes(await pdf.save());
+
+      log("PDF saved at: $filePath");
+
+      await Share.shareXFiles([XFile(filePath)],
+          text: "https://apps.signitivessoft.com/individualPage");
+    } catch (e) {
+      log("Error generating PDF: $e");
+      CustomToast.showErrorToast(msg: "Failed to generate PDF");
+    } finally {
+      isPdfSending = false;
       notifyListeners();
     }
   }

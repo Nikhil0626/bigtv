@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class RedeemAmazonCoupons extends StatelessWidget {
-  const RedeemAmazonCoupons({Key? key}) : super(key: key);
+  const RedeemAmazonCoupons({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +137,7 @@ class RedeemAmazonCoupons extends StatelessWidget {
                 width: 160,
                 padding: const EdgeInsets.all(15),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
@@ -155,7 +155,7 @@ class RedeemAmazonCoupons extends StatelessWidget {
                     Text(
                       leftDescription,
                       style: TextStyle(
-                        color: Colors.white.withOpacity(0.9),
+                        color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 11,
                         height: 1.3,
                       ),
@@ -186,7 +186,7 @@ class RedeemAmazonCoupons extends StatelessWidget {
                           Text(
                             rightDescription,
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha: 0.9),
                               fontSize: 11,
                               height: 1.3,
                             ),
@@ -203,7 +203,7 @@ class RedeemAmazonCoupons extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.15),
+                            color: Colors.black.withValues(alpha: 0.15),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -231,7 +231,7 @@ class RedeemAmazonCoupons extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
+                  color: Colors.black.withValues(alpha: 0.15),
                   blurRadius: 8,
                   offset: const Offset(0, 2),
                 ),
@@ -255,7 +255,7 @@ class RedeemAmazonCoupons extends StatelessWidget {
           Positioned(
             left: 185,
             top: 60,
-            child: Container(
+            child: SizedBox(
               width: 2,
               height: 55,
               child: CustomPaint(
@@ -264,61 +264,6 @@ class RedeemAmazonCoupons extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-
-  Widget _buildLookingSection() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.2),
-        borderRadius: BorderRadius.circular(25),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 20,
-            height: 20,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.white, width: 2),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Stack(
-              children: [
-                Positioned(
-                  top: 1,
-                  left: 9,
-                  child: Container(
-                    width: 1,
-                    height: 6,
-                    color: Colors.white,
-                  ),
-                ),
-                Positioned(
-                  top: 9,
-                  right: 1,
-                  child: Container(
-                    width: 4,
-                    height: 1,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Text(
-            'Looking for deals?',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
     );
   }
 

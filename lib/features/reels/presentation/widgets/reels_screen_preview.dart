@@ -218,9 +218,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                 label: 'కామెంట్',
                 iconColor: Colors.white,
                 onTap: () async {
-                  SharedPreferences sp = await SharedPreferences.getInstance();
                   context.read<AuthenticationProvider>().sendEvent("CommentPage");
-
                   showComments(context, widget.reelCard.id.toString(),widget.reelCard.title.toString(),);
                 },
               ),

@@ -32,6 +32,45 @@ class AuthenticationProvider extends ChangeNotifier {
   List<LocationModel> getAllLocationList = [];
   List<String> selectedLocations = [];
 
+  int remainingTime = 60;
+  Timer? _timer;
+  bool canResend = false;
+
+  void startCountdown() {
+    remainingTime = 60;
+    canResend = false;
+    notifyListeners();
+
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (remainingTime > 0) {
+        remainingTime--;
+        notifyListeners();
+      } else {
+        _timer?.cancel();
+        canResend = true;
+        notifyListeners();
+      }
+    });
+  }
+
+  String formatTime(int seconds) {
+    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
+    final secs = (seconds % 60).toString().padLeft(2, '0');
+    return "$minutes:$secs";
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  void updateLoginStatus(NewAppLoginStatus status) {
+    newAppLoginStatus = status;
+    notifyListeners();
+  }
+
   void validationErrors(value) {
     if (value == null || value.trim().isEmpty) {
       errorMessage = "Please Enter Mobile Number";
@@ -86,6 +125,7 @@ class AuthenticationProvider extends ChangeNotifier {
           isBlockedUser = response.data['is_active'];
         } else {
           newAppLoginStatus = NewAppLoginStatus.otp;
+          startCountdown();
           saveLoginState();
           EventRepo().addEvent({
             "loginType": "mobileNumber",

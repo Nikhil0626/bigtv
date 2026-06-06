@@ -31,10 +31,10 @@ class SettingsView extends StatefulWidget {
   });
 
   @override
-  _SettingsViewState createState() => _SettingsViewState();
+  SettingsViewState createState() => SettingsViewState();
 }
 
-class _SettingsViewState extends State<SettingsView> {
+class SettingsViewState extends State<SettingsView> {
   NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
   bool isNotificationsEnabled = false;
   String appVersion = "";
@@ -166,7 +166,7 @@ class _SettingsViewState extends State<SettingsView> {
                     String? userId = preferences.getString("userId");
 
                     WebEngagePlugin.trackEvent('logout_user', {
-                      "device_id": "${deviceId}",
+                      "device_id": "$deviceId",
                       "date_time": DateTime.now().toString(),
                       "user_id": userId ?? "",
                     });

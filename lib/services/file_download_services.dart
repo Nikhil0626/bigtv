@@ -11,7 +11,7 @@ Future<String?> getDownloadDirectory() async {
     directory = await getApplicationDocumentsDirectory();
   }
 
-  return directory?.path;
+  return directory.path;
 }
 
 Future<void> downloadFile(String fileUrl, String fileName) async {

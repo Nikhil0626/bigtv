@@ -6,7 +6,6 @@ import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_comments.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
@@ -70,7 +69,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
           child: CachedNetworkImage(
             imageUrl: pollProvider.localArticle['image_url'] ?? "",
             fit: BoxFit.fill,
-            placeholder: (context, url) => Container(color: AppColors.borderColor.withOpacity(.2)),
+            placeholder: (context, url) => Container(color: AppColors.borderColor.withValues(alpha: .2)),
             errorWidget: (context, url, error) => Center(child: Icon(Icons.image, size: 80, color: Colors.grey.shade300)),
           ),
         ),
@@ -80,7 +79,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
           child: Padding(
             padding: EdgeInsets.only(top: 8, right: 12),
             child: Container(
-              decoration: BoxDecoration(color: Colors.black.withOpacity(0.9), shape: BoxShape.circle),
+              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.9), shape: BoxShape.circle),
               child: IconButton(
                 icon: Icon(Icons.ios_share_outlined, color: Colors.white, size: 22),
                 onPressed: () async {
@@ -128,7 +127,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 gradient: LinearGradient(
-                  colors: [Colors.black.withOpacity(.4), Colors.black],
+                  colors: [Colors.black.withValues(alpha: .4), Colors.black],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -217,7 +216,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                           margin: const EdgeInsets.symmetric(horizontal: 8),
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           decoration: BoxDecoration(
-                            color: isSelected ? Colors.blue.withOpacity(0.8) : Colors.white,
+                            color: isSelected ? Colors.blue.withValues(alpha: 0.8) : Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
                               color: isSelected ? Colors.blue : Colors.grey.shade700,
@@ -406,7 +405,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                                   margin: const EdgeInsets.only(right: 8),
                                   padding: const EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withOpacity(.5),
+                                    color: Colors.white.withValues(alpha: .5),
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(color: Colors.grey),
                                   ),
@@ -466,15 +465,13 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
 
   Widget _buildResultsView(PollProvider pollProvider, ScreenshotController adsScreenshotController) {
     final options = pollProvider.localArticle['pollData']['options'] as List;
-    final totalVotes = pollProvider.localArticle['pollData']['totalVotes'] ?? 0;
-
     return Stack(
       children: [
         Positioned.fill(
           child: CachedNetworkImage(
             imageUrl: pollProvider.localArticle['image_url'] ?? "",
             fit: BoxFit.fill,
-            placeholder: (context, url) => Container(color: AppColors.borderColor.withOpacity(.2)),
+            placeholder: (context, url) => Container(color: AppColors.borderColor.withValues(alpha: .2)),
             errorWidget: (context, url, error) => Center(child: Icon(Icons.image, size: 80, color: Colors.grey.shade300)),
           ),
         ),
@@ -484,7 +481,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
           child: Padding(
             padding: EdgeInsets.only(top: 8, right: 12),
             child: Container(
-              decoration: BoxDecoration(color: Colors.black.withOpacity(0.9), shape: BoxShape.circle),
+              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.9), shape: BoxShape.circle),
               child: IconButton(
                 icon: Icon(Icons.ios_share_outlined, color: Colors.white, size: 22),
                 onPressed: () async {
@@ -532,7 +529,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
                 gradient: LinearGradient(
-                  colors: [Colors.black.withOpacity(.4), Colors.black],
+                  colors: [Colors.black.withValues(alpha: .4), Colors.black],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
@@ -650,7 +647,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                                 alignment: Alignment.centerLeft,
                                 child: Container(
                                   decoration: BoxDecoration(
-                                    color: Colors.blue.withOpacity(0.6),
+                                    color: Colors.blue.withValues(alpha: 0.6),
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                 ),
@@ -815,7 +812,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                               margin: const EdgeInsets.only(right: 8),
                               padding: const EdgeInsets.all(10),
                               decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(.5),
+                                color: Colors.white.withValues(alpha: .5),
                                 borderRadius: BorderRadius.circular(10),
                                 border: Border.all(color: Colors.grey),
                               ),

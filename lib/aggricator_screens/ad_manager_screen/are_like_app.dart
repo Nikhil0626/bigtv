@@ -39,7 +39,7 @@ class AreLikeApp extends StatelessWidget {
                   ),
                   Expanded(
                     child: ListView.builder(
-                      itemCount: homeProvider?.getAllSurveyDataList.length,
+                      itemCount: homeProvider.getAllSurveyDataList.length,
                       itemBuilder: (context, index) {
                         return Container(
                           height: 30,

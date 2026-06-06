@@ -10,11 +10,13 @@ import '../../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 
 class FeedbackForm extends StatefulWidget {
+  const FeedbackForm({super.key});
+
   @override
-  _FeedbackFormState createState() => _FeedbackFormState();
+  FeedbackFormState createState() => FeedbackFormState();
 }
 
-class _FeedbackFormState extends State<FeedbackForm> {
+class FeedbackFormState extends State<FeedbackForm> {
   int selectedStar = 0;
 
   String get feedbackMessage {
@@ -246,7 +248,7 @@ class _FeedbackFormState extends State<FeedbackForm> {
                             height: 35.h,
                             // margin: EdgeInsets.only(bottom: 20.h),
                             decoration: BoxDecoration(
-                              color: (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar > 0) ? AppColors.appButtonColor : AppColors.bodyTextColor.withOpacity(.2),
+                              color: (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar > 0) ? AppColors.appButtonColor : AppColors.bodyTextColor.withValues(alpha: .2),
                               borderRadius: BorderRadius.all(Radius.circular(8.r)),
                             ),
                             child: Center(

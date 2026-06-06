@@ -5,8 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../rating_screen/rating_provider/rating_provider.dart';
-import '../../../utils/app_colors.dart';
 import '../../../utils/app_fonts.dart';
 import '../../../utils/app_spaces.dart';
 import '../../../utils/date_format.dart';
@@ -84,7 +82,7 @@ class _PollsCommentsState extends State<PollsComments> {
                                               padding: const EdgeInsets.all(12),
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                color: color.withOpacity(0.12),
+                                                color: color.withValues(alpha: 0.12),
                                               ),
                                               child: Text(
                                                 emoji,
@@ -160,7 +158,7 @@ class _PollsCommentsState extends State<PollsComments> {
                                               padding: const EdgeInsets.all(12),
                                               decoration: BoxDecoration(
                                                 shape: BoxShape.circle,
-                                                color: color.withOpacity(0.12),
+                                                color: color.withValues(alpha: 0.12),
                                               ),
                                               child: Text(
                                                 emoji,

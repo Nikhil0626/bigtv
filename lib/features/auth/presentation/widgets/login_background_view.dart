@@ -1,6 +1,5 @@
 import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
-import 'package:chotanews/core/theme/spacing.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +91,7 @@ class LoginBackgroundView extends StatelessWidget {
                       return Container(
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: Colors.grey.withOpacity(0.1),
+                          color: Colors.grey.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Text(
@@ -116,8 +115,8 @@ class LoginBackgroundView extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          (isDark ? AppColorTokens.darkBackground : Colors.white).withOpacity(0.35), // Very subtle white at top
-                          (isDark ? AppColorTokens.darkBackground : Colors.white).withOpacity(0.0), // Middle fade
+                          (isDark ? AppColorTokens.darkBackground : Colors.white).withValues(alpha: 0.35), // Very subtle white at top
+                          (isDark ? AppColorTokens.darkBackground : Colors.white).withValues(alpha: 0.0), // Middle fade
                           Colors.transparent, // Completely transparent at bottom
                         ],
                         stops: const [0.0, 0.5, 1.0],
@@ -138,7 +137,7 @@ class LoginBackgroundView extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          (isDark ? AppColorTokens.darkBackground : Colors.white).withOpacity(0.0),
+                          (isDark ? AppColorTokens.darkBackground : Colors.white).withValues(alpha: 0.0),
                           isDark ? AppColorTokens.darkBackground : Colors.white,
                         ],
                       ),
@@ -151,7 +150,6 @@ class LoginBackgroundView extends StatelessWidget {
 
           SizedBox(height: 16.h),
 
-          // The Authentication Form directly inline
           _getLoginContent(authenticationProvider.newAppLoginStatus),
         ],
       ),

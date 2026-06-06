@@ -1,15 +1,10 @@
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
-import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../globel_keys/global_variables_data.dart';
-import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../events_data/event_repo.dart';
 import 'contact_us.dart';
 
 class AdvertiseWithUs extends StatefulWidget {

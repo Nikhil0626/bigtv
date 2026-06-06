@@ -103,7 +103,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                 width: double.infinity,
                 height: 35.h,
                 decoration: BoxDecoration(
-                  color: authenticationProvider.selectedCategories.isEmpty ? AppColors.bodyTextColor.withOpacity(.2) : AppColors.appButtonColor,
+                  color: authenticationProvider.selectedCategories.isEmpty ? AppColors.bodyTextColor.withValues(alpha: .2) : AppColors.appButtonColor,
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: authenticationProvider.isCatSaveLoading

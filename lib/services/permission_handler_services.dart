@@ -102,21 +102,19 @@ Future<void> checkForUpdate() async {
     try {
       VersionInfo? versionInfo = await UpgradeVersion.getiOSStoreVersion(packageInfo: _packageInfo, regionCode: "US");
 
-      if (versionInfo != null) {
-        debugPrint("iOS Store Info: ${versionInfo.toJson()}");
+      debugPrint("iOS Store Info: ${versionInfo.toJson()}");
 
-        if (versionInfo.canUpdate && versionInfo.appStoreLink != null) {
-          final Uri url = Uri.parse(versionInfo.appStoreLink!);
-          if (await canLaunchUrl(url)) {
-            await launchUrl(url, mode: LaunchMode.externalApplication);
-          } else {
-            debugPrint("Cannot launch App Store URL");
-          }
+      if (versionInfo.canUpdate) {
+        final Uri url = Uri.parse(versionInfo.appStoreLink);
+        if (await canLaunchUrl(url)) {
+          await launchUrl(url, mode: LaunchMode.externalApplication);
         } else {
-          debugPrint("No update needed or no URL");
+          debugPrint("Cannot launch App Store URL");
         }
+      } else {
+        debugPrint("No update needed or no URL");
       }
-    } catch (e) {
+        } catch (e) {
       debugPrint("Error checking iOS update: $e");
     }
   }
@@ -153,8 +151,6 @@ Future<void> requestLocationPermission() async {
 Future<void> getAddressFromLatLng(double latitude, double longitude) async {
   try {
     List<Placemark> placemarks = await placemarkFromCoordinates(latitude, longitude);
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    print("location ------ $placemarks");
     Placemark place = placemarks[0];
     sendLiveLocationDetails(place);
   } catch (e) {
@@ -236,8 +232,6 @@ Future<void> getReferrerFromPlayStore() async {
         "osType": "Android",
         "isSharedUser": false
       }, "referral");
-      // log("ios referral ${e.toString()} $st");
-      final uri = Uri.parse("https://dummy.com/?$referrerUrl");
       sharedPreferences.setString("referralCode",  referrerUrl?? "chota123");
     } catch (e, st) {
       log("ios referral ${e.toString()} $st");

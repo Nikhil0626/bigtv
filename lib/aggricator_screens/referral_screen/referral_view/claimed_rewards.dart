@@ -3,7 +3,6 @@ import 'dart:developer';
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/no_claimed_rewards.dart';
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/redeemCupons.dart';
 import 'package:chotanews/utils/app_colors.dart';
-import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -235,7 +234,7 @@ class _ClaimedRewardsState extends State<ClaimedRewards> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.grey.withOpacity(0.3), // Shadow color
+                                color: Colors.grey.withValues(alpha: 0.3), // Shadow color
                                 spreadRadius: 1, // How much the shadow spreads
                                 blurRadius: 5, // Softness of the shadow
                                 offset: Offset(0, 3), // Position of shadow (horizontal, vertical)

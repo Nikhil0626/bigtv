@@ -42,9 +42,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 
-import 'package:pdf/widgets.dart' as pw;
-import 'package:http/http.dart' as http;
-
 
 
 class MainScreenBytView extends StatefulWidget {
@@ -75,7 +72,6 @@ class MainScreenBytView extends StatefulWidget {
 
 class _MainScreenBytViewState extends State<MainScreenBytView> {
   ScreenshotController adsScreenshotController = ScreenshotController();
-  bool isSending = false;
 
   @override
   void initState() {
@@ -372,7 +368,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                       widget.article['id'],
                                       widget.article['content'].toString());
 
-                                  if (widget.article['type'] == "Standard" ||
+                                if (widget.article['type'] == "Standard" ||
                                       widget.article['type'] ==
                                           "Video" ||
                                       widget.article['type'] ==
@@ -400,7 +396,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     }
                                   } else if (widget.article['type'] ==
                                       "Gallery") {
-                                    createAndSharePdfs(
+                                    context.read<HomeProvider>().createAndSharePdfs(
                                         context,
                                         widget.article);
                                   }
@@ -418,7 +414,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                         .toString()
                                   }, "shared_article");
                                 },
-                                child: isSending
+                                child: context.watch<HomeProvider>().isPdfSending
                                     ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
                                     : SvgPicture.asset(
                                   "assets/svg/share.svg",
@@ -552,8 +548,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                     Container(
                       color: AppColors
                           .borderColor
-                          .withOpacity(
-                          .2),
+                          .withValues(
+                          alpha: .2),
                     ),
                 errorWidget:
                     (context, url,
@@ -648,7 +644,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                           width: MediaQuery.of(context).size.width,
                           fit: BoxFit.fill,
                           placeholder: (context, url) => Container(
-                            color: AppColors.borderColor.withOpacity(.2),
+                            color: AppColors.borderColor.withValues(alpha: .2),
                           ),
                           errorWidget: (context, url, error) => Center(
                             child: Column(
@@ -869,7 +865,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                             CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                                           }
                                         } else if (widget.article['type'] == "Gallery") {
-                                          createAndSharePdfs(context, widget.article);
+                                          context.read<HomeProvider>().createAndSharePdfs(context, widget.article);
                                         }
                                         EventRepo().addEvent({
                                           "share": "news",
@@ -878,7 +874,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           "postTitle": widget.article['title'].toString()
                                         }, "shared_article");
                                       },
-                                      child: isSending
+                                      child: context.watch<HomeProvider>().isPdfSending
                                           ? const SizedBox(height: 14, width: 14, child: AppLoadingScreen())
                                           : SvgPicture.asset(
                                         "assets/svg/share.svg",
@@ -956,7 +952,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           "● ",
                                           style: TextStyle(
                                             fontSize: 14.sp,
-                                            color: AppColors.textColor.withOpacity(0.8),
+                                            color: AppColors.textColor.withValues(alpha: 0.8),
                                             height: 1,
                                           ),
                                         ),
@@ -969,7 +965,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                               height: 1,
                                             ),
                                             style: homeScreenFontStyle(
-                                              color: AppColors.textColor.withOpacity(0.8),
+                                              color: AppColors.textColor.withValues(alpha: 0.8),
                                               fontWeight: FontWeight.w600,
                                               fontSize: 16.sp,
                                             ),
@@ -1052,61 +1048,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     );
   }
 
-  Future<void> createAndSharePdfs(BuildContext context, article) async {
-    isSending = true;
-    setState(() {});
-
-    List imageData = article['gallery'];
-    try {
-      final pdf = pw.Document();
-
-      for (var item in imageData) {
-        String imageUrl = item['Url'].toString() ?? '';
-        log("Pdf $imageUrl");
-        if (imageUrl.isNotEmpty) {
-          final response = await http.get(Uri.parse(imageUrl));
-
-          if (response.statusCode == 200) {
-            final Uint8List imageData = response.bodyBytes;
-            final pdfImage = pw.MemoryImage(imageData);
-
-            pdf.addPage(
-              pw.Page(
-                build: (pw.Context context) {
-                  return pw.FullPage(
-                    ignoreMargins: true,
-                    child: pw.Image(
-                      pdfImage,
-                      fit: pw.BoxFit.contain,
-                    ),
-                  );
-                },
-              ),
-            );
-          } else {
-            log("Failed to load image: $imageUrl");
-          }
-        }
-      }
-
-      final directory = await getApplicationDocumentsDirectory();
-      final filePath = "${directory.path}/${article['id']}.pdf";
-      final file = File(filePath);
-      await file.writeAsBytes(await pdf.save());
-
-      log("PDF saved at: $filePath");
-
-      await Share.shareXFiles([XFile(filePath)],
-          text: "https://apps.signitivessoft.com/individualPage");
-      isSending = false;
-      setState(() {});
-    } catch (e) {
-      isSending = false;
-      setState(() {});
-      log("Error: $e");
-    }
-  }
-
   List<TextSpan> _parseText(BuildContext context, String text, links, article) {
     RegExp linkRegExp =
     RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
@@ -1156,7 +1097,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           style: homeScreenFontStyle(
             color: widget.article['subType'] == "BigBlackStandard"
                 ? Colors.white
-                : AppColors.textColor.withOpacity(0.8),
+                : AppColors.textColor.withValues(alpha: 0.8),
             fontWeight: FontWeight.w600,
             fontSize: 17.sp,
           )));

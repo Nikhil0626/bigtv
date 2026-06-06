@@ -1,10 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../utils/app_fonts.dart';
-import '../../../utils/app_loading_screen.dart';
 import '../../../utils/app_spaces.dart';
 import '../referral_provider/referral_provider.dart';
 
@@ -59,7 +57,7 @@ class _AllRewardsState extends State<AllRewards> {
                           borderRadius: BorderRadius.circular(12),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
+                              color: Colors.black.withValues(alpha: 0.1),
                               spreadRadius: 2,
                               blurRadius: 8,
                               offset: Offset(0, 4), // horizontal, vertical

@@ -60,7 +60,6 @@ class ReelsProviders extends ChangeNotifier {
   void isLikePost(val) async {
     SharedPreferences sp = await SharedPreferences.getInstance();
     String? userId = sp.getString("userId");
-    String? deviceId = sp.getString("deviceId");
     log(val.id.toString());
     if (!isLikeList.contains(val.id.toString())) {
 
@@ -123,34 +122,5 @@ class ReelsProviders extends ChangeNotifier {
       notifyListeners();
       return reelData;
     }
-  }
-
-
-
-  List isBookMark = [];
-
-
-  void isBookMarkPost(val,context) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("userId");
-    String? deviceId = sp.getString("deviceId");
-    log(val.id.toString());
-    if (!isBookMark.contains(val.id.toString())) {
-
-      isBookMark.add(val.id.toString());
-      Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val.id.toString(), context,1
-      );
-      log(isBookMark.toString());
-    } else {
-      Provider.of<SettingsProvider>(context,listen: false).saveBookmarks(
-          val.id.toString(), context,0
-      );
-      isBookMark.remove(val.id.toString());
-
-      log(isBookMark.toString());
-    }
-
-    notifyListeners();
   }
 }

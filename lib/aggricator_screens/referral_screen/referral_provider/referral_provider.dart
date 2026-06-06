@@ -3,7 +3,6 @@ import 'dart:developer';
 
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -49,8 +48,8 @@ class ReferralProvider extends ChangeNotifier {
 
   void getData(SharedPreferences? preferences) async {
     myReferralCode = preferences!.getString("myReferralCode") ?? "N/A";
-    myReferralLink = preferences!.getString("myReferralLink") ?? "N/A";
-    userId = preferences!.getString("userId") ?? "N/A";
+    myReferralLink = preferences.getString("myReferralLink") ?? "N/A";
+    userId = preferences.getString("userId") ?? "N/A";
     log("get code $myReferralCode /////  get my link $myReferralLink");
     notifyListeners();
   }
@@ -255,8 +254,8 @@ class ReferralProvider extends ChangeNotifier {
       CustomToast.showErrorToast(msg: "something went wrong");
       log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
-      print(e.toString());
-      print(st.toString());
+      log(e.toString());
+      log(st.toString());
     }finally{
       notifyListeners();
     }
@@ -275,7 +274,7 @@ class ReferralProvider extends ChangeNotifier {
       isDismissible: false,
       enableDrag: false,
       isScrollControlled: true,
-      barrierColor: Colors.black.withOpacity(0.7), // Optional: darker backdrop
+      barrierColor: Colors.black.withValues(alpha: 0.7), // Optional: darker backdrop
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),

@@ -1,12 +1,8 @@
-import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
-import 'package:chotanews/core/theme/spacing.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
@@ -17,7 +13,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -34,11 +29,6 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   AuthenticationProvider? authenticationProvider;
 
-  // OTP Timer Variables
-  int _remainingTime = 60;
-  Timer? _timer;
-  bool canResend = false;
-
   @override
   void initState() {
     super.initState();
@@ -50,7 +40,6 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
 
   @override
   void dispose() {
-    _timer?.cancel();
     super.dispose();
   }
 
@@ -73,47 +62,11 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
     WebEngagePlugin.setSecureToken("siva kumar", message.toString());
   }
 
-  void startCountdown() {
-    setState(() {
-      _remainingTime = 60;
-      canResend = false;
-    });
-
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_remainingTime > 0) {
-        setState(() {
-          _remainingTime--;
-        });
-      } else {
-        _timer?.cancel();
-        setState(() {
-          canResend = true;
-        });
-      }
-    });
-  }
-
-  String formatTime(int seconds) {
-    final minutes = (seconds ~/ 60).toString().padLeft(2, '0');
-    final secs = (seconds % 60).toString().padLeft(2, '0');
-    return "$minutes:$secs";
-  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthenticationProvider>(
       builder: (_, provider, __) {
-        // Automatically start timer when switching to OTP state if not already running
-        if (provider.newAppLoginStatus == NewAppLoginStatus.otp && _timer == null) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            startCountdown();
-          });
-        } else if (provider.newAppLoginStatus != NewAppLoginStatus.otp) {
-          _timer?.cancel();
-          _timer = null;
-        }
-
         bool isOtpState = provider.newAppLoginStatus == NewAppLoginStatus.otp;
         bool isDark = context.theme.brightness == Brightness.dark;
         final colorScheme = context.colors;
@@ -220,8 +173,7 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
               children: [
                 InkWell(
                   onTap: () {
-                    provider.newAppLoginStatus = NewAppLoginStatus.login;
-                    provider.notifyListeners();
+                    provider.updateLoginStatus(NewAppLoginStatus.login);
                   },
                   child: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
                 ),
@@ -298,7 +250,7 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
               decoration: BoxDecoration(
                 color: (isOtpState ? provider.isOtpButtonEnabled : provider.isButtonEnabled)
                     ? colorScheme.primary
-                    : colorScheme.primary.withOpacity(0.3),
+                    : colorScheme.primary.withValues(alpha: 0.3),
                 borderRadius: BorderRadius.circular(8.r),
               ),
               child: Center(
@@ -342,15 +294,14 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
                 children: [
                   TextSpan(
                     recognizer: TapGestureRecognizer()
-                      ..onTap = canResend
+                      ..onTap = provider.canResend
                           ? () {
-                              startCountdown();
                               provider.sendOtp(context);
                             }
                           : null,
                     text: "Resend",
                     style: typography.bodyMedium?.copyWith(
-                      color: canResend ? colorScheme.primary : (isDark ? AppColorTokens.darkTextSecondary : AppColorTokens.lightTextSecondary),
+                      color: provider.canResend ? colorScheme.primary : (isDark ? AppColorTokens.darkTextSecondary : AppColorTokens.lightTextSecondary),
                       fontWeight: FontWeight.w600,
                       fontSize: 14.sp,
                     ),
@@ -359,11 +310,11 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
               ),
             ),
             SizedBox(height: 8.h),
-            if (!canResend)
+            if (!provider.canResend)
               Text(
-                "Request new OTP in ${formatTime(_remainingTime)}",
+                "Request new OTP in ${provider.formatTime(provider.remainingTime)}",
                 style: typography.bodySmall?.copyWith(
-                  color: isDark ? AppColorTokens.darkTextSecondary.withOpacity(0.7) : AppColorTokens.lightTextSecondary.withOpacity(0.7),
+                  color: isDark ? AppColorTokens.darkTextSecondary.withValues(alpha: 0.7) : AppColorTokens.lightTextSecondary.withValues(alpha: 0.7),
                   fontSize: 12.sp,
                 ),
               ),

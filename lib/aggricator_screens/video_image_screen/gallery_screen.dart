@@ -181,14 +181,12 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
 
                     width(width: 12.sp),
 
-                    // Comment Button
                     BottomActions(
                       postType: widget.postDetails['subType'] ?? "",
                       icon: "assets/svg/new_comment.svg",
                       label: 'కామెంట్',
                       iconColor: AppColors.iconColors,
                       onTap: () async {
-                        SharedPreferences sp = await SharedPreferences.getInstance();
                         context.read<AuthenticationProvider>().sendEvent("CommentPage");
                         showComments(context, widget.postDetails['id'],widget.postDetails['title'],);
                       },

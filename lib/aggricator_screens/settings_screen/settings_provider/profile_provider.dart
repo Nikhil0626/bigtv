@@ -119,7 +119,7 @@ Map<String,dynamic> body = {
         log("Like posted successfully: ${response.data}");
       }
     } on DioException catch (e, st) {
-      log("Like posted successfully:");
+      log("Like posted successfully: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
       CustomToast.showSuccessToast(msg: "Profile data not updated");
       log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
@@ -152,7 +152,7 @@ Map<String,dynamic> body = {
       notifyListeners();
       await uploadFile(filePath, userId);
     } else {
-      print("No file selected.");
+      log("No file selected.");
     }
   }
 
@@ -182,16 +182,16 @@ Map<String,dynamic> body = {
       final response = await request.send();
 
       if (response.statusCode == 200) {
-        print('Upload successful: ${response.toString()}');
+        log('Upload successful: ${response.toString()}');
         final responseBody = await response.stream.bytesToString();
         final decodedResponse = json.decode(responseBody);
         uploadImageUrl = decodedResponse['image_url'];
-        print('Upload successful: $responseBody');
+        log('Upload successful: $responseBody');
       } else {
-        print('Failed to upload. Status code: ${response.statusCode}');
+        log('Failed to upload. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error uploading file: $e');
+      log('Error uploading file: $e');
     }
     finally{
       isProfileLoading = false;

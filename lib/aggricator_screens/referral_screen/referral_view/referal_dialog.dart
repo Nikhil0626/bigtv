@@ -226,25 +226,6 @@ class _ReferralDialogState extends State<ReferralDialog> {
                             Navigator.pop(mainNavigatorKey.currentContext!);
 
                             String myReferralLink = referralProvider.referralData['referral_link'] ?? "N/A";
-                            String myReferralCode = referralProvider.referralData['referral_code'] ?? "N/A";
-                            log("hai1");
-                            // if(myReferralLink == "N/A"){
-                            //   referralProvider.getReferralStats(mainNavigatorKey.currentContext);
-                            // }
-                            // else if(myReferralLink == null) {
-                            //   log("hai2");
-                            //   referralProvider.getReferralStats(mainNavigatorKey.currentContext!).then((val)async{
-                            //     ShareResult result = await Share.share(myReferralLink);
-                            //     if (result.status == ShareResultStatus.success) {
-                            //
-                            //       context.read<ReferralProvider>().postProcessReferral(context);
-                            //       Navigator.push(
-                            //         mainNavigatorKey.currentContext!,
-                            //         MaterialPageRoute(builder: (context) => ReferEarn()),
-                            //       );
-                            //     }
-                            //   });
-                            // }
                             if (myReferralLink == "N/A" || myReferralLink == "Null" || myReferralLink == null || myReferralLink.isEmpty) {
                               log("hai2");
                               referralProvider.getReferralStats(mainNavigatorKey.currentContext!,isHome:true);

@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:chotanews/aggricator_screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/privacy_policy.dart';
@@ -19,7 +18,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 import 'filters_screen/filter_view.dart';
@@ -32,10 +30,10 @@ class SettingsView extends StatefulWidget {
   });
 
   @override
-  _SettingsViewState createState() => _SettingsViewState();
+  SettingsViewState createState() => SettingsViewState();
 }
 
-class _SettingsViewState extends State<SettingsView> {
+class SettingsViewState extends State<SettingsView> {
   NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
   bool isNotificationsEnabled = false;
   String appVersion = "";
@@ -187,9 +185,7 @@ class _SettingsViewState extends State<SettingsView> {
                 ],
               ),
             ),),
-            //context.watch<SettingsProvider>().bannerAdsLoading == BannerAdsLoading.fail ? SizedBox.shrink() : Banner300x50Size(),
 
-            //Spacer(),
             Padding(
               padding: const EdgeInsets.only(bottom: 70.0),
               child: Text(
@@ -200,154 +196,6 @@ class _SettingsViewState extends State<SettingsView> {
           ],
         ),
       ),
-    );
-  }
-
-  void _showShareBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-      ),
-      builder: (BuildContext context) {
-        return FractionallySizedBox(
-          heightFactor: 0.35,
-          child: Container(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Share Our App",
-                  style: homeScreenFontStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-                ),
-                height(height: 10),
-                Divider(
-                  height: 1,
-                  color: context.borderColor,
-                ),
-                height(height: 10),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                          EventRepo().addEvent({
-                            "shareApp": Platform.isIOS ? "iOS" : "Android",
-                            "createAt": DateTime.now().toString(),
-                          }, "share_app");
-                          Share.share(
-                            "Check out this app: https://apps.apple.com/in/app/chotanews-daily-telugu-news/id1631068092",
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.3),
-                                    blurRadius: 5,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              padding: EdgeInsets.all(16),
-                              child: Icon(
-                                Icons.apple,
-                                size: 50,
-                                color: context.textColor,
-                              ),
-                            ),
-                            height(height: 8),
-                              Text(
-                                "App Store",
-                                style: context.typography.titleMedium,
-                              ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pop(context);
-                          EventRepo().addEvent({
-                            "shareApp": Platform.isIOS ? "iOS" : "Android",
-                            "createAt": DateTime.now().toString(),
-                          }, "share_app");
-                          Share.share(
-                            "Check out this app: https://play.google.com/store/apps/details?id=com.chotanews",
-                          );
-                        },
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: context.cardColor,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.withOpacity(0.3),
-                                    blurRadius: 5,
-                                    spreadRadius: 2,
-                                  ),
-                                ],
-                              ),
-                              padding: EdgeInsets.all(16),
-                              child: Icon(
-                                Icons.android,
-                                size: 50,
-                                color: Colors.green,
-                              ),
-                            ),
-                            height(height: 8),
-                              Text(
-                                "Play Store",
-                                style: context.typography.titleMedium,
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                height(height: 20),
-                InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
-                  child: Container(
-                    width: double.infinity,
-                    height: 35.h,
-                    // margin: EdgeInsets.only(bottom: 20.h),
-                    decoration: BoxDecoration(
-                      color: context.primaryColor,
-                      borderRadius: BorderRadius.all(Radius.circular(8.r)),
-                    ),
-                    child: Center(
-                      child: Text(
-                        'Cancel',
-                        style: context.typography.labelLarge?.copyWith(color: Colors.white),
-                      ),
-                    ),
-                  ),
-                ),
-                height(height: 20),
-              ],
-            ),
-          ),
-        );
-      },
     );
   }
 

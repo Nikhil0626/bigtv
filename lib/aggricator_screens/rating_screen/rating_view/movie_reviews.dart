@@ -79,7 +79,7 @@ class _MovieRatingsState extends State<MovieRatings> {
                       width: double.infinity,
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
-                        color: AppColors.borderColor.withOpacity(.2),
+                        color: AppColors.borderColor.withValues(alpha: .2),
                       ),
                       errorWidget: (context, url, error) => Center(
                         child: Icon(Icons.image, size: 80, color: Colors.grey.shade300),

@@ -63,7 +63,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
               height: 35.h,
               decoration: BoxDecoration(
                 color:
-                    (authenticationProvider.selectedLocations.isNotEmpty && authenticationProvider.selectedLocations.length <= 5) ? AppColors.appButtonColor : AppColors.bodyTextColor.withOpacity(.2),
+                    (authenticationProvider.selectedLocations.isNotEmpty && authenticationProvider.selectedLocations.length <= 5) ? AppColors.appButtonColor : AppColors.bodyTextColor.withValues(alpha: .2),
                 borderRadius: BorderRadius.all(Radius.circular(8.r)),
               ),
               child: Center(
@@ -107,10 +107,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: authenticationProvider.states!.entries.map((entry) {
-                              int stateId = entry.key;
                               String stateName = entry.value;
-
-
                               return CheckboxListTile(
                                 title: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,

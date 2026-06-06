@@ -1,108 +1,14 @@
-// import 'package:chotanews/utils/app_spaces.dart';
-// import 'package:flutter/material.dart';
-// import 'package:flutter_screenutil/flutter_screenutil.dart';
-// import 'package:flutter_svg/svg.dart';
-//
-// class RegionSelectionScreen extends StatefulWidget {
-//   @override
-//   _RegionSelectionScreenState createState() => _RegionSelectionScreenState();
-// }
-//
-// class _RegionSelectionScreenState extends State<RegionSelectionScreen> with SingleTickerProviderStateMixin {
-//   late TabController _tabController;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _tabController = TabController(length: 2, vsync: this);
-//   }
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         backgroundColor: Colors.white,
-//         elevation: 0,
-//         leading: IconButton(
-//           icon: Icon(Icons.arrow_back, color: Colors.black, size: 28),
-//           onPressed: () {},
-//         ),
-//       ),
-//       body: Padding(
-//         padding: const EdgeInsets.all(16.0),
-//         child: Column(
-//           crossAxisAlignment: CrossAxisAlignment.start,
-//           children: [
-//             SvgPicture.asset(
-//               'assets/svg/Chota_news_logo.svg',
-//               height: 30,
-//               width: 180,
-//               alignment: Alignment.centerLeft,
-//             ),
-//             height(height: 40.h),
-//             Text("Let's personalise", style: TextStyle(fontSize: 32, color: Colors.blue, fontWeight: FontWeight.w400)),
-//             Text("your experience", style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.blue)),
-//             SizedBox(height: 16),
-//             Text("Choose Regions",
-//                 style: TextStyle(
-//                   fontSize: 18,
-//                   fontWeight: FontWeight.w600,
-//                 )),
-//             SizedBox(height: 4),
-//             Text("Select your districts to receive hyperlocal news and relevant local information tailored to your area.",
-//                 style: TextStyle(fontSize: 12, color: Colors.black)),
-//             SizedBox(height: 16),
-//             TabBar(
-//               controller: _tabController,
-//               labelColor: Colors.blue,
-//               unselectedLabelColor: Colors.black,
-//               indicator: UnderlineTabIndicator(
-//                 borderSide: BorderSide(color: Colors.lightBlue, width: 2.0),
-//               ),
-//               labelStyle: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//               unselectedLabelStyle: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-//               tabs: [
-//                 Tab(text: "Andhra Pradesh"),
-//                 Tab(text: "Telangana"),
-//               ],
-//             ),
-//             Expanded(
-//               child: TabBarView(
-//                 controller: _tabController,
-//                 children: [],
-//               ),
-//             ),
-//             height(height: 16),
-//             Center(
-//               child: ElevatedButton(
-//                 style: ElevatedButton.styleFrom(
-//                   backgroundColor: Colors.blue,
-//                   padding: EdgeInsets.symmetric(horizontal: 60, vertical: 14),
-//                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-//                 ),
-//                 onPressed: () {},
-//                 child: Text("Skip", style: TextStyle(fontSize: 16, color: Colors.white, fontWeight: FontWeight.bold)),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 
 import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
-import 'package:chotanews/core/theme/spacing.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
-import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/utils/app_enums.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import 'package:chotanews/features/auth/domain/models/location_model.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 
 class DistrictView extends StatefulWidget {
@@ -159,9 +65,8 @@ class _DistrictViewState extends State<DistrictView> {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                SizedBox(height: 24.h),
-
-                // Location List
+                height(height: 24.h),
+                
                 Expanded(
                   child: authenticationProvider.isLocationLoading || authenticationProvider.states == null
                       ? Center(child: AppLoadingScreen())
@@ -192,7 +97,7 @@ class _DistrictViewState extends State<DistrictView> {
                                     boxShadow: isSelected
                                         ? [
                                             BoxShadow(
-                                              color: colorScheme.primary.withOpacity(0.1),
+                                              color: colorScheme.primary.withValues(alpha: 0.1),
                                               blurRadius: 8,
                                               spreadRadius: 1,
                                             )
@@ -217,10 +122,10 @@ class _DistrictViewState extends State<DistrictView> {
                                               begin: Alignment.centerLeft,
                                               end: Alignment.centerRight,
                                               colors: [
-                                                (isDark ? AppColorTokens.darkSurface : Colors.white).withOpacity(0.0),
+                                                (isDark ? AppColorTokens.darkSurface : Colors.white).withValues(alpha: 0.0),
                                                 isSelected 
-                                                    ? colorScheme.primary.withOpacity(0.05) 
-                                                    : (isDark ? Colors.white.withOpacity(0.02) : Colors.black.withOpacity(0.02)),
+                                                    ? colorScheme.primary.withValues(alpha: 0.05) 
+                                                    : (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.02)),
                                               ],
                                             ),
                                           ),
@@ -241,7 +146,7 @@ class _DistrictViewState extends State<DistrictView> {
                                                       end: Alignment.centerRight,
                                                       colors: [
                                                         Colors.transparent,
-                                                        Colors.white.withOpacity(isDark ? 0.4 : 0.8),
+                                                        Colors.white.withValues(alpha: isDark ? 0.4 : 0.8),
                                                       ],
                                                     ).createShader(rect);
                                                   },
@@ -259,8 +164,8 @@ class _DistrictViewState extends State<DistrictView> {
                                                   Icons.location_city,
                                                   size: 80.sp,
                                                   color: isSelected 
-                                                      ? colorScheme.primary.withOpacity(0.1) 
-                                                      : (isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.05)),
+                                                      ? colorScheme.primary.withValues(alpha: 0.1) 
+                                                      : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
                                                 );
                                               }
                                             }
@@ -345,13 +250,13 @@ class _DistrictViewState extends State<DistrictView> {
                           height: 48.h,
                           decoration: BoxDecoration(
                             color: authenticationProvider.selectedLocations.isEmpty 
-                                ? colorScheme.primary.withOpacity(0.3) 
+                                ? colorScheme.primary.withValues(alpha: 0.3) 
                                 : colorScheme.primary,
                             borderRadius: BorderRadius.circular(8.r),
                             boxShadow: authenticationProvider.selectedLocations.isNotEmpty
                                 ? [
                                     BoxShadow(
-                                      color: colorScheme.primary.withOpacity(0.3),
+                                      color: colorScheme.primary.withValues(alpha: 0.3),
                                       blurRadius: 8,
                                       offset: const Offset(0, 4),
                                     )
@@ -386,11 +291,10 @@ class _DistrictViewState extends State<DistrictView> {
                       
                       SizedBox(height: 4.h),
                       
-                      // Back Button
+                    
                       InkWell(
                         onTap: () {
-                          authenticationProvider.newAppLoginStatus = NewAppLoginStatus.category;
-                          authenticationProvider.notifyListeners();
+                          authenticationProvider.updateLoginStatus(NewAppLoginStatus.category);
                         },
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.h),

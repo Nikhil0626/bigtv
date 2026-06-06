@@ -74,7 +74,7 @@ class _JoinContestScreenState extends State<JoinContestScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item.contestName ?? "New Contest",
+                        item.contestName ?? '',
                         maxLines: 1,
                         style: newAppFont(
                           fontSize: 16,
@@ -113,7 +113,7 @@ class _JoinContestScreenState extends State<JoinContestScreen> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
                               decoration: BoxDecoration(
-                                color: item.isParticipated == true ? Colors.lightBlue.withOpacity(0.15) : Colors.green.withOpacity(0.15),
+                                color: item.isParticipated == true ? Colors.lightBlue.withValues(alpha: 0.15) : Colors.green.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(
