@@ -129,8 +129,9 @@ class BaseService {
     try {
       switch (method) {
         case RequestType.get:
-          final uri = Uri.parse(dio.options.baseUrl + url)
-              .replace(queryParameters: queryParameters);
+          // Stringify all query parameters because Uri.replace requires Strings
+          final Map<String, dynamic>? stringifiedParams = queryParameters?.map((key, value) => MapEntry(key, value.toString()));
+          final uri = Uri.parse(dio.options.baseUrl + url).replace(queryParameters: stringifiedParams);
           response = await dio.getUri(uri, cancelToken: token);
           break;
         case RequestType.put:

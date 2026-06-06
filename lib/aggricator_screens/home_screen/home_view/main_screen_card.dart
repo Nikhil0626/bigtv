@@ -96,74 +96,87 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                     children: [
                       Column(
                         children: [
-                          homeProvider.getAllAiTagsList.isEmpty
-                              ? SizedBox.shrink()
-                              : Container(
-                                  height: 45.h,
-                                  color: AppColorTokens.aiTagBackground,
-                                  child: ListView.separated(
-                                    controller: homeProvider.aiTagScrollController,
-                                    scrollDirection: Axis.horizontal,
-                                    itemCount: homeProvider.getAllAiTagsList.length,
-                                    separatorBuilder: (context, index) {
-                                      return Padding(
-                                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                                        child: VerticalDivider(
-                                          color: Colors.grey.withOpacity(0.5),
-                                          thickness: 1,
-                                          width: 10.w,
-                                        ),
-                                      );
-                                    },
-                                    itemBuilder: (context, index) {
-                                      // Ensure key exists
-                                      if (!homeProvider.aiTagKeys.containsKey(index)) {
-                                        homeProvider.aiTagKeys[index] = GlobalKey();
-                                      }
+                          Container(
+                            height: 45.h,
+                            color: AppColorTokens.aiTagBackground,
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 16.w),
+                                  child: Image.asset(
+                                    "assets/images/BigTvPostLogo.png",
+                                    height: 30.h,
+                                  ),
+                                ),
+                                if (homeProvider.getAllAiTagsList.isNotEmpty)
+                                  Expanded(
+                                    child: ListView.separated(
+                                      controller: homeProvider.aiTagScrollController,
+                                      scrollDirection: Axis.horizontal,
+                                      itemCount: homeProvider.getAllAiTagsList.length,
+                                      separatorBuilder: (context, index) {
+                                        return Padding(
+                                          padding: EdgeInsets.symmetric(vertical: 12.h),
+                                          child: VerticalDivider(
+                                            color: Colors.grey.withOpacity(0.5),
+                                            thickness: 1,
+                                            width: 10.w,
+                                          ),
+                                        );
+                                      },
+                                      itemBuilder: (context, index) {
+                                        // Ensure key exists
+                                        if (!homeProvider.aiTagKeys.containsKey(index)) {
+                                          homeProvider.aiTagKeys[index] = GlobalKey();
+                                        }
 
-                                      final tag = homeProvider.getAllAiTagsList[index];
-                                      final tagId = tag['aitagid'];
-                                      final isSelected = homeProvider.selectedTagId == tagId;
+                                        final tag = homeProvider.getAllAiTagsList[index];
+                                        final tagId = tag['aitagid'];
+                                        final isSelected = homeProvider.selectedTagId == tagId;
 
-                                      return InkWell(
-                                        key: homeProvider.aiTagKeys[index],
-                                        onTap: () async {
-                                          homeProvider.setSelectedTagId(tagId);
-                                          homeProvider.getAllPostsByAiId(tagId.toString());
-                                          homeProvider.aiTagDataLoaded(true);
-                                          context.read<VideoProvider>().pauseVideo();
-                                          homeProvider.aiTagsScrollToCenter(index);
-                                          EventRepo().addEvent({
-                                            "aiTagName": tag['aitagname'].toString(),
-                                            "aiTagId": tag['aitagid'].toString(),
-                                            "createAt": DateTime.now().toString(),
-                                          }, "ai_tag_click");
-                                        },
-                                        child: Container(
-                                          alignment: Alignment.center,
-                                          padding: EdgeInsets.symmetric(horizontal: 10.w),
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              bottom: BorderSide(
-                                                color: isSelected ? AppColorTokens.primaryRed : Colors.transparent,
-                                                width: 3,
+                                        return InkWell(
+                                          key: homeProvider.aiTagKeys[index],
+                                          onTap: () async {
+                                            homeProvider.setSelectedTagId(tagId);
+                                            homeProvider.getAllPostsByAiId(tagId.toString());
+                                            homeProvider.aiTagDataLoaded(true);
+                                            context.read<VideoProvider>().pauseVideo();
+                                            homeProvider.aiTagsScrollToCenter(index);
+                                            EventRepo().addEvent({
+                                              "aiTagName": tag['aitagname'].toString(),
+                                              "aiTagId": tag['aitagid'].toString(),
+                                              "createAt": DateTime.now().toString(),
+                                            }, "ai_tag_click");
+                                          },
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                            decoration: BoxDecoration(
+                                              border: Border(
+                                                bottom: BorderSide(
+                                                  color: isSelected ? AppColorTokens.primaryRed : Colors.transparent,
+                                                  width: 3,
+                                                ),
+                                              ),
+                                            ),
+                                            child: Text(
+                                              tag['aitagname'].toString().toUpperCase(),
+                                              style: TextStyle(
+                                                fontFamily: 'DDTW00-CondensedSemiBold',
+                                                color: AppColors.wColor,
+                                                fontSize: 20.sp,
+                                                fontWeight: FontWeight.w600,
+                                                letterSpacing: 0.5,
                                               ),
                                             ),
                                           ),
-                                          child: Text(
-                                            tag['aitagname'].toString().toUpperCase(),
-                                            style: TextStyle(
-                                              fontFamily: 'DDTW00-CondensedSemiBold',
-                                              color: AppColors.wColor,
-                                              fontSize: 20.sp,
-                                              fontWeight: FontWeight.w600,
-                                              letterSpacing: 0.5,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  )),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
                           Expanded(child: MainScreenPageView()),
                         ],
                       ),

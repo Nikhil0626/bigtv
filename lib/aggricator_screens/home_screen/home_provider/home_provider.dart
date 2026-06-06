@@ -209,7 +209,7 @@ class HomeProvider extends ChangeNotifier {
     // }
     isPostLoading = true;
     String userId = preferences.getString("userId") ?? "0";
-    Map<String, dynamic> body = {"user_id": userId.toString()};
+    Map<String, dynamic> body = {"user_id": userId.toString(), "isBigTv": "true"};
     try {
       Response response = await HomeRepo().getSinglePost(body, postId);
       log(response.data.toString());
@@ -219,7 +219,9 @@ class HomeProvider extends ChangeNotifier {
           Future.delayed(
             Duration(milliseconds: 100),
                 () {
-              getAllPost(isGetAllPost: true);
+              if (!isLink && !isAds) {
+                getAllPost(isGetAllPost: true);
+              }
               if (isLink) {
                 EventRepo().addEvent({
                   "platform": Platform.isIOS ? "iOS" : "Android",
@@ -267,7 +269,9 @@ class HomeProvider extends ChangeNotifier {
       Future.delayed(
         Duration(milliseconds: 300),
             () {
-          getAllPost(isGetAllPost: true);
+          if (!isLink) {
+            getAllPost(isGetAllPost: true);
+          }
         },
       );
       isPostLoading = false;
@@ -279,7 +283,9 @@ class HomeProvider extends ChangeNotifier {
       Future.delayed(
         Duration(milliseconds: 300),
             () {
-          getAllPost(isGetAllPost: true);
+          if (!isLink) {
+            getAllPost(isGetAllPost: true);
+          }
         },
       );
       isPostLoading = false;
@@ -342,7 +348,7 @@ class HomeProvider extends ChangeNotifier {
         .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
-    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true};
+    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true, "isBigTv": true};
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
@@ -462,6 +468,7 @@ class HomeProvider extends ChangeNotifier {
       "aitagid": postId,
       "user_id": userId ?? "",
       "isAdManager": "true",
+      "isBigTv": "true",
     };
     log(body.toString());
     try {

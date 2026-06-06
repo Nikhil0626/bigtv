@@ -116,8 +116,8 @@ class _HomeViewState extends State<HomeView> {
                           alignment: Alignment.bottomCenter,
                           child: SafeArea(
                             // minimum: EdgeInsets.only(left: 16,right: 16, bottom:4),
-                            child: Container(
-                              height: 56, // reduced height
+                              child: Container(
+                                height: 64, // increased to accommodate activeIcon border
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(20),
@@ -136,11 +136,13 @@ class _HomeViewState extends State<HomeView> {
                                   type: BottomNavigationBarType.fixed,
                                   currentIndex: homeProvider.selectedIndex,
                                   onTap: (index) {
+                                    context.read<VideoProvider>().pauseVideo();
                                     homeProvider.isTabChange();
                                     homeProvider.homePageController.jumpToPage(index);
                                     homeProvider.pageChange(isValue: true);
                                     if (index == 0) {
                                       homeProvider.getAllPost();
+                                      homeProvider.aiTagDataLoaded(false);
                                       homeProvider.setSelectedTagId(0);
                                       EventRepo().addEvent({
                                         "aiTagName": "news",
@@ -182,6 +184,17 @@ class _HomeViewState extends State<HomeView> {
                                         height: 22,
                                       colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                       ),
+                                      activeIcon: Container(
+                                        padding: EdgeInsets.only(top: 4),
+                                        decoration: BoxDecoration(
+                                          border: Border(top: BorderSide(color: Colors.white, width: 2)),
+                                        ),
+                                        child: SvgPicture.asset(
+                                          "assets/new_app_icon/bytes.svg",
+                                          height: 22,
+                                          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                        ),
+                                      ),
                                       label: 'news'.tr(),
                                     ),
                                     BottomNavigationBarItem(
@@ -189,6 +202,17 @@ class _HomeViewState extends State<HomeView> {
                                         "assets/new_app_icon/paper.svg",
                                         height: 22,
                                       colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                      ),
+                                      activeIcon: Container(
+                                        padding: EdgeInsets.only(top: 4),
+                                        decoration: BoxDecoration(
+                                          border: Border(top: BorderSide(color: Colors.white, width: 2)),
+                                        ),
+                                        child: SvgPicture.asset(
+                                          "assets/new_app_icon/paper.svg",
+                                          height: 22,
+                                          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                        ),
                                       ),
                                       label: 'ePaper'.tr(),
                                     ),
@@ -198,6 +222,17 @@ class _HomeViewState extends State<HomeView> {
                                         height: 22,
                                       colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                       ),
+                                      activeIcon: Container(
+                                        padding: EdgeInsets.only(top: 4),
+                                        decoration: BoxDecoration(
+                                          border: Border(top: BorderSide(color: Colors.white, width: 2)),
+                                        ),
+                                        child: SvgPicture.asset(
+                                          "assets/new_app_icon/reel.svg",
+                                          height: 22,
+                                          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                        ),
+                                      ),
                                       label: 'reels'.tr(),
                                     ),
                                     BottomNavigationBarItem(
@@ -205,6 +240,17 @@ class _HomeViewState extends State<HomeView> {
                                         "assets/new_app_icon/menu.svg",
                                         height: 22,
                                       colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                      ),
+                                      activeIcon: Container(
+                                        padding: EdgeInsets.only(top: 4),
+                                        decoration: BoxDecoration(
+                                          border: Border(top: BorderSide(color: Colors.white, width: 2)),
+                                        ),
+                                        child: SvgPicture.asset(
+                                          "assets/new_app_icon/menu.svg",
+                                          height: 22,
+                                          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
+                                        ),
                                       ),
                                       label: 'more'.tr(),
                                     ),

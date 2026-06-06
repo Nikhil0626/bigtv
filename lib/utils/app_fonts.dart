@@ -5,31 +5,48 @@ import '../globel_keys/globel_keys.dart';
 import '../core/theme/theme_extensions.dart';
 
 @Deprecated('Use context.typography from theme_extensions.dart instead.')
-TextStyle homeScreenFontStyle(
-    {Color? color,
-      double? fontSize = 14,
-      FontWeight? fontWeight = FontWeight.normal}) {
-  
+TextStyle homeScreenFontStyle({
+  Color? color,
+  double? fontSize = 14,
+  FontWeight? fontWeight = FontWeight.normal,
+  double? letterSpacing,
+  double? height,
+  TextDecoration? decoration,
+  Color? decorationColor,
+  double? decorationThickness,
+  TextDecorationStyle? decorationStyle,
+}) {
   final BuildContext? ctx = mainNavigatorKey.currentContext;
   final defaultColor = ctx?.textColor ?? Colors.black;
 
   return GoogleFonts.anekTelugu(
     textStyle: TextStyle(
       fontSize: fontSize,
-      height: 1.4,
+      height: height ?? 1.4,
       wordSpacing: 2,
       fontWeight: fontWeight,
       color: color ?? defaultColor,
+      letterSpacing: letterSpacing ?? 0.5,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationThickness: decorationThickness,
+      decorationStyle: decorationStyle,
     ),
   );
 }
 
 @Deprecated('Use context.typography from theme_extensions.dart instead.')
-TextStyle fontStyle(
-    {Color? color,
-      double? fontSize = 14,
-      FontWeight? fontWeight = FontWeight.normal}) {
-
+TextStyle fontStyle({
+  Color? color,
+  double? fontSize = 14,
+  FontWeight? fontWeight = FontWeight.normal,
+  double? letterSpacing,
+  double? height,
+  TextDecoration? decoration,
+  Color? decorationColor,
+  double? decorationThickness,
+  TextDecorationStyle? decorationStyle,
+}) {
   final BuildContext? ctx = mainNavigatorKey.currentContext;
   final defaultColor = ctx?.textColor ?? Colors.black;
 
@@ -38,16 +55,28 @@ TextStyle fontStyle(
       fontSize: fontSize,
       fontWeight: fontWeight,
       color: color ?? defaultColor,
-    )
+      letterSpacing: letterSpacing ?? 0.5,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationThickness: decorationThickness,
+      decorationStyle: decorationStyle,
+    ),
   );
 }
 
 @Deprecated('Use context.typography from theme_extensions.dart instead.')
-TextStyle newAppFont(
-    {Color? color,
-      double? fontSize = 14,
-      FontWeight? fontWeight = FontWeight.normal}) {
-
+TextStyle newAppFont({
+  Color? color,
+  double? fontSize = 14,
+  FontWeight? fontWeight = FontWeight.normal,
+  double? letterSpacing,
+  double? height,
+  TextDecoration? decoration,
+  Color? decorationColor,
+  double? decorationThickness,
+  TextDecorationStyle? decorationStyle,
+}) {
   final BuildContext? ctx = mainNavigatorKey.currentContext;
   final defaultColor = ctx?.textColor ?? Colors.black;
 
@@ -56,6 +85,12 @@ TextStyle newAppFont(
       fontSize: fontSize?.sp,
       fontWeight: fontWeight,
       color: color ?? defaultColor,
-    )
+      letterSpacing: letterSpacing ?? 0.5,
+      height: height,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationThickness: decorationThickness,
+      decorationStyle: decorationStyle,
+    ),
   );
 }

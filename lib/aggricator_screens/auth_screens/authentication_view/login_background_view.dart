@@ -9,212 +9,183 @@ import '../../../utils/app_spaces.dart';
 import '../../../utils/app_enums.dart';
 import 'district_view.dart';
 import 'categories_view.dart';
-import 'otp_verification_view.dart';
+import 'unified_auth_view.dart';
 import '../authentication_provider/authentication_provider.dart';
-import 'login_view.dart';
 
 class LoginBackgroundView extends StatelessWidget {
   const LoginBackgroundView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final screenHeight = MediaQuery.of(context).size.height;
-    final screenWidth = MediaQuery.of(context).size.width;
+    final mediaQuery = MediaQuery.of(context);
+    final screenHeight = mediaQuery.size.height;
+    final screenWidth = mediaQuery.size.width;
 
     return Consumer<AuthenticationProvider>(
       builder: (_, authenticationProvider, __) {
-        return Scaffold(
-          body: Stack(
-            children: [
-              SingleChildScrollView(
-                child: SizedBox(
-                  width: screenWidth,
-                  height: screenHeight,
-                  child: Stack(
-                    children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            height: screenHeight * 0.65,
-                            alignment: Alignment.center,
-                            color: AppColors.loginBgColor,
-                            padding: EdgeInsets.only(top: 100.sp),
-                            child: Column(
-                              children: [
-                                Image.asset("assets/svg/login.png"),
+        bool isAuthScreen = authenticationProvider.newAppLoginStatus == NewAppLoginStatus.login ||
+            authenticationProvider.newAppLoginStatus == NewAppLoginStatus.none ||
+            authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp;
 
-                                height(height: 20.h),
-                               if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.login ||authenticationProvider.newAppLoginStatus == NewAppLoginStatus.none )
-                               Column(
-                                 children: [
-                                   Text(
-                                     'Get hyperlocal news',
-                                     style: newAppFont(
-                                       fontSize: 18.sp,
-                                       color: Colors.white,
-                                       fontWeight: FontWeight.w600,
-                                     ),
-                                   ),
-                                   Row(
-                                     children: [
-                                       Padding(
-                                         padding:  EdgeInsets.only(top: 10.0,left: MediaQuery.of(context).size.width/4),
-                                         child: Text(
-                                           'in your local language',
-                                           style: newAppFont(
-                                             fontSize: 12.sp,
-                                             color: Colors.white,
-                                             fontWeight: FontWeight.w600,
-                                           ),
-                                         ),
-                                       ),
-                                       SvgPicture.asset("assets/svg/mic.svg",height: 50,)
-                                     ],
-                                   ),
-                                 ],
-                               ),
-                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp)
-                               Column(
-                                 mainAxisAlignment: MainAxisAlignment.center,
-                                 crossAxisAlignment: CrossAxisAlignment.center,
-                                 children: [
-                                   Text(
-                                     'OTP Verification',
-                                     style: newAppFont(
-                                       fontSize: 22.sp,
-                                       color: Colors.white,
-                                       fontWeight: FontWeight.w600,
-                                     ),
-                                   ),
-                                   height(height: 20),
-                                   Text(
-                                     'Please enter the 4-digit code sent to your phone number +91${authenticationProvider.phoneController.text}',
-                                     textAlign: TextAlign.center,
-                                     style: newAppFont(
-                                       fontSize: 12.sp,
-                                       color: Colors.white,
-                                       fontWeight: FontWeight.w400,
-                                     ),
-                                   ),
-                                 ],
-                               ),
-                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.category)
-                               Column(
-                                 mainAxisAlignment: MainAxisAlignment.center,
-                                 crossAxisAlignment: CrossAxisAlignment.center,
-                                 children: [
-                                   Text(
-                                     'Select Topics',
-                                     style: newAppFont(
-                                       fontSize: 24.sp,
-                                       color: Colors.white,
-                                       fontWeight: FontWeight.w600,
-                                     ),
-                                   ),
-                                   height(height: 20),
-                                   Text(
-                                     'Choose categories for personalised news updates and stories',
-                                     textAlign: TextAlign.center,
-                                     style: newAppFont(
-                                       fontSize: 12.sp,
-                                       color: Colors.white,
-                                       fontWeight: FontWeight.w400,
-                                     ),
-                                   ),
-                                 ],
-                               ),
-                                if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.location)
-                               Column(
-                                 mainAxisAlignment: MainAxisAlignment.center,
-                                 crossAxisAlignment: CrossAxisAlignment.center,
-                                 children: [
-                                   Text(
-                                     'Select Region',
-                                     style: newAppFont(
-                                       fontSize: 24.sp,
-                                       color: Colors.white,
-                                       fontWeight: FontWeight.w600,
-                                     ),
-                                   ),
-                                   height(height: 20),
-                                   Padding(
-                                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                                     child: Text(
-                                       'Select region to receive hyperlocal news and relevant local information tailored to your area.',
-                                       textAlign: TextAlign.center,
-                                       style: newAppFont(
-                                         fontSize: 12.sp,
-                                         color: Colors.white,
-                                         fontWeight: FontWeight.w400,
-                                       ),
-                                     ),
-                                   ),
-                                 ],
-                               )
-                              ],
-                            ),
-                          ),
-                          // White Section (Empty Placeholder)
-                          Expanded(
-                            child: Container(color: Colors.white),
-                          ),
-                        ],
-                      ),
-              
-                      // Login / OTP Verification Widget (Positioned)
-                      Positioned(
-                        bottom: screenHeight * 0.12,
-                        left: 0,
-                        right: 0,
-                        child: SizedBox(
-                          height:context.watch<AuthenticationProvider>().isBlockedUser == false? MediaQuery.of(context).size.height * .57: screenHeight * 0.5,
-                          child: AnimatedSwitcher(
-                            duration: Duration(milliseconds: 300),
-                            child: _getLoginContent(authenticationProvider.newAppLoginStatus),
-                          ),
-                        ),
-                      )
-                    ],
-                  ),
-                ),
+        return Scaffold(
+          backgroundColor: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E1E) : Colors.white,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: SizedBox(
+                height: screenHeight - mediaQuery.padding.top - mediaQuery.padding.bottom,
+                child: isAuthScreen ? _buildAuthLayout(context, authenticationProvider) : _buildOtherLayout(context, authenticationProvider, screenWidth, screenHeight),
               ),
-              if(authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp )
-              Positioned(
-                  left: 20,
-                  top: 50,
-                  child:InkWell(
-                    onTap: (){
-                      authenticationProvider.setLogOutStatus(context, false);
-                    },
-                    child: Container(width: 30,height: 30,decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(8))),
-                    child: Icon(Icons.arrow_back_ios_new_outlined,size: 20,),
-                    ),
-                  ) )
-            ],
+            ),
           ),
         );
       },
     );
   }
-}
 
+  Widget _buildAuthLayout(BuildContext context, AuthenticationProvider authenticationProvider) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 16.h),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          height(height: 10.h),
+          Image.asset(
+            "assets/images/BigTvPostLogo.png",
+            height: 40.h,
+            fit: BoxFit.contain,
+          ),
+          height(height: 8.h),
 
+          Text(
+            'STAY UPDATED EVERY MINUTE',
+            style: homeScreenFontStyle(
+              fontSize: 20.sp,
+              color: const Color(0xFFE50914),
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.1,
+            ),
+          ),
+          height(height: 4.h),
+          Text(
+            'మీకు నచ్చిన వార్తలు మీ చేతిలో',
+            style: homeScreenFontStyle(
+              fontSize: 15.sp,
+              color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.black87,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
 
-Widget _getLoginContent(NewAppLoginStatus status) {
-  switch (status) {
-    case NewAppLoginStatus.location:
-      return const DistrictView(key: ValueKey('location'));
-    case NewAppLoginStatus.category:
-      return CategoriesView(key: ValueKey('category'));
-    case NewAppLoginStatus.otp:
-      return OtpVerificationView(key: ValueKey('otp'));
-    case NewAppLoginStatus.login:
-    case NewAppLoginStatus.none:
-    default:
-      return LoginView(key: ValueKey('login'));
+          // Hero Image with Gradients
+          Expanded(
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: Image.asset(
+                    "assets/images/login_image.png",
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Text(
+                          "Please add 'login_image.png' to assets/images",
+                          style: newAppFont(color: Colors.grey, fontSize: 12.sp),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                // Top white gradient (very subtle)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: 120.h, // Height of the top gradient
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.white.withOpacity(0.35), // Very subtle white at top
+                          Colors.white.withOpacity(0.0), // Middle fade
+                          Colors.transparent, // Completely transparent at bottom
+                        ],
+                        stops: const [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Bottom gradient (existing fade)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  height: 80.h,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF1E1E1E).withOpacity(0.0)
+                              : Colors.white.withOpacity(0.0),
+                          Theme.of(context).brightness == Brightness.dark
+                              ? const Color(0xFF1E1E1E)
+                              : Colors.white,
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          height(height: 16.h),
+
+          // The Authentication Form directly inline
+          _getLoginContent(authenticationProvider.newAppLoginStatus),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOtherLayout(BuildContext context, AuthenticationProvider authenticationProvider, double screenWidth, double screenHeight) {
+    return Container(
+      width: screenWidth,
+      height: screenHeight,
+      color: Theme.of(context).brightness == Brightness.dark ? const Color(0xFF1E1E1E) : Colors.white,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        switchInCurve: Curves.easeInOut,
+        switchOutCurve: Curves.easeInOut,
+        child: Container(
+          key: ValueKey(authenticationProvider.newAppLoginStatus),
+          child: _getLoginContent(authenticationProvider.newAppLoginStatus),
+        ),
+      ),
+    );
+  }
+
+  Widget _getLoginContent(NewAppLoginStatus status) {
+    switch (status) {
+      case NewAppLoginStatus.location:
+        return const DistrictView(key: ValueKey('location'));
+      case NewAppLoginStatus.category:
+        return CategoriesView(key: ValueKey('category'));
+      case NewAppLoginStatus.otp:
+      case NewAppLoginStatus.login:
+      case NewAppLoginStatus.none:
+      default:
+        return const UnifiedAuthView(key: ValueKey('unified_auth'));
+    }
   }
 }

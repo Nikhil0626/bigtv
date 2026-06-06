@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';

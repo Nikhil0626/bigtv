@@ -97,20 +97,15 @@ class _SettingsViewState extends State<SettingsView> {
                   // else
                   SizedBox.shrink(),
 
-                  height(height: 5.h),
                   _buildThemeToggle(context),
-                  height(height: 5.h),
 
                   _buildSettingsRow(context, "Filter.svg", "Filter", () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
                   }),
-                  // height(height: 5.h),
                   //
                   // _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () async {
                   //   _showShareBottomSheet(context);
                   // }),
-
-                  height(height: 5.h),
 
                   _buildSettingsRow(context, "Help_support.svg", "Help & Support", () {
                     EventRepo().addEvent({
@@ -125,7 +120,6 @@ class _SettingsViewState extends State<SettingsView> {
                     );
                   }),
 
-                  height(height: 5.h),
                   _buildSettingsRow(context, "Advertise_icon.svg", "Advertise With Us", () {
                     EventRepo().addEvent({
                       "visitPageName": "Advertise With Us",
@@ -139,7 +133,6 @@ class _SettingsViewState extends State<SettingsView> {
                     );
                   }),
 
-                  height(height: 5.h),
                   _buildSettingsRow(context, "Terms_icon.svg", "Terms & Conditions", () {
                     EventRepo().addEvent({
                       "visitPageName": "Terms & Conditions",
@@ -170,7 +163,6 @@ class _SettingsViewState extends State<SettingsView> {
                   //   }
                   // }
                   // ),
-                  height(height: 5.h),
                   _buildSettingsRow(context, "Private_icon.svg", "Privacy Policy", () {
                     EventRepo().addEvent({
                       "visitPageName": "Privacy Policy",
@@ -183,7 +175,6 @@ class _SettingsViewState extends State<SettingsView> {
                       ),
                     );
                   }),
-                  height(height: 5.h),
                   _buildSettingsRow(context, "Feedback.svg", "Feedback", () {
                     EventRepo().addEvent({
                       "visitPageName": "Feedback",
@@ -191,7 +182,6 @@ class _SettingsViewState extends State<SettingsView> {
                     }, "compliance_section");
                     Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
                   }),
-                  height(height: 5.h),
                   _buildSettingsRow(context, "contest.svg", "Ads Contest", () {
                     EventRepo().addEvent({
                       "visitPageName": "Contest",
@@ -199,7 +189,6 @@ class _SettingsViewState extends State<SettingsView> {
                     }, "compliance_section");
                     Navigator.push(context, MaterialPageRoute(builder: (context) => ContestScreen()));
                   }),
-                  height(height: 5.h),
                   _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () async {
                     closeSubscribe();
                     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -388,55 +377,55 @@ class _SettingsViewState extends State<SettingsView> {
   }
 
   Widget _buildSettingsRow(BuildContext context, String iconName, String title, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: context.cardColor,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: context.borderColor.withOpacity(0.5)),
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            color: Colors.transparent,
+            width: MediaQuery.of(context).size.width,
+            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+            child: Row(
+              children: [
+                iconName =="profile.png"?Image.asset('assets/svg/$iconName',height: 24.w, width: 24.w, color: context.iconTheme.color): SvgPicture.asset('assets/svg/$iconName', height: 24.w, width: 24.w, colorFilter: ColorFilter.mode(context.iconTheme.color ?? Colors.grey, BlendMode.srcIn)),
+                width(width: 16.w),
+                Text(title, style: context.typography.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+                Spacer(),
+                Icon(Icons.arrow_forward_ios, size: 16, color: context.subtitleColor),
+              ],
+            ),
+          ),
         ),
-        margin: EdgeInsets.symmetric(vertical: 4),
-        width: MediaQuery.of(context).size.width,
-        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-        child: Row(
-          children: [
-            iconName =="profile.png"?Image.asset('assets/svg/$iconName',height: 24.w, width: 24.w, color: context.iconTheme.color): SvgPicture.asset('assets/svg/$iconName', height: 24.w, width: 24.w, colorFilter: ColorFilter.mode(context.iconTheme.color ?? Colors.grey, BlendMode.srcIn)),
-            width(width: 16.w),
-            Text(title, style: context.typography.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
-            Spacer(),
-            Icon(Icons.arrow_forward_ios, size: 16, color: context.subtitleColor),
-          ],
-        ),
-      ),
+        Divider(height: 1, color: context.borderColor.withOpacity(0.3)),
+      ],
     );
   }
 
   Widget _buildThemeToggle(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
-    return Container(
-      decoration: BoxDecoration(
-        color: context.cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: context.borderColor.withOpacity(0.5)),
-      ),
-      margin: EdgeInsets.symmetric(vertical: 4),
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: Row(
-        children: [
-          Icon(Icons.dark_mode, size: 24, color: context.iconTheme.color),
-          width(width: 16.w),
-          Text("Dark Mode", style: context.typography.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
-          Spacer(),
-          Switch(
-            value: themeProvider.isDarkMode,
-            activeColor: context.primaryColor,
-            onChanged: (val) {
-              themeProvider.setThemeMode(val ? ThemeMode.dark : ThemeMode.light);
-            },
+    return Column(
+      children: [
+        Container(
+          color: Colors.transparent,
+          padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+          child: Row(
+            children: [
+              Icon(Icons.dark_mode, size: 24, color: context.iconTheme.color),
+              width(width: 16.w),
+              Text("Dark Mode", style: context.typography.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
+              Spacer(),
+              Switch(
+                value: themeProvider.isDarkMode,
+                activeColor: context.primaryColor,
+                onChanged: (val) {
+                  themeProvider.setThemeMode(val ? ThemeMode.dark : ThemeMode.light);
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        Divider(height: 1, color: context.borderColor.withOpacity(0.3)),
+      ],
     );
   }
 }

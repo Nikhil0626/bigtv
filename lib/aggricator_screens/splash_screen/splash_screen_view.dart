@@ -64,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> {
             ? Container(
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
-                color: Colors.white,
+                color: Theme.of(context).scaffoldBackgroundColor,
                 child: Image.asset(
                   "assets/svg/splash_video.gif",
                   fit: BoxFit.cover,
@@ -75,7 +75,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 width: MediaQuery.of(context).size.width,
                 child: Center(
                   child: Image.asset(
-                    "assets/playstore.png",
+                    "assets/BIGTV-APP ICON.png",
                     height: 100,
                     width: 100,
                   ),

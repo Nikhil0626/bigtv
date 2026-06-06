@@ -316,8 +316,8 @@ class AuthenticationProvider extends ChangeNotifier {
 
         print(states);
 
-        selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.districtName.toString()).toList();
-        log(getAllLocationList.first.districtName.toString());
+        selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.stateName.toString()).toSet().toList();
+        log(getAllLocationList.first.stateName.toString());
         log("response.data.toString123 $selectedLocations");
         String result = selectedLocations.toSet().join(',');
         preferences.setString("locationId", result);
@@ -348,12 +348,13 @@ class AuthenticationProvider extends ChangeNotifier {
   Future sendLocationsToServer(BuildContext context, {bool isFilter = false}) async {
     isLocationSendingLoading = true;
     notifyListeners();
-    List<int> selectedCategoryIds = selectedLocations
-        .map((name) => getAllLocationList
-        .firstWhere((item) => item.districtName == name)
-        .districtId)
-        .toList();
-    log("selkhvgbkjegjke ${selectedCategoryIds}");
+    List<int> selectedCategoryIds = [];
+    for (String stateName in selectedLocations) {
+      var districtsInState = getAllLocationList.where((item) => item.stateName == stateName).toList();
+      selectedCategoryIds.addAll(districtsInState.map((e) => e.districtId));
+    }
+    selectedCategoryIds = selectedCategoryIds.toSet().toList();
+    log("Mapped state names to district IDs: ${selectedCategoryIds}");
     log("Selected District Names: $selectedLocations");
     String nameOfDistrict = selectedLocations.toSet().join(',');
     sendUserAttribute(nameOfDistrict);

@@ -7,6 +7,8 @@ import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -179,7 +181,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                           child: Align(
                             alignment: Alignment.topCenter,
                             child: VideoPreview(
-                              imageUrl: article['image_url'],
+                              imageUrl: (article['image_url'] != null && article['image_url'].toString().startsWith('http')) ? article['image_url'] : "https://migwp.chotanews.com/${article['image_url']}",
                               url: article['video_url'] ?? "",
                               isFoldable: false,
                             ),
@@ -191,7 +193,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ImagePreview(
-                                    imageUrl: article['image_url'],
+                                    imageUrl: (article['image_url'] != null && article['image_url'].toString().startsWith('http')) ? article['image_url'] : "https://migwp.chotanews.com/${article['image_url']}",
                                     title: article['title'],
                                   ),
                                 ));
@@ -204,7 +206,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                 topLeft: Radius.circular(16.r),
                               ),
                               child: CachedNetworkImage(
-                                imageUrl: article['image_url'] ?? "fgyhuiiuh",
+                                imageUrl: (article['image_url'] != null && article['image_url'].toString().startsWith('http')) ? article['image_url'] : "https://migwp.chotanews.com/${article['image_url']}",
                                 height: MediaQuery.of(context).size.height * (article['subType'] == "BigBlackStandard" ? .65 : .45),
                                 width: MediaQuery.of(context).size.width,
                                 fit: BoxFit.fill,
@@ -245,157 +247,125 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                       ),],
                     ),
 
-                    // Action bar between image and title
                     Container(
-                      color: article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 0.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Chota News branding
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text.rich(
-                              TextSpan(
-                                children: [
-                                  TextSpan(
-                                    text: "Chota ",
-                                    style: fontStyle(
-                                      fontSize: Platform.isIOS ? 16 : 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: article['subType'] == "BigBlackStandard" ? Colors.white : Colors.black,
-                                    ),
-                                  ),
-                                  TextSpan(
-                                    text: "News",
-                                    style: fontStyle(
-                                      fontSize: Platform.isIOS ? 16 : 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xff00A8FF),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          // Action buttons
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: article['subType'] == "BigBlackStandard" ? Colors.black : Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                  return InkWell(
-                                    onTap: () async {
-                                      log("Like");
-                                      settingsProvider.isLikePost(article);
-                                      EventRepo().addEvent({
-                                        "like": !settingsProvider.isLikeList.contains(article['id'].toString()),
-                                        "postId": article['id'].toString()??"000",
-                                        "createAt": DateTime.now().toString(),
-                                        "postTitle": article['title'].toString()
-                                      }, "liked_article");
-                                    },
-                                    child: SizedBox(
-                                      width: 24,
-                                      child: SvgPicture.asset(
-                                          settingsProvider.isLikeList.contains(article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                          height: 18,
-                                          width: 18,
-                                          color: settingsProvider.isLikeList.contains(article['id'].toString()) ? Colors.lightBlue : Colors.grey),
-                                    ),
-                                  );
-                                }),
-                                SizedBox(width: 16),
-                                InkWell(
-                                  onTap: () {
-                                    log("Comment...");
-                                    if (context.mounted) {
-                                      context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                      showComments(context, article['id'],article['title']);
-                                    }
-                                  },
-                                  child: SizedBox(
-                                    width: 24,
-                                    child: SvgPicture.asset("assets/svg/new_comment.svg", height: 20, width: 20, color: Colors.grey),
-                                  ),
-                                ),
-                                SizedBox(width: 16),
-                                InkWell(
-                                  onTap: () async {
-                                    SharedPreferences sp = await SharedPreferences.getInstance();
-                                    String? userId = sp.getString("userId");
-
-                                    sendShareDetails(userId, article['id'], article['content'].toString());
-
-                                    if (article['type'] == "Standard" || article['type'] == "Video" || article['type'] == "Image") {
-                                      try {
-                                        final image = await adsScreenshotController.capture(
-                                          pixelRatio: 2.0,
-                                        );
-                                        if (image != null) {
-                                          final directory = await getTemporaryDirectory();
-                                          final imagePath = '${directory.path}/${article['id']}.png';
-                                          final imageFile = File(imagePath);
-                                          await imageFile.writeAsBytes(image);
-
-                                          Share.shareXFiles([XFile(imageFile.path)], text: article['linkURLAndroid'].toString());
-                                        } else {
-                                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                        }
-                                      } catch (e) {
-                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                      }
-                                    } else if (article['type'] == "Gallery") {}
-                                  },
-                                  child: SizedBox(
-                                    width: 24,
-                                    child: SvgPicture.asset(
-                                      "assets/svg/share.svg",
-                                      height: 18,
-                                      width: 18,
-                                      color: Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
+                      height: 4,
+                      width: MediaQuery.of(context).size.width,
+                      color: Color(0xFFED1C24),
                     ),
-
-                    // Title and content section
                     Expanded(
                       child: Container(
                         width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
-                          color: article['subType'] == "BigBlackStandard" ? AppColors.textColor : Colors.white,
-                          borderRadius: BorderRadius.only(
-                            // topRight: Radius.circular(10.sp),
-                            // topLeft: Radius.circular(10.sp),
-                          ),
-                        ),
+                        color: article['subType'] == "BigBlackStandard"
+                            ? Colors.black
+                            : (Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
                         child: Padding(
-                          padding: const EdgeInsets.only(top: 8, bottom: 16, right: 16, left: 16),
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(article['title'] ?? "No Title",
-                                  style: homeScreenFontStyle(
-                                      color: article['subType'] != "BigBlackStandard" ? AppColors.textColor : AppColors.cardBackgroundColor,
-                                      fontSize: 18.sp,
-                                      fontWeight: FontWeight.bold)),
+                              /// Title and Action Icons in a Row with minimal spacing
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    /// Article Title
+                                    Expanded(
+                                      child: Text(
+                                        article['title'] ?? "No Title",
+                                        style: homeScreenFontStyle(
+                                          color: AppColorTokens.primaryRed,
+                                          fontSize: 18.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    /// Action Icons Container
+                                    Container(
+                                      padding: const EdgeInsets.all(8.0),
+                                      decoration: BoxDecoration(border: BoxBorder.all(color: Color(0xFFED1C24), width: 0.36), borderRadius: BorderRadius.all(Radius.circular(8))),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          /// Like
+                                          Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                            return InkWell(
+                                              onTap: () async {
+                                                log("Like");
+                                                settingsProvider.isLikePost(article);
+                                                EventRepo().addEvent({
+                                                  "isLike": !settingsProvider.isLikeList.contains(article['id'].toString()),
+                                                  "postId": article['id'].toString() ?? "000",
+                                                  "createAt": DateTime.now().toString(),
+                                                  "postTitle": article['title'].toString()
+                                                }, "liked_article");
+                                              },
+                                              child: SvgPicture.asset(
+                                                settingsProvider.isLikeList.contains(article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                                height: 18,
+                                                width: 18,
+                                                color: settingsProvider.isLikeList.contains(article['id'].toString()) ? AppColorTokens.primaryRed : AppColorTokens.primaryRed,
+                                              ),
+                                            );
+                                          }),
+                                          const SizedBox(width: 14),
+                                          /// Comment
+                                          InkWell(
+                                            onTap: () {
+                                              log("Comment...");
+                                              if (context.mounted) {
+                                                context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                                showComments(context, article['id'], article['title']);
+                                              }
+                                            },
+                                            child: SvgPicture.asset(
+                                              "assets/svg/new_comment.svg",
+                                              height: 18,
+                                              width: 18,
+                                              color: Color(0xFFED1C24),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 14),
+                                          /// Share
+                                          InkWell(
+                                            onTap: () async {
+                                              SharedPreferences sp = await SharedPreferences.getInstance();
+                                              String? userId = sp.getString("userId");
+                                              sendShareDetails(userId, article['id'], article['content'].toString());
+                                              if (article['type'] == "Standard" || article['type'] == "Video" || article['type'] == "Image") {
+                                                try {
+                                                  final image = await adsScreenshotController.capture(pixelRatio: 2.0);
+                                                  if (image != null) {
+                                                    final directory = await getTemporaryDirectory();
+                                                    final imagePath = '${directory.path}/${article['id']}.png';
+                                                    final imageFile = File(imagePath);
+                                                    await imageFile.writeAsBytes(image);
+                                                    Share.shareXFiles([XFile(imageFile.path)], text: article['linkURLAndroid'].toString());
+                                                  } else {
+                                                    CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                                  }
+                                                } catch (e) {
+                                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                                }
+                                              } else if (article['type'] == "Gallery") {}
+                                            },
+                                            child: SvgPicture.asset(
+                                              "assets/svg/share.svg",
+                                              height: 18,
+                                              width: 18,
+                                              color: Color(0xFFED1C24),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                               height(height: 8),
                               Expanded(
                                 child: article['subType'] == "BulletPost"

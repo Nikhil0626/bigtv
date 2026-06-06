@@ -150,7 +150,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                   ),
                 ),
               ),
-              if (context.watch<HomeProvider>().isAiTagDataLoaded && widget.isAiTags == false)
+              if (context.watch<HomeProvider>().isAiTagDataLoaded && widget.isAiTags == false && homeProvider.getAllPostList.isNotEmpty)
                 SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 4,

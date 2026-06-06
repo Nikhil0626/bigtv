@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_view.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/settings_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_model/bookmarks_model.dart';
