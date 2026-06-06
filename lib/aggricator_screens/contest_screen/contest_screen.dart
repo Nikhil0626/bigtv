@@ -1,16 +1,10 @@
 import 'package:chotanews/aggricator_screens/contest_screen/winners_screen.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:chotanews/utils/app_no_data.dart';
-import 'package:chotanews/utils/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
 import '../../../utils/app_fonts.dart';
-import '../../no_data_screen/contest_no_data.dart';
-import '../../utils/app_spaces.dart';
-import 'contest_model.dart';
 import 'contest_provider.dart';
 import 'join_contest_screen.dart';
 

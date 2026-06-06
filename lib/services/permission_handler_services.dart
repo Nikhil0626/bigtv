@@ -17,7 +17,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../aggricator_screens/auth_screens/authentication_repo/authentication_repo.dart';
+import 'package:chotanews/features/auth/data/repositories/authentication_repo.dart';
 import '../aggricator_screens/events_data/event_repo.dart';
 
 Future<void> requestManageStoragePermission() async {

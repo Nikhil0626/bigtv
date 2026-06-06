@@ -1,4 +1,7 @@
 
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
@@ -6,9 +9,6 @@ import 'package:provider/provider.dart';
 
 import 'dart:async';
 
-import '../../../globel_keys/globel_keys.dart';
-import '../../events_data/event_repo.dart';
-import '../../home_screen/home_provider/home_provider.dart';
 
 
 class BannerAdsProvider with ChangeNotifier {

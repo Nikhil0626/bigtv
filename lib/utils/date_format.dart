@@ -8,7 +8,7 @@ String formatTimeDifference(String inputTime,{bool isComment= false} ) {
   final now = DateTime.now().add(const Duration(hours: -5, minutes: -30));
 
 
-  DateFormat inputFormat = DateFormat("MMM d, yyyy h:mm a");
+
   DateFormat format = DateFormat('yyyy-MM-ddTHH:mm:ss');
   DateFormat format1 = DateFormat('yyyy-MM-dd HH:mm:ss');
 

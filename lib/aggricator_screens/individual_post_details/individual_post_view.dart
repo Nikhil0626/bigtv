@@ -2,13 +2,15 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
 import 'package:chotanews/utils/app_no_data.dart';
+import 'package:chotanews/utils/image_view_ads.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -18,11 +20,10 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../utils/image_view_ads.dart';
-import '../ad_manager_screen/ad_screen/banner_300x50_size.dart';
-import '../ad_manager_screen/ad_screen/ios_ads_view.dart';
-import '../ad_manager_screen/ad_screen/android_ads_view.dart';
-
+import '../../utils/in_app_web_view.dart';
+import '../settings_screen/settings_provider/settings_provider.dart';
+import '../video_image_screen/gallery_screen.dart';
+import '../video_image_screen/video_preview.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
@@ -31,14 +32,7 @@ import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
-import '../../utils/botton_actions.dart';
 import '../events_data/event_repo.dart';
-import '../home_screen/home_provider/home_provider.dart';
-import '../home_screen/home_support_widgets/image_preview.dart';
-import '../../utils/in_app_web_view.dart';
-import '../settings_screen/settings_provider/settings_provider.dart';
-import '../video_image_screen/gallery_screen.dart';
-import '../video_image_screen/video_preview.dart';
 
 class IndividualPostView1 extends StatefulWidget {
   final String postId;
@@ -63,10 +57,8 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return false; // Exit app
-      },
+    return PopScope(
+      canPop: false,
       child: Scaffold(
         body: SafeArea(
           child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
@@ -526,7 +518,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
           ),
           recognizer: TapGestureRecognizer()
             ..onTap = () async {
-              print("sbhjhfjksdfnsdknf1111 $link");
+              log("Launching URL: $link");
               launchURL(Uri.parse(link.toString()));
             }));
 

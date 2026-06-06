@@ -1,10 +1,10 @@
 import 'dart:developer';
-import 'dart:io';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/settings_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_model/bookmarks_model.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
@@ -12,12 +12,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:hive/hive.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../services/webengage_event_tracks.dart';
-import '../../home_screen/home_provider/home_provider.dart';
 
 class SettingsProvider extends ChangeNotifier {
   List<BookmarksModel> getAllBookmarkList = [];
@@ -236,7 +233,6 @@ class SettingsProvider extends ChangeNotifier {
     log(deviceId.toString());
     final AdSize customAdSize = AdSize(width: 300, height: 50);
     bannerAd = BannerAd(
-      // adUnitId: "/22387492205,23277683599/id1631068092.Banner1.1747894331",
       adUnitId: context.read<HomeProvider>().adManagerBannerId,
       size: customAdSize,
       request: const AdManagerAdRequest(),

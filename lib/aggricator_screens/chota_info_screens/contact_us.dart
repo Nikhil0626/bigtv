@@ -1,8 +1,9 @@
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'dart:developer';
+
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../globel_keys/global_variables_data.dart';
@@ -10,7 +11,6 @@ import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
-import '../events_data/event_repo.dart';
 
 class ContactUs extends StatefulWidget {
   const ContactUs({super.key});
@@ -20,67 +20,34 @@ class ContactUs extends StatefulWidget {
 }
 
 class _ContactUsState extends State<ContactUs> {
-  // Function to launch email
-  // Future<void> _launchEmail(String email) async {
-  //   final Uri emailUri = Uri(
-  //     scheme: 'mailto',
-  //     path: email,
-  //   );
-  //   print("emailUri");
-  //   try {
-  //     if (await canLaunch(emailUri.toString())) {
-  //       await launch(emailUri.toString());
-  //     } else {
-  //       throw 'Could not launch email: $email';
-  //     }
-  //   } catch (e) {
-  //     print('Error launching email: $e');
-  //   }
-  // }
-  // Future<void> launchSingleEmail() async {
-  //   final Email email = Email(
-  //     to: ['siva143145@gmail.com'], // Change this to the recipient email
-  //     subject: 'Hello from Flutter!',
-  //     body: 'This is a test email sent from my Flutter app.',
-  //   );
-  //
-  //   await EmailLauncher.launch(email);
-  // }
-  Future<void> launchSingleEmail(email) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("loginId")??"";
-
+  Future<void> launchSingleEmail(String email) async {
     contactViaMail();
-    await EasyLauncher.email(
-        email: email,
-        subject: "",
-        body: "");
+    await EasyLauncher.email(email: email, subject: "", body: "");
   }
 
   Future<void> _launchPhone(String phone) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("loginId")??"";
-
     contactViaCall();
     final Uri phoneUri = Uri(
       scheme: 'tel',
       path: phone,
     );
     try {
-      if (await canLaunch(phoneUri.toString())) {
-        await launch(phoneUri.toString());
+      if (await canLaunchUrl(phoneUri)) {
+        await launchUrl(phoneUri);
       } else {
-        throw 'Could not launch phone: $phone';
+        log('Could not launch phone: $phone');
       }
     } catch (e) {
-      print('Error launching phone: $e');
+      log('Error launching phone: $e');
     }
   }
-@override
+
+  @override
   void initState() {
-  context.read<AuthenticationProvider>().sendEvent("ContactPage");
+    context.read<AuthenticationProvider>().sendEvent("ContactPage");
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,7 +69,7 @@ class _ContactUsState extends State<ContactUs> {
         ),
         title: Row(
           children: [
-             width(width: 4),
+            width(width: 4),
             Padding(
               padding: const EdgeInsets.only(top: 1),
               child: Text(
@@ -118,7 +85,7 @@ class _ContactUsState extends State<ContactUs> {
         ),
       ),
       body: Padding(
-        padding:  EdgeInsets.only(bottom: 16.0+ MediaQuery.of(context).padding.bottom,right: 16,top: 16,left: 16),
+        padding: EdgeInsets.only(bottom: 16.0 + MediaQuery.of(context).padding.bottom, right: 16, top: 16, left: 16),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -207,11 +174,11 @@ class ContactDetailTile extends StatelessWidget {
   final VoidCallback onEmailTap;
 
   const ContactDetailTile({
-    Key? key,
+    super.key,
     required this.title,
     required this.email,
     required this.onEmailTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -222,15 +189,15 @@ class ContactDetailTile extends StatelessWidget {
             text: title,
             style: fontStyle(fontSize: 14, fontWeight: FontWeight.normal),
           ),
-           WidgetSpan(
+          WidgetSpan(
             child: height(height: 5),
           ),
           WidgetSpan(
             child: GestureDetector(
               onTap: onEmailTap,
               child: Text(
-                textAlign: TextAlign.center,
                 email,
+                textAlign: TextAlign.center,
                 style: fontStyle(fontSize: 14, color: Colors.blue),
               ),
             ),
@@ -241,6 +208,5 @@ class ContactDetailTile extends StatelessWidget {
         ],
       ),
     );
-
   }
 }

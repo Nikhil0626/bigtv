@@ -1,7 +1,7 @@
-import 'dart:math';
-
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_view/login_background_view.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider/news_posts_provider.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
+import 'package:chotanews/features/home/presentation/providers/news_posts_provider.dart';
+import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -131,7 +131,6 @@ class _CommentSectionState extends State<CommentSection> {
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      // User Avatar
                                       CircleAvatar(
                                         child: Text(
                                           filteredComments[index].user.name == "" ? "U" : filteredComments[index].user.name.toString().split("").first.toString() ?? "U",
@@ -139,7 +138,6 @@ class _CommentSectionState extends State<CommentSection> {
                                         ),
                                       ),
                                       width(width: 10),
-                                      // Comment Content
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,12 +245,13 @@ class _CommentSectionState extends State<CommentSection> {
                             }
                           } else {
                             if (context.mounted) {
-                              Navigator.pushAndRemoveUntil(
+                              Navigator.pop(context);
+                              context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+                              Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => LoginBackgroundView(),
+                                  builder: (context) => const LoginBackgroundView(),
                                 ),
-                                (route) => false,
                               );
                             }
                           }

@@ -6,7 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../events_data/event_repo.dart';
 import '../../globel_keys/globel_keys.dart';
-import '../auth_screens/authentication_view/login_background_view.dart';
+import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'contest_model.dart';
 import 'contest_repo.dart';
 

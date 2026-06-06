@@ -1,7 +1,2 @@
 
 
-
-
-Map<String,String> ePaperIndividual = {};
-
-

@@ -1,14 +1,13 @@
+import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../utils/app_spaces.dart';
-import '../../utils/app_fonts.dart';
+
 import 'contest_provider.dart';
-import '../home_screen/home_provider/home_provider.dart';
 import '../individual_post_details/individual_post_view.dart';
 import 'contest_screen.dart';
-import '../contest_screen/contest_screen.dart';
 
 class JoinContestScreen extends StatefulWidget {
   const JoinContestScreen({super.key});
@@ -99,7 +98,6 @@ class _JoinContestScreenState extends State<JoinContestScreen> {
                               if(item.isParticipated == true ){
 
                               }else{
-                                // Navigator.pop(context);
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
@@ -109,7 +107,6 @@ class _JoinContestScreenState extends State<JoinContestScreen> {
                                     ),
                                   ),
                                 );
-                                // context.read<HomeProvider>().sendAdsDataSend(item.postId, item.contestName, item.contestImageUrl, true, "");
 
                               }
                             },

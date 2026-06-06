@@ -6,9 +6,6 @@ class BaseUrls {
   /// event states
   static const String eventUrl = "/events";
 
-  ///ENewsPapers
-  static const String getMainEPapers = "/enewspaper/first_pages";
-  static const String getSingleEPapers = "/enewspapers";
 
   /// Reels Apis
   static const String getAllReels = "/reels";
@@ -49,12 +46,10 @@ class BaseUrls {
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
   /// Python live apis
-  static const String ePaperBaseUrlAws = "https://aggregator.chotanews.com";
   static const String baseUrlAwsDev = "https://api.chotanews.com";
 
 
   /// Python Dev Apis
-  // static const String ePaperBaseUrlAws = "http://devaggregator.chotanews.com";
   // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
 
   ///Login login

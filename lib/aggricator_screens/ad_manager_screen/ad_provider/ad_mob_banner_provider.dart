@@ -1,6 +1,6 @@
 import 'dart:developer';
 import 'dart:io';
-import 'package:chotanews/aggricator_screens/home_screen/home_provider/home_provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';

@@ -1,5 +1,5 @@
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
-import 'package:chotanews/aggricator_screens/home_screen/home_view/home_view.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';

@@ -105,6 +105,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                         CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                       }
                     } catch (e) {
+                      log("Error sharing: $e");
                       CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                     }
                   }
@@ -209,10 +210,8 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                     return Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          setState(() {
-                            pollProvider.tempSelectedOptionId = option['id'];
-                            selectId = options.indexOf(option);
-                          });
+                          pollProvider.tempSelectedOptionId = option['id'];
+                          selectId = options.indexOf(option);
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -510,6 +509,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                         CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                       }
                     } catch (e) {
+                      log("Error sharing: $e");
                       CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
                     }
                   }
@@ -629,9 +629,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                     return Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          setState(() {
-                            pollProvider.tempSelectedOptionId = option['id'];
-                          });
+                          pollProvider.tempSelectedOptionId = option['id'];
                         },
                         child: Container(
                           height: 50,

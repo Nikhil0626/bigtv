@@ -3,7 +3,7 @@ import 'dart:io';
 
 
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:chotanews/aggricator_screens/auth_screens/authentication_provider/authentication_provider.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';

@@ -1,0 +1,1176 @@
+import 'dart:developer';
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/android_ads_view.dart';
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_screen.dart';
+import 'package:chotanews/aggricator_screens/rating_screen/rating_view/movie_reviews.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/gallery_screen.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_preview.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/features/home/presentation/widgets/full_standed_video_view.dart';
+import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_player.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/services/webengage_event_tracks.dart';
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
+import 'package:chotanews/utils/app_spaces.dart';
+import 'package:chotanews/utils/app_toasts.dart';
+import 'package:chotanews/utils/botton_actions.dart';
+import 'package:chotanews/utils/commant_screen.dart';
+import 'package:chotanews/utils/date_format.dart';
+import 'package:chotanews/utils/image_view_ads.dart';
+import 'package:chotanews/utils/in_app_web_view.dart';
+import 'package:chotanews/utils/keep_alive_page.dart';
+import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:lottie/lottie.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+
+import 'package:pdf/widgets.dart' as pw;
+import 'package:http/http.dart' as http;
+
+
+
+class MainScreenBytView extends StatefulWidget {
+  final article;
+  final pageController;
+  final int length;
+  final int index;
+  final String aiTagId;
+  final String aiTagName;
+  final bool isaiTags;
+  final bool isMainScreen;
+
+  const MainScreenBytView({
+    super.key,
+    required this.article,
+    this.isaiTags = false,
+    this.aiTagId = "",
+    this.aiTagName = "",
+    this.isMainScreen = false,
+    this.pageController,
+    this.length = 0,
+    this.index = 0,
+  });
+
+  @override
+  State<MainScreenBytView> createState() => _MainScreenBytViewState();
+}
+
+class _MainScreenBytViewState extends State<MainScreenBytView> {
+  ScreenshotController adsScreenshotController = ScreenshotController();
+  bool isSending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Debug log for AI tag videos
+    if (widget.isaiTags && widget.article['type'] == "Video") {
+      log("AI Tag Video Article: ${widget.article['id']}");
+      log("Video URL: ${widget.article['video_url']}");
+      log("Image URL: ${widget.article['image_url']}");
+      log("Full Image URL: ${_getImageUrl(widget.article['image_url'])}");
+    }
+  }
+
+  // Helper method to get proper image URL
+  String _getImageUrl(dynamic imageUrl) {
+    if (imageUrl == null) {
+      return "https://via.placeholder.com/400x300?text=No+Image";
+    }
+
+    String url = imageUrl.toString();
+
+    // If it's already a valid URL, return as is
+    if (url.startsWith('http')) {
+      return url;
+    }
+
+    // Handle different possible formats
+    if (url.startsWith('/')) {
+      return "https://migwp.chotanews.com$url";
+    }
+
+    // Default construction
+    return "https://migwp.chotanews.com/$url";
+  }
+
+  // Helper method to get proper video URL
+  String _getVideoUrl(dynamic videoUrl) {
+    if (videoUrl == null) {
+      return "";
+    }
+
+    String url = videoUrl.toString();
+
+    // If it's already a valid URL, return as is
+    if (url.startsWith('http')) {
+      return url;
+    }
+
+    // Handle different possible formats
+    if (url.startsWith('/')) {
+      return "https://migwp.chotanews.com$url";
+    }
+
+    // Default construction
+    return "https://migwp.chotanews.com/$url";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return (widget.index + 2 >
+        context.read<HomeProvider>().getAllPostList.length &&
+        context.read<HomeProvider>().isAiTagDataLoaded)
+        ? Card(
+      elevation: 4,
+      color: Colors.green[50],
+      shape:
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Lottie.asset("assets/svg/done.json",
+                  height: 200, width: 200),
+              height(
+                height: 10,
+              ),
+              Text(
+                "Your have Read the News",
+                style: homeScreenFontStyle(
+                    color: AppColors.textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+              height(
+                height: 20,
+              ),
+              Text(
+                "${context.read<HomeProvider>().getAllPostList.length}/${context.read<HomeProvider>().getAllPostList.length} Completed",
+                style: homeScreenFontStyle(
+                    color: Colors.green,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+      ),
+    )
+        : SizedBox(
+      height: MediaQuery.of(context).size.height,
+      width: MediaQuery.of(context).size.width,
+      child:
+      (widget.article['type'].toString() == "Standard" &&
+          widget.article['subType'].toString().toLowerCase() ==
+              "polls")
+          ? PollScreenDesign(
+        artical: widget.article,
+        index: widget.index,
+      )
+          : (widget.article['type'].toString() == "Standard" &&
+          widget.article['subType']
+              .toString()
+              .toLowerCase() ==
+              "reviews")
+          ? MovieRatings(
+        article: widget.article,
+      )
+          : InkWell(
+        onTap: () {
+          context.read<HomeProvider>().pageChange(
+              isValue: !context
+                  .read<HomeProvider>()
+                  .isBottomEnable);
+        },
+        child: Screenshot(
+          controller: adsScreenshotController,
+          child: widget.article['type'].toString() ==
+              "WebUrl"
+              ? Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: InAppWebViewScreen(
+              webUrl: context
+                  .read<HomeProvider>()
+                  .webUrl
+                  .toString(),
+              title: '',
+            ),
+          )
+              : widget.article['type'] == "GoogleAds"
+              ? AndroidAdsView(
+            article: widget.article,
+            index: widget.index,
+          )
+              : widget.article['type'] == "Reel"
+              ? FullStandardVideoView(
+            reelData: widget.article,
+          )
+              : (widget.article['type'] ==
+              "Image" &&
+              widget.article['subType'] !=
+                  "ImageAd")
+              ? Stack(
+            children: [
+              Image.network(
+                _getImageUrl(widget.article['image_url']),
+                width:
+                MediaQuery.of(context)
+                    .size
+                    .width,
+                height:
+                MediaQuery.of(context)
+                    .size
+                    .height,
+                fit: BoxFit.fill,
+              ),
+              Positioned(
+                bottom: 0,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(
+                          context)
+                          .padding
+                          .bottom +
+                          6),
+                  child: Container(
+                    height: 45.sp,
+                    color: Colors
+                        .transparent,
+                    width: MediaQuery.of(
+                        context)
+                        .size
+                        .width,
+                    child: Column(
+                      crossAxisAlignment:
+                      CrossAxisAlignment
+                          .start,
+                      mainAxisAlignment:
+                      MainAxisAlignment
+                          .spaceAround,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets
+                              .symmetric(
+                              horizontal:
+                              16.0
+                                  .sp,
+                              vertical:
+                              5.sp),
+                          child: Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment
+                                .spaceBetween,
+                            children: [
+                              Consumer<
+                                  SettingsProvider>(
+                                  builder: (_,
+                                      settingsProvider,
+                                      __) {
+                                    return BottomActions(
+                                      postType:
+                                      widget.article['subType'] ??
+                                          "",
+                                      icon: settingsProvider.isLikeList.contains(widget.article['id'].toString())
+                                          ? "assets/svg/like_full.svg"
+                                          : "assets/svg/like.svg",
+                                      label:
+                                      'லைக்',
+                                      isLike: settingsProvider
+                                          .isLikeList
+                                          .contains(widget.article['id'].toString()),
+                                      onTap:
+                                          () async {
+                                        log("Like");
+                                        settingsProvider
+                                            .isLikePost(widget.article);
+                                        EventRepo()
+                                            .addEvent({
+                                          "like":
+                                          !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                          "postId":
+                                          widget.article['id'].toString() ?? '000',
+                                          "createAt":
+                                          DateTime.now().toString(),
+                                          "postTitle":
+                                          widget.article['title'].toString()
+                                        }, "liked_article");
+                                      },
+                                    );
+                                  }),
+                              width(
+                                  width:
+                                  6),
+                              BottomActions(
+                                postType:
+                                widget.article['subType'].toString() ??
+                                    "",
+                                icon:
+                                "assets/svg/new_comment.svg",
+                                label:
+                                'கமெண்ட்',
+                                onTap:
+                                    () async {
+                                  if (context
+                                      .mounted) {
+                                    context
+                                        .read<AuthenticationProvider>()
+                                        .sendEvent("CommentPage");
+                                    showComments(
+                                        context,
+                                        widget.article['id'],
+                                        widget.article['title']);
+                                  }
+                                },
+                              ),
+                              const Spacer(),
+                              InkWell(
+                                onTap:
+                                    () async {
+                                  SharedPreferences
+                                  sp =
+                                  await SharedPreferences.getInstance();
+                                  String?
+                                  userId =
+                                  sp.getString("userId");
+                                  EventRepo()
+                                      .addEvent({
+                                    "share":
+                                    "news",
+                                    "postId": widget
+                                        .article['id']
+                                        .toString(),
+                                    "createAt":
+                                    DateTime.now().toString(),
+                                    "postTitle": widget
+                                        .article['title']
+                                        .toString()
+                                  }, "shared_article");
+
+                                  sendShareDetails(
+                                      userId,
+                                      widget.article['id'],
+                                      widget.article['content'].toString());
+
+                                  if (widget.article['type'] == "Standard" ||
+                                      widget.article['type'] ==
+                                          "Video" ||
+                                      widget.article['type'] ==
+                                          "Image") {
+                                    try {
+                                      final image =
+                                      await adsScreenshotController.capture(
+                                        pixelRatio: 2.0,
+                                      );
+                                      if (image !=
+                                          null) {
+                                        final directory = await getTemporaryDirectory();
+                                        final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                        final imageFile = File(imagePath);
+                                        await imageFile.writeAsBytes(image);
+
+                                        Share.shareXFiles([
+                                          XFile(imageFile.path)
+                                        ], text: widget.article['linkURLAndroid'].toString());
+                                      } else {
+                                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                      }
+                                    } catch (e) {
+                                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                    }
+                                  } else if (widget.article['type'] ==
+                                      "Gallery") {
+                                    createAndSharePdfs(
+                                        context,
+                                        widget.article);
+                                  }
+                                  EventRepo()
+                                      .addEvent({
+                                    "share":
+                                    "news",
+                                    "postId": widget
+                                        .article['id']
+                                        .toString(),
+                                    "createAt":
+                                    DateTime.now().toString(),
+                                    "postTitle": widget
+                                        .article['title']
+                                        .toString()
+                                  }, "shared_article");
+                                },
+                                child: isSending
+                                    ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                    : SvgPicture.asset(
+                                  "assets/svg/share.svg",
+                                  height: 20,
+                                  width: 20,
+                                  color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                ),
+                              ),
+                              width(
+                                  width:
+                                  20),
+                              Consumer<
+                                  HomeProvider>(
+                                  builder: (_,
+                                      homeProvide,
+                                      __) {
+                                    return SizedBox(
+                                      height:
+                                      24,
+                                      width:
+                                      24,
+                                      child:
+                                      InkWell(
+                                        onTap:
+                                            () async {
+                                          log("Refresh");
+
+                                          homeProvide.isReloadData();
+                                          if (widget.isaiTags) {
+                                            EventRepo().addEvent({
+                                              "refresh": false,
+                                              "createAt": DateTime.now().toString()
+                                            }, "reload_article");
+                                            homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
+                                                  (value) {
+                                                homeProvide.isReloadFalse();
+                                              },
+                                            );
+                                          } else {
+                                            homeProvide.getAllPostList = [];
+                                            homeProvide.getAllPost();
+                                            EventRepo().addEvent({
+                                              "refresh": true,
+                                              "createAt": DateTime.now().toString()
+                                            }, "reload_article");
+                                          }
+                                        },
+                                        child: context.read<HomeProvider>().isReload
+                                            ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                            : SvgPicture.asset(
+                                          "assets/svg/new_refresh.svg",
+                                          height: 22,
+                                          width: 22,
+                                          color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )
+              : (widget.article['type'] ==
+              "Image" &&
+              widget.article[
+              'subType'] ==
+                  "ImageAd")
+              ? InkWell(
+              onTap: () async {
+                SharedPreferences sp =
+                await SharedPreferences
+                    .getInstance();
+                bool isLogin = sp.getString(
+                    "loginType") !=
+                    "login"
+                    ? true
+                    : false;
+                if (isLogin) {
+                  CustomToast
+                      .showErrorToast(
+                      msg:
+                      "Your a guest user, Please Login to Join Contest");
+                } else {
+                  if (widget.article[
+                  'postUrl'] ==
+                      "" ||
+                      widget.article[
+                      'postUrl'] ==
+                          null) {
+                  } else {
+                    context.read<HomeProvider>().sendAdsDataSend(
+                        widget.article[
+                        'id'],
+                        widget.article[
+                        'title'],
+                        widget.article[
+                        'image_url'],
+                        false,
+                        widget.article[
+                        'postUrl']);
+                  }
+                }
+              },
+              child: widget
+                  .article[
+              'image_url']
+                  .length ==
+                  1
+                  ? CachedNetworkImage(
+                imageUrl: _getImageUrl(widget.article['image_url'][0]),
+                width:
+                MediaQuery.of(
+                    context)
+                    .size
+                    .width,
+                height:
+                MediaQuery.of(
+                    context)
+                    .size
+                    .height,
+                fit: BoxFit.fill,
+                placeholder:
+                    (context,
+                    url) =>
+                    Container(
+                      color: AppColors
+                          .borderColor
+                          .withOpacity(
+                          .2),
+                    ),
+                errorWidget:
+                    (context, url,
+                    error) =>
+                    Center(
+                      child: Icon(
+                        Icons.image,
+                        size: 100,
+                        color: Colors
+                            .grey
+                            .shade300,
+                      ),
+                    ),
+              )
+                  : ImagePostSlider(
+                imageUrl: widget
+                    .article[
+                'image_url'],
+              ))
+              : widget.article['type'] ==
+              "Gallery"
+              ? KeepAlivePage(
+            keepAlive: true,
+            child: Stack(
+              children: [
+                FullPageCarousel(
+                  isHome: true,
+                  imageUrls: widget
+                      .article[
+                  'gallery'] ??
+                      [],
+                  postDetails:
+                  widget
+                      .article,
+                ),
+              ],
+            ),
+          )
+              : Column(
+            children: [
+              Stack(
+                children: [
+                  /// IMAGE / VIDEO CONTAINER
+                  Container(
+                    height: widget.article[
+                    'subType'] ==
+                        "BigBlackStandard"
+                        ? MediaQuery.of(context)
+                        .size
+                        .height *
+                        .52
+                        : MediaQuery.of(context)
+                        .size
+                        .height *
+                        .33,
+                    child: widget.article['type'] ==
+                        "Video" &&
+                        widget.article['video_platform'] ==
+                            "Twitter"
+                        ? CustomVideoPlayer(
+                      url: _getVideoUrl(widget.article['video_url']),
+                      imageUrl: _getImageUrl(widget.article['image_url']),
+                    )
+                        : widget.article['type'] ==
+                        "Video"
+                        ? SizedBox(
+                      height: MediaQuery.of(context).size.height * .33,
+                      width: MediaQuery.of(context).size.width,
+                      child: VideoPreview(
+                        imageUrl: _getImageUrl(widget.article['image_url']),
+                        url: _getVideoUrl(widget.article['video_url']),
+                        isFoldable: false,
+                      ),
+                    )
+                        : InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ImagePreview(
+                              imageUrl: _getImageUrl(widget.article['image_url']),
+                              title: widget.article['title'],
+                            ),
+                          ),
+                        );
+                      },
+                      child: SizedBox(
+                        height: MediaQuery.of(context).size.height * .35,
+                        child: CachedNetworkImage(
+                          imageUrl: _getImageUrl(widget.article['image_url']),
+                          height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .65 : .4),
+                          width: MediaQuery.of(context).size.width,
+                          fit: BoxFit.fill,
+                          placeholder: (context, url) => Container(
+                            color: AppColors.borderColor.withOpacity(.2),
+                          ),
+                          errorWidget: (context, url, error) => Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  size: 50,
+                                  color: Colors.grey.shade400,
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  "Failed to load image",
+                                  style: TextStyle(
+                                    color: Colors.grey.shade400,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  /// SHOW BACK BUTTON ONLY FOR AI TAG POSTS
+                  if (widget
+                      .isaiTags)
+                    Positioned(
+                      top: MediaQuery.of(context)
+                          .padding
+                          .top +
+                          10,
+                      right: 16,
+                      child:
+                      GestureDetector(
+                        onTap:
+                            () {
+                          context
+                              .read<VideoProvider>()
+                              .pauseVideo();
+                          context
+                              .read<HomeProvider>()
+                              .setSelectedTagId(0);
+                          context
+                              .read<HomeProvider>()
+                              .aiTagDataLoaded(false);
+                          context
+                              .read<HomeProvider>()
+                              .pageChange(
+                            isValue: true,
+                          );
+                          context
+                              .read<HomeProvider>()
+                              .getAllPost();
+                        },
+                        child:
+                        Container(
+                          padding:
+                          EdgeInsets.all(7),
+                          decoration:
+                          BoxDecoration(
+                            color:
+                            Colors.black54,
+                            shape:
+                            BoxShape.circle,
+                          ),
+                          child:
+                          Icon(
+                            Icons
+                                .arrow_back,
+                            color:
+                            Colors.white,
+                            size:
+                            20,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              Container(
+                height: 4,
+                width:
+                MediaQuery.of(
+                    context)
+                    .size
+                    .width,
+                color: Color(
+                    0xFFED1C24),
+              ),
+              Expanded(
+                child: Container(
+                  width: MediaQuery.of(
+                      context)
+                      .size
+                      .width,
+                  color: widget.article[
+                  'subType'] ==
+                      "BigBlackStandard"
+                      ? Colors
+                      .black
+                      : (Theme.of(context).brightness ==
+                      Brightness
+                          .dark
+                      ? Colors
+                      .black
+                      : Colors
+                      .white),
+                  child: Padding(
+                    padding: const EdgeInsets
+                        .symmetric(
+                        horizontal:
+                        16.0),
+                    child: Column(
+                      mainAxisAlignment:
+                      MainAxisAlignment
+                          .start,
+                      crossAxisAlignment:
+                      CrossAxisAlignment
+                          .start,
+                      children: [
+                        /// Title and Action Icons in a Row with minimal spacing
+                        Padding(
+                          padding: const EdgeInsets
+                              .symmetric(
+                              vertical:
+                              8.0),
+                          child:
+                          Row(
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                            children: [
+                              /// Article Title - 22px font, fits in 2 lines
+                              Expanded(
+                                child: Text(
+                                  widget.article['title'] ?? "No Title",
+                                  style: homeScreenFontStyle(
+                                    color: AppColorTokens.primaryRed,
+                                    fontSize: 18.sp,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              /// Action Icons Container with minimal spacing
+                              Container(
+                                padding: const EdgeInsets.all(8.0),
+                                decoration: BoxDecoration(border: BoxBorder.all(color: Color(0xFFED1C24), width: 0.36), borderRadius: BorderRadius.all(Radius.circular(8))),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    /// Like Icon - Size 14
+                                    Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                      return InkWell(
+                                        onTap: () async {
+                                          log("Like");
+                                          settingsProvider.isLikePost(widget.article);
+                                          EventRepo().addEvent({
+                                            "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                            "postId": widget.article['id'].toString() ?? "000",
+                                            "createAt": DateTime.now().toString(),
+                                            "postTitle": widget.article['title'].toString()
+                                          }, "liked_article");
+                                        },
+                                        child: SvgPicture.asset(
+                                          settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                          height: 18,
+                                          width: 18,
+                                          color: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? AppColorTokens.primaryRed : AppColorTokens.primaryRed,
+                                        ),
+                                      );
+                                    }),
+                                    const SizedBox(width: 14),
+                                    /// Comment Icon - Size 14
+                                    InkWell(
+                                      onTap: () {
+                                        log("Comment...");
+                                        if (context.mounted) {
+                                          context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                          showComments(context, widget.article['id'], widget.article['title']);
+                                        }
+                                      },
+                                      child: SvgPicture.asset(
+                                        "assets/svg/new_comment.svg",
+                                        height: 18,
+                                        width: 18,
+                                        color: Color(0xFFED1C24),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    /// Share Icon - Size 14
+                                    InkWell(
+                                      onTap: () async {
+                                        SharedPreferences sp = await SharedPreferences.getInstance();
+                                        String? userId = sp.getString("userId");
+                                        sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
+                                        if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
+                                          try {
+                                            final image = await adsScreenshotController.capture(
+                                              pixelRatio: 2.0,
+                                            );
+                                            if (image != null) {
+                                              final directory = await getTemporaryDirectory();
+                                              final imagePath = '${directory.path}/${widget.article['id']}.png';
+                                              final imageFile = File(imagePath);
+                                              await imageFile.writeAsBytes(image);
+                                              Share.shareXFiles([
+                                                XFile(imageFile.path)
+                                              ], text: widget.article['linkURLAndroid'].toString());
+                                            } else {
+                                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
+                                            }
+                                          } catch (e) {
+                                            CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                          }
+                                        } else if (widget.article['type'] == "Gallery") {
+                                          createAndSharePdfs(context, widget.article);
+                                        }
+                                        EventRepo().addEvent({
+                                          "share": "news",
+                                          "postId": widget.article['id'].toString(),
+                                          "createAt": DateTime.now().toString(),
+                                          "postTitle": widget.article['title'].toString()
+                                        }, "shared_article");
+                                      },
+                                      child: isSending
+                                          ? const SizedBox(height: 14, width: 14, child: AppLoadingScreen())
+                                          : SvgPicture.asset(
+                                        "assets/svg/share.svg",
+                                        height: 18,
+                                        width: 18,
+                                        color: Color(0xFFED1C24),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 14),
+                                    /// Refresh Icon - Size 18
+                                    Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                      return InkWell(
+                                        onTap: () async {
+                                          log("Refresh");
+                                          EventRepo().addEvent({
+                                            "refresh": true,
+                                            "createAt": DateTime.now().toString()
+                                          }, "reload_article");
+                                          homeProvide.isReloadData();
+                                          if (homeProvide.isAiTagDataLoaded) {
+                                            homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
+                                            homeProvide.isReloadFalse();
+                                          } else {
+                                            homeProvide.getAllPostList = [];
+                                            homeProvide.getAllPost();
+                                          }
+                                        },
+                                        child: homeProvide.isReload
+                                            ? const SizedBox(height: 18, width: 18, child: AppLoadingScreen())
+                                            : SvgPicture.asset(
+                                          "assets/svg/new_refresh.svg",
+                                          height: 18,
+                                          width: 18,
+                                          color: Color(0xFFED1C24),
+                                        ),
+                                      );
+                                    }),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        height(
+                            height:
+                            0),
+                        SizedBox(
+                          height:
+                          10,
+                        ),
+                        Expanded(
+                          child: widget.article['subType'] ==
+                              "BulletPost"
+                              ? Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
+                                  ? Text(widget.article['content'],
+                                  style: homeScreenFontStyle(
+                                    color: AppColors.textColor,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 16.sp,
+                                  ))
+                                  : const SizedBox.shrink(),
+                              if (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty) height(height: 8),
+                              Expanded(
+                                child: ListView(
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  children: widget.article['bulletPoints'].map<Widget>((item) {
+                                    return Row(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "● ",
+                                          style: TextStyle(
+                                            fontSize: 14.sp,
+                                            color: AppColors.textColor.withOpacity(0.8),
+                                            height: 1,
+                                          ),
+                                        ),
+                                        width(width: 5.sp),
+                                        Expanded(
+                                          child: Text(
+                                            item,
+                                            strutStyle: StrutStyle(
+                                              fontSize: 16.sp,
+                                              height: 1,
+                                            ),
+                                            style: homeScreenFontStyle(
+                                              color: AppColors.textColor.withOpacity(0.8),
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 16.sp,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    );
+                                  }).toList(),
+                                ),
+                              ),
+                              RichText(
+                                text: TextSpan(
+                                  children: [
+                                    const TextSpan(text: "\n\n"),
+                                    WidgetSpan(
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          if (widget.article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
+                                          if (widget.article['isReporter'] == 1)
+                                            Text(
+                                              ' ${widget.article['reportedBy']} | ',
+                                              style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                            ),
+                                          Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                          Text(
+                                            " ${formatTimeDifference(widget.article['created'])}",
+                                            style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          )
+                              : RichText(
+                            text: TextSpan(
+                              text: '',
+                              children: [
+                                ..._parseText(context, widget.article['content'], widget.article['links'], widget.article),
+                                if (widget.article['isStickyPost'] != 1)
+                                  TextSpan(
+                                    children: [
+                                      const TextSpan(text: "\n"),
+                                      WidgetSpan(
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            if (widget.article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
+                                            if (widget.article['isReporter'] == 1)
+                                              Text(
+                                                ' ${widget.article['reportedBy']} | ',
+                                                style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                              ),
+                                            Icon(Icons.access_time, size: 14, color: Colors.grey),
+                                            Text(
+                                              " ${formatTimeDifference(widget.article['created'])}",
+                                              style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> createAndSharePdfs(BuildContext context, article) async {
+    isSending = true;
+    setState(() {});
+
+    List imageData = article['gallery'];
+    try {
+      final pdf = pw.Document();
+
+      for (var item in imageData) {
+        String imageUrl = item['Url'].toString() ?? '';
+        log("Pdf $imageUrl");
+        if (imageUrl.isNotEmpty) {
+          final response = await http.get(Uri.parse(imageUrl));
+
+          if (response.statusCode == 200) {
+            final Uint8List imageData = response.bodyBytes;
+            final pdfImage = pw.MemoryImage(imageData);
+
+            pdf.addPage(
+              pw.Page(
+                build: (pw.Context context) {
+                  return pw.FullPage(
+                    ignoreMargins: true,
+                    child: pw.Image(
+                      pdfImage,
+                      fit: pw.BoxFit.contain,
+                    ),
+                  );
+                },
+              ),
+            );
+          } else {
+            log("Failed to load image: $imageUrl");
+          }
+        }
+      }
+
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath = "${directory.path}/${article['id']}.pdf";
+      final file = File(filePath);
+      await file.writeAsBytes(await pdf.save());
+
+      log("PDF saved at: $filePath");
+
+      await Share.shareXFiles([XFile(filePath)],
+          text: "https://apps.signitivessoft.com/individualPage");
+      isSending = false;
+      setState(() {});
+    } catch (e) {
+      isSending = false;
+      setState(() {});
+      log("Error: $e");
+    }
+  }
+
+  List<TextSpan> _parseText(BuildContext context, String text, links, article) {
+    RegExp linkRegExp =
+    RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
+    List<TextSpan> spans = [];
+
+    text.splitMapJoin(linkRegExp, onMatch: (match) {
+      String link = match.group(0)!;
+
+      if (link.contains('link1') && links != null && links.isNotEmpty) {
+        link = links[0]['value'].toString();
+        log("jkhdsbfrefkjfksbfke  $link");
+      } else if (link.contains('link2') && links != null && links.length > 1) {
+        link = links[1]['value'].toString();
+      } else if (link.contains('link3') && links != null && links.length > 2) {
+        link = links[2]['value'].toString();
+      } else {
+        link = link;
+      }
+      spans.add(TextSpan(
+        text: match
+            .group(0)
+            .toString()
+            .replaceFirst('<link1>', '')
+            .replaceFirst('</link1>', '')
+            .replaceFirst('<link2>', '')
+            .replaceFirst('</link2>', '')
+            .replaceFirst('<link3>', '')
+            .replaceFirst('</link3>', ''),
+        style: homeScreenFontStyle(
+          color: article['subType'] == "BigBlackStandard"
+              ? Colors.white
+              : Colors.blue,
+          fontWeight: FontWeight.w600,
+          fontSize: 16.sp,
+        ),
+        recognizer: TapGestureRecognizer()
+          ..onTap = () async {
+            print("sbhjhfjksdfnsdknf1111 $link");
+            launchURL(Uri.parse(link.toString()));
+          },
+      ));
+
+      return "";
+    }, onNonMatch: (nonMatch) {
+      spans.add(TextSpan(
+          text: nonMatch,
+          style: homeScreenFontStyle(
+            color: widget.article['subType'] == "BigBlackStandard"
+                ? Colors.white
+                : AppColors.textColor.withOpacity(0.8),
+            fontWeight: FontWeight.w600,
+            fontSize: 17.sp,
+          )));
+      return "";
+    });
+
+    return spans;
+  }
+
+  Future<void> launchURL(Uri uri) async {
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      throw 'Could not launch ${uri.path}';
+    }
+  }
+}

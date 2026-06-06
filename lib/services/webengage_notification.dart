@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
-import '../aggricator_screens/home_screen/home_provider/home_provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import '../globel_keys/globel_keys.dart';
 
 WebEngagePlugin _webEngagePlugin = WebEngagePlugin();

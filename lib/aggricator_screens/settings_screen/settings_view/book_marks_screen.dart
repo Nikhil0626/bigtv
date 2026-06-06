@@ -1,8 +1,11 @@
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/e_papers_screens/paper_models/single_paper_model.dart';
+import 'package:chotanews/aggricator_screens/individual_post_details/individual_post_view.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:chotanews/features/reels/presentation/widgets/individual_reel_post.dart';
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -10,11 +13,6 @@ import 'package:chotanews/utils/date_format.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import '../../../utils/app_colors.dart';
-import '../../../utils/app_fonts.dart';
-import '../../e_papers_screens/paper_view/papers_screen_preview.dart';
-import '../../individual_post_details/individual_post_view.dart';
-import '../../reels_screens/reels_view/individule_reel_post.dart';
 
 class SavedArticles extends StatefulWidget {
   const SavedArticles({super.key});
@@ -72,17 +70,6 @@ class _SavedArticlesState extends State<SavedArticles> {
                                         builder: (context) => ReelsCardView(
                                               postId: article.postId.toString(),
                                             )));
-                              } else if (article.type.toString() == "Epapers") {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PapersScreenPreview(
-                                        isBookmarked: article.isBookmarked ? 1 : 0,
-                                        postId: article.postId.toString(),
-                                        name: "E-Paper",
-                                        imageUrls: [PageData(id: article.postId, imageUrl: article.imageUrl.toString(), pageNumber: 1)],
-                                      ),
-                                    ));
                               } else {
                                 Navigator.push(
                                     context,
@@ -125,7 +112,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                                   height: 80,
                                                   fit: BoxFit.fill,
                                                   placeholder: (context, url) => Container(
-                                                        color: AppColors.borderColor.withOpacity(.2),
+                                                        color: AppColors.borderColor.withAlpha(2),
                                                       ),
                                                   errorWidget: (context, url, error) {
                                                     log(error.toString());

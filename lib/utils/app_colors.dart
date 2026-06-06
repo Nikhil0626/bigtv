@@ -21,7 +21,6 @@ class AppColors {
   static Color get textColor => _ctx?.textColor ?? const Color(0xFF111111);
   static Color get settingsPageTextColor => _ctx?.textColor ?? const Color(0xFF111111);
   static Color get settingsPageIconColor => _ctx?.iconTheme.color ?? const Color(0xFF5E5E5E);
-  static Color get ePaperCardColor => _ctx?.cardColor ?? const Color(0xFFFAFAFA);
   static Color get loginBgColor => _ctx?.primaryColor ?? const Color(0xFFF40000);
   static Color get loginNumberBg => _ctx?.cardColor ?? const Color(0xFFFAFAFA);
   static Color get ratingColor => const Color(0xFFFFD700);

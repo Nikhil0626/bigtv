@@ -1,18 +1,20 @@
+import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/banner_300x50_size.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/home/presentation/screens/home_view.dart';
+import 'package:chotanews/utils/app_colors.dart';
+import 'package:chotanews/utils/app_enums.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
+import 'package:chotanews/utils/app_spaces.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../utils/app_colors.dart';
-import '../../../../utils/app_enums.dart';
-import '../../../../utils/app_fonts.dart';
-import '../../../../utils/app_spaces.dart';
-import '../../../../utils/app_toasts.dart';
-import '../../../ad_manager_screen/ad_screen/banner_300x50_size.dart';
-import '../../../auth_screens/authentication_model/location_model.dart';
-import '../../../auth_screens/authentication_provider/authentication_provider.dart';
-import '../../../home_screen/home_view/home_view.dart';
-import '../../settings_provider/settings_provider.dart';
+
+
+
 
 class UpdateRegionsView extends StatefulWidget {
   const UpdateRegionsView({super.key});
@@ -36,7 +38,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
         bottomNavigationBar: Padding(
           padding: EdgeInsets.all(25.w),
           child: InkWell(
-            onTap: authenticationProvider.selectedLocations.length >= 1 && authenticationProvider.selectedLocations.length <= 5
+            onTap: authenticationProvider.selectedLocations.isNotEmpty && authenticationProvider.selectedLocations.length <= 5
                 ? () {
                     authenticationProvider
                         .sendLocationsToServer(
@@ -64,7 +66,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
               height: 35.h,
               decoration: BoxDecoration(
                 color:
-                    (authenticationProvider.selectedLocations.length >= 1 && authenticationProvider.selectedLocations.length <= 5) ? AppColors.appButtonColor : AppColors.bodyTextColor.withOpacity(.2),
+                    (authenticationProvider.selectedLocations.isNotEmpty && authenticationProvider.selectedLocations.length <= 5) ? AppColors.appButtonColor : AppColors.bodyTextColor.withOpacity(.2),
                 borderRadius: BorderRadius.all(Radius.circular(8.r)),
               ),
               child: Center(
@@ -90,26 +92,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                     Expanded(
                       child: ListView(
                         children: [
-                          // Padding(
-                          //   padding: const EdgeInsets.symmetric(vertical: 20),
-                          //   child: Container(
-                          //     padding: EdgeInsets.symmetric(horizontal: 10),
-                          //     decoration: BoxDecoration(
-                          //       color: Colors.grey[200],
-                          //       borderRadius: BorderRadius.circular(6),
-                          //     ),
-                          //     child: TextField(
-                          //       decoration: InputDecoration(
-                          //         icon: Icon(Icons.search, color: Colors.grey),
-                          //         hintText: 'Search',
-                          //         border: InputBorder.none,
-                          //       ),
-                          //       onChanged: (value) {
-                          //         // Implement search functionality if needed
-                          //       },
-                          //     ),
-                          //   ),
-                          // ),
+
                           height(height: 12.h),
                           Align(
                             alignment: Alignment.centerLeft,
@@ -118,17 +101,6 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                                 text: "Districts to be selected ",
                                 style: newAppFont(color: Colors.grey.shade500),
                                 children: [
-                                  // TextSpan(
-                                  //   text: "0${authenticationProvider.selectedLocations.length}",
-                                  //   style: newAppFont(color: AppColors.appButtonColor, fontWeight: FontWeight.w500),
-                                  // ),
-                                  // TextSpan(
-                                  //   text: "/05\n",
-                                  //   style: newAppFont(
-                                  //     color: Colors.grey.shade500,
-                                  //     fontWeight: FontWeight.w600,
-                                  //   ),
-                                  // ),
                                   if (authenticationProvider.selectedLocations.length > 5)
                                     TextSpan(text: "You Have Selected Maximum Number of Districts", style: newAppFont(fontSize: 10, color: Colors.red, fontWeight: FontWeight.w400)),
                                 ],
@@ -141,37 +113,16 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                             children: authenticationProvider.states!.entries.map((entry) {
                               int stateId = entry.key;
                               String stateName = entry.value;
-
-                              List<LocationModel> districts = authenticationProvider.getAllLocationList.where((loc) => loc.stateId.toString() == stateId.toString()).toList();
-
-                              return Container(
-                                // decoration: BoxDecoration(
-                                //   border: Border.all(color: Colors.grey.shade300),
-                                //   borderRadius: BorderRadius.circular(4),
-                                // ),
-                                child: CheckboxListTile(
-                                  // tilePadding: EdgeInsets.symmetric(horizontal: 16),
-                                  title: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Text(stateName,
-                                          style: newAppFont(
-                                            fontWeight: FontWeight.w600,
-                                          )),
-                                      // width(width: 10),
-                                      // Text("(${districts.length})",
-                                      //     style: newAppFont(
-                                      //         fontWeight: FontWeight.w300,
-                                      //         color: AppColors.iconColors
-                                      //     )),
-                                    ],
-                                  ),
-                                  value: authenticationProvider.selectedLocations.contains(stateName),
-                                  activeColor: AppColors.appButtonColor,
-                                  onChanged: (bool? selected) {
-                                    authenticationProvider.addToSelectedLocations(stateName);
-                                  },
-                                ),
+                              return CheckboxListTile(
+                                title: Text(stateName,
+                                    style: newAppFont(
+                                      fontWeight: FontWeight.w600,
+                                    )),
+                                value: authenticationProvider.selectedLocations.contains(stateName),
+                                activeColor: AppColors.appButtonColor,
+                                onChanged: (bool? selected) {
+                                  authenticationProvider.addToSelectedLocations(stateName);
+                                },
                               );
                             }).toList(),
                           ),

@@ -1,9 +1,9 @@
 import 'dart:developer';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
-import '../home_screen/home_provider/home_provider.dart';
 import 'video_provider.dart';
 
 class CustomVideoPlayer extends StatefulWidget {
@@ -38,7 +38,6 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
   @override
   void didUpdateWidget(CustomVideoPlayer oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // If the URL changed, reinitialize the video
     if (oldWidget.url != widget.url) {
       _initializeVideo();
     }
@@ -119,18 +118,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
                   child: VideoPlayer(videoProvider.controller!),
                 ),
               ),
-              // if (videoProvider.controller?.value.isBuffering == true)
-              //   Container(
-              //     color: Colors.black54,
-              //     height: 330,
-              //     width: MediaQuery.of(context).size.width,
-              //     child: const Center(
-              //       child: CircularProgressIndicator(
-              //         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-              //       ),
-              //     ),
-              //   ),
-              /// Play / Pause button overlay
+
               if (!videoProvider.isPlaying)
                 IconButton(
                   icon: SvgPicture.asset(

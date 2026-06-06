@@ -1,12 +1,12 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/globel_keys/globel_keys.dart';
+import 'package:chotanews/utils/app_enums.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
-import '../../../globel_keys/globel_keys.dart';
-import '../../../utils/app_enums.dart';
-import '../../home_screen/home_provider/home_provider.dart';
 
 class Banner300x50Size extends StatefulWidget {
   const Banner300x50Size({super.key});

@@ -1,69 +1,4 @@
-// import 'dart:async';
-// import 'dart:convert';
-// import 'dart:developer';
-//
-// import 'package:dio/dio.dart';
-//
-// import '../utils/app_enums.dart';
-// import 'base_urls.dart';
-//
-// class BaseService {
-//   Dio dio = Dio();
-//
-//   Future<dynamic> makeRequest<T>({
-//     required String url,
-//     String? baseUrl,
-//     String? token1,
-//     dynamic body,
-//     Options? options,
-//     String? contentType,
-//     Map<String, dynamic>? queryParameters,
-//     RequestType method = RequestType.get,
-//     CancelToken? token,
-//     Map<String, dynamic>? headers,
-//   }) async {
-//     dio.options.baseUrl = baseUrl ?? BaseUrls.baseUrl;
-//     dio.options.connectTimeout = const Duration(seconds:60);
-//     dio.options.receiveTimeout = const Duration(seconds: 60);
-//     dio.options.contentType = contentType ?? 'application/json';
-//     // dio.options.headers = {
-//     //   "Authorization": token1 != null ? "Bearer $token1" : "",
-//     //   ...?headers,
-//     // };
-//
-//     Response response;
-//
-//     try {
-//       switch (method) {
-//         case RequestType.get:
-//           final uri = Uri.parse(dio.options.baseUrl + url).replace(queryParameters: queryParameters);
-//           response = await dio.getUri(uri, cancelToken: token);
-//           break;
-//         case RequestType.put:
-//           response = await dio.put(url, options: options, data: json.encode(body));
-//           break;
-//         case RequestType.post:
-//           response = await dio.post(
-//             url,
-//             options: options,
-//             queryParameters: queryParameters,
-//             data: body is FormData ? body : json.encode(body),
-//           );
-//           break;
-//         case RequestType.delete:
-//           response = await dio.delete(url, options: options, queryParameters: queryParameters, data: json.encode(body));
-//           break;
-//       }
-//       return response;
-//     } on DioException catch (e) {
-//       log('Request failed: ${e.response?.statusCode} - ${e.message}');
-//       throw e;
-//     } catch (e) {
-//       log('Unexpected error: $e');
-//       throw e;
-//     }
-//   }
-// }
+
 
 
 import 'dart:async';
@@ -93,7 +28,6 @@ class BaseService {
         return handler.next(response); // Continue with the response
       },
       onError: (DioException e, ErrorInterceptorHandler handler) {
-        // Log the error details
         log('hello siva ${e.toString()}');
         log('hello siva111 ${handler.toString()}');
         log('Error[${e.response?.statusCode}] => PATH: ${e.requestOptions.uri}');
@@ -129,7 +63,6 @@ class BaseService {
     try {
       switch (method) {
         case RequestType.get:
-          // Stringify all query parameters because Uri.replace requires Strings
           final Map<String, dynamic>? stringifiedParams = queryParameters?.map((key, value) => MapEntry(key, value.toString()));
           final uri = Uri.parse(dio.options.baseUrl + url).replace(queryParameters: stringifiedParams);
           response = await dio.getUri(uri, cancelToken: token);

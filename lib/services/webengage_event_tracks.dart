@@ -86,16 +86,6 @@ void sandFlipData(userId,count, int isTab,){
 }
 
 
-void districtLocationUpdate(locationName,locationId,userId){
-
-  // WebEngagePlugin.trackEvent('district_location', {
-  //   "device_id": "${GlobalVariables().deviceId}",
-  //   "location_name": locationName??"",
-  //   "location_id": "${locationId??""}",
-  //   "user_id": mainNavigatorKey.currentContext!.read<FlipProvider>().userId??"",
-  // });
-}
-
 
 void contactViaMail() async{
   SharedPreferences sp = await SharedPreferences.getInstance();

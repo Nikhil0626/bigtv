@@ -2,6 +2,11 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
+import 'package:chotanews/services/webengage_event_tracks.dart';
+import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
@@ -11,11 +16,6 @@ import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../services/webengage_event_tracks.dart';
-import '../../../utils/app_colors.dart';
-import '../../events_data/event_repo.dart';
-import '../../home_screen/home_provider/home_provider.dart';
-import '../../home_screen/home_support_widgets/image_preview.dart';
 import '../rating_provider/rating_provider.dart';
 import 'list_reviews.dart';
 
@@ -88,38 +88,6 @@ class _MovieRatingsState extends State<MovieRatings> {
                   ),
                 ),
               ),
-              // Positioned(
-              //   top: 12,
-              //   right: 14,
-              //   // child: Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-              //   //   return InkWell(
-              //   //     onTap: () async {
-              //   //       log("Refresh");
-              //   //       EventRepo().addEvent({"refresh": true, "createAt": DateTime.now().toString()}, "reload_article");
-              //   //       homeProvide.isReloadData();
-              //   //       if (homeProvide.isAiTagDataLoaded) {
-              //   //         homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
-              //   //       } else {
-              //   //         homeProvide.getAllPostList = [];
-              //   //         homeProvide.getAllPost();
-              //   //         homeProvide.pageChange(isValue: true);
-              //   //       }
-              //   //     },
-              //   //     child: Container(
-              //   //       width: 38,
-              //   //       padding: EdgeInsets.all(7),
-              //   //       decoration: BoxDecoration(
-              //   //         color: (homeProvide.isBookMark.contains(widget.article['id'].toString()) || widget.article['isBookmarked'] == 1)
-              //   //             ? AppColors.appButtonColor
-              //   //             : Colors.black54,
-              //   //         shape: BoxShape.circle,
-              //   //       ),
-              //   //       child: SvgPicture.asset("assets/svg/new_refresh.svg",
-              //   //           height: 20, width: 20, color: widget.article['subType'] != "BigBlackStandard" ? Colors.white : Colors.grey),
-              //   //     ),
-              //   //   );
-              //   // }),
-              // ),
             ],
           ),
         ),
