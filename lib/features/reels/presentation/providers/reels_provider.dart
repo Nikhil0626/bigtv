@@ -24,7 +24,6 @@ class ReelsProviders extends ChangeNotifier {
 
   Future getAllReels({String postId = "0"}) async {
     reelsLoading = true;
-    isBookMark = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString('userId');
     try {
@@ -43,10 +42,6 @@ class ReelsProviders extends ChangeNotifier {
             )
             .toList();
       }
-      isBookMark = getAllReelsList
-          .where((e) => e.isBookmarked == 1)
-          .map((e) => e.id.toString())
-          .toList();
     } on DioException catch (e, st) {
       log("dio error --- ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {

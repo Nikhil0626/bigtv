@@ -17,6 +17,7 @@ import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/s
 
 
 
+import '../core/providers/web_view_provider.dart';
 import '../core/theme/theme_provider.dart';
 
 class AppProviders {
@@ -35,5 +36,6 @@ class AppProviders {
     ChangeNotifierProvider<AdMobBannerProvider>(create: (_) => AdMobBannerProvider()),
     ChangeNotifierProvider<VideoProvider>(create: (_) => VideoProvider()),
     ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
+    ChangeNotifierProvider<WebViewProvider>(create: (_) => WebViewProvider()),
   ];
 }

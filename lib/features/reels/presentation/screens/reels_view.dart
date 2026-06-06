@@ -34,10 +34,10 @@ class ReelsScreen extends StatefulWidget {
   const ReelsScreen({super.key});
 
   @override
-  _ReelsScreenState createState() => _ReelsScreenState();
+  ReelsScreenState createState() => ReelsScreenState();
 }
 
-class _ReelsScreenState extends State<ReelsScreen> {
+class ReelsScreenState extends State<ReelsScreen> {
   YoutubePlayerController? _controller;
   List<ReelsModel> removedCards = [];
   Offset slideOffset = Offset.zero;
@@ -116,7 +116,7 @@ class EachReelCard extends StatefulWidget {
   final ReelsProviders reelsProvider;
   final int index;
 
-  EachReelCard({super.key, required this.reel, required this.reelsProvider, required this.index});
+  const EachReelCard({super.key, required this.reel, required this.reelsProvider, required this.index});
 
   @override
   State<EachReelCard> createState() => _EachReelCardState();
@@ -148,7 +148,7 @@ class _EachReelCardState extends State<EachReelCard> {
             borderRadius: BorderRadius.circular(20.r),
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
+                color: Colors.grey.withValues(alpha: 0.2),
                 blurRadius: 6,
                 spreadRadius: 2,
                 offset: Offset(0, 3),
@@ -173,7 +173,7 @@ class _EachReelCardState extends State<EachReelCard> {
                           placeholder: (context, url) => Container(
                             height: MediaQuery.of(context).size.height * .52,
                             width: MediaQuery.of(context).size.width,
-                            color: AppColors.borderColor.withOpacity(.2),
+                            color: AppColors.borderColor.withValues(alpha: .2),
                           ),
                           errorWidget: (context, url, error) => Center(
                             child: Icon(
@@ -223,7 +223,7 @@ class _EachReelCardState extends State<EachReelCard> {
                                   imageUrl: widget.reel.publisherImage,
                                   fit: BoxFit.fill,
                                   placeholder: (context, url) => Container(
-                                    color: AppColors.borderColor.withOpacity(.2),
+                                    color: AppColors.borderColor.withValues(alpha: .2),
                                   ),
                                   errorWidget: (context, url, error) => Center(
                                     child: Icon(

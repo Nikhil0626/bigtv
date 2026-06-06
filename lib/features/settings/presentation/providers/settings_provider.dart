@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/settings_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_model/bookmarks_model.dart';
@@ -48,43 +47,14 @@ class SettingsProvider extends ChangeNotifier {
         log(response.data.toString());
       }
     } catch (e, st) {
-      log("kjsbdcjksjksdhbcfk${e.toString()} -- ${st}");
+      log("kjsbdcjksjksdhbcfk${e.toString()} -- $st");
     } finally {
       isBookMarkLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> saveBookmarks(String postId, context, isBookMark) async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? userId = preferences.getString("userId");
-    String? loginType = preferences.getString("loginType");
 
-    if (loginType == "login") {
-      Map<String, dynamic> body = {
-        "post_id": postId,
-        "user_id": userId,
-        "bookmark": isBookMark
-      };
-      try {
-        log("body $body");
-        Response response = await SettingsRepo().saveBookMarks(body);
-        if (response.statusCode == 200) {
-          if (isBookMark == 1) {
-            // CustomToast.showSuccessToast(msg: "Bookmark added",);
-          } else {
-            // CustomToast.showErrorToast(msg: "Bookmark removed", );
-          }
-        }
-      } catch (e) {
-        log("Error: $e");
-      } finally {
-        notifyListeners();
-      }
-    } else {
-      Provider.of<AuthenticationProvider>(context, listen: false).setLogOutStatus(context, false);
-    }
-  }
 
   Future<void> postLike(String postId, isLike) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
@@ -115,7 +85,7 @@ class SettingsProvider extends ChangeNotifier {
     if (!isLikeList.contains(val['id'].toString())) {
       isLikeList.add(val['id'].toString());
       postLike(val['id'].toString(), true);
-      sendLikeDetails(userId??0, val, true, val['title'].toString());
+      sendLikeDetails(userId, val, true, val['title'].toString());
       log(isLikeList.toString());
     } else {
       postLike(val['id'].toString(), false);
@@ -171,7 +141,7 @@ class SettingsProvider extends ChangeNotifier {
       "user_id": userId,
       "user_rating": rating,
       "comment_ids": selectedCategoryIds,
-      "custom_comment": feedbackController.text ?? ""
+      "custom_comment": feedbackController.text
     };
 
     log(body.toString());

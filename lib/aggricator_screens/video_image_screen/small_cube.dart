@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_carousel_slider/carousel_slider.dart';
-import 'package:flutter_carousel_slider/carousel_slider_transforms.dart';
 
 class SmallCube extends StatefulWidget {
+  const SmallCube({super.key});
+
   @override
-  _SmallCubeState createState() => _SmallCubeState();
+  SmallCubeState createState() => SmallCubeState();
 }
 
-class _SmallCubeState extends State<SmallCube> {
+class SmallCubeState extends State<SmallCube> {
   final List<Color> colors = [
     Colors.red,
     Colors.orange,

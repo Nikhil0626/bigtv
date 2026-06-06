@@ -112,7 +112,7 @@ class _SavedArticlesState extends State<SavedArticles> {
                                                   height: 80,
                                                   fit: BoxFit.fill,
                                                   placeholder: (context, url) => Container(
-                                                        color: AppColors.borderColor.withOpacity(.2),
+                                                        color: AppColors.borderColor.withValues(alpha: .2),
                                                       ),
                                                   errorWidget: (context, url, error) {
                                                     log(error.toString());

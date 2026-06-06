@@ -8,7 +8,7 @@ extension ThemeExtensions on BuildContext {
 
   // Semantic Shortcuts based on our design system
   Color get primaryColor => colors.primary;
-  Color get backgroundColor => colors.background;
+  Color get backgroundColor => colors.surface;
   Color get surfaceColor => colors.surface;
   Color get textColor => colors.onSurface;
   Color get subtitleColor => theme.brightness == Brightness.light ? const Color(0xFF6B7280) : const Color(0xFF9CA3AF);

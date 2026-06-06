@@ -24,16 +24,16 @@ Future<void> requestManageStoragePermission() async {
   if (Platform.isAndroid) {
     var status = await Permission.manageExternalStorage.status;
     if (status.isGranted) {
-      print("✅ Manage External Storage permission already granted");
+      log("✅ Manage External Storage permission already granted");
     } else if (status.isDenied) {
       var result = await Permission.manageExternalStorage.request();
       if (result.isGranted) {
-        print("✅ Manage External Storage permission granted");
+        log("✅ Manage External Storage permission granted");
       } else {
         await Permission.manageExternalStorage.request();
       }
     } else if (status.isPermanentlyDenied) {
-      print("⚠️ Manage External Storage permission permanently denied. Opening settings...");
+      log("⚠️ Manage External Storage permission permanently denied. Opening settings...");
       await openAppSettings();
     }
   }
@@ -44,25 +44,25 @@ Future<void> requestStoragePermission() async {
     var status = await Permission.storage.status;
 
     if (status.isGranted) {
-      print("✅ Storage permission already granted");
+      log("✅ Storage permission already granted");
     } else if (status.isDenied) {
       var result = await Permission.storage.request();
       if (result.isGranted) {
-        print("✅ Storage permission granted");
+        log("✅ Storage permission granted");
       } else {
-        print("❌ Storage permission denied");
+        log("❌ Storage permission denied");
       }
     } else if (status.isPermanentlyDenied) {
-      print("⚠️ Storage permission permanently denied. Opening settings...");
+      log("⚠️ Storage permission permanently denied. Opening settings...");
       await openAppSettings();
     }
   }
 }
 
 Future<void> checkForUpdate() async {
-  PackageInfo _packageInfo = PackageInfo();
+  PackageInfo packageInfo = PackageInfo();
   final info = await PackageManager.getPackageInfo();
-  _packageInfo = info;
+  packageInfo = info;
   if (Platform.isAndroid) {
     try {
       InAppUpdateManager manager = InAppUpdateManager();
@@ -88,7 +88,6 @@ Future<void> checkForUpdate() async {
           debugPrint("Starting flexible update...");
           String? msg = await manager.startAnUpdate(type: AppUpdateType.flexible);
           debugPrint(msg ?? '');
-          // Optionally call completeFlexibleUpdate() after download finishes
         } else {
           debugPrint("Update available but no method allowed");
         }
@@ -100,7 +99,7 @@ Future<void> checkForUpdate() async {
     }
   } else if (Platform.isIOS) {
     try {
-      VersionInfo? versionInfo = await UpgradeVersion.getiOSStoreVersion(packageInfo: _packageInfo, regionCode: "US");
+      VersionInfo? versionInfo = await UpgradeVersion.getiOSStoreVersion(packageInfo: packageInfo, regionCode: "US");
 
       debugPrint("iOS Store Info: ${versionInfo.toJson()}");
 
@@ -127,7 +126,7 @@ Future<void> initPlugin() async {
   }
 
   final uuid = await AppTrackingTransparency.getAdvertisingIdentifier();
-  print("UUID: $uuid");
+  log("UUID: $uuid");
 }
 
 Future<void> requestLocationPermission() async {
@@ -136,14 +135,14 @@ Future<void> requestLocationPermission() async {
   if (permission == LocationPermission.denied) {
     permission = await Geolocator.requestPermission();
     if (permission == LocationPermission.deniedForever) {
-      print('Location permissions are permanently denied.');
+      log('Location permissions are permanently denied.');
       return;
     }
   }
 
   if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
     Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    print("Location: ${position.latitude}, ${position.longitude}");
+    log("Location: ${position.latitude}, ${position.longitude}");
     getAddressFromLatLng(position.latitude, position.longitude);
   }
 }
@@ -154,7 +153,7 @@ Future<void> getAddressFromLatLng(double latitude, double longitude) async {
     Placemark place = placemarks[0];
     sendLiveLocationDetails(place);
   } catch (e) {
-    print(e);
+    log("$e");
   }
 }
 
@@ -177,9 +176,9 @@ Future<void> getReferrerFromPlayStore() async {
     final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
     if (response.statusCode == 200) {
       ip = jsonDecode(response.body);
-      print("Public IP: ${ip['ip']}");
+      log("Public IP: ${ip['ip']}");
     } else {
-      print("Failed to get public IP");
+      log("Failed to get public IP");
     }
     String ipAddress = ip['ip'] ?? "";
 
@@ -200,7 +199,7 @@ Future<void> getReferrerFromPlayStore() async {
         EventRepo().addEvent({
           "shareApp": Platform.isIOS ? "iOS" : "Android",
           "userId": userId ?? "0",
-          'referrerUrl': "$referredCode",
+          'referrerUrl': referredCode,
           'clickTimestamp': DateTime.now().toString(),
           'installTimestamp': DateTime.now().toString(),
           "createAt": DateTime.now().toString(),

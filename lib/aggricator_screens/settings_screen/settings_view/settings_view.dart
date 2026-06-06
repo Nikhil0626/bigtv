@@ -217,7 +217,7 @@ class SettingsViewState extends State<SettingsView> {
             ),
           ),
         ),
-        Divider(height: 1, color: context.borderColor.withOpacity(0.3)),
+        Divider(height: 1, color: context.borderColor.withValues(alpha: 0.3)),
       ],
     );
   }
@@ -237,7 +237,7 @@ class SettingsViewState extends State<SettingsView> {
               Spacer(),
               Switch(
                 value: themeProvider.isDarkMode,
-                activeColor: context.primaryColor,
+                activeThumbColor: context.primaryColor,
                 onChanged: (val) {
                   themeProvider.setThemeMode(val ? ThemeMode.dark : ThemeMode.light);
                 },
@@ -245,7 +245,7 @@ class SettingsViewState extends State<SettingsView> {
             ],
           ),
         ),
-        Divider(height: 1, color: context.borderColor.withOpacity(0.3)),
+        Divider(height: 1, color: context.borderColor.withValues(alpha: 0.3)),
       ],
     );
   }

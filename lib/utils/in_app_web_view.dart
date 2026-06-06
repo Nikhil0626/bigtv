@@ -1,5 +1,7 @@
+import 'package:chotanews/core/providers/web_view_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
@@ -22,13 +24,16 @@ class InAppWebViewScreen extends StatefulWidget {
 
 class _WebViewScreenState extends State<InAppWebViewScreen> {
   late final WebViewController webViewController;
-  String? pageTitle;
-  var loadingPercentage = 0;
 
   @override
   void initState() {
     super.initState();
     _initializeWebViewController();
+    
+    // Reset provider state on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<WebViewProvider>().reset();
+    });
   }
 
   void _initializeWebViewController() {
@@ -44,7 +49,6 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
 
     final controller = WebViewController.fromPlatformCreationParams(params);
 
-    // Android-specific settings
     if (controller.platform is AndroidWebViewController) {
       AndroidWebViewController.enableDebugging(true);
       (controller.platform as AndroidWebViewController)
@@ -59,15 +63,17 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
-            setState(() => loadingPercentage = progress);
+            context.read<WebViewProvider>().updateLoadingPercentage(progress);
           },
           onPageStarted: (String url) {
-            setState(() => loadingPercentage = 0);
+            context.read<WebViewProvider>().updateLoadingPercentage(0);
           },
           onPageFinished: (String url) async {
-            setState(() => loadingPercentage = 100);
+            context.read<WebViewProvider>().updateLoadingPercentage(100);
             final title = await controller.getTitle();
-            if (mounted) setState(() => pageTitle = title);
+            if (mounted) {
+              context.read<WebViewProvider>().updatePageTitle(title);
+            }
           },
           onWebResourceError: (WebResourceError error) {
             if (mounted) {
@@ -88,7 +94,8 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
           },
         ),
       )
-      ..setUserAgent('Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36')
+      ..setUserAgent(
+          'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36')
       ..loadRequest(Uri.parse(widget.webUrl));
 
     webViewController = controller;
@@ -111,41 +118,52 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
         appBar: widget.title.isEmpty
             ? null
             : AppBar(
-          backgroundColor: Colors.white,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black, size: 23),
-            onPressed: () async {
-              if (await webViewController.canGoBack()) {
-                await webViewController.goBack();
-              } else if (mounted) {
-                Navigator.pop(context);
-              }
-            },
-          ),
-          centerTitle: false,
-          title: Text(
-            pageTitle ?? widget.title,
-            style: TextStyle(
-              color: AppColors.textColor,
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh, color: Colors.black),
-              onPressed: () => webViewController.reload(),
-            ),
-          ],
-        ),
+                backgroundColor: Colors.white,
+                leading: IconButton(
+                  icon:
+                      const Icon(Icons.arrow_back, color: Colors.black, size: 23),
+                  onPressed: () async {
+                    if (await webViewController.canGoBack()) {
+                      await webViewController.goBack();
+                    } else if (mounted) {
+                      Navigator.pop(context);
+                    }
+                  },
+                ),
+                centerTitle: false,
+                title: Consumer<WebViewProvider>(
+                  builder: (context, webViewProvider, child) {
+                    return Text(
+                      webViewProvider.pageTitle ?? widget.title,
+                      style: TextStyle(
+                        color: AppColors.textColor,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    );
+                  },
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.refresh, color: Colors.black),
+                    onPressed: () => webViewController.reload(),
+                  ),
+                ],
+              ),
         body: Column(
           children: [
-            if (loadingPercentage < 100)
-              LinearProgressIndicator(
-                value: loadingPercentage / 100,
-                color: Colors.blue,
-                backgroundColor: Colors.grey[200],
-              ),
+            Consumer<WebViewProvider>(
+              builder: (context, webViewProvider, child) {
+                if (webViewProvider.loadingPercentage < 100) {
+                  return LinearProgressIndicator(
+                    value: webViewProvider.loadingPercentage / 100,
+                    color: Colors.blue,
+                    backgroundColor: Colors.grey[200],
+                  );
+                }
+                return const SizedBox.shrink();
+              },
+            ),
             Expanded(
               child: SizedBox(
                 height: widget.isHome
@@ -162,4 +180,3 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
     );
   }
 }
-

@@ -12,10 +12,10 @@ class FullStandardVideoView extends StatefulWidget {
    FullStandardVideoView({super.key, required this.reelData});
 
   @override
-  State<FullStandardVideoView> createState() => _FullStandardVideoViewState();
+  State<FullStandardVideoView> createState() => FullStandardVideoViewState();
 }
 
-class _FullStandardVideoViewState extends State<FullStandardVideoView> {
+class FullStandardVideoViewState extends State<FullStandardVideoView> {
   ScreenshotController sc = ScreenshotController();
   YoutubePlayerController? ytController;
 

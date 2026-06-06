@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -17,7 +18,7 @@ Future<String?> getDownloadDirectory() async {
 Future<void> downloadFile(String fileUrl, String fileName) async {
   String? directoryPath = await getDownloadDirectory();
   if (directoryPath == null) {
-    print("❌ Unable to get directory.");
+    log("❌ Unable to get directory.");
     return;
   }
 
@@ -29,11 +30,11 @@ Future<void> downloadFile(String fileUrl, String fileName) async {
     if (response.statusCode == 200) {
       File file = File(filePath);
       await file.writeAsBytes(response.bodyBytes);
-      print("✅ File downloaded to: $filePath");
+      log("✅ File downloaded to: $filePath");
     } else {
-      print("❌ Download failed: ${response.statusCode} - ${response.reasonPhrase}");
+      log("❌ Download failed: ${response.statusCode} - ${response.reasonPhrase}");
     }
   } catch (e) {
-    print("❌ Download error: $e");
+    log("❌ Download error: $e");
   }
 }

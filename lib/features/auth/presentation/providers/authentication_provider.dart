@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:chotanews/features/auth/data/repositories/authentication_repo.dart';
@@ -351,8 +352,6 @@ class AuthenticationProvider extends ChangeNotifier {
             .toList();
 
         states = {for (var d in data) d['stateId']: d['stateName']};
-
-        print(states);
 
         selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.stateName.toString()).toSet().toList();
         log(getAllLocationList.first.stateName.toString());

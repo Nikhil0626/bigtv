@@ -37,10 +37,10 @@ class FullPageCarousel extends StatefulWidget {
   const FullPageCarousel({super.key, required this.imageUrls, this.className = "", required this.postDetails, this.isHome = false});
 
   @override
-  _FullPageCarouselState createState() => _FullPageCarouselState();
+  FullPageCarouselState createState() => FullPageCarouselState();
 }
 
-class _FullPageCarouselState extends State<FullPageCarousel> {
+class FullPageCarouselState extends State<FullPageCarousel> {
   int _currentIndex = 0;
   ScreenshotController sc = ScreenshotController();
   final CarouselSliderController _controller = CarouselSliderController();
@@ -134,7 +134,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
               effect: ExpandingDotsEffect(
                 dotHeight: 7,
                 dotWidth: 7,
-                activeDotColor: Colors.cyan.withOpacity(.3),
+                activeDotColor: Colors.cyan.withValues(alpha: .3),
                 dotColor: Colors.grey.shade400,
               ),
               onDotClicked: (index) {
@@ -201,7 +201,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                       label: 'షేర్',
                       iconColor: AppColors.iconColors,
                       onTap: () async {
-                        print("Share");
+                        log("Share");
                          EventRepo().addEvent({
                           "share": "news",
                           "postId": widget.postDetails['id'].toString()??"000",   // ✅ postId converted to String
@@ -274,7 +274,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                               );
                             }
                           } catch (e) {
-                            print('Error downloading or sharing image: $e');
+                            log('Error downloading or sharing image: $e');
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(content: Text('Something went wrong: $e')),
                             );
@@ -288,7 +288,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withOpacity(0.3),
+                                    color: Colors.grey.withValues(alpha: 0.3),
                                     blurRadius: 5,
                                     spreadRadius: 2,
                                   ),
@@ -326,7 +326,7 @@ class _FullPageCarouselState extends State<FullPageCarousel> {
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: Colors.grey.withOpacity(0.3),
+                                    color: Colors.grey.withValues(alpha: 0.3),
                                     blurRadius: 5,
                                     spreadRadius: 2,
                                   ),

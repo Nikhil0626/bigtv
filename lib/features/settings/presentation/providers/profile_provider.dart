@@ -176,21 +176,20 @@ Map<String,dynamic> body = {
       contentType: MediaType('image', 'jpeg'),
     ));
 
-    /// Send the request
     try {
       final response = await request.send();
 
       if (response.statusCode == 200) {
-        print('Upload successful: ${response.toString()}');
+        log('Upload successful: ${response.toString()}');
         final responseBody = await response.stream.bytesToString();
         final decodedResponse = json.decode(responseBody);
         uploadImageUrl = decodedResponse['image_url'];
-        print('Upload successful: $responseBody');
+        log('Upload successful: $responseBody');
       } else {
-        print('Failed to upload. Status code: ${response.statusCode}');
+        log('Failed to upload. Status code: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error uploading file: $e');
+      log('Error uploading file: $e');
     }
     finally{
       isProfileLoading = false;

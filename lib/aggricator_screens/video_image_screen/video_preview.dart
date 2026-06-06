@@ -13,7 +13,7 @@ class VideoPreview extends StatefulWidget {
   final bool isFoldable;
   final String postId;
 
-  VideoPreview({
+  const VideoPreview({
     super.key,
     required this.url,
     required this.imageUrl,
@@ -23,10 +23,10 @@ class VideoPreview extends StatefulWidget {
   });
 
   @override
-  _VideoPreview createState() => _VideoPreview();
+  VideoPreviewPage createState() => VideoPreviewPage();
 }
 
-class _VideoPreview extends State<VideoPreview> {
+class VideoPreviewPage extends State<VideoPreview> {
   @override
   void initState() {
     super.initState();

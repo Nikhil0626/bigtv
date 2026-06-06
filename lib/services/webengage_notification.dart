@@ -57,7 +57,7 @@ void subscribeToPushCallbacks() {
   _webEngagePlugin.pushActionStream.listen((event) {
     Map<String, dynamic>? messagePayload = event.payload;
 
-    log("pushActionStream: flutter test  22222  ${messagePayload}");
+    log("pushActionStream: flutter test  22222  $messagePayload");
 
     if (Platform.isIOS) {
       log("pushActionStream: flutter test  11111 ${messagePayload?['data']['customData'][0]['value']}");
@@ -94,12 +94,11 @@ void showDialogWithMessage(String msg) {
       builder: (BuildContext context) {
         return Dialog(
             insetPadding: EdgeInsets.all(5.0),
-            child: new Container(
-              // padding: new EdgeInsets.all(10.0),
-              decoration: new BoxDecoration(
+            child: Container(
+              decoration: BoxDecoration(
                 color: Colors.white,
               ),
-              child: new Text(
+              child: Text(
                 msg,
                 style: TextStyle(
                   color: Colors.black,

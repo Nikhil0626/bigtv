@@ -32,10 +32,10 @@ class ReelPreviewScreen extends StatefulWidget {
   const ReelPreviewScreen({super.key, required this.initialIndex});
 
   @override
-  _ReelPreviewScreenState createState() => _ReelPreviewScreenState();
+  ReelPreviewScreenState createState() => ReelPreviewScreenState();
 }
 
-class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
+class ReelPreviewScreenState extends State<ReelPreviewScreen> {
   late PageController _pageController;
   late List<YoutubePlayerController> _controllers;
 
@@ -89,7 +89,6 @@ class _ReelPreviewScreenState extends State<ReelPreviewScreen> {
 
   @override
   void dispose() {
-    // _controllers = [];
     super.dispose();
   }
 
@@ -316,7 +315,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                               imageUrl: widget.reelCard.publisherImage,
                               fit: BoxFit.fill,
                               placeholder: (context, url) => Container(
-                                color: AppColors.borderColor.withOpacity(.2),
+                                color: AppColors.borderColor.withValues(alpha: .2),
                               ),
                               errorWidget: (context, url, error) => Center(
                                 child: Icon(
