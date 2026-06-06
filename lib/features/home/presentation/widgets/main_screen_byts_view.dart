@@ -724,6 +724,25 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                         ),
                       ),
                     ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: widget.article['type'] == "Video" ? SizedBox.shrink(): Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      color: Theme.of(context).primaryColor.withValues(alpha:0.6),
+                      child: Text(
+                        widget.article['title'] ?? "No Title",
+                        style: homeScreenFontStyle(
+                          color: Colors.white,
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
                 ],
               ),
               Container(
@@ -777,21 +796,24 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                           Row(
                             crossAxisAlignment:
                             CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              /// Article Title - 22px font, fits in 2 lines
                               Expanded(
-                                child: Text(
-                                  widget.article['title'] ?? "No Title",
-                                  style: homeScreenFontStyle(
-                                    color: AppColorTokens.primaryRed,
-                                    fontSize: 18.sp,
-                                    fontWeight: FontWeight.w600,
+                                child: widget.article['type'] != "Video" ? SizedBox.shrink(): Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+
+                                  child: Text(
+                                    widget.article['title'] ?? "No Title",
+                                    style: homeScreenFontStyle(
+                                      color:  Theme.of(context).primaryColor,
+                                      fontSize: 18.sp,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
-                              const SizedBox(width: 6),
                               /// Action Icons Container with minimal spacing
                               Container(
                                 padding: const EdgeInsets.all(8.0),

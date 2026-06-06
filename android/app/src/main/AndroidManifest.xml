@@ -43,7 +43,7 @@
     <application
         android:name=".MainApplication"
         android:icon="@mipmap/ic_launcher"
-        android:label="chotanews"
+        android:label="BigTV News"
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:hardwareAccelerated="true"
@@ -127,7 +127,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="app.chotanews.com"  />
+                <data android:scheme="https" android:host="app.bigtv24x7.com"  />
             </intent-filter>
 
 
@@ -136,7 +136,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data  android:host="app.chotanews.com" android:scheme="https" />
+                <data  android:host="app.bigtv24x7.com" android:scheme="https" />
             </intent-filter>
 
 

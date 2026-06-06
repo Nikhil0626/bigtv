@@ -1,10 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_spaces.dart';
 import '../individual_post_details/individual_post_view.dart';
+import '../../core/theme/theme_extensions.dart';
 
 class RecommendedNews extends StatelessWidget {
   final List rList;
@@ -19,7 +19,7 @@ class RecommendedNews extends StatelessWidget {
             style: fontStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textColor)),
+                color: context.textColor)),
         height(height: 10),
         Expanded(
           child: ListView.builder(
@@ -45,8 +45,8 @@ class RecommendedNews extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(vertical: 4.0, horizontal: 10),
                   decoration: BoxDecoration(
-                    color: AppColors.wColor,
-                    border: Border.all(width: 2, color: AppColors.wColor),
+                    color: context.cardColor,
+                    border: Border.all(width: 2, color: context.cardColor),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Row(
@@ -61,7 +61,7 @@ class RecommendedNews extends StatelessWidget {
                           placeholder: (context, url) => Container(
                             height: 50,
                             width: 50,
-                            color: AppColors.borderColor.withAlpha(51), // 0.2 * 255 approx 51
+                            color: context.borderColor.withAlpha(51), // 0.2 * 255 approx 51
                           ),
                           errorWidget: (context, url, error) => Container(
                             height: 40,
@@ -87,7 +87,7 @@ class RecommendedNews extends StatelessWidget {
                               style: fontStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.textColor),
+                                  color: context.textColor),
                             ),
                             height(height: 2),
                             Row(
@@ -110,7 +110,7 @@ class RecommendedNews extends StatelessWidget {
                                   style: fontStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
-                                      color: AppColors.textColor),
+                                      color: context.textColor),
                                 ),
                               ],
                             ),

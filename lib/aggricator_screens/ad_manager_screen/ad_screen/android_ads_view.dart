@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../ad_provider/ad_mob_banner_provider.dart';
 import '../recommended_news.dart';
 import 'ios_ads_view.dart';
+import '../../../core/theme/theme_extensions.dart';
 
 class AndroidAdsView extends StatelessWidget {
   final dynamic article;
@@ -27,7 +28,7 @@ class AndroidAdsView extends StatelessWidget {
 
     if (ad is BannerAd || ad is AdManagerBannerAd) {
       return Container(
-        color: Colors.grey[200],
+        color: context.backgroundColor,
         alignment: Alignment.center,
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -56,7 +57,7 @@ class AndroidAdsView extends StatelessWidget {
       );
     } else if (ad is NativeAd) {
       return Container(
-        color: Colors.white,
+        color: context.backgroundColor,
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         child: AdWidget(ad: ad),
