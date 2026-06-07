@@ -61,7 +61,7 @@ class LoginBackgroundView extends StatelessWidget {
           SizedBox(height: 8.h),
 
           Text(
-            'STAY UPDATED EVERY MINUTE',
+            'WITHOUT FEAR OR FAVOR',
             style: typography.titleLarge?.copyWith(
               fontSize: 20.sp,
               color: colorScheme.primary,

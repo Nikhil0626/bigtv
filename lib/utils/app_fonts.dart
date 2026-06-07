@@ -15,6 +15,7 @@ TextStyle homeScreenFontStyle({
   Color? decorationColor,
   double? decorationThickness,
   TextDecorationStyle? decorationStyle,
+  Color? backgroundColor,
 }) {
   final BuildContext? ctx = mainNavigatorKey.currentContext;
   final defaultColor = ctx?.textColor ?? Colors.black;
@@ -26,6 +27,7 @@ TextStyle homeScreenFontStyle({
       wordSpacing: 2,
       fontWeight: fontWeight,
       color: color ?? defaultColor,
+      backgroundColor: backgroundColor,
       letterSpacing: letterSpacing ?? 0.5,
       decoration: decoration,
       decorationColor: decorationColor,
