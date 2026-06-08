@@ -255,7 +255,7 @@ class _ReferralDialogState extends State<ReferralDialog> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Image.asset('assets/images/wa-icon.png',width: 24,height: 24,),
+                              Image.asset('assets/images/BigTvPostLogo.png',width: 24,height: 24,),
                               SizedBox(width: 12.w),
                               Text(
                                 "మిత్రులని ఆహ్వానించండి",

@@ -1,7 +1,7 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\Users\Admin\src\flutter_windows_3.35.4-stable\flutter"
-export "FLUTTER_APPLICATION_PATH=C:\Users\Admin\StudioProjects\ChotaNewsMobile"
+export "FLUTTER_ROOT=/Users/jogishivakumar/fvm/versions/3.41.5"
+export "FLUTTER_APPLICATION_PATH=/Users/jogishivakumar/Documents/bigtv"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
 export "FLUTTER_BUILD_NAME=5.0.9"

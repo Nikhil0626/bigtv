@@ -6,7 +6,6 @@ import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:platform_device_id_plus/platform_device_id.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../globel_keys/global_variables_data.dart';
@@ -16,9 +15,6 @@ Future<String?> getUniqueDeviceId(
 ) async {
   SharedPreferences sp = await SharedPreferences.getInstance();
   PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-  String? deviceId = await PlatformDeviceId.getDeviceId;
-  log("Device ID: $deviceId");
 
   log("app latest version ${packageInfo.toString()}");
   log("app latest version ${packageInfo.buildNumber}");
@@ -34,7 +30,7 @@ Future<String?> getUniqueDeviceId(
 
   if (Platform.isAndroid) {
     AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-    sp.setString("deviceId", deviceId.toString());
+    sp.setString("deviceId", androidInfo.id);
     if (token == "close") {
       return "";
     }

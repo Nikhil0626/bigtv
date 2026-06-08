@@ -1,7 +1,6 @@
 import 'dart:developer';
 
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
-import 'package:easy_url_launcher/easy_url_launcher.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,7 +20,17 @@ class ContactUs extends StatefulWidget {
 class _ContactUsState extends State<ContactUs> {
   Future<void> launchSingleEmail(String email) async {
     contactViaMail();
-    await EasyLauncher.email(email: email, subject: "", body: "");
+    final Uri emailLaunchUri = Uri(
+      scheme: 'mailto',
+      path: email,
+    );
+    try {
+      if (await canLaunchUrl(emailLaunchUri)) {
+        await launchUrl(emailLaunchUri);
+      }
+    } catch (e) {
+      log('Error launching email: $e');
+    }
   }
 
   Future<void> _launchPhone(String phone) async {

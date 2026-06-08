@@ -133,9 +133,9 @@ class _DistrictViewState extends State<DistrictView> {
                                             builder: (context) {
                                               String? imagePath;
                                               if (stateName.toLowerCase().contains('telangana')) {
-                                                imagePath = 'assets/images/telangana.png';
+                                                imagePath = 'assets/images/telangana.jpg';
                                               } else if (stateName.toLowerCase().contains('andhra') || stateName.toLowerCase().contains('ap')) {
-                                                imagePath = 'assets/images/ap.png';
+                                                imagePath = 'assets/images/ap.jpg';
                                               }
 
                                               if (imagePath != null) {

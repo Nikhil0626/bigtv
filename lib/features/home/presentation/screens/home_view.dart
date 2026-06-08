@@ -17,7 +17,6 @@ import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -170,7 +169,7 @@ class _HomeViewState extends State<HomeView> {
                                           colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                         ),
                                       ),
-                                      label: 'news'.tr(),
+                                      label: 'news',
                                     ),
                                     BottomNavigationBarItem(
                                       icon: SvgPicture.asset(
@@ -189,7 +188,7 @@ class _HomeViewState extends State<HomeView> {
                                           colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                         ),
                                       ),
-                                      label: 'reels'.tr(),
+                                      label: 'reels',
                                     ),
                                     BottomNavigationBarItem(
                                       icon: SvgPicture.asset(
@@ -208,7 +207,7 @@ class _HomeViewState extends State<HomeView> {
                                           colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                         ),
                                       ),
-                                      label: 'more'.tr(),
+                                      label: 'more',
                                     ),
                                   ],
                                 ),

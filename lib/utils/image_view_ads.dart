@@ -1,12 +1,10 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_carousel_slider/carousel_slider.dart';
-
+import 'package:carousel_slider/carousel_slider.dart';
 
 class ImagePostSlider extends StatelessWidget {
-  final imageUrl;
-  const ImagePostSlider({super.key,required this.imageUrl});
-
+  final List<dynamic> imageUrl;
+  const ImagePostSlider({super.key, required this.imageUrl});
 
   @override
   Widget build(BuildContext context) {
@@ -14,11 +12,16 @@ class ImagePostSlider extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Center(
         child: CarouselSlider.builder(
-          unlimitedMode: true,
-          autoSliderTransitionTime: const Duration(milliseconds: 1000),
-          autoSliderDelay: const Duration(seconds: 3),
-          enableAutoSlider: true,
-          slideBuilder: (index) {
+          itemCount: imageUrl.length,
+          options: CarouselOptions(
+            autoPlay: true,
+            aspectRatio: 1.0,
+            enlargeCenterPage: true,
+            viewportFraction: 1.0,
+            autoPlayInterval: const Duration(seconds: 3),
+            autoPlayAnimationDuration: const Duration(milliseconds: 1000),
+          ),
+          itemBuilder: (context, index, realIndex) {
             return ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: CachedNetworkImage(
@@ -33,19 +36,11 @@ class ImagePostSlider extends StatelessWidget {
                   ),
                 ),
                 errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 60, color: Colors.grey),
-              )
+              ),
             );
           },
-          slideTransform: const CubeTransform(),
-          slideIndicator: CircularSlideIndicator(
-            padding: const EdgeInsets.only(bottom: 32),
-            indicatorBackgroundColor: Colors.grey,
-            currentIndicatorColor: Colors.blue,
-          ),
-          itemCount: imageUrl.length,
         ),
       ),
     );
   }
 }
- 

@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:chotanews/aggricator_screens/polls_screens/poll_repo.dart';
 import 'package:dio/dio.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
