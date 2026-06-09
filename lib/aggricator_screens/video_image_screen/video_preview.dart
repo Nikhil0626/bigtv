@@ -93,6 +93,7 @@ class VideoPreviewPage extends State<VideoPreview> {
                         homeProvider.toggleMute();
                       },
                     ),
+                    FullScreenButton(),
                   ],
                 ),
                 builder: (context, player) => player,

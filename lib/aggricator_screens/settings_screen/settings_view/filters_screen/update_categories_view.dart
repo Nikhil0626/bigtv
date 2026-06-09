@@ -27,6 +27,34 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
     context.read<AuthenticationProvider>().getAllCategories();
   }
 
+  String _getCategoryImage(String categoryName, int index) {
+    final name = categoryName.trim().toLowerCase();
+    if (name.contains('business')) return 'assets/images/business.jpg';
+    if (name.contains('sports')) return 'assets/images/sports.jpg';
+    if (name.contains('entertainment') || name.contains('cinema')) return 'assets/images/entertainment.jpg';
+    if (name.contains('politics')) return 'assets/images/politics.jpg';
+    if (name.contains('technology') || name.contains('tech')) return 'assets/images/technology.jpg';
+    if (name.contains('lifestyle')) return 'assets/images/lifestyle.jpg';
+    if (name.contains('science')) return 'assets/images/science.jpg';
+    if (name.contains('startup')) return 'assets/images/startup.jpg';
+    if (name.contains('education')) return 'assets/images/education.jpg';
+    
+    // If the API returns categories in another language or unmapped names, 
+    // provide a varied fallback based on the index so they don't all look identical.
+    final fallbacks = [
+      'assets/images/business.jpg',
+      'assets/images/sports.jpg',
+      'assets/images/entertainment.jpg',
+      'assets/images/politics.jpg',
+      'assets/images/technology.jpg',
+      'assets/images/lifestyle.jpg',
+      'assets/images/science.jpg',
+      'assets/images/startup.jpg',
+      'assets/images/education.jpg'
+    ];
+    return fallbacks[index % fallbacks.length];
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<AuthenticationProvider, SettingsProvider>(
@@ -43,39 +71,98 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                 height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success || settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
                 Banner300x50Size(),
                 height(height: 10),
-                SingleChildScrollView(
+                Expanded(
                   child: authenticationProvider.isCatLoading
                       ? AppLoadingScreen()
                       : authenticationProvider.getAllCategoryList.isEmpty
                           ? AppNoData()
-                          : Wrap(
-                              spacing: 10.w,
-                              runSpacing: 10.h,
-                              children: categories.map((category) {
-                                final categoryName = category.categoryName.toString();
+                          : GridView.builder(
+                              physics: const BouncingScrollPhysics(),
+                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                childAspectRatio: 1.3,
+                                crossAxisSpacing: 10.w,
+                                mainAxisSpacing: 10.h,
+                              ),
+                              itemCount: categories.length,
+                              itemBuilder: (context, index) {
+                                final categoryName = categories[index].categoryName.toString();
                                 final isSelected = selectedCategories.contains(categoryName);
                                 return GestureDetector(
                                   onTap: () {
                                     authenticationProvider.addToSelectedEngagements(categoryName);
                                   },
                                   child: Container(
-                                    padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
                                     decoration: BoxDecoration(
-                                      color: isSelected ? AppColors.appButtonColor : AppColors.cardBackgroundColor,
-                                      borderRadius: BorderRadius.circular(20.r),
-                                    ),
-                                    child: Text(
-                                      categoryName,
-                                      textAlign: TextAlign.center,
-                                      style: homeScreenFontStyle(
-                                        color: isSelected ? Colors.white : Colors.black54,
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w500,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                        color: isSelected ? AppColors.appButtonColor : Colors.transparent,
+                                        width: isSelected ? 2.0 : 0.0,
                                       ),
+                                      image: DecorationImage(
+                                        image: AssetImage(_getCategoryImage(categoryName, index)),
+                                        fit: BoxFit.cover,
+                                        colorFilter: ColorFilter.mode(
+                                          Colors.black.withValues(alpha: 0.4),
+                                          BlendMode.darken,
+                                        ),
+                                      ),
+                                      boxShadow: isSelected
+                                          ? [
+                                              BoxShadow(
+                                                color: AppColors.appButtonColor.withValues(alpha: 0.3),
+                                                blurRadius: 8,
+                                                spreadRadius: 1,
+                                              )
+                                            ]
+                                          : [],
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: 4.w),
+                                            child: Text(
+                                              categoryName,
+                                              textAlign: TextAlign.center,
+                                              style: homeScreenFontStyle(
+                                                color: Colors.white,
+                                                fontSize: 14.sp,
+                                                fontWeight: FontWeight.w700,
+                                              ).copyWith(
+                                                shadows: [
+                                                  Shadow(
+                                                    color: Colors.black.withValues(alpha: 0.7),
+                                                    offset: const Offset(0, 1),
+                                                    blurRadius: 3,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        if (isSelected)
+                                          Positioned(
+                                            top: 6.h,
+                                            right: 6.w,
+                                            child: Container(
+                                              padding: EdgeInsets.all(2.w),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.appButtonColor,
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Icon(
+                                                Icons.check,
+                                                color: Colors.white,
+                                                size: 14.sp,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
                                 );
-                              }).toList(),
+                              },
                             ),
                 ),
               ],

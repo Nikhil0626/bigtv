@@ -36,43 +36,6 @@ void onInAppDismiss(Map<String, dynamic>? message) {
   log("This is a callback on inapp dismiss from native to flutter. Payload $message");
 }
 
-void subscribeToPushCallbacks() {
-  if (_isSubscribed) return;
-  _isSubscribed = true;
-  log("pushActionStream: flutter test 0000");
-  _webEngagePlugin.pushStream.listen((event) {
-
-    Map<String, dynamic> messagePayload = event.payload!;
-    log("pushActionStream: flutter test  11111 --- ${messagePayload["postId"]}");
-    if (Platform.isIOS) {
-      log("pushActionStream: flutter test  11111 ${messagePayload['data']['customData'][0]['value']}");
-
-      sendEventToServer(messagePayload['data']['customData'][0]['value']);
-    } else {
-      sendEventToServer(messagePayload["postId"] ?? "0");
-    }
-  });
-
-  //Push action click listener
-  _webEngagePlugin.pushActionStream.listen((event) {
-    Map<String, dynamic>? messagePayload = event.payload;
-
-    log("pushActionStream: flutter test  22222  $messagePayload");
-
-    if (Platform.isIOS) {
-      log("pushActionStream: flutter test  11111 ${messagePayload?['data']['customData'][0]['value']}");
-
-      sendEventToServer(messagePayload?['data']['customData'][0]['value']);
-    } else {
-      sendEventToServer(messagePayload?["postId"] ?? "0");
-    }
-  });
-}
-
-void sendEventToServer(msg) async {
-  mainNavigatorKey.currentContext?.read<HomeProvider>().aiTagDataLoaded(true);
-
-}
 
 void subscribeToTrackDeeplink() {
   log("pushActionStream:1111111");

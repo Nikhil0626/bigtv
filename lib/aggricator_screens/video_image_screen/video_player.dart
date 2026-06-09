@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'video_provider.dart';
+import 'fullscreen_video_view.dart';
 
 class CustomVideoPlayer extends StatefulWidget {
   final String url;
@@ -169,6 +170,20 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
                         color: Colors.white,
                       ),
                       onPressed: videoProvider.toggleMute,
+                    ),
+
+                    /// Fullscreen Button
+                    IconButton(
+                      icon: const Icon(Icons.fullscreen, color: Colors.white),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => FullscreenVideoView(
+                              controller: videoProvider.controller!,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

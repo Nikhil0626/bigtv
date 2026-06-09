@@ -112,16 +112,105 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: authenticationProvider.states!.entries.map((entry) {
                               String stateName = entry.value;
-                              return CheckboxListTile(
-                                title: Text(stateName,
-                                    style: newAppFont(
-                                      fontWeight: FontWeight.w600,
-                                    )),
-                                value: authenticationProvider.selectedLocations.contains(stateName),
-                                activeColor: AppColors.appButtonColor,
-                                onChanged: (bool? selected) {
-                                  authenticationProvider.addToSelectedLocations(stateName);
-                                },
+                              final isSelected = authenticationProvider.selectedLocations.contains(stateName);
+                              return Padding(
+                                padding: EdgeInsets.only(bottom: 16.h),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    authenticationProvider.addToSelectedLocations(stateName);
+                                  },
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    height: 100.h,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8.r),
+                                      border: Border.all(
+                                        color: isSelected ? AppColors.appButtonColor : Colors.grey.shade300,
+                                        width: isSelected ? 1.5 : 1.0,
+                                      ),
+                                      boxShadow: isSelected
+                                          ? [
+                                              BoxShadow(
+                                                color: AppColors.appButtonColor.withValues(alpha: 0.1),
+                                                blurRadius: 8,
+                                                spreadRadius: 1,
+                                              )
+                                            ]
+                                          : [],
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        Builder(
+                                          builder: (context) {
+                                            String? imagePath;
+                                            if (stateName.toLowerCase().contains('telangana') || stateName.toLowerCase().contains('తెలంగాణ')) {
+                                              imagePath = 'assets/images/Telangana logo.png';
+                                            } else if (stateName.toLowerCase().contains('andhra') || stateName.toLowerCase().contains('ap') || stateName.toLowerCase().contains('ఆంధ్రప్రదేశ్')) {
+                                              imagePath = 'assets/images/AP logo.png';
+                                            }
+
+                                            if (imagePath != null) {
+                                              return Padding(
+                                                padding: EdgeInsets.only(right: 16.w),
+                                                child: Align(
+                                                  alignment: Alignment.centerRight,
+                                                  child: Image.asset(
+                                                    imagePath,
+                                                    height: 60.sp,
+                                                    width: 60.sp,
+                                                    fit: BoxFit.contain,
+                                                  ),
+                                                ),
+                                              );
+                                            } else {
+                                              return const SizedBox();
+                                            }
+                                          }
+                                        ),
+                                        
+                                        Padding(
+                                          padding: EdgeInsets.only(left: 16.w, right: 90.w),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                                                color: isSelected ? AppColors.appButtonColor : Colors.grey.shade400,
+                                                size: 24.sp,
+                                              ),
+                                              SizedBox(width: 16.w),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      stateName,
+                                                      style: newAppFont(
+                                                        fontSize: 16.sp,
+                                                        color: Colors.black87,
+                                                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                    SizedBox(height: 4.h),
+                                                    Text(
+                                                      "Local news, events and updates from $stateName",
+                                                      style: newAppFont(
+                                                        fontSize: 11.sp,
+                                                        color: Colors.black54,
+                                                        fontWeight: FontWeight.w400,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
                               );
                             }).toList(),
                           ),

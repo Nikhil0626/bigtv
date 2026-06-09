@@ -21,38 +21,32 @@ class _CategoriesViewState extends State<CategoriesView> {
     super.initState();
   }
 
-  String _getCategoryIcon(String categoryName) {
-    switch (categoryName.toLowerCase()) {
-      case 'business':
-        return 'assets/images/business_icon.png';
-      case 'sports':
-        return 'assets/images/sports_icon.png';
-      case 'entertainment':
-        return 'assets/images/entertainment_icon.png';
-      case 'cinema':
-        return 'assets/images/cinema_icon.png';
-      case 'politics':
-        return 'assets/images/politics_icon.png';
-      case 'health':
-        return 'assets/images/health_icon.png';
-      case 'technology':
-      case 'tech':
-        return 'assets/images/tech_icon.png';
-      case 'world':
-      case 'international':
-        return 'assets/images/world_icon.png';
-      case 'auto':
-        return 'assets/images/auto_icon.png';
-      case 'education':
-        return 'assets/images/education_icon.png';
-      case 'lifestyle':
-        return 'assets/images/lifestyle_icon.png';
-      case 'weather':
-        return 'assets/images/weather_icon.png';
-      default:
-        // Fallback or generic placeholder, we will use a generic one if missing
-        return 'assets/images/business_icon.png';
-    }
+  String _getCategoryImage(String categoryName, int index) {
+    final name = categoryName.trim().toLowerCase();
+    if (name.contains('business')) return 'assets/images/business.jpg';
+    if (name.contains('sports')) return 'assets/images/sports.jpg';
+    if (name.contains('entertainment') || name.contains('cinema')) return 'assets/images/entertainment.jpg';
+    if (name.contains('politics')) return 'assets/images/politics.jpg';
+    if (name.contains('technology') || name.contains('tech')) return 'assets/images/technology.jpg';
+    if (name.contains('lifestyle')) return 'assets/images/lifestyle.jpg';
+    if (name.contains('science')) return 'assets/images/science.jpg';
+    if (name.contains('startup')) return 'assets/images/startup.jpg';
+    if (name.contains('education')) return 'assets/images/education.jpg';
+    
+    // If the API returns categories in another language or unmapped names, 
+    // provide a varied fallback based on the index so they don't all look identical.
+    final fallbacks = [
+      'assets/images/business.jpg',
+      'assets/images/sports.jpg',
+      'assets/images/entertainment.jpg',
+      'assets/images/politics.jpg',
+      'assets/images/technology.jpg',
+      'assets/images/lifestyle.jpg',
+      'assets/images/science.jpg',
+      'assets/images/startup.jpg',
+      'assets/images/education.jpg'
+    ];
+    return fallbacks[index % fallbacks.length];
   }
 
   @override
@@ -76,26 +70,26 @@ class _CategoriesViewState extends State<CategoriesView> {
                   height: 48.h,
                   fit: BoxFit.contain,
                 ),
-                SizedBox(height: 24.h),
+                SizedBox(height: 10.h),
                 Text(
-                  'CHOOSE YOUR INTERESTS',
+                  'మీ ఆసక్తులని ఎంచుకోండి',
                   style: typography.titleMedium?.copyWith(
-                    fontSize: 18.sp,
+                    fontSize: 24.sp,
                     color: colorScheme.primary,
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 SizedBox(height: 4.h),
-                Text(
-                  'Select the categories you want to see in your feed',
-                  textAlign: TextAlign.center,
-                  style: typography.bodySmall?.copyWith(
-                    fontSize: 13.sp,
-                    color: isDark ? AppColorTokens.darkTextSecondary : AppColorTokens.lightTextSecondary,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                SizedBox(height: 24.h),
+                // Text(
+                //   'Select the categories you want to see in your feed',
+                //   textAlign: TextAlign.center,
+                //   style: typography.bodySmall?.copyWith(
+                //     fontSize: 13.sp,
+                //     color: isDark ? AppColorTokens.darkTextSecondary : AppColorTokens.lightTextSecondary,
+                //     fontWeight: FontWeight.w400,
+                //   ),
+                // ),
+                SizedBox(height: 10.h),
 
                 // Categories Grid
                 Expanded(
@@ -105,7 +99,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                           physics: const BouncingScrollPhysics(),
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            childAspectRatio: 2.2,
+                            childAspectRatio: 1.7,
                             crossAxisSpacing: 12.w,
                             mainAxisSpacing: 12.h,
                           ),
@@ -119,16 +113,23 @@ class _CategoriesViewState extends State<CategoriesView> {
                               child: AnimatedContainer(
                                 duration: const Duration(milliseconds: 200),
                                 decoration: BoxDecoration(
-                                  color: isDark ? AppColorTokens.darkSurface : AppColorTokens.lightSurface,
                                   borderRadius: BorderRadius.circular(8.r),
                                   border: Border.all(
-                                    color: isSelected ? colorScheme.primary : colorScheme.outline,
-                                    width: isSelected ? 1.5 : 1.0,
+                                    color: isSelected ? colorScheme.primary : Colors.transparent,
+                                    width: isSelected ? 2.0 : 0.0,
+                                  ),
+                                  image: DecorationImage(
+                                    image: AssetImage(_getCategoryImage(category.categoryName.toString(), index)),
+                                    fit: BoxFit.cover,
+                                    colorFilter: ColorFilter.mode(
+                                      Colors.black.withValues(alpha: 0.4),
+                                      BlendMode.darken,
+                                    ),
                                   ),
                                   boxShadow: isSelected
                                       ? [
                                           BoxShadow(
-                                            color: colorScheme.primary.withValues(alpha: 0.1),
+                                            color: colorScheme.primary.withValues(alpha: 0.3),
                                             blurRadius: 8,
                                             spreadRadius: 1,
                                           )
@@ -138,62 +139,43 @@ class _CategoriesViewState extends State<CategoriesView> {
                                 child: Stack(
                                   children: [
                                     Center(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          Container(
-                                            padding: EdgeInsets.all(6.w),
-                                            decoration: BoxDecoration(
-                                              color: isSelected ? colorScheme.primary.withValues(alpha: 0.1) : (isDark ? AppColorTokens.darkCard : AppColorTokens.lightCard),
-                                              shape: BoxShape.circle,
-                                            ),
-                                            child: Image.asset(
-                                              _getCategoryIcon(category.categoryName.toString()),
-                                              color: isSelected ? colorScheme.primary : (isDark ? AppColorTokens.darkIcon : AppColorTokens.lightIcon),
-                                              height: 20.sp,
-                                              width: 20.sp,
-                                            ),
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 4.w),
+                                        child: Text(
+                                          category.categoryName.toString(),
+                                          textAlign: TextAlign.center,
+                                          style: typography.bodySmall?.copyWith(
+                                            color: Colors.white,
+                                            fontSize: 16.sp,
+                                            fontWeight: FontWeight.w700,
+                                            shadows: [
+                                              Shadow(
+                                                color: Colors.black.withValues(alpha: 0.7),
+                                                offset: const Offset(0, 1),
+                                                blurRadius: 3,
+                                              ),
+                                            ],
                                           ),
-                                          SizedBox(height: 6.h),
-                                          Text(
-                                            category.categoryName.toString(),
-                                            textAlign: TextAlign.center,
-                                            style: typography.bodySmall?.copyWith(
-                                              color: isDark ? AppColorTokens.darkTextPrimary : AppColorTokens.lightTextPrimary,
-                                              fontSize: 12.sp,
-                                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
                                     ),
-                                    Positioned(
-                                      top: 8.h,
-                                      right: 8.w,
-                                      child: isSelected
-                                          ? Container(
-                                              decoration: BoxDecoration(
-                                                color: colorScheme.primary,
-                                                shape: BoxShape.circle,
-                                              ),
-                                              child: Icon(
-                                                Icons.check,
-                                                color: colorScheme.onPrimary,
-                                                size: 14.sp,
-                                              ),
-                                            )
-                                          : Container(
-                                              width: 14.sp,
-                                              height: 14.sp,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                border: Border.all(
-                                                  color: colorScheme.outline,
-                                                  width: 1.5,
-                                                ),
-                                              ),
-                                            ),
-                                    ),
+                                    if (isSelected)
+                                      Positioned(
+                                        top: 6.h,
+                                        right: 6.w,
+                                        child: Container(
+                                          padding: EdgeInsets.all(2.w),
+                                          decoration: BoxDecoration(
+                                            color: colorScheme.primary,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.check,
+                                            color: colorScheme.onPrimary,
+                                            size: 14.sp,
+                                          ),
+                                        ),
+                                      ),
                                   ],
                                 ),
                               ),
@@ -208,41 +190,41 @@ class _CategoriesViewState extends State<CategoriesView> {
                   child: Column(
                     children: [
                       // Info Text
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColorTokens.darkSurface : AppColorTokens.lightCard,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(4.w),
-                              decoration: BoxDecoration(
-                                color: colorScheme.primary,
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.check,
-                                color: colorScheme.onPrimary,
-                                size: 12.sp,
-                              ),
-                            ),
-                            SizedBox(width: 12.w),
-                            Expanded(
-                              child: Text(
-                                "You can change these preferences later in settings",
-                                style: typography.bodySmall?.copyWith(
-                                  fontSize: 12.sp,
-                                  color: isDark ? AppColorTokens.darkTextSecondary : AppColorTokens.lightTextSecondary,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
+                      // Container(
+                      //   padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                      //   decoration: BoxDecoration(
+                      //     color: isDark ? AppColorTokens.darkSurface : AppColorTokens.lightCard,
+                      //     borderRadius: BorderRadius.circular(8.r),
+                      //   ),
+                      //   child: Row(
+                      //     children: [
+                      //       Container(
+                      //         padding: EdgeInsets.all(4.w),
+                      //         decoration: BoxDecoration(
+                      //           color: colorScheme.primary,
+                      //           shape: BoxShape.circle,
+                      //         ),
+                      //         child: Icon(
+                      //           Icons.check,
+                      //           color: colorScheme.onPrimary,
+                      //           size: 12.sp,
+                      //         ),
+                      //       ),
+                      //       SizedBox(width: 12.w),
+                      //       Expanded(
+                      //         child: Text(
+                      //           "You can change these preferences later in settings",
+                      //           style: typography.bodySmall?.copyWith(
+                      //             fontSize: 12.sp,
+                      //             color: isDark ? AppColorTokens.darkTextSecondary : AppColorTokens.lightTextSecondary,
+                      //             fontWeight: FontWeight.w400,
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
+                      // SizedBox(height: 16.h),
                       
                       // Continue Button
                       InkWell(
@@ -307,15 +289,6 @@ class _CategoriesViewState extends State<CategoriesView> {
                             height: 6.w,
                             decoration: BoxDecoration(
                               color: colorScheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Container(
-                            width: 6.w,
-                            height: 6.w,
-                            decoration: BoxDecoration(
-                              color: colorScheme.outline,
                               shape: BoxShape.circle,
                             ),
                           ),

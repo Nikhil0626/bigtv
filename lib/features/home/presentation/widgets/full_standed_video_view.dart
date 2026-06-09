@@ -68,31 +68,35 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
                     );
                   }
                 },
-                child: YoutubePlayer(
-                  controller: ytController!,
-                  // showVideoProgressIndicator: true,
-                  bottomActions: [
-                    CurrentPosition(),
-                    ProgressBar(
-                      isExpanded: true,
-                      colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
-                    ),
-                    RemainingDuration(),
-                    IconButton(
-                      icon: Icon(
-                        homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
-                        color: Colors.white,
+                child: YoutubePlayerBuilder(
+                  player: YoutubePlayer(
+                    controller: ytController!,
+                    // showVideoProgressIndicator: true,
+                    bottomActions: [
+                      CurrentPosition(),
+                      ProgressBar(
+                        isExpanded: true,
+                        colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
                       ),
-                      onPressed: () {
-                        if (homeProvider.isMuted) {
-                          ytController?.unMute();
-                        } else {
-                          ytController?.mute();
-                        }
-                        homeProvider.toggleMute(); // Update your isMuted state
-                      },
-                    ), // ✅ Show remaining time
-                  ],
+                      RemainingDuration(),
+                      IconButton(
+                        icon: Icon(
+                          homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          if (homeProvider.isMuted) {
+                            ytController?.unMute();
+                          } else {
+                            ytController?.mute();
+                          }
+                          homeProvider.toggleMute(); // Update your isMuted state
+                        },
+                      ), // ✅ Show remaining time
+                      FullScreenButton(),
+                    ],
+                  ),
+                  builder: (context, player) => player,
                 ),
               );
             }),

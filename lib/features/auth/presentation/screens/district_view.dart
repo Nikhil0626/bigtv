@@ -132,41 +132,27 @@ class _DistrictViewState extends State<DistrictView> {
                                           child: Builder(
                                             builder: (context) {
                                               String? imagePath;
-                                              if (stateName.toLowerCase().contains('telangana')) {
-                                                imagePath = 'assets/images/telangana.png';
-                                              } else if (stateName.toLowerCase().contains('andhra') || stateName.toLowerCase().contains('ap')) {
-                                                imagePath = 'assets/images/ap.png';
+                                              if (stateName.toLowerCase().contains('తెలంగాణ')) {
+                                                imagePath = 'assets/images/Telangana logo.png';
+                                              } else if (stateName.toLowerCase().contains('ఆంధ్రప్రదేశ్') || stateName.toLowerCase().contains('ap')) {
+                                                imagePath = 'assets/images/AP logo.png';
                                               }
 
                                               if (imagePath != null) {
-                                                return ShaderMask(
-                                                  shaderCallback: (rect) {
-                                                    return LinearGradient(
-                                                      begin: Alignment.centerLeft,
-                                                      end: Alignment.centerRight,
-                                                      colors: [
-                                                        Colors.transparent,
-                                                        Colors.white.withValues(alpha: isDark ? 0.4 : 0.8),
-                                                      ],
-                                                    ).createShader(rect);
-                                                  },
-                                                  blendMode: BlendMode.dstIn,
-                                                  child: Image.asset(
-                                                    imagePath,
-                                                    fit: BoxFit.cover,
+                                                return Padding(
+                                                  padding: EdgeInsets.only(right: 2.w),
+                                                  child: Align(
                                                     alignment: Alignment.centerRight,
-                                                    color: isDark ? Colors.white : null,
-                                                    colorBlendMode: isDark ? BlendMode.difference : null,
+                                                    child: Image.asset(
+                                                      imagePath,
+                                                      height: 120.sp,
+                                                      width: 120.sp,
+                                                      fit: BoxFit.cover,
+                                                    ),
                                                   ),
                                                 );
                                               } else {
-                                                return Icon(
-                                                  Icons.location_city,
-                                                  size: 80.sp,
-                                                  color: isSelected 
-                                                      ? colorScheme.primary.withValues(alpha: 0.1) 
-                                                      : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.05)),
-                                                );
+                                                return const SizedBox();
                                               }
                                             }
                                           ),
@@ -175,7 +161,7 @@ class _DistrictViewState extends State<DistrictView> {
                                       
                                       // Content
                                       Padding(
-                                        padding: EdgeInsets.symmetric(horizontal: 16.w),
+                                        padding: EdgeInsets.only(left: 16.w, right: 90.w),
                                         child: Row(
                                           children: [
                                             Icon(
@@ -336,15 +322,6 @@ class _DistrictViewState extends State<DistrictView> {
                             height: 6.w,
                             decoration: BoxDecoration(
                               color: colorScheme.primary,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          SizedBox(width: 8.w),
-                          Container(
-                            width: 6.w,
-                            height: 6.w,
-                            decoration: BoxDecoration(
-                              color: colorScheme.outline,
                               shape: BoxShape.circle,
                             ),
                           ),

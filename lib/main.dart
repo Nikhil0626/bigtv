@@ -23,6 +23,7 @@ import 'package:workmanager/workmanager.dart';
 
 import 'aggricator_screens/events_data/event_repo.dart';
 import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'aggricator_screens/splash_screen/splash_screen_view.dart';
 import 'globel_keys/globel_keys.dart';
 import 'core/theme/app_theme.dart';
@@ -66,6 +67,28 @@ Future<void> main() async {
     WebEngagePlugin.onPushMessageReceive(message.data);
   });
 
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    _handleBackgroundNotification(message.data);
+  });
+
+  FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+    if (message != null) {
+      _handleBackgroundNotification(message.data);
+    }
+  });
+
+  WebEngagePlugin().pushStream.listen((event) {
+    if (event.payload != null) {
+      _handleBackgroundNotification(event.payload!);
+    }
+  });
+
+  WebEngagePlugin().pushActionStream.listen((event) {
+    if (event.payload != null) {
+      _handleBackgroundNotification(event.payload!);
+    }
+  });
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -84,6 +107,16 @@ Future<void> main() async {
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   WebEngagePlugin.onPushMessageReceive(message.data);
+}
+
+Map<String, dynamic>? pendingPushPayload;
+
+void _handleBackgroundNotification(Map<String, dynamic> payload) {
+  if (mainNavigatorKey.currentContext != null) {
+    mainNavigatorKey.currentContext!.read<HomeProvider>().handleNotificationTap(payload);
+  } else {
+    pendingPushPayload = payload;
+  }
 }
 
 class MyApp extends StatefulWidget {

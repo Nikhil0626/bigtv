@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:chotanews/main.dart';
 import 'package:app_links/app_links.dart';
 import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/contest_screen/contest_provider.dart';
@@ -169,7 +170,7 @@ class HomeProvider extends ChangeNotifier {
           Future.delayed(
             const Duration(milliseconds: 100),
                 () {
-              if (!isLink && !isAds) {
+              if (!isAds) {
                 getAllPost(isGetAllPost: true);
               }
               if (isLink) {
@@ -217,9 +218,7 @@ class HomeProvider extends ChangeNotifier {
       Future.delayed(
         const Duration(milliseconds: 300),
             () {
-          if (!isLink) {
-            getAllPost(isGetAllPost: true);
-          }
+          getAllPost(isGetAllPost: true);
         },
       );
       isPostLoading = false;
@@ -229,9 +228,7 @@ class HomeProvider extends ChangeNotifier {
       Future.delayed(
         const Duration(milliseconds: 300),
             () {
-          if (!isLink) {
-            getAllPost(isGetAllPost: true);
-          }
+          getAllPost(isGetAllPost: true);
         },
       );
       isPostLoading = false;
@@ -479,25 +476,61 @@ class HomeProvider extends ChangeNotifier {
   void subscribeToPushCallbacks() {
     if (_isSubscribed) return;
     _isSubscribed = true;
-    log("pushActionStream: subscribing");
+    log("pushActionStream: checking pending payloads");
 
-    _webEngagePluginInstance.pushStream.listen((event) {
-      _handleNotificationTap(event.payload);
-    });
-
-    _webEngagePluginInstance.pushActionStream.listen((event) {
-      _handleNotificationTap(event.payload);
-    });
+    if (pendingPushPayload != null) {
+      postId = _extractPostIdSafely(pendingPushPayload);
+      Future.delayed(Duration.zero, () {
+        handleNotificationTap(pendingPushPayload);
+        pendingPushPayload = null;
+      });
+    }
   }
 
-  void _handleNotificationTap(Map<String, dynamic>? messagePayload) async {
+  String? _extractPostIdSafely(Map<String, dynamic>? payload) {
+    if (payload == null) return "0";
+    
+    String? foundId;
+    void search(Map m) {
+      m.forEach((k, v) {
+        if (foundId != null) return;
+        if (k == 'postId' || k == 'post_id') {
+          foundId = v.toString();
+        } else if (v is Map) {
+          search(v);
+        } else if (v is List) {
+          for (var item in v) {
+            if (item is Map) search(item);
+          }
+        }
+      });
+    }
+    
+    // Check WebEngage array style customData first
+    try {
+      if (payload['data'] != null && payload['data']['customData'] is List) {
+        for (var item in payload['data']['customData']) {
+          if (item is Map && (item['key'] == 'postId' || item['key'] == 'post_id')) {
+            return item['value'].toString();
+          }
+          // iOS WebEngage might just put the value in the first item without a key
+          if (item is Map && item.containsKey('value') && !item.containsKey('key')) {
+             return item['value'].toString();
+          }
+        }
+      }
+    } catch (e) {
+      log("Error checking iOS WebEngage customData: $e");
+    }
+
+    search(payload);
+    return foundId ?? "0";
+  }
+
+  void handleNotificationTap(Map<String, dynamic>? messagePayload) async {
     log("Notification tapped with payload: $messagePayload");
 
-    if (Platform.isIOS) {
-      postId = messagePayload?['data']['customData'][0]['value'] ?? "0";
-    } else {
-      postId = messagePayload?["postId"] ?? "0";
-    }
+    postId = _extractPostIdSafely(messagePayload);
 
     if (postId == "0") return;
 
@@ -507,17 +540,25 @@ class HomeProvider extends ChangeNotifier {
     getAllAiTagsPostList = [];
     isHomeLoading = true;
 
-    if (mainNavigatorKey.currentContext == null) {
+    if (mainNavigatorKey.currentState == null) {
       await Future.delayed(const Duration(milliseconds: 300));
-      if (mainNavigatorKey.currentContext == null) return;
+      if (mainNavigatorKey.currentState == null) {
+        isHomeLoading = false;
+        notifyListeners();
+        return;
+      }
     }
 
-    Navigator.of(mainNavigatorKey.currentContext!, rootNavigator: true).popUntil((route) => route.isFirst);
-    homePageController.jumpToPage(0);
+    mainNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+    if (homePageController.hasClients) {
+      homePageController.jumpToPage(0);
+    }
     getAllPostList = [];
     notifyListeners();
 
     await getIndividualPost(postId, isLink: true);
+    isHomeLoading = false;
+    notifyListeners();
   }
 
   StreamSubscription<Uri>? linkSubscription;
@@ -549,10 +590,8 @@ class HomeProvider extends ChangeNotifier {
       if (mainNavigatorKey.currentState != null) {
         mainNavigatorKey.currentState!.popUntil((route) => route.isFirst);
       }
-      if (mainNavigatorKey.currentContext != null) {
-        Navigator.of(mainNavigatorKey.currentContext!, rootNavigator: true).popUntil((route) => route.isFirst);
-      }
-      getIndividualPost(postId, isLink: false);
+      await getIndividualPost(postId, isLink: false);
+      isHomeLoading = false;
       notifyListeners();
     }
   }
