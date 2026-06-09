@@ -85,7 +85,7 @@ class LoginBackgroundView extends StatelessWidget {
               children: [
                 Positioned.fill(
                   child: Image.asset(
-                    "assets/images/login_image.png",
+                    "assets/images/login_image.jpg",
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
@@ -95,7 +95,7 @@ class LoginBackgroundView extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12.r),
                         ),
                         child: Text(
-                          "Please add 'login_image.png' to assets/images",
+                          "Please add 'login_image.jpg' to assets/images",
                           style: typography.bodySmall?.copyWith(color: Colors.grey, fontSize: 12.sp),
                         ),
                       );

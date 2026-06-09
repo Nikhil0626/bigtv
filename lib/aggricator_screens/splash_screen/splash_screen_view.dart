@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 import 'dart:async';
 
@@ -65,9 +66,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 height: MediaQuery.of(context).size.height,
                 width: MediaQuery.of(context).size.width,
                 color: Theme.of(context).scaffoldBackgroundColor,
-                child: Image.asset(
-                  "assets/svg/splash_video.gif",
-                  fit: BoxFit.cover,
+                child: Lottie.asset(
+                  "assets/svg/spinner.json",
+                  fit: BoxFit.contain,
                 ),
               )
             : SizedBox(

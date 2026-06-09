@@ -7,7 +7,7 @@ import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/services/register_provider.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 
-import 'package:easy_localization/easy_localization.dart';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +48,7 @@ Future<void> main() async {
   MobileAds.instance.updateRequestConfiguration(RequestConfiguration(testDeviceIds: ['14B2035F5FFE81424A56C13FE69A1545']));
   initPlugin();
   getReferrerFromPlayStore();
-  await EasyLocalization.ensureInitialized();
+
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.dark,
@@ -93,13 +93,7 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]).then((_) {
-    runApp(EasyLocalization(
-        supportedLocales: [
-          Locale('te'),
-        ],
-        path: 'assets/translations',
-        fallbackLocale: Locale("te"),
-        child: AppLifecycleManager(child: MyApp())));
+    runApp(AppLifecycleManager(child: MyApp()));
   });
 }
 
@@ -160,10 +154,10 @@ class _MyAppState extends State<MyApp> {
           builder: (context, themeProvider, child) {
             return MaterialApp(
               navigatorKey: mainNavigatorKey,
-              localizationsDelegates: context.localizationDelegates,
-              supportedLocales: const [Locale('te', '')],
-              // Add your locales
-              locale: _locale,
+
+              // supportedLocales: const [Locale('te', '')],
+              // // Add your locales
+              // locale: _locale,
               themeMode: themeProvider.themeMode,
               theme: AppTheme.lightTheme,
               darkTheme: AppTheme.darkTheme,
