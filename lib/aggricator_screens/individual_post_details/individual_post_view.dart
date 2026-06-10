@@ -363,12 +363,38 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     (article['content'] != "" && article['content'] != null && article['content'].toString().isNotEmpty)
-                                        ? Text(article['content'],
-                                        style: homeScreenFontStyle(
-                                          color: AppColors.textColor,
-                                          fontWeight: FontWeight.w500,
-                                          fontSize: 16.sp,
-                                        ))
+                                        ? (() {
+                                            String content = article['content'].toString();
+                                            List<String> words = content.split(RegExp(r'\s+'));
+                                            bool isOverflow = words.length > 30;
+                                            String displayContent = isOverflow ? words.take(30).join(' ') + "..." : content;
+                                            
+                                            return RichText(
+                                              text: TextSpan(
+                                                text: displayContent,
+                                                style: homeScreenFontStyle(
+                                                  color: AppColors.textColor,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 16.sp,
+                                                ),
+                                                children: [
+                                                  if (isOverflow)
+                                                    TextSpan(
+                                                      text: " Read more",
+                                                      style: homeScreenFontStyle(
+                                                        color: Colors.blue,
+                                                        fontWeight: FontWeight.w500,
+                                                        fontSize: 16.sp,
+                                                      ),
+                                                      recognizer: TapGestureRecognizer()
+                                                        ..onTap = () {
+                                                          _showBottomSheet(context, article);
+                                                        },
+                                                    ),
+                                                ],
+                                              ),
+                                            );
+                                          })()
                                         : const SizedBox.shrink(),
                                     if (article['content'] != "" && article['content'] != null && article['content'].toString().isNotEmpty) height(height: 8),
                                     Expanded(
@@ -438,7 +464,31 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                   text: TextSpan(
                                     text: '',
                                     children: [
-                                      ..._parseText(context, article['content'], article['links'], article),
+                                      ...(() {
+                                        String content = article['content']?.toString() ?? "";
+                                        List<String> words = content.split(RegExp(r'\s+'));
+                                        bool isOverflow = words.length > 30;
+                                        String displayContent = isOverflow ? words.take(30).join(' ') + "..." : content;
+                                        
+                                        List<TextSpan> spans = _parseText(context, displayContent, article['links'], article);
+                                        if (isOverflow) {
+                                          spans.add(
+                                            TextSpan(
+                                              text: " Read more",
+                                              style: homeScreenFontStyle(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 16.sp,
+                                              ),
+                                              recognizer: TapGestureRecognizer()
+                                                ..onTap = () {
+                                                  _showBottomSheet(context, article);
+                                                },
+                                            ),
+                                          );
+                                        }
+                                        return spans;
+                                      })(),
                                       if (article['isStickyPost'] != 1)
                                         TextSpan(
                                           children: [
@@ -479,6 +529,112 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
           }),
         ),
       ),
+    );
+  }
+
+  void _showBottomSheet(BuildContext context, dynamic article) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.85,
+          decoration: BoxDecoration(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Image.asset(
+                          "assets/images/BigTvPostLogo.png",
+                          height: 30.h,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) => Text(
+                            "News Details",
+                            style: homeScreenFontStyle(
+                              fontSize: 18.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    InkWell(
+                      onTap: () => Navigator.pop(context),
+                      child: Icon(Icons.close, color: AppColors.textColor),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (article['image_url'] != null && article['image_url'].toString().isNotEmpty)
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(12.r),
+                            child: CachedNetworkImage(
+                              imageUrl: (article['image_url'].toString().startsWith('http'))
+                                  ? article['image_url']
+                                  : "https://migwp.chotanews.com/${article['image_url']}",
+                              width: double.infinity,
+                              height: 250.h,
+                              fit: BoxFit.cover,
+                              placeholder: (context, url) => Container(
+                                color: AppColors.borderColor.withValues(alpha: .2),
+                              ),
+                              errorWidget: (context, url, error) => Center(
+                                child: Icon(
+                                  Icons.image,
+                                  size: 100,
+                                  color: Colors.grey.shade300,
+                                ),
+                              ),
+                            ),
+                          ),
+                        SizedBox(height: 16.h),
+                        Text(
+                          article['title'] ?? "",
+                          style: homeScreenFontStyle(
+                            color: AppColorTokens.primaryRed,
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        RichText(
+                          text: TextSpan(
+                            children: _parseText(
+                              context, 
+                              article['content'] ?? "", 
+                              article['links'], 
+                              {'subType': 'Standard'} // Force standard colors for bottom sheet
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 30.h),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
