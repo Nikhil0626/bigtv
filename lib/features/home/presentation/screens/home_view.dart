@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
@@ -20,7 +19,7 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:provider/provider.dart';
 
 
@@ -94,7 +93,7 @@ class _HomeViewState extends State<HomeView> {
                         },
                         children: [MainScreenCard(), ReelsScreen(), KeepAlivePage(keepAlive: true, child: SettingsView())],
                       ),
-                      if (homeProvider.isBottomEnable && context.watch<SettingsProvider>().bannerAdsLoading != BannerAdsLoading.success)
+                      if (homeProvider.isBottomEnable)
                         Align(
                           alignment: Alignment.bottomCenter,
                           child: SafeArea(
@@ -169,7 +168,7 @@ class _HomeViewState extends State<HomeView> {
                                           colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                         ),
                                       ),
-                                      label: 'news',
+                                      label: 'వార్తలు',
                                     ),
                                     BottomNavigationBarItem(
                                       icon: SvgPicture.asset(
@@ -188,7 +187,7 @@ class _HomeViewState extends State<HomeView> {
                                           colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                         ),
                                       ),
-                                      label: 'reels',
+                                      label: 'రీల్స్',
                                     ),
                                     BottomNavigationBarItem(
                                       icon: SvgPicture.asset(
@@ -207,7 +206,7 @@ class _HomeViewState extends State<HomeView> {
                                           colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                                         ),
                                       ),
-                                      label: 'more',
+                                      label: 'మరిన్ని',
                                     ),
                                   ],
                                 ),
@@ -218,54 +217,6 @@ class _HomeViewState extends State<HomeView> {
                   ),
                                 ],
                               ),
-                  bottomNavigationBar:Platform.isIOS?Consumer<AdMobBannerProvider>(
-                    builder: (_, adMobBannerProvider, __) {
-                      final currentIndex = adMobBannerProvider.currentPageIndex;
-                      final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
-                      if (adsList.isEmpty) {
-                        return const SizedBox.shrink();
-                      } else if ((currentIndex + 1) % 5 == 0) {
-                        return const SizedBox.shrink();
-                      } else {
-                        log("siva new ${adsList.last}");
-                        return  Container(
-                          height: 50,
-                          width: MediaQuery.of(context).size.width,
-                          alignment: Alignment.center,
-                          child: Container(
-                            height: 50,
-                            width: 320,
-                            color: Colors.white,
-                            alignment: Alignment.center,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2.0),
-                              child: Center(child: AdWidget(ad: adsList.last)),
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                  ): SafeArea(
-                    child: Consumer<AdMobBannerProvider>(
-                      builder: (_, adMobBannerProvider, __) {
-                        final currentIndex = adMobBannerProvider.currentPageIndex;
-                        final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
-                        if (adsList.isEmpty) {
-                          return const SizedBox.shrink();
-                        } else if ((currentIndex + 1) % 5 == 0) {
-                          return const SizedBox.shrink();
-                        } else {
-                          log("siva new ${adsList.last}");
-                          return  Container(
-                            height: 50,
-                            width: MediaQuery.of(context).size.width,
-                            alignment: Alignment.center,
-                            child: Center(child: AdWidget(ad: adsList[adsList.length-1])),
-                          );
-                        }
-                      },
-                    ),
-                  ),
                 );
           },
         ),

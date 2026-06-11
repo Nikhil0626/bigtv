@@ -11,7 +11,7 @@ import '../../../../utils/app_colors.dart';
 import '../../../../utils/app_enums.dart';
 import '../../../../utils/app_fonts.dart';
 import '../../../../utils/app_spaces.dart';
-import '../../../ad_manager_screen/ad_screen/banner_300x50_size.dart';
+
 
 class UpdateCategoriesView extends StatefulWidget {
   const UpdateCategoriesView({super.key});
@@ -69,7 +69,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
             child: Column(
               children: [
                 height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success || settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
-                Banner300x50Size(),
+
                 height(height: 10),
                 Expanded(
                   child: authenticationProvider.isCatLoading

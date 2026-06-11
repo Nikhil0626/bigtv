@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/android_ads_view.dart';
+
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_screen.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_view/movie_reviews.dart';
@@ -25,7 +25,7 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/utils/botton_actions.dart';
 import 'package:chotanews/utils/commant_screen.dart';
 import 'package:chotanews/utils/date_format.dart';
-import 'package:chotanews/utils/image_view_ads.dart';
+
 import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:flutter/gestures.dart';
@@ -40,6 +40,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:chotanews/utils/image_post_slider.dart';
 class MainScreenBytView extends StatefulWidget {
   final article;
   final pageController;
@@ -209,19 +210,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                         title: '',
                                       ),
                                     )
-                                  : widget.article['type'] == "GoogleAds"
-                                      ? AndroidAdsView(
-                                          article: widget.article,
-                                          index: widget.index,
-                                        )
-                                      : widget.article['type'] == "Reel"
+                                  : widget.article['type'] == "Reel"
                                           ? FullStandardVideoView(
                                               reelData: widget.article,
                                             )
-                                          : (widget.article['type'] ==
-                                                      "Image" &&
-                                                  widget.article['subType'] !=
-                                                      "ImageAd")
+                                          : widget.article['type'] == "Image"
                                               ? Stack(
                                                   children: [
                                                     Image.network(

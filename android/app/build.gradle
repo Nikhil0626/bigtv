@@ -42,9 +42,7 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        ndk {
-            abiFilters 'armeabi-v7a', 'arm64-v8a'
-        }
+
     }
 
     signingConfigs {
@@ -73,7 +71,7 @@ flutter {
 dependencies {
     implementation platform('com.google.firebase:firebase-bom:33.1.0')
     implementation 'androidx.multidex:multidex:2.0.1'
-    implementation 'com.google.android.gms:play-services-ads:23.3.0'
+
     implementation 'androidx.cardview:cardview:1.0.0'
     implementation 'com.google.android.gms:play-services-appset:16.0.2'
     implementation 'androidx.constraintlayout:constraintlayout:2.2.1'

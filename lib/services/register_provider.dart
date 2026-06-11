@@ -3,8 +3,7 @@ import 'package:chotanews/features/auth/presentation/providers/authentication_pr
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
-import '../aggricator_screens/ad_manager_screen/ad_provider/banner_ads_provider.dart';
+
 import '../aggricator_screens/contest_screen/contest_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/news_posts_provider.dart';
@@ -30,10 +29,10 @@ class AppProviders {
     ChangeNotifierProvider<ProfileProvider>(create: (_) => ProfileProvider()),
     ChangeNotifierProvider<ReferralProvider>(create: (_) => ReferralProvider()),
     ChangeNotifierProvider<RatingProvider>(create: (_) => RatingProvider()),
-    ChangeNotifierProvider<BannerAdsProvider>(create: (_) => BannerAdsProvider()),
+
     ChangeNotifierProvider<PollProvider>(create: (_) => PollProvider()),
     ChangeNotifierProvider<AdsContestProvider>(create: (_) => AdsContestProvider()),
-    ChangeNotifierProvider<AdMobBannerProvider>(create: (_) => AdMobBannerProvider()),
+
     ChangeNotifierProvider<VideoProvider>(create: (_) => VideoProvider()),
     ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
     ChangeNotifierProvider<WebViewProvider>(create: (_) => WebViewProvider()),

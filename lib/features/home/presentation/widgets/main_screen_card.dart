@@ -1,5 +1,5 @@
 
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
+
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/loading_screen/home_shimmer.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
@@ -28,20 +28,12 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   List<Map<String, dynamic>> removedCards = [];
   Offset slideOffset = Offset.zero;
   bool isAnimating = false;
-  AdMobBannerProvider? bannerAdsProvider;
-
   @override
   void initState() {
     super.initState();
-    bannerAdsProvider = Provider.of<AdMobBannerProvider>(context, listen: false);
-    bannerAdsProvider!.adsDispose();
     context.read<HomeProvider>().getAllAiTags();
     if (context.read<HomeProvider>().postId.toString() == "0") {
-      context.read<HomeProvider>().getAllPost().then(
-        (value) {
-          bannerAdsProvider?.adsLoad();
-        },
-      );
+      context.read<HomeProvider>().getAllPost();
     }
   }
 
@@ -69,7 +61,6 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    context.read<HomeProvider>().isBannerAdLoaded(false);
     return Scaffold(
       body: Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
         return SafeArea(

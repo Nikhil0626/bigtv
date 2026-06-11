@@ -6,7 +6,7 @@ import 'package:chotanews/features/auth/presentation/providers/authentication_pr
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
 import 'package:chotanews/utils/app_no_data.dart';
-import 'package:chotanews/utils/image_view_ads.dart';
+import 'package:chotanews/utils/image_post_slider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';

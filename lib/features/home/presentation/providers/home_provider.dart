@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:chotanews/main.dart';
 import 'package:app_links/app_links.dart';
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
+
 import 'package:chotanews/aggricator_screens/contest_screen/contest_provider.dart';
 import 'package:chotanews/aggricator_screens/contest_screen/contest_screen.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
@@ -21,7 +21,7 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -38,19 +38,13 @@ import 'dart:typed_data';
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
-  List getRecommendedPostList = [];
+
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
   List getAllSurveyDataList = [];
   List getImageAdsList = [];
 
-  String adManageId = "";
-  String adManagerNativeId = "";
-  String adManagerBannerId = "";
-  String adMobNativeId = "";
-  String adMobBannerId = "";
-  String adMobStickBannerId = "";
-  String adManagerStickBannerId = "";
+
 
   var getSinglePostList = {};
   int aiCurrentPostId = 0;
@@ -269,7 +263,7 @@ class HomeProvider extends ChangeNotifier {
       getAllPostList = [];
     }
     isBookMark = [];
-    getRecommendedPostList = [];
+
     isWebView = false;
     webUrl = "";
     allPostLastId = "0";
@@ -290,7 +284,7 @@ class HomeProvider extends ChangeNotifier {
         .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
     log('Category IDs: $categoriesIds');
 
-    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true, "isBigTv": true};
+    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": false, "isBigTv": true};
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
@@ -299,25 +293,8 @@ class HomeProvider extends ChangeNotifier {
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
       allPostLastId = response.data['lastId'].toString();
-      adManageId = Platform.isIOS ? response.data['adUnits']['ios']['admanageid'] : response.data['adUnits']['android']['admanageid'];
-      adManagerNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admanagernativeid'] : response.data['adUnits']['android']['admanagernativeid'];
-      adManagerBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerbannerid'] : response.data['adUnits']['android']['admanagerbannerid'];
-      adMobNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admobnativeid'] : response.data['adUnits']['android']['admobnativeid'];
-      adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
-
-      adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
-      adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mainNavigatorKey.currentContext != null) {
-          final bannerAdsProvider = Provider.of<AdMobBannerProvider>(mainNavigatorKey.currentContext!, listen: false);
-          bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
-        }
-      });
-
       getImageAdsList.addAll(response.data['ads_list']);
-      getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
-      log("adMobStickBannerId: $adMobStickBannerId --- $adManagerStickBannerId");
+
       if (isWebView) {
         getAllPostList.insert(0, {
           "id": 000000,
@@ -391,7 +368,7 @@ class HomeProvider extends ChangeNotifier {
       "deviceid": deviceId ?? "",
       "aitagid": postId,
       "user_id": userId ?? "",
-      "isAdManager": "true",
+      "isAdManager": "false",
       "isBigTv": "true",
     };
     log(body.toString());

@@ -1,4 +1,4 @@
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_screen/banner_300x50_size.dart';
+
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
@@ -69,7 +69,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
             child: Column(
               children: [
                 height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success || settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
-                Banner300x50Size(),
+
                 height(height: 10),
                 Expanded(
                   child: authenticationProvider.isCatLoading

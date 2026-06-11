@@ -25,14 +25,12 @@ class ImagePostSlider extends StatelessWidget {
             return ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: CachedNetworkImage(
-                imageUrl: imageUrl[index],
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                fit: BoxFit.fill,
-                placeholder: (context, url) => Container(
-                  color: Colors.grey.shade200,
-                  child: const Center(
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                imageUrl: imageUrl[index]['Url'].toString(),
+                fit: BoxFit.cover,
+                width: double.infinity,
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.red,
                   ),
                 ),
                 errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 60, color: Colors.grey),

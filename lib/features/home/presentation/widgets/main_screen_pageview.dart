@@ -2,13 +2,11 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:ui';
 
-import 'package:chotanews/aggricator_screens/ad_manager_screen/ad_provider/ad_mob_banner_provider.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'main_screen_byts_view.dart';
 
@@ -77,28 +75,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                               if (FocusScope.of(context).hasFocus) {
                                 FocusScope.of(context).unfocus();
                               }
-                              _handlePageChanged(value);
 
-                              final adKeys = context.read<AdMobBannerProvider>().ads.length;
-
-                              context.read<AdMobBannerProvider>().changePageIndex(value);
-
-                              log(" Last Index of ads data $adKeys ----- $value --- ${adKeys * 5} ---${context.read<AdMobBannerProvider>().ads}");
-
-                              if (value == (adKeys * 5)) {
-                                int? lastKey = context.read<AdMobBannerProvider>().ads.keys.isNotEmpty ? context.read<AdMobBannerProvider>().ads.keys.last : adKeys;
-
-                                context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 4, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 3, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 2, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 1, AdSize.mediumRectangle);
-                              } else if (value == 3 && context.read<AdMobBannerProvider>().ads.isEmpty) {
-                                int? lastKey = 0;
-                                context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 4, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 3, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 2, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 1, AdSize.mediumRectangle);
-                              }
 
                               if (homeProvider.isBottomEnable) {
                                 homeProvider.pageChange(isValue: false);
@@ -113,14 +90,14 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
                               context.read<HomeProvider>().flipEvent(
                                     'news',
-                                    homeProvider.getAllPostList[_getNewsIndex(value)]['id'],
+                                    homeProvider.getAllPostList[value]['id'],
                                     value > autoIndex ? true : false,
                                   );
                               autoIndex = value;
 
                               final now = DateTime.now();
                               final duration = now.difference(_pageStartTime ?? now);
-                              AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[_getNewsIndex(value)]['id']);
+                              AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
 
                               setState(() {
                                 _pageStartTime = now;
@@ -168,41 +145,4 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
       ),
     );
   }
-
-
-  int _getNewsIndex(int builderIndex) {
-    const adEvery = 5;
-    final adsBefore = builderIndex ~/ (adEvery + 1);
-    final newsIndex = builderIndex - adsBefore;
-    if (newsIndex >= homeProvider!.getAllPostList.length) {
-      return homeProvider!.getAllPostList.length - 1;
-    }
-    return newsIndex;
-  }
-
-  void _handlePageChanged(int value) {
-
-    final adMobProvider = context.read<AdMobBannerProvider>();
-    final adStickyKeys = adMobProvider.adsBanner320x50.length;
-
-
-    log("Last Index of Sticky ads data ${adMobProvider.adsBanner320x50}");
-
-    if (value == (adStickyKeys * 4)) {
-      int? lastStickyKey = adMobProvider.adsBanner320x50.keys.isNotEmpty
-          ? adMobProvider.adsBanner320x50.keys.last
-          : adStickyKeys;
-
-      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 1, AdSize.banner);
-    } else if (value == 1 && adMobProvider.adsBanner320x50.isNotEmpty) {
-      int? lastStickyKey = 0;
-      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 1, AdSize.banner);
-
-    }
-  }
 }
-
-
-
-
-

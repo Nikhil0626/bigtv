@@ -13,7 +13,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
+
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -43,9 +43,7 @@ Future<void> main() async {
   await Hive.openBox('events');
   await Hive.openBox('pollBox');
   EventCron().start();
-  MobileAds.instance.initialize();
 
-  MobileAds.instance.updateRequestConfiguration(RequestConfiguration(testDeviceIds: ['14B2035F5FFE81424A56C13FE69A1545']));
   initPlugin();
   getReferrerFromPlayStore();
 
@@ -54,7 +52,7 @@ Future<void> main() async {
     statusBarIconBrightness: Brightness.dark,
   ));
   checkForUpdate();
-  unawaited(MobileAds.instance.initialize());
+
   await Firebase.initializeApp();
   AnalyticsService.logAppOpen();
   AnalyticsService().trackAppOpen();
