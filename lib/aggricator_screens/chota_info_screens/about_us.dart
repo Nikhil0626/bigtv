@@ -65,21 +65,10 @@ class AboutUs extends StatelessWidget {
                   children: [
                     height(height: 10),
                     Text(
-                      "Chota News",
+                      "Bigtv News",
                       style: fontStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    height(height: 10),
-                    InkWell(
-                      onTap: () => _launchEmail("info@chotanews.com"), // Updated
-                      child: Text(
-                        "info@chotanews.com",
-                        style: fontStyle(
-                          fontSize: 16,
-                          color: Colors.blue,
-                        ),
                       ),
                     ),
                   ],
@@ -87,7 +76,7 @@ class AboutUs extends StatelessWidget {
               ),
               height(height: 20),
               Text(
-                "Chota News is a first of its kind unique mobile media company in the country. We produce & distribute “Made for Mobile Content” to Indian local language audience. Like TV media & Print media, we are building a technology-based mobile media company with short news and other rich content in local languages.",
+                "Bigtv News is a first of its kind unique mobile media company in the country. We produce & distribute “Made for Mobile Content” to Indian local language audience. Like TV media & Print media, we are building a technology-based mobile media company with short news and other rich content in local languages.",
                 style: fontStyle(fontSize: 14),
                 textAlign: TextAlign.justify,
               ),
@@ -100,22 +89,7 @@ class AboutUs extends StatelessWidget {
                 ),
               ),
               height(height: 10),
-              ContactDetailTile(
-                title: "For support/feedback queries",
-                email: "info@chotanews.com",
-                onEmailTap: () => _launchEmail("info@chotanews.com"), // Added tap behavior
-              ),
 
-              ContactDetailTile(
-                title: "For advertising/partnership enquiries",
-                email: "advertising@chotanews.com", 
-                onEmailTap: () => _launchEmail("advertising@chotanews.com"),
-              ),
-              ContactDetailTile(
-                title: "For complaints, queries, or grievances",
-                email: "grievance@chotanews.com", 
-                onEmailTap: () => _launchEmail("grievance@Chotanews.com"),
-              ),
               height(height: 20),
               Text(
                 "Address",
@@ -131,7 +105,7 @@ class AboutUs extends StatelessWidget {
               ),
               height(height: 10),
               InkWell(
-                onTap: () => _launchPhone("+918121031063"), // Updated
+                onTap: () => _launchPhone("+91 81210 31061"), // Updated
                 child: RichText(
                   text: TextSpan(
                     children: [
@@ -140,7 +114,7 @@ class AboutUs extends StatelessWidget {
                         style: fontStyle(fontSize: 16, color: Colors.black),
                       ),
                       TextSpan(
-                        text: "+91 81210 31063",
+                        text: "+91 81210 31061",
                         style: fontStyle(fontSize: 16, color: Colors.lightBlue), // Light blue color for number
                       ),
                     ],

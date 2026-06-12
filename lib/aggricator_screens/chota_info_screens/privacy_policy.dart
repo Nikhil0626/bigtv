@@ -81,20 +81,20 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              sectionContent("Please carefully read our privacy policies. This provides important details on Your rights and obligations. The data collection, use, storage, and disclosure procedures for the desktop and mobile apps of ChotaNews are described in this privacy statement (hereafter referred to as You, Your, or User). This privacy statement applies to the ChotaNews mobile application (hereinafter referred to as (App), which is owned by ChotaNews Private Limited. By downloading, installing, or using this App, you consent to the use of Your personal information as stated in this privacy notice. By downloading, installing, using, or creating a ChotaNews profile, you consent to the collection, transfer, storage, disclosure, and other uses of Your information as outlined in this Privacy Policy.\n "),
+              sectionContent("Please carefully read our privacy policies. This provides important details on Your rights and obligations. The data collection, use, storage, and disclosure procedures for the desktop and mobile apps of Bigtv News are described in this privacy statement (hereafter referred to as You, Your, or User). This privacy statement applies to the Bigtv News mobile application (hereinafter referred to as (App), which is owned by Bigtv News Private Limited. By downloading, installing, or using this App, you consent to the use of Your personal information as stated in this privacy notice. By downloading, installing, using, or creating a Bigtv News profile, you consent to the collection, transfer, storage, disclosure, and other uses of Your information as outlined in this Privacy Policy.\n "),
               height(height: 10),
                Text(
                   "This privacy notice does not cover any websites, services, applications, or businesses provided by "
-                  "third parties that ChotaNews does not own, control, or have any influence over Third Party Services."
-                  " ChotaNews explicitly disclaims liability for any privacy policies or data collection procedures used by"
+                  "third parties that Bigtv News does not own, control, or have any influence over Third Party Services."
+                  " Bigtv News explicitly disclaims liability for any privacy policies or data collection procedures used by"
                   " third-party services",style: fontStyle(fontSize: 14),),
               height(height: 10),
                Text(
                   "If you don't agree with any of the terms and conditions of the App, you shouldn't download, install, or use it. "
-                  "ChotaNews has the right to make changes at any moment and without prior notice. By downloading, installing, and/or using this programme, "
+                  "Bigtv News has the right to make changes at any moment and without prior notice. By downloading, installing, and/or using this programme, "
                   "you consent to be governed by any such revisions, additions, amendments, or modifications.",style: fontStyle(fontSize: 14),),
               height(height: 10),
-               Text("Information the user provides to ChotaNews:",style: fontStyle(fontSize: 14),),
+               Text("Information the user provides to Bigtv News:",style: fontStyle(fontSize: 14),),
               height(height: 5),
                Text("Information That Identifies Any Individual ",style: fontStyle(fontSize: 14),),
               height(height: 10),
@@ -113,22 +113,22 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                Text(
                   "The programme delivers news and content to users in accordance with their consent and in accordance with their location. ",style: fontStyle(fontSize: 14),),
               height(height: 10),
-               Text("What makes use of the data that ChotaNews gathers? ",style: fontStyle(fontSize: 14),),
+               Text("What makes use of the data that Bigtv News gathers? ",style: fontStyle(fontSize: 14),),
               height(height: 10),
                Text(
-                  "ChotaNews may collect and use your personal information for the following purposes:",style: fontStyle(fontSize: 14),),
+                  "Bigtv News may collect and use your personal information for the following purposes:",style: fontStyle(fontSize: 14),),
               height(height: 10),
                Text(
-                  "When you login to the App, we recognise you using your email address. Based on the content and personally identifiable information pertaining to You, ChotaNews may be able to control Your access to and use of the App, communicate with the User, customise Your experience using the "
-                  "App, and/or the content of any email newsletter or other components that ChotaNews may occasionally send to You. ",style: fontStyle(fontSize: 14),),
+                  "When you login to the App, we recognise you using your email address. Based on the content and personally identifiable information pertaining to You, Bigtv News may be able to control Your access to and use of the App, communicate with the User, customise Your experience using the "
+                  "App, and/or the content of any email newsletter or other components that Bigtv News may occasionally send to You. ",style: fontStyle(fontSize: 14),),
               height(height: 10),
                Text(
-                  "Your email address will be used to send you user information, administrative updates, changes to your account setup, and other App-related information, as well as to keep you informed of any changes to ChotaNews policies. "
-                  "In addition to this, you will occasionally receive emails with information about the firm, relevant products or services, etc. Additionally, email addresses could be utilised to react to any requests you make via queries or other forms of communication. ChotaNews has given comprehensive unsubscribe instructions at the bottom of each email in case You ever wish to stop receiving future newsletters.  To prevent or stop acts that are against the ChotaNews "
-                  "User Agreement, Terms and Conditions, and other relevant laws, ChotaNews may utilise the personal information given by the User. How ChotaNews protects user data ",style: fontStyle(fontSize: 14),),
+                  "Your email address will be used to send you user information, administrative updates, changes to your account setup, and other App-related information, as well as to keep you informed of any changes to Bigtv News policies. "
+                  "In addition to this, you will occasionally receive emails with information about the firm, relevant products or services, etc. Additionally, email addresses could be utilised to react to any requests you make via queries or other forms of communication. Bigtv News has given comprehensive unsubscribe instructions at the bottom of each email in case You ever wish to stop receiving future newsletters.  To prevent or stop acts that are against the Bigtv News "
+                  "User Agreement, Terms and Conditions, and other relevant laws, Bigtv News may utilise the personal information given by the User. How Bigtv News protects user data ",style: fontStyle(fontSize: 14),),
               height(height: 10),
                Text(
-                  "ChotaNews adheres to the necessary data collection, storage, and processing policies and security measures to guard against unauthorised access, alteration, disclosure, or destruction of Your personal information, login, password, and data stored on the App. ChotaNews is "
+                  "Bigtv News adheres to the necessary data collection, storage, and processing policies and security measures to guard against unauthorised access, alteration, disclosure, or destruction of Your personal information, login, password, and data stored on the App. Bigtv News is "
                   "unable to guarantee the security of any information obtained by unauthorised access, use,"
                   " hardware or software failures, or other situations that might, at any time, damage the privacy of "
                   "users' personal information. In order to prevent unauthorised access to his or her account and personal"
@@ -137,31 +137,31 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
               // Section 2: Data Collection
               sectionTitle("Sharing identity and security details ",),
               sectionContent(
-                  "Except as indicated in this Policy, ChotaNews does not transfer, sell, or rent Your personally identifiable "
+                  "Except as indicated in this Policy, Bigtv News does not transfer, sell, or rent Your personally identifiable "
                   "information to outsiders. "
-                  "For the aforementioned reasons, ChotaNews may divulge generic aggregated demographic data about its users"
+                  "For the aforementioned reasons, Bigtv News may divulge generic aggregated demographic data about its users"
                   " and visitors to its business partners, "
                   "dependable affiliates, and advertisers. This data will not include any personally identifying information."
                   ),
               height(height: 10),
               Text(
-                  "ChotaNews sometimes could be required by law or litigation to divulge personal information about users. ChotaNews may also "
+                  "Bigtv News sometimes could be required by law or litigation to divulge personal information about users. Bigtv News may also "
                       "provide information on the user if it determines that doing so is necessary for reasons of law enforcement,"
                       " national security, or other causes of public importance.",style: fontStyle(fontSize: 14),),
               height(height: 10),
               Text(
-                  "ChotaNews retains the right to transfer users' personal information to a third party in the case of a merger, "
+                  "Bigtv News retains the right to transfer users' personal information to a third party in the case of a merger, "
                   "acquisition, or sale of all or a portion of the company's assets. ",style: fontStyle(fontSize: 14),),
               height(height: 10),
               Text(
-                  "Users Have Options Regarding How Their Information Is Used If you are a user who occasionally receives such emails, you have the option to quitof receiving marketing or promotional emails from ChotaNews by following the instructions in such emails. ChotaNews may nevertheless send the user emails pertaining to his or her"
+                  "Users Have Options Regarding How Their Information Is Used If you are a user who occasionally receives such emails, you have the option to quitof receiving marketing or promotional emails from Bigtv News by following the instructions in such emails. Bigtv News may nevertheless send the user emails pertaining to his or her"
                   " account or any continuing business connections even if they are not promotional emails. ",style: fontStyle(fontSize: 14),),
 
               // Section 3: How We Use Your Data
               sectionTitle("Modifications to this Terms Of service ",),
               sectionContent(
-                  "This Privacy Policy could be revised and updated from time to time by ChotaNews. The updated Privacy Policy will be made available here, at "
-                  "https://www.chotanews.com/privacy-policy.php, as a notification. It is advised that you often visit this page to learn about updates to the Privacy Policy. "
+                  "This Privacy Policy could be revised and updated from time to time by Bigtv News. The updated Privacy Policy will be made available here, at "
+                  "https://www.bigtvnews.com/privacy-policy.php, as a notification. It is advised that you often visit this page to learn about updates to the Privacy Policy. "
                   "You acknowledge and agree that it is Your responsibility to frequently review this Privacy Policy and keep up with any updates. "
                   "If you object to any updates to the Privacy Policy, you must not use or access the App. If you use the App following the posting of the modified Policy, "
                   "you will be assumed to have accepted and acknowledged the changes."),
@@ -172,55 +172,6 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                   "You confirm that you have read and agree to the Privacy Policy by using this App. "
                   "You are not allowed to use or access this application if you disagree with our privacy policy. "
                   "If this Privacy Policy is revised and you continue to use the App, it will be considered that you agree to the revised policy."),
-
-
-              height(height: 20),
-              Text(
-                "Contact Details",
-                style: fontStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              height(height: 10),
-              ContactDetailTile(
-                title: "For any support/feedback queries,please write to",
-                email: " info@chotanews.com",
-                onEmailTap: () => _launchEmail("info@chotanews.com"),
-              ),
-              height(height: 10),
-              ContactDetailTile(
-                title: "For advertising/partnership enquiries, please write to",
-                email: " advertising@chotanews.com",
-                onEmailTap: () =>
-                    _launchEmail("advertising@chotanews.com"),
-              ),
-              height(height: 10),
-              ContactDetailTile(
-                title:
-                    "For any complaints,queries, or grievances, please write to",
-                email: " grievance@chotanews.com",
-                onEmailTap: () => _launchEmail("grievance@chotanews.com"),
-              ),
-              height(height: 20),
-              Text(
-                "Address",
-                style: fontStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              height(height: 10),
-              Text(
-                "Pravasa Media LLP\nDwaraka Trident, 4th Floor\nKavuri Hills, JubileeHills, Hyderabad,\nTelangana 500033",
-                style: fontStyle(fontSize: 14),
-              ),
-              height(height: 10),
-              ContactDetailTile(
-                title: "Phone: ",
-                email: "+91 9440913555",
-                onEmailTap: () => _launchPhone("+91 9440913555"),
-              ),
             ],
           ),
         ),

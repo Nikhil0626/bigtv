@@ -8,7 +8,8 @@ import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/services/deviice_details.dart';
-
+import 'package:chotanews/aggricator_screens/chota_info_screens/terms_conditions.dart';
+import 'package:chotanews/aggricator_screens/chota_info_screens/privacy_policy.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -415,10 +416,7 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const InAppWebViewScreen(
-                              webUrl: BaseUrls.termsPage,
-                              title: "Terms & Conditions",
-                            ),
+                            builder: (context) => const TermsConditions(),
                           ),
                         );
                       },
@@ -442,10 +440,7 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const InAppWebViewScreen(
-                              webUrl: BaseUrls.privacyPage,
-                              title: "Privacy policy",
-                            ),
+                            builder: (context) => const PrivacyPolicy(),
                           ),
                         );
                       },

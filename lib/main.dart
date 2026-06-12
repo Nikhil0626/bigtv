@@ -76,14 +76,14 @@ Future<void> main() async {
   });
 
   WebEngagePlugin().pushStream.listen((event) {
-    if (event.payload != null) {
-      _handleBackgroundNotification(event.payload!);
+    if (event.payload != null || event.deepLink != null) {
+      _handleBackgroundNotification(event.payload, deepLink: event.deepLink);
     }
   });
 
   WebEngagePlugin().pushActionStream.listen((event) {
-    if (event.payload != null) {
-      _handleBackgroundNotification(event.payload!);
+    if (event.payload != null || event.deepLink != null) {
+      _handleBackgroundNotification(event.payload, deepLink: event.deepLink);
     }
   });
 
@@ -102,12 +102,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 Map<String, dynamic>? pendingPushPayload;
+String? pendingDeepLink;
 
-void _handleBackgroundNotification(Map<String, dynamic> payload) {
+void _handleBackgroundNotification(Map<String, dynamic>? payload, {String? deepLink}) {
   if (mainNavigatorKey.currentContext != null) {
-    mainNavigatorKey.currentContext!.read<HomeProvider>().handleNotificationTap(payload);
+    mainNavigatorKey.currentContext!.read<HomeProvider>().handleNotificationTap(payload, deepLink: deepLink);
   } else {
-    pendingPushPayload = payload;
+    pendingPushPayload = payload ?? {};
+    pendingDeepLink = deepLink;
   }
 }
 

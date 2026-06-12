@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
@@ -455,11 +456,11 @@ class HomeProvider extends ChangeNotifier {
     _isSubscribed = true;
     log("pushActionStream: checking pending payloads");
 
-    if (pendingPushPayload != null) {
-      postId = _extractPostIdSafely(pendingPushPayload);
+    if (pendingPushPayload != null || pendingDeepLink != null) {
       Future.delayed(Duration.zero, () {
-        handleNotificationTap(pendingPushPayload);
+        handleNotificationTap(pendingPushPayload, deepLink: pendingDeepLink);
         pendingPushPayload = null;
+        pendingDeepLink = null;
       });
     }
   }
@@ -483,10 +484,27 @@ class HomeProvider extends ChangeNotifier {
       });
     }
     
-    // Check WebEngage array style customData first
+    // Check WebEngage array style customData directly or inside 'data'
     try {
-      if (payload['data'] != null && payload['data']['customData'] is List) {
-        for (var item in payload['data']['customData']) {
+      List? customDataList;
+      var customData = payload['customData'] ?? (payload['data'] != null ? payload['data']['customData'] : null);
+      if (customData is String) {
+        try {
+          var decoded = jsonDecode(customData);
+          if (decoded is List) {
+            customDataList = decoded;
+          } else if (decoded is Map) {
+             search(decoded); // In case it's a map not list
+          }
+        } catch (e) {
+          log("Error decoding WebEngage customData JSON string: $e");
+        }
+      } else if (customData is List) {
+        customDataList = customData;
+      }
+      
+      if (customDataList != null) {
+        for (var item in customDataList) {
           if (item is Map && (item['key'] == 'postId' || item['key'] == 'post_id')) {
             return item['value'].toString();
           }
@@ -497,19 +515,33 @@ class HomeProvider extends ChangeNotifier {
         }
       }
     } catch (e) {
-      log("Error checking iOS WebEngage customData: $e");
+      log("Error checking WebEngage customData: $e");
     }
 
     search(payload);
     return foundId ?? "0";
   }
 
-  void handleNotificationTap(Map<String, dynamic>? messagePayload) async {
-    log("Notification tapped with payload: $messagePayload");
+  void handleNotificationTap(Map<String, dynamic>? messagePayload, {String? deepLink}) async {
+    log("Notification tapped with payload: $messagePayload, deepLink: $deepLink");
 
-    postId = _extractPostIdSafely(messagePayload);
+    if (deepLink != null && deepLink.isNotEmpty) {
+      try {
+        Uri uri = Uri.parse(deepLink);
+        final String? id = uri.queryParameters['postId'] ?? uri.queryParameters['post_id'];
+        if (id != null) {
+          postId = id;
+        } else {
+          postId = _extractPostIdSafely(messagePayload);
+        }
+      } catch (e) {
+        postId = _extractPostIdSafely(messagePayload);
+      }
+    } else {
+      postId = _extractPostIdSafely(messagePayload);
+    }
 
-    if (postId == "0") return;
+    if (postId == "0" || postId == null) return;
 
     isComeFromLinkOrNotification = true;
     isAiTagDataLoaded = false;
@@ -539,14 +571,24 @@ class HomeProvider extends ChangeNotifier {
   }
 
   StreamSubscription<Uri>? linkSubscription;
-  late PageController homePageController;
+  PageController homePageController = PageController(initialPage: 0);
   bool isHomeScreen = false;
 
   Future<void> initDeepLinks() async {
+    try {
+      final initialUri = await AppLinks().getInitialLink();
+      if (initialUri != null) {
+        debugPrint('getInitialLink: $initialUri');
+        Future.delayed(const Duration(milliseconds: 500), () {
+          _handleDeepLink(initialUri);
+        });
+      }
+    } catch (e) {
+      log("Error getting initial link: $e");
+    }
+
     linkSubscription = AppLinks().uriLinkStream.listen((uri) {
       debugPrint('onAppLink: $uri');
-      homePageController.jumpToPage(0);
-
       isHomeLoading = true;
       getAllPostList = [];
       postId = "0";
@@ -560,12 +602,15 @@ class HomeProvider extends ChangeNotifier {
 
   void _handleDeepLink(Uri uri) async {
     log("Deep link path: $uri");
-    final String? id = uri.queryParameters['postId'];
+    final String? id = uri.queryParameters['postId'] ?? uri.queryParameters['post_id'];
     if (id != null) {
       postId = id;
       isComeFromLinkOrNotification = true;
       if (mainNavigatorKey.currentState != null) {
         mainNavigatorKey.currentState!.popUntil((route) => route.isFirst);
+      }
+      if (homePageController.hasClients) {
+        homePageController.jumpToPage(0);
       }
       await getIndividualPost(postId, isLink: false);
       isHomeLoading = false;

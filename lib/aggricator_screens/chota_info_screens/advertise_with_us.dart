@@ -70,7 +70,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                   children: <Widget>[
                     height(height: 10),
                     Text(
-                      "Chota News",
+                      "Bigtv News",
                       style: fontStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -78,10 +78,10 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
                     ),
                     height(height: 10),
                     InkWell(
-                      onTap: () => _launchEmail("info@chotanews.com"),
+                      onTap: () => _launchEmail("Poojithaagoor@bigtvlive.com"),
                       // Updated
                       child: Text(
-                        "info@chotanews.com",
+                        "Poojithaagoor@bigtvlive.com",
                         style: fontStyle(
                           fontSize: 16,
                           color: Colors.blue,
@@ -94,7 +94,7 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
               height(height: 16),
 
               Text(
-                "Chota News is a first of its kind unique mobile media company in the country. We produce & distribute “Made for Mobile Content” to Indian local language audience. Like TV media & Print media, we are building a technology-based mobile media company with short news and other rich content in local languages.",
+                "Bigtv News is a first of its kind unique mobile media company in the country. We produce & distribute “Made for Mobile Content” to Indian local language audience. Like TV media & Print media, we are building a technology-based mobile media company with short news and other rich content in local languages.",
                 style: fontStyle(fontSize: 14),
                 textAlign: TextAlign.justify,
               ),
@@ -108,8 +108,8 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
 
               ContactDetailTile(
                 title: "For Advertising / partnership enquiries, please write to",
-                email: "advertising@chotanews.com",
-                onEmailTap: () => _launchEmail("advertising@chotanews.com"),
+                email: "Poojithaagoor@bigtvlive.com",
+                onEmailTap: () => _launchEmail("Poojithaagoor@bigtvlive.com"),
               ),
               height(height: 20),
 
@@ -132,8 +132,8 @@ class _AdvertiseWithUsState extends State<AdvertiseWithUs> {
 
               ContactDetailTile(
                 title: "Phone: ",
-                email: "+91 9440913555",
-                onEmailTap: () => _launchPhone("+91 9440913555"),
+                email: "+91 81210 31061",
+                onEmailTap: () => _launchPhone("+91 81210 31061"),
               ),
 
             ],

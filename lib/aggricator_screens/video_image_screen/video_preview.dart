@@ -101,12 +101,7 @@ class VideoPreviewPage extends State<VideoPreview> {
             ),
           ],
         )
-            : ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20),
-            topRight: Radius.circular(20),
-          ),
-          child: Stack(
+          : Stack(
             alignment: Alignment.center,
             children: [
               Image.network(
@@ -127,7 +122,7 @@ class VideoPreviewPage extends State<VideoPreview> {
               ),
             ],
           ),
-        ),
+        
       );
     });
   }

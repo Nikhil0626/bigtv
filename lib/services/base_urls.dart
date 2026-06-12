@@ -36,12 +36,11 @@ class BaseUrls {
   static const String sendCode = "/validateReferalCode";
   static const String validateOtp = "/validateOtp";
 
-  ///Web Pages
-  static const String aboutPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/About+5.html";
-  static const String contactPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/ContactPage+2.html";
-  static const String advertisePage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/AdvertisePage+2.html";
-  static const String termsPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Terms%26Conditions+1.html";
-  static const String privacyPage = "https://uploadsmedia.s3.us-east-1.amazonaws.com/Privacy+5.html";
+  static const String aboutPage = "https://chotanews.com/about-us";
+  static const String contactPage = "https://chotanews.com/contact-us";
+  static const String advertisePage = "https://chotanews.com/advertise";
+  static const String termsPage = "https://chotanews.com/terms-conditions";
+  static const String privacyPage = "https://chotanews.com/privacy-policy";
 
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 

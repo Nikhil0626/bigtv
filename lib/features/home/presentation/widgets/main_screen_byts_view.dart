@@ -962,8 +962,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                       ? (() {
                                                                                           String content = widget.article['content'].toString();
                                                                                           List<String> words = content.split(RegExp(r'\s+'));
-                                                                                          bool isOverflow = words.length > 30;
-                                                                                          String displayContent = isOverflow ? words.take(30).join(' ') + "..." : content;
+                                                                                          bool isOverflow = words.length > 50;
+                                                                                          String displayContent = isOverflow ? words.take(50).join(' ') + "..." : content;
                                                                                           
                                                                                           return RichText(
                                                                                             text: TextSpan(
@@ -1062,8 +1062,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                     ...(() {
                                                                                       String content = widget.article['content']?.toString() ?? "";
                                                                                       List<String> words = content.split(RegExp(r'\s+'));
-                                                                                      bool isOverflow = words.length > 30;
-                                                                                      String displayContent = isOverflow ? words.take(30).join(' ') + "..." : content;
+                                                                                      bool isOverflow = words.length > 50;
+                                                                                      String displayContent = isOverflow ? words.take(50).join(' ') + "..." : content;
                                                                                       
                                                                                       List<TextSpan> spans = _parseText(context, displayContent, widget.article['links'], widget.article);
                                                                                       if (isOverflow) {

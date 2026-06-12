@@ -62,7 +62,7 @@ class _TermsConditionsState extends State<TermsConditions> {
         child: ListView(
           children: [
              Text(style: fontStyle(fontSize: 14,fontWeight: FontWeight.normal),
-              "Chota News Network is a perfect platform for citizens"
+              "Bigtv News Network is a perfect platform for citizens"
                " to report news and make your content reach millions"
                " of users every day. The whole idea is to empower the"
                " audience with vivid categories and local happenings"
@@ -71,11 +71,11 @@ class _TermsConditionsState extends State<TermsConditions> {
             ),
             height(height: 5),
             headlineWithContent(
-                "1. What is Chota News Network",
-                    "ChotaNews Network is the easiest way to publish"
-                    " articles on ChotaNews app if you have a zeal to"
+                "1. What is Bigtv News Network",
+                    "Bigtv News Network is the easiest way to publish"
+                    " articles on Bigtv News app if you have a zeal to"
                     " write and make some earnings additionally. Network"
-                    " by ChotaNews is an easy citizen powered, content"
+                    " by Bigtv News is an easy citizen powered, content"
                 " publishing option to reach millions of readers and "
                 "monetize content."
 
@@ -83,10 +83,10 @@ class _TermsConditionsState extends State<TermsConditions> {
                 ),
             headlineWithContent(
                 "2. Why contribute to us?",
-                "ChotaNews assures your content reaches to the right audience. "
+                "Bigtv News assures your content reaches to the right audience. "
                     "A very unique and classy reading experience has enabled us to engage millions of active readers who are constantly consuming interesting content just like yours. "
                     "Various categories and proper localization helped us to connect vernacular readers with diverse tastes and preferences. "
-                    "We want you to have a great experience when using ChotaNews. "
+                    "We want you to have a great experience when using Bigtv News. "
                     "We are a small team working extremely hard on a mission to build great vernacular content for India and also power every "
                     "locality, "
                     "by building a 'civic Reporting' community. "
@@ -95,7 +95,7 @@ class _TermsConditionsState extends State<TermsConditions> {
             headlineWithContent(
                 "3. Registration",
 
-                    "You need to register as a contributor on ChotaNews Network to publish your articles and videos so that the content can reach millions of readers on the ChotaNews App. "
+                    "You need to register as a contributor on Bigtv News Network to publish your articles and videos so that the content can reach millions of readers on the Bigtv News App. "
                     "We are open to common people, writers, and bloggers who want to write, gain weight, and make some earnings. "
                   ),
             headlineWithContent(
@@ -105,7 +105,7 @@ class _TermsConditionsState extends State<TermsConditions> {
             headlineWithContent(
                 "5. Content Policy",
 
-                    "ChotaNews Network provides a platform for people to put their views as well as news for the audience. "
+                    "Bigtv News Network provides a platform for people to put their views as well as news for the audience. "
                     "In order to ensure a good experience for both contributors and writers, read our content policy carefully."),
             headlineWithContent(
                 "6. Title",
@@ -159,9 +159,9 @@ class _TermsConditionsState extends State<TermsConditions> {
                     "Content containing any kind of job offers or self-promotions is restricted."),
             headlineWithContent(
                 "13. Terms",
-                "ChotaNews reserves the right to remove any content that it feels is not relevant on the platform without any prior notice. "
+                "Bigtv News reserves the right to remove any content that it feels is not relevant on the platform without any prior notice. "
                     "Please go through the revenue model carefully to understand all financial terms. "
-                    "Signing up on ChotaNews Network allows ChotaNews to use your content on its app. "
+                    "Signing up on Bigtv News Network allows Bigtv News to use your content on its app. "
                     "Our app may transmit your personal information to our internal servers, which may be situated outside India. "
                     "This personal information is deleted from our servers 180 days after you delete the app or cancel/terminate your user account on the app, "
                     "except to the extent storage of such data, including your personal information, is necessary for our purposes and/or required under applicable laws."),

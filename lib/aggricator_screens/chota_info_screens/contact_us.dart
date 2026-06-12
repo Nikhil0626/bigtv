@@ -103,23 +103,13 @@ class _ContactUsState extends State<ContactUs> {
                   children: <Widget>[
                     height(height: 10),
                     Text(
-                      "Chota News",
+                      "Bigtv News",
                       style: fontStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    height(height: 10),
-                    InkWell(
-                      onTap: () => launchSingleEmail('info@chotanews.com'),
-                      child: Text(
-                        "info@chotanews.com",
-                        style: fontStyle(
-                          fontSize: 16,
-                          color: Colors.blue,
-                        ),
-                      ),
-                    ),
+
                   ],
                 ),
               ),
@@ -131,24 +121,7 @@ class _ContactUsState extends State<ContactUs> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              height(height: 10),
-              ContactDetailTile(
-                title: "For any support/feedback queries,please write to",
-                email: " info@chotanews.com",
-                onEmailTap: () => launchSingleEmail("info@chotanews.com"),
-              ),
-              height(height: 10),
-              ContactDetailTile(
-                title: "For advertising/partnership enquiries, please write to",
-                email: " advertising@chotanews.com",
-                onEmailTap: () => launchSingleEmail("advertising@chotanews.com"),
-              ),
-              height(height: 10),
-              ContactDetailTile(
-                title: "For any complaints,queries, or grievances, please write to",
-                email: " grievance@chotanews.com",
-                onEmailTap: () => launchSingleEmail("grievance@chotanews.com"),
-              ),
+
               height(height: 20),
               Text(
                 "Address",
@@ -165,8 +138,8 @@ class _ContactUsState extends State<ContactUs> {
               height(height: 10),
               ContactDetailTile(
                 title: "Phone: ",
-                email: "+91 9440913555",
-                onEmailTap: () => _launchPhone("+91 9440913555"),
+                email: "+91 81210 31061",
+                onEmailTap: () => _launchPhone("+91 81210 31061"),
               ),
             ],
           ),

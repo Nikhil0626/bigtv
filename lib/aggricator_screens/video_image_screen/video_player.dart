@@ -190,12 +190,7 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
               ),
             ],
           )
-              : ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
-            child: Stack(
+              : Stack(
               alignment: Alignment.center,
               children: [
                 Image.network(
@@ -224,7 +219,6 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
                 ),
               ],
             ),
-          ),
         );
       },
     );
