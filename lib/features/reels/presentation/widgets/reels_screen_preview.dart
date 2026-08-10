@@ -155,6 +155,13 @@ class _ReelsCardViewState extends State<ReelsCardView> {
             child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
               return YoutubePlayer(
                 controller: widget.youtubePlayerController,
+                bufferIndicator: const Align(
+                  alignment: Alignment.bottomCenter,
+                  child: LinearProgressIndicator(
+                    color: Colors.red,
+                    backgroundColor: Colors.transparent,
+                  ),
+                ),
                 // showVideoProgressIndicator: true,
                 bottomActions: [
                   CurrentPosition(),

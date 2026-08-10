@@ -189,10 +189,16 @@ class _HomeViewState extends State<HomeView> {
                       clipBehavior: Clip.antiAlias,
                       padding: EdgeInsets.zero,
                       height: 64,
-                      child: BottomNavigationBar(
-                        backgroundColor: Colors.transparent,
-                        type: BottomNavigationBarType.fixed,
-                        elevation: 0,
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          splashColor: Colors.transparent,
+                          highlightColor: Colors.transparent,
+                          hoverColor: Colors.transparent,
+                        ),
+                        child: BottomNavigationBar(
+                          backgroundColor: Colors.transparent,
+                          type: BottomNavigationBarType.fixed,
+                          elevation: 0,
                         currentIndex: homeProvider.selectedIndex > 3 ? 3 : homeProvider.selectedIndex,
                         onTap: (index) {
                           context.read<VideoProvider>().pauseVideo();
@@ -327,6 +333,7 @@ class _HomeViewState extends State<HomeView> {
                             label: homeProvider.langCode == 'ml' ? 'ആൽമരം' : 'మరిన్ని',
                           ),
                         ],
+                      ),
                       ),
                     )
                   : null,

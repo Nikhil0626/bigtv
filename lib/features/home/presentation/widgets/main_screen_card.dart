@@ -76,6 +76,13 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                             color: AppColorTokens.primaryRed,
                             child: Row(
                               children: [
+                                if (homeProvider.langCode == 'ml')
+                                  PremiumAnimatedButton(
+                                    onTap: () {
+                                      homeProvider.onItemTapped(2);
+                                      homeProvider.homePageController.jumpToPage(2);
+                                    },
+                                  ),
                                 if (homeProvider.getAllAiTagsList.isNotEmpty)
                                   Expanded(
                                     child: ListView.separated(
@@ -88,7 +95,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                           child: VerticalDivider(
                                             color: Colors.grey.withAlpha(5),
                                             thickness: 1,
-                                            width: 10.w,
+                                            width: 2.w,
                                           ),
                                         );
                                       },
@@ -117,11 +124,11 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                           },
                                           child: Container(
                                             alignment: Alignment.center,
-                                            padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                            padding: EdgeInsets.symmetric(horizontal: 6.w),
                                             decoration: BoxDecoration(
                                               border: Border(
                                                 bottom: BorderSide(
-                                                  color: isSelected ? AppColorTokens.primaryRed : Colors.transparent,
+                                                  color: isSelected ? Colors.white : Colors.transparent,
                                                   width: 3,
                                                 ),
                                               ),
@@ -130,7 +137,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                               tag['aitagname'].toString(),
                                               style: TextStyle(
                                                 color: AppColors.wColor,
-                                                fontSize: 20.sp,
+                                                fontSize: 16.sp,
                                                 fontWeight: FontWeight.w600,
                                                 letterSpacing: 0.5,
                                               ),
@@ -151,11 +158,115 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
           ),
         );
       }),
-
     );
   }
+}
 
-  int currentIndexs = 0;
+class PremiumAnimatedButton extends StatefulWidget {
+  final VoidCallback onTap;
+  const PremiumAnimatedButton({super.key, required this.onTap});
+
+  @override
+  State<PremiumAnimatedButton> createState() => _PremiumAnimatedButtonState();
+}
+
+class _PremiumAnimatedButtonState extends State<PremiumAnimatedButton> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 2000),
+    )..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFFFFDF00),
+              Color(0xFFD4AF37),
+              Color(0xFFFFDF00),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFFD4AF37).withOpacity(0.4),
+              blurRadius: 8,
+              spreadRadius: 1,
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.workspace_premium, color: Colors.black87, size: 18),
+                    SizedBox(width: 4.w),
+                    Text(
+                      "Premium",
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Positioned.fill(
+                child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    return FractionalTranslation(
+                      translation: Offset(-1.5 + (_controller.value * 3.0), 0.0),
+                      child: Transform(
+                        transform: Matrix4.skewX(-0.3),
+                        child: Container(
+                          width: 30,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [
+                                Colors.white.withOpacity(0.0),
+                                Colors.white.withOpacity(0.6),
+                                Colors.white.withOpacity(0.0),
+                              ],
+                              stops: const [0.0, 0.5, 1.0],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class ShimmerCard extends StatelessWidget {

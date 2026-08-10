@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:turn_page_transition/turn_page_transition.dart';
 
 class EpaperDetailScreen extends StatefulWidget {
   final Map<String, dynamic> epaper;
@@ -12,14 +13,24 @@ class EpaperDetailScreen extends StatefulWidget {
 }
 
 class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
-  late PageController _pageController;
+  late TurnPageController _pageController;
   int _currentPage = 0;
   bool _showOverlay = true;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 0);
+    _pageController = TurnPageController(
+      initialPage: 0,
+      duration: const Duration(milliseconds: 300),
+    );
+    _pageController.addListener(() {
+      if (_currentPage != _pageController.currentIndex) {
+        setState(() {
+          _currentPage = _pageController.currentIndex;
+        });
+      }
+    });
   }
 
   @override
@@ -32,38 +43,36 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
   Widget build(BuildContext context) {
     final List<dynamic> paperImages = widget.epaper['paperImages'] ?? [];
 
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _showOverlay = !_showOverlay;
-              });
-            },
-            child: paperImages.isEmpty
-                ? const Center(
-                    child: Text("No images found",
-                        style: TextStyle(color: Colors.white)))
-                : PageView.builder(
-                    physics: const NeverScrollableScrollPhysics(), // Disable swiping
-                    controller: _pageController,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentPage = index;
-                      });
-                    },
+          paperImages.isEmpty
+              ? const Center(
+                  child: Text("No images found",
+                      style: TextStyle(color: Colors.white)))
+              : TurnPageView.builder(
+                  useOnSwipe: false,
+                  useOnTap: false,
+                  controller: _pageController,
                     itemCount: paperImages.length,
                     itemBuilder: (context, index) {
                       final imageUrl = paperImages[index];
                       return InteractiveViewer(
                         minScale: 1.0,
                         maxScale: 4.0,
-                        child: SizedBox(
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          child: CachedNetworkImage(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showOverlay = !_showOverlay;
+                            });
+                          },
+                          child: SizedBox(
+                            width: size.width,
+                            height: size.height,
+                            child: CachedNetworkImage(
                             imageUrl: imageUrl,
                             fit: BoxFit.fill, // Stretches to fill the entire screen, eliminating any blank spaces at the top or bottom
                             placeholder: (context, url) => Shimmer.fromColors(
@@ -82,11 +91,30 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
                             ),
                           ),
                         ),
-                      );
+                      ));
                     },
                   ),
-          ),
           
+          // Back Button
+          if (_showOverlay)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 10,
+              left: 16,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                ),
+              ),
+            ),
+            
           // Left Arrow
           if (_showOverlay && _currentPage > 0)
             Align(
@@ -95,10 +123,12 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
                 padding: const EdgeInsets.only(left: 16.0),
                 child: InkWell(
                   onTap: () {
-                    _pageController.previousPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
+                    if (_currentPage > 0) {
+                      _pageController.previousPage();
+                      setState(() {
+                        _currentPage = _pageController.currentIndex;
+                      });
+                    }
                   },
                   child: Container(
                     padding: const EdgeInsets.only(left: 16, right: 8, top: 12, bottom: 12),
@@ -120,10 +150,12 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
                 padding: const EdgeInsets.only(right: 16.0),
                 child: InkWell(
                   onTap: () {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
+                    if (_currentPage < paperImages.length - 1) {
+                      _pageController.nextPage();
+                      setState(() {
+                        _currentPage = _pageController.currentIndex;
+                      });
+                    }
                   },
                   child: Container(
                     padding: const EdgeInsets.only(left: 12, right: 12, top: 12, bottom: 12),
@@ -144,7 +176,7 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
               right: 0,
               child: Container(
                 height: 140,
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withValues(alpha: 0.7),
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: SafeArea(
                   top: false,
@@ -155,11 +187,10 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
                       final imageUrl = paperImages[index];
                       return GestureDetector(
                         onTap: () {
-                          _pageController.animateToPage(
-                            index,
-                            duration: const Duration(milliseconds: 300),
-                            curve: Curves.easeInOut,
-                          );
+                          _pageController.animateToPage(index);
+                          setState(() {
+                            _currentPage = _pageController.currentIndex; // Or simply _currentPage = index;
+                          });
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 8.0),

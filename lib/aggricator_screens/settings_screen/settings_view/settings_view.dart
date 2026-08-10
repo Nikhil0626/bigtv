@@ -145,13 +145,7 @@ class SettingsViewState extends State<SettingsView> {
                     }, "compliance_section");
                     Navigator.push(context, MaterialPageRoute(builder: (context) => FeedbackForm()));
                   }),
-                  _buildSettingsRow(context, "contest.svg", "Ads Contest", () {
-                    EventRepo().addEvent({
-                      "visitPageName": "Contest",
-                      "createAt": DateTime.now().toString(),
-                    }, "compliance_section");
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => ContestScreen()));
-                  }),
+
                   _buildSettingsRow(context, "Signout.svg", !settingsProvider.isNotificationsEnabled ? "Login" : "Logout", () async {
                     closeSubscribe();
                     SharedPreferences preferences = await SharedPreferences.getInstance();

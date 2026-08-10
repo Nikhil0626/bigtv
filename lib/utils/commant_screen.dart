@@ -200,7 +200,7 @@ class _CommentSectionState extends State<CommentSection> {
 
                 // Comment Input Field
                 Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 12),
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 12, right: 12),
                   child: Row(
                     children: [
                       Expanded(
@@ -217,45 +217,47 @@ class _CommentSectionState extends State<CommentSection> {
                                 horizontal: 20,
                                 vertical: 10,
                               ),
+                              suffixIcon: Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: IconButton(
+                                  icon: const Icon(Icons.send, color: Colors.red),
+                                  onPressed: () async {
+                                    SharedPreferences sp = await SharedPreferences.getInstance();
+                                    bool isLogin = sp.getString("loginType").toString() == "login" ? true : false ?? false;
+                                    if (isLogin) {
+                                      if (controller.text.isEmpty) {
+                                      } else {
+                                         EventRepo().addEvent({
+                                          "commented": controller.text,
+                                          "postId": widget.postId.toString()??"000",
+                                          "createAt": DateTime.now().toString(),
+                                           "postTitle": widget.postTitle.toString()??""
+
+                                         }, "commented_article");
+                                        newsPostsProvider.sendCommentsOnPost(widget.postId, controller.text).then(
+                                              (value) => controller.text = '',
+                                            );
+
+
+                                      }
+                                    } else {
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                        context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const LoginBackgroundView(),
+                                          ),
+                                        );
+                                      }
+                                    }
+                                  },
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                       width(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.send, color: Colors.blue),
-                        onPressed: () async {
-                          SharedPreferences sp = await SharedPreferences.getInstance();
-                          bool isLogin = sp.getString("loginType").toString() == "login" ? true : false ?? false;
-                          if (isLogin) {
-                            if (controller.text.isEmpty) {
-                            } else {
-                               EventRepo().addEvent({
-                                "commented": controller.text,
-                                "postId": widget.postId.toString()??"000",
-                                "createAt": DateTime.now().toString(),
-                                 "postTitle": widget.postTitle.toString()??""
-
-                               }, "commented_article");
-                              newsPostsProvider.sendCommentsOnPost(widget.postId, controller.text).then(
-                                    (value) => controller.text = '',
-                                  );
-
-
-                            }
-                          } else {
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                              context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginBackgroundView(),
-                                ),
-                              );
-                            }
-                          }
-                        },
                       ),
                     ],
                   ),

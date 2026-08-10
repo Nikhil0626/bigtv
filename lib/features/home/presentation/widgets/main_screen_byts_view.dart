@@ -397,10 +397,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                   ? InkWell(
                                                       onTap: () async {
                                                         if (widget.article['postUrl'] != null && widget.article['postUrl'].toString().isNotEmpty) {
-                                                          final url = Uri.parse(widget.article['postUrl'].toString());
-                                                          if (await canLaunchUrl(url)) {
-                                                            await launchUrl(url);
-                                                          }
+                                                          final url = widget.article['postUrl'].toString();
+                                                          Navigator.push(context, MaterialPageRoute(builder: (context) => InAppWebViewScreen(webUrl: url, title: "")));
                                                         }
                                                         
                                                         SharedPreferences sp = await SharedPreferences.getInstance();
@@ -621,7 +619,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                     ),
                                                                   ),
                                                                 Positioned(
-                                                                  bottom: 12,
+                                                                  bottom: 6,
                                                                   left: 12,
                                                                   right: 12,
                                                                   child: widget.article[

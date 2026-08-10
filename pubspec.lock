@@ -129,6 +129,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "9.2.1"
+  book_page_flip:
+    dependency: "direct main"
+    description:
+      name: book_page_flip
+      sha256: "95ba79d4d95ba30f0dbf83958d8fb2efe47b97a3df16acf2ab677d700e0e7c4d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.0"
   boolean_selector:
     dependency: transitive
     description:
@@ -1088,6 +1096,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.1"
+  page_curl_effect:
+    dependency: "direct main"
+    description:
+      name: page_curl_effect
+      sha256: "2c7797ccf23b603ce34658a2c6c049413e9d8921570b90078bb6cf68ec2f3b8d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.2"
   path:
     dependency: transitive
     description:
@@ -1557,6 +1573,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  turn_page_transition:
+    dependency: "direct main"
+    description:
+      name: turn_page_transition
+      sha256: b60f306a847ebb58fe693db47d46f69339b1ed13f9930e43c9257bc3477f7b80
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.5.0"
   typed_data:
     dependency: transitive
     description:

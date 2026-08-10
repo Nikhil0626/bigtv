@@ -121,20 +121,14 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                     thumbShape: RoundSliderThumbShape(enabledThumbRadius: 2),
                     overlayShape: RoundSliderOverlayShape(overlayRadius: 3),
                     inactiveTrackColor: Colors.transparent,
-                    activeTrackColor: Colors.white,
-                    thumbColor: Colors.white,
+                    activeTrackColor: Colors.red,
+                    thumbColor: Colors.red,
                   ),
-                  child: ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      return rainbowGradient.createShader(bounds);
-                    },
-                    blendMode: BlendMode.srcATop,
-                    child: Slider(
-                      value: homeProvider.pageController!.hasClients ? (homeProvider.pageController!.page ?? 0) : 0,
-                      min: 0,
-                      max: (homeProvider.getAllPostList.length -1).toDouble(),
-                      onChanged: null, // read-only slider
-                    ),
+                  child: Slider(
+                    value: homeProvider.pageController!.hasClients ? (homeProvider.pageController!.page ?? 0) : 0,
+                    min: 0,
+                    max: (homeProvider.getAllPostList.length -1).toDouble(),
+                    onChanged: null, // read-only slider
                   ),
                 ),
             ],
