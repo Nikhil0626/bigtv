@@ -14,9 +14,11 @@ class  HomeShimmer extends StatelessWidget {
         highlightColor: Colors.grey.shade100,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: SingleChildScrollView(
+            physics: const NeverScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
             children: [
               // Image
               Container(
@@ -80,6 +82,7 @@ class  HomeShimmer extends StatelessWidget {
             ],
           ),
         ),
+      ),
       ),
     );
   }

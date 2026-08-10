@@ -8,8 +8,8 @@ import 'package:chotanews/features/home/presentation/providers/home_provider.dar
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
 import 'main_screen_byts_view.dart';
 
 class MainScreenPageView extends StatefulWidget {
@@ -55,7 +55,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
             children: [
               Expanded(
                 child: Padding(
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  padding: EdgeInsets.zero,
                   child: ScrollConfiguration(
                     behavior: ScrollConfiguration.of(context).copyWith(
                       dragDevices: {
@@ -84,21 +84,6 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                               context.read<AdMobBannerProvider>().changePageIndex(value);
 
                               log(" Last Index of ads data $adKeys ----- $value --- ${adKeys * 5} ---${context.read<AdMobBannerProvider>().ads}");
-
-                              if (value == (adKeys * 5)) {
-                                int? lastKey = context.read<AdMobBannerProvider>().ads.keys.isNotEmpty ? context.read<AdMobBannerProvider>().ads.keys.last : adKeys;
-
-                                context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 4, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 3, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 2, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 1, AdSize.mediumRectangle);
-                              } else if (value == 3 && context.read<AdMobBannerProvider>().ads.isEmpty) {
-                                int? lastKey = 0;
-                                context.read<AdMobBannerProvider>().loadAdMobBanner(lastKey + 4, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerBanner(lastKey + 3, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdMobNative(lastKey + 2, AdSize.mediumRectangle);
-                                context.read<AdMobBannerProvider>().loadAdManagerNative(lastKey + 1, AdSize.mediumRectangle);
-                              }
 
                               if (homeProvider.isBottomEnable) {
                                 homeProvider.pageChange(isValue: false);
@@ -143,23 +128,20 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                 SliderTheme(
                   data: SliderTheme.of(context).copyWith(
                     trackHeight: 4,
-                    thumbShape: RoundSliderThumbShape(enabledThumbRadius: 2),
-                    overlayShape: RoundSliderOverlayShape(overlayRadius: 3),
-                    inactiveTrackColor: Colors.transparent,
-                    activeTrackColor: Colors.white,
-                    thumbColor: Colors.white,
+                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 2),
+                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 3),
+                    inactiveTrackColor: Colors.grey.shade300,
+                    activeTrackColor: AppColorTokens.primaryRed,
+                    thumbColor: AppColorTokens.primaryRed,
+                    disabledActiveTrackColor: AppColorTokens.primaryRed,
+                    disabledInactiveTrackColor: Colors.grey.shade300,
+                    disabledThumbColor: AppColorTokens.primaryRed,
                   ),
-                  child: ShaderMask(
-                    shaderCallback: (Rect bounds) {
-                      return rainbowGradient.createShader(bounds);
-                    },
-                    blendMode: BlendMode.srcATop,
-                    child: Slider(
-                      value: homeProvider.pageController!.hasClients ? (homeProvider.pageController!.page ?? 0) : 0,
-                      min: 0,
-                      max: (homeProvider.getAllPostList.length -1).toDouble(),
-                      onChanged: null, // read-only slider
-                    ),
+                  child: Slider(
+                    value: homeProvider.pageController!.hasClients ? (homeProvider.pageController!.page ?? 0) : 0,
+                    min: 0,
+                    max: (homeProvider.getAllPostList.length -1).toDouble(),
+                    onChanged: null, // read-only slider
                   ),
                 ),
             ],
@@ -181,24 +163,8 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
   }
 
   void _handlePageChanged(int value) {
-
     final adMobProvider = context.read<AdMobBannerProvider>();
-    final adStickyKeys = adMobProvider.adsBanner320x50.length;
-
-
     log("Last Index of Sticky ads data ${adMobProvider.adsBanner320x50}");
-
-    if (value == (adStickyKeys * 4)) {
-      int? lastStickyKey = adMobProvider.adsBanner320x50.keys.isNotEmpty
-          ? adMobProvider.adsBanner320x50.keys.last
-          : adStickyKeys;
-
-      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 1, AdSize.banner);
-    } else if (value == 1 && adMobProvider.adsBanner320x50.isNotEmpty) {
-      int? lastStickyKey = 0;
-      adMobProvider.loadAd320x50ManagerBanner(lastStickyKey + 1, AdSize.banner);
-
-    }
   }
 }
 

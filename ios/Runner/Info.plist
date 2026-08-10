@@ -7,7 +7,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>ChotaNews</string>
+    <string>BigTV News</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -34,18 +34,35 @@
     </array>
 
     <!-- Privacy Usage Descriptions -->
+    <key>NSCameraUsageDescription</key>
+    <string>BigTV News uses your camera to capture and share photos or videos within the app.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>BigTV News uses the microphone to record audio or video for sharing within the app.</string>
     <key>NSPhotoLibraryUsageDescription</key>
     <string>This app may access your photo library for media sharing or uploading.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>BigTV News would like to save photos or videos to your photo library.</string>
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>This app may access your location to provide localized content and features.</string>
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>This app may use your location in the background to deliver region-specific news and notifications.</string>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>ChotaNews requires access to the local network to enable seamless notifications and content updates.</string>
+    <string>BigTV News requires access to the local network to enable seamless notifications and content updates.</string>
     <key>NSPushKitUsageDescription</key>
-    <string>ChotaNews uses PushKit to enhance notifications when the app is in the background.</string>
+    <string>BigTV News uses PushKit to enhance notifications when the app is in the background.</string>
     <key>NSUserTrackingUsageDescription</key>
     <string>We use this data to provide you with personalized ads and analytics.</string>
+    <key>NSContactsUsageDescription</key>
+    <string>BigTV News may access your contacts to help you share content with friends.</string>
+    <key>NSCalendarsUsageDescription</key>
+    <string>BigTV News may access your calendar to set reminders for your favourite shows.</string>
+    <key>NSFaceIDUsageDescription</key>
+    <string>BigTV News uses Face ID for secure and quick authentication.</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>BigTV News may use Bluetooth to connect with nearby devices for content sharing.</string>
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>BigTV News may use Bluetooth to connect with nearby devices for content sharing.</string>
+
 
     <!-- Background Modes -->
     <key>UIBackgroundModes</key>
@@ -68,15 +85,10 @@
     <key>UISupportedInterfaceOrientations</key>
     <array>
         <string>UIInterfaceOrientationPortrait</string>
-        <string>UIInterfaceOrientationPortraitUpsideDown</string>
         <string>UIInterfaceOrientationLandscapeLeft</string>
         <string>UIInterfaceOrientationLandscapeRight</string>
     </array>
 
-
-     <!-- AdMob -->
-    <key>GADApplicationIdentifier</key>
-    <string>ca-app-pub-2405357352181832~7031527412</string>
 
     <!-- Facebook Integration -->
     <key>FacebookAppID</key>
@@ -127,10 +139,9 @@
     <true/>
 
 
-    <key>UIStatusBarStyle</key>
-    <string>UIStatusBarStyleLightContent</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
-    <false/>
+    <true/>
+
 
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>This app needs location access to get Wi-Fi info</string>

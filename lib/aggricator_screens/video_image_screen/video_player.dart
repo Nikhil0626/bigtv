@@ -1,4 +1,4 @@
-import 'dart:developer';
+import 'dart:async';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -29,11 +29,15 @@ class CustomVideoPlayer extends StatefulWidget {
 }
 
 class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindingObserver {
+  bool _showControls = true;
+  Timer? _hideTimer;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _initializeVideo();
+    _startHideTimer();
   }
 
   @override
@@ -41,17 +45,39 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
     super.didUpdateWidget(oldWidget);
     if (oldWidget.url != widget.url) {
       _initializeVideo();
+      _startHideTimer();
     }
   }
 
   @override
   void dispose() {
+    _hideTimer?.cancel();
     WidgetsBinding.instance.removeObserver(this);
-    // Don't dispose the controller here - let the provider handle it
     super.dispose();
   }
 
-  // Handle app lifecycle changes
+  void _startHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _showControls = false;
+        });
+      }
+    });
+  }
+
+  void _toggleControls() {
+    setState(() {
+      _showControls = !_showControls;
+    });
+    if (_showControls) {
+      _startHideTimer();
+    } else {
+      _hideTimer?.cancel();
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final videoProvider = context.read<VideoProvider>();
@@ -63,7 +89,6 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
         videoProvider.pauseVideo();
         break;
       case AppLifecycleState.resumed:
-      // Don't auto-play on resume
         break;
       case AppLifecycleState.inactive:
         break;
@@ -71,11 +96,24 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
   }
 
   void _initializeVideo() {
-    // Use a small delay to ensure widget is properly mounted
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final videoProvider = context.read<VideoProvider>();
       videoProvider.initializeVideo(widget.url);
     });
+  }
+
+  void _openFullscreen(BuildContext context, VideoPlayerController controller) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => FullscreenVideoView(
+          controller: controller,
+        ),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(opacity: animation, child: child);
+        },
+        transitionDuration: const Duration(milliseconds: 250),
+      ),
+    );
   }
 
   @override
@@ -84,24 +122,20 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
       builder: (context, videoProvider, homeProvider, __) {
         return GestureDetector(
           onTap: () {
-            // Toggle play/pause on tap
-            videoProvider.togglePlayPause();
+            _toggleControls();
           },
           onVerticalDragUpdate: (details) {
             final controller = context.read<HomeProvider>().pageController!;
             if (details.delta.dy < -10) {
-              log("jhvjhbhjbjhhijhiu");
               videoProvider.pauseVideo();
-              // videoProvider.controller?.pause();
               controller.nextPage(
-                duration: Duration(milliseconds: 600),
+                duration: const Duration(milliseconds: 600),
                 curve: Curves.easeIn,
               );
             } else if (details.delta.dy > 10) {
-              log("jhvjhbhjbjhhijhiu000");
               videoProvider.controller?.pause();
               controller.previousPage(
-                duration: Duration(milliseconds: 600),
+                duration: const Duration(milliseconds: 600),
                 curve: Curves.easeIn,
               );
             }
@@ -110,7 +144,6 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
               ? Stack(
             alignment: Alignment.center,
             children: [
-              /// Video Player
               SizedBox(
                 height: 330,
                 width: MediaQuery.of(context).size.width,
@@ -119,82 +152,84 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
                   child: VideoPlayer(videoProvider.controller!),
                 ),
               ),
-
-              if (!videoProvider.isPlaying)
-                IconButton(
-                  icon: SvgPicture.asset(
-                    "assets/svg/play_circle.svg",
-                    height: 58,
-                    width: 58,
-                  ),
-                  onPressed: () => videoProvider.playVideo(),
-                ),
-
-              /// Video Controls
-              Positioned(
-                bottom: 10,
-                left: 10,
-                right: 10,
-                child: Row(
-                  children: [
-                    /// Play/Pause Button
-                    IconButton(
-                      icon: Icon(
-                        videoProvider.isPlaying
-                            ? Icons.pause
-                            : Icons.play_arrow,
-                        color: Colors.white,
-                      ),
-                      onPressed: () => videoProvider.togglePlayPause(),
-                    ),
-
-                    /// Progress Bar
-                    Expanded(
-                      child: VideoProgressIndicator(
-                        videoProvider.controller!,
-                        allowScrubbing: true,
-                        colors: const VideoProgressColors(
-                          playedColor: Colors.red,
-                          bufferedColor: Colors.grey,
-                          backgroundColor: Colors.black26,
+              AnimatedOpacity(
+                opacity: _showControls ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 300),
+                child: IgnorePointer(
+                  ignoring: !_showControls,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      if (!videoProvider.isPlaying)
+                        IconButton(
+                          icon: SvgPicture.asset(
+                            "assets/svg/play_circle.svg",
+                            height: 58,
+                            width: 58,
+                          ),
+                          onPressed: () {
+                            videoProvider.playVideo();
+                            _startHideTimer();
+                          },
+                        ),
+                      Positioned(
+                        bottom: 10,
+                        left: 10,
+                        right: 120,
+                        child: Row(
+                          children: [
+                            IconButton(
+                              icon: Icon(
+                                videoProvider.isPlaying
+                                    ? Icons.pause
+                                    : Icons.play_arrow,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                videoProvider.togglePlayPause();
+                                _startHideTimer();
+                              },
+                            ),
+                            Expanded(
+                              child: VideoProgressIndicator(
+                                videoProvider.controller!,
+                                allowScrubbing: true,
+                                colors: const VideoProgressColors(
+                                  playedColor: Colors.red,
+                                  bufferedColor: Colors.grey,
+                                  backgroundColor: Colors.black26,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              icon: Icon(
+                                videoProvider.isMuted
+                                    ? Icons.volume_off
+                                    : Icons.volume_up,
+                                color: Colors.white,
+                              ),
+                              onPressed: () {
+                                videoProvider.toggleMute();
+                                _startHideTimer();
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.fullscreen, color: Colors.white),
+                              onPressed: () {
+                                _openFullscreen(context, videoProvider.controller!);
+                              },
+                            ),
+                          ],
                         ),
                       ),
-                    ),
-
-                    /// Mute Button
-                    IconButton(
-                      icon: Icon(
-                        videoProvider.isMuted
-                            ? Icons.volume_off
-                            : Icons.volume_up,
-                        color: Colors.white,
-                      ),
-                      onPressed: videoProvider.toggleMute,
-                    ),
-
-                    /// Fullscreen Button
-                    IconButton(
-                      icon: const Icon(Icons.fullscreen, color: Colors.white),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => FullscreenVideoView(
-                              controller: videoProvider.controller!,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
           )
               : ClipRRect(
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(20),
-              topRight: Radius.circular(20),
-            ),
+            borderRadius: BorderRadius.zero,
             child: Stack(
               alignment: Alignment.center,
               children: [

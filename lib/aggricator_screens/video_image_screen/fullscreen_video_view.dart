@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:video_player/video_player.dart';
@@ -14,21 +15,30 @@ class FullscreenVideoView extends StatefulWidget {
 }
 
 class _FullscreenVideoViewState extends State<FullscreenVideoView> {
+  bool _showControls = true;
+  bool _isExiting = false;
+  Timer? _hideTimer;
+
   @override
   void initState() {
     super.initState();
-    // Force landscape mode
-    SystemChrome.setPreferredOrientations([
+    _setLandscapeOrientation();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    _startHideTimer();
+  }
+
+  void _setLandscapeOrientation() async {
+    await SystemChrome.setPreferredOrientations([]);
+    await SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
     ]);
-    // Hide status bar
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   @override
   void dispose() {
-    // Failsafe in case of swipe back
+    _hideTimer?.cancel();
+    SystemChrome.setPreferredOrientations([]);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
@@ -37,15 +47,38 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
     super.dispose();
   }
 
+  void _startHideTimer() {
+    _hideTimer?.cancel();
+    _hideTimer = Timer(const Duration(seconds: 3), () {
+      if (mounted) {
+        setState(() {
+          _showControls = false;
+        });
+      }
+    });
+  }
+
+  void _toggleControls() {
+    setState(() {
+      _showControls = !_showControls;
+    });
+    if (_showControls) {
+      _startHideTimer();
+    } else {
+      _hideTimer?.cancel();
+    }
+  }
+
   void _exitFullscreen() async {
+    if (_isExiting) return;
+    _isExiting = true;
+    _hideTimer?.cancel();
+    await SystemChrome.setPreferredOrientations([]);
     await SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
     await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
-    
-    // Add a tiny delay to allow the engine to flush the layout
-    await Future.delayed(const Duration(milliseconds: 100));
     
     if (mounted) {
       Navigator.of(context).pop();
@@ -65,64 +98,93 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
         backgroundColor: Colors.black,
         body: Consumer<VideoProvider>(
           builder: (context, videoProvider, __) {
-            return Stack(
-              alignment: Alignment.center,
-              children: [
-                Center(
-                  child: AspectRatio(
-                    aspectRatio: widget.controller.value.aspectRatio,
-                    child: VideoPlayer(widget.controller),
+            return GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _toggleControls,
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Center(
+                    child: AspectRatio(
+                      aspectRatio: widget.controller.value.aspectRatio,
+                      child: VideoPlayer(widget.controller),
+                    ),
                   ),
-                ),
-                Positioned(
-                  top: 20,
-                  left: 20,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
-                    onPressed: _exitFullscreen,
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  right: 20,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          videoProvider.isPlaying ? Icons.pause : Icons.play_arrow,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                        onPressed: () => videoProvider.togglePlayPause(),
-                      ),
-                      Expanded(
-                        child: VideoProgressIndicator(
-                          widget.controller,
-                          allowScrubbing: true,
-                          colors: const VideoProgressColors(
-                            playedColor: Colors.red,
-                            bufferedColor: Colors.grey,
-                            backgroundColor: Colors.black26,
+                  AnimatedOpacity(
+                    opacity: _showControls ? 1.0 : 0.0,
+                    duration: const Duration(milliseconds: 300),
+                    child: IgnorePointer(
+                      ignoring: !_showControls,
+                      child: Stack(
+                        children: [
+                          Positioned(
+                            top: 20,
+                            left: 20,
+                            child: IconButton(
+                              icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                              onPressed: _exitFullscreen,
+                            ),
                           ),
-                        ),
+                          Positioned(
+                            top: 20,
+                            right: 20,
+                            child: IconButton(
+                              icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 32),
+                              onPressed: _exitFullscreen,
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 20,
+                            left: 20,
+                            right: 20,
+                            child: Row(
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    videoProvider.isPlaying ? Icons.pause : Icons.play_arrow,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                  onPressed: () {
+                                    videoProvider.togglePlayPause();
+                                    _startHideTimer();
+                                  },
+                                ),
+                                Expanded(
+                                  child: VideoProgressIndicator(
+                                    widget.controller,
+                                    allowScrubbing: true,
+                                    colors: const VideoProgressColors(
+                                      playedColor: Colors.red,
+                                      bufferedColor: Colors.grey,
+                                      backgroundColor: Colors.black26,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: Icon(
+                                    videoProvider.isMuted ? Icons.volume_off : Icons.volume_up,
+                                    color: Colors.white,
+                                    size: 30,
+                                  ),
+                                  onPressed: () {
+                                    videoProvider.toggleMute();
+                                    _startHideTimer();
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 30),
+                                  onPressed: _exitFullscreen,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
-                      IconButton(
-                        icon: Icon(
-                          videoProvider.isMuted ? Icons.volume_off : Icons.volume_up,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                        onPressed: videoProvider.toggleMute,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 30),
-                        onPressed: _exitFullscreen,
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             );
           },
         ),

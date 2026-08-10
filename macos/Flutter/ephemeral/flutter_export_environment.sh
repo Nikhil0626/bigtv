@@ -1,11 +1,12 @@
 #!/bin/sh
 # This is a generated file; do not edit or check into version control.
-export "FLUTTER_ROOT=C:\Users\Admin\src\flutter_windows_3.35.4-stable\flutter"
-export "FLUTTER_APPLICATION_PATH=C:\Users\Admin\StudioProjects\ChotaNewsMobile"
+export "FLUTTER_ROOT=/Users/pravasamedia/Development/flutter"
+export "FLUTTER_APPLICATION_PATH=/Users/pravasamedia/Documents/live_projects/bigtv"
+export "FLUTTER_FRAMEWORK_SWIFT_PACKAGE_PATH=/Users/pravasamedia/Documents/live_projects/bigtv/macos/Flutter/ephemeral/Packages/.packages/FlutterFramework"
 export "COCOAPODS_PARALLEL_CODE_SIGN=true"
 export "FLUTTER_BUILD_DIR=build"
-export "FLUTTER_BUILD_NAME=5.0.9"
-export "FLUTTER_BUILD_NUMBER=2211"
+export "FLUTTER_BUILD_NAME=6.0.0"
+export "FLUTTER_BUILD_NUMBER=2215"
 export "DART_OBFUSCATION=false"
 export "TRACK_WIDGET_CREATION=true"
 export "TREE_SHAKE_ICONS=false"

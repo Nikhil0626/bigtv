@@ -210,10 +210,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                       ),
                                     )
                                   : widget.article['type'] == "GoogleAds"
-                                      ? AndroidAdsView(
-                                          article: widget.article,
-                                          index: widget.index,
-                                        )
+                                      ? const SizedBox.shrink()
                                       : widget.article['type'] == "Reel"
                                           ? FullStandardVideoView(
                                               reelData: widget.article,
@@ -492,91 +489,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       widget.article[
                                                               'subType'] ==
                                                           "ImageAd")
-                                                  ? InkWell(
-                                                      onTap: () async {
-                                                        SharedPreferences sp =
-                                                            await SharedPreferences
-                                                                .getInstance();
-                                                        bool isLogin = sp.getString(
-                                                                    "loginType") !=
-                                                                "login"
-                                                            ? true
-                                                            : false;
-                                                        if (isLogin) {
-                                                          CustomToast
-                                                              .showErrorToast(
-                                                                  msg:
-                                                                      "Your a guest user, Please Login to Join Contest");
-                                                        } else {
-                                                          if (widget.article[
-                                                                      'postUrl'] ==
-                                                                  "" ||
-                                                              widget.article[
-                                                                      'postUrl'] ==
-                                                                  null) {
-                                                          } else {
-                                                            context.read<HomeProvider>().sendAdsDataSend(
-                                                                widget.article[
-                                                                    'id'],
-                                                                widget.article[
-                                                                    'title'],
-                                                                widget.article[
-                                                                    'image_url'],
-                                                                false,
-                                                                widget.article[
-                                                                    'postUrl']);
-                                                          }
-                                                        }
-                                                      },
-                                                      child: widget
-                                                                  .article[
-                                                                      'image_url']
-                                                                  .length ==
-                                                              1
-                                                          ? CachedNetworkImage(
-                                                              imageUrl: _getImageUrl(
-                                                                  widget.article[
-                                                                          'image_url']
-                                                                      [0]),
-                                                              width:
-                                                                  MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width,
-                                                              height:
-                                                                  MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .height,
-                                                              fit: BoxFit.fill,
-                                                              placeholder:
-                                                                  (context,
-                                                                          url) =>
-                                                                      Container(
-                                                                color: AppColors
-                                                                    .borderColor
-                                                                    .withValues(
-                                                                        alpha:
-                                                                            .2),
-                                                              ),
-                                                              errorWidget:
-                                                                  (context, url,
-                                                                          error) =>
-                                                                      Center(
-                                                                child: Icon(
-                                                                  Icons.image,
-                                                                  size: 100,
-                                                                  color: Colors
-                                                                      .grey
-                                                                      .shade300,
-                                                                ),
-                                                              ),
-                                                            )
-                                                          : ImagePostSlider(
-                                                              imageUrl: widget
-                                                                      .article[
-                                                                  'image_url'],
-                                                            ))
+                                                  ? const SizedBox.shrink()
                                                   : widget.article['type'] ==
                                                           "Gallery"
                                                       ? KeepAlivePage(
@@ -736,21 +649,39 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                     ),
                                                                   ),
                                                                 Positioned(
-                                                                  bottom: 12,
-                                                                  left: 12,
-                                                                  right: 12,
+                                                                  bottom: 0,
+                                                                  left: 10,
+                                                                  right: 0,
                                                                   child: widget.article[
                                                                               'type'] ==
                                                                           "Video"
-                                                                      ? SizedBox
+                                                                      ? const SizedBox
                                                                           .shrink()
-                                                                      : Align(
-                                                                    alignment: Alignment.bottomLeft,
-                                                                    child: HighlightedTitleText(
-                                                                      text: widget.article['title'] ?? "No Title",
-                                                                      fontSize: 22.sp,
-                                                                      highlightColor: const Color(0xFFED1C24).withValues(alpha: 0.7),
-                                                                    ),
+                                                                      : Container(
+                                                                          padding: EdgeInsets.only(
+                                                                              bottom: 6,
+                                                                              right: 120,
+                                                                              left: 10),
+                                                                          child:
+                                                                              Align(
+                                                                            alignment:
+                                                                                Alignment.bottomLeft,
+                                                                            child:
+                                                                                HighlightedTitleText(
+                                                                              text: widget.article['title'] ?? "No Title",
+                                                                              fontSize: 16,
+                                                                              highlightColor: const Color(0xFFED1C24).withValues(alpha: 0.7),
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                ),
+                                                                Positioned(
+                                                                  bottom: 0,
+                                                                  right: 0,
+                                                                  child: Image
+                                                                      .asset(
+                                                                    "assets/images/BigTvPostLogo.png",
+                                                                    width: 120,
                                                                   ),
                                                                 ),
                                                               ],
@@ -887,9 +818,23 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                             final imagePath = '${directory.path}/${widget.article['id']}.png';
                                                                                             final imageFile = File(imagePath);
                                                                                             await imageFile.writeAsBytes(image);
-                                                                                            Share.shareXFiles([
-                                                                                              XFile(imageFile.path)
-                                                                                            ], text: widget.article['linkURLAndroid'].toString());
+
+                                                                                            final String shareLink = (Platform.isIOS
+                                                                                                    ? (widget.article['linkURLIos'] ?? widget.article['linkURLAndroid'])
+                                                                                                    : widget.article['linkURLAndroid'])
+                                                                                                ?.toString() ?? '';
+                                                                                            final String textToShare = (shareLink.isNotEmpty && shareLink != 'null') ? shareLink : '';
+
+                                                                                            final RenderBox? box = context.findRenderObject() as RenderBox?;
+                                                                                            final Rect sharePosition = box != null
+                                                                                                ? (box.localToGlobal(Offset.zero) & box.size)
+                                                                                                : Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width, MediaQuery.of(context).size.height / 2);
+
+                                                                                            await Share.shareXFiles(
+                                                                                              [XFile(imageFile.path, mimeType: 'image/png', bytes: image)],
+                                                                                              text: textToShare.isNotEmpty ? textToShare : null,
+                                                                                              sharePositionOrigin: sharePosition,
+                                                                                            );
                                                                                           } else {
                                                                                             CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                                                                                           }
@@ -1252,7 +1197,6 @@ class _HighlightTextPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _HighlightTextPainter old) =>
       old.text != text ||
-          old.highlightColor != highlightColor ||
-          old.fontSize != fontSize;
+      old.highlightColor != highlightColor ||
+      old.fontSize != fontSize;
 }
-

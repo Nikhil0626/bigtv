@@ -1,10 +1,10 @@
 import Flutter
-import google_mobile_ads
 import UIKit
 import FirebaseCore
-//import FirebaseDynamicLinks
 import WebEngage
 import webengage_flutter
+
+
 
 @main
 @objc class AppDelegate: FlutterAppDelegate {
@@ -20,14 +20,6 @@ import webengage_flutter
         WebEngage.sharedInstance().application(
             application, didFinishLaunchingWithOptions: launchOptions)
         GeneratedPluginRegistrant.register(with: self)
-        GADMobileAds.sharedInstance().start(completionHandler: nil)
-
-        let nativeAdFactory = NativeAdFactoryExample()
-        FLTGoogleMobileAdsPlugin.registerNativeAdFactory(
-            self,
-            factoryId: "adFactoryExample",
-            nativeAdFactory: nativeAdFactory as! FLTNativeAdFactory
-        )
 
         if #available(iOS 10.0, *) {
             UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate

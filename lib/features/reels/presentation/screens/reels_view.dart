@@ -339,9 +339,15 @@ class _EachReelCardState extends State<EachReelCard> {
                                   final imageFile = File(imagePath);
                                   await imageFile.writeAsBytes(image);
 
-                                  Share.shareXFiles(
-                                    [XFile(imageFile.path)],
+                                  final RenderBox? box = context.findRenderObject() as RenderBox?;
+                                  final Rect sharePosition = box != null
+                                      ? (box.localToGlobal(Offset.zero) & box.size)
+                                      : Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width, MediaQuery.of(context).size.height / 2);
+
+                                  await Share.shareXFiles(
+                                    [XFile(imageFile.path, mimeType: 'image/png', bytes: image)],
                                     text: widget.reel.videoUrl,
+                                    sharePositionOrigin: sharePosition,
                                   );
                                 } else {
                                   CustomToast.showErrorToast(msg: "Failed to capture screenshot.");

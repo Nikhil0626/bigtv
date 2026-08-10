@@ -50,8 +50,10 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
     _controllers = List.generate(
       reelsList.length,
           (index) {
+        String rawUrl = reelsList[index].videoUrl;
+        String videoId = YoutubePlayer.convertUrlToId(rawUrl) ?? rawUrl;
         final controller = YoutubePlayerController(
-          initialVideoId: YoutubePlayer.convertUrlToId(reelsList[index].videoUrl)!,
+          initialVideoId: videoId,
           flags: const YoutubePlayerFlags(
             autoPlay: true,
             mute: false,
@@ -89,6 +91,10 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
 
   @override
   void dispose() {
+    for (var controller in _controllers) {
+      controller.pause();
+      controller.dispose();
+    }
     super.dispose();
   }
 
@@ -253,7 +259,16 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                       final imageFile = File(imagePath);
                       await imageFile.writeAsBytes(image);
 
-                      Share.shareXFiles([XFile(imageFile.path)], text: widget.reelCard.videoUrl);
+                      final RenderBox? box = context.findRenderObject() as RenderBox?;
+                      final Rect sharePosition = box != null
+                          ? (box.localToGlobal(Offset.zero) & box.size)
+                          : Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width, MediaQuery.of(context).size.height / 2);
+
+                      await Share.shareXFiles(
+                        [XFile(imageFile.path, mimeType: 'image/png', bytes: image)],
+                        text: widget.reelCard.videoUrl,
+                        sharePositionOrigin: sharePosition,
+                      );
                     } else {
                       CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
                     }

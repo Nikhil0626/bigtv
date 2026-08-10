@@ -21,8 +21,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 
 
@@ -64,11 +64,14 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+        systemNavigationBarColor: AppColorTokens.primaryRed,
+        systemNavigationBarIconBrightness: Brightness.light,
       ),
       child: WillPopScope(
         onWillPop: () async {
@@ -82,190 +85,91 @@ class _HomeViewState extends State<HomeView> {
         },
         child: Consumer<HomeProvider>(
           builder: (_, homeProvider, __) {
-            return
-                Scaffold(
+            return Scaffold(
                   body: Stack(
                     children: [
                       PageView(
                         controller: homeProvider.homePageController,
-                        physics: NeverScrollableScrollPhysics(),
+                        physics: const NeverScrollableScrollPhysics(),
                         onPageChanged: (index) {
                           homeProvider.onItemTapped(index);
                           context.read<VideoProvider>().pauseVideo();
                         },
-                        children: [MainScreenCard(), ReelsScreen(), KeepAlivePage(keepAlive: true, child: SettingsView())],
+                        children: [
+                          MainScreenCard(),
+                          ReelsScreen(),
+                          KeepAlivePage(keepAlive: true, child: SettingsView()),
+                        ],
                       ),
                       if (homeProvider.isBottomEnable && context.watch<SettingsProvider>().bannerAdsLoading != BannerAdsLoading.success)
                         Align(
                           alignment: Alignment.bottomCenter,
-                          child: SafeArea(
-                              child: Container(
-                                height: 64, // increased to accommodate activeIcon border
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black12,
-                                    blurRadius: 6,
-                                    offset: Offset(0, 2),
-                                  ),
-                                ],
-                              ),
-                              child: ClipRRect(
-                                child: BottomNavigationBar(
-                                  backgroundColor: AppColorTokens.primaryRed,
-                                  type: BottomNavigationBarType.fixed,
-                                  currentIndex: homeProvider.selectedIndex,
-                                  onTap: (index) {
-                                    context.read<VideoProvider>().pauseVideo();
-                                    homeProvider.isTabChange();
-                                    homeProvider.homePageController.jumpToPage(index);
-                                    homeProvider.pageChange(isValue: true);
-                                    if (index == 0) {
-                                      homeProvider.getAllPost();
-                                      homeProvider.aiTagDataLoaded(false);
-                                      homeProvider.setSelectedTagId(0);
-                                      EventRepo().addEvent({
-                                        "aiTagName": "news",
-                                        "aiTagId": "-1",
-                                        "createAt": DateTime.now().toString(),
-                                      }, "ai_tag_click");
-                                    } else if (index == 1) {
-                                      EventRepo().addEvent({
-                                        "aiTagName": "reels",
-                                        "aiTagId": "-3",
-                                        "createAt": DateTime.now().toString(),
-                                      }, "ai_tag_click");
-                                    } else if (index == 2) {
-                                      EventRepo().addEvent({
-                                        "aiTagName": "more",
-                                        "aiTagId": "-4",
-                                        "createAt": DateTime.now().toString(),
-                                      }, "ai_tag_click");
-                                    }
-                                  },
-                                  selectedItemColor: Colors.white,
-                                  unselectedItemColor: Colors.white,
-                                  selectedFontSize: 12,
-                                  unselectedFontSize: 12,
-                                  iconSize: 22,
-                                  showSelectedLabels: true,
-                                  showUnselectedLabels: true,
-                                  items: [
-                                    BottomNavigationBarItem(
-                                      icon: SvgPicture.asset(
-                                        "assets/new_app_icon/bytes.svg",
-                                        height: 22,
-                                      colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                      ),
-                                      activeIcon: Container(
-                                        padding: EdgeInsets.only(top: 4),
-                                        decoration: BoxDecoration(
-                                          border: Border(top: BorderSide(color: Colors.white, width: 2)),
-                                        ),
-                                        child: SvgPicture.asset(
-                                          "assets/new_app_icon/bytes.svg",
-                                          height: 22,
-                                          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                        ),
-                                      ),
-                                      label: 'news'.tr(),
-                                    ),
-                                    BottomNavigationBarItem(
-                                      icon: SvgPicture.asset(
-                                        "assets/new_app_icon/reel.svg",
-                                        height: 22,
-                                      colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                      ),
-                                      activeIcon: Container(
-                                        padding: EdgeInsets.only(top: 4),
-                                        decoration: BoxDecoration(
-                                          border: Border(top: BorderSide(color: Colors.white, width: 2)),
-                                        ),
-                                        child: SvgPicture.asset(
-                                          "assets/new_app_icon/reel.svg",
-                                          height: 22,
-                                          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                        ),
-                                      ),
-                                      label: 'reels'.tr(),
-                                    ),
-                                    BottomNavigationBarItem(
-                                      icon: SvgPicture.asset(
-                                        "assets/new_app_icon/menu.svg",
-                                        height: 22,
-                                      colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                      ),
-                                      activeIcon: Container(
-                                        padding: EdgeInsets.only(top: 4),
-                                        decoration: BoxDecoration(
-                                          border: Border(top: BorderSide(color: Colors.white, width: 2)),
-                                        ),
-                                        child: SvgPicture.asset(
-                                          "assets/new_app_icon/menu.svg",
-                                          height: 22,
-                                          colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                                        ),
-                                      ),
-                                      label: 'more'.tr(),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-
-                  ),
-                                ],
-                              ),
-                  bottomNavigationBar:Platform.isIOS?Consumer<AdMobBannerProvider>(
-                    builder: (_, adMobBannerProvider, __) {
-                      final currentIndex = adMobBannerProvider.currentPageIndex;
-                      final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
-                      if (adsList.isEmpty) {
-                        return const SizedBox.shrink();
-                      } else if ((currentIndex + 1) % 5 == 0) {
-                        return const SizedBox.shrink();
-                      } else {
-                        log("siva new ${adsList.last}");
-                        return  Container(
-                          height: 50,
-                          width: MediaQuery.of(context).size.width,
-                          alignment: Alignment.center,
                           child: Container(
-                            height: 50,
-                            width: 320,
-                            color: Colors.white,
-                            alignment: Alignment.center,
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 2.0),
-                              child: Center(child: AdWidget(ad: adsList.last)),
+                            color: AppColorTokens.primaryRed,
+                            child: SafeArea(
+                              top: false,
+                              child: BottomNavigationBar(
+                                elevation: 0,
+                                backgroundColor: AppColorTokens.primaryRed,
+                              type: BottomNavigationBarType.fixed,
+                              currentIndex: homeProvider.selectedIndex,
+                              onTap: (index) {
+                                context.read<VideoProvider>().pauseVideo();
+                                homeProvider.isTabChange();
+                                homeProvider.homePageController.jumpToPage(index);
+                                homeProvider.pageChange(isValue: true);
+                                if (index == 0) {
+                                  homeProvider.getAllPost();
+                                  homeProvider.aiTagDataLoaded(false);
+                                  homeProvider.setSelectedTagId(0);
+                                  EventRepo().addEvent({"aiTagName": "news", "aiTagId": "-1", "createAt": DateTime.now().toString()}, "ai_tag_click");
+                                } else if (index == 1) {
+                                  EventRepo().addEvent({"aiTagName": "reels", "aiTagId": "-3", "createAt": DateTime.now().toString()}, "ai_tag_click");
+                                } else if (index == 2) {
+                                  EventRepo().addEvent({"aiTagName": "more", "aiTagId": "-4", "createAt": DateTime.now().toString()}, "ai_tag_click");
+                                }
+                              },
+                              selectedItemColor: Colors.white,
+                              unselectedItemColor: Colors.white70,
+                              selectedFontSize: 11,
+                              unselectedFontSize: 11,
+                              iconSize: 22,
+                              showSelectedLabels: true,
+                              showUnselectedLabels: true,
+                              items: [
+                                 BottomNavigationBarItem(
+                                   icon: SvgPicture.asset("assets/new_app_icon/bytes.svg", height: 22, colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)),
+                                   activeIcon: Column(mainAxisSize: MainAxisSize.min, children: [
+                                     Container(height: 2, width: 28, color: Colors.white),
+                                     const SizedBox(height: 4),
+                                     SvgPicture.asset("assets/new_app_icon/bytes.svg", height: 22, colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)),
+                                   ]),
+                                   label: 'news'.tr(),
+                                 ),
+                                BottomNavigationBarItem(
+                                  icon: SvgPicture.asset("assets/new_app_icon/reel.svg", height: 22, colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)),
+                                  activeIcon: Column(mainAxisSize: MainAxisSize.min, children: [
+                                    Container(height: 2, width: 28, color: Colors.white),
+                                    const SizedBox(height: 4),
+                                    SvgPicture.asset("assets/new_app_icon/reel.svg", height: 22, colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)),
+                                  ]),
+                                  label: 'reels'.tr(),
+                                ),
+                                BottomNavigationBarItem(
+                                  icon: SvgPicture.asset("assets/new_app_icon/menu.svg", height: 22, colorFilter: const ColorFilter.mode(Colors.white70, BlendMode.srcIn)),
+                                  activeIcon: Column(mainAxisSize: MainAxisSize.min, children: [
+                                    Container(height: 2, width: 28, color: Colors.white),
+                                    const SizedBox(height: 4),
+                                    SvgPicture.asset("assets/new_app_icon/menu.svg", height: 22, colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn)),
+                                  ]),
+                                  label: 'more'.tr(),
+                                ),
+                              ],
                             ),
                           ),
-                        );
-                      }
-                    },
-                  ): SafeArea(
-                    child: Consumer<AdMobBannerProvider>(
-                      builder: (_, adMobBannerProvider, __) {
-                        final currentIndex = adMobBannerProvider.currentPageIndex;
-                        final adsList = adMobBannerProvider.adsBanner320x50.values.where((ad) => ad != null).toList();
-                        if (adsList.isEmpty) {
-                          return const SizedBox.shrink();
-                        } else if ((currentIndex + 1) % 5 == 0) {
-                          return const SizedBox.shrink();
-                        } else {
-                          log("siva new ${adsList.last}");
-                          return  Container(
-                            height: 50,
-                            width: MediaQuery.of(context).size.width,
-                            alignment: Alignment.center,
-                            child: Center(child: AdWidget(ad: adsList[adsList.length-1])),
-                          );
-                        }
-                      },
-                    ),
+                        ),
+                      ),
+                    ],
                   ),
                 );
           },

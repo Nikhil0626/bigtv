@@ -10,7 +10,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -184,65 +183,11 @@ class SettingsProvider extends ChangeNotifier {
   }
 
 
-  String? to = '';
-  String? from = '';
-  String? renderTime = '';
-  BannerAdsLoading bannerAdsLoading = BannerAdsLoading.loading;
-  late BannerAd bannerAd;
+  BannerAdsLoading bannerAdsLoading = BannerAdsLoading.fail;
 
-  void loadBannerAd(BuildContext context) async{
-
-    SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
-
-    String? userId= sharedPreferences.getString("userId");
-    String? deviceId= sharedPreferences.getString("deviceId");
-    from =  DateTime.now().toString();
-    bannerAdsLoading = BannerAdsLoading.loading;
-
-    log(userId.toString());
-    log(deviceId.toString());
-    final AdSize customAdSize = AdSize(width: 300, height: 50);
-    bannerAd = BannerAd(
-      adUnitId: context.read<HomeProvider>().adManagerBannerId,
-      size: customAdSize,
-      request: const AdManagerAdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) async{
-          to =  DateTime.now().toString();
-          debugPrint(ad.responseInfo.toString());
-          bannerAdsLoading = BannerAdsLoading.success;
-          Map<String, dynamic> newEvent = {
-            "sdkRequestStartTime":from,
-            "sdkRequestReceivedTime":to,
-            "adsRenderingTime":DateTime.now().difference(DateTime.parse(to!)).inMicroseconds.toString(),
-            "createAt":DateTime.now().toString(),
-            "adResponse":ad.responseInfo.toString(),
-          };
-          debugPrint("All Events: $newEvent");
-           EventRepo().addEvent(newEvent,"ads_success");
-
-          notifyListeners();
-        },
-        onAdFailedToLoad: (ad, error) async{
-          to =  DateTime.now().toString();
-          if (kDebugMode) {
-            debugPrint(error.responseInfo.toString());
-          }
-          bannerAdsLoading = BannerAdsLoading.fail;
-          Map<String, dynamic> newEvent = {
-            "sdkRequestStartTime":from,
-            "sdkRequestReceivedTime":to,
-            "adsRenderingTime":"0",
-            "createAt":DateTime.now().toString(),
-            "adResponse":error.responseInfo.toString(),
-          };
-          debugPrint("All Events: $newEvent");
-          await EventRepo().addEvent(newEvent,"ads_failure");
-          ad.dispose();
-          notifyListeners();
-        },
-      ),
-    )..load();
+  void loadBannerAd(BuildContext context) async {
+    bannerAdsLoading = BannerAdsLoading.fail;
+    notifyListeners();
   }
 
 }

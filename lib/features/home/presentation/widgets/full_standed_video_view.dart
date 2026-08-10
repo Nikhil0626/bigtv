@@ -1,4 +1,5 @@
 
+import 'package:chotanews/aggricator_screens/video_image_screen/fullscreen_youtube_view.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,8 +23,10 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
   @override
   void initState() {
     super.initState();
+    String rawCode = widget.reelData['reel_video_code']?.toString() ?? "";
+    String videoId = YoutubePlayer.convertUrlToId(rawCode) ?? rawCode;
     ytController = YoutubePlayerController(
-      initialVideoId: YoutubePlayer.convertUrlToId("https://www.youtube.com/watch?v=${widget.reelData['reel_video_code']}")!,
+      initialVideoId: videoId,
       flags: const YoutubePlayerFlags(
         autoPlay: true,
         mute: false,
@@ -93,7 +96,42 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
                           homeProvider.toggleMute(); // Update your isMuted state
                         },
                       ), // ✅ Show remaining time
-                      FullScreenButton(),
+                      IconButton(
+                        icon: const Icon(Icons.fullscreen, color: Colors.white),
+                        onPressed: () {
+                          if (ytController != null) {
+                            final currentPos = ytController!.value.position;
+                            final wasPlaying = ytController!.value.isPlaying;
+                            Navigator.of(context).push(
+                              PageRouteBuilder(
+                                pageBuilder: (context, animation, secondaryAnimation) => FullscreenYoutubeView(
+                                  controller: ytController!,
+                                  initialPosition: currentPos,
+                                  wasPlaying: wasPlaying,
+                                ),
+                                transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                  return FadeTransition(opacity: animation, child: child);
+                                },
+                                transitionDuration: const Duration(milliseconds: 200),
+                              ),
+                            ).then((result) {
+                              if (result is Map) {
+                                final pos = result['position'] as Duration?;
+                                final playing = result['wasPlaying'] as bool?;
+                                if (pos != null) {
+                                  ytController?.seekTo(pos);
+                                }
+                                if (playing == true) {
+                                  ytController?.play();
+                                }
+                              } else if (wasPlaying) {
+                                ytController?.play();
+                              }
+                            });
+                          }
+                        },
+                      ),
+                      const SizedBox(width: 120),
                     ],
                   ),
                   builder: (context, player) => player,

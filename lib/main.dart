@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/event_cron.dart';
@@ -13,7 +14,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -38,23 +38,38 @@ void callbackDispatcher() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Catch disposed webview channel calls silently
+  FlutterError.onError = (FlutterErrorDetails details) {
+    if (details.exception is MissingPluginException ||
+        details.exception.toString().contains('flutter_inappwebview') ||
+        details.exception.toString().contains('evaluateJavascript')) {
+      return;
+    }
+    FlutterError.presentError(details);
+  };
+
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    if (error is MissingPluginException ||
+        error.toString().contains('flutter_inappwebview') ||
+        error.toString().contains('evaluateJavascript')) {
+      return true;
+    }
+    return false;
+  };
+
   final appDocumentDir = await getApplicationDocumentsDirectory();
   Hive.init(appDocumentDir.path);
   await Hive.openBox('events');
   await Hive.openBox('pollBox');
   EventCron().start();
-  MobileAds.instance.initialize();
-
-  MobileAds.instance.updateRequestConfiguration(RequestConfiguration(testDeviceIds: ['14B2035F5FFE81424A56C13FE69A1545']));
   initPlugin();
   getReferrerFromPlayStore();
   await EasyLocalization.ensureInitialized();
-  SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
   ));
   checkForUpdate();
-  unawaited(MobileAds.instance.initialize());
   await Firebase.initializeApp();
   AnalyticsService.logAppOpen();
   AnalyticsService().trackAppOpen();
@@ -91,7 +106,6 @@ Future<void> main() async {
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
-    DeviceOrientation.portraitDown,
   ]).then((_) {
     runApp(EasyLocalization(
         supportedLocales: [
@@ -158,20 +172,32 @@ class _MyAppState extends State<MyApp> {
         providers: AppProviders.all,
         child: Consumer<ThemeProvider>(
           builder: (context, themeProvider, child) {
-            return MaterialApp(
-              navigatorKey: mainNavigatorKey,
-              localizationsDelegates: context.localizationDelegates,
-              supportedLocales: const [Locale('te', '')],
-              // Add your locales
-              locale: _locale,
-              themeMode: themeProvider.themeMode,
-              theme: AppTheme.lightTheme,
-              darkTheme: AppTheme.darkTheme,
-              routes: {
-                '/': (context) => SplashScreen(),
-                '/settings': (context) => SettingsView(),
-              },
-              debugShowCheckedModeBanner: false,
+            final isDark = themeProvider.themeMode == ThemeMode.dark ||
+                (themeProvider.themeMode == ThemeMode.system &&
+                    MediaQuery.platformBrightnessOf(context) == Brightness.dark);
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                // Light icons (white) in dark mode, dark icons (black) in light mode
+                statusBarIconBrightness:
+                    isDark ? Brightness.light : Brightness.dark,
+                statusBarBrightness:
+                    isDark ? Brightness.dark : Brightness.light,
+              ),
+              child: MaterialApp(
+                navigatorKey: mainNavigatorKey,
+                localizationsDelegates: context.localizationDelegates,
+                supportedLocales: const [Locale('te', '')],
+                locale: _locale,
+                themeMode: themeProvider.themeMode,
+                theme: AppTheme.lightTheme,
+                darkTheme: AppTheme.darkTheme,
+                routes: {
+                  '/': (context) => SplashScreen(),
+                  '/settings': (context) => SettingsView(),
+                },
+                debugShowCheckedModeBanner: false,
+              ),
             );
           },
         ),

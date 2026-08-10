@@ -50,28 +50,10 @@
 
         android:theme="@style/LaunchTheme"
         android:windowSoftInputMode="adjustResize">
-        <meta-data
-            android:name="com.google.android.gms.ads.AD_MANAGER_APP"
-            android:value="true"/>
-
         <!-- Meta-Data -->
         <meta-data
             android:name="com.webengage.sdk.android.environment"
             android:value="in" />
-<!--        <meta-data-->
-<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-3940256099942544~1458002511" />-->
-
-
-        <!--set Account-->
-<!--        <meta-data-->
-<!--            android:name="com.google.android.gms.ads.APPLICATION_ID"-->
-<!--            android:value="ca-app-pub-2405357352181832~7892348790" />-->
-
-            <!--Chotnews sales-->
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3206456546664189~1645119151" />
 
 <!--        <meta-data-->
 <!--            android:name="com.facebook.sdk.ApplicationId"-->

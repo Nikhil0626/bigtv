@@ -266,8 +266,22 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                               final file = File(filePath);
                               await file.writeAsBytes(response.bodyBytes);
 
-                              // Share the image
-                              await Share.shareXFiles([XFile(file.path)], text: Platform.isIOS?article['linkURLIos']:article['linkURLAndroid']);
+                              final String shareLink = (Platform.isIOS
+                                      ? (article['linkURLIos'] ?? article['linkURLAndroid'])
+                                      : article['linkURLAndroid'])
+                                  ?.toString() ?? '';
+                              final String textToShare = (shareLink.isNotEmpty && shareLink != 'null') ? shareLink : '';
+
+                              final RenderBox? box = context.findRenderObject() as RenderBox?;
+                              final Rect sharePosition = box != null
+                                  ? (box.localToGlobal(Offset.zero) & box.size)
+                                  : Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width, MediaQuery.of(context).size.height / 2);
+
+                              await Share.shareXFiles(
+                                [XFile(file.path, mimeType: 'image/jpeg', bytes: response.bodyBytes)],
+                                text: textToShare.isNotEmpty ? textToShare : null,
+                                sharePositionOrigin: sharePosition,
+                              );
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(content: Text('Image download failed.')),

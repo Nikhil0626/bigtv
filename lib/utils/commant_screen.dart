@@ -200,62 +200,71 @@ class _CommentSectionState extends State<CommentSection> {
 
                 // Comment Input Field
                 Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 12),
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 12, right: 12),
                   child: Row(
                     children: [
                       Expanded(
                         child: SizedBox(
-                          height: 40,
+                          height: 48,
                           child: TextField(
                             controller: controller,
+                            style: const TextStyle(color: Colors.black),
                             decoration: InputDecoration(
                               hintText: 'Add a comment...',
+                              hintStyle: const TextStyle(color: Colors.grey),
+                              fillColor: Colors.white,
+                              filled: true,
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(30),
+                                borderSide: const BorderSide(color: Color(0xFFE53935)),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30),
+                                borderSide: const BorderSide(color: Color(0xFFE53935)),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(30),
+                                borderSide: const BorderSide(color: Color(0xFFE53935)),
                               ),
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 20,
                                 vertical: 10,
                               ),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.send, color: Color(0xFFE53935)),
+                                onPressed: () async {
+                                  SharedPreferences sp = await SharedPreferences.getInstance();
+                                  bool isLogin = sp.getString("loginType").toString() == "login" ? true : false ?? false;
+                                  if (isLogin) {
+                                    if (controller.text.isEmpty) {
+                                    } else {
+                                       EventRepo().addEvent({
+                                        "commented": controller.text,
+                                        "postId": widget.postId.toString()??"000",
+                                        "createAt": DateTime.now().toString(),
+                                         "postTitle": widget.postTitle.toString()??""
+                                       }, "commented_article");
+                                       newsPostsProvider.sendCommentsOnPost(widget.postId, controller.text).then(
+                                            (value) => controller.text = '',
+                                          );
+                                    }
+                                  } else {
+                                    if (context.mounted) {
+                                      Navigator.pop(context);
+                                      context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const LoginBackgroundView(),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                       width(width: 8),
-                      IconButton(
-                        icon: const Icon(Icons.send, color: Colors.blue),
-                        onPressed: () async {
-                          SharedPreferences sp = await SharedPreferences.getInstance();
-                          bool isLogin = sp.getString("loginType").toString() == "login" ? true : false ?? false;
-                          if (isLogin) {
-                            if (controller.text.isEmpty) {
-                            } else {
-                               EventRepo().addEvent({
-                                "commented": controller.text,
-                                "postId": widget.postId.toString()??"000",
-                                "createAt": DateTime.now().toString(),
-                                 "postTitle": widget.postTitle.toString()??""
-
-                               }, "commented_article");
-                              newsPostsProvider.sendCommentsOnPost(widget.postId, controller.text).then(
-                                    (value) => controller.text = '',
-                                  );
-
-
-                            }
-                          } else {
-                            if (context.mounted) {
-                              Navigator.pop(context);
-                              context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const LoginBackgroundView(),
-                                ),
-                              );
-                            }
-                          }
-                        },
                       ),
                     ],
                   ),

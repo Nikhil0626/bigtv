@@ -1,0 +1,85 @@
+PODS:
+  - app_tracking_transparency (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_inappwebview_ios (0.0.1):
+    - Flutter
+    - flutter_inappwebview_ios/Core (= 0.0.1)
+    - OrderedSet (~> 6.0.3)
+  - flutter_inappwebview_ios/Core (0.0.1):
+    - Flutter
+    - OrderedSet (~> 6.0.3)
+  - flutter_upgrade_version (1.1.8):
+    - Flutter
+  - OrderedSet (6.0.3)
+  - permission_handler_apple (9.3.0):
+    - Flutter
+  - platform_device_id_plus (0.0.1):
+    - Flutter
+  - WebEngage (7.0.0):
+    - WebEngage/Core (= 7.0.0)
+    - WebEngage/Location (= 7.0.0)
+  - WebEngage/Core (7.0.0)
+  - WebEngage/Location (7.0.0):
+    - WebEngage/Core
+  - webengage_flutter (1.7.0):
+    - Flutter
+    - WebEngage (>= 6.10.0)
+  - webview_flutter_wkwebview (0.0.1):
+    - Flutter
+    - FlutterMacOS
+  - workmanager (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - app_tracking_transparency (from `.symlinks/plugins/app_tracking_transparency/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
+  - flutter_upgrade_version (from `.symlinks/plugins/flutter_upgrade_version/ios`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - platform_device_id_plus (from `.symlinks/plugins/platform_device_id_plus/ios`)
+  - webengage_flutter (from `.symlinks/plugins/webengage_flutter/ios`)
+  - webview_flutter_wkwebview (from `.symlinks/plugins/webview_flutter_wkwebview/darwin`)
+  - workmanager (from `.symlinks/plugins/workmanager/ios`)
+
+SPEC REPOS:
+  trunk:
+    - OrderedSet
+    - WebEngage
+
+EXTERNAL SOURCES:
+  app_tracking_transparency:
+    :path: ".symlinks/plugins/app_tracking_transparency/ios"
+  Flutter:
+    :path: Flutter
+  flutter_inappwebview_ios:
+    :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
+  flutter_upgrade_version:
+    :path: ".symlinks/plugins/flutter_upgrade_version/ios"
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+  platform_device_id_plus:
+    :path: ".symlinks/plugins/platform_device_id_plus/ios"
+  webengage_flutter:
+    :path: ".symlinks/plugins/webengage_flutter/ios"
+  webview_flutter_wkwebview:
+    :path: ".symlinks/plugins/webview_flutter_wkwebview/darwin"
+  workmanager:
+    :path: ".symlinks/plugins/workmanager/ios"
+
+SPEC CHECKSUMS:
+  app_tracking_transparency: 3d84f147f67ca82d3c15355c36b1fa6b66ca7c92
+  Flutter: 71a624a5bc0c04062bf19101d501e466baf2fb47
+  flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
+  flutter_upgrade_version: 911009e80a0b058173939342c66acb352c8858c1
+  OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  platform_device_id_plus: ead043ea948d38cec3e8d2b9aa17cfd0825e2d23
+  WebEngage: ea7b635da85e664434378883ccfd9116378521ff
+  webengage_flutter: 8d01ef5974a0c6e06171d7572da609b486d5e55e
+  webview_flutter_wkwebview: 8ebf4fded22593026f7dbff1fbff31ea98573c8d
+  workmanager: 01be2de7f184bd15de93a1812936a2b7f42ef07e
+
+PODFILE CHECKSUM: 89d2292b06bb0d2c7fb502c889f6a4708437994d
+
+COCOAPODS: 1.17.0

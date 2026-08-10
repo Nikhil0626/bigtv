@@ -1,2 +1,10 @@
-#include? "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
+#include? "../Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"
 #include "Generated.xcconfig"
+
+FRAMEWORK_SEARCH_PATHS = $(inherited) "${PODS_CONFIGURATION_BUILD_DIR}" "${PODS_ROOT}/WebEngage/WebEngage.xcframework/ios-arm64_x86_64-simulator" "${PODS_ROOT}/WebEngage/WebEngage.xcframework/ios-arm64"
+HEADER_SEARCH_PATHS = $(inherited) "${PODS_ROOT}/WebEngage/WebEngage.xcframework/ios-arm64_x86_64-simulator/WebEngage.framework/Headers" "${PODS_ROOT}/WebEngage/WebEngage.xcframework/ios-arm64/WebEngage.framework/Headers" "${PODS_ROOT}/../.symlinks/plugins/webengage_flutter/ios/Classes"
+
+
+
+
+

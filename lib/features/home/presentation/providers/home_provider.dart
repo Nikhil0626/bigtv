@@ -21,7 +21,6 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -33,8 +32,6 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:typed_data';
-
-
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
@@ -126,8 +123,9 @@ class HomeProvider extends ChangeNotifier {
   }
 
   void youtubeInitial(String url) {
+    String videoId = YoutubePlayer.convertUrlToId(url) ?? url;
     controller = YoutubePlayerController(
-      initialVideoId: url,
+      initialVideoId: videoId,
       flags: const YoutubePlayerFlags(
         autoPlay: true,
         enableCaption: false,
@@ -150,7 +148,8 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getIndividualPost(dynamic postId, {bool isAds = false, bool isLink = false}) async {
+  Future<void> getIndividualPost(dynamic postId,
+      {bool isAds = false, bool isLink = false}) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     log("getIndividualPost $postId");
     if (isAds == true) {
@@ -169,7 +168,7 @@ class HomeProvider extends ChangeNotifier {
           getAllPostList.add(response.data['data']);
           Future.delayed(
             const Duration(milliseconds: 100),
-                () {
+            () {
               if (!isAds) {
                 getAllPost(isGetAllPost: true);
               }
@@ -217,7 +216,7 @@ class HomeProvider extends ChangeNotifier {
       log("Get News Api catch error $e", stackTrace: st);
       Future.delayed(
         const Duration(milliseconds: 300),
-            () {
+        () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -227,7 +226,7 @@ class HomeProvider extends ChangeNotifier {
       log("Get News Api catch error $e", stackTrace: st);
       Future.delayed(
         const Duration(milliseconds: 300),
-            () {
+        () {
           getAllPost(isGetAllPost: true);
         },
       );
@@ -256,7 +255,8 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
+  Future<void> getAllPost(
+      {String postIds = "0", bool isGetAllPost = false}) async {
     final context = mainNavigatorKey.currentContext;
     if (context != null) {
       context.read<RatingProvider>().ratingsList = [];
@@ -277,20 +277,32 @@ class HomeProvider extends ChangeNotifier {
     String? userId = preferences.getString("userId");
     String? deviceId = preferences.getString("deviceId");
     String locationId = preferences.getString("locationId") ?? "";
-    List<int> locationIds = locationId.split(',').where((e) =>
-    e
-        .trim()
-        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+    List<int> locationIds = locationId
+        .split(',')
+        .where((e) => e.trim().isNotEmpty)
+        .map((e) => int.tryParse(e.trim()))
+        .whereType<int>()
+        .toList();
     log('Location IDs: $locationIds ==== ${getAllPostList.length}');
 
     String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<int> categoriesIds = categoriesId.split(',').where((e) =>
-    e
-        .trim()
-        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
+    List<int> categoriesIds = categoriesId
+        .split(',')
+        .where((e) => e.trim().isNotEmpty)
+        .map((e) => int.tryParse(e.trim()))
+        .whereType<int>()
+        .toList();
     log('Category IDs: $categoriesIds');
 
-    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": true, "isBigTv": true};
+    Map<String, dynamic> body = {
+      "device_id": deviceId,
+      "postId": postIds,
+      "locationIds": locationIds,
+      "categoriesId": categoriesIds,
+      "userId": userId ?? 0,
+      "isAdManager": false,
+      "isBigTv": true
+    };
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
@@ -299,21 +311,28 @@ class HomeProvider extends ChangeNotifier {
       isWebView = response.data['webView'];
       webUrl = response.data['webUrl'];
       allPostLastId = response.data['lastId'].toString();
-      adManageId = Platform.isIOS ? response.data['adUnits']['ios']['admanageid'] : response.data['adUnits']['android']['admanageid'];
-      adManagerNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admanagernativeid'] : response.data['adUnits']['android']['admanagernativeid'];
-      adManagerBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerbannerid'] : response.data['adUnits']['android']['admanagerbannerid'];
-      adMobNativeId = Platform.isIOS ? response.data['adUnits']['ios']['admobnativeid'] : response.data['adUnits']['android']['admobnativeid'];
-      adMobBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobbannerid'] : response.data['adUnits']['android']['admobbannerid'];
+      adManageId = Platform.isIOS
+          ? response.data['adUnits']['ios']['admanageid']
+          : response.data['adUnits']['android']['admanageid'];
+      adManagerNativeId = Platform.isIOS
+          ? response.data['adUnits']['ios']['admanagernativeid']
+          : response.data['adUnits']['android']['admanagernativeid'];
+      adManagerBannerId = Platform.isIOS
+          ? response.data['adUnits']['ios']['admanagerbannerid']
+          : response.data['adUnits']['android']['admanagerbannerid'];
+      adMobNativeId = Platform.isIOS
+          ? response.data['adUnits']['ios']['admobnativeid']
+          : response.data['adUnits']['android']['admobnativeid'];
+      adMobBannerId = Platform.isIOS
+          ? response.data['adUnits']['ios']['admobbannerid']
+          : response.data['adUnits']['android']['admobbannerid'];
 
-      adMobStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admobstickyid'] : response.data['adUnits']['android']['admobstickyid'];
-      adManagerStickBannerId = Platform.isIOS ? response.data['adUnits']['ios']['admanagerstickyid'] : response.data['adUnits']['android']['admanagerstickyid'];
-
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mainNavigatorKey.currentContext != null) {
-          final bannerAdsProvider = Provider.of<AdMobBannerProvider>(mainNavigatorKey.currentContext!, listen: false);
-          bannerAdsProvider.loadAd320x50ManagerBanner(0, AdSize.banner);
-        }
-      });
+      adMobStickBannerId = Platform.isIOS
+          ? response.data['adUnits']['ios']['admobstickyid']
+          : response.data['adUnits']['android']['admobstickyid'];
+      adManagerStickBannerId = Platform.isIOS
+          ? response.data['adUnits']['ios']['admanagerstickyid']
+          : response.data['adUnits']['android']['admanagerstickyid'];
 
       getImageAdsList.addAll(response.data['ads_list']);
       getRecommendedPostList.addAll(response.data['ad_homepage_data'] ?? []);
@@ -346,8 +365,10 @@ class HomeProvider extends ChangeNotifier {
           "subType": "",
           "isStickyPost": 0,
           "adPosition": null,
-          "linkURLAndroid": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
-          "linkURLIos": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+          "linkURLAndroid":
+              "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
+          "linkURLIos":
+              "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
           "links": [],
           "categoryId": 2,
           "isBookmarked": 0
@@ -391,7 +412,7 @@ class HomeProvider extends ChangeNotifier {
       "deviceid": deviceId ?? "",
       "aitagid": postId,
       "user_id": userId ?? "",
-      "isAdManager": "true",
+      "isAdManager": "false",
       "isBigTv": "true",
     };
     log(body.toString());
@@ -489,7 +510,7 @@ class HomeProvider extends ChangeNotifier {
 
   String? _extractPostIdSafely(Map<String, dynamic>? payload) {
     if (payload == null) return "0";
-    
+
     String? foundId;
     void search(Map m) {
       m.forEach((k, v) {
@@ -505,17 +526,20 @@ class HomeProvider extends ChangeNotifier {
         }
       });
     }
-    
+
     // Check WebEngage array style customData first
     try {
       if (payload['data'] != null && payload['data']['customData'] is List) {
         for (var item in payload['data']['customData']) {
-          if (item is Map && (item['key'] == 'postId' || item['key'] == 'post_id')) {
+          if (item is Map &&
+              (item['key'] == 'postId' || item['key'] == 'post_id')) {
             return item['value'].toString();
           }
           // iOS WebEngage might just put the value in the first item without a key
-          if (item is Map && item.containsKey('value') && !item.containsKey('key')) {
-             return item['value'].toString();
+          if (item is Map &&
+              item.containsKey('value') &&
+              !item.containsKey('key')) {
+            return item['value'].toString();
           }
         }
       }
@@ -566,6 +590,16 @@ class HomeProvider extends ChangeNotifier {
   bool isHomeScreen = false;
 
   Future<void> initDeepLinks() async {
+    try {
+      final initialUri = await AppLinks().getInitialLink();
+      if (initialUri != null) {
+        debugPrint('Initial App Link: $initialUri');
+        _handleDeepLink(initialUri);
+      }
+    } catch (e) {
+      log("Error fetching initial link: $e");
+    }
+
     linkSubscription = AppLinks().uriLinkStream.listen((uri) {
       debugPrint('onAppLink: $uri');
       homePageController.jumpToPage(0);
@@ -628,10 +662,14 @@ class HomeProvider extends ChangeNotifier {
       final size = box.size;
       final position = box.localToGlobal(Offset.zero);
 
-      final screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+      final screenWidth = WidgetsBinding
+              .instance.platformDispatcher.views.first.physicalSize.width /
+          WidgetsBinding
+              .instance.platformDispatcher.views.first.devicePixelRatio;
 
       final itemCenter = position.dx + size.width / 2;
-      final targetOffset = aiTagScrollController.offset + itemCenter - screenWidth / 2;
+      final targetOffset =
+          aiTagScrollController.offset + itemCenter - screenWidth / 2;
 
       aiTagScrollController.animateTo(
         targetOffset.clamp(
@@ -644,7 +682,8 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> sendAdsDataSend(dynamic postId, dynamic title, dynamic postImage, bool isComeContest, String sourceUrl) async {
+  Future<void> sendAdsDataSend(dynamic postId, dynamic title, dynamic postImage,
+      bool isComeContest, String sourceUrl) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
@@ -666,7 +705,9 @@ class HomeProvider extends ChangeNotifier {
         }
         if (mainNavigatorKey.currentContext != null) {
           if (isComeContest) {
-            mainNavigatorKey.currentContext!.read<AdsContestProvider>().getContestList(mainNavigatorKey.currentContext);
+            mainNavigatorKey.currentContext!
+                .read<AdsContestProvider>()
+                .getContestList(mainNavigatorKey.currentContext);
           } else {
             Navigator.push(
                 mainNavigatorKey.currentContext!,
@@ -676,7 +717,8 @@ class HomeProvider extends ChangeNotifier {
           }
         }
 
-        CustomToast.showSuccessToast(msg: "Your Successfully Joined The Contest");
+        CustomToast.showSuccessToast(
+            msg: "Your Successfully Joined The Contest");
         EventRepo().addEvent({
           "user_id": userId,
           "post_id": postId,
@@ -713,7 +755,8 @@ class HomeProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         getAdsDataList.addAll(response.data);
         log("LogsData ${getAdsDataList.length}");
-        EventRepo().addEvent({"user_id": userId, "isCheck": true}, "check_contest");
+        EventRepo()
+            .addEvent({"user_id": userId, "isCheck": true}, "check_contest");
       }
     } on DioException catch (e, st) {
       log("getAdsSaveData DioException: $e", stackTrace: st);
@@ -776,12 +819,22 @@ class HomeProvider extends ChangeNotifier {
       final directory = await getApplicationDocumentsDirectory();
       final filePath = "${directory.path}/${article['id']}.pdf";
       final file = File(filePath);
-      await file.writeAsBytes(await pdf.save());
+      final pdfBytes = await pdf.save();
+      await file.writeAsBytes(pdfBytes);
 
       log("PDF saved at: $filePath");
 
-      await Share.shareXFiles([XFile(filePath)],
-          text: "https://apps.signitivessoft.com/individualPage");
+      final RenderBox? box = context.findRenderObject() as RenderBox?;
+      final Rect sharePosition = box != null
+          ? (box.localToGlobal(Offset.zero) & box.size)
+          : Rect.fromLTWH(0, 0, MediaQuery.of(context).size.width,
+              MediaQuery.of(context).size.height / 2);
+
+      await Share.shareXFiles(
+        [XFile(filePath, mimeType: 'application/pdf', bytes: pdfBytes)],
+        text: "https://apps.signitivessoft.com/individualPage",
+        sharePositionOrigin: sharePosition,
+      );
     } catch (e) {
       log("Error generating PDF: $e");
       CustomToast.showErrorToast(msg: "Failed to generate PDF");

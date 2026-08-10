@@ -27,23 +27,20 @@ class _ReelsCardViewState extends State<ReelsCardView> {
     super.initState();
 
     context.read<ReelsProviders>().getIndividualReelData(widget.postId).then((value) {
-      log(value.toString());
-      final videoId = YoutubePlayer.convertUrlToId(value.videoUrl);
-      if (videoId != null) {
-        controller = YoutubePlayerController(
-          initialVideoId: videoId,
-          flags: const YoutubePlayerFlags(
-            autoPlay: true,
-            mute: false,
-            forceHD: true,
-            loop: false,
-            disableDragSeek: true,
-            enableCaption: false,
-            controlsVisibleAtStart: true,
-          ),
-        );
-        setState(() {}); // Refresh UI after controller is ready
-      }
+      final videoId = YoutubePlayer.convertUrlToId(value.videoUrl) ?? value.videoUrl;
+      controller = YoutubePlayerController(
+        initialVideoId: videoId,
+        flags: const YoutubePlayerFlags(
+          autoPlay: true,
+          mute: false,
+          forceHD: true,
+          loop: false,
+          disableDragSeek: true,
+          enableCaption: false,
+          controlsVisibleAtStart: true,
+        ),
+      );
+      setState(() {});
     });
   }
 

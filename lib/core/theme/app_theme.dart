@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'color_tokens.dart';
 import 'typography.dart';
 import 'spacing.dart';
@@ -31,6 +32,11 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         iconTheme: IconThemeData(color: AppColorTokens.lightIcon),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.dark,  // dark icons for light background
+          statusBarBrightness: Brightness.light,     // iOS: dark icons
+        ),
       ),
       cardTheme: CardThemeData(
         color: AppColorTokens.lightCard,
@@ -102,6 +108,11 @@ class AppTheme {
         elevation: 0,
         centerTitle: true,
         iconTheme: IconThemeData(color: AppColorTokens.darkIcon),
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: Brightness.light,  // light icons for dark background
+          statusBarBrightness: Brightness.dark,        // iOS: light icons
+        ),
       ),
       cardTheme: CardThemeData(
         color: AppColorTokens.darkCard,
