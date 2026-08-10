@@ -41,14 +41,14 @@ class FullPageCarousel extends StatefulWidget {
 }
 
 class FullPageCarouselState extends State<FullPageCarousel> {
-  int _currentIndex = 0;
+  final ValueNotifier<int> _currentIndex = ValueNotifier<int>(0);
   ScreenshotController sc = ScreenshotController();
   final CarouselSliderController _controller = CarouselSliderController();
 
   @override
-  void initState() {
-    super.initState();
-
+  void dispose() {
+    _currentIndex.dispose();
+    super.dispose();
   }
 
   @override
@@ -99,9 +99,7 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                   pageSnapping: true,
                   autoPlay: true,
                   onPageChanged: (index, reason) {
-                    setState(() {
-                      _currentIndex = index;
-                    });
+                    _currentIndex.value = index;
                   },
                   scrollPhysics: const BouncingScrollPhysics(),
                   enlargeCenterPage: true,
@@ -114,7 +112,7 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                     decoration: BoxDecoration(
                       image: DecorationImage(
                         image: NetworkImage(
-                          image['Url'],
+                          image is String ? image : (image['Url'] ?? ""),
                         ),
                         fit: isFoldable ? BoxFit.fill : BoxFit.cover,
                         filterQuality: FilterQuality.medium,
@@ -128,17 +126,22 @@ class FullPageCarouselState extends State<FullPageCarousel> {
           ),
           Positioned(
             bottom: 50,
-            child: AnimatedSmoothIndicator(
-              activeIndex: _currentIndex,
-              count: widget.imageUrls.length,
-              effect: ExpandingDotsEffect(
-                dotHeight: 7,
-                dotWidth: 7,
-                activeDotColor: Colors.cyan.withValues(alpha: .3),
-                dotColor: Colors.grey.shade400,
-              ),
-              onDotClicked: (index) {
-                _controller.jumpToPage(index);
+            child: ValueListenableBuilder<int>(
+              valueListenable: _currentIndex,
+              builder: (context, currentIndex, child) {
+                return AnimatedSmoothIndicator(
+                  activeIndex: currentIndex,
+                  count: widget.imageUrls.length,
+                  effect: ExpandingDotsEffect(
+                    dotHeight: 7,
+                    dotWidth: 7,
+                    activeDotColor: Colors.cyan.withValues(alpha: .3),
+                    dotColor: Colors.grey.shade400,
+                  ),
+                  onDotClicked: (index) {
+                    _controller.jumpToPage(index);
+                  },
+                );
               },
             ),
           ),
@@ -256,7 +259,9 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                         onTap: () async{
                           try {
                             Navigator.pop(context);
-                            final response = await http.get(Uri.parse(article['gallery'][_currentIndex]['Url']));
+                            var currentImage = article['gallery'][_currentIndex.value];
+                            String imageUrl = currentImage is String ? currentImage : (currentImage['Url'] ?? "");
+                            final response = await http.get(Uri.parse(imageUrl));
                             if (response.statusCode == 200) {
                               // Get temporary directory
                               final tempDir = await getTemporaryDirectory();

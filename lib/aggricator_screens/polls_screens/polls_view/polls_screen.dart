@@ -30,7 +30,6 @@ class PollScreenDesign extends StatefulWidget {
 }
 
 class _PollScreenDesignState extends State<PollScreenDesign> {
-  int? selectId;
   ScreenshotController adsScreenshotController = ScreenshotController();
 
   @override
@@ -209,8 +208,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                     return Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          pollProvider.tempSelectedOptionId = option['id'];
-                          selectId = options.indexOf(option);
+                          pollProvider.setTempSelectedOptionId(option['id']);
                         },
                         child: Container(
                           margin: const EdgeInsets.symmetric(horizontal: 8),
@@ -304,9 +302,9 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                               CustomToast.showErrorToast(msg: "Your a guest user, Please login to submit poll");
                             } else {
                               pollProvider.submitPolls(
-                                pollProvider.localArticle['id'] ?? " ",
-                                selectId!,
-                                pollProvider.localArticle['pollData']['options'][selectId]['id'] ?? " ",
+                                pollProvider.localArticle['id'] ?? 0, // Using 0 as default id if null
+                                0, // unused index
+                                pollProvider.tempSelectedOptionId,
                                 pollProvider.localArticle['title'] ?? " ",
                               );
                             }
@@ -626,7 +624,7 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                     return Expanded(
                       child: GestureDetector(
                         onTap: () {
-                          pollProvider.tempSelectedOptionId = option['id'];
+                          pollProvider.setTempSelectedOptionId(option['id']);
                         },
                         child: Container(
                           height: 50,

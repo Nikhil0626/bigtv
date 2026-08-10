@@ -37,4 +37,19 @@ class HomeRepo extends BaseService{
     Response  response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.contestClick,method: RequestType.post,body:body );
     return response;
   }
-}
+
+  Future getEpapers(Map<String, dynamic> queryParams) async{
+    Response response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: "/epapers",method: RequestType.get,queryParameters: queryParams);
+    return response;
+  }
+
+  Future postDeviceDetails(Map<String, dynamic> body) async {
+    Response response = await makeRequest(
+      baseUrl: BaseUrls.newServerBaseUrl,
+      url: BaseUrls.deviceDetails,
+      method: RequestType.post,
+      body: body
+    );
+    return response;
+  }
+}

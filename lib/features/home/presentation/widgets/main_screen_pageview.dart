@@ -99,9 +99,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                               final duration = now.difference(_pageStartTime ?? now);
                               AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
 
-                              setState(() {
-                                _pageStartTime = now;
-                              });
+                              _pageStartTime = now;
                             },
                             itemBuilder: (context, index) {
                               return MainScreenBytView(

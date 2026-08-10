@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 
 class DistrictView extends StatefulWidget {
@@ -69,14 +70,14 @@ class _DistrictViewState extends State<DistrictView> {
                 height(height: 24.h),
                 
                 Expanded(
-                  child: authenticationProvider.isLocationLoading || authenticationProvider.states == null
+                  child: authenticationProvider.isLocationLoading || authenticationProvider.getAllLocationList.isEmpty
                       ? Center(child: AppLoadingScreen())
                       : ListView.builder(
                           physics: const BouncingScrollPhysics(),
-                          itemCount: authenticationProvider.states!.entries.length,
+                          itemCount: authenticationProvider.getAllLocationList.length,
                           itemBuilder: (context, index) {
-                            final entry = authenticationProvider.states!.entries.elementAt(index);
-                            final stateName = entry.value;
+                            final location = authenticationProvider.getAllLocationList[index];
+                            final stateName = location.stateName;
                             final isSelected = authenticationProvider.selectedLocations.contains(stateName);
 
                             return Padding(
@@ -85,89 +86,40 @@ class _DistrictViewState extends State<DistrictView> {
                                 onTap: () {
                                   authenticationProvider.addToSelectedLocations(stateName);
                                 },
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 200),
-                                  height: 100.h,
+                                child: Container(
                                   decoration: BoxDecoration(
-                                    color: isDark ? AppColorTokens.darkSurface : Colors.white,
-                                    borderRadius: BorderRadius.circular(8.r),
+                                    // color: context.cardColor,
                                     border: Border.all(
-                                      color: isSelected ? colorScheme.primary : (isDark ? AppColorTokens.darkBorder : AppColorTokens.lightBorder),
-                                      width: isSelected ? 1.5 : 1.0,
+                                      color: isSelected ? context.primaryColor : context.borderColor,
+                                      width: isSelected ? 2 : 1,
                                     ),
-                                    boxShadow: isSelected
-                                        ? [
-                                            BoxShadow(
-                                              color: colorScheme.primary.withValues(alpha: 0.1),
-                                              blurRadius: 8,
-                                              spreadRadius: 1,
-                                            )
-                                          ]
-                                        : [],
+                                    borderRadius: BorderRadius.circular(8.r),
                                   ),
                                   child: Stack(
                                     children: [
-                                      // Faded right side indicator/gradient
-                                      Positioned(
-                                        right: 0,
-                                        top: 0,
-                                        bottom: 0,
-                                        width: 120.w,
-                                        child: Container(
-                                          decoration: BoxDecoration(
-                                            borderRadius: BorderRadius.only(
-                                              topRight: Radius.circular(8.r),
-                                              bottomRight: Radius.circular(8.r),
+                                      if (location.imageUrl != null && location.imageUrl!.isNotEmpty)
+                                        Positioned(
+                                          right: 16.w,
+                                          bottom: 0,
+                                          top: 0,
+                                          child: Align(
+                                            alignment: Alignment.centerRight,
+                                            child: CachedNetworkImage(
+                                              imageUrl: location.imageUrl!,
+                                              height: 100.sp,
+                                              width: 100.sp,
+                                              // fit: BoxFit.contain,
+                                              errorWidget: (context, url, error) => const SizedBox(),
                                             ),
-                                            gradient: LinearGradient(
-                                              begin: Alignment.centerLeft,
-                                              end: Alignment.centerRight,
-                                              colors: [
-                                                (isDark ? AppColorTokens.darkSurface : Colors.white).withValues(alpha: 0.0),
-                                                isSelected 
-                                                    ? colorScheme.primary.withValues(alpha: 0.05) 
-                                                    : (isDark ? Colors.white.withValues(alpha: 0.02) : Colors.black.withValues(alpha: 0.02)),
-                                              ],
-                                            ),
-                                          ),
-                                          child: Builder(
-                                            builder: (context) {
-                                              String? imagePath;
-                                              if (stateName.toLowerCase().contains('తెలంగాణ')) {
-                                                imagePath = 'assets/images/Telangana logo.png';
-                                              } else if (stateName.toLowerCase().contains('ఆంధ్రప్రదేశ్') || stateName.toLowerCase().contains('ap')) {
-                                                imagePath = 'assets/images/AP logo.png';
-                                              }
-
-                                              if (imagePath != null) {
-                                                return Padding(
-                                                  padding: EdgeInsets.only(right: 2.w),
-                                                  child: Align(
-                                                    alignment: Alignment.centerRight,
-                                                    child: Image.asset(
-                                                      imagePath,
-                                                      height: 120.sp,
-                                                      width: 120.sp,
-                                                      fit: BoxFit.cover,
-                                                    ),
-                                                  ),
-                                                );
-                                              } else {
-                                                return const SizedBox();
-                                              }
-                                            }
                                           ),
                                         ),
-                                      ),
-                                      
-                                      // Content
                                       Padding(
-                                        padding: EdgeInsets.only(left: 16.w, right: 90.w),
+                                        padding: EdgeInsets.only(left: 16.w, right: 90.w, top: 20.h, bottom: 20.h),
                                         child: Row(
                                           children: [
                                             Icon(
                                               isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                                              color: isSelected ? colorScheme.primary : (isDark ? AppColorTokens.darkIcon : AppColorTokens.lightIcon),
+                                              color: isSelected ? context.primaryColor : context.colors.outline,
                                               size: 24.sp,
                                             ),
                                             SizedBox(width: 16.w),
@@ -178,19 +130,17 @@ class _DistrictViewState extends State<DistrictView> {
                                                 children: [
                                                   Text(
                                                     stateName,
-                                                    style: typography.titleSmall?.copyWith(
-                                                      fontSize: 16.sp,
-                                                      color: isDark ? AppColorTokens.darkTextPrimary : AppColorTokens.lightTextPrimary,
+                                                    style: context.typography.titleMedium?.copyWith(
+                                                      color: context.textColor,
                                                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                                     ),
                                                   ),
                                                   SizedBox(height: 4.h),
                                                   Text(
                                                     "Local news, events and updates from $stateName",
-                                                    style: typography.bodySmall?.copyWith(
+                                                    style: context.typography.bodySmall?.copyWith(
+                                                      color: context.colors.onSurfaceVariant,
                                                       fontSize: 11.sp,
-                                                      color: isDark ? AppColorTokens.darkTextSecondary : AppColorTokens.lightTextSecondary,
-                                                      fontWeight: FontWeight.w400,
                                                     ),
                                                   ),
                                                 ],
@@ -309,6 +259,15 @@ class _DistrictViewState extends State<DistrictView> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Container(
+                            width: 6.w,
+                            height: 6.w,
+                            decoration: BoxDecoration(
+                              color: colorScheme.outline,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
                           Container(
                             width: 6.w,
                             height: 6.w,

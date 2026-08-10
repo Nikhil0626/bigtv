@@ -5,6 +5,8 @@ import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:chotanews/services/base_urls.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/services/deviice_details.dart';
@@ -46,17 +48,29 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
 
   getMobileNumber() async {
     WebEngagePlugin webEngagePlugin = WebEngagePlugin();
+    String fcmToken = "";
     if (Platform.isIOS) {
       String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-      getUniqueDeviceId(apnsToken ?? "");
+      fcmToken = apnsToken ?? "";
+      await getUniqueDeviceId(fcmToken);
     } else if (Platform.isAndroid) {
       var token = await FirebaseMessaging.instance.getToken();
+      fcmToken = token ?? "";
       if (token != null) {
-        getUniqueDeviceId(token);
+        await getUniqueDeviceId(token);
         webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
         WebEngagePlugin.setPushToken(token);
       }
     }
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? deviceId = prefs.getString("deviceId");
+    
+    Provider.of<HomeProvider>(context, listen: false).sendDeviceDetailsApi(
+        userId: "0",
+        deviceId: deviceId ?? "",
+        fcmToken: fcmToken,
+    );
   }
 
   void _onTokenInvalidated(Map<String, dynamic>? message) {
@@ -100,7 +114,7 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
               height: 48.h,
               padding: const EdgeInsets.symmetric(horizontal: 15),
               decoration: BoxDecoration(
-                color: isDark ? AppColorTokens.darkSurface : Colors.white,
+                color: colorScheme.surface,
                 border: Border.all(color: colorScheme.outline, width: 1.5),
                 borderRadius: BorderRadius.circular(8.r),
               ),
@@ -176,14 +190,14 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
                   onTap: () {
                     provider.updateLoginStatus(NewAppLoginStatus.login);
                   },
-                  child: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
+                  child: Icon(Icons.arrow_back, color: colorScheme.onSurface),
                 ),
                 Text(
                   "OTP Verification",
                   style: typography.titleLarge?.copyWith(
                     fontSize: 18.sp,
                     fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.black,
+                    color: colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(width: 24), // Spacer to center title
@@ -214,12 +228,12 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
                   borderRadius: BorderRadius.circular(10.r),
                   fieldHeight: 56.w,
                   fieldWidth: 56.w,
-                  activeFillColor: isDark ? AppColorTokens.darkSurface : Colors.white,
+                  activeFillColor: colorScheme.surface,
                   activeColor: colorScheme.outline,
                   selectedColor: colorScheme.primary,
-                  selectedFillColor: isDark ? AppColorTokens.darkSurface : Colors.white,
+                  selectedFillColor: colorScheme.surface,
                   inactiveColor: colorScheme.outline,
-                  inactiveFillColor: isDark ? AppColorTokens.darkSurface : Colors.white,
+                  inactiveFillColor: colorScheme.surface,
                   borderWidth: 1,
                 ),
                 autoDisposeControllers: false,
@@ -261,7 +275,7 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
                     Text(
                       isOtpState ? 'Verify' : 'Continue',
                       style: typography.labelLarge?.copyWith(
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                         fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -271,12 +285,12 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
                         ? SizedBox(
                             width: 20.sp,
                             height: 20.sp,
-                            child: const CircularProgressIndicator(
-                              color: Colors.white,
+                            child: CircularProgressIndicator(
+                              color: colorScheme.onPrimary,
                               strokeWidth: 2,
                             ),
                           )
-                        : Icon(isOtpState ? Icons.check_circle_outline : Icons.arrow_forward, color: Colors.white, size: 20.sp),
+                        : Icon(isOtpState ? Icons.check_circle_outline : Icons.arrow_forward, color: colorScheme.onPrimary, size: 20.sp),
                   ],
                 ),
               ),
@@ -378,7 +392,7 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
                       Text(
                         'Continue as Guest',
                         style: typography.bodyLarge?.copyWith(
-                          color: isDark ? Colors.white : Colors.black,
+                          color: colorScheme.onSurface,
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           decoration: TextDecoration.underline,

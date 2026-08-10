@@ -23,7 +23,7 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
   void initState() {
     super.initState();
     ytController = YoutubePlayerController(
-      initialVideoId: YoutubePlayer.convertUrlToId("https://www.youtube.com/watch?v=${widget.reelData['reel_video_code']}")!,
+      initialVideoId: YoutubePlayer.convertUrlToId(widget.reelData['reel_video_code'] ?? "") ?? widget.reelData['reel_video_code'] ?? "",
       flags: const YoutubePlayerFlags(
         autoPlay: true,
         mute: false,
@@ -93,7 +93,10 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
                           homeProvider.toggleMute(); // Update your isMuted state
                         },
                       ), // ✅ Show remaining time
-                      FullScreenButton(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 120.0),
+                      child: FullScreenButton(),
+                    ),
                     ],
                   ),
                   builder: (context, player) => player,

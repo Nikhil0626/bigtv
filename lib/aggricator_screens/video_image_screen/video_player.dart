@@ -173,17 +173,20 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
                     ),
 
                     /// Fullscreen Button
-                    IconButton(
-                      icon: const Icon(Icons.fullscreen, color: Colors.white),
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => FullscreenVideoView(
-                              controller: videoProvider.controller!,
+                    Padding(
+                      padding: const EdgeInsets.only(right: 120.0),
+                      child: IconButton(
+                        icon: const Icon(Icons.fullscreen, color: Colors.white),
+                        onPressed: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => FullscreenVideoView(
+                                controller: videoProvider.controller!,
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),

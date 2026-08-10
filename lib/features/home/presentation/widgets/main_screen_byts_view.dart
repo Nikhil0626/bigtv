@@ -214,7 +214,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                           ? FullStandardVideoView(
                                               reelData: widget.article,
                                             )
-                                          : widget.article['type'] == "Image"
+                                          : (widget.article['type'] == "Image" && widget.article['subType'] != "ImageAd")
                                               ? Stack(
                                                   children: [
                                                     Image.network(
@@ -331,98 +331,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                       },
                                                                     ),
                                                                     const Spacer(),
-                                                                    InkWell(
-                                                                      onTap:
-                                                                          () async {
-                                                                        SharedPreferences
-                                                                            sp =
-                                                                            await SharedPreferences.getInstance();
-                                                                        String?
-                                                                            userId =
-                                                                            sp.getString("userId");
-                                                                        EventRepo()
-                                                                            .addEvent({
-                                                                          "share":
-                                                                              "news",
-                                                                          "postId": widget
-                                                                              .article['id']
-                                                                              .toString(),
-                                                                          "createAt":
-                                                                              DateTime.now().toString(),
-                                                                          "postTitle": widget
-                                                                              .article['title']
-                                                                              .toString()
-                                                                        }, "shared_article");
 
-                                                                        sendShareDetails(
-                                                                            userId,
-                                                                            widget.article['id'],
-                                                                            widget.article['content'].toString());
-
-                                                                        if (widget.article['type'] == "Standard" ||
-                                                                            widget.article['type'] ==
-                                                                                "Video" ||
-                                                                            widget.article['type'] ==
-                                                                                "Image") {
-                                                                          try {
-                                                                            final image =
-                                                                                await adsScreenshotController.capture(
-                                                                              pixelRatio: 2.0,
-                                                                            );
-                                                                            if (image !=
-                                                                                null) {
-                                                                              final directory = await getTemporaryDirectory();
-                                                                              final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                                                              final imageFile = File(imagePath);
-                                                                              await imageFile.writeAsBytes(image);
-
-                                                                              Share.shareXFiles([
-                                                                                XFile(imageFile.path)
-                                                                              ], text: widget.article['linkURLAndroid'].toString());
-                                                                            } else {
-                                                                              CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                                                            }
-                                                                          } catch (e) {
-                                                                            CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                                                          }
-                                                                        } else if (widget.article['type'] ==
-                                                                            "Gallery") {
-                                                                          context.read<HomeProvider>().createAndSharePdfs(
-                                                                              context,
-                                                                              widget.article);
-                                                                        }
-                                                                        EventRepo()
-                                                                            .addEvent({
-                                                                          "share":
-                                                                              "news",
-                                                                          "postId": widget
-                                                                              .article['id']
-                                                                              .toString(),
-                                                                          "createAt":
-                                                                              DateTime.now().toString(),
-                                                                          "postTitle": widget
-                                                                              .article['title']
-                                                                              .toString()
-                                                                        }, "shared_article");
-                                                                      },
-                                                                      child: context
-                                                                              .watch<
-                                                                                  HomeProvider>()
-                                                                              .isPdfSending
-                                                                          ? const SizedBox(
-                                                                              height: 22,
-                                                                              width: 22,
-                                                                              child: AppLoadingScreen())
-                                                                          : SvgPicture.asset(
-                                                                              "assets/svg/share.svg",
-                                                                              height: 20,
-                                                                              width: 20,
-                                                                              color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
-                                                                            ),
-                                                                    ),
-                                                                    width(
-                                                                        width:
-                                                                            20),
                                                                     Consumer<
                                                                             HomeProvider>(
                                                                         builder: (_,
@@ -487,88 +396,60 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                           "ImageAd")
                                                   ? InkWell(
                                                       onTap: () async {
-                                                        SharedPreferences sp =
-                                                            await SharedPreferences
-                                                                .getInstance();
-                                                        bool isLogin = sp.getString(
-                                                                    "loginType") !=
-                                                                "login"
-                                                            ? true
-                                                            : false;
-                                                        if (isLogin) {
-                                                          CustomToast
-                                                              .showErrorToast(
-                                                                  msg:
-                                                                      "Your a guest user, Please Login to Join Contest");
-                                                        } else {
-                                                          if (widget.article[
-                                                                      'postUrl'] ==
-                                                                  "" ||
-                                                              widget.article[
-                                                                      'postUrl'] ==
-                                                                  null) {
-                                                          } else {
-                                                            context.read<HomeProvider>().sendAdsDataSend(
-                                                                widget.article[
-                                                                    'id'],
-                                                                widget.article[
-                                                                    'title'],
-                                                                widget.article[
-                                                                    'image_url'],
-                                                                false,
-                                                                widget.article[
-                                                                    'postUrl']);
+                                                        if (widget.article['postUrl'] != null && widget.article['postUrl'].toString().isNotEmpty) {
+                                                          final url = Uri.parse(widget.article['postUrl'].toString());
+                                                          if (await canLaunchUrl(url)) {
+                                                            await launchUrl(url);
                                                           }
                                                         }
+                                                        
+                                                        SharedPreferences sp = await SharedPreferences.getInstance();
+                                                        bool isLogin = sp.getString("loginType") != "login" ? true : false;
+                                                        if (!isLogin) {
+                                                          context.read<HomeProvider>().sendAdsDataSend(
+                                                              widget.article['id'],
+                                                              widget.article['title'],
+                                                              widget.article['image_url'],
+                                                              false,
+                                                              widget.article['postUrl']);
+                                                        }
                                                       },
-                                                      child: widget
-                                                                  .article[
-                                                                      'image_url']
-                                                                  .length ==
-                                                              1
-                                                          ? CachedNetworkImage(
-                                                              imageUrl: _getImageUrl(
-                                                                  widget.article[
-                                                                          'image_url']
-                                                                      [0]),
-                                                              width:
-                                                                  MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width,
-                                                              height:
-                                                                  MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .height,
+                                                      child: (widget.article['image_url'] is List)
+                                                          ? (widget.article['image_url'].length == 1
+                                                              ? CachedNetworkImage(
+                                                                  imageUrl: _getImageUrl(widget.article['image_url'][0]),
+                                                                  width: MediaQuery.of(context).size.width,
+                                                                  height: MediaQuery.of(context).size.height,
+                                                                  fit: BoxFit.fill,
+                                                                  placeholder: (context, url) => Container(
+                                                                    color: AppColors.borderColor.withValues(alpha: .2),
+                                                                  ),
+                                                                  errorWidget: (context, url, error) => Center(
+                                                                    child: Icon(
+                                                                      Icons.image,
+                                                                      size: 100,
+                                                                      color: Colors.grey.shade300,
+                                                                    ),
+                                                                  ),
+                                                                )
+                                                              : ImagePostSlider(
+                                                                  imageUrl: widget.article['image_url'],
+                                                                ))
+                                                          : CachedNetworkImage(
+                                                              imageUrl: _getImageUrl(widget.article['image_url']),
+                                                              width: MediaQuery.of(context).size.width,
+                                                              height: MediaQuery.of(context).size.height,
                                                               fit: BoxFit.fill,
-                                                              placeholder:
-                                                                  (context,
-                                                                          url) =>
-                                                                      Container(
-                                                                color: AppColors
-                                                                    .borderColor
-                                                                    .withValues(
-                                                                        alpha:
-                                                                            .2),
+                                                              placeholder: (context, url) => Container(
+                                                                color: AppColors.borderColor.withValues(alpha: .2),
                                                               ),
-                                                              errorWidget:
-                                                                  (context, url,
-                                                                          error) =>
-                                                                      Center(
+                                                              errorWidget: (context, url, error) => Center(
                                                                 child: Icon(
                                                                   Icons.image,
                                                                   size: 100,
-                                                                  color: Colors
-                                                                      .grey
-                                                                      .shade300,
+                                                                  color: Colors.grey.shade300,
                                                                 ),
                                                               ),
-                                                            )
-                                                          : ImagePostSlider(
-                                                              imageUrl: widget
-                                                                      .article[
-                                                                  'image_url'],
                                                             ))
                                                   : widget.article['type'] ==
                                                           "Gallery"
@@ -623,7 +504,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                               width: MediaQuery.of(context).size.width,
                                                                               child: VideoPreview(
                                                                                 imageUrl: _getImageUrl(widget.article['image_url']),
-                                                                                url: _getVideoUrl(widget.article['video_url']),
+                                                                                url: widget.article['video_url'],
                                                                                 isFoldable: false,
                                                                               ),
                                                                             )
@@ -672,6 +553,17 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                 ),
                                                                               ),
                                                                             ),
+                                                                ),
+
+                                                                Positioned(
+                                                                  bottom: 0,
+                                                                  right: 0,
+                                                                  child: Image.asset(
+                                                                    "assets/images/BigTvPostLogo.png",
+                                                                    width: 120,
+                                                                    height: 40,
+                                                                    fit: BoxFit.contain,
+                                                                  ),
                                                                 ),
 
                                                                 /// SHOW BACK BUTTON ONLY FOR AI TAG POSTS
@@ -739,10 +631,13 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                           .shrink()
                                                                       : Align(
                                                                     alignment: Alignment.bottomLeft,
-                                                                    child: HighlightedTitleText(
-                                                                      text: widget.article['title'] ?? "No Title",
-                                                                      fontSize: 22.sp,
-                                                                      highlightColor: const Color(0xFFED1C24).withValues(alpha: 0.7),
+                                                                    child: Padding(
+                                                                      padding: EdgeInsetsGeometry.only(right: 100),
+                                                                      child: HighlightedTitleText(
+                                                                        text: (widget.article['imagetitel'] != null && widget.article['imagetitel'].toString().isNotEmpty) ? widget.article['imagetitel'] : (widget.article['title'] ?? "No Title"),
+                                                                        fontSize: 21,
+                                                                        highlightColor: const Color(0xFFED1C24).withValues(alpha: 0.7),
+                                                                      ),
                                                                     ),
                                                                   ),
                                                                 ),
@@ -817,10 +712,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                             const SizedBox(width: 8),
 
                                                                             /// Action Icons Container with minimal spacing
-                                                                            Container(
-                                                                              padding: const EdgeInsets.all(8.0),
-                                                                              decoration: BoxDecoration(border: BoxBorder.all(color: Color(0xFFED1C24), width: 0.36), borderRadius: BorderRadius.all(Radius.circular(8))),
-                                                                              child: Row(
+                                                                            if (widget.article['type'] != 'ImageAd' && widget.article['subType'] != 'ImageAd')
+                                                                              Container(
+                                                                                padding: const EdgeInsets.all(8.0),
+                                                                                decoration: BoxDecoration(border: BoxBorder.all(color: Color(0xFFED1C24), width: 0.36), borderRadius: BorderRadius.all(Radius.circular(8))),
+                                                                                child: Row(
                                                                                 mainAxisAlignment: MainAxisAlignment.end,
                                                                                 children: [
                                                                                   /// Like Icon - Size 14
@@ -862,52 +758,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                       color: Color(0xFFED1C24),
                                                                                     ),
                                                                                   ),
-                                                                                  const SizedBox(width: 8),
 
-                                                                                  /// Share Icon - Size 14
-                                                                                  InkWell(
-                                                                                    onTap: () async {
-                                                                                      SharedPreferences sp = await SharedPreferences.getInstance();
-                                                                                      String? userId = sp.getString("userId");
-                                                                                      sendShareDetails(userId, widget.article['id'], widget.article['content'].toString());
-                                                                                      if (widget.article['type'] == "Standard" || widget.article['type'] == "Video" || widget.article['type'] == "Image") {
-                                                                                        try {
-                                                                                          final image = await adsScreenshotController.capture(
-                                                                                            pixelRatio: 2.0,
-                                                                                          );
-                                                                                          if (image != null) {
-                                                                                            final directory = await getTemporaryDirectory();
-                                                                                            final imagePath = '${directory.path}/${widget.article['id']}.png';
-                                                                                            final imageFile = File(imagePath);
-                                                                                            await imageFile.writeAsBytes(image);
-                                                                                            Share.shareXFiles([
-                                                                                              XFile(imageFile.path)
-                                                                                            ], text: widget.article['linkURLAndroid'].toString());
-                                                                                          } else {
-                                                                                            CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                                                                          }
-                                                                                        } catch (e) {
-                                                                                          CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                                                                        }
-                                                                                      } else if (widget.article['type'] == "Gallery") {
-                                                                                        context.read<HomeProvider>().createAndSharePdfs(context, widget.article);
-                                                                                      }
-                                                                                      EventRepo().addEvent({
-                                                                                        "share": "news",
-                                                                                        "postId": widget.article['id'].toString(),
-                                                                                        "createAt": DateTime.now().toString(),
-                                                                                        "postTitle": widget.article['title'].toString()
-                                                                                      }, "shared_article");
-                                                                                    },
-                                                                                    child: context.watch<HomeProvider>().isPdfSending
-                                                                                        ? const SizedBox(height: 14, width: 14, child: AppLoadingScreen())
-                                                                                        : SvgPicture.asset(
-                                                                                            "assets/svg/share.svg",
-                                                                                            height: 16,
-                                                                                            width: 16,
-                                                                                            color: Color(0xFFED1C24),
-                                                                                          ),
-                                                                                  ),
                                                                                   const SizedBox(width: 8),
 
                                                                                   /// Refresh Icon - Size 18
@@ -1042,6 +893,21 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                                   ' ${widget.article['reportedBy']} | ',
                                                                                                   style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
                                                                                                 ),
+                                                                                              if (widget.article['isWebPost'] == true)
+                                                                                                InkWell(
+                                                                                                  onTap: () async {
+                                                                                                    if (widget.article['postUrl'] != null && widget.article['postUrl'].toString().isNotEmpty) {
+                                                                                                      await launchUrl(Uri.parse(widget.article['postUrl']));
+                                                                                                    }
+                                                                                                  },
+                                                                                                  child: Padding(
+                                                                                                    padding: const EdgeInsets.only(right: 8.0),
+                                                                                                    child: Text(
+                                                                                                      "BIGTV.COM",
+                                                                                                      style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: Colors.red),
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                ),
                                                                                               Icon(Icons.access_time, size: 14, color: Colors.grey),
                                                                                               Text(
                                                                                                 " ${formatTimeDifference(widget.article['created'])}",
@@ -1097,6 +963,21 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                                   Text(
                                                                                                     ' ${widget.article['reportedBy']} | ',
                                                                                                     style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
+                                                                                                  ),
+                                                                                                if (widget.article['isWebPost'] == true)
+                                                                                                  InkWell(
+                                                                                                    onTap: () async {
+                                                                                                      if (widget.article['postUrl'] != null && widget.article['postUrl'].toString().isNotEmpty) {
+                                                                                                        await launchUrl(Uri.parse(widget.article['postUrl']));
+                                                                                                      }
+                                                                                                    },
+                                                                                                    child: Padding(
+                                                                                                      padding: const EdgeInsets.only(right: 8.0),
+                                                                                                      child: Text(
+                                                                                                        "BIGTV.COM",
+                                                                                                        style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: Colors.red),
+                                                                                                      ),
+                                                                                                    ),
                                                                                                   ),
                                                                                                 Icon(Icons.access_time, size: 14, color: Colors.grey),
                                                                                                 Text(

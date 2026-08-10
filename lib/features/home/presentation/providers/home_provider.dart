@@ -67,6 +67,14 @@ class HomeProvider extends ChangeNotifier {
 
   int? get selectedTagId => _selectedTagId;
 
+  String langCode = 'en';
+
+  Future<void> loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    langCode = prefs.getString("selectedLanguageCode") ?? "en";
+    notifyListeners();
+  }
+
   void onItemTapped(int index) {
     selectedIndex = index;
     notifyListeners();
@@ -121,8 +129,9 @@ class HomeProvider extends ChangeNotifier {
   }
 
   void youtubeInitial(String url) {
+    String videoId = YoutubePlayer.convertUrlToId(url) ?? url;
     controller = YoutubePlayerController(
-      initialVideoId: url,
+      initialVideoId: videoId,
       flags: const YoutubePlayerFlags(
         autoPlay: true,
         enableCaption: false,
@@ -269,70 +278,48 @@ class HomeProvider extends ChangeNotifier {
     webUrl = "";
     allPostLastId = "0";
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? userId = preferences.getString("userId");
+    String langCode = preferences.getString("selectedLanguageCode") ?? "en";
+
     String? deviceId = preferences.getString("deviceId");
-    String locationId = preferences.getString("locationId") ?? "";
-    List<int> locationIds = locationId.split(',').where((e) =>
-    e
-        .trim()
-        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
-    log('Location IDs: $locationIds ==== ${getAllPostList.length}');
+    String? userIdStr = preferences.getString("userId");
+    int userId = 0;
+    if (userIdStr != null && userIdStr.isNotEmpty) {
+      userId = int.tryParse(userIdStr) ?? 0;
+    }
 
-    String categoriesId = preferences.getString("categoriesId") ?? "";
-    List<int> categoriesIds = categoriesId.split(',').where((e) =>
-    e
-        .trim()
-        .isNotEmpty).map((e) => int.tryParse(e.trim())).whereType<int>().toList();
-    log('Category IDs: $categoriesIds');
-
-    Map<String, dynamic> body = {"device_id": deviceId, "postId": postIds, "locationIds": locationIds, "categoriesId": categoriesIds, "userId": userId ?? 0, "isAdManager": false, "isBigTv": true};
+    Map<String, dynamic> body = {
+      "device_id": deviceId ?? "",
+      "postId": int.tryParse(postIds) ?? 0,
+      "locationIds": [],
+      "categoriesId": [],
+      "userId": userId,
+      "isAdManager": false,
+      "isBigTv": true,
+      "lang": langCode,
+    };
     log("all post body ${body.toString()}");
     try {
       Response response = await HomeRepo().getAllPosts(body);
-      List data = response.data['posts'];
-
-      isWebView = response.data['webView'];
-      webUrl = response.data['webUrl'];
-      allPostLastId = response.data['lastId'].toString();
-      getImageAdsList.addAll(response.data['ads_list']);
-
-      if (isWebView) {
-        getAllPostList.insert(0, {
-          "id": 000000,
-          "postOrder": 00000,
-          "author": 9,
-          "title": "WebUrl",
-          "content": "Hello",
-          "created": "2025-04-22T08:36:04",
-          "guid": "",
-          "post_type": "post",
-          "post_name": "WebUrl",
-          "post_mime_type": "",
-          "totalLikes": 8,
-          "totalViews": 14104,
-          "totalComments": 0,
-          "image_url": "",
-          "video_url": "",
-          "downloadUrl": null,
-          "gallery": null,
-          "type": "WebUrl",
-          "totalShares": 0,
-          "isReporter": 0,
-          "reportedBy": "",
-          "categoryName": "నేషనల్",
-          "postUrl": "",
-          "subType": "",
-          "isStickyPost": 0,
-          "adPosition": null,
-          "linkURLAndroid": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
-          "linkURLIos": "https://apps.signitivessoft.com/e6979_aW5kaXZpZHVhbFBhZ2U?eeb65_cG9zdElk=e9f48_Mzk1MjY1OQ",
-          "links": [],
-          "categoryId": 2,
-          "isBookmarked": 0
-        });
+      
+      var responseData = response.data;
+      List data = [];
+      if (responseData is Map) {
+         data = responseData['posts'] ?? responseData['data'] ?? [];
+         isWebView = responseData['webView'] ?? false;
+         webUrl = responseData['webUrl'] ?? "";
+         allPostLastId = responseData['lastId']?.toString() ?? "0";
+         if (responseData['ads_list'] != null) {
+           getImageAdsList.addAll(responseData['ads_list']);
+         }
+      } else if (responseData is List) {
+         data = responseData;
+         // Setup simple pagination continuation if max limit is reached
+         allPostLastId = data.length >= 100 ? "1" : "0";
       }
-      getAllPostList.addAll(data);
 
+
+      getAllPostList.addAll(data);
+      log("Print all post ${data}");
       final seenIds = <int>{};
       getAllPostList.retainWhere((e) {
         final id = e['id'] as int;
@@ -392,14 +379,27 @@ class HomeProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
+    String langCode = preferences.getString("selectedLanguageCode") ?? "en";
     getAllAiTagsList = [];
     Map<String, dynamic> body = {
-      "deviceid": deviceId ?? "",
-      "userid": userId ?? "",
+      "lang": langCode,
     };
     try {
       Response response = await HomeRepo().getAllAiTags(body);
-      getAllAiTagsList.addAll(response.data);
+      
+      var responseData = response.data;
+      if (responseData is String) {
+        try { responseData = jsonDecode(responseData); } catch (_) {}
+      }
+      List data = responseData is List ? responseData : (responseData['data'] ?? []);
+      
+      getAllAiTagsList = data.map((e) {
+        if (e['aitagnameTranslations'] != null && e['aitagnameTranslations'][langCode] != null) {
+          e['aitagname'] = e['aitagnameTranslations'][langCode];
+        }
+        return e;
+      }).toList();
+      
       log(getAllAiTagsList.toString());
     } on DioException catch (e, st) {
       log("Get News Api catch error $e", stackTrace: st);
@@ -707,7 +707,7 @@ class HomeProvider extends ChangeNotifier {
         }, "submit_contest");
       } else {
         log("send data ${response.data}");
-        CustomToast.showErrorToast(msg: "${response.data['detail']}");
+        // CustomToast.showErrorToast(msg: "${response.data['detail']}");
       }
     } on DioException catch (e, st) {
       log("ad post imager send data $e  --- $st");
@@ -810,6 +810,25 @@ class HomeProvider extends ChangeNotifier {
     } finally {
       isPdfSending = false;
       notifyListeners();
+    }
+  }
+  Future<void> sendDeviceDetailsApi({required String userId, required String deviceId, required String fcmToken}) async {
+    try {
+      final deviceInfo = await getDeviceInfoData();
+      
+      Map<String, dynamic> body = {
+        "user_id": int.tryParse(userId) ?? 0,
+        "device_type": deviceInfo['device_type'],
+        "device_id": deviceId,
+        "fcm_token": fcmToken,
+        "app_version": deviceInfo['app_version'],
+        "os_version": deviceInfo['os_version']
+      };
+
+      await HomeRepo().postDeviceDetails(body);
+      log("Device details sent successfully");
+    } catch (e) {
+      log("Error sending device details: $e");
     }
   }
 }

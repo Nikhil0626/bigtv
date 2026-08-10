@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class ReelsProviders extends ChangeNotifier {
-  bool reelsLoading = false;
+  bool reelsLoading = true;
   List<ReelsModel> getAllReelsList = [];
   List<String> isLikeList = [];
   bool isMuted = false;
@@ -24,12 +24,15 @@ class ReelsProviders extends ChangeNotifier {
 
   Future getAllReels({String postId = "0"}) async {
     reelsLoading = true;
+    notifyListeners();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString('userId');
     try {
+      String langCode = preferences.getString("selectedLanguageCode") ?? "te";
       Map<String,dynamic> body =
       {
         "user_id":userId??"0",
+        "lang": langCode,
       };
       Response response = await ReelsRepo().getAllReels(body);
 

@@ -10,6 +10,8 @@ import 'dart:async';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
+import 'package:chotanews/aggricator_screens/splash_screen/splash_provider.dart';
+
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -18,70 +20,45 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  bool showGif = false;
-  StreamSubscription? pushSub;
-  StreamSubscription? pushActionSub;
-
   @override
   void initState() {
     super.initState();
-    Future.delayed(Duration(milliseconds: 300), () {
-      checkLastShownDate();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      if (mounted) {
+        context.read<SplashProvider>().checkLastShownDate(context);
+      }
     });
-  }
-
-  Future<void> checkLastShownDate() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? lastDate = prefs.getString('last_shown_date');
-    String? locationNames = prefs.getString("locationNames");
-    String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
-
-    if (lastDate == today) {
-      setState(() {
-        showGif = true;
-      });
-      await prefs.setString('last_shown_date', today);
-      EventRepo().addEvent(
-        {"createAt": DateTime.now().toString(), "platform": Platform.isIOS ? "iOS" : "android",    "districtNames": locationNames??"",},
-        "opened_app",
-      );
-    }
-    await Future.delayed(Duration(seconds: showGif ? 5 : 2));
-    context.read<AuthenticationProvider>().isPageNavigation(context);
-  }
-
-  @override
-  void dispose() {
-    pushSub?.cancel();
-    pushActionSub?.cancel();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: showGif
-            ? Container(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: Lottie.asset(
-                  "assets/svg/spinner.json",
-                  fit: BoxFit.contain,
-                ),
-              )
-            : SizedBox(
-                height: MediaQuery.of(context).size.height,
-                width: MediaQuery.of(context).size.width,
-                child: Center(
-                  child: Image.asset(
-                    "assets/BIGTV-APP ICON.png",
-                    height: 100,
-                    width: 100,
+      body: Consumer<SplashProvider>(
+        builder: (context, provider, child) {
+          return Center(
+            child: provider.showGif
+                ? Container(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    child: Lottie.asset(
+                      "assets/svg/spinner.json",
+                      fit: BoxFit.contain,
+                    ),
+                  )
+                : SizedBox(
+                    height: MediaQuery.of(context).size.height,
+                    width: MediaQuery.of(context).size.width,
+                    child: Center(
+                      child: Image.asset(
+                        "assets/BIGTV-APP ICON.png",
+                        height: 100,
+                        width: 100,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+          );
+        },
       ),
     );
   }

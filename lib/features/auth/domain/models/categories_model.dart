@@ -44,11 +44,15 @@ class CategoryModel {
   final int? categoryId;
   final String? categoryName;
   final bool? isFollowed;
+  final String? imageUrl;
+  final bool? isActive;
 
   CategoryModel({
     this.categoryId,
     this.categoryName,
     this.isFollowed,
+    this.imageUrl,
+    this.isActive,
   });
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
@@ -56,6 +60,8 @@ class CategoryModel {
       categoryId: json['categoryId'] as int?,
       categoryName: json['categoryName'] as String?,
       isFollowed: json['isFollowed'] as bool?,
+      imageUrl: json['imageUrl'] as String?,
+      isActive: json['isActive'] as bool?,
     );
   }
 
@@ -63,5 +69,7 @@ class CategoryModel {
     'categoryId': categoryId,
     'categoryName': categoryName,
     'isFollowed': isFollowed,
+    'imageUrl': imageUrl,
+    'isActive': isActive,
   };
 }

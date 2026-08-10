@@ -11,8 +11,8 @@ import 'package:chotanews/utils/app_spaces.dart';
 
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart'; 
+import 'package:provider/provider.dart';  
 import 'main_screen_pageview.dart';
 
 class MainScreenCard extends StatefulWidget {
@@ -73,16 +73,9 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                         children: [
                           Container(
                             height: 45.h,
-                            color: AppColorTokens.aiTagBackground,
+                            color: AppColorTokens.primaryRed,
                             child: Row(
                               children: [
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                                  child: Image.asset(
-                                    "assets/images/BigTvPostLogo.png",
-                                    height: 30.h,
-                                  ),
-                                ),
                                 if (homeProvider.getAllAiTagsList.isNotEmpty)
                                   Expanded(
                                     child: ListView.separated(
@@ -134,9 +127,8 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                               ),
                                             ),
                                             child: Text(
-                                              tag['aitagname'].toString().toUpperCase(),
+                                              tag['aitagname'].toString(),
                                               style: TextStyle(
-                                                fontFamily: 'DDTW00-CondensedSemiBold',
                                                 color: AppColors.wColor,
                                                 fontSize: 20.sp,
                                                 fontWeight: FontWeight.w600,

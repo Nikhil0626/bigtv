@@ -17,10 +17,10 @@ class FeedbackForm extends StatefulWidget {
 }
 
 class FeedbackFormState extends State<FeedbackForm> {
-  int selectedStar = 0;
+  final ValueNotifier<int> selectedStar = ValueNotifier<int>(0);
 
-  String get feedbackMessage {
-    switch (selectedStar) {
+  String getFeedbackMessage(int starIndex) {
+    switch (starIndex) {
       case 1:
         return "Poor experience";
       case 2:
@@ -38,10 +38,18 @@ class FeedbackFormState extends State<FeedbackForm> {
 
   @override
   void initState() {
-    context.read<SettingsProvider>().feedbackList = [];
-    context.read<SettingsProvider>().isOthersSelected = false;
-    context.read<SettingsProvider>().getFeedBack();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SettingsProvider>().feedbackList = [];
+      context.read<SettingsProvider>().isOthersSelected = false;
+      context.read<SettingsProvider>().getFeedBack();
+    });
+  }
+
+  @override
+  void dispose() {
+    selectedStar.dispose();
+    super.dispose();
   }
 
   @override
@@ -82,46 +90,49 @@ class FeedbackFormState extends State<FeedbackForm> {
                             ),
                             child: Padding(
                               padding: EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Rate your experience with ChotaNews?",
-                                    style: newAppFont(
-                                      fontSize: 16,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  height(height: 8),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: List.generate(5, (index) {
-                                      return GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            selectedStar = index + 1;
-                                          });
-                                        },
-                                        child: Icon(
-                                          Icons.star,
-                                          color: index < selectedStar ? AppColors.ratingColor : Colors.grey,
-                                          size: 40,
+                              child: ValueListenableBuilder<int>(
+                                valueListenable: selectedStar,
+                                builder: (context, starValue, child) {
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Rate your experience with ChotaNews?",
+                                        style: newAppFont(
+                                          fontSize: 16,
                                         ),
-                                      );
-                                    }),
-                                  ),
-                                  height(height: 3),
-                                  Text(
-                                    feedbackMessage,
-                                    style: newAppFont(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColors.appButtonColor,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ],
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      height(height: 8),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: List.generate(5, (index) {
+                                          return GestureDetector(
+                                            onTap: () {
+                                              selectedStar.value = index + 1;
+                                            },
+                                            child: Icon(
+                                              Icons.star,
+                                              color: index < starValue ? AppColors.ratingColor : Colors.grey,
+                                              size: 40,
+                                            ),
+                                          );
+                                        }),
+                                      ),
+                                      height(height: 3),
+                                      Text(
+                                        getFeedbackMessage(starValue),
+                                        style: newAppFont(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.appButtonColor,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    ],
+                                  );
+                                },
                               ),
                             ),
                           ),
@@ -228,36 +239,39 @@ class FeedbackFormState extends State<FeedbackForm> {
                               )
                             : SizedBox.shrink(),
                         height(height: 16),
-                        InkWell(
-                          onTap: () {
-                            if (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar > 0) {
-                              settingsProvider.postFeedBack(selectedStar,).then((value) {
-                                  selectedStar = 0;
-                                  setState(() {
+                        ValueListenableBuilder<int>(
+                          valueListenable: selectedStar,
+                          builder: (context, starValue, child) {
+                            return InkWell(
+                              onTap: () {
+                                if (settingsProvider.selectedFeedbackList.isNotEmpty && starValue > 0) {
+                                  settingsProvider.postFeedBack(starValue).then((value) {
+                                    selectedStar.value = 0;
                                     settingsProvider.feedbackController.clear();
                                     settingsProvider.selectedFeedbackList.clear();
                                   });
-                                },
-                              );
-                            } else {
-                              CustomToast.showErrorToast(msg: "Select at list one star and value field");
-                            }
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            height: 35.h,
-                            // margin: EdgeInsets.only(bottom: 20.h),
-                            decoration: BoxDecoration(
-                              color: (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar > 0) ? AppColors.appButtonColor : AppColors.bodyTextColor.withValues(alpha: .2),
-                              borderRadius: BorderRadius.all(Radius.circular(8.r)),
-                            ),
-                            child: Center(
-                              child: Text(
-                                'Submit',
-                                style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                                } else {
+                                  CustomToast.showErrorToast(msg: "Select at list one star and value field");
+                                }
+                              },
+                              child: Container(
+                                width: double.infinity,
+                                height: 35.h,
+                                decoration: BoxDecoration(
+                                  color: (settingsProvider.selectedFeedbackList.isNotEmpty && starValue > 0)
+                                      ? AppColors.appButtonColor
+                                      : AppColors.bodyTextColor.withValues(alpha: .2),
+                                  borderRadius: BorderRadius.all(Radius.circular(8.r)),
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    'Submit',
+                                    style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         ),
                       ],
                     ),

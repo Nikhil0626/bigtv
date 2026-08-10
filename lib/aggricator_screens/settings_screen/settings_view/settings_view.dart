@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -35,15 +36,13 @@ class SettingsView extends StatefulWidget {
 }
 
 class SettingsViewState extends State<SettingsView> {
-  NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
-  bool isNotificationsEnabled = false;
-  String appVersion = "";
-
   @override
   void initState() {
-    getLogin();
-    context.read<AuthenticationProvider>().sendEvent("SettingsView");
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<SettingsProvider>().getLoginDetails();
+    });
+    context.read<AuthenticationProvider>().sendEvent("SettingsView");
   }
 
   @override
@@ -51,42 +50,36 @@ class SettingsViewState extends State<SettingsView> {
     super.dispose();
   }
 
-  Future getLogin() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    appVersion = sp.getString("app_version") ?? "";
-    isNotificationsEnabled = sp.getString("loginType") == "login" ? true : false;
-    log(isNotificationsEnabled.toString());
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Expanded(child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildSettingsRow(context, "profile.png", "Edit Profile", () {
-                    EventRepo().addEvent({
-                      "visitPageName":"Edit Profile",
-                      "createAt": DateTime.now().toString(),
-                    }, "compliance_section");
-                    if (isNotificationsEnabled == false) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => LoginBackgroundView()),
-                      );
-                    } else if (isNotificationsEnabled == true) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => ProfileView()),
-                      );
-                    }
-                  }),
-                  SizedBox.shrink(),
+    return Consumer<SettingsProvider>(
+      builder: (context, settingsProvider, child) {
+        return SafeArea(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Expanded(child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      _buildSettingsRow(context, "profile.png", "Edit Profile", () {
+                        EventRepo().addEvent({
+                          "visitPageName":"Edit Profile",
+                          "createAt": DateTime.now().toString(),
+                        }, "compliance_section");
+                        if (settingsProvider.isNotificationsEnabled == false) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => LoginBackgroundView()),
+                          );
+                        } else {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ProfileView()),
+                          );
+                        }
+                      }),
+                      SizedBox.shrink(),
 
                   _buildThemeToggle(context),
 
@@ -159,7 +152,7 @@ class SettingsViewState extends State<SettingsView> {
                     }, "compliance_section");
                     Navigator.push(context, MaterialPageRoute(builder: (context) => ContestScreen()));
                   }),
-                  _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () async {
+                  _buildSettingsRow(context, "Signout.svg", !settingsProvider.isNotificationsEnabled ? "Login" : "Logout", () async {
                     closeSubscribe();
                     SharedPreferences preferences = await SharedPreferences.getInstance();
                     String? deviceId = preferences.getString("deviceId");
@@ -186,13 +179,15 @@ class SettingsViewState extends State<SettingsView> {
             Padding(
               padding: const EdgeInsets.only(bottom: 70.0),
               child: Text(
-                "V$appVersion",
+                "V${settingsProvider.appVersion}",
                 style: fontStyle(fontWeight: FontWeight.normal),
               ),
             ),
           ],
         ),
       ),
+    );
+      },
     );
   }
 

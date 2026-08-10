@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 import '../screens/district_view.dart';
 import '../screens/categories_view.dart';
 import '../screens/unified_auth_view.dart';
+import '../screens/language_selection_screen.dart';
 
 class LoginBackgroundView extends StatelessWidget {
   const LoginBackgroundView({super.key});
@@ -27,7 +28,7 @@ class LoginBackgroundView extends StatelessWidget {
         bool isDark = context.theme.brightness == Brightness.dark;
 
         return Scaffold(
-          backgroundColor: isDark ? AppColorTokens.darkBackground : Colors.white,
+          backgroundColor: context.theme.scaffoldBackgroundColor,
           body: SafeArea(
             child: SingleChildScrollView(
               child: SizedBox(
@@ -115,8 +116,8 @@ class LoginBackgroundView extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          (isDark ? AppColorTokens.darkBackground : Colors.white).withValues(alpha: 0.35), // Very subtle white at top
-                          (isDark ? AppColorTokens.darkBackground : Colors.white).withValues(alpha: 0.0), // Middle fade
+                          context.theme.scaffoldBackgroundColor.withValues(alpha: 0.35), // Very subtle white at top
+                          context.theme.scaffoldBackgroundColor.withValues(alpha: 0.0), // Middle fade
                           Colors.transparent, // Completely transparent at bottom
                         ],
                         stops: const [0.0, 0.5, 1.0],
@@ -137,8 +138,8 @@ class LoginBackgroundView extends StatelessWidget {
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                         colors: [
-                          (isDark ? AppColorTokens.darkBackground : Colors.white).withValues(alpha: 0.0),
-                          isDark ? AppColorTokens.darkBackground : Colors.white,
+                          context.theme.scaffoldBackgroundColor.withValues(alpha: 0.0),
+                          context.theme.scaffoldBackgroundColor,
                         ],
                       ),
                     ),
@@ -162,7 +163,7 @@ class LoginBackgroundView extends StatelessWidget {
     return Container(
       width: screenWidth,
       height: screenHeight,
-      color: isDark ? AppColorTokens.darkBackground : Colors.white,
+      color: context.theme.scaffoldBackgroundColor,
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 300),
         switchInCurve: Curves.easeInOut,
@@ -181,6 +182,8 @@ class LoginBackgroundView extends StatelessWidget {
         return const DistrictView(key: ValueKey('location'));
       case NewAppLoginStatus.category:
         return CategoriesView(key: ValueKey('category'));
+      case NewAppLoginStatus.language:
+        return const LanguageSelectionScreen(key: ValueKey('language'));
       case NewAppLoginStatus.otp:
       case NewAppLoginStatus.login:
       case NewAppLoginStatus.none:

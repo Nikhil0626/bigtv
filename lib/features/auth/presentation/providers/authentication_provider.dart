@@ -1,5 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:provider/provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 
 import 'package:chotanews/features/auth/data/repositories/authentication_repo.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
@@ -16,6 +22,7 @@ import 'package:webengage_flutter/webengage_flutter.dart';
 
 import 'package:chotanews/features/auth/domain/models/categories_model.dart';
 import 'package:chotanews/features/auth/domain/models/location_model.dart';
+import 'package:chotanews/features/auth/domain/models/language_model.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 
 class AuthenticationProvider extends ChangeNotifier {
@@ -27,11 +34,18 @@ class AuthenticationProvider extends ChangeNotifier {
   String? errorMessage;
   bool isButtonEnabled = false;
   bool isOtpButtonEnabled = false;
+  bool isLanguageSelected = false;
   NewAppLoginStatus newAppLoginStatus = NewAppLoginStatus.none;
   List<CategoryModel> getAllCategoryList = [];
   List<String> selectedCategories = [];
   List<LocationModel> getAllLocationList = [];
   List<String> selectedLocations = [];
+  int? selectedLanguageId;
+
+  void setSelectedLanguageId(int id) {
+    selectedLanguageId = id;
+    notifyListeners();
+  }
 
   int remainingTime = 60;
   Timer? _timer;
@@ -178,6 +192,20 @@ class AuthenticationProvider extends ChangeNotifier {
         sp.setString("myReferralLink", response.data['user']['refferal_link'].toString());
         sp.setString("userId", response.data['user']['id'].toString());
         sp.setString("userName", response.data['user']['name'].toString());
+        
+        // Send device details for logged-in user
+        String token = "";
+        if (Platform.isIOS) {
+          token = await FirebaseMessaging.instance.getAPNSToken() ?? "";
+        } else {
+          token = await FirebaseMessaging.instance.getToken() ?? "";
+        }
+        Provider.of<HomeProvider>(context, listen: false).sendDeviceDetailsApi(
+            userId: response.data['user']['id'].toString(),
+            deviceId: "0",
+            fcmToken: token,
+        );
+
         sp.setString("userStatus", response.data['user']['status'].toString());
         if (response.data['is_new_user'] == false) {
           getAllCategories();
@@ -197,10 +225,8 @@ class AuthenticationProvider extends ChangeNotifier {
             },
           );
         } else {
-          newAppLoginStatus = NewAppLoginStatus.category;
+          newAppLoginStatus = NewAppLoginStatus.language;
           saveLoginState();
-          getAllCategories();
-          // getAllLocations();
         }
 
         WebEngagePlugin.userLogin(response.data['user']['id'].toString());
@@ -239,25 +265,92 @@ class AuthenticationProvider extends ChangeNotifier {
   bool isCatLoading = false;
   bool isCatSaveLoading = false;
 
+
+  bool isLanguageLoading = false;
+  List<LanguageModel> getAllLanguageList = [];
+
+  Future getAllLanguages() async {
+    isLanguageLoading = true;
+    notifyListeners();
+    try {
+      print("Fetching languages...");
+      Response response = await AuthenticationRepo().getAllLanguages(<String, dynamic>{
+        "skip": 0,
+        "limit": 100,
+      });
+      print("Languages response status: ${response.statusCode}");
+      print("Languages response data type: ${response.data.runtimeType}");
+      print("Languages response data: ${response.data}");
+      
+      if (response.statusCode == 200) {
+        var responseData = response.data;
+        if (responseData is String) {
+          try {
+            responseData = jsonDecode(responseData);
+          } catch (e) {
+            print("Languages decode error: $e");
+          }
+        }
+        
+        List data = responseData is List ? responseData : (responseData['data'] ?? []);
+        print("Languages list length: ${data.length}");
+        getAllLanguageList = data.map((e) => LanguageModel.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+      }
+    } catch (e, st) {
+      print("Error getAllLanguages --- ${e.toString()} --- ${st.toString()}");
+    } finally {
+      isLanguageLoading = false;
+      notifyListeners();
+    }
+  }
+
+  void saveLanguageAndProceed(int languageId) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    await preferences.setInt("selectedLanguageId", languageId);
+    try {
+      final lang = getAllLanguageList.firstWhere((l) => l.id == languageId);
+      await preferences.setString("selectedLanguageCode", lang.code ?? 'en');
+    } catch (_) {}
+    newAppLoginStatus = NewAppLoginStatus.category;
+    saveLoginState();
+    getAllCategories();
+    notifyListeners();
+  }
   Future getAllCategories() async {
     isCatLoading = true;
     selectedCategories = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    String langCode = preferences.getString("selectedLanguageCode") ?? "en";
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
+
     Map<String, dynamic> body = {
+      "lang": langCode,
       "device_id": deviceId ?? "",
-      "user_id": userId ?? "",
     };
+
+    if (userId != null && userId.isNotEmpty) {
+      body["user_id"] = userId;
+    }
     try {
       log("get all catttt$body");
 
       Response response = await AuthenticationRepo().getAllCategories(body);
       if (response.statusCode == 200) {
-        List data = response.data['categories'];
+        var responseData = response.data;
+        if (responseData is String) {
+          try { responseData = jsonDecode(responseData); } catch (_) {}
+        }
+        List data = responseData is List ? responseData : (responseData['categories'] ?? responseData['data'] ?? []);
+        
         getAllCategoryList = data
             .map(
-              (e) => CategoryModel.fromJson(e),
+              (e) {
+                if (e['categoryNameTranslations'] != null && e['categoryNameTranslations'][langCode] != null) {
+                  e['categoryName'] = e['categoryNameTranslations'][langCode];
+                }
+                return CategoryModel.fromJson(e);
+              }
             )
             .toList();
 
@@ -334,24 +427,37 @@ class AuthenticationProvider extends ChangeNotifier {
     isLocationLoading = true;
     selectedLocations = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
+    String langCode = preferences.getString("selectedLanguageCode") ?? "en";
     String? deviceId = preferences.getString("deviceId");
-    String? userId = preferences.getString("userId");
+    
     Map<String, dynamic> body = {
-      "device_id": deviceId,
-      "user_id": userId ?? "",
+      "lang": langCode,
+      "device_id": deviceId ?? "",
     };
     try {
       log("response.data.toString123");
       Response response = await AuthenticationRepo().getStateLocation(body);
       if (response.statusCode == 200) {
-        List data = response.data['locations'];
+        var responseData = response.data;
+        if (responseData is String) {
+          try { responseData = jsonDecode(responseData); } catch (_) {}
+        }
+        List data = responseData is List ? responseData : (responseData['locations'] ?? responseData['data'] ?? []);
+        
         getAllLocationList = data
             .map(
-              (e) => LocationModel.fromJson(e),
+              (e) {
+                if (e['locationNameTranslations'] != null && e['locationNameTranslations'][langCode] != null) {
+                  e['locationName'] = e['locationNameTranslations'][langCode];
+                } else if (e['stateNameTranslations'] != null && e['stateNameTranslations'][langCode] != null) {
+                  e['stateName'] = e['stateNameTranslations'][langCode];
+                }
+                return LocationModel.fromJson(e);
+              }
             )
             .toList();
 
-        states = {for (var d in data) d['stateId']: d['stateName']};
+        states = {for (var d in data) (d['locationId'] ?? d['stateId']): (d['locationName'] ?? d['stateName'])};
 
         selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.stateName.toString()).toSet().toList();
         log(getAllLocationList.first.stateName.toString());
@@ -387,12 +493,12 @@ class AuthenticationProvider extends ChangeNotifier {
     notifyListeners();
     List<int> selectedCategoryIds = [];
     for (String stateName in selectedLocations) {
-      var districtsInState = getAllLocationList.where((item) => item.stateName == stateName).toList();
-      selectedCategoryIds.addAll(districtsInState.map((e) => e.districtId));
+      var statesMatched = getAllLocationList.where((item) => item.stateName == stateName).toList();
+      selectedCategoryIds.addAll(statesMatched.map((e) => e.stateId));
     }
     selectedCategoryIds = selectedCategoryIds.toSet().toList();
-    log("Mapped state names to district IDs: ${selectedCategoryIds}");
-    log("Selected District Names: $selectedLocations");
+    log("Mapped state names to state IDs: ${selectedCategoryIds}");
+    log("Selected State Names: $selectedLocations");
     String nameOfDistrict = selectedLocations.toSet().join(',');
     sendUserAttribute(nameOfDistrict);
 
@@ -487,10 +593,23 @@ class AuthenticationProvider extends ChangeNotifier {
   void continueAsGuest(
     context,
   ) async {
-    newAppLoginStatus = NewAppLoginStatus.category;
+    newAppLoginStatus = NewAppLoginStatus.language;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginState", newAppLoginStatus.toString());
     preferences.setString("loginType", "skip");
+
+    String token = "";
+    if (Platform.isIOS) {
+      token = await FirebaseMessaging.instance.getAPNSToken() ?? "";
+    } else {
+      token = await FirebaseMessaging.instance.getToken() ?? "";
+    }
+    String? deviceId = preferences.getString("deviceId");
+    Provider.of<HomeProvider>(context, listen: false).sendDeviceDetailsApi(
+        userId: "0",
+        deviceId: deviceId ?? "",
+        fcmToken: token,
+    );
 
     notifyListeners();
   }
@@ -506,4 +625,6 @@ class AuthenticationProvider extends ChangeNotifier {
 
   void sendEvent(pageName) async {
   }
+
+
 }

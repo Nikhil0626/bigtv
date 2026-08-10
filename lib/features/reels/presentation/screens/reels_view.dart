@@ -39,59 +39,22 @@ class ReelsScreen extends StatefulWidget {
 
 class ReelsScreenState extends State<ReelsScreen> {
   YoutubePlayerController? _controller;
-  List<ReelsModel> removedCards = [];
-  Offset slideOffset = Offset.zero;
-  bool isAnimating = false;
   late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    context.read<ReelsProviders>().getAllReelsList = [];
-    context.read<ReelsProviders>().getAllReels();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ReelsProviders>().getAllReelsList = [];
+      context.read<ReelsProviders>().getAllReels();
+    });
     _pageController = PageController(viewportFraction: 1.0);
   }
-
-  void animateRemoveTopCard() async {
-    if (context.read<ReelsProviders>().getAllReelsList.isEmpty || isAnimating) return;
-    setState(() {
-      isAnimating = true;
-      slideOffset = Offset(0, -1);
-    });
-    await Future.delayed(Duration(milliseconds: 600));
-    setState(() {
-      removedCards.add(context.read<ReelsProviders>().getAllReelsList.removeLast());
-      slideOffset = Offset.zero;
-      isAnimating = false;
-    });
-  }
-
-  void animateUndoCard() async {
-    if (removedCards.isEmpty || isAnimating) return;
-    setState(() {
-      isAnimating = true;
-      slideOffset = Offset(0, 1);
-      context.read<ReelsProviders>().getAllReelsList.add(removedCards.removeLast());
-    });
-
-    await Future.delayed(Duration(milliseconds: 50));
-    setState(() {
-      slideOffset = Offset.zero;
-    });
-
-    await Future.delayed(Duration(milliseconds: 600));
-    setState(() {
-      isAnimating = false;
-    });
-  }
-
-  final CardSwiperController controller = CardSwiperController();
-
-  double dragOffset = 0.0;
 
   @override
   void dispose() {
     _controller?.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -107,8 +70,6 @@ class ReelsScreenState extends State<ReelsScreen> {
       }),
     );
   }
-
-  int currentIndexs = 0;
 }
 
 class EachReelCard extends StatefulWidget {

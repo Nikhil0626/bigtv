@@ -45,9 +45,11 @@ class BaseUrls {
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
   /// Python live apis
-  static const String baseUrlAwsDev = "https://api.chotanews.com";
+  static const String baseUrlAwsDev = "https://apidev.chotanews.com";
 
-
+  /// New Server API
+  static const String newServerBaseUrl = "http://192.168.70.251";
+  static const String deviceDetails = "/api/v1/deviceDetails";
   /// Python Dev Apis
   // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
 
@@ -80,6 +82,7 @@ class BaseUrls {
   ///Location Apis
   static const String getAllLocation = "/locations";
   static const String getStateLocation = "/state_locations";
+  static const String getAllLanguages = "/languages";
 
   ///Bookmarks Apis
   static const String getAllBookMarks = "/bookmark";
@@ -106,6 +109,9 @@ class BaseUrls {
   static const String contestClick = "/contest/click";
   static const String adContestClick = "/contest/participation/";
   static const String test = "/test";
+
+  /// Premium Content Apis
+  static const String seriesContent = "/api/content";
 }
 
 

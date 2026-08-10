@@ -51,7 +51,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
       reelsList.length,
           (index) {
         final controller = YoutubePlayerController(
-          initialVideoId: YoutubePlayer.convertUrlToId(reelsList[index].videoUrl)!,
+          initialVideoId: YoutubePlayer.convertUrlToId(reelsList[index].videoUrl) ?? reelsList[index].videoUrl,
           flags: const YoutubePlayerFlags(
             autoPlay: true,
             mute: false,
@@ -95,7 +95,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
       body: Consumer<ReelsProviders>(builder: (_, reelsProviders, __) {
         return PageView.builder(
           controller: _pageController,
@@ -119,10 +119,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
             }, "reel_viewed");
           },
           itemBuilder: (context, index) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 50),
-              child: ReelsCardView(youtubePlayerController: _controllers[index], reelCard: reelsProviders.getAllReelsList[index]),
-            );
+            return ReelsCardView(youtubePlayerController: _controllers[index], reelCard: reelsProviders.getAllReelsList[index]);
           },
         );
       }),

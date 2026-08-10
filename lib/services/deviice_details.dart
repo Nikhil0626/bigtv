@@ -94,3 +94,24 @@ Future<String?> getUniqueDeviceId(
   }
   return null;
 }
+
+Future<Map<String, String>> getDeviceInfoData() async {
+  PackageInfo packageInfo = await PackageInfo.fromPlatform();
+  final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  String osVersion = "";
+  String deviceType = Platform.isIOS ? "ios" : "android";
+
+  if (Platform.isAndroid) {
+    AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+    osVersion = androidInfo.version.release;
+  } else if (Platform.isIOS) {
+    IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+    osVersion = iosInfo.systemVersion;
+  }
+  
+  return {
+    "app_version": packageInfo.version,
+    "os_version": osVersion,
+    "device_type": deviceType,
+  };
+}

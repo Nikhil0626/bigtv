@@ -13,6 +13,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
+import 'package:chotanews/core/theme/theme_extensions.dart';
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -321,16 +322,16 @@ class ProfileViewState extends State<ProfileView> {
                           width: double.infinity,
                           height: 35.h,
                           decoration: BoxDecoration(
-                            color: AppColors.appButtonColor,
+                            color: context.primaryColor,
                             borderRadius: BorderRadius.circular(8.r),
                           ),
                           child: Center(
                             child: profileProvider.isProfileLoading
                                 ? AppLoadingScreen()
                                 : Text('Update',
-                                    style: newAppFont(
+                                    style: context.typography.labelLarge?.copyWith(
                                         fontSize: 16.sp,
-                                        color: Colors.white,
+                                        color: context.colors.onPrimary,
                                         fontWeight: FontWeight.w600)),
                           ),
                         ),
@@ -361,7 +362,7 @@ class ProfileViewState extends State<ProfileView> {
                                       height(height: 12),
                                       Text(
                                         "Delete Account?",
-                                        style: TextStyle(
+                                        style: context.typography.titleLarge?.copyWith(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -369,9 +370,9 @@ class ProfileViewState extends State<ProfileView> {
                                       Text(
                                         "Are you sure you want to delete your account? This action cannot be undone.",
                                         textAlign: TextAlign.center,
-                                        style: TextStyle(
+                                        style: context.typography.bodyMedium?.copyWith(
                                             fontSize: 14,
-                                            color: Colors.black87),
+                                            color: context.textColor),
                                       ),
                                       height(height: 24),
                                       Row(
@@ -382,8 +383,8 @@ class ProfileViewState extends State<ProfileView> {
                                                   Navigator.pop(context),
                                               child: Text(
                                                 "Cancel",
-                                                style: fontStyle(
-                                                    color: Colors.black,
+                                                style: context.typography.labelLarge?.copyWith(
+                                                    color: context.textColor,
                                                     fontSize: 16,
                                                     fontWeight:
                                                         FontWeight.w600),
@@ -394,7 +395,7 @@ class ProfileViewState extends State<ProfileView> {
                                           Expanded(
                                             child: ElevatedButton(
                                               style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.red,
+                                                backgroundColor: context.colors.error,
                                               ),
                                               onPressed: () async {
                                                 Navigator.pop(context);
@@ -405,6 +406,7 @@ class ProfileViewState extends State<ProfileView> {
                                                     .deleteAccount()
                                                     .then(
                                                   (value) {
+                                                    if (!context.mounted) return;
                                                     closeSubscribe();
 
                                                     String? deviceId =
@@ -440,8 +442,8 @@ class ProfileViewState extends State<ProfileView> {
                                               },
                                               child: Text(
                                                 "Delete",
-                                                style: fontStyle(
-                                                    color: Colors.white,
+                                                style: context.typography.labelLarge?.copyWith(
+                                                    color: context.colors.onError,
                                                     fontSize: 16,
                                                     fontWeight:
                                                         FontWeight.w600),
@@ -462,16 +464,16 @@ class ProfileViewState extends State<ProfileView> {
                           width: double.infinity,
                           height: 35.h,
                           decoration: BoxDecoration(
-                              color: AppColors.cardBackgroundColor,
+                              color: context.cardColor,
                               borderRadius: BorderRadius.circular(8.r),
-                              border: Border.all(color: Colors.blue, width: 1)),
+                              border: Border.all(color: context.primaryColor, width: 1)),
                           child: Center(
                             child: profileProvider.isProfileLoading
                                 ? AppLoadingScreen()
                                 : Text('Delete account',
-                                    style: newAppFont(
+                                    style: context.typography.labelLarge?.copyWith(
                                         fontSize: 16,
-                                        color: Colors.blue,
+                                        color: context.primaryColor,
                                         fontWeight: FontWeight.w600)),
                           ),
                         ),

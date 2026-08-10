@@ -18,7 +18,6 @@ class AuthenticationRepo extends BaseService {
 
   Future validateOtp(body) async {
     Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.validateOtpPy, method: RequestType.post, body: body);
-
     return response;
   }
 
@@ -35,7 +34,7 @@ class AuthenticationRepo extends BaseService {
   }
 
   Future getAllLocations(body) async {
-    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.getAllLocation, method: RequestType.get, queryParameters: body);
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.getStateLocation, method: RequestType.get, queryParameters: body);
     log(response.data.toString());
     return response;
   }
@@ -48,6 +47,12 @@ class AuthenticationRepo extends BaseService {
 
   Future getStateLocation(body) async {
     Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.getStateLocation, method: RequestType.get, queryParameters: body);
+    log(response.data.toString());
+    return response;
+  }
+
+  Future getAllLanguages(body) async {
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.getAllLanguages, method: RequestType.get, queryParameters: body);
     log(response.data.toString());
     return response;
   }

@@ -104,6 +104,7 @@
         <string>fbauth2</string>
         <string>fb-messenger-share-api</string>
         <string>fbshareextension</string>
+        <string>whatsapp</string>
     </array>
 
     <!-- Flutter -->

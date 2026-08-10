@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
+import 'package:chotanews/aggricator_screens/splash_screen/splash_provider.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:provider/provider.dart';
@@ -12,8 +13,7 @@ import '../aggricator_screens/rating_screen/rating_provider/rating_provider.dart
 import '../aggricator_screens/referral_screen/referral_provider/referral_provider.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
-
-
+import 'package:chotanews/features/home/presentation/providers/epaper_provider.dart';
 
 
 import '../core/providers/web_view_provider.dart';
@@ -22,6 +22,7 @@ import '../core/theme/theme_provider.dart';
 class AppProviders {
   static List<ChangeNotifierProvider> all = [
     ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
+    ChangeNotifierProvider<EpaperProvider>(create: (_) => EpaperProvider()),
     ChangeNotifierProvider<NewsPostsProvider>(create: (_) => NewsPostsProvider()),
     ChangeNotifierProvider<AuthenticationProvider>(create: (_) => AuthenticationProvider()),
     ChangeNotifierProvider<ReelsProviders>(create: (_) => ReelsProviders()),
@@ -36,5 +37,6 @@ class AppProviders {
     ChangeNotifierProvider<VideoProvider>(create: (_) => VideoProvider()),
     ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
     ChangeNotifierProvider<WebViewProvider>(create: (_) => WebViewProvider()),
+    ChangeNotifierProvider<SplashProvider>(create: (_) => SplashProvider()),
   ];
 }

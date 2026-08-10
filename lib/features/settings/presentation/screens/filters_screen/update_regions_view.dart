@@ -1,4 +1,5 @@
 
+import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
@@ -11,7 +12,7 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
+import 'package:cached_network_image/cached_network_image.dart';
 
 class UpdateRegionsView extends StatefulWidget {
   const UpdateRegionsView({super.key});
@@ -30,27 +31,18 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
   @override
   Widget build(BuildContext context) {
     return Consumer2<AuthenticationProvider, SettingsProvider>(builder: (_, authenticationProvider, settingsProvider, __) {
+      bool isDark = context.theme.brightness == Brightness.dark;
       return Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: context.scaffoldBackgroundColor,
         bottomNavigationBar: Padding(
           padding: EdgeInsets.all(25.w),
           child: InkWell(
             onTap: authenticationProvider.selectedLocations.isNotEmpty && authenticationProvider.selectedLocations.length <= 5
                 ? () {
-                    authenticationProvider
-                        .sendLocationsToServer(
-                      context,
-                    )
-                        .then(
+                    authenticationProvider.sendLocationsToServer(context).then(
                       (value) {
                         if (context.mounted) {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => HomeView(),
-                            ),
-                            (route) => false,
-                          );
+                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => HomeView()), (route) => false);
                         }
                       },
                     );
@@ -60,16 +52,15 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                   },
             child: Container(
               width: double.infinity,
-              height: 35.h,
+              height: 48.h,
               decoration: BoxDecoration(
-                color:
-                    (authenticationProvider.selectedLocations.isNotEmpty && authenticationProvider.selectedLocations.length <= 5) ? AppColors.appButtonColor : AppColors.bodyTextColor.withValues(alpha: .2),
+                color: (authenticationProvider.selectedLocations.isNotEmpty && authenticationProvider.selectedLocations.length <= 5) ? context.primaryColor : context.colors.outline.withValues(alpha: 0.5),
                 borderRadius: BorderRadius.all(Radius.circular(8.r)),
               ),
               child: Center(
                 child: Text(
                   'Update',
-                  style: newAppFont(color: Colors.white, fontWeight: FontWeight.w500),
+                  style: context.typography.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16.sp),
                 ),
               ),
             ),
@@ -84,7 +75,6 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                 child: Column(
                   children: [
                     height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success || settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
-
                     height(height: 10),
                     Expanded(
                       child: ListView(
@@ -95,19 +85,19 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                             child: RichText(
                               text: TextSpan(
                                 text: "Districts to be selected ",
-                                style: newAppFont(color: Colors.grey.shade500),
+                                style: context.typography.bodyMedium?.copyWith(color: context.colors.onSurfaceVariant),
                                 children: [
                                   if (authenticationProvider.selectedLocations.length > 5)
-                                    TextSpan(text: "You Have Selected Maximum Number of Districts", style: newAppFont(fontSize: 10, color: Colors.red, fontWeight: FontWeight.w400)),
+                                    TextSpan(text: "\nYou Have Selected Maximum Number of Districts", style: context.typography.bodySmall?.copyWith(color: Colors.red, fontWeight: FontWeight.w400)),
                                 ],
                               ),
                             ),
                           ),
-                          height(height: 8),
+                          height(height: 16),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: authenticationProvider.states!.entries.map((entry) {
-                              String stateName = entry.value;
+                            children: authenticationProvider.getAllLocationList.map((location) {
+                              String stateName = location.stateName;
                               final isSelected = authenticationProvider.selectedLocations.contains(stateName);
                               return Padding(
                                 padding: EdgeInsets.only(bottom: 16.h),
@@ -115,63 +105,41 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                                   onTap: () {
                                     authenticationProvider.addToSelectedLocations(stateName);
                                   },
-                                  child: AnimatedContainer(
-                                    duration: const Duration(milliseconds: 200),
-                                    height: 100.h,
+                                  child: Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.white,
+                                      color: context.cardColor,
                                       borderRadius: BorderRadius.circular(8.r),
                                       border: Border.all(
-                                        color: isSelected ? AppColors.appButtonColor : Colors.grey.shade300,
-                                        width: isSelected ? 1.5 : 1.0,
+                                        color: isSelected ? context.primaryColor : context.borderColor,
+                                        width: isSelected ? 2.0 : 1.0,
                                       ),
-                                      boxShadow: isSelected
-                                          ? [
-                                              BoxShadow(
-                                                color: AppColors.appButtonColor.withValues(alpha: 0.1),
-                                                blurRadius: 8,
-                                                spreadRadius: 1,
-                                              )
-                                            ]
-                                          : [],
                                     ),
                                     child: Stack(
                                       children: [
-                                        Builder(
-                                          builder: (context) {
-                                            String? imagePath;
-                                            if (stateName.toLowerCase().contains('telangana') || stateName.toLowerCase().contains('తెలంగాణ')) {
-                                              imagePath = 'assets/images/Telangana logo.png';
-                                            } else if (stateName.toLowerCase().contains('andhra') || stateName.toLowerCase().contains('ap') || stateName.toLowerCase().contains('ఆంధ్రప్రదేశ్')) {
-                                              imagePath = 'assets/images/AP logo.png';
-                                            }
-
-                                            if (imagePath != null) {
-                                              return Padding(
-                                                padding: EdgeInsets.only(right: 16.w),
-                                                child: Align(
-                                                  alignment: Alignment.centerRight,
-                                                  child: Image.asset(
-                                                    imagePath,
-                                                    height: 60.sp,
-                                                    width: 60.sp,
-                                                    fit: BoxFit.contain,
-                                                  ),
-                                                ),
-                                              );
-                                            } else {
-                                              return const SizedBox();
-                                            }
-                                          }
-                                        ),
+                                        if (location.imageUrl != null && location.imageUrl!.isNotEmpty)
+                                          Positioned(
+                                            right: 16.w,
+                                            bottom: 0,
+                                            top: 0,
+                                            child: Align(
+                                              alignment: Alignment.centerRight,
+                                              child: CachedNetworkImage(
+                                                imageUrl: location.imageUrl!,
+                                                height: 60.sp,
+                                                width: 60.sp,
+                                                fit: BoxFit.contain,
+                                                errorWidget: (context, url, error) => const SizedBox(),
+                                              ),
+                                            ),
+                                          ),
                                         
                                         Padding(
-                                          padding: EdgeInsets.only(left: 16.w, right: 90.w),
+                                          padding: EdgeInsets.only(left: 16.w, right: 90.w, top: 20.h, bottom: 20.h),
                                           child: Row(
                                             children: [
                                               Icon(
                                                 isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                                                color: isSelected ? AppColors.appButtonColor : Colors.grey.shade400,
+                                                color: isSelected ? context.primaryColor : context.colors.outline,
                                                 size: 24.sp,
                                               ),
                                               SizedBox(width: 16.w),
@@ -182,19 +150,17 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                                                   children: [
                                                     Text(
                                                       stateName,
-                                                      style: newAppFont(
-                                                        fontSize: 16.sp,
-                                                        color: Colors.black87,
+                                                      style: context.typography.titleMedium?.copyWith(
+                                                        color: context.textColor,
                                                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                                       ),
                                                     ),
                                                     SizedBox(height: 4.h),
                                                     Text(
                                                       "Local news, events and updates from $stateName",
-                                                      style: newAppFont(
+                                                      style: context.typography.bodySmall?.copyWith(
+                                                        color: context.colors.onSurfaceVariant,
                                                         fontSize: 11.sp,
-                                                        color: Colors.black54,
-                                                        fontWeight: FontWeight.w400,
                                                       ),
                                                     ),
                                                   ],

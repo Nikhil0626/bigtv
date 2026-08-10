@@ -20,6 +20,17 @@ class SettingsProvider extends ChangeNotifier {
   List<BookmarksModel> getAllBookmarkList = [];
   bool isMainLoading = false;
   bool isOthersSelected = false;
+  
+  String appVersion = "";
+  bool isNotificationsEnabled = false;
+
+  Future<void> getLoginDetails() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    appVersion = sp.getString("app_version") ?? "";
+    isNotificationsEnabled = sp.getString("loginType") == "login";
+    notifyListeners();
+  }
+
   List feedbackList = [];
   List<String> selectedFeedbackList = [];
   TextEditingController feedbackController = TextEditingController();

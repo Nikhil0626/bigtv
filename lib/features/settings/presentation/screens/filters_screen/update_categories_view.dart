@@ -11,6 +11,7 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 
 class UpdateCategoriesView extends StatefulWidget {
@@ -27,33 +28,6 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
     context.read<AuthenticationProvider>().getAllCategories();
   }
 
-  String _getCategoryImage(String categoryName, int index) {
-    final name = categoryName.trim().toLowerCase();
-    if (name.contains('business')) return 'assets/images/business.jpg';
-    if (name.contains('sports')) return 'assets/images/sports.jpg';
-    if (name.contains('entertainment') || name.contains('cinema')) return 'assets/images/entertainment.jpg';
-    if (name.contains('politics')) return 'assets/images/politics.jpg';
-    if (name.contains('technology') || name.contains('tech')) return 'assets/images/technology.jpg';
-    if (name.contains('lifestyle')) return 'assets/images/lifestyle.jpg';
-    if (name.contains('science')) return 'assets/images/science.jpg';
-    if (name.contains('startup')) return 'assets/images/startup.jpg';
-    if (name.contains('education')) return 'assets/images/education.jpg';
-    
-    // If the API returns categories in another language or unmapped names, 
-    // provide a varied fallback based on the index so they don't all look identical.
-    final fallbacks = [
-      'assets/images/business.jpg',
-      'assets/images/sports.jpg',
-      'assets/images/entertainment.jpg',
-      'assets/images/politics.jpg',
-      'assets/images/technology.jpg',
-      'assets/images/lifestyle.jpg',
-      'assets/images/science.jpg',
-      'assets/images/startup.jpg',
-      'assets/images/education.jpg'
-    ];
-    return fallbacks[index % fallbacks.length];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +54,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                               physics: const BouncingScrollPhysics(),
                               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 2,
-                                childAspectRatio: 2.2,
+                                childAspectRatio: 1.8,
                                 crossAxisSpacing: 12.w,
                                 mainAxisSpacing: 12.h,
                               ),
@@ -99,14 +73,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                                         color: isSelected ? AppColors.appButtonColor : Colors.transparent,
                                         width: isSelected ? 2.0 : 0.0,
                                       ),
-                                      image: DecorationImage(
-                                        image: AssetImage(_getCategoryImage(categoryName, index)),
-                                        fit: BoxFit.cover,
-                                        colorFilter: ColorFilter.mode(
-                                          Colors.black.withValues(alpha: 0.4),
-                                          BlendMode.darken,
-                                        ),
-                                      ),
+                                      color: Theme.of(context).cardColor,
                                       boxShadow: isSelected
                                           ? [
                                               BoxShadow(
@@ -126,21 +93,24 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                                               categoryName,
                                               textAlign: TextAlign.center,
                                               style: homeScreenFontStyle(
-                                                color: Colors.white,
+                                                color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
                                                 fontSize: 14.sp,
                                                 fontWeight: FontWeight.w700,
-                                              ).copyWith(
-                                                shadows: [
-                                                  Shadow(
-                                                    color: Colors.black.withValues(alpha: 0.7),
-                                                    offset: const Offset(0, 1),
-                                                    blurRadius: 3,
-                                                  ),
-                                                ],
                                               ),
                                             ),
                                           ),
                                         ),
+                                        if (categories[index].imageUrl != null && categories[index].imageUrl!.isNotEmpty)
+                                          Positioned(
+                                            right: -10.w,
+                                            bottom: -10.h,
+                                            child: CachedNetworkImage(
+                                              imageUrl: categories[index].imageUrl!,
+                                              height: 90.sp,
+                                              width: 90.sp,
+                                              errorWidget: (context, url, error) => const SizedBox(),
+                                            ),
+                                          ),
                                         if (isSelected)
                                           Positioned(
                                             top: 6.h,

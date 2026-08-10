@@ -20,7 +20,7 @@ class ReelsCardView extends StatefulWidget {
 
 class _ReelsCardViewState extends State<ReelsCardView> {
   ScreenshotController sc = ScreenshotController();
-  YoutubePlayerController? controller;
+  final ValueNotifier<YoutubePlayerController?> _controllerNotifier = ValueNotifier<YoutubePlayerController?>(null);
 
   @override
   void initState() {
@@ -28,9 +28,9 @@ class _ReelsCardViewState extends State<ReelsCardView> {
 
     context.read<ReelsProviders>().getIndividualReelData(widget.postId).then((value) {
       log(value.toString());
-      final videoId = YoutubePlayer.convertUrlToId(value.videoUrl);
-      if (videoId != null) {
-        controller = YoutubePlayerController(
+      final videoId = YoutubePlayer.convertUrlToId(value.videoUrl) ?? value.videoUrl;
+      if (videoId.isNotEmpty) {
+        _controllerNotifier.value = YoutubePlayerController(
           initialVideoId: videoId,
           flags: const YoutubePlayerFlags(
             autoPlay: true,
@@ -42,14 +42,14 @@ class _ReelsCardViewState extends State<ReelsCardView> {
             controlsVisibleAtStart: true,
           ),
         );
-        setState(() {}); // Refresh UI after controller is ready
       }
     });
   }
 
   @override
   void dispose() {
-    controller?.dispose(); // Dispose properly
+    _controllerNotifier.value?.dispose(); // Dispose properly
+    _controllerNotifier.dispose();
     super.dispose();
   }
 
@@ -57,44 +57,49 @@ class _ReelsCardViewState extends State<ReelsCardView> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Consumer<ReelsProviders>(builder: (_, reelsProviders, __) {
-        if (reelsProviders.isReelDataLoading || controller == null) {
-          return AppLoadingScreen();
-        }
+        return ValueListenableBuilder<YoutubePlayerController?>(
+          valueListenable: _controllerNotifier,
+          builder: (context, controller, child) {
+            if (reelsProviders.isReelDataLoading || controller == null) {
+              return AppLoadingScreen();
+            }
 
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: Screenshot(
-                controller: sc,
-                child: YoutubePlayer(
-                  controller: controller!,
-                  bottomActions: [
-                    CurrentPosition(),
-                    ProgressBar(
-                      isExpanded: true,
-                      colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
+            return Stack(
+              children: [
+                Positioned.fill(
+                  child: Screenshot(
+                    controller: sc,
+                    child: YoutubePlayer(
+                      controller: controller,
+                      bottomActions: [
+                        CurrentPosition(),
+                        ProgressBar(
+                          isExpanded: true,
+                          colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
+                        ),
+                        RemainingDuration(),
+                        IconButton(
+                          icon: Icon(
+                            reelsProviders.isMuted ? Icons.volume_off : Icons.volume_up,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (reelsProviders.isMuted) {
+                              controller.unMute();
+                            } else {
+                              controller.mute();
+                            }
+                            reelsProviders.toggleMute();
+                          },
+                        ),
+                      ],
                     ),
-                    RemainingDuration(),
-                    IconButton(
-                      icon: Icon(
-                        reelsProviders.isMuted ? Icons.volume_off : Icons.volume_up,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        if (reelsProviders.isMuted) {
-                          controller?.unMute();
-                        } else {
-                          controller?.mute();
-                        }
-                        reelsProviders.toggleMute();
-                      },
-                    ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-            // ... other Positioned widgets
-          ],
+                // ... other Positioned widgets
+              ],
+            );
+          },
         );
       }),
     );

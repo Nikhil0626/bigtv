@@ -30,6 +30,7 @@ class VideoPreviewPage extends State<VideoPreview> {
   @override
   void initState() {
     super.initState();
+    log("Nikhil Youtube${widget.url}");
     context.read<HomeProvider>().youtubeInitial(widget.url);
   }
 
@@ -93,7 +94,10 @@ class VideoPreviewPage extends State<VideoPreview> {
                         homeProvider.toggleMute();
                       },
                     ),
-                    FullScreenButton(),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 120.0),
+                      child: FullScreenButton(),
+                    ),
                   ],
                 ),
                 builder: (context, player) => player,

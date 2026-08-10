@@ -4,6 +4,7 @@ import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 
@@ -21,33 +22,6 @@ class _CategoriesViewState extends State<CategoriesView> {
     super.initState();
   }
 
-  String _getCategoryImage(String categoryName, int index) {
-    final name = categoryName.trim().toLowerCase();
-    if (name.contains('business')) return 'assets/images/business.jpg';
-    if (name.contains('sports')) return 'assets/images/sports.jpg';
-    if (name.contains('entertainment') || name.contains('cinema')) return 'assets/images/entertainment.jpg';
-    if (name.contains('politics')) return 'assets/images/politics.jpg';
-    if (name.contains('technology') || name.contains('tech')) return 'assets/images/technology.jpg';
-    if (name.contains('lifestyle')) return 'assets/images/lifestyle.jpg';
-    if (name.contains('science')) return 'assets/images/science.jpg';
-    if (name.contains('startup')) return 'assets/images/startup.jpg';
-    if (name.contains('education')) return 'assets/images/education.jpg';
-    
-    // If the API returns categories in another language or unmapped names, 
-    // provide a varied fallback based on the index so they don't all look identical.
-    final fallbacks = [
-      'assets/images/business.jpg',
-      'assets/images/sports.jpg',
-      'assets/images/entertainment.jpg',
-      'assets/images/politics.jpg',
-      'assets/images/technology.jpg',
-      'assets/images/lifestyle.jpg',
-      'assets/images/science.jpg',
-      'assets/images/startup.jpg',
-      'assets/images/education.jpg'
-    ];
-    return fallbacks[index % fallbacks.length];
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,9 +73,9 @@ class _CategoriesViewState extends State<CategoriesView> {
                           physics: const BouncingScrollPhysics(),
                           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
-                            childAspectRatio: 1.4,
-                            crossAxisSpacing: 8.w,
-                            mainAxisSpacing: 8.h,
+                            crossAxisSpacing: 16.w,
+                            mainAxisSpacing: 16.h,
+                            childAspectRatio: 1.8,
                           ),
                           itemCount: authenticationProvider.getAllCategoryList.length,
                           itemBuilder: (context, index) {
@@ -110,81 +84,70 @@ class _CategoriesViewState extends State<CategoriesView> {
 
                             return GestureDetector(
                               onTap: () => authenticationProvider.addToSelectedEngagements(category.categoryName.toString()),
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(8.r),
-                                      boxShadow: isSelected
-                                          ? [
-                                              BoxShadow(
-                                                color: colorScheme.primary.withValues(alpha: 0.3),
-                                                blurRadius: 8,
-                                                spreadRadius: 1,
-                                              )
-                                            ]
-                                          : [],
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(8.r),
-                                      child: Image.asset(
-                                        _getCategoryImage(category.categoryName.toString(), index),
-                                        fit: BoxFit.cover,
-                                        color: Colors.black.withValues(alpha: 0.4),
-                                        colorBlendMode: BlendMode.darken,
-                                      ),
-                                    ),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: context.cardColor,
+                                  border: Border.all(
+                                    color: isSelected ? context.primaryColor : context.borderColor,
+                                    width: isSelected ? 2 : 1,
                                   ),
-                                  if (isSelected)
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8.r),
-                                        border: Border.all(
-                                          color: colorScheme.primary,
-                                          width: 2.0,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: context.primaryColor.withValues(alpha: 0.1),
+                                            blurRadius: 8,
+                                            spreadRadius: 1,
+                                          )
+                                        ]
+                                      : [],
+                                ),
+                                child: Stack(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10.0),
+                                      child: Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Text(
+                                          category.categoryName.toString(),
+                                          style: context.typography.titleMedium?.copyWith(
+                                            color: isSelected ? context.primaryColor : context.textColor,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                          textAlign: TextAlign.start,
                                         ),
                                       ),
                                     ),
-                                  Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 4.w),
-                                      child: Text(
-                                        category.categoryName.toString(),
-                                        textAlign: TextAlign.center,
-                                        style: typography.bodySmall?.copyWith(
-                                          color: Colors.white,
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w700,
-                                          shadows: [
-                                            Shadow(
-                                              color: Colors.black.withValues(alpha: 0.7),
-                                              offset: const Offset(0, 1),
-                                              blurRadius: 3,
-                                            ),
-                                          ],
+                                      if (category.imageUrl != null && category.imageUrl!.isNotEmpty)
+                                        Positioned(
+                                          right: -10.w,
+                                          bottom: -20.h,
+                                          child: CachedNetworkImage(
+                                            imageUrl: category.imageUrl!,
+                                            height: 100.sp,
+                                            width: 100.sp,
+                                            errorWidget: (context, url, error) => const SizedBox(),
+                                          ),
+                                        ),
+                                    if (isSelected)
+                                      Positioned(
+                                        top: 8.h,
+                                        right: 8.w,
+                                        child: Container(
+                                          padding: EdgeInsets.all(2.w),
+                                          decoration: BoxDecoration(
+                                            color: context.primaryColor,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.check,
+                                            color: context.colors.onPrimary,
+                                            size: 14.sp,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                  if (isSelected)
-                                    Positioned(
-                                      top: 6.h,
-                                      right: 6.w,
-                                      child: Container(
-                                        padding: EdgeInsets.all(2.w),
-                                        decoration: BoxDecoration(
-                                          color: colorScheme.primary,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Icon(
-                                          Icons.check,
-                                          color: colorScheme.onPrimary,
-                                          size: 14.sp,
-                                        ),
-                                      ),
-                                    ),
-                                ],
+                                  ],
+                                ),
                               ),
                             );
                           },
@@ -249,12 +212,49 @@ class _CategoriesViewState extends State<CategoriesView> {
                         ),
                       ),
                       
+                      SizedBox(height: 4.h),
+                      
+                      InkWell(
+                        onTap: () {
+                          // authenticationProvider.updateLoginStatus(NewAppLoginStatus.language);
+                        },
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.h),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(Icons.arrow_back, size: 16.sp, color: isDark ? AppColorTokens.darkTextPrimary : AppColorTokens.lightTextPrimary),
+                              SizedBox(width: 8.w),
+                              Text(
+                                'Back',
+                                style: typography.bodyMedium?.copyWith(
+                                  fontSize: 14.sp,
+                                  color: isDark ? AppColorTokens.darkTextPrimary : AppColorTokens.lightTextPrimary,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                      SizedBox(height: 4.h),
+                      
                       SizedBox(height: 24.h),
                       
                       // Pagination Dots
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
+                          Container(
+                            width: 6.w,
+                            height: 6.w,
+                            decoration: BoxDecoration(
+                              color: colorScheme.outline,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          SizedBox(width: 8.w),
                           Container(
                             width: 6.w,
                             height: 6.w,

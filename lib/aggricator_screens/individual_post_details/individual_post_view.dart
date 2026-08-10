@@ -101,16 +101,23 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                     },
                     child: Stack(
                       children: [
-                        article['image_url'].length == 1
-                            ? Image.network(
-                         article['image_url'][0] ?? "",
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                          fit: BoxFit.fill,
-                        )
-                            : ImagePostSlider(
-                          imageUrl: article['image_url'],
-                        ),
+                        (article['image_url'] is List)
+                            ? (article['image_url'].length == 1
+                                ? Image.network(
+                                    article['image_url'][0] ?? "",
+                                    width: MediaQuery.of(context).size.width,
+                                    height: MediaQuery.of(context).size.height,
+                                    fit: BoxFit.fill,
+                                  )
+                                : ImagePostSlider(
+                                    imageUrl: article['image_url'],
+                                  ))
+                            : Image.network(
+                                article['image_url'] ?? "",
+                                width: MediaQuery.of(context).size.width,
+                                height: MediaQuery.of(context).size.height,
+                                fit: BoxFit.fill,
+                              ),
 
                         Positioned(
                           top: 40,
@@ -276,10 +283,11 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                       ),
                                     ),
                                      width(width: 6),
-                                    Container(
-                                      padding: const EdgeInsets.all(8.0),
-                                      decoration: BoxDecoration(border: BoxBorder.all(color: Color(0xFFED1C24), width: 0.36), borderRadius: BorderRadius.all(Radius.circular(8))),
-                                      child: Row(
+                                    if (article['type'] != 'ImageAd' && article['subType'] != 'ImageAd')
+                                        Container(
+                                          padding: const EdgeInsets.all(8.0),
+                                          decoration: BoxDecoration(border: BoxBorder.all(color: Color(0xFFED1C24), width: 0.36), borderRadius: BorderRadius.all(Radius.circular(8))),
+                                          child: Row(
                                         mainAxisAlignment: MainAxisAlignment.end,
                                         children: [
                                           Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {

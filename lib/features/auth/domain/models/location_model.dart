@@ -1,39 +1,43 @@
 class LocationModel {
-  final int districtId;
-  final String districtName;
-  final int stateId;
-  final String stateName;
-  final String value;
+  final int stateId; // Or locationId
+  final String stateName; // Or locationName
+  final String? value;
+  final bool? isActive;
+  final bool? status;
   final bool isFollowed;
+  final String? imageUrl;
 
   LocationModel({
-    required this.districtId,
-    required this.districtName,
     required this.stateId,
     required this.stateName,
-    required this.value,
-    required this.isFollowed,
+    this.value,
+    this.isActive,
+    this.status,
+    this.isFollowed = false,
+    this.imageUrl,
   });
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     return LocationModel(
-      districtId: json['districtId'] ?? 0,
-      districtName: json['districtName'] ?? '',
-      stateId: json['stateId'] ?? 0,
-      stateName: json['stateName'] ?? '',
-      value: json['value'] ?? '',
+      stateId: json['locationId'] ?? json['stateId'] ?? 0,
+      stateName: json['locationName'] ?? json['stateName'] ?? '',
+      value: json['value'],
+      isActive: json['isActive'],
+      status: json['status'],
       isFollowed: json['isFollowed'] ?? false,
+      imageUrl: json['imageUrl'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'districtId': districtId,
-      'districtName': districtName,
       'stateId': stateId,
       'stateName': stateName,
       'value': value,
+      'isActive': isActive,
+      'status': status,
       'isFollowed': isFollowed,
+      'imageUrl': imageUrl,
     };
   }
 }

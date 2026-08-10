@@ -279,8 +279,13 @@ class ExpandableTextWidget extends StatefulWidget {
 }
 
 class ExpandableTextWidgetState extends State<ExpandableTextWidget> {
-  bool isExpanded = false;
-  bool isOverflowing = false;
+  final ValueNotifier<bool> isExpanded = ValueNotifier<bool>(false);
+
+  @override
+  void dispose() {
+    isExpanded.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -302,35 +307,38 @@ class ExpandableTextWidgetState extends State<ExpandableTextWidget> {
 
         bool isOverflowing = textPainter.didExceedMaxLines;
 
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.text,
-              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
-              maxLines: isExpanded ? null : 4, // Initially collapsed
-              overflow: isExpanded ? TextOverflow.visible : TextOverflow.ellipsis,
-            ),
-            if (isOverflowing) // Show "Read More" only if needed
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    isExpanded = !isExpanded;
-                  });
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    isExpanded ? "Show Less" : "Read More",
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.blue,
+        return ValueListenableBuilder<bool>(
+          valueListenable: isExpanded,
+          builder: (context, expanded, child) {
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.text,
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.black),
+                  maxLines: expanded ? null : 4, // Initially collapsed
+                  overflow: expanded ? TextOverflow.visible : TextOverflow.ellipsis,
+                ),
+                if (isOverflowing) // Show "Read More" only if needed
+                  GestureDetector(
+                    onTap: () {
+                      isExpanded.value = !isExpanded.value;
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        expanded ? "Show Less" : "Read More",
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                          color: Colors.blue,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-          ],
+              ],
+            );
+          },
         );
       },
     );

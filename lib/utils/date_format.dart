@@ -5,7 +5,7 @@ import 'package:intl/intl.dart';
 String formatTimeDifference(String inputTime,{bool isComment= false} ) {
 
 
-  final now = DateTime.now().add(const Duration(hours: -5, minutes: -30));
+  final now = DateTime.now();
 
 
 
@@ -18,13 +18,15 @@ String formatTimeDifference(String inputTime,{bool isComment= false} ) {
       date = now;
 
     } else {
-       date = isComment?format1.parse(inputTime).toLocal():format.parse(inputTime).toLocal(); // Convert to local time
+       date = isComment?format1.parse(inputTime).toLocal():DateTime.parse(inputTime).toLocal(); // Convert to local time
        date.toString();
     }
   } catch (e) {
     log(e.toString());
     return "Invalid date ";
   }
+
+  log("${now}-------${date}");
 
   final difference = now.difference(date);
   if (difference.inSeconds < 0) {

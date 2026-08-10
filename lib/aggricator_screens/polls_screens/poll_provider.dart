@@ -16,6 +16,11 @@ class PollProvider with ChangeNotifier {
   int? tempSelectedOptionId;
   late Map<String, dynamic> localArticle;
 
+  void setTempSelectedOptionId(int id) {
+    tempSelectedOptionId = id;
+    notifyListeners();
+  }
+
   void addData(artical) async {
     tempSelectedOptionId = null;
     log('Hello siva kumar');
