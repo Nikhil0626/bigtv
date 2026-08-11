@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ThemeProvider with ChangeNotifier {
   static const String _themePrefKey = 'theme_pref';
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.light;
 
   ThemeMode get themeMode => _themeMode;
 
@@ -22,6 +22,9 @@ class ThemeProvider with ChangeNotifier {
       } else {
         _themeMode = ThemeMode.system;
       }
+      notifyListeners();
+    } else {
+      _themeMode = ThemeMode.light;
       notifyListeners();
     }
   }

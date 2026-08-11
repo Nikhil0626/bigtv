@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -29,6 +30,7 @@ class SplashProvider extends ChangeNotifier {
     }
     await Future.delayed(Duration(seconds: showGif ? 5 : 2));
     if (context.mounted) {
+      await context.read<HomeProvider>().loadLanguage();
       context.read<AuthenticationProvider>().isPageNavigation(context);
     }
   }
