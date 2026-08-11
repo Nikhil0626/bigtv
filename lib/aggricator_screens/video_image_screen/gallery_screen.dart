@@ -195,31 +195,7 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                       },
                     ),
 
-                    Spacer(),
 
-                    // Share Button
-                    BottomActions(
-                      postType: widget.postDetails['subType'] ?? "",
-                      icon: "assets/svg/share.svg",
-                      label: 'షేర్',
-                      iconColor: AppColors.iconColors,
-                      onTap: () async {
-                        log("Share");
-                         EventRepo().addEvent({
-                          "share": "news",
-                          "postId": widget.postDetails['id'].toString()??"000",   // ✅ postId converted to String
-                          "createAt": DateTime.now().toString(),
-                           "postTitle": widget.postDetails['title'].toString()
-
-                         }, "shared_article");
-
-
-                        SharedPreferences sp = await SharedPreferences.getInstance();
-                        String? userId = sp.getString("userId");
-                        sendShareDetails(userId, widget.postDetails['id'], widget.postDetails['content'].toString());
-                        showShareOptionsBottomSheet(context, widget.postDetails);
-                      },
-                    ),
                   ],
                 ),
               ),

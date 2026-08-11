@@ -71,6 +71,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                     controller: sc,
                     child: YoutubePlayer(
                       controller: controller,
+                      aspectRatio: MediaQuery.of(context).size.width / MediaQuery.of(context).size.height,
                       bottomActions: [
                         CurrentPosition(),
                         ProgressBar(

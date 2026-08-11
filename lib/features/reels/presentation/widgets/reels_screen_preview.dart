@@ -155,6 +155,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
             child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
               return YoutubePlayer(
                 controller: widget.youtubePlayerController,
+                aspectRatio: MediaQuery.of(context).size.width / MediaQuery.of(context).size.height,
                 bufferIndicator: const Align(
                   alignment: Alignment.bottomCenter,
                   child: LinearProgressIndicator(

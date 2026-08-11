@@ -291,23 +291,43 @@ class ReelVideoPlayer extends StatelessWidget {
                   ),
                 );
               }
-              return const Align(
+              return Stack(
+                fit: StackFit.expand,
+                children: [
+                  if (episode.thumbnail.isNotEmpty)
+                    Image.network(
+                      episode.thumbnail,
+                      fit: BoxFit.cover,
+                    ),
+                  const Align(
+                    alignment: Alignment.bottomCenter,
+                    child: LinearProgressIndicator(
+                      color: Colors.red,
+                      backgroundColor: Colors.transparent,
+                    ),
+                  ),
+                ],
+              );
+            },
+          )
+        else
+          Stack(
+            fit: StackFit.expand,
+            children: [
+              if (episode.thumbnail.isNotEmpty)
+                Image.network(
+                  episode.thumbnail,
+                  fit: BoxFit.cover,
+                ),
+              const Align(
                 alignment: Alignment.bottomCenter,
                 child: LinearProgressIndicator(
                   color: Colors.red,
                   backgroundColor: Colors.transparent,
                 ),
-              ); // Replaced with linear bar at bottom
-            },
-          )
-        else
-          const Align(
-            alignment: Alignment.bottomCenter,
-            child: LinearProgressIndicator(
-              color: Colors.red,
-              backgroundColor: Colors.transparent,
-            ),
-          ), // Replaced with linear bar at bottom
+              ),
+            ],
+          ),
 
         // Overlay info
         Positioned(
