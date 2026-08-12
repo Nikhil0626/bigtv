@@ -28,7 +28,11 @@ class MainActivity: FlutterActivity() {
 
     private fun shareToWhatsApp(imagePath: String?, text: String?, result: MethodChannel.Result) {
         val intent = Intent(Intent.ACTION_SEND)
-        intent.type = "image/*"
+        if (imagePath != null && imagePath.endsWith(".pdf", ignoreCase = true)) {
+            intent.type = "application/pdf"
+        } else {
+            intent.type = "image/*"
+        }
         intent.setPackage("com.whatsapp")
         
         if (text != null) {

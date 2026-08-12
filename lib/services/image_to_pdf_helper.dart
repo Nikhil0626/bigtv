@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
+import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Create A Pdf Multiple News Article
@@ -16,7 +17,7 @@ Future<void> createAndSharePdf(BuildContext context, dynamic article) async {
     final pdf = pw.Document();
 
     for (var item in imageData) {
-      String imageUrl = item['Url'].toString();
+      String imageUrl = item is String ? item : (item['Url']?.toString() ?? "");
       if (imageUrl.isNotEmpty) {
         final response = await http.get(Uri.parse(imageUrl));
 
@@ -51,7 +52,18 @@ Future<void> createAndSharePdf(BuildContext context, dynamic article) async {
 
     log("PDF saved at: $filePath");
 
-    await Share.shareXFiles([XFile(filePath)], text: "${article['id']}");
+    try {
+      const platform = MethodChannel('com.chotanews/whatsapp');
+      await platform.invokeMethod('shareToWhatsApp', {'imagePath': filePath, 'text': "${article['title'] ?? article['id']}"});
+    } catch (e) {
+      if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
+        if (context.mounted) {
+          CustomToast.showInfoToast(msg: "WhatsApp is not installed");
+        }
+      } else {
+        await Share.shareXFiles([XFile(filePath)], text: "${article['id']}");
+      }
+    }
   } catch (e) {
     log("Error: $e");
     if (context.mounted) {

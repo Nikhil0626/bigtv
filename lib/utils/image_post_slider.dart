@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
 
 class ImagePostSlider extends StatelessWidget {
   final List<dynamic> imageUrl;
@@ -22,18 +23,31 @@ class ImagePostSlider extends StatelessWidget {
             autoPlayAnimationDuration: const Duration(milliseconds: 1000),
           ),
           itemBuilder: (context, index, realIndex) {
-            return ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: CachedNetworkImage(
-                imageUrl: imageUrl[index]['Url'].toString(),
-                fit: BoxFit.cover,
-                width: double.infinity,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(
-                    color: Colors.red,
+            return GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ImagePreview(
+                      imageUrl: imageUrl[index]['Url'].toString(),
+                      title: "",
+                    ),
                   ),
+                );
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl[index]['Url'].toString(),
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(
+                      color: Colors.red,
+                    ),
+                  ),
+                  errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 60, color: Colors.grey),
                 ),
-                errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 60, color: Colors.grey),
               ),
             );
           },

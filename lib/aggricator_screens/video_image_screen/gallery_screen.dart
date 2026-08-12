@@ -9,9 +9,12 @@ import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:chotanews/utils/app_toasts.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,6 +25,7 @@ import '../../../globel_keys/app_router.dart';
 import '../../../services/image_to_pdf_helper.dart';
 import '../../../services/webengage_event_tracks.dart';
 import '../../../utils/commant_screen.dart';
+import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
 
 import '../../utils/botton_actions.dart';
 import '../events_data/event_repo.dart';
@@ -44,6 +48,18 @@ class FullPageCarouselState extends State<FullPageCarousel> {
   final ValueNotifier<int> _currentIndex = ValueNotifier<int>(0);
   ScreenshotController sc = ScreenshotController();
   final CarouselSliderController _controller = CarouselSliderController();
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Preload gallery images so they are ready when the user swipes to this post
+    for (var image in widget.imageUrls) {
+      String url = image is String ? image : (image['Url'] ?? "");
+      if (url.isNotEmpty) {
+        precacheImage(NetworkImage(url), context);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -105,18 +121,31 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                   enlargeCenterPage: true,
                 ),
                 items: widget.imageUrls.map((image) {
-                  return AnimatedContainer(
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeInOut,
-                    width: MediaQuery.of(context).size.width,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(
-                          image is String ? image : (image['Url'] ?? ""),
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ImagePreview(
+                            imageUrl: image is String ? image : (image['Url'] ?? ""),
+                            title: widget.postDetails['title'] ?? "",
+                          ),
                         ),
-                        fit: isFoldable ? BoxFit.fill : BoxFit.cover,
-                        filterQuality: FilterQuality.medium,
-                        isAntiAlias: true,
+                      );
+                    },
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                      width: MediaQuery.of(context).size.width,
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(
+                            image is String ? image : (image['Url'] ?? ""),
+                          ),
+                          fit: isFoldable ? BoxFit.fill : BoxFit.cover,
+                          filterQuality: FilterQuality.medium,
+                          isAntiAlias: true,
+                        ),
                       ),
                     ),
                   );
@@ -194,8 +223,16 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                         showComments(context, widget.postDetails['id'],widget.postDetails['title'],);
                       },
                     ),
-
-
+                    const Spacer(),
+                    InkWell(
+                      onTap: () {
+                        showShareOptionsBottomSheet(context, widget.postDetails);
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.only(right: 16.w),
+                        child: Image.asset("assets/images/WhatsApp_icon.png", height: 30.sp, width: 30.sp),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -212,7 +249,7 @@ class FullPageCarouselState extends State<FullPageCarousel> {
   ) {
     showModalBottomSheet(
       context: context,
-      builder: (context) {
+      builder: (sheetContext) {
         return SafeArea(
             child:Container(
               padding: EdgeInsets.symmetric(horizontal: 16,vertical: 20),
@@ -234,7 +271,7 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                       InkWell(
                         onTap: () async{
                           try {
-                            Navigator.pop(context);
+                            Navigator.pop(sheetContext);
                             var currentImage = article['gallery'][_currentIndex.value];
                             String imageUrl = currentImage is String ? currentImage : (currentImage['Url'] ?? "");
                             final response = await http.get(Uri.parse(imageUrl));
@@ -247,18 +284,35 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                               final file = File(filePath);
                               await file.writeAsBytes(response.bodyBytes);
 
-                              // Share the image
-                              await Share.shareXFiles([XFile(file.path)], text: Platform.isIOS?article['linkURLIos']:article['linkURLAndroid']);
+                              // Share the image to WhatsApp directly
+                              final String title = article['title']?.toString() ?? "";
+                              final String link = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
+                              final String shareText = title + "\n" + link;
+                              
+                              try {
+                                const platform = MethodChannel('com.chotanews/whatsapp');
+                                await platform.invokeMethod('shareToWhatsApp', {'imagePath': file.path, 'text': shareText});
+                              } catch (e) {
+                                if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
+                                  CustomToast.showInfoToast(msg: "WhatsApp is not installed");
+                                } else {
+                                  await Share.shareXFiles([XFile(file.path)], text: shareText);
+                                }
+                              }
                             } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('Image download failed.')),
-                              );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Image download failed.')),
+                                );
+                              }
                             }
                           } catch (e) {
                             log('Error downloading or sharing image: $e');
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Something went wrong: $e')),
-                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Something went wrong: $e')),
+                              );
+                            }
                           }
                         },
                         child: Column(
@@ -293,11 +347,8 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                       ),
                       InkWell(
                         onTap:() {
-                          createAndSharePdf(context, widget.postDetails).then(
-                                (value) {
-                              Navigator.pop(context);
-                            },
-                          );
+                          Navigator.pop(sheetContext);
+                          createAndSharePdf(context, widget.postDetails);
                         },
                         child: Column(
                           children: [
@@ -333,7 +384,7 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                   height(height: 20),
                   InkWell(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pop(sheetContext);
                     },
                     child: Container(
                       width: double.infinity,

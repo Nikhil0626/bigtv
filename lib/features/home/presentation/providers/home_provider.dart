@@ -812,7 +812,7 @@ class HomeProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-  Future<void> sendDeviceDetailsApi({required String userId, required String deviceId, required String fcmToken}) async {
+  Future<void> sendDeviceDetailsApi({required String userId, required String deviceId, required String fcmToken, required String lan}) async {
     try {
       final deviceInfo = await getDeviceInfoData();
       
@@ -822,7 +822,8 @@ class HomeProvider extends ChangeNotifier {
         "device_id": deviceId,
         "fcm_token": fcmToken,
         "app_version": deviceInfo['app_version'],
-        "os_version": deviceInfo['os_version']
+        "os_version": deviceInfo['os_version'],
+        "lan": lan
       };
 
       await HomeRepo().postDeviceDetails(body);

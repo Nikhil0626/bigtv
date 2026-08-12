@@ -63,14 +63,6 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
       }
     }
 
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? deviceId = prefs.getString("deviceId");
-    
-    Provider.of<HomeProvider>(context, listen: false).sendDeviceDetailsApi(
-        userId: "0",
-        deviceId: deviceId ?? "",
-        fcmToken: fcmToken,
-    );
   }
 
   void _onTokenInvalidated(Map<String, dynamic>? message) {

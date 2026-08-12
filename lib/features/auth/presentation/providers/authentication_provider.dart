@@ -193,18 +193,7 @@ class AuthenticationProvider extends ChangeNotifier {
         sp.setString("userId", response.data['user']['id'].toString());
         sp.setString("userName", response.data['user']['name'].toString());
         
-        // Send device details for logged-in user
-        String token = "";
-        if (Platform.isIOS) {
-          token = await FirebaseMessaging.instance.getAPNSToken() ?? "";
-        } else {
-          token = await FirebaseMessaging.instance.getToken() ?? "";
-        }
-        Provider.of<HomeProvider>(context, listen: false).sendDeviceDetailsApi(
-            userId: response.data['user']['id'].toString(),
-            deviceId: "0",
-            fcmToken: token,
-        );
+        // Device details API call moved to language selection
 
         sp.setString("userStatus", response.data['user']['status'].toString());
         if (response.data['is_new_user'] == false) {
@@ -304,13 +293,32 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  void saveLanguageAndProceed(int languageId) async {
+  void saveLanguageAndProceed(BuildContext context, int languageId) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.setInt("selectedLanguageId", languageId);
+    String langCode = 'en';
     try {
       final lang = getAllLanguageList.firstWhere((l) => l.id == languageId);
-      await preferences.setString("selectedLanguageCode", lang.code ?? 'en');
+      langCode = lang.code ?? 'en';
+      await preferences.setString("selectedLanguageCode", langCode);
     } catch (_) {}
+
+    String token = "";
+    if (Platform.isIOS) {
+      token = await FirebaseMessaging.instance.getAPNSToken() ?? "";
+    } else {
+      token = await FirebaseMessaging.instance.getToken() ?? "";
+    }
+    String? deviceId = preferences.getString("deviceId");
+    String? userId = preferences.getString("userId");
+
+    Provider.of<HomeProvider>(context, listen: false).sendDeviceDetailsApi(
+        userId: userId ?? "0",
+        deviceId: deviceId ?? "",
+        fcmToken: token,
+        lan: langCode,
+    );
+
     newAppLoginStatus = NewAppLoginStatus.category;
     saveLoginState();
     getAllCategories();
@@ -598,18 +606,7 @@ class AuthenticationProvider extends ChangeNotifier {
     preferences.setString("loginState", newAppLoginStatus.toString());
     preferences.setString("loginType", "skip");
 
-    String token = "";
-    if (Platform.isIOS) {
-      token = await FirebaseMessaging.instance.getAPNSToken() ?? "";
-    } else {
-      token = await FirebaseMessaging.instance.getToken() ?? "";
-    }
-    String? deviceId = preferences.getString("deviceId");
-    Provider.of<HomeProvider>(context, listen: false).sendDeviceDetailsApi(
-        userId: "0",
-        deviceId: deviceId ?? "",
-        fcmToken: token,
-    );
+    // Device details API call moved to language selection
 
     notifyListeners();
   }

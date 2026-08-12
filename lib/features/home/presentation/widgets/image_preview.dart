@@ -13,45 +13,72 @@ class ImagePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: null,
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: null,
+      body: SafeArea(
+        child: Stack(
           children: [
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: InkWell(
-                   onTap: () {
-                     Navigator.pop(context);
-                   },
-                  child: Icon(Icons.cancel_rounded,color: Colors.red,size: 24,)),
-            ),
-            Expanded(
-              child: Center(
-                child: Hero(
-                  tag: imageUrl,
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrl,
-                    placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                    errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.white),
-                    fit: BoxFit.contain,
+            // Full screen interactive viewer
+            Positioned.fill(
+              child: InteractiveViewer(
+                minScale: 1.0,
+                maxScale: 8.0,
+                clipBehavior: Clip.none,
+                child: Center(
+                  child: Hero(
+                    tag: imageUrl,
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+                      errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red),
+                      fit: BoxFit.contain,
+                    ),
                   ),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10.0,horizontal: 10),
-              child: Text( title,style: homeScreenFontStyle(
-                color: AppColors.textColor,
-                fontWeight: FontWeight.bold,
-                fontSize: 14.sp,
-              ),),
-            )
+            // Close Button
+            Positioned(
+              top: 20,
+              left: 20,
+              child: InkWell(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .7),
+                    shape: BoxShape.circle,
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: const Icon(Icons.cancel_rounded, color: Colors.red, size: 28),
+                ),
+              ),
+            ),
+            // Title Overlay
+            if (title.isNotEmpty)
+              Positioned(
+                bottom: 20,
+                left: 20,
+                right: 20,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 15.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: .8),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    title,
+                    style: homeScreenFontStyle(
+                      color: AppColors.textColor,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.sp,
+                    ),
+                  ),
+                ),
+              ),
           ],
-
         ),
       ),
     );

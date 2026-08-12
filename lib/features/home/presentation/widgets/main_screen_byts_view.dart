@@ -475,8 +475,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                               children: [
                                                                 /// IMAGE / VIDEO CONTAINER
                                                                 Container(
-                                                                  height: widget.article[
-                                                                              'subType'] ==
+                                                                  height: MediaQuery.of(context).orientation == Orientation.landscape 
+                                                                      ? MediaQuery.of(context).size.height 
+                                                                      : (widget.article['subType'] ==
                                                                           "BigBlackStandard"
                                                                       ? MediaQuery.of(context)
                                                                               .size
@@ -485,7 +486,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                       : MediaQuery.of(context)
                                                                               .size
                                                                               .height *
-                                                                          .33,
+                                                                          .33),
                                                                   child: widget.article['type'] ==
                                                                               "Video" &&
                                                                           widget.article['video_platform'] ==
@@ -499,7 +500,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                       : widget.article['type'] ==
                                                                               "Video"
                                                                           ? SizedBox(
-                                                                              height: MediaQuery.of(context).size.height * .33,
+                                                                              height: MediaQuery.of(context).orientation == Orientation.landscape
+                                                                                  ? MediaQuery.of(context).size.height
+                                                                                  : MediaQuery.of(context).size.height * .33,
                                                                               width: MediaQuery.of(context).size.width,
                                                                               child: VideoPreview(
                                                                                 imageUrl: _getImageUrl(widget.article['image_url']),
@@ -632,17 +635,18 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 ),
                                                               ],
                                                             ),
-                                                            Container(
-                                                              height: 4,
-                                                              width:
-                                                                  MediaQuery.of(
-                                                                          context)
-                                                                      .size
-                                                                      .width,
-                                                              color: Color(
-                                                                  0xFFED1C24),
-                                                            ),
-                                                            Expanded(
+                                                            if (MediaQuery.of(context).orientation != Orientation.landscape) ...[
+                                                              Container(
+                                                                height: 4,
+                                                                width:
+                                                                    MediaQuery.of(
+                                                                            context)
+                                                                        .size
+                                                                        .width,
+                                                                color: Color(
+                                                                    0xFFED1C24),
+                                                              ),
+                                                              Expanded(
                                                               child: Container(
                                                                 width: MediaQuery.of(
                                                                         context)
@@ -986,6 +990,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 ),
                                                               ),
                                                             ),
+                                                            ],
                                                           ],
                                                         ),
                             ),
@@ -1047,8 +1052,20 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                         if (article['image_url'] != null && article['image_url'].toString().isNotEmpty)
                           ClipRRect(
                             borderRadius: BorderRadius.circular(12.r),
-                            child: CachedNetworkImage(
-                              imageUrl: _getImageUrl(article['image_url']),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => ImagePreview(
+                                      imageUrl: _getImageUrl(article['image_url']),
+                                      title: article['title'] ?? "",
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: CachedNetworkImage(
+                                imageUrl: _getImageUrl(article['image_url']),
                               width: double.infinity,
                               height: 250.h,
                               fit: BoxFit.cover,
@@ -1064,6 +1081,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                               ),
                             ),
                           ),
+                        ),
                         SizedBox(height: 16.h),
                         Text(
                           article['title'] ?? "",

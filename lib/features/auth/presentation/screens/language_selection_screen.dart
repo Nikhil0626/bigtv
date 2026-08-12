@@ -146,7 +146,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                       onPressed: provider.selectedLanguageId == null
                           ? null
                           : () {
-                              provider.saveLanguageAndProceed(provider.selectedLanguageId!);
+                              provider.saveLanguageAndProceed(context, provider.selectedLanguageId!);
                             },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: context.primaryColor,

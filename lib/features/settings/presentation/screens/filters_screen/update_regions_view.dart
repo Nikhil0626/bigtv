@@ -117,18 +117,22 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                                     child: Stack(
                                       children: [
                                         if (location.imageUrl != null && location.imageUrl!.isNotEmpty)
-                                          Positioned(
-                                            right: 16.w,
-                                            bottom: 0,
-                                            top: 0,
-                                            child: Align(
-                                              alignment: Alignment.centerRight,
+                                          Positioned.fill(
+                                            child: ClipRRect(
+                                              borderRadius: BorderRadius.circular(6.r),
                                               child: CachedNetworkImage(
                                                 imageUrl: location.imageUrl!,
-                                                height: 60.sp,
-                                                width: 60.sp,
-                                                fit: BoxFit.contain,
+                                                fit: BoxFit.cover,
                                                 errorWidget: (context, url, error) => const SizedBox(),
+                                              ),
+                                            ),
+                                          ),
+                                        if (location.imageUrl != null && location.imageUrl!.isNotEmpty)
+                                          Positioned.fill(
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                color: Colors.black.withValues(alpha: 0.5),
+                                                borderRadius: BorderRadius.circular(6.r),
                                               ),
                                             ),
                                           ),
@@ -137,11 +141,11 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                                           padding: EdgeInsets.only(left: 16.w, right: 90.w, top: 20.h, bottom: 20.h),
                                           child: Row(
                                             children: [
-                                              Icon(
-                                                isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                                                color: isSelected ? context.primaryColor : context.colors.outline,
-                                                size: 24.sp,
-                                              ),
+                                                Icon(
+                                                  isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                                                  color: (location.imageUrl != null && location.imageUrl!.isNotEmpty) ? Colors.white : (isSelected ? context.primaryColor : context.colors.outline),
+                                                  size: 24.sp,
+                                                ),
                                               SizedBox(width: 16.w),
                                               Expanded(
                                                 child: Column(
@@ -151,7 +155,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                                                     Text(
                                                       stateName,
                                                       style: context.typography.titleMedium?.copyWith(
-                                                        color: context.textColor,
+                                                        color: (location.imageUrl != null && location.imageUrl!.isNotEmpty) ? Colors.white : context.textColor,
                                                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                                       ),
                                                     ),
@@ -159,7 +163,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                                                     Text(
                                                       "Local news, events and updates from $stateName",
                                                       style: context.typography.bodySmall?.copyWith(
-                                                        color: context.colors.onSurfaceVariant,
+                                                        color: (location.imageUrl != null && location.imageUrl!.isNotEmpty) ? Colors.white70 : context.colors.onSurfaceVariant,
                                                         fontSize: 11.sp,
                                                       ),
                                                     ),

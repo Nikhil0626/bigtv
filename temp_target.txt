@@ -1,0 +1,123 @@
+﻿                                                                        Padding(
+                                                                          padding: const EdgeInsets.only(top: 12.0, bottom: 4.0),
+                                                                          child: Row(
+                                                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                                                            children: [
+                                                                              /// Like Icon
+                                                                              Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                                                                return InkWell(
+                                                                                  onTap: () async {
+                                                                                    log("Like");
+                                                                                    settingsProvider.isLikePost(widget.article);
+                                                                                    EventRepo().addEvent({
+                                                                                      "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                                                                      "postId": widget.article['id'].toString() ?? "000",
+                                                                                      "createAt": DateTime.now().toString(),
+                                                                                      "postTitle": widget.article['title'].toString()
+                                                                                    }, "liked_article");
+                                                                                  },
+                                                                                  child: SvgPicture.asset(
+                                                                                    settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                                                                    height: 22,
+                                                                                    width: 22,
+                                                                                    color: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? AppColorTokens.primaryRed : AppColorTokens.primaryRed,
+                                                                                  ),
+                                                                                );
+                                                                              }),
+                                                                              /// Comment Icon
+                                                                              InkWell(
+                                                                                onTap: () {
+                                                                                  log("Comment...");
+                                                                                  if (context.mounted) {
+                                                                                    context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                                                                    showComments(context, widget.article['id'], widget.article['title']);
+                                                                                  }
+                                                                                },
+                                                                                child: SvgPicture.asset(
+                                                                                  "assets/svg/new_comment.svg",
+                                                                                  height: 22,
+                                                                                  width: 22,
+                                                                                  color: Color(0xFFED1C24),
+                                                                                ),
+                                                                              ),
+                                                                              /// Refresh Icon
+                                                                              Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                                                                return InkWell(
+                                                                                  onTap: () async {
+                                                                                    log("Refresh");
+                                                                                    EventRepo().addEvent({
+                                                                                      "refresh": true,
+                                                                                      "createAt": DateTime.now().toString()
+                                                                                    }, "reload_article");
+                                                                                    homeProvide.isReloadData();
+                                                                                    if (homeProvide.isAiTagDataLoaded) {
+                                                                                      homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
+                                                                                      homeProvide.isReloadFalse();
+                                                                                    } else {
+                                                                                      homeProvide.getAllPostList = [];
+                                                                                      homeProvide.getAllPost();
+                                                                                    }
+                                                                                  },
+                                                                                  child: homeProvide.isReload
+                                                                                      ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
+                                                                                      : SvgPicture.asset(
+                                                                                          "assets/svg/new_refresh.svg",
+                                                                                          height: 22,
+                                                                                          width: 22,
+                                                                                          color: Color(0xFFED1C24),
+                                                                                        ),
+                                                                                );
+                                                                              }),
+                                                                              /// WhatsApp Icon
+                                                                              InkWell(
+                                                                                onTap: () async {
+                                                                                  try {
+                                                                                    final String title = widget.article['title']?.toString() ?? "";
+                                                                                    final String link = widget.article['linkURLAndroid']?.toString() ?? "";
+                                                                                    final String shareText = "$title\n$link";
+
+                                                                                    final imageBytes = await adsScreenshotController.capture(delay: const Duration(milliseconds: 10));
+                                                                                    if (imageBytes != null) {
+                                                                                      final directory = await getTemporaryDirectory();
+                                                                                      final imagePath = await File('${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png').create();
+                                                                                      await imagePath.writeAsBytes(imageBytes);
+
+                                                                                      try {
+                                                                                        const platform = MethodChannel('com.chotanews/whatsapp');
+                                                                                        await platform.invokeMethod('shareToWhatsApp', {
+                                                                                          'imagePath': imagePath.path,
+                                                                                          'text': shareText,
+                                                                                        });
+                                                                                      } catch (e) {
+                                                                                        if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
+                                                                                          CustomToast.showInfoToast(msg: "WhatsApp is not installed");
+                                                                                        } else {
+                                                                                          debugPrint("Failed to share to WhatsApp: '${e.toString()}'.");
+                                                                                          await Share.shareXFiles(
+                                                                                            [XFile(imagePath.path)],
+                                                                                            text: shareText,
+                                                                                          );
+                                                                                        }
+                                                                                      }
+                                                                                    } else {
+                                                                                      final url = 'whatsapp://send?text=${Uri.encodeComponent(shareText)}';
+                                                                                      final uri = Uri.parse(url);
+                                                                                      if (await canLaunchUrl(uri)) {
+                                                                                        await launchUrl(uri);
+                                                                                      } else {
+                                                                                        CustomToast.showInfoToast(msg: "WhatsApp is not installed");
+                                                                                      }
+                                                                                    }
+                                                                                  } catch (e) {
+                                                                                    debugPrint("WhatsApp share error: $e");
+                                                                                  }
+                                                                                },
+                                                                                child: Image.asset(
+                                                                                  "assets/images/WhatsApp_icon.png",
+                                                                                  height: 24,
+                                                                                  width: 24,
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        ),

@@ -66,7 +66,9 @@ class VideoPreviewPage extends State<VideoPreview> {
             ? Stack(
           children: [
             SizedBox(
-              height: 330,
+              height: MediaQuery.of(context).orientation == Orientation.landscape 
+                  ? MediaQuery.of(context).size.height 
+                  : 330,
               child: YoutubePlayerBuilder(
                 player: YoutubePlayer(
                   controller: homeProvider.controller,

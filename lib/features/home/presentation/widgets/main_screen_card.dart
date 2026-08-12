@@ -13,6 +13,7 @@ import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.d
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart'; 
 import 'package:provider/provider.dart';  
+import 'package:chotanews/utils/app_fonts.dart';
 import 'main_screen_pageview.dart';
 
 class MainScreenCard extends StatefulWidget {
@@ -81,6 +82,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                     onTap: () {
                                       homeProvider.onItemTapped(2);
                                       homeProvider.homePageController.jumpToPage(2);
+                                      homeProvider.pageChange(isValue: true);
                                     },
                                   ),
                                 if (homeProvider.getAllAiTagsList.isNotEmpty)
@@ -123,10 +125,14 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                             }, "ai_tag_click");
                                           },
                                           child: Container(
-                                            alignment: Alignment.center,
-                                            padding: EdgeInsets.symmetric(horizontal: 6.w),
+                                            // alignment: Alignment.center,
+                                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8),
                                             decoration: BoxDecoration(
                                               border: Border(
+                                                top: const BorderSide(
+                                                  color: Colors.transparent,
+                                                  width: 3,
+                                                ),
                                                 bottom: BorderSide(
                                                   color: isSelected ? Colors.white : Colors.transparent,
                                                   width: 3,
@@ -135,7 +141,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                                             ),
                                             child: Text(
                                               tag['aitagname'].toString(),
-                                              style: TextStyle(
+                                              style: homeScreenFontStyle(
                                                 color: AppColors.wColor,
                                                 fontSize: 16.sp,
                                                 fontWeight: FontWeight.w600,
