@@ -82,6 +82,7 @@ class _EpaperScreenState extends State<EpaperScreen> {
           }
 
           return GridView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.all(16),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,

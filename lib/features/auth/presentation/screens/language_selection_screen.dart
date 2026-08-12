@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
+import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
@@ -163,7 +164,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                   SizedBox(height: 4.h),
                   InkWell(
                     onTap: () {
-                      // provider.updateLoginStatus(NewAppLoginStatus.phone);
+                      context.read<AuthenticationProvider>().updateLoginStatus(NewAppLoginStatus.login);
                     },
                     child: Padding(
                       padding: EdgeInsets.symmetric(vertical: 8.h),

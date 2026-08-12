@@ -120,6 +120,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
         builder: (context, state) {
           if (state is PremiumLoading) {
             return GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,
@@ -151,6 +152,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
             }
 
             return GridView.builder(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 3,

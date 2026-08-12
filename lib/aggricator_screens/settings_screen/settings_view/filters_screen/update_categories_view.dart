@@ -64,6 +64,12 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
 
         return Scaffold(
           backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            elevation: 0,
+            leading: const BackButton(color: Colors.black),
+            title: Text("Select Categories", style: TextStyle(color: Colors.black)),
+          ),
           body: Padding(
             padding: EdgeInsets.all(16.w),
             child: Column(

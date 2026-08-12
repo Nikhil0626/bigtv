@@ -22,7 +22,7 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
     super.initState();
     _pageController = TurnPageController(
       initialPage: 0,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(seconds: 1),
     );
     _pageController.addListener(() {
       if (_currentPage != _pageController.currentIndex) {

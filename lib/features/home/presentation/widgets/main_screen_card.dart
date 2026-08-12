@@ -72,7 +72,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                       Column(
                         children: [
                           Container(
-                            height: 45.h,
+                            height: 35.h,
                             color: AppColorTokens.primaryRed,
                             child: Row(
                               children: [

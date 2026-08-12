@@ -93,73 +93,7 @@ class _HomeViewState extends State<HomeView> {
             return Scaffold(
               extendBody: true,
               floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-              floatingActionButton: homeProvider.selectedIndex == 0
-                  ? AnimatedBuilder(
-                      animation: homeProvider.pageController ?? ChangeNotifier(),
-                      builder: (context, child) {
-                        final currentIndex = homeProvider.pageController?.hasClients == true
-                            ? homeProvider.pageController?.page?.round() ?? 0
-                            : 0;
-                            
-                        if (homeProvider.getAllPostList.isNotEmpty &&
-                            currentIndex < homeProvider.getAllPostList.length &&
-                            homeProvider.getAllPostList[currentIndex]['subType'] == 'ImageAd') {
-                          return const SizedBox.shrink();
-                        }
-
-                        return FloatingActionButton(
-                          onPressed: () async {
-                            try {
-                              if (homeProvider.getAllPostList.isNotEmpty && currentIndex < homeProvider.getAllPostList.length) {
-                                final currentPost = homeProvider.getAllPostList[currentIndex];
-                                final String title = currentPost['title']?.toString() ?? "";
-                                final String link = currentPost['linkURLAndroid']?.toString() ?? "";
-                                final String shareText = "$title\n$link";
-
-                                final imageBytes = await screenshotController.capture(delay: const Duration(milliseconds: 10));
-                                if (imageBytes != null) {
-                                  final directory = await getTemporaryDirectory();
-                                  final imagePath = await File('${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png').create();
-                                  await imagePath.writeAsBytes(imageBytes);
-
-                                  try {
-                                    const platform = MethodChannel('com.chotanews/whatsapp');
-                                    await platform.invokeMethod('shareToWhatsApp', {
-                                      'imagePath': imagePath.path,
-                                      'text': shareText,
-                                    });
-                                  } on PlatformException catch (e) {
-                                    if (e.code == "APP_NOT_INSTALLED") {
-                                      CustomToast.showInfoToast(msg: "WhatsApp is not installed");
-                                    } else {
-                                      debugPrint("Failed to share to WhatsApp: '${e.message}'.");
-                                      await Share.shareXFiles(
-                                        [XFile(imagePath.path)],
-                                        text: shareText,
-                                      );
-                                    }
-                                  }
-                                } else {
-                                  final url = 'whatsapp://send?text=${Uri.encodeComponent(shareText)}';
-                                  final uri = Uri.parse(url);
-                                  if (await canLaunchUrl(uri)) {
-                                    await launchUrl(uri);
-                                  } else {
-                                    CustomToast.showInfoToast(msg: "WhatsApp is not installed");
-                                  }
-                                }
-                              }
-                            } catch (e) {
-                              debugPrint("WhatsApp share error: $e");
-                            }
-                          },
-                          backgroundColor: Colors.transparent,
-                          elevation: 0,
-                          child: Image.asset("assets/images/WhatsApp_icon.png", height: 48, width: 48),
-                        );
-                      },
-                    )
-                  : null,
+              floatingActionButton: null,
               body: PageView(
                 controller: homeProvider.homePageController,
                 physics: const NeverScrollableScrollPhysics(),

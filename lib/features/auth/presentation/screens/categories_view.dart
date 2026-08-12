@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/utils/app_enums.dart';
 
 class CategoriesView extends StatefulWidget {
   const CategoriesView({super.key});
@@ -216,7 +217,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                       
                       InkWell(
                         onTap: () {
-                          // authenticationProvider.updateLoginStatus(NewAppLoginStatus.language);
+                          context.read<AuthenticationProvider>().updateLoginStatus(NewAppLoginStatus.language);
                         },
                         child: Padding(
                           padding: EdgeInsets.symmetric(vertical: 8.h),
