@@ -63,13 +63,16 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: MediaQuery.of(context).orientation != Orientation.landscape ? AppColorTokens.primaryRed : Colors.black,
       body: Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
         return SafeArea(
           left: MediaQuery.of(context).orientation != Orientation.landscape,
           right: MediaQuery.of(context).orientation != Orientation.landscape,
           top: MediaQuery.of(context).orientation != Orientation.landscape,
           bottom: MediaQuery.of(context).orientation != Orientation.landscape,
-          child: Center(
+          child: Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Center(
             child: homeProvider.isHomeLoading
                 ? HomeShimmer()
                 : Stack(
@@ -166,6 +169,7 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                       ),
                     ],
                   ),
+            ),
           ),
         );
       }),
