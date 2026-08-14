@@ -289,10 +289,13 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                               final String link = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
                               final String shareText = title + "\n" + link;
                               
-                              try {
-                                const platform = MethodChannel('com.chotanews/whatsapp');
-                                await platform.invokeMethod('shareToWhatsApp', {'imagePath': file.path, 'text': shareText});
-                              } catch (e) {
+                                try {
+                                  const platform = MethodChannel('com.chotanews/whatsapp');
+                                  await platform.invokeMethod('shareToWhatsApp', {'imagePath': file.path, 'text': shareText});
+                                  if (Platform.isIOS) {
+                                    CustomToast.showInfoToast(msg: "Text copied to clipboard. Paste it in WhatsApp.");
+                                  }
+                                } catch (e) {
                                 if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
                                   CustomToast.showInfoToast(msg: "WhatsApp is not installed");
                                 } else {

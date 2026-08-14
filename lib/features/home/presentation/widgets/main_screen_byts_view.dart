@@ -957,6 +957,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                         try {
                                                                                           const platform = MethodChannel('com.chotanews/whatsapp');
                                                                                           await platform.invokeMethod('shareToWhatsApp', {'imagePath': imagePath.path, 'text': shareText});
+                                                                                          if (Platform.isIOS) {
+                                                                                            CustomToast.showInfoToast(msg: "Text copied to clipboard. Paste it in WhatsApp.");
+                                                                                          }
                                                                                         } catch (e) {
                                                                                           if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
                                                                                             CustomToast.showInfoToast(msg: "WhatsApp is not installed");

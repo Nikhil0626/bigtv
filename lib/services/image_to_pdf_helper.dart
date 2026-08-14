@@ -55,6 +55,11 @@ Future<void> createAndSharePdf(BuildContext context, dynamic article) async {
     try {
       const platform = MethodChannel('com.chotanews/whatsapp');
       await platform.invokeMethod('shareToWhatsApp', {'imagePath': filePath, 'text': "${article['title'] ?? article['id']}"});
+      if (Platform.isIOS) {
+        if (context.mounted) {
+          CustomToast.showInfoToast(msg: "Text copied to clipboard. Paste it in WhatsApp.");
+        }
+      }
     } catch (e) {
       if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
         if (context.mounted) {
