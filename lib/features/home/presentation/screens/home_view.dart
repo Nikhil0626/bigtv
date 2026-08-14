@@ -124,7 +124,7 @@ class _HomeViewState extends State<HomeView> {
                 left: 0,
                 right: 0,
                 child: Visibility(
-                  visible: homeProvider.isBottomEnable,
+                  visible: homeProvider.isBottomEnable && MediaQuery.of(context).orientation != Orientation.landscape,
                   child: Container(
                     color: AppColorTokens.primaryRed,
                     child: SafeArea(

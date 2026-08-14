@@ -65,6 +65,10 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
     return Scaffold(
       body: Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
         return SafeArea(
+          left: MediaQuery.of(context).orientation != Orientation.landscape,
+          right: MediaQuery.of(context).orientation != Orientation.landscape,
+          top: MediaQuery.of(context).orientation != Orientation.landscape,
+          bottom: MediaQuery.of(context).orientation != Orientation.landscape,
           child: Center(
             child: homeProvider.isHomeLoading
                 ? HomeShimmer()
@@ -72,9 +76,10 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
                     children: [
                       Column(
                         children: [
-                          Container(
-                            height: 35.h,
-                            color: AppColorTokens.primaryRed,
+                          if (MediaQuery.of(context).orientation != Orientation.landscape)
+                            Container(
+                              height: 35.h,
+                              color: AppColorTokens.primaryRed,
                             child: Row(
                               children: [
                                 if (homeProvider.langCode == 'ml')

@@ -558,16 +558,17 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                             ),
                                                                 ),
 
-                                                                Positioned(
-                                                                  bottom: 0,
-                                                                  right: 0,
-                                                                  child: Image.asset(
-                                                                    "assets/images/BigTvPostLogo.png",
-                                                                    width: 120,
-                                                                    height: 40,
-                                                                    fit: BoxFit.contain,
+                                                                if (MediaQuery.of(context).orientation != Orientation.landscape)
+                                                                  Positioned(
+                                                                    bottom: 0,
+                                                                    right: 0,
+                                                                    child: Image.asset(
+                                                                      "assets/images/BigTvPostLogo.png",
+                                                                      width: 120,
+                                                                      height: 40,
+                                                                      fit: BoxFit.contain,
+                                                                    ),
                                                                   ),
-                                                                ),
 
                                                                 /// SHOW BACK BUTTON ONLY FOR AI TAG POSTS
                                                                 if (widget
