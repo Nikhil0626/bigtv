@@ -1,11 +1,12 @@
-import GoogleMobileAds
-import google_mobile_ads
+// import GoogleMobileAds
+// import google_mobile_ads
 
 /**
  * The example NativeAdView.xib can be found at
  * github.com/googleads/googleads-mobile-flutter/blob/main/packages/google_mobile_ads/
  *     example/ios/Runner/NativeAdView.xib
  */
+/*
 class NativeAdFactoryExample: NSObject, FLTNativeAdFactory {
     func createNativeAd(_ nativeAd: GADNativeAd, customOptions: [AnyHashable : Any]? = nil) -> GADNativeAdView? {
         // Create and place the ad in the view hierarchy.
@@ -57,3 +58,4 @@ class NativeAdFactoryExample: NSObject, FLTNativeAdFactory {
         return adView
     }
 }
+*/

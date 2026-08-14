@@ -7,7 +7,8 @@ import 'video_provider.dart';
 class FullscreenVideoView extends StatefulWidget {
   final VideoPlayerController controller;
 
-  const FullscreenVideoView({Key? key, required this.controller}) : super(key: key);
+  const FullscreenVideoView({Key? key, required this.controller})
+      : super(key: key);
 
   @override
   State<FullscreenVideoView> createState() => _FullscreenVideoViewState();
@@ -33,7 +34,8 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: SystemUiOverlay.values);
     super.dispose();
   }
 
@@ -42,11 +44,12 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
-    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
-    
+    await SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+        overlays: SystemUiOverlay.values);
+
     // Add a tiny delay to allow the engine to flush the layout
     await Future.delayed(const Duration(milliseconds: 100));
-    
+
     if (mounted) {
       Navigator.of(context).pop();
     }
@@ -78,7 +81,8 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
                   top: 20,
                   left: 20,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 30),
+                    icon: const Icon(Icons.arrow_back,
+                        color: Colors.white, size: 30),
                     onPressed: _exitFullscreen,
                   ),
                 ),
@@ -90,7 +94,9 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
                     children: [
                       IconButton(
                         icon: Icon(
-                          videoProvider.isPlaying ? Icons.pause : Icons.play_arrow,
+                          videoProvider.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
                           color: Colors.white,
                           size: 30,
                         ),
@@ -109,14 +115,17 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
                       ),
                       IconButton(
                         icon: Icon(
-                          videoProvider.isMuted ? Icons.volume_off : Icons.volume_up,
+                          videoProvider.isMuted
+                              ? Icons.volume_off
+                              : Icons.volume_up,
                           color: Colors.white,
                           size: 30,
                         ),
                         onPressed: videoProvider.toggleMute,
                       ),
                       IconButton(
-                        icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 30),
+                        icon: const Icon(Icons.fullscreen_exit,
+                            color: Colors.white, size: 30),
                         onPressed: _exitFullscreen,
                       ),
                     ],

@@ -1,5 +1,3 @@
-
-
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/loading_screen/home_shimmer.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
@@ -8,11 +6,11 @@ import 'package:chotanews/features/home/presentation/providers/home_provider.dar
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 
-
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart'; 
-import 'package:provider/provider.dart';  
+import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'main_screen_pageview.dart';
 
@@ -25,7 +23,8 @@ class MainScreenCard extends StatefulWidget {
   State<MainScreenCard> createState() => _MainScreenCardState();
 }
 
-class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStateMixin {
+class _MainScreenCardState extends State<MainScreenCard>
+    with TickerProviderStateMixin {
   List<Map<String, dynamic>> removedCards = [];
   Offset slideOffset = Offset.zero;
   bool isAnimating = false;
@@ -47,10 +46,14 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
       final box = keyContext.findRenderObject() as RenderBox;
       final size = box.size;
       final position = box.localToGlobal(Offset.zero);
-      final screenWidth = WidgetsBinding.instance.platformDispatcher.views.first.physicalSize.width / WidgetsBinding.instance.platformDispatcher.views.first.devicePixelRatio;
+      final screenWidth = WidgetsBinding
+              .instance.platformDispatcher.views.first.physicalSize.width /
+          WidgetsBinding
+              .instance.platformDispatcher.views.first.devicePixelRatio;
 
       final itemCenter = position.dx + size.width / 2;
-      final targetOffset = aiTagScrollController.offset + itemCenter - screenWidth / 2;
+      final targetOffset =
+          aiTagScrollController.offset + itemCenter - screenWidth / 2;
 
       aiTagScrollController.animateTo(
         targetOffset.clamp(0.0, aiTagScrollController.position.maxScrollExtent),
@@ -62,117 +65,154 @@ class _MainScreenCardState extends State<MainScreenCard> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: MediaQuery.of(context).orientation != Orientation.landscape ? AppColorTokens.primaryRed : Colors.black,
-      body: Consumer2<HomeProvider, SettingsProvider>(builder: (_, homeProvider, settingsProvider, __) {
-        return SafeArea(
-          left: MediaQuery.of(context).orientation != Orientation.landscape,
-          right: MediaQuery.of(context).orientation != Orientation.landscape,
-          top: MediaQuery.of(context).orientation != Orientation.landscape,
-          bottom: MediaQuery.of(context).orientation != Orientation.landscape,
-          child: Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: Center(
-            child: homeProvider.isHomeLoading
-                ? HomeShimmer()
-                : Stack(
-                    children: [
-                      Column(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColorTokens.primaryRed,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+      child: Consumer2<HomeProvider, SettingsProvider>(
+        builder: (_, homeProvider, settingsProvider, __) {
+          return Scaffold(
+            backgroundColor:
+                MediaQuery.of(context).orientation != Orientation.landscape
+                    ? AppColorTokens.primaryRed
+                    : Colors.black,
+            appBar: MediaQuery.of(context).orientation != Orientation.landscape
+                ? AppBar(
+                    toolbarHeight: 35.h,
+                    backgroundColor: AppColorTokens.primaryRed,
+                    elevation: 0,
+                    automaticallyImplyLeading: false,
+                    titleSpacing: 0,
+                    systemOverlayStyle: const SystemUiOverlayStyle(
+                      statusBarColor: Colors.transparent,
+                      statusBarIconBrightness: Brightness.light,
+                      statusBarBrightness: Brightness.dark,
+                    ),
+                    title: Container(
+                      color: AppColorTokens.primaryRed,
+                      height: 35.h,
+                      child: Row(
                         children: [
-                          if (MediaQuery.of(context).orientation != Orientation.landscape)
-                            Container(
-                              height: 35.h,
-                              color: AppColorTokens.primaryRed,
-                            child: Row(
-                              children: [
-                                if (homeProvider.langCode == 'ml')
-                                  PremiumAnimatedButton(
-                                    onTap: () {
-                                      homeProvider.onItemTapped(2);
-                                      homeProvider.homePageController.jumpToPage(2);
-                                      homeProvider.pageChange(isValue: true);
-                                    },
-                                  ),
-                                if (homeProvider.getAllAiTagsList.isNotEmpty)
-                                  Expanded(
-                                    child: ListView.separated(
-                                      controller: homeProvider.aiTagScrollController,
-                                      scrollDirection: Axis.horizontal,
-                                      itemCount: homeProvider.getAllAiTagsList.length,
-                                      separatorBuilder: (context, index) {
-                                        return Padding(
-                                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                                          child: VerticalDivider(
-                                            color: Colors.grey.withAlpha(5),
-                                            thickness: 1,
-                                            width: 2.w,
-                                          ),
-                                        );
-                                      },
-                                      itemBuilder: (context, index) {
-                                        if (!homeProvider.aiTagKeys.containsKey(index)) {
-                                          homeProvider.aiTagKeys[index] = GlobalKey();
-                                        }
-
-                                        final tag = homeProvider.getAllAiTagsList[index];
-                                        final tagId = tag['aitagid'];
-                                        final isSelected = homeProvider.selectedTagId == tagId;
-
-                                        return InkWell(
-                                          key: homeProvider.aiTagKeys[index],
-                                          onTap: () async {
-                                            homeProvider.setSelectedTagId(tagId);
-                                            homeProvider.getAllPostsByAiId(tagId.toString());
-                                            homeProvider.aiTagDataLoaded(true);
-                                            context.read<VideoProvider>().pauseVideo();
-                                            homeProvider.aiTagsScrollToCenter(index);
-                                            EventRepo().addEvent({
-                                              "aiTagName": tag['aitagname'].toString(),
-                                              "aiTagId": tag['aitagid'].toString(),
-                                              "createAt": DateTime.now().toString(),
-                                            }, "ai_tag_click");
-                                          },
-                                          child: Container(
-                                            // alignment: Alignment.center,
-                                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8),
-                                            decoration: BoxDecoration(
-                                              border: Border(
-                                                top: const BorderSide(
-                                                  color: Colors.transparent,
-                                                  width: 3,
-                                                ),
-                                                bottom: BorderSide(
-                                                  color: isSelected ? Colors.white : Colors.transparent,
-                                                  width: 3,
-                                                ),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              tag['aitagname'].toString(),
-                                              style: homeScreenFontStyle(
-                                                color: AppColors.wColor,
-                                                fontSize: 16.sp,
-                                                fontWeight: FontWeight.w600,
-                                                letterSpacing: 0.5,
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                              ],
+                          if (homeProvider.langCode == 'ml')
+                            PremiumAnimatedButton(
+                              onTap: () {
+                                homeProvider.onItemTapped(2);
+                                homeProvider.homePageController.jumpToPage(2);
+                                homeProvider.pageChange(isValue: true);
+                              },
                             ),
-                          ),
-                          Expanded(child: MainScreenPageView()),
+                          if (homeProvider.getAllAiTagsList.isNotEmpty)
+                            Expanded(
+                              child: ListView.separated(
+                                controller: homeProvider.aiTagScrollController,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: homeProvider.getAllAiTagsList.length,
+                                separatorBuilder: (context, index) {
+                                  return Padding(
+                                    padding:
+                                        EdgeInsets.symmetric(vertical: 12.h),
+                                    child: VerticalDivider(
+                                      color: Colors.grey.withAlpha(5),
+                                      thickness: 1,
+                                      width: 2.w,
+                                    ),
+                                  );
+                                },
+                                itemBuilder: (context, index) {
+                                  if (!homeProvider.aiTagKeys
+                                      .containsKey(index)) {
+                                    homeProvider.aiTagKeys[index] = GlobalKey();
+                                  }
+
+                                  final tag =
+                                      homeProvider.getAllAiTagsList[index];
+                                  final tagId = tag['aitagid'];
+                                  final isSelected =
+                                      homeProvider.selectedTagId == tagId;
+
+                                  return InkWell(
+                                    key: homeProvider.aiTagKeys[index],
+                                    onTap: () async {
+                                      homeProvider.setSelectedTagId(tagId);
+                                      homeProvider
+                                          .getAllPostsByAiId(tagId.toString());
+                                      homeProvider.aiTagDataLoaded(true);
+                                      context
+                                          .read<VideoProvider>()
+                                          .pauseVideo();
+                                      homeProvider.aiTagsScrollToCenter(index);
+                                      EventRepo().addEvent({
+                                        "aiTagName":
+                                            tag['aitagname'].toString(),
+                                        "aiTagId": tag['aitagid'].toString(),
+                                        "createAt": DateTime.now().toString(),
+                                      }, "ai_tag_click");
+                                    },
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 6.w, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          top: const BorderSide(
+                                            color: Colors.transparent,
+                                            width: 3,
+                                          ),
+                                          bottom: BorderSide(
+                                            color: isSelected
+                                                ? Colors.white
+                                                : Colors.transparent,
+                                            width: 3,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Text(
+                                        tag['aitagname'].toString(),
+                                        style: homeScreenFontStyle(
+                                          color: AppColors.wColor,
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.w600,
+                                          letterSpacing: 0.5,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  )
+                : null,
+            body: SafeArea(
+              left: MediaQuery.of(context).orientation != Orientation.landscape,
+              right:
+                  MediaQuery.of(context).orientation != Orientation.landscape,
+              top: false,
+              bottom:
+                  MediaQuery.of(context).orientation != Orientation.landscape,
+              child: Container(
+                color: Theme.of(context).scaffoldBackgroundColor,
+                child: Center(
+                  child: homeProvider.isHomeLoading
+                      ? HomeShimmer()
+                      : Stack(
+                          children: [
+                            Column(
+                              children: [
+                                Expanded(child: MainScreenPageView()),
+                              ],
+                            ),
+                          ],
+                        ),
+                ),
+              ),
             ),
-          ),
-        );
-      }),
+          );
+        },
+      ),
     );
   }
 }
@@ -185,7 +225,8 @@ class PremiumAnimatedButton extends StatefulWidget {
   State<PremiumAnimatedButton> createState() => _PremiumAnimatedButtonState();
 }
 
-class _PremiumAnimatedButtonState extends State<PremiumAnimatedButton> with SingleTickerProviderStateMixin {
+class _PremiumAnimatedButtonState extends State<PremiumAnimatedButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -237,7 +278,8 @@ class _PremiumAnimatedButtonState extends State<PremiumAnimatedButton> with Sing
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.workspace_premium, color: Colors.black87, size: 18),
+                    const Icon(Icons.workspace_premium,
+                        color: Colors.black87, size: 18),
                     SizedBox(width: 4.w),
                     Text(
                       "Premium",
@@ -255,7 +297,8 @@ class _PremiumAnimatedButtonState extends State<PremiumAnimatedButton> with Sing
                   animation: _controller,
                   builder: (context, child) {
                     return FractionalTranslation(
-                      translation: Offset(-1.5 + (_controller.value * 3.0), 0.0),
+                      translation:
+                          Offset(-1.5 + (_controller.value * 3.0), 0.0),
                       child: Transform(
                         transform: Matrix4.skewX(-0.3),
                         child: Container(

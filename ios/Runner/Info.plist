@@ -129,7 +129,7 @@
     <key>UIStatusBarStyle</key>
     <string>UIStatusBarStyleLightContent</string>
     <key>UIViewControllerBasedStatusBarAppearance</key>
-    <false/>
+    <true/>
 
     <key>NSLocationWhenInUseUsageDescription</key>
     <string>This app needs location access to get Wi-Fi info</string>
