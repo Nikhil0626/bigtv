@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
@@ -36,6 +37,10 @@ class VideoPreviewPage extends State<VideoPreview> {
 
   @override
   void dispose() {
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+      DeviceOrientation.portraitDown,
+    ]);
     super.dispose();
   }
 
@@ -44,10 +49,15 @@ class VideoPreviewPage extends State<VideoPreview> {
     return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
       return GestureDetector(
         onVerticalDragUpdate: (details) {
+          if (MediaQuery.of(context).orientation == Orientation.landscape) return;
           final controller = context.read<HomeProvider>().pageController!;
           if (details.delta.dy < -10) {
 
             log("jhvjhbhjbjhhijhiu");
+            SystemChrome.setPreferredOrientations([
+              DeviceOrientation.portraitUp,
+              DeviceOrientation.portraitDown,
+            ]);
             homeProvider.isPlayingYoutube(false);
             controller.nextPage(
               duration: Duration(milliseconds: 600),
@@ -55,6 +65,10 @@ class VideoPreviewPage extends State<VideoPreview> {
             );
           } else if (details.delta.dy > 10) {
             log("jhvjhbhjbjhhijhiu000");
+            SystemChrome.setPreferredOrientations([
+              DeviceOrientation.portraitUp,
+              DeviceOrientation.portraitDown,
+            ]);
             homeProvider.isPlayingYoutube(false);
             controller.previousPage(
               duration: Duration(milliseconds: 600),
@@ -67,7 +81,7 @@ class VideoPreviewPage extends State<VideoPreview> {
           children: [
             SizedBox(
               height: MediaQuery.of(context).orientation == Orientation.landscape 
-                  ? MediaQuery.of(context).size.height 
+                  ? MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top
                   : 330,
               child: YoutubePlayerBuilder(
                 player: YoutubePlayer(
@@ -75,6 +89,10 @@ class VideoPreviewPage extends State<VideoPreview> {
                   showVideoProgressIndicator: true,
                   onReady: () => debugPrint("YouTube Player Ready"),
                   onEnded: (metaData) {
+                    SystemChrome.setPreferredOrientations([
+                      DeviceOrientation.portraitUp,
+                      DeviceOrientation.portraitDown,
+                    ]);
                     homeProvider.isPlayingYoutube(false);
                   },
                   bottomActions: [
@@ -103,6 +121,40 @@ class VideoPreviewPage extends State<VideoPreview> {
                   ],
                 ),
                 builder: (context, player) => player,
+              ),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: InkWell(
+                onTap: () {
+                  bool isLandscape = MediaQuery.of(context).orientation == Orientation.landscape;
+                  if (isLandscape) {
+                    SystemChrome.setPreferredOrientations([
+                      DeviceOrientation.portraitUp,
+                      DeviceOrientation.portraitDown,
+                    ]);
+                  } else {
+                    SystemChrome.setPreferredOrientations([
+                      DeviceOrientation.landscapeLeft,
+                      DeviceOrientation.landscapeRight,
+                    ]);
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Colors.black54,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    MediaQuery.of(context).orientation == Orientation.landscape
+                        ? Icons.fullscreen_exit
+                        : Icons.fullscreen,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
               ),
             ),
           ],

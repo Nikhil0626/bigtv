@@ -390,7 +390,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future sendCategoriesToServer({bool isFilter = false}) async {
     isCatSaveLoading = true;
-    List<int> selectedCategoryIds = getAllCategoryList.where((item) => selectedCategories.contains(item.categoryName.toString())).map((item) => item.categoryId as int).toList();
+    List<int> selectedCategoryIds = getAllCategoryList.where((item) => selectedCategories.contains(item.categoryName.toString()) && item.categoryId != null).map((item) => item.categoryId as int).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String result = selectedCategoryIds.toSet().join(',');
     String catNames = selectedCategories.toSet().join(',');

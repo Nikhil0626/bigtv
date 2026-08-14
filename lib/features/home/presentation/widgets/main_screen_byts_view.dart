@@ -172,8 +172,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
             ),
           )
         : SizedBox(
-            height: MediaQuery.of(context).size.height,
-            width: MediaQuery.of(context).size.width,
+            height: double.infinity,
+            width: double.infinity,
             child:
                 (widget.article['type'].toString() == "Standard" &&
                         widget.article['subType'].toString().toLowerCase() ==
@@ -190,7 +190,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                         ? MovieRatings(
                             article: widget.article,
                           )
-                        : InkWell(
+                        : GestureDetector(
                             onTap: () {
                               context.read<HomeProvider>().pageChange(
                                   isValue: !context
@@ -471,12 +471,13 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                         )
                                                       : Column(
                                                           children: [
-                                                            Stack(
-                                                              children: [
-                                                                /// IMAGE / VIDEO CONTAINER
-                                                                Container(
+                                                            LandscapeFlexible(
+                                                              child: Stack(
+                                                                children: [
+                                                                  /// IMAGE / VIDEO CONTAINER
+                                                                  Container(
                                                                   height: MediaQuery.of(context).orientation == Orientation.landscape 
-                                                                      ? MediaQuery.of(context).size.height 
+                                                                      ? double.infinity
                                                                       : (widget.article['subType'] ==
                                                                           "BigBlackStandard"
                                                                       ? MediaQuery.of(context)
@@ -501,7 +502,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                               "Video"
                                                                           ? SizedBox(
                                                                               height: MediaQuery.of(context).orientation == Orientation.landscape
-                                                                                  ? MediaQuery.of(context).size.height
+                                                                                  ? double.infinity
                                                                                   : MediaQuery.of(context).size.height * .33,
                                                                               width: MediaQuery.of(context).size.width,
                                                                               child: VideoPreview(
@@ -635,7 +636,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 ),
                                                               ],
                                                             ),
-                                                            if (MediaQuery.of(context).orientation != Orientation.landscape) ...[
+                                                          ),
+                                                          if (MediaQuery.of(context).orientation != Orientation.landscape) ...[
                                                               Container(
                                                                 height: 4,
                                                                 width:
@@ -1288,5 +1290,17 @@ class _HighlightTextPainter extends CustomPainter {
       old.text != text ||
           old.highlightColor != highlightColor ||
           old.fontSize != fontSize;
+}
+
+class LandscapeFlexible extends StatelessWidget {
+  final Widget child;
+  const LandscapeFlexible({Key? key, required this.child}) : super(key: key);
+  @override
+  Widget build(BuildContext context) {
+    return Flexible(
+      fit: MediaQuery.of(context).orientation == Orientation.landscape ? FlexFit.tight : FlexFit.loose,
+      child: child,
+    );
+  }
 }
 

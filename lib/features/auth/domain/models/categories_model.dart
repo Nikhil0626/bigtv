@@ -57,8 +57,8 @@ class CategoryModel {
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      categoryId: json['categoryId'] as int?,
-      categoryName: json['categoryName'] as String?,
+      categoryId: (json['categoryId'] ?? json['categoryid']) as int?,
+      categoryName: (json['categoryName'] ?? json['categoryname']) as String?,
       isFollowed: json['isFollowed'] as bool?,
       imageUrl: json['imageUrl'] as String?,
       isActive: json['isActive'] as bool?,

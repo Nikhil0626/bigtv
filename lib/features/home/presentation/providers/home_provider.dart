@@ -295,7 +295,7 @@ class HomeProvider extends ChangeNotifier {
       "userId": userId,
       "isAdManager": false,
       "isBigTv": true,
-      "lang": langCode,
+      "lang": "",
     };
     log("all post body ${body.toString()}");
     try {

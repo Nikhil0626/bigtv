@@ -94,8 +94,10 @@ class _HomeViewState extends State<HomeView> {
               extendBody: true,
               floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
               floatingActionButton: null,
-              body: PageView(
-                controller: homeProvider.homePageController,
+              body: Stack(
+                children: [
+                  PageView(
+                    controller: homeProvider.homePageController,
                 physics: const NeverScrollableScrollPhysics(),
                 onPageChanged: (index) {
                   homeProvider.onItemTapped(index);
@@ -117,162 +119,151 @@ class _HomeViewState extends State<HomeView> {
                   const KeepAlivePage(keepAlive: true, child: SettingsView())
                 ],
               ),
-              bottomNavigationBar: homeProvider.isBottomEnable
-                  ? BottomAppBar(
-                      color: AppColorTokens.primaryRed,
-                      clipBehavior: Clip.antiAlias,
-                      padding: EdgeInsets.zero,
-                      height: 64,
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          splashColor: Colors.transparent,
-                          highlightColor: Colors.transparent,
-                          hoverColor: Colors.transparent,
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Visibility(
+                  visible: homeProvider.isBottomEnable,
+                  child: Container(
+                    color: AppColorTokens.primaryRed,
+                    child: SafeArea(
+                      top: false,
+                      child: SizedBox(
+                        height: 60,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildNavItem(
+                              context,
+                              homeProvider,
+                              index: 0,
+                              iconPath: "assets/new_app_icon/bytes.svg",
+                              labelMl: 'വാർത്തകൾ',
+                              labelTe: 'వార్తలు',
+                            ),
+                            _buildNavItem(
+                              context,
+                              homeProvider,
+                              index: 1,
+                              iconPath: "assets/new_app_icon/reel.svg",
+                              labelMl: 'റീൽസ്',
+                              labelTe: 'రీల్స్',
+                            ),
+                            if (homeProvider.langCode == 'ml')
+                              _buildNavItem(
+                                context,
+                                homeProvider,
+                                index: 2,
+                                iconData: Icons.workspace_premium,
+                                labelMl: 'പ്രീമിയം',
+                                labelTe: 'ప్రీమియం',
+                              ),
+                            if (homeProvider.langCode != 'ml')
+                              _buildNavItem(
+                                context,
+                                homeProvider,
+                                index: 2,
+                                iconData: Icons.newspaper,
+                                labelMl: 'ഇ-പേപ്പർ',
+                                labelTe: 'ఈ-పేపర్',
+                              ),
+                            _buildNavItem(
+                              context,
+                              homeProvider,
+                              index: 3,
+                              iconPath: "assets/new_app_icon/menu.svg",
+                              labelMl: 'ആൽമരം',
+                              labelTe: 'మరిన్ని',
+                            ),
+                          ],
                         ),
-                        child: BottomNavigationBar(
-                          backgroundColor: Colors.transparent,
-                          type: BottomNavigationBarType.fixed,
-                          elevation: 0,
-                        currentIndex: homeProvider.selectedIndex > 3 ? 3 : homeProvider.selectedIndex,
-                        onTap: (index) {
-                          context.read<VideoProvider>().pauseVideo();
-                          homeProvider.isTabChange();
-                          homeProvider.homePageController.jumpToPage(index);
-                          homeProvider.pageChange(isValue: true);
-
-                          if (index == 0) {
-                            homeProvider.getAllPost();
-                            homeProvider.aiTagDataLoaded(false);
-                            homeProvider.setSelectedTagId(0);
-                            EventRepo().addEvent({
-                              "aiTagName": "news",
-                              "aiTagId": "-1",
-                              "createAt": DateTime.now().toString(),
-                            }, "ai_tag_click");
-                          } else if (index == 1) {
-                            EventRepo().addEvent({
-                              "aiTagName": "reels",
-                              "aiTagId": "-3",
-                              "createAt": DateTime.now().toString(),
-                            }, "ai_tag_click");
-                          } else if (index == 2) {
-                            if (homeProvider.langCode == 'ml') {
-                              EventRepo().addEvent({
-                                "aiTagName": "premium",
-                                "aiTagId": "-6",
-                                "createAt": DateTime.now().toString(),
-                              }, "ai_tag_click");
-                            } else {
-                              EventRepo().addEvent({
-                                "aiTagName": "epaper",
-                                "aiTagId": "-4",
-                                "createAt": DateTime.now().toString(),
-                              }, "ai_tag_click");
-                            }
-                          } else if (index == 3) {
-                            EventRepo().addEvent({
-                              "aiTagName": "more",
-                              "aiTagId": "-5",
-                              "createAt": DateTime.now().toString(),
-                            }, "ai_tag_click");
-                          }
-                        },
-                        selectedItemColor: context.colors.onPrimary,
-                        unselectedItemColor: context.colors.onPrimary,
-                        selectedFontSize: 12,
-                        unselectedFontSize: 12,
-                        iconSize: 22,
-                        showSelectedLabels: true,
-                        showUnselectedLabels: true,
-                        items: [
-                          BottomNavigationBarItem(
-                            icon: SvgPicture.asset(
-                              "assets/new_app_icon/bytes.svg",
-                              height: 22,
-                              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                            ),
-                            activeIcon: Container(
-                              padding: const EdgeInsets.only(top: 4),
-                              decoration: const BoxDecoration(
-                                border: Border(top: BorderSide(color: Colors.white, width: 2)),
-                              ),
-                              child: SvgPicture.asset(
-                                "assets/new_app_icon/bytes.svg",
-                                height: 22,
-                                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                              ),
-                            ),
-                            label: homeProvider.langCode == 'ml' ? 'വാർത്തകൾ' : 'వార్తలు',
-                          ),
-                          BottomNavigationBarItem(
-                            icon: SvgPicture.asset(
-                              "assets/new_app_icon/reel.svg",
-                              height: 22,
-                              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                            ),
-                            activeIcon: Container(
-                              padding: const EdgeInsets.only(top: 4),
-                              decoration: const BoxDecoration(
-                                border: Border(top: BorderSide(color: Colors.white, width: 2)),
-                              ),
-                              child: SvgPicture.asset(
-                                "assets/new_app_icon/reel.svg",
-                                height: 22,
-                                colorFilter: ColorFilter.mode(context.colors.onPrimary, BlendMode.srcIn),
-                              ),
-                            ),
-                            label: homeProvider.langCode == 'ml' ? 'റീൽസ്' : 'రీల్స్',
-                          ),
-                          if (homeProvider.langCode == 'ml')
-                            BottomNavigationBarItem(
-                              icon: Icon(Icons.workspace_premium, color: context.colors.onPrimary, size: 22),
-                              activeIcon: Container(
-                                padding: const EdgeInsets.only(top: 4),
-                                decoration: BoxDecoration(
-                                  border: Border(top: BorderSide(color: context.colors.onPrimary, width: 2)),
-                                ),
-                                child: Icon(Icons.workspace_premium, color: context.colors.onPrimary, size: 22),
-                              ),
-                              label: homeProvider.langCode == 'ml' ? 'പ്രീമിയം' : 'ప్రీమియం',
-                            ),
-                          if (homeProvider.langCode != 'ml')
-                            BottomNavigationBarItem(
-                              icon: Icon(Icons.newspaper, color: context.colors.onPrimary, size: 22),
-                              activeIcon: Container(
-                                padding: const EdgeInsets.only(top: 4),
-                                decoration: BoxDecoration(
-                                  border: Border(top: BorderSide(color: context.colors.onPrimary, width: 2)),
-                                ),
-                                child: Icon(Icons.newspaper, color: context.colors.onPrimary, size: 22),
-                              ),
-                              label: homeProvider.langCode == 'ml' ? 'ഇ-പേപ്പർ' : 'ఈ-పేపర్',
-                            ),
-                          BottomNavigationBarItem(
-                            icon: SvgPicture.asset(
-                              "assets/new_app_icon/menu.svg",
-                              height: 22,
-                              colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                            ),
-                            activeIcon: Container(
-                              padding: const EdgeInsets.only(top: 4),
-                              decoration: const BoxDecoration(
-                                border: Border(top: BorderSide(color: Colors.white, width: 2)),
-                              ),
-                              child: SvgPicture.asset(
-                                "assets/new_app_icon/menu.svg",
-                                height: 22,
-                                colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                              ),
-                            ),
-                            label: homeProvider.langCode == 'ml' ? 'ആൽമരം' : 'మరిన్ని',
-                          ),
-                        ],
                       ),
-                      ),
-                    )
-                  : null,
+                    ),
+                  ),
+                ),
+              ),
+                ],
+              ),
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(
+    BuildContext context,
+    HomeProvider homeProvider, {
+    required int index,
+    String? iconPath,
+    IconData? iconData,
+    required String labelMl,
+    required String labelTe,
+  }) {
+    bool isSelected = (homeProvider.selectedIndex > 3 ? 3 : homeProvider.selectedIndex) == index;
+    String label = homeProvider.langCode == 'ml' ? labelMl : labelTe;
+    Color itemColor = context.colors.onPrimary;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        context.read<VideoProvider>().pauseVideo();
+        homeProvider.isTabChange();
+        homeProvider.homePageController.jumpToPage(index);
+        homeProvider.pageChange(isValue: true);
+
+        if (index == 0) {
+          homeProvider.getAllPost();
+          homeProvider.aiTagDataLoaded(false);
+          homeProvider.setSelectedTagId(0);
+          EventRepo().addEvent({"aiTagName": "news", "aiTagId": "-1", "createAt": DateTime.now().toString()}, "ai_tag_click");
+        } else if (index == 1) {
+          EventRepo().addEvent({"aiTagName": "reels", "aiTagId": "-3", "createAt": DateTime.now().toString()}, "ai_tag_click");
+        } else if (index == 2) {
+          if (homeProvider.langCode == 'ml') {
+            EventRepo().addEvent({"aiTagName": "premium", "aiTagId": "-6", "createAt": DateTime.now().toString()}, "ai_tag_click");
+          } else {
+            EventRepo().addEvent({"aiTagName": "epaper", "aiTagId": "-4", "createAt": DateTime.now().toString()}, "ai_tag_click");
+          }
+        } else if (index == 3) {
+          EventRepo().addEvent({"aiTagName": "more", "aiTagId": "-5", "createAt": DateTime.now().toString()}, "ai_tag_click");
+        }
+      },
+      child: Container(
+        height: 60,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: isSelected ? const EdgeInsets.only(top: 4) : EdgeInsets.zero,
+              decoration: isSelected
+                  ? BoxDecoration(
+                      border: Border(top: BorderSide(color: itemColor, width: 2)),
+                    )
+                  : null,
+              child: iconPath != null
+                  ? SvgPicture.asset(
+                      iconPath,
+                      height: 22,
+                      colorFilter: ColorFilter.mode(itemColor, BlendMode.srcIn),
+                    )
+                  : Icon(
+                      iconData,
+                      color: itemColor,
+                      size: 22,
+                    ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: itemColor,
+                fontSize: 12,
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -47,6 +47,9 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? Colors.black
+          : Colors.white,
       body: Consumer<HomeProvider>(
         builder: (_, homeProvider, __) {
           return Column(
@@ -66,7 +69,9 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                             child: AppNoData(),
                           )
                         : PageView.builder(
-                            physics: const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
+                            physics: MediaQuery.of(context).orientation == Orientation.landscape
+                                ? const NeverScrollableScrollPhysics()
+                                : const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
                             controller: homeProvider.pageController!,
                             scrollDirection: Axis.vertical,
                             itemCount: homeProvider.getAllPostList.length,
