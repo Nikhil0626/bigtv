@@ -34,6 +34,8 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'dart:typed_data';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 
 
@@ -815,7 +817,50 @@ class HomeProvider extends ChangeNotifier {
   Future<void> sendDeviceDetailsApi({required String userId, required String deviceId, required String fcmToken, required String lan}) async {
     try {
       final deviceInfo = await getDeviceInfoData();
+      SharedPreferences preferences = await SharedPreferences.getInstance();
       
+      String locationName = preferences.getString("locationNames") ?? "";
+      String pincode = preferences.getString("pincode") ?? "";
+
+      try {
+        LocationPermission permission = await Geolocator.checkPermission();
+        bool hasRequestedLocation = preferences.getBool("hasRequestedLocation") ?? false;
+        
+        if (permission == LocationPermission.denied && !hasRequestedLocation) {
+          permission = await Geolocator.requestPermission();
+          await preferences.setBool("hasRequestedLocation", true);
+        }
+
+        if (permission == LocationPermission.always || permission == LocationPermission.whileInUse) {
+          Position position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+          List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+          if (placemarks.isNotEmpty) {
+            Placemark place = placemarks.first;
+            
+            List<String> addressParts = [];
+            if (place.street?.isNotEmpty == true) addressParts.add(place.street!);
+            if (place.subLocality?.isNotEmpty == true && !addressParts.contains(place.subLocality)) addressParts.add(place.subLocality!);
+            if (place.locality?.isNotEmpty == true && !addressParts.contains(place.locality)) addressParts.add(place.locality!);
+            if (place.administrativeArea?.isNotEmpty == true && !addressParts.contains(place.administrativeArea)) addressParts.add(place.administrativeArea!);
+            if (place.postalCode?.isNotEmpty == true && !addressParts.contains(place.postalCode)) addressParts.add(place.postalCode!);
+            if (place.country?.isNotEmpty == true && !addressParts.contains(place.country)) addressParts.add(place.country!);
+
+            String fullAddress = addressParts.join(", ");
+
+            if (fullAddress.isNotEmpty) {
+              locationName = fullAddress;
+            }
+            
+            String pin = place.postalCode ?? "";
+            if (pin.isNotEmpty) {
+              pincode = pin;
+            }
+          }
+        }
+      } catch (e) {
+        log("Error getting location from geocoding: $e");
+      }
+
       Map<String, dynamic> body = {
         "user_id": int.tryParse(userId) ?? 0,
         "device_type": deviceInfo['device_type'],
@@ -823,7 +868,9 @@ class HomeProvider extends ChangeNotifier {
         "fcm_token": fcmToken,
         "app_version": deviceInfo['app_version'],
         "os_version": deviceInfo['os_version'],
-        "lan": lan
+        "lan": lan,
+        "location": locationName,
+        "pincode": pincode
       };
 
       await HomeRepo().postDeviceDetails(body);

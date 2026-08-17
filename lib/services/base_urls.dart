@@ -48,7 +48,8 @@ class BaseUrls {
   static const String baseUrlAwsDev = "https://apidev.chotanews.com";
 
   /// New Server API
-  static const String newServerBaseUrl = "http://192.168.70.251";
+  // static const String newServerBaseUrl = "http://192.168.70.251";
+  static const String newServerBaseUrl = "https://api.pravasamedia.com";
   static const String deviceDetails = "/api/v1/deviceDetails";
   /// Python Dev Apis
   // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
