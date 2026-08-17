@@ -287,21 +287,25 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                               // Share the image to WhatsApp directly
                               final String title = article['title']?.toString() ?? "";
                               final String link = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
-                              final String shareText = title + "\n" + link;
+                              final String postUrl = article['postUrl']?.toString() ?? "";
+                              final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
                               
                                 try {
-                                  const platform = MethodChannel('com.chotanews/whatsapp');
-                                  await platform.invokeMethod('shareToWhatsApp', {'imagePath': file.path, 'text': shareText});
                                   if (Platform.isIOS) {
-                                    CustomToast.showInfoToast(msg: "Text copied to clipboard. Paste it in WhatsApp.");
+                                    final Size size = MediaQuery.of(context).size;
+                                    await Share.shareXFiles([XFile(file.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+                                  } else {
+                                    const platform = MethodChannel('com.chotanews/whatsapp');
+                                    await platform.invokeMethod('shareToWhatsApp', {'imagePath': file.path, 'text': shareText});
                                   }
                                 } catch (e) {
-                                if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
-                                  CustomToast.showInfoToast(msg: "WhatsApp is not installed");
-                                } else {
-                                  await Share.shareXFiles([XFile(file.path)], text: shareText);
+                                  if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
+                                    CustomToast.showInfoToast(msg: "WhatsApp is not installed");
+                                  } else {
+                                    final Size size = MediaQuery.of(context).size;
+                                    await Share.shareXFiles([XFile(file.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+                                  }
                                 }
-                              }
                             } else {
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
