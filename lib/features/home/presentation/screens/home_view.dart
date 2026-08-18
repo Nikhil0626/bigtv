@@ -18,6 +18,7 @@ import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:chotanews/utils/app_toasts.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
@@ -51,12 +52,37 @@ class _HomeViewState extends State<HomeView> {
       requestNotificationPermission();
       homeProvider?.getMobileNumber();
       homeProvider?.loadLanguage();
+      _sendDeviceDetails();
     });
     homeProvider?.initDeepLinks();
     homeProvider?.subscribeToPushCallbacks();
     homeProvider?.selectedIndex = 0;
     homeProvider?.homePageController = PageController(initialPage: 0);
     super.initState();
+  }
+
+  Future<void> _sendDeviceDetails() async {
+    try {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      String token = "";
+      if (Platform.isIOS) {
+        token = await FirebaseMessaging.instance.getAPNSToken() ?? "";
+      } else {
+        token = await FirebaseMessaging.instance.getToken() ?? "";
+      }
+      String? deviceId = preferences.getString("deviceId");
+      String? userId = preferences.getString("userId");
+      String langCode = preferences.getString("selectedLanguageCode") ?? "en";
+
+      homeProvider?.sendDeviceDetailsApi(
+        userId: userId ?? "0",
+        deviceId: deviceId ?? "",
+        fcmToken: token,
+        lan: langCode,
+      );
+    } catch (e) {
+      debugPrint("Error sending device details: $e");
+    }
   }
 
   @override
