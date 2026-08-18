@@ -53,12 +53,17 @@ Future<void> createAndSharePdf(BuildContext context, dynamic article) async {
     log("PDF saved at: $filePath");
 
     try {
-      const platform = MethodChannel('com.chotanews/whatsapp');
-      await platform.invokeMethod('shareToWhatsApp', {'imagePath': filePath, 'text': "${article['title'] ?? article['id']}"});
+      final String title = article['title']?.toString() ?? article['id'].toString();
+      final String appLink = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
+      final String postUrl = article['postUrl']?.toString() ?? "";
+      final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$appLink";
+      
       if (Platform.isIOS) {
-        if (context.mounted) {
-          CustomToast.showInfoToast(msg: "Text copied to clipboard. Paste it in WhatsApp.");
-        }
+        final Size size = MediaQuery.of(context).size;
+        await Share.shareXFiles([XFile(filePath)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+      } else {
+        const platform = MethodChannel('com.chotanews/whatsapp');
+        await platform.invokeMethod('shareToWhatsApp', {'imagePath': filePath, 'text': shareText});
       }
     } catch (e) {
       if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
@@ -66,7 +71,8 @@ Future<void> createAndSharePdf(BuildContext context, dynamic article) async {
           CustomToast.showInfoToast(msg: "WhatsApp is not installed");
         }
       } else {
-        await Share.shareXFiles([XFile(filePath)], text: "${article['id']}");
+        final Size size = MediaQuery.of(context).size;
+        await Share.shareXFiles([XFile(filePath)], text: "${article['id']}", sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
       }
     }
   } catch (e) {

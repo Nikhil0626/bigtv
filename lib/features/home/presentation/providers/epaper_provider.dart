@@ -12,6 +12,25 @@ class EpaperProvider extends ChangeNotifier {
   String? selectedEdition;
   DateTime? selectedDate;
 
+  // Detail screen state
+  int currentPage = 0;
+  bool showOverlay = true;
+
+  void setCurrentPage(int index) {
+    currentPage = index;
+    notifyListeners();
+  }
+
+  void toggleOverlay() {
+    showOverlay = !showOverlay;
+    notifyListeners();
+  }
+
+  void resetDetailState() {
+    currentPage = 0;
+    showOverlay = true;
+  }
+
   Future<void> fetchEpapers() async {
     isLoading = true;
     notifyListeners();

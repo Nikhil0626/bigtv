@@ -556,7 +556,7 @@
 				DEVELOPMENT_TEAM = 74NBJBC965;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Chotanews;
+				INFOPLIST_KEY_CFBundleDisplayName = BigTV;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -755,7 +755,7 @@
 				DEVELOPMENT_TEAM = 74NBJBC965;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Chotanews;
+				INFOPLIST_KEY_CFBundleDisplayName = BigTV;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -792,7 +792,7 @@
 				DEVELOPMENT_TEAM = 74NBJBC965;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Runner/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Chotanews;
+				INFOPLIST_KEY_CFBundleDisplayName = BigTV;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

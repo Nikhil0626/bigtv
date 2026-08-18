@@ -104,12 +104,13 @@ Future<void> checkForUpdate() async {
       debugPrint("iOS Store Info: ${versionInfo.toJson()}");
 
       if (versionInfo.canUpdate) {
-        final Uri url = Uri.parse(versionInfo.appStoreLink);
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url, mode: LaunchMode.externalApplication);
-        } else {
-          debugPrint("Cannot launch App Store URL");
-        }
+        debugPrint("Update available, but auto-launch disabled to prevent Safari popup loop. AppStoreLink: ${versionInfo.appStoreLink}");
+        // final Uri url = Uri.parse(versionInfo.appStoreLink);
+        // if (await canLaunchUrl(url)) {
+        //   await launchUrl(url, mode: LaunchMode.externalApplication);
+        // } else {
+        //   debugPrint("Cannot launch App Store URL");
+        // }
       } else {
         debugPrint("No update needed or no URL");
       }

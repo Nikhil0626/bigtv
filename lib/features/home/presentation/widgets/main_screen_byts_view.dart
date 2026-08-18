@@ -947,24 +947,28 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                   onTap: () async {
                                                                                     try {
                                                                                       final String title = widget.article['title']?.toString() ?? "";
-                                                                                      final String link = widget.article['linkURLAndroid']?.toString() ?? "";
-                                                                                      final String shareText = title + "\n" + link;
+                                                                                      final String link = Platform.isIOS ? (widget.article['linkURLIos']?.toString() ?? "") : (widget.article['linkURLAndroid']?.toString() ?? "");
+                                                                                      final String postUrl = widget.article['postUrl']?.toString() ?? "";
+                                                                                      final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
                                                                                       final imageBytes = await adsScreenshotController.capture(delay: const Duration(milliseconds: 10));
                                                                                       if (imageBytes != null) {
                                                                                         final directory = await getTemporaryDirectory();
                                                                                         final imagePath = await File(directory.path + "/screenshot_" + DateTime.now().millisecondsSinceEpoch.toString() + ".png").create();
                                                                                         await imagePath.writeAsBytes(imageBytes);
                                                                                         try {
-                                                                                          const platform = MethodChannel('com.chotanews/whatsapp');
-                                                                                          await platform.invokeMethod('shareToWhatsApp', {'imagePath': imagePath.path, 'text': shareText});
                                                                                           if (Platform.isIOS) {
-                                                                                            CustomToast.showInfoToast(msg: "Text copied to clipboard. Paste it in WhatsApp.");
+                                                                                            final Size size = MediaQuery.of(context).size;
+                                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+                                                                                          } else {
+                                                                                            const platform = MethodChannel('com.chotanews/whatsapp');
+                                                                                            await platform.invokeMethod('shareToWhatsApp', {'imagePath': imagePath.path, 'text': shareText});
                                                                                           }
                                                                                         } catch (e) {
                                                                                           if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
                                                                                             CustomToast.showInfoToast(msg: "WhatsApp is not installed");
                                                                                           } else {
-                                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText);
+                                                                                            final Size size = MediaQuery.of(context).size;
+                                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
                                                                                           }
                                                                                         }
                                                                                       } else {
