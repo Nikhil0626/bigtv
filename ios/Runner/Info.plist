@@ -7,7 +7,7 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>$(DEVELOPMENT_LANGUAGE)</string>
     <key>CFBundleDisplayName</key>
-    <string>ChotaNews</string>
+    <string>BigTV</string>
     <key>CFBundleExecutable</key>
     <string>$(EXECUTABLE_NAME)</string>
     <key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
     <key>CFBundleInfoDictionaryVersion</key>
     <string>6.0</string>
     <key>CFBundleName</key>
-    <string>chotaNews</string>
+    <string>BigTV</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
@@ -41,9 +41,9 @@
     <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
     <string>This app may use your location in the background to deliver region-specific news and notifications.</string>
     <key>NSLocalNetworkUsageDescription</key>
-    <string>ChotaNews requires access to the local network to enable seamless notifications and content updates.</string>
+    <string>BigTV requires access to the local network to enable seamless notifications and content updates.</string>
     <key>NSPushKitUsageDescription</key>
-    <string>ChotaNews uses PushKit to enhance notifications when the app is in the background.</string>
+    <string>BigTV uses PushKit to enhance notifications when the app is in the background.</string>
     <key>NSUserTrackingUsageDescription</key>
     <string>We use this data to provide you with personalized ads and analytics.</string>
 
