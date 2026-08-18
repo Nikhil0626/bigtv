@@ -59,7 +59,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
             loop: false,
             disableDragSeek: true,
             enableCaption: false,
-            controlsVisibleAtStart: true,
+            controlsVisibleAtStart: false,
           ),
         );
 
@@ -153,48 +153,57 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           child: Screenshot(
             controller: sc,
             child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-              return YoutubePlayer(
-                controller: widget.youtubePlayerController,
-                aspectRatio: MediaQuery.of(context).size.width / MediaQuery.of(context).size.height,
-                bufferIndicator: const Align(
-                  alignment: Alignment.bottomCenter,
-                  child: LinearProgressIndicator(
-                    color: Colors.red,
-                    backgroundColor: Colors.transparent,
+              return SizedBox.expand(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width,
+                    height: MediaQuery.of(context).size.width / (9 / 16),
+                    child: YoutubePlayer(
+                      controller: widget.youtubePlayerController,
+                      aspectRatio: 9 / 16,
+                      bufferIndicator: const Align(
+                        alignment: Alignment.bottomCenter,
+                        child: LinearProgressIndicator(
+                          color: Colors.red,
+                          backgroundColor: Colors.transparent,
+                        ),
+                      ),
+                      // showVideoProgressIndicator: true,
+                      bottomActions: [
+                        CurrentPosition(),
+                        ProgressBar(
+                          isExpanded: true,
+                          colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
+                        ),
+                        RemainingDuration(),
+
+                        IconButton(
+                          icon: Icon(
+                            homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (homeProvider.isMuted) {
+                              widget.youtubePlayerController.unMute();
+
+                            } else {
+                              widget.youtubePlayerController.mute();
+                            }
+                            homeProvider.toggleMute(); // Update your isMuted state
+                          },
+                        ), // ✅ Show remaining time
+                      ],
+                    ),
                   ),
                 ),
-                // showVideoProgressIndicator: true,
-                bottomActions: [
-                  CurrentPosition(),
-                  ProgressBar(
-                    isExpanded: true,
-                    colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
-                  ),
-                  RemainingDuration(),
-
-                  IconButton(
-                    icon: Icon(
-                      homeProvider.isMuted ? Icons.volume_off : Icons.volume_up,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      if (homeProvider.isMuted) {
-                        widget.youtubePlayerController.unMute();
-
-                      } else {
-                        widget.youtubePlayerController.mute();
-                      }
-                      homeProvider.toggleMute(); // Update your isMuted state
-                    },
-                  ), // ✅ Show remaining time
-                ],
               );
             }),
           ),
         ),
         Positioned(
           right: 10,
-          bottom: 100,
+          bottom: 120,
           child: Column(
             children: [
               BottomActions(
@@ -272,13 +281,13 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           ),
         ),
         Positioned(
-          bottom: 50,
+          bottom: 65,
           left: 0,
           right: 0,
           child: Padding(
             padding: const EdgeInsets.only(right: 60.0),
             child: Container(
-              padding: EdgeInsets.only(right: 12.w, left: 12.w),
+              padding: EdgeInsets.only(top: 10.h, left: 20.w, right: 12.w),
               width: MediaQuery.of(context).size.width - 100,
 
               child: Column(

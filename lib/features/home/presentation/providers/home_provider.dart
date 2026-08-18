@@ -22,6 +22,7 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -297,7 +298,7 @@ class HomeProvider extends ChangeNotifier {
       "userId": userId,
       "isAdManager": false,
       "isBigTv": true,
-      "lang": "",
+      "lang": langCode,
     };
     log("all post body ${body.toString()}");
     try {
@@ -804,8 +805,27 @@ class HomeProvider extends ChangeNotifier {
 
       log("PDF saved at: $filePath");
 
-      await Share.shareXFiles([XFile(filePath)],
-          text: "https://apps.signitivessoft.com/individualPage");
+      final String title = article['title']?.toString() ?? article['id'].toString();
+      final String appLink = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
+      final String postUrl = article['postUrl']?.toString() ?? "";
+      String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$appLink";
+
+      if (postUrl.contains("youtube.com") || postUrl.contains("youtu.be")) {
+        shareText = "$title\n$appLink";
+      }
+      
+      try {
+        if (Platform.isIOS) {
+          final Size size = MediaQuery.of(context).size;
+          await Share.shareXFiles([XFile(filePath)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+        } else {
+          const platform = MethodChannel('com.chotanews/whatsapp');
+          await platform.invokeMethod('shareToWhatsApp', {'imagePath': filePath, 'text': shareText});
+        }
+      } catch (e) {
+        final Size size = MediaQuery.of(context).size;
+        await Share.shareXFiles([XFile(filePath)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+      }
     } catch (e) {
       log("Error generating PDF: $e");
       CustomToast.showErrorToast(msg: "Failed to generate PDF");

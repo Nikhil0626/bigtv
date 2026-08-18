@@ -52,11 +52,12 @@ Future<void> createAndSharePdf(BuildContext context, dynamic article) async {
 
     log("PDF saved at: $filePath");
 
+    final String title = article['title']?.toString() ?? article['id'].toString();
+    final String appLink = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
+    final String postUrl = article['postUrl']?.toString() ?? "";
+    final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$appLink";
+
     try {
-      final String title = article['title']?.toString() ?? article['id'].toString();
-      final String appLink = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
-      final String postUrl = article['postUrl']?.toString() ?? "";
-      final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$appLink";
       
       if (Platform.isIOS) {
         final Size size = MediaQuery.of(context).size;
@@ -66,14 +67,8 @@ Future<void> createAndSharePdf(BuildContext context, dynamic article) async {
         await platform.invokeMethod('shareToWhatsApp', {'imagePath': filePath, 'text': shareText});
       }
     } catch (e) {
-      if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
-        if (context.mounted) {
-          CustomToast.showInfoToast(msg: "WhatsApp is not installed");
-        }
-      } else {
-        final Size size = MediaQuery.of(context).size;
-        await Share.shareXFiles([XFile(filePath)], text: "${article['id']}", sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-      }
+      final Size size = MediaQuery.of(context).size;
+      await Share.shareXFiles([XFile(filePath)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
     }
   } catch (e) {
     log("Error: $e");

@@ -288,7 +288,10 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                               final String title = article['title']?.toString() ?? "";
                               final String link = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
                               final String postUrl = article['postUrl']?.toString() ?? "";
-                              final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
+                              String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
+                              if (postUrl.contains("youtube.com") || postUrl.contains("youtu.be")) {
+                                shareText = "$title\n$link";
+                              }
                               
                                 try {
                                   if (Platform.isIOS) {
@@ -300,7 +303,8 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                                   }
                                 } catch (e) {
                                   if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
-                                    CustomToast.showInfoToast(msg: "WhatsApp is not installed");
+                                    final Size size = MediaQuery.of(context).size;
+                                    await Share.shareXFiles([XFile(file.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
                                   } else {
                                     final Size size = MediaQuery.of(context).size;
                                     await Share.shareXFiles([XFile(file.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));

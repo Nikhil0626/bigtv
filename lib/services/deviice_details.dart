@@ -110,7 +110,7 @@ Future<Map<String, String>> getDeviceInfoData() async {
   }
   
   return {
-    "app_version": packageInfo.version,
+    "app_version": "${packageInfo.version}+${packageInfo.buildNumber}",
     "os_version": osVersion,
     "device_type": deviceType,
   };

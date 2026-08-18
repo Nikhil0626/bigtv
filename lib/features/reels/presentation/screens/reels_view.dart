@@ -61,6 +61,7 @@ class ReelsScreenState extends State<ReelsScreen> {
   @override
   Widget build(BuildContext context) {
     return SafeArea(
+      top: false,
       child: Consumer<ReelsProviders>(builder: (_, reelsProvider, __) {
         return reelsProvider.reelsLoading
             ? HomeShimmer()

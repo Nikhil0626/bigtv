@@ -965,7 +965,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                           }
                                                                                         } catch (e) {
                                                                                           if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
-                                                                                            CustomToast.showInfoToast(msg: "WhatsApp is not installed");
+                                                                                            final Size size = MediaQuery.of(context).size;
+                                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
                                                                                           } else {
                                                                                             final Size size = MediaQuery.of(context).size;
                                                                                             await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
@@ -976,7 +977,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                         if (await canLaunchUrl(Uri.parse(url))) {
                                                                                           await launchUrl(Uri.parse(url));
                                                                                         } else {
-                                                                                          CustomToast.showInfoToast(msg: "WhatsApp is not installed");
+                                                                                          await Share.share(shareText);
                                                                                         }
                                                                                       }
                                                                                     } catch (e) {
