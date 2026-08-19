@@ -12,6 +12,8 @@
 	<array>
 		<string>applinks:app.chotanews.com</string>
 		<string>webcredentials:app.chotanews.com</string>
+		<string>applinks:app.bigtv24x7.com</string>
+		<string>webcredentials:example.com</string>
 	</array>
 </dict>
 </plist>
