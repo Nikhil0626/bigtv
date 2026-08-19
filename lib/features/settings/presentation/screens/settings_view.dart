@@ -74,6 +74,7 @@ class SettingsViewState extends State<SettingsView> {
                       "createAt": DateTime.now().toString(),
                     }, "compliance_section");
                     if (isNotificationsEnabled == false) {
+                      context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => LoginBackgroundView()),

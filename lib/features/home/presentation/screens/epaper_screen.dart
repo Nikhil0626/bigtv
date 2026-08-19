@@ -29,7 +29,7 @@ class _EpaperScreenState extends State<EpaperScreen> {
       top: true,
       bottom: false,
       child: Scaffold(
-        backgroundColor: Colors.grey[100],
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Align(
           alignment: Alignment.centerLeft,
@@ -64,11 +64,11 @@ class _EpaperScreenState extends State<EpaperScreen> {
               itemCount: 6,
               itemBuilder: (context, index) {
                 return Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
+                  baseColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800]! : Colors.grey[300]!,
+                  highlightColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[700]! : Colors.grey[100]!,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: Theme.of(context).cardColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -110,7 +110,7 @@ class _EpaperScreenState extends State<EpaperScreen> {
                 },
                 child: Container(
                   decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: Theme.of(context).cardColor,
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: const [
                     BoxShadow(
@@ -134,9 +134,9 @@ class _EpaperScreenState extends State<EpaperScreen> {
                           imageUrl: firstImage,
                           fit: BoxFit.fill,
                           placeholder: (context, url) => Shimmer.fromColors(
-                            baseColor: Colors.grey[300]!,
-                            highlightColor: Colors.grey[100]!,
-                            child: Container(color: Colors.white),
+                            baseColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[800]! : Colors.grey[300]!,
+                            highlightColor: Theme.of(context).brightness == Brightness.dark ? Colors.grey[700]! : Colors.grey[100]!,
+                            child: Container(color: Theme.of(context).cardColor),
                           ),
                           errorWidget: (context, url, error) =>
                           const Icon(Icons.error),

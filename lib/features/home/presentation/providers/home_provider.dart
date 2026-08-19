@@ -613,7 +613,13 @@ class HomeProvider extends ChangeNotifier {
         mainNavigatorKey.currentState!.popUntil((route) => route.isFirst);
       }
       if (homePageController.hasClients) {
-        homePageController.jumpToPage(0);
+        try {
+          if (homePageController.positions.length == 1) {
+            homePageController.jumpToPage(0);
+          }
+        } catch (e) {
+          log("Error jumping to page: $e");
+        }
       }
       await getIndividualPost(postId, isLink: false);
       isHomeLoading = false;

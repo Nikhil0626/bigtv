@@ -12,7 +12,7 @@ class AppNoData extends StatelessWidget {
     return Center(
       child: Text(
         data == "" ? "No data Found" : data,
-        style: fontStyle(fontSize: 14, color: const Color(0xff111928), fontWeight: FontWeight.bold),
+        style: fontStyle(fontSize: 14, fontWeight: FontWeight.bold),
       ),
     );
   }

@@ -187,7 +187,6 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
         style: fontStyle(
           fontSize: 16,
           fontWeight: FontWeight.bold,
-          color: Colors.black,
         ),
       ),
     );
@@ -200,7 +199,6 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
         content,
         style: fontStyle(
           fontSize: 14,
-          color: Colors.black87,
         ),
       ),
     );
