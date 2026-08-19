@@ -196,27 +196,10 @@ class AuthenticationProvider extends ChangeNotifier {
         // Device details API call moved to language selection
 
         sp.setString("userStatus", response.data['user']['status'].toString());
-        if (response.data['is_new_user'] == false) {
-          getAllCategories();
-          getAllLocations();
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(
-              builder: (context) => HomeView(),
-            ),
-            (route) => false,
-          );
-          Future.delayed(
-            Duration(seconds: 2),
-            () {
-              newAppLoginStatus = NewAppLoginStatus.home;
-              saveLoginState();
-            },
-          );
-        } else {
-          newAppLoginStatus = NewAppLoginStatus.language;
-          saveLoginState();
-        }
+        
+        // Always redirect to language selection regardless of new/existing user
+        newAppLoginStatus = NewAppLoginStatus.language;
+        saveLoginState();
 
         WebEngagePlugin.userLogin(response.data['user']['id'].toString());
         WebEngagePlugin.setUserPhone(phoneController.text.toString());

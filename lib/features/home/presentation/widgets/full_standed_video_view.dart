@@ -72,7 +72,7 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
                   player: YoutubePlayer(
                     controller: ytController!,
                     // showVideoProgressIndicator: true,
-                    bottomActions: MediaQuery.of(context).orientation == Orientation.landscape ? [] : [
+                    bottomActions: [
                       CurrentPosition(),
                       ProgressBar(
                         isExpanded: true,
@@ -99,10 +99,7 @@ class FullStandardVideoViewState extends State<FullStandardVideoView> {
                     ),
                     ],
                   ),
-                  builder: (context, player) => AbsorbPointer(
-                    absorbing: MediaQuery.of(context).orientation == Orientation.landscape,
-                    child: player,
-                  ),
+                  builder: (context, player) => player,
                 ),
               );
             }),

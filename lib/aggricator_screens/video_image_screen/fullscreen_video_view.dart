@@ -15,6 +15,8 @@ class FullscreenVideoView extends StatefulWidget {
 }
 
 class _FullscreenVideoViewState extends State<FullscreenVideoView> {
+  bool _showControls = true;
+
   @override
   void initState() {
     super.initState();
@@ -55,6 +57,12 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
     }
   }
 
+  void _toggleControls() {
+    setState(() {
+      _showControls = !_showControls;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -71,64 +79,78 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
             return Stack(
               alignment: Alignment.center,
               children: [
-                Center(
-                  child: AspectRatio(
-                    aspectRatio: widget.controller.value.aspectRatio,
-                    child: VideoPlayer(widget.controller),
+                GestureDetector(
+                  onTap: _toggleControls,
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: widget.controller.value.aspectRatio,
+                      child: VideoPlayer(widget.controller),
+                    ),
                   ),
                 ),
-                Positioned(
-                  top: 20,
-                  left: 20,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back,
-                        color: Colors.white, size: 30),
-                    onPressed: _exitFullscreen,
-                  ),
-                ),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  right: 20,
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          videoProvider.isPlaying
-                              ? Icons.pause
-                              : Icons.play_arrow,
-                          color: Colors.white,
-                          size: 30,
-                        ),
-                        onPressed: () => videoProvider.togglePlayPause(),
-                      ),
-                      Expanded(
-                        child: VideoProgressIndicator(
-                          widget.controller,
-                          allowScrubbing: true,
-                          colors: const VideoProgressColors(
-                            playedColor: Colors.red,
-                            bufferedColor: Colors.grey,
-                            backgroundColor: Colors.black26,
+                AnimatedOpacity(
+                  opacity: _showControls ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: IgnorePointer(
+                    ignoring: !_showControls,
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          top: 20,
+                          left: 20,
+                          child: IconButton(
+                            icon: const Icon(Icons.arrow_back,
+                                color: Colors.white, size: 30),
+                            onPressed: _exitFullscreen,
                           ),
                         ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          videoProvider.isMuted
-                              ? Icons.volume_off
-                              : Icons.volume_up,
-                          color: Colors.white,
-                          size: 30,
+                        Positioned(
+                          bottom: 20,
+                          left: 20,
+                          right: 20,
+                          child: Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  videoProvider.isPlaying
+                                      ? Icons.pause
+                                      : Icons.play_arrow,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                                onPressed: () => videoProvider.togglePlayPause(),
+                              ),
+                              Expanded(
+                                child: VideoProgressIndicator(
+                                  widget.controller,
+                                  allowScrubbing: true,
+                                  colors: const VideoProgressColors(
+                                    playedColor: Colors.red,
+                                    bufferedColor: Colors.grey,
+                                    backgroundColor: Colors.black26,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  videoProvider.isMuted
+                                      ? Icons.volume_off
+                                      : Icons.volume_up,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                                onPressed: videoProvider.toggleMute,
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.fullscreen_exit,
+                                    color: Colors.white, size: 30),
+                                onPressed: _exitFullscreen,
+                              ),
+                            ],
+                          ),
                         ),
-                        onPressed: videoProvider.toggleMute,
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.fullscreen_exit,
-                            color: Colors.white, size: 30),
-                        onPressed: _exitFullscreen,
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
