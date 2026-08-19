@@ -279,10 +279,10 @@ class AuthenticationProvider extends ChangeNotifier {
   void saveLanguageAndProceed(BuildContext context, int languageId) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.setInt("selectedLanguageId", languageId);
-    String langCode = 'en';
+    String langCode = 'te';
     try {
       final lang = getAllLanguageList.firstWhere((l) => l.id == languageId);
-      langCode = lang.code ?? 'en';
+      langCode = lang.code ?? 'te';
       await preferences.setString("selectedLanguageCode", langCode);
     } catch (_) {}
 
@@ -311,7 +311,7 @@ class AuthenticationProvider extends ChangeNotifier {
     isCatLoading = true;
     selectedCategories = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String langCode = preferences.getString("selectedLanguageCode") ?? "en";
+    String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
 
@@ -418,7 +418,7 @@ class AuthenticationProvider extends ChangeNotifier {
     isLocationLoading = true;
     selectedLocations = [];
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String langCode = preferences.getString("selectedLanguageCode") ?? "en";
+    String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     String? deviceId = preferences.getString("deviceId");
     
     Map<String, dynamic> body = {

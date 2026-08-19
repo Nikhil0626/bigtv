@@ -72,7 +72,7 @@ class _HomeViewState extends State<HomeView> {
       }
       String? deviceId = preferences.getString("deviceId");
       String? userId = preferences.getString("userId");
-      String langCode = preferences.getString("selectedLanguageCode") ?? "en";
+      String langCode = preferences.getString("selectedLanguageCode") ?? "te";
 
       homeProvider?.sendDeviceDetailsApi(
         userId: userId ?? "0",

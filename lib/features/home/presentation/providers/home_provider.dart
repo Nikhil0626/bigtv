@@ -70,11 +70,11 @@ class HomeProvider extends ChangeNotifier {
 
   int? get selectedTagId => _selectedTagId;
 
-  String langCode = 'en';
+  String langCode = 'te';
 
   Future<void> loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
-    langCode = prefs.getString("selectedLanguageCode") ?? "en";
+    langCode = prefs.getString("selectedLanguageCode") ?? "te";
     notifyListeners();
   }
 
@@ -281,7 +281,7 @@ class HomeProvider extends ChangeNotifier {
     webUrl = "";
     allPostLastId = "0";
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String langCode = preferences.getString("selectedLanguageCode") ?? "en";
+    String langCode = preferences.getString("selectedLanguageCode") ?? "te";
 
     String? deviceId = preferences.getString("deviceId");
     String? userIdStr = preferences.getString("userId");
@@ -382,7 +382,7 @@ class HomeProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
-    String langCode = preferences.getString("selectedLanguageCode") ?? "en";
+    String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     getAllAiTagsList = [];
     Map<String, dynamic> body = {
       "lang": langCode,
