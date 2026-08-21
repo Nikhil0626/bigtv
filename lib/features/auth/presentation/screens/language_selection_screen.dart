@@ -149,13 +149,13 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                               provider.saveLanguageAndProceed(context, provider.selectedLanguageId!);
                             },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: context.primaryColor,
-                        disabledBackgroundColor: context.borderColor,
+                        backgroundColor: provider.selectedLanguageId == null ? Colors.grey.shade400 : context.primaryColor,
+                        disabledBackgroundColor: Colors.grey.shade400,
                       ),
                       child: Text(
                         "Continue",
                         style: context.typography.titleMedium?.copyWith(
-                          color: context.colors.onPrimary,
+                          color: provider.selectedLanguageId == null ? Colors.white70 : context.colors.onPrimary,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

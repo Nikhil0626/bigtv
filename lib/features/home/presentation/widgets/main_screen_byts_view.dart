@@ -483,7 +483,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                       ? MediaQuery.of(context)
                                                                               .size
                                                                               .height *
-                                                                          .52
+                                                                          .60
                                                                       : MediaQuery.of(context)
                                                                               .size
                                                                               .height *
@@ -524,10 +524,10 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                 );
                                                                               },
                                                                               child: SizedBox(
-                                                                                height: MediaQuery.of(context).size.height * .35,
+                                                                                height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .60 : .35),
                                                                                 child: CachedNetworkImage(
                                                                                   imageUrl: _getImageUrl(widget.article['image_url']),
-                                                                                  height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .65 : .4),
+                                                                                  height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .60 : .4),
                                                                                   width: MediaQuery.of(context).size.width,
                                                                                   fit: BoxFit.fill,
                                                                                   placeholder: (context, url) => Container(
