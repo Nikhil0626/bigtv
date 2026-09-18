@@ -52,10 +52,6 @@
         android:theme="@style/LaunchTheme"
         android:windowSoftInputMode="adjustResize">
         <!-- Meta-Data -->
-        <meta-data
-            android:name="com.webengage.sdk.android.environment"
-            android:value="in" />
-
 <!--        <meta-data-->
 <!--            android:name="com.facebook.sdk.ApplicationId"-->
 <!--            android:value="@string/facebook_app_id" />-->
@@ -70,9 +66,6 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <meta-data
-            android:name="com.webengage.sdk.android.key"
-            android:value="in~~1341061ba" />
         <meta-data android:name="flutter_deeplinking_enabled" android:value="false" />
 
 

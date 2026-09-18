@@ -58,18 +58,6 @@
 		DD3DCAF32DCFA438004AB175 /* NativeAdView.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = NativeAdView.xib; sourceTree = "<group>"; };
 		DD5111052D4FB979000A5861 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DD931E262DCF994E00C7EEEB /* NativeAdFactoryExample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeAdFactoryExample.swift; sourceTree = "<group>"; };
-		DD9364272D5C8CB600EFEC5C /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		DD9364282D5C8CB600EFEC5C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		DD9364292D5C8CB600EFEC5C /* WebEngage.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WebEngage.xcframework; sourceTree = "<group>"; };
-		DD93642A2D5C8CB600EFEC5C /* WELocation.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WELocation.xcframework; sourceTree = "<group>"; };
-		DD93642C2D5C8CF100EFEC5C /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		DD93642D2D5C8CF100EFEC5C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		DD93642E2D5C8CF100EFEC5C /* WebEngage.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WebEngage.xcframework; sourceTree = "<group>"; };
-		DD93642F2D5C8CF100EFEC5C /* WELocation.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WELocation.xcframework; sourceTree = "<group>"; };
-		DD9364312D5C8D9900EFEC5C /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
-		DD9364322D5C8D9900EFEC5C /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		DD9364332D5C8D9900EFEC5C /* WebEngage.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WebEngage.xcframework; sourceTree = "<group>"; };
-		DD9364342D5C8D9900EFEC5C /* WELocation.xcframework */ = {isa = PBXFileReference; expectedSignature = "AppleDeveloperProgram:S7X7V9YPX7:Sarthak Sharma"; lastKnownFileType = wrapper.xcframework; path = WELocation.xcframework; sourceTree = "<group>"; };
 		DDAB80C22D461EC4008D0B68 /* RunnerDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerDebug.entitlements; sourceTree = "<group>"; };
 		DDAB80C32D461F8F008D0B68 /* RunnerRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = RunnerRelease.entitlements; sourceTree = "<group>"; };
 		DDF795072E4E0A7F00BB83E6 /* GameOfWarScreen.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GameOfWarScreen.xib; sourceTree = "<group>"; };
@@ -173,49 +161,10 @@
 		C526F4B19814563B09D39692 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				DD93642B2D5C8CB600EFEC5C /* WebEngageFramework */,
-				DD9364302D5C8CF100EFEC5C /* WebEngageFramework */,
-				DD9364352D5C8D9900EFEC5C /* WebEngageFramework */,
 				A86C6ABF00C23C2EFEFC865D /* Pods_Runner.framework */,
 				50B68FB4BF6311D80F952E0F /* Pods_RunnerTests.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		DD93642B2D5C8CB600EFEC5C /* WebEngageFramework */ = {
-			isa = PBXGroup;
-			children = (
-				DD9364272D5C8CB600EFEC5C /* LICENSE */,
-				DD9364282D5C8CB600EFEC5C /* README.md */,
-				DD9364292D5C8CB600EFEC5C /* WebEngage.xcframework */,
-				DD93642A2D5C8CB600EFEC5C /* WELocation.xcframework */,
-			);
-			name = WebEngageFramework;
-			path = ../../../../Downloads/WebEngageFramework;
-			sourceTree = "<group>";
-		};
-		DD9364302D5C8CF100EFEC5C /* WebEngageFramework */ = {
-			isa = PBXGroup;
-			children = (
-				DD93642C2D5C8CF100EFEC5C /* LICENSE */,
-				DD93642D2D5C8CF100EFEC5C /* README.md */,
-				DD93642E2D5C8CF100EFEC5C /* WebEngage.xcframework */,
-				DD93642F2D5C8CF100EFEC5C /* WELocation.xcframework */,
-			);
-			name = WebEngageFramework;
-			path = ../../../../Downloads/WebEngageFramework;
-			sourceTree = "<group>";
-		};
-		DD9364352D5C8D9900EFEC5C /* WebEngageFramework */ = {
-			isa = PBXGroup;
-			children = (
-				DD9364312D5C8D9900EFEC5C /* LICENSE */,
-				DD9364322D5C8D9900EFEC5C /* README.md */,
-				DD9364332D5C8D9900EFEC5C /* WebEngage.xcframework */,
-				DD9364342D5C8D9900EFEC5C /* WELocation.xcframework */,
-			);
-			name = WebEngageFramework;
-			path = ../../../../Downloads/WebEngageFramework;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
