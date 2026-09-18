@@ -30,6 +30,7 @@ class SplashProvider extends ChangeNotifier {
     }
     await Future.delayed(Duration(seconds: showGif ? 5 : 2));
     if (context.mounted) {
+      context.read<HomeProvider>().getAppConfig();
       await context.read<HomeProvider>().loadLanguage();
       context.read<AuthenticationProvider>().isPageNavigation(context);
     }

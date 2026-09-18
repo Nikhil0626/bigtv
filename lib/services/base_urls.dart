@@ -45,12 +45,13 @@ class BaseUrls {
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
   /// Python live apis
-  static const String baseUrlAwsDev = "https://api.chotanews.com";
+  static const String baseUrlAwsDev = "https://apidev.chotanews.com";
 
   /// New Server API
   // static const String newServerBaseUrl = "http://192.168.70.251";
   static const String newServerBaseUrl = "https://api.pravasamedia.com";
   static const String deviceDetails = "/api/v1/deviceDetails";
+  static const String appConfig = "/api/v1/app-config";
   /// Python Dev Apis
   // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
 
@@ -64,7 +65,9 @@ class BaseUrls {
   ///FeedBack
   static const String getAllPost = "/allposts";
   static const String aiTags = "/aitags";
+  static const String videoTags = "/api/v1/video-tags";
   static const String aiTagsById = "/aitag/content";
+  static const String updateMoreFollow = "/update_morefollow";
 
   ///Rating
   static const String postRating = "/moviereviews/submit";

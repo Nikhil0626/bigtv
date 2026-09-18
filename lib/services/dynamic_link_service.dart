@@ -14,7 +14,27 @@ class DynamicLinkService {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();
     String? postId = deepLink?.queryParameters["postId"];
     String? referralCode = deepLink?.queryParameters["referralCode"];
+    String? epaperId = deepLink?.queryParameters["epaperId"] ?? deepLink?.queryParameters["id"];
+
+    if ((epaperId == null || epaperId.isEmpty) && deepLink != null && deepLink.pathSegments.contains("epaper")) {
+      final index = deepLink.pathSegments.indexOf("epaper");
+      if (index + 1 < deepLink.pathSegments.length) {
+        epaperId = deepLink.pathSegments[index + 1];
+      }
+    }
+
     log("Navigating to : $deepLink");
+
+    if (epaperId != null && epaperId.isNotEmpty) {
+      log("Navigating to Epaper ID: $epaperId");
+      if (!context.mounted) return;
+      Navigator.pushNamed(
+        mainNavigatorKey.currentContext!,
+        RoutesManager.homeScreen,
+        arguments: {"epaperId": epaperId, "tab": "0"},
+      );
+      return;
+    }
 
     if (postId != null && postId.isNotEmpty) {
 

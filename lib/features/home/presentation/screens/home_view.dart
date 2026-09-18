@@ -9,6 +9,7 @@ import 'package:chotanews/features/home/presentation/providers/home_provider.dar
 import 'package:chotanews/features/home/presentation/widgets/main_screen_card.dart';
 import 'package:chotanews/features/reels/presentation/screens/reels_view.dart';
 import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart';
+import 'package:chotanews/features/home/presentation/screens/editorial_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:chotanews/features/premium/presentation/bloc/premium_bloc.dart';
 import 'package:chotanews/features/premium/data/repositories/premium_repo.dart';
@@ -24,11 +25,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
-import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'package:share_plus/share_plus.dart';
 // import 'package:social_share/social_share.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeView extends StatefulWidget {
@@ -135,6 +133,7 @@ class _HomeViewState extends State<HomeView> {
                     child: const MainScreenCard(),
                   ),
                   const ReelsScreen(),
+                  const EditorialScreen(),
                   if (homeProvider.langCode == 'ml')
                     BlocProvider(
                       create: (context) => PremiumBloc(premiumRepo: PremiumRepo()),
@@ -150,7 +149,7 @@ class _HomeViewState extends State<HomeView> {
                 left: 0,
                 right: 0,
                 child: Visibility(
-                  visible: homeProvider.isBottomEnable && MediaQuery.of(context).orientation != Orientation.landscape,
+                  visible: !homeProvider.isCurrentArticleGrid && (homeProvider.isBottomEnable || homeProvider.isAiTagDataLoaded) && MediaQuery.of(context).orientation != Orientation.landscape,
                   child: Container(
                     color: AppColorTokens.primaryRed,
                     child: SafeArea(
@@ -176,11 +175,19 @@ class _HomeViewState extends State<HomeView> {
                               labelMl: 'റീൽസ്',
                               labelTe: 'రీల్స్',
                             ),
+                            _buildNavItem(
+                              context,
+                              homeProvider,
+                              index: 2,
+                              iconData: Icons.article_outlined,
+                              labelMl: 'എഡിറ്റോറിയൽ',
+                              labelTe: 'ఎడిటోరియల్',
+                            ),
                             if (homeProvider.langCode == 'ml')
                               _buildNavItem(
                                 context,
                                 homeProvider,
-                                index: 2,
+                                index: 3,
                                 iconData: Icons.workspace_premium,
                                 labelMl: 'പ്രീമിയം',
                                 labelTe: 'ప్రీమియం',
@@ -189,7 +196,7 @@ class _HomeViewState extends State<HomeView> {
                               _buildNavItem(
                                 context,
                                 homeProvider,
-                                index: 2,
+                                index: 3,
                                 iconData: Icons.newspaper,
                                 labelMl: 'ഇ-പേപ്പർ',
                                 labelTe: 'ఈ-పేపర్',
@@ -197,7 +204,7 @@ class _HomeViewState extends State<HomeView> {
                             _buildNavItem(
                               context,
                               homeProvider,
-                              index: 3,
+                              index: 4,
                               iconPath: "assets/new_app_icon/menu.svg",
                               labelMl: 'ആൽമരം',
                               labelTe: 'మరిన్ని',
@@ -227,7 +234,7 @@ class _HomeViewState extends State<HomeView> {
     required String labelMl,
     required String labelTe,
   }) {
-    bool isSelected = (homeProvider.selectedIndex > 3 ? 3 : homeProvider.selectedIndex) == index;
+    bool isSelected = homeProvider.selectedIndex == index;
     String label = homeProvider.langCode == 'ml' ? labelMl : labelTe;
     Color itemColor = context.colors.onPrimary;
 
@@ -240,19 +247,23 @@ class _HomeViewState extends State<HomeView> {
         homeProvider.pageChange(isValue: true);
 
         if (index == 0) {
-          homeProvider.getAllPost();
+          if (homeProvider.getAllPostList.isEmpty) {
+            homeProvider.getAllPost();
+          }
           homeProvider.aiTagDataLoaded(false);
           homeProvider.setSelectedTagId(0);
           EventRepo().addEvent({"aiTagName": "news", "aiTagId": "-1", "createAt": DateTime.now().toString()}, "ai_tag_click");
         } else if (index == 1) {
           EventRepo().addEvent({"aiTagName": "reels", "aiTagId": "-3", "createAt": DateTime.now().toString()}, "ai_tag_click");
         } else if (index == 2) {
+          EventRepo().addEvent({"aiTagName": "editorial", "aiTagId": "-7", "createAt": DateTime.now().toString()}, "ai_tag_click");
+        } else if (index == 3) {
           if (homeProvider.langCode == 'ml') {
             EventRepo().addEvent({"aiTagName": "premium", "aiTagId": "-6", "createAt": DateTime.now().toString()}, "ai_tag_click");
           } else {
             EventRepo().addEvent({"aiTagName": "epaper", "aiTagId": "-4", "createAt": DateTime.now().toString()}, "ai_tag_click");
           }
-        } else if (index == 3) {
+        } else if (index == 4) {
           EventRepo().addEvent({"aiTagName": "more", "aiTagId": "-5", "createAt": DateTime.now().toString()}, "ai_tag_click");
         }
       },

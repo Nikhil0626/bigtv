@@ -19,7 +19,16 @@ class HomeRepo extends BaseService{
     return response;
   }
   Future getAllAiTags(Map<String, dynamic> body) async{
-    Response  response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: BaseUrls.aiTags,method: RequestType.get,queryParameters: body);
+    Response response = await makeRequest(baseUrl: BaseUrls.newServerBaseUrl, url: BaseUrls.videoTags, method: RequestType.get);
+    return response;
+  }
+
+  Future getTagVideos(String slug) async {
+    Response response = await makeRequest(
+      baseUrl: BaseUrls.newServerBaseUrl,
+      url: "/api/v1/video-tags/$slug/videos",
+      method: RequestType.get,
+    );
     return response;
   }
 
@@ -49,6 +58,15 @@ class HomeRepo extends BaseService{
       url: BaseUrls.deviceDetails,
       method: RequestType.post,
       body: body
+    );
+    return response;
+  }
+
+  Future getAppConfig() async {
+    Response response = await makeRequest(
+      baseUrl: BaseUrls.newServerBaseUrl,
+      url: BaseUrls.appConfig,
+      method: RequestType.get,
     );
     return response;
   }

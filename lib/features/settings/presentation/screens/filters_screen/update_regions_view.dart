@@ -3,9 +3,7 @@ import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
-import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_enums.dart';
-import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/app_toasts.dart';
@@ -31,9 +29,8 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
   @override
   Widget build(BuildContext context) {
     return Consumer2<AuthenticationProvider, SettingsProvider>(builder: (_, authenticationProvider, settingsProvider, __) {
-      bool isDark = context.theme.brightness == Brightness.dark;
       return Scaffold(
-        backgroundColor: context.scaffoldBackgroundColor,
+        backgroundColor: context.theme.scaffoldBackgroundColor,
         bottomNavigationBar: Padding(
           padding: EdgeInsets.all(25.w),
           child: InkWell(

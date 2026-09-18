@@ -22,11 +22,33 @@ class SettingsProvider extends ChangeNotifier {
   List feedbackList = [];
   List<String> selectedFeedbackList = [];
   TextEditingController feedbackController = TextEditingController();
+  int selectedStar = 0;
   List profileList = [];
   List<String> selectedProfileList = [];
   TextEditingController profileController = TextEditingController();
 
   bool isBookMarkLoading = false;
+  String appVersion = "";
+  bool isNotificationsEnabled = false;
+
+  void setSelectedStar(int star) {
+    selectedStar = star;
+    notifyListeners();
+  }
+
+  void resetFeedback() {
+    selectedStar = 0;
+    feedbackController.clear();
+    selectedFeedbackList.clear();
+    notifyListeners();
+  }
+
+  Future<void> loadSettingsInfo() async {
+    SharedPreferences sp = await SharedPreferences.getInstance();
+    appVersion = sp.getString("app_version") ?? "";
+    isNotificationsEnabled = sp.getString("loginType") == "login";
+    notifyListeners();
+  }
 
   Future getAllBookMarks({String id = "0"}) async {
     isBookMarkLoading = true;

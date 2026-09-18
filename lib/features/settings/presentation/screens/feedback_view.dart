@@ -17,9 +17,7 @@ class FeedbackForm extends StatefulWidget {
 }
 
 class FeedbackFormState extends State<FeedbackForm> {
-  int selectedStar = 0;
-
-  String get feedbackMessage {
+  String feedbackMessage(int selectedStar) {
     switch (selectedStar) {
       case 1:
         return "Poor experience";
@@ -99,13 +97,11 @@ class FeedbackFormState extends State<FeedbackForm> {
                                     children: List.generate(5, (index) {
                                       return GestureDetector(
                                         onTap: () {
-                                          setState(() {
-                                            selectedStar = index + 1;
-                                          });
+                                          settingsProvider.setSelectedStar(index + 1);
                                         },
                                         child: Icon(
                                           Icons.star,
-                                          color: index < selectedStar ? AppColors.ratingColor : Colors.grey,
+                                          color: index < settingsProvider.selectedStar ? AppColors.ratingColor : Colors.grey,
                                           size: 40,
                                         ),
                                       );
@@ -113,7 +109,7 @@ class FeedbackFormState extends State<FeedbackForm> {
                                   ),
                                   height(height: 3),
                                   Text(
-                                    feedbackMessage,
+                                    feedbackMessage(settingsProvider.selectedStar),
                                     style: newAppFont(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
@@ -230,13 +226,9 @@ class FeedbackFormState extends State<FeedbackForm> {
                         height(height: 16),
                         InkWell(
                           onTap: () {
-                            if (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar > 0) {
-                              settingsProvider.postFeedBack(selectedStar,).then((value) {
-                                  selectedStar = 0;
-                                  setState(() {
-                                    settingsProvider.feedbackController.clear();
-                                    settingsProvider.selectedFeedbackList.clear();
-                                  });
+                            if (settingsProvider.selectedFeedbackList.isNotEmpty && settingsProvider.selectedStar > 0) {
+                              settingsProvider.postFeedBack(settingsProvider.selectedStar).then((value) {
+                                  settingsProvider.resetFeedback();
                                 },
                               );
                             } else {
@@ -248,7 +240,7 @@ class FeedbackFormState extends State<FeedbackForm> {
                             height: 35.h,
                             // margin: EdgeInsets.only(bottom: 20.h),
                             decoration: BoxDecoration(
-                              color: (settingsProvider.selectedFeedbackList.isNotEmpty && selectedStar > 0) ? AppColors.appButtonColor : AppColors.bodyTextColor.withValues(alpha: 0.2),
+                              color: (settingsProvider.selectedFeedbackList.isNotEmpty && settingsProvider.selectedStar > 0) ? AppColors.appButtonColor : AppColors.bodyTextColor.withValues(alpha: 0.2),
                               borderRadius: BorderRadius.all(Radius.circular(8.r)),
                             ),
                             child: Center(

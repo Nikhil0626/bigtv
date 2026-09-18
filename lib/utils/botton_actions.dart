@@ -1,4 +1,5 @@
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -6,26 +7,42 @@ import 'package:provider/provider.dart';
 class BottomActions extends StatelessWidget {
   final String icon;
   final String label;
-  final iconColor;
+  final dynamic iconColor;
   final String postType;
   final bool isLike;
-  final onTap;
+  final dynamic onTap;
   final Widget? iconWidget;
+  final double iconSize;
 
-  const BottomActions({super.key, required this.icon, required this.label, required this.postType, this.isLike = false, this.iconColor = Colors.grey, this.iconWidget, required this.onTap});
+  const BottomActions({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.postType,
+    this.isLike = false,
+    this.iconColor = AppColorTokens.primaryRed,
+    this.iconWidget,
+    this.iconSize = 20,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+      final Color colorToUse = iconColor is Color ? iconColor : AppColorTokens.primaryRed;
       return InkWell(
         onTap: onTap,
         child: SizedBox(
-          width: 40,
-          child: label == "లైక్"
-              ? SvgPicture.asset(icon, height: 20, width: 20, color: isLike ? Theme.of(context).primaryColor : iconColor)
-              : label != "లైక్"
-                  ? SvgPicture.asset(icon, height: 20, width: 20, color: iconColor)
-                  : SizedBox.shrink(),
+          width: 44,
+          child: SvgPicture.asset(
+            icon,
+            height: iconSize,
+            width: iconSize,
+            colorFilter: ColorFilter.mode(
+              isLike ? AppColorTokens.primaryRed : colorToUse,
+              BlendMode.srcIn,
+            ),
+          ),
         ),
       );
     });

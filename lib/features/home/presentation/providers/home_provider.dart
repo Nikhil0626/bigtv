@@ -7,7 +7,6 @@ import 'package:chotanews/main.dart';
 import 'package:app_links/app_links.dart';
 
 import 'package:chotanews/aggricator_screens/contest_screen/contest_provider.dart';
-import 'package:chotanews/aggricator_screens/contest_screen/contest_screen.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
@@ -17,6 +16,7 @@ import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/base_service.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/services/deviice_details.dart';
+import 'package:chotanews/services/translation_service.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
@@ -45,6 +45,11 @@ class HomeProvider extends ChangeNotifier {
 
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
+  List tagVideosList = [];
+  bool isTagVideosLoading = false;
+  String currentTagSlug = "";
+  String currentTagTitle = "";
+  String? currentTagThumbnailUrl;
   List getAllSurveyDataList = [];
   List getImageAdsList = [];
 
@@ -62,19 +67,20 @@ class HomeProvider extends ChangeNotifier {
   bool isMuted = false;
   bool isImageAdClose = false;
   late YoutubePlayerController controller;
-  int? _selectedTagId;
+  dynamic _selectedTagId;
 
   bool isVideoPlaying = false;
   bool isVideosMuted = false;
   late VideoPlayerController videoController;
 
-  int? get selectedTagId => _selectedTagId;
+  dynamic get selectedTagId => _selectedTagId;
 
   String langCode = 'te';
 
   Future<void> loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
     langCode = prefs.getString("selectedLanguageCode") ?? "te";
+    isEnglishMode = langCode == 'en';
     notifyListeners();
   }
 
@@ -92,6 +98,39 @@ class HomeProvider extends ChangeNotifier {
     getSinglePostList = {};
     isPostLoading = true;
     notifyListeners();
+  }
+
+  bool folkNight = false;
+
+  bool isEnglishMode = false;
+  void toggleEnglishMode() {
+    isEnglishMode = !isEnglishMode;
+    if (isEnglishMode) {
+      // Ensure model is ready (retries if previous attempt failed)
+      TranslationService().init();
+      TranslationService().preloadAllArticles(getAllPostList);
+    }
+    notifyListeners();
+  }
+
+  void setEnglishMode(bool value) {
+    if (isEnglishMode != value) {
+      toggleEnglishMode();
+    }
+  }
+
+  Future<void> getAppConfig() async {
+    try {
+      Response response = await HomeRepo().getAppConfig();
+      if (response.statusCode == 200) {
+        if (response.data != null && response.data['success'] == true) {
+          folkNight = response.data['data']['folkNight'] ?? false;
+          notifyListeners();
+        }
+      }
+    } catch (e) {
+      log("Error fetching app config: $e");
+    }
   }
 
   void isTabChange() {
@@ -152,8 +191,12 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void setSelectedTagId(int id) {
-    _selectedTagId = id;
+  void setSelectedTagId(dynamic id) {
+    if (id == null || id == 0 || id == "0") {
+      _selectedTagId = null;
+    } else {
+      _selectedTagId = id;
+    }
     notifyListeners();
   }
 
@@ -274,6 +317,7 @@ class HomeProvider extends ChangeNotifier {
     isHomeLoading = true;
     if (isGetAllPost == false && postIds == "0") {
       getAllPostList = [];
+      _currentPageIndex = 0;
     }
     isBookMark = [];
 
@@ -299,6 +343,8 @@ class HomeProvider extends ChangeNotifier {
       "isAdManager": false,
       "isBigTv": true,
       "lang": langCode,
+      "isHomePost": true,
+      "isHomePast": true,
     };
     log("all post body ${body.toString()}");
     try {
@@ -320,16 +366,152 @@ class HomeProvider extends ChangeNotifier {
          allPostLastId = data.length >= 100 ? "1" : "0";
       }
 
+      // Extract homepost items from response and prepend them to the feed
+      List homePosts = [];
+      if (responseData is Map && responseData['homepost'] != null && responseData['homepost'] is List) {
+        homePosts = responseData['homepost'];
+      } else if (data.isNotEmpty && data[0] is Map && data[0]['homepost'] != null) {
+        final raw = data[0]['homepost'];
+        if (raw is List) {
+          homePosts = raw;
+        }
+        // Remove the homepost wrapper element from regular data
+        data = data.sublist(1);
+      }
+      log("Extracted homePosts count: ${homePosts.length}");
+
+      // Extract top-level morefollow items if present
+      List moreFollowList = [];
+      if (responseData is Map) {
+        final raw = responseData['morefollow'] ??
+            responseData['more_follow'] ??
+            responseData['moreFollow'] ??
+            responseData['moreFollowTags'];
+        if (raw is List) {
+          moreFollowList = raw;
+        }
+      }
+
+      // Filter out posts that are already present inside homePosts 3-grid card
+      if (homePosts.isNotEmpty) {
+        final homePostIds = homePosts
+            .where((e) => e is Map && e['id'] != null)
+            .map((e) => e['id'].toString())
+            .toSet();
+        if (homePostIds.isNotEmpty) {
+          data.removeWhere((e) => e is Map && e['id'] != null && homePostIds.contains(e['id'].toString()));
+        }
+      }
 
       getAllPostList.addAll(data);
       log("Print all post ${data}");
       final seenIds = <int>{};
       getAllPostList.retainWhere((e) {
-        final id = e['id'] as int;
-        if (id == 234000) return true;
+        if (e is! Map) return true;
+        final typeStr = e['type']?.toString().toLowerCase() ?? '';
+        final subTypeStr = e['subType']?.toString().toLowerCase() ?? '';
+        final postTypeStr = e['post_type']?.toString().toLowerCase() ?? '';
+        if (typeStr == 'morefollow' ||
+            subTypeStr == 'morefollow' ||
+            postTypeStr == 'morefollow' ||
+            e['morefollow'] != null ||
+            e['moreFollowTags'] != null) {
+          return true;
+        }
+        if (typeStr == 'homepostgrid' ||
+            subTypeStr == 'homepostgrid' ||
+            postTypeStr == 'homepostgrid' ||
+            e['homepost'] != null ||
+            e['id'] == -999) {
+          return false;
+        }
+        final id = e['id'];
+        if (id == null) return true;
+        if (id is! int) return true;
+        if (id == 234000 || id == -998) return true;
         return seenIds.add(id);
       });
 
+      // Ensure a morefollow recommendation card exists in the initial feed
+      bool hasMoreFollow = getAllPostList.any((e) =>
+          e is Map &&
+          (e['type']?.toString().toLowerCase() == 'morefollow' ||
+              e['subType']?.toString().toLowerCase() == 'morefollow' ||
+              e['post_type']?.toString().toLowerCase() == 'morefollow' ||
+              e['morefollow'] != null ||
+              e['moreFollowTags'] != null));
+
+      if (!hasMoreFollow && isGetAllPost == false && postIds == "0" && getAllPostList.isNotEmpty) {
+        final tagsToInsert = moreFollowList.isNotEmpty
+            ? moreFollowList
+            : [
+                {
+                  "id": 1,
+                  "morefollowId": 1,
+                  "morefollowName": "డిఎస్సి",
+                  "morefollowNameTranslations": {"te": "డిఎస్సి"},
+                  "imageUrl": "https://chotanews-wordpress-files-mig.s3.ap-south-1.amazonaws.com/uploads/2026/09/dsc_tag.jpg",
+                  "isActive": true,
+                  "isFollowed": false
+                },
+                {
+                  "id": 2,
+                  "morefollowId": 2,
+                  "morefollowName": "నేపాల్ వరదలు",
+                  "morefollowNameTranslations": {"te": "నేపాల్ వరదలు"},
+                  "imageUrl": "https://chotanews-wordpress-files-mig.s3.ap-south-1.amazonaws.com/uploads/2026/09/nepal_floods.jpg",
+                  "isActive": true,
+                  "isFollowed": false
+                },
+                {
+                  "id": 3,
+                  "morefollowId": 3,
+                  "morefollowName": "క్రికెట్",
+                  "morefollowNameTranslations": {"te": "క్రికెట్"},
+                  "imageUrl": "",
+                  "isActive": true,
+                  "isFollowed": false
+                },
+                {
+                  "id": 4,
+                  "morefollowId": 4,
+                  "morefollowName": "ట్రెండింగ్",
+                  "morefollowNameTranslations": {"te": "ట్రెండింగ్"},
+                  "imageUrl": "",
+                  "isActive": true,
+                  "isFollowed": false
+                }
+              ];
+
+        final insertIdx = getAllPostList.length >= 3 ? 3 : getAllPostList.length;
+        getAllPostList.insert(insertIdx, {
+          'id': -998,
+          'type': 'morefollow',
+          'post_type': 'morefollow',
+          'subType': 'morefollow',
+          'isAd': false,
+          'morefollow': tagsToInsert,
+        });
+      }
+
+      // Prepend homePosts grid at position 0 (shown first in the feed)
+      if (homePosts.isNotEmpty && isGetAllPost == false && postIds == "0") {
+        getAllPostList.removeWhere((e) =>
+            e is Map &&
+            (e['id'] == -999 ||
+                e['type'] == 'HomePostGrid' ||
+                e['subType'] == 'HomePostGrid' ||
+                e['post_type'] == 'HomePostGrid'));
+        getAllPostList.insert(0, {
+          'id': -999,
+          'type': 'HomePostGrid',
+          'post_type': 'HomePostGrid',
+          'subType': 'HomePostGrid',
+          'homepost': homePosts,
+        });
+      }
+
+      TranslationService().preloadAllArticles(getAllPostList);
       notifyListeners();
     } on DioException catch (e, st) {
       log("Get News Api catch error $e", stackTrace: st);
@@ -368,6 +550,7 @@ class HomeProvider extends ChangeNotifier {
       log(response.data.toString());
       List data = response.data;
       getAllPostList.addAll(data);
+      TranslationService().preloadAllArticles(getAllPostList);
     } on DioException catch (e, st) {
       log("Get News Api catch error $e", stackTrace: st);
     } catch (e, st) {
@@ -380,15 +563,10 @@ class HomeProvider extends ChangeNotifier {
 
   Future<void> getAllAiTags() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? deviceId = preferences.getString("deviceId");
-    String? userId = preferences.getString("userId");
     String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     getAllAiTagsList = [];
-    Map<String, dynamic> body = {
-      "lang": langCode,
-    };
     try {
-      Response response = await HomeRepo().getAllAiTags(body);
+      Response response = await HomeRepo().getAllAiTags({});
       
       var responseData = response.data;
       if (responseData is String) {
@@ -397,18 +575,60 @@ class HomeProvider extends ChangeNotifier {
       List data = responseData is List ? responseData : (responseData['data'] ?? []);
       
       getAllAiTagsList = data.map((e) {
-        if (e['aitagnameTranslations'] != null && e['aitagnameTranslations'][langCode] != null) {
-          e['aitagname'] = e['aitagnameTranslations'][langCode];
+        Map<String, dynamic> item = Map<String, dynamic>.from(e is Map ? e : {});
+        item['aitagid'] = item['id'] ?? item['aitagid'];
+        item['slug'] = item['slug'] ?? item['name'] ?? item['aitagname'] ?? item['id'];
+        item['aitagname'] = item['name'] ?? item['aitagname'] ?? item['slug'];
+        item['thumbnailUrl'] = item['thumbnailUrl'] ?? item['thumbnail_url'] ?? item['thumbnail'];
+        if (item['aitagnameTranslations'] != null && item['aitagnameTranslations'][langCode] != null) {
+          item['aitagname'] = item['aitagnameTranslations'][langCode];
         }
-        return e;
+        return item;
       }).toList();
       
-      log(getAllAiTagsList.toString());
+      log("Video Tags loaded: $getAllAiTagsList");
     } on DioException catch (e, st) {
-      log("Get News Api catch error $e", stackTrace: st);
+      log("Get Video Tags Api catch error $e", stackTrace: st);
     } catch (e, st) {
-      log("Get News Api catch error $e", stackTrace: st);
+      log("Get Video Tags Api catch error $e", stackTrace: st);
     } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchVideosByTagSlug(String slug, {String? displayTitle, String? thumbnailUrl}) async {
+    currentTagSlug = slug;
+    currentTagTitle = displayTitle ?? slug;
+    currentTagThumbnailUrl = thumbnailUrl;
+    isTagVideosLoading = true;
+    tagVideosList = [];
+
+    // Pause any playing YouTube video controller to free SurfaceView buffers
+    try {
+      if (isPlaying) {
+        controller.pause();
+        isPlaying = false;
+      }
+    } catch (_) {}
+
+    notifyListeners();
+
+    try {
+      final encodedSlug = Uri.encodeComponent(slug);
+      Response response = await HomeRepo().getTagVideos(encodedSlug);
+      var responseData = response.data;
+      if (responseData is String) {
+        try { responseData = jsonDecode(responseData); } catch (_) {}
+      }
+      List data = responseData is List ? responseData : (responseData['data'] ?? []);
+      tagVideosList = data;
+      log("Fetched ${tagVideosList.length} videos for tag slug: $slug");
+    } on DioException catch (e, st) {
+      log("Get Tag Videos Api catch error $e", stackTrace: st);
+    } catch (e, st) {
+      log("Get Tag Videos Api catch error $e", stackTrace: st);
+    } finally {
+      isTagVideosLoading = false;
       notifyListeners();
     }
   }
@@ -446,7 +666,38 @@ class HomeProvider extends ChangeNotifier {
 
   void aiTagDataLoaded(bool value) {
     isAiTagDataLoaded = value;
+    if (value) {
+      isBottomEnable = true;
+    }
     notifyListeners();
+  }
+
+  int _currentPageIndex = 0;
+  int get currentPageIndex => _currentPageIndex;
+
+  void setCurrentPageIndex(int index) {
+    if (_currentPageIndex != index) {
+      _currentPageIndex = index;
+      notifyListeners();
+    }
+  }
+
+  bool isHomePostGrid(dynamic article) {
+    if (article is! Map) return false;
+    return article['type'] == 'HomePostGrid' ||
+        article['subType'] == 'HomePostGrid' ||
+        article['post_type'] == 'HomePostGrid' ||
+        article['homepost'] != null;
+  }
+
+  bool get isCurrentArticleGrid {
+    if (selectedIndex != 0) return false;
+    if (isAiTagDataLoaded) return false;
+    if (getAllPostList.isEmpty) return false;
+    if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
+      return isHomePostGrid(getAllPostList[_currentPageIndex]);
+    }
+    return false;
   }
 
   final WebEngagePlugin _webEngagePluginInstance = WebEngagePlugin();
@@ -605,7 +856,7 @@ class HomeProvider extends ChangeNotifier {
 
   void _handleDeepLink(Uri uri) async {
     log("Deep link path: $uri");
-    final String? id = uri.queryParameters['postId'] ?? uri.queryParameters['post_id'];
+    final String? id = uri.queryParameters['postId'] ?? uri.queryParameters['post_id'] ?? uri.queryParameters['epaperId'] ?? uri.queryParameters['id'];
     if (id != null) {
       postId = id;
       isComeFromLinkOrNotification = true;
@@ -698,12 +949,6 @@ class HomeProvider extends ChangeNotifier {
         if (mainNavigatorKey.currentContext != null) {
           if (isComeContest) {
             mainNavigatorKey.currentContext!.read<AdsContestProvider>().getContestList(mainNavigatorKey.currentContext);
-          } else {
-            Navigator.push(
-                mainNavigatorKey.currentContext!,
-                MaterialPageRoute(
-                  builder: (context) => const ContestScreen(),
-                ));
           }
         }
 
@@ -727,6 +972,33 @@ class HomeProvider extends ChangeNotifier {
 
   List getAdsDataList = [];
   bool isAdsDataLoading = false;
+
+  Future<void> updateMoreFollowData(List<int> morefollowIds) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    String? userId = preferences.getString("userId");
+    String? deviceId = preferences.getString("deviceId");
+
+    try {
+      Response response = await BaseService().makeRequest(
+        baseUrl: BaseUrls.baseUrlAwsDev,
+        url: BaseUrls.updateMoreFollow,
+        method: RequestType.post,
+        body: {
+          "device_id": deviceId ?? "",
+          "user_id": userId ?? "",
+          "morefollowIds": morefollowIds
+        },
+      );
+      if (response.statusCode == 200) {
+        log("updateMoreFollowData success: ${response.data}");
+      }
+    } on DioException catch (e, st) {
+      log("updateMoreFollowData DioException: $e", stackTrace: st);
+    } catch (e, st) {
+      log("updateMoreFollowData error: $e", stackTrace: st);
+    }
+  }
+
 
   Future<void> getAdsSaveData() async {
     isAdsDataLoading = true;
@@ -812,13 +1084,12 @@ class HomeProvider extends ChangeNotifier {
       log("PDF saved at: $filePath");
 
       final String title = article['title']?.toString() ?? article['id'].toString();
-      final String appLink = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
-      final String postUrl = article['postUrl']?.toString() ?? "";
-      String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$appLink";
-
-      if (postUrl.contains("youtube.com") || postUrl.contains("youtu.be")) {
-        shareText = "$title\n$appLink";
+      final String id = article['id']?.toString() ?? article['_id']?.toString() ?? '';
+      String appLink = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
+      if (appLink.isEmpty) {
+        appLink = "https://www.bigtv24x7.com/posts?postId=$id";
       }
+      final String shareText = "$title\n$appLink";
       
       try {
         if (Platform.isIOS) {
@@ -903,6 +1174,164 @@ class HomeProvider extends ChangeNotifier {
       log("Device details sent successfully");
     } catch (e) {
       log("Error sending device details: $e");
+    }
+  }
+
+  /// WordPress Editorial API logic
+  List<Map<String, dynamic>> editorialPosts = [];
+  bool isEditorialLoading = false;
+  bool isEditorialLoadingMore = false;
+  int editorialCurrentPage = 1;
+  bool hasMoreEditorial = true;
+
+  String _cleanWpTitle(String rawTitle) {
+    return rawTitle
+        .replaceAll('&#8217;', "'")
+        .replaceAll('&#8216;', "'")
+        .replaceAll('&#8220;', '"')
+        .replaceAll('&#8221;', '"')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#039;', "'")
+        .trim();
+  }
+
+  String _extractWpImageUrl(Map<String, dynamic> item) {
+    try {
+      if (item['_embedded'] != null &&
+          item['_embedded']['wp:featuredmedia'] != null &&
+          (item['_embedded']['wp:featuredmedia'] as List).isNotEmpty) {
+        final media = item['_embedded']['wp:featuredmedia'][0];
+        if (media['source_url'] != null && media['source_url'].toString().isNotEmpty) {
+          return media['source_url'].toString();
+        }
+      }
+      if (item['yoast_head_json'] != null &&
+          item['yoast_head_json']['og_image'] != null &&
+          (item['yoast_head_json']['og_image'] as List).isNotEmpty) {
+        final ogImg = item['yoast_head_json']['og_image'][0]['url'];
+        if (ogImg != null && ogImg.toString().isNotEmpty) {
+          return ogImg.toString();
+        }
+      }
+      if (item['jetpack_featured_media_url'] != null &&
+          item['jetpack_featured_media_url'].toString().isNotEmpty) {
+        return item['jetpack_featured_media_url'].toString();
+      }
+      final String content = item['content']?['rendered']?.toString() ?? '';
+      final RegExp regExp = RegExp(r'<img[^>]+src="([^">]+)"');
+      final match = regExp.firstMatch(content);
+      if (match != null && match.groupCount >= 1) {
+        return match.group(1) ?? '';
+      }
+    } catch (e) {
+      log("Error extracting WP image: $e");
+    }
+    return '';
+  }
+
+  String _formatWpDate(String rawDate) {
+    if (rawDate.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(rawDate);
+      final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return "${dt.day} ${months[dt.month - 1]} ${dt.year}";
+    } catch (_) {
+      return rawDate.split('T').first;
+    }
+  }
+
+  Future<void> fetchEditorialPosts({bool refresh = false}) async {
+    if (isEditorialLoading) return;
+
+    if (refresh || editorialPosts.isEmpty) {
+      isEditorialLoading = true;
+      editorialCurrentPage = 1;
+      hasMoreEditorial = true;
+      notifyListeners();
+    }
+
+    try {
+      final url = "https://www.bigtvlive.com/wp-json/wp/v2/posts?per_page=50&page=1&_embed";
+      final response = await Dio().get(url);
+      if (response.statusCode == 200 && response.data is List) {
+        final List list = response.data;
+        final List<Map<String, dynamic>> parsed = [];
+        for (var item in list) {
+          if (item is Map<String, dynamic>) {
+            parsed.add({
+              'id': item['id'],
+              'title': _cleanWpTitle(item['title']?['rendered']?.toString() ?? ''),
+              'content': item['content']?['rendered']?.toString() ?? '',
+              'excerpt': item['excerpt']?['rendered']?.toString() ?? '',
+              'image_url': _extractWpImageUrl(item),
+              'publishDate': _formatWpDate(item['date']?.toString() ?? ''),
+              'link': item['link']?.toString() ?? '',
+              'raw_date': item['date']?.toString() ?? '',
+            });
+          }
+        }
+        editorialPosts = parsed;
+        if (list.length < 50) {
+          hasMoreEditorial = false;
+        }
+      }
+    } catch (e, st) {
+      log("Error fetching editorial posts: $e", stackTrace: st);
+    } finally {
+      isEditorialLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loadMoreEditorialPosts() async {
+    if (isEditorialLoading || isEditorialLoadingMore || !hasMoreEditorial) return;
+
+    isEditorialLoadingMore = true;
+    notifyListeners();
+
+    final nextPage = editorialCurrentPage + 1;
+
+    try {
+      final url = "https://www.bigtvlive.com/wp-json/wp/v2/posts?per_page=50&page=$nextPage&_embed";
+      final response = await Dio().get(url);
+      if (response.statusCode == 200 && response.data is List) {
+        final List list = response.data;
+        if (list.isEmpty) {
+          hasMoreEditorial = false;
+        } else {
+          final List<Map<String, dynamic>> parsed = [];
+          for (var item in list) {
+            if (item is Map<String, dynamic>) {
+              parsed.add({
+                'id': item['id'],
+                'title': _cleanWpTitle(item['title']?['rendered']?.toString() ?? ''),
+                'content': item['content']?['rendered']?.toString() ?? '',
+                'excerpt': item['excerpt']?['rendered']?.toString() ?? '',
+                'image_url': _extractWpImageUrl(item),
+                'publishDate': _formatWpDate(item['date']?.toString() ?? ''),
+                'link': item['link']?.toString() ?? '',
+                'raw_date': item['date']?.toString() ?? '',
+              });
+            }
+          }
+          editorialPosts.addAll(parsed);
+          editorialCurrentPage = nextPage;
+          if (list.length < 50) {
+            hasMoreEditorial = false;
+          }
+        }
+      } else {
+        hasMoreEditorial = false;
+      }
+    } catch (e, st) {
+      log("Error loading more editorial posts: $e", stackTrace: st);
+      hasMoreEditorial = false;
+    } finally {
+      isEditorialLoadingMore = false;
+      notifyListeners();
     }
   }
 }

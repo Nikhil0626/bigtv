@@ -16,9 +16,28 @@ TextStyle homeScreenFontStyle({
   double? decorationThickness,
   TextDecorationStyle? decorationStyle,
   Color? backgroundColor,
+  bool isEnglish = false,
 }) {
   final BuildContext? ctx = mainNavigatorKey.currentContext;
   final defaultColor = ctx?.textColor ?? Colors.black;
+
+  if (isEnglish) {
+    final double effectiveFontSize = (fontSize ?? 14) + 1.5;
+    return GoogleFonts.poppins(
+      textStyle: TextStyle(
+        fontSize: effectiveFontSize,
+        height: height ?? 1.4,
+        fontWeight: fontWeight,
+        color: color ?? defaultColor,
+        backgroundColor: backgroundColor,
+        letterSpacing: letterSpacing ?? 0.3,
+        decoration: decoration,
+        decorationColor: decorationColor,
+        decorationThickness: decorationThickness,
+        decorationStyle: decorationStyle,
+      ),
+    );
+  }
 
   return GoogleFonts.anekTelugu(
     textStyle: TextStyle(

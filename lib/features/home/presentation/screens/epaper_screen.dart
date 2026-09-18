@@ -1,8 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/home/presentation/providers/epaper_provider.dart';
-import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/epaper_detail_screen.dart';
+import 'package:chotanews/services/epaper_share_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -204,6 +204,18 @@ class _EpaperScreenState extends State<EpaperScreen> {
                               ],
                             ),
                           ),
+                          IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            icon: Image.asset("assets/images/WhatsApp_icon.png", height: 22, width: 22),
+                            onPressed: () {
+                              EpaperShareHelper.shareIndividualPage(
+                                context: context,
+                                epaper: epaper,
+                                pageIndex: 0,
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -333,4 +345,5 @@ class _EpaperScreenState extends State<EpaperScreen> {
       }
     );
   }
+
 }

@@ -7,15 +7,14 @@ import 'video_provider.dart';
 class FullscreenVideoView extends StatefulWidget {
   final VideoPlayerController controller;
 
-  const FullscreenVideoView({Key? key, required this.controller})
-      : super(key: key);
+  const FullscreenVideoView({super.key, required this.controller});
 
   @override
   State<FullscreenVideoView> createState() => _FullscreenVideoViewState();
 }
 
 class _FullscreenVideoViewState extends State<FullscreenVideoView> {
-  bool _showControls = true;
+  final ValueNotifier<bool> _showControlsNotifier = ValueNotifier<bool>(true);
 
   @override
   void initState() {
@@ -31,6 +30,7 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
 
   @override
   void dispose() {
+    _showControlsNotifier.dispose();
     // Failsafe in case of swipe back
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -58,16 +58,14 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
   }
 
   void _toggleControls() {
-    setState(() {
-      _showControls = !_showControls;
-    });
+    _showControlsNotifier.value = !_showControlsNotifier.value;
   }
 
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (!didPop) {
           _exitFullscreen();
         }
@@ -88,11 +86,14 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
                     ),
                   ),
                 ),
-                AnimatedOpacity(
-                  opacity: _showControls ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 300),
-                  child: IgnorePointer(
-                    ignoring: !_showControls,
+                ValueListenableBuilder<bool>(
+                  valueListenable: _showControlsNotifier,
+                  builder: (context, showControls, _) {
+                    return AnimatedOpacity(
+                      opacity: showControls ? 1.0 : 0.0,
+                      duration: const Duration(milliseconds: 300),
+                      child: IgnorePointer(
+                        ignoring: !showControls,
                     child: Stack(
                       children: [
                         Positioned(
@@ -151,13 +152,14 @@ class _FullscreenVideoViewState extends State<FullscreenVideoView> {
                         ),
                       ],
                     ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+                  ));
+                },
+              ),
+            ],
+          );
+        },
       ),
-    );
-  }
+    ),
+  );
+}
 }

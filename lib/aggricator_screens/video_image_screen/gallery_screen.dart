@@ -3,6 +3,7 @@ import 'dart:io';
 
 
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -189,7 +190,8 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                       builder: (_, settingsProvider, __) {
                         bool isLiked = settingsProvider.isLikeList.contains(widget.postDetails['id'].toString());
                         return BottomActions(
-                          iconColor: AppColors.iconColors,
+                          iconColor: AppColorTokens.primaryRed,
+                          iconSize: 28,
                           postType: widget.postDetails['subType']?.toString() ?? "",
                           icon: isLiked ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                           label: 'లైక్',
@@ -217,7 +219,8 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                       postType: widget.postDetails['subType'] ?? "",
                       icon: "assets/svg/new_comment.svg",
                       label: 'కామెంట్',
-                      iconColor: AppColors.iconColors,
+                      iconColor: AppColorTokens.primaryRed,
+                      iconSize: 28,
                       onTap: () async {
                         context.read<AuthenticationProvider>().sendEvent("CommentPage");
                         showComments(context, widget.postDetails['id'],widget.postDetails['title'],);

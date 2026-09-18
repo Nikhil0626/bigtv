@@ -4,13 +4,16 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/features/home/presentation/widgets/bulletin_view.dart';
 import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/image_post_slider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/utils/translated_text.dart';
 import 'package:flutter_svg/svg.dart';
 
 import 'package:path_provider/path_provider.dart';
@@ -33,12 +36,19 @@ import '../../utils/app_toasts.dart';
 import '../../utils/commant_screen.dart';
 import '../../utils/date_format.dart';
 import '../events_data/event_repo.dart';
+import 'package:chotanews/features/home/presentation/widgets/main_screen_byts_view.dart';
 
 class IndividualPostView1 extends StatefulWidget {
   final String postId;
   final bool isComeFrom;
+  final Map<String, dynamic>? initialArticle;
 
-  const IndividualPostView1({super.key, required this.postId, this.isComeFrom = false});
+  const IndividualPostView1({
+    super.key,
+    required this.postId,
+    this.isComeFrom = false,
+    this.initialArticle,
+  });
 
   @override
   State<IndividualPostView1> createState() => _IndividualPostView1State();
@@ -46,6 +56,96 @@ class IndividualPostView1 extends StatefulWidget {
 
 class _IndividualPostView1State extends State<IndividualPostView1> {
   ScreenshotController adsScreenshotController = ScreenshotController();
+
+  Color _getPostBackgroundColor(dynamic article, BuildContext context) {
+    if (article == null || article is! Map) {
+      return Theme.of(context).brightness == Brightness.dark
+          ? Colors.black
+          : Colors.white;
+    }
+    final type = article['type']?.toString().toLowerCase() ?? '';
+    final postType = article['post_type']?.toString().toLowerCase() ?? '';
+    final subType = article['subType']?.toString().toLowerCase() ?? '';
+
+    final isBigTvSpecial = type == 'bigtvspecial' ||
+        postType == 'bigtvspecial' ||
+        subType == 'bigtvspecial';
+
+    if (isBigTvSpecial || article['colorCode'] != null) {
+      final parsed = _parseHexColor(article['colorCode']);
+      if (parsed != null) {
+        return parsed;
+      }
+    }
+
+    if (_isBigBlackStandard(article)) {
+      return Colors.black;
+    }
+
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.black
+        : Colors.white;
+  }
+
+  Color? _parseHexColor(dynamic hexString) {
+    if (hexString == null) return null;
+    String str = hexString.toString().trim();
+    if (str.isEmpty || str == 'null' || str == 'string') return null;
+    str = str.replaceAll('#', '');
+    if (str.length == 6) {
+      str = 'FF$str';
+    }
+    final intVal = int.tryParse(str, radix: 16);
+    if (intVal != null) {
+      return Color(intVal);
+    }
+    return null;
+  }
+
+  bool _isDarkBg(dynamic article, BuildContext context) {
+    return _getPostBackgroundColor(article, context).computeLuminance() < 0.5;
+  }
+
+  bool _isBigTvSpecial(dynamic article) {
+    if (article == null || article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final subType = article['subType']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+
+    return type == 'bigtvspecial' ||
+        postType == 'bigtvspecial' ||
+        subType == 'bigtvspecial';
+  }
+
+  bool _isBigBlackStandard(dynamic article) {
+    if (article == null || article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final subType = article['subType']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+
+    return type == 'bigblackstandard' ||
+        postType == 'bigblackstandard' ||
+        subType == 'bigblackstandard';
+  }
+
+  bool _is70PercentPost(dynamic article) {
+    if (article == null || article is! Map) return false;
+    return _isBigTvSpecial(article) || _isBigBlackStandard(article);
+  }
+
+  bool _isBulletinPost(dynamic article) {
+    if (article == null || article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final subType = article['subType']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+
+    return type == 'bulletin' ||
+        postType == 'bulletin' ||
+        subType == 'bulletin' ||
+        type == 'bulletpost' ||
+        postType == 'bulletpost' ||
+        subType == 'bulletpost';
+  }
 
   @override
   void initState() {
@@ -57,487 +157,137 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      child: Scaffold(
-        body: SafeArea(
-          child: Consumer<HomeProvider>(builder: (_, homeProvider, __) {
-            final article = homeProvider.getSinglePostList.isEmpty ? {} : homeProvider.getSinglePostList;
-            return homeProvider.isPostLoading
-                ? AppLoadingScreen()
-                : homeProvider.getSinglePostList.isEmpty
-                ? AppNoData()
-                : Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-              child: Screenshot(
+    return Consumer<HomeProvider>(builder: (_, homeProvider, __) {
+      final articleFromProvider = homeProvider.getSinglePostList.isEmpty ? <String, dynamic>{} : Map<String, dynamic>.from(homeProvider.getSinglePostList);
+      final article = articleFromProvider.isNotEmpty ? articleFromProvider : (widget.initialArticle ?? <String, dynamic>{});
+
+      return PopScope(
+        canPop: true,
+        child: Scaffold(
+          backgroundColor: _getPostBackgroundColor(article, context),
+          body: SafeArea(
+            top: true,
+            bottom: false,
+            child: homeProvider.isPostLoading && article.isEmpty
+                ? const AppLoadingScreen()
+                : article.isEmpty
+                    ? const AppNoData()
+                    : SizedBox(
+                        height: MediaQuery.of(context).size.height,
+                        width: MediaQuery.of(context).size.width,
+                        child: Screenshot(
                 controller: adsScreenshotController,
                 child: article['type'].toString() == "WebUrl"
                     ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: InAppWebViewScreen(
-                    webUrl: context.read<HomeProvider>().webUrl.toString(),
-                    title: '',
-                  ),
-                )
-                    : (article['type'] == "Image" &&article['subType'] == "ImageAd")
-                    ? InkWell(
-                    onTap: () async {
-                      SharedPreferences sp = await SharedPreferences.getInstance();
-                      bool isLogin = sp.getString("loginType") != "login" ? true : false;
-                      if (isLogin) {
-                        CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
-                      } else {
-                        if (article['postUrl'] == "" || article['postUrl'] == null) {
-
-                        } else {
-                          Navigator.pop(context);
-                          context
-                              .read<HomeProvider>()
-                              .sendAdsDataSend(article['id'], article['title'], article['image_url'], false, article['postUrl']);
-                        }
-                      }
-                    },
-                    child: Stack(
-                      children: [
-                        (article['image_url'] is List)
-                            ? (article['image_url'].length == 1
-                                ? Image.network(
-                                    article['image_url'][0] ?? "",
-                                    width: MediaQuery.of(context).size.width,
-                                    height: MediaQuery.of(context).size.height,
-                                    fit: BoxFit.fill,
-                                  )
-                                : ImagePostSlider(
-                                    imageUrl: article['image_url'],
-                                  ))
-                            : Image.network(
-                                article['image_url'] ?? "",
-                                width: MediaQuery.of(context).size.width,
-                                height: MediaQuery.of(context).size.height,
-                                fit: BoxFit.fill,
-                              ),
-
-                        Positioned(
-                          top: 40,
-                          left: 30,
-                          child: InkWell(
-                            onTap: () {
-                              log("sfhskjfhewfheawiuhgf");
-                              Navigator.pop(context);
+                        padding: const EdgeInsets.all(8.0),
+                        child: InAppWebViewScreen(
+                          webUrl: context.read<HomeProvider>().webUrl.toString(),
+                          title: '',
+                        ),
+                      )
+                    : (article['type'] == "Image" && article['subType'] == "ImageAd")
+                        ? InkWell(
+                            onTap: () async {
+                              SharedPreferences sp = await SharedPreferences.getInstance();
+                              bool isLogin = sp.getString("loginType") != "login" ? true : false;
+                              if (isLogin) {
+                                CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
+                              } else {
+                                if (article['postUrl'] != "" && article['postUrl'] != null) {
+                                  Navigator.pop(context);
+                                  context.read<HomeProvider>().sendAdsDataSend(
+                                      article['id'], article['title'], article['image_url'], false, article['postUrl']);
+                                }
+                              }
                             },
-                            child: Container(
-                              padding: EdgeInsets.all(7),
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                              ),
-                              height: 40,
-                              width: 40,
-                              child: Icon(
-                                Icons.arrow_back,
-                                color: Colors.black,
-                                size: 20,
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    ))
-                    : article['type'] == "Gallery"
-                    ? Stack(
-                  children: [
-
-                    FullPageCarousel(
-                      isHome: true,
-                      imageUrls: article['gallery'] ?? [],
-                      postDetails: article,
-                    ),
-
-                    // Bottom action bar
-                  ],
-                )
-                    : Column(
-                  children: [
-                    // Image section
-                    Stack(
-                      children: [Container(
-                        height: article['subType'] == "BigBlackStandard"
-                            ? MediaQuery.of(context).size.height * .65
-                            : MediaQuery.of(context).size.height * .40,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(16.r),
-                            topLeft: Radius.circular(16.r),
-                          ),
-                          color: Colors.black,
-                        ),
-                        child: article['type'] == "Video"
-                            ? SizedBox(
-                          height: MediaQuery.of(context).size.height * .31,
-                          width: MediaQuery.of(context).size.width,
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: VideoPreview(
-                              imageUrl: (article['image_url'] != null && article['image_url'].toString().startsWith('http')) ? article['image_url'] : "https://migwp.chotanews.com/${article['image_url']}",
-                              url: article['video_url'] ?? "",
-                              isFoldable: false,
-                            ),
-                          ),
-                        )
-                            : InkWell(
-                          onTap: () {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => ImagePreview(
-                                    imageUrl: (article['image_url'] != null && article['image_url'].toString().startsWith('http')) ? article['image_url'] : "https://migwp.chotanews.com/${article['image_url']}",
-                                    title: article['title'],
-                                  ),
-                                ));
-                          },
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height * .40,
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(16.r),
-                                topLeft: Radius.circular(16.r),
-                              ),
-                              child: CachedNetworkImage(
-                                imageUrl: (article['image_url'] != null && article['image_url'].toString().startsWith('http')) ? article['image_url'] : "https://migwp.chotanews.com/${article['image_url']}",
-                                height: MediaQuery.of(context).size.height * (article['subType'] == "BigBlackStandard" ? .65 : .45),
-                                width: MediaQuery.of(context).size.width,
-                                fit: BoxFit.fill,
-                                placeholder: (context, url) => Container(
-                                  color: AppColors.borderColor.withValues(alpha: .2),
-                                ),
-                                errorWidget: (context, url, error) => Center(
-                                  child: Icon(
-                                    Icons.image,
-                                    size: 100,
-                                    color: Colors.grey.shade300,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ), Positioned(
-                        top: 10,
-                        left: 14,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(7),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.arrow_back,
-                              color: Colors.white,
-                              size: 20,
-                            ),
-                          ),
-                        ),
-                      ),],
-                    ),
-
-                    Container(
-                      height: 4,
-                      width: MediaQuery.of(context).size.width,
-                      color: Color(0xFFED1C24),
-                    ),
-                    Expanded(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width,
-                        color: article['subType'] == "BigBlackStandard"
-                            ? Colors.black
-                            : (Theme.of(context).brightness == Brightness.dark ? Colors.black : Colors.white),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              /// Title and Action Icons in a Row with minimal spacing
-                              Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    /// Article Title
-                                    Expanded(
-                                      child: Text(
-                                        article['title'] ?? "No Title",
-                                        style: homeScreenFontStyle(
-                                          color: AppColorTokens.primaryRed,
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.w600,
+                            child: Stack(
+                              children: [
+                                (article['image_url'] is List)
+                                    ? (article['image_url'].length == 1
+                                        ? Image.network(
+                                            article['image_url'][0] ?? "",
+                                            width: MediaQuery.of(context).size.width,
+                                            height: MediaQuery.of(context).size.height,
+                                            fit: BoxFit.fill,
+                                            errorBuilder: (context, error, stackTrace) => Image.asset(
+                                              "assets/images/bigtv_default_post.png",
+                                              width: MediaQuery.of(context).size.width,
+                                              height: MediaQuery.of(context).size.height,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          )
+                                        : ImagePostSlider(
+                                            imageUrl: article['image_url'],
+                                          ))
+                                    : Image.network(
+                                        article['image_url'] ?? "",
+                                        width: MediaQuery.of(context).size.width,
+                                        height: MediaQuery.of(context).size.height,
+                                        fit: BoxFit.fill,
+                                        errorBuilder: (context, error, stackTrace) => Image.asset(
+                                          "assets/images/bigtv_default_post.png",
+                                          width: MediaQuery.of(context).size.width,
+                                          height: MediaQuery.of(context).size.height,
+                                          fit: BoxFit.cover,
                                         ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                Positioned(
+                                  top: 40,
+                                  left: 30,
+                                  child: InkWell(
+                                    onTap: () => Navigator.pop(context),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(7),
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      height: 40,
+                                      width: 40,
+                                      child: const Icon(
+                                        Icons.arrow_back,
+                                        color: Colors.black,
+                                        size: 20,
                                       ),
                                     ),
-                                     width(width: 6),
-                                    if (article['type'] != 'ImageAd' && article['subType'] != 'ImageAd')
-                                        Container(
-                                          padding: const EdgeInsets.all(8.0),
-                                          decoration: BoxDecoration(border: BoxBorder.all(color: Color(0xFFED1C24), width: 0.36), borderRadius: BorderRadius.all(Radius.circular(8))),
-                                          child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
-                                        children: [
-                                          Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                            return InkWell(
-                                              onTap: () async {
-                                                log("Like");
-                                                settingsProvider.isLikePost(article);
-                                                EventRepo().addEvent({
-                                                  "isLike": !settingsProvider.isLikeList.contains(article['id'].toString()),
-                                                  "postId": article['id'].toString() ?? "000",
-                                                  "createAt": DateTime.now().toString(),
-                                                  "postTitle": article['title'].toString()
-                                                }, "liked_article");
-                                              },
-                                              child: SvgPicture.asset(
-                                                settingsProvider.isLikeList.contains(article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                                height: 18,
-                                                width: 18,
-                                                color: settingsProvider.isLikeList.contains(article['id'].toString()) ? AppColorTokens.primaryRed : AppColorTokens.primaryRed,
-                                              ),
-                                            );
-                                          }),
-                                           width(width: 14),
-                                          InkWell(
-                                            onTap: () {
-                                              log("Comment...");
-                                              if (context.mounted) {
-                                                context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                showComments(context, article['id'], article['title']);
-                                              }
-                                            },
-                                            child: SvgPicture.asset(
-                                              "assets/svg/new_comment.svg",
-                                              height: 18,
-                                              width: 18,
-                                              color: Color(0xFFED1C24),
-                                            ),
-                                          ),
-                                         width(width: 14),
-
-                                          InkWell(
-                                            onTap: () async {
-                                              SharedPreferences sp = await SharedPreferences.getInstance();
-                                              String? userId = sp.getString("userId");
-                                              sendShareDetails(userId, article['id'], article['content'].toString());
-                                              if (article['type'] == "Standard" || article['type'] == "Video" || article['type'] == "Image") {
-                                                try {
-                                                  final image = await adsScreenshotController.capture(pixelRatio: 2.0);
-                                                  if (image != null) {
-                                                    final directory = await getTemporaryDirectory();
-                                                    final imagePath = '${directory.path}/${article['id']}.png';
-                                                    final imageFile = File(imagePath);
-                                                    await imageFile.writeAsBytes(image);
-                                                    Share.shareXFiles([XFile(imageFile.path)], text: article['linkURLAndroid'].toString());
-                                                  } else {
-                                                    CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                                                  }
-                                                } catch (e) {
-                                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                                }
-                                              } else if (article['type'] == "Gallery") {}
-                                            },
-                                            child: SvgPicture.asset(
-                                              "assets/svg/share.svg",
-                                              height: 18,
-                                              width: 18,
-                                              color: Color(0xFFED1C24),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              height(height: 8),
-                              Expanded(
-                                child: article['subType'] == "BulletPost"
-                                    ? Column(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    (article['content'] != "" && article['content'] != null && article['content'].toString().isNotEmpty)
-                                        ? (() {
-                                            String content = article['content'].toString();
-                                            List<String> words = content.split(RegExp(r'\s+'));
-                                            bool isOverflow = words.length > 30;
-                                            String displayContent = isOverflow ? words.take(30).join(' ') + "..." : content;
-                                            
-                                            return RichText(
-                                              text: TextSpan(
-                                                text: displayContent,
-                                                style: homeScreenFontStyle(
-                                                  color: AppColors.textColor,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 16.sp,
-                                                ),
-                                                children: [
-                                                  if (isOverflow)
-                                                    TextSpan(
-                                                      text: " Read more",
-                                                      style: homeScreenFontStyle(
-                                                        color: Colors.blue,
-                                                        fontWeight: FontWeight.w500,
-                                                        fontSize: 16.sp,
-                                                      ),
-                                                      recognizer: TapGestureRecognizer()
-                                                        ..onTap = () {
-                                                          _showBottomSheet(context, article);
-                                                        },
-                                                    ),
-                                                ],
-                                              ),
-                                            );
-                                          })()
-                                        : const SizedBox.shrink(),
-                                    if (article['content'] != "" && article['content'] != null && article['content'].toString().isNotEmpty) height(height: 8),
-                                    Expanded(
-                                      child: ListView(
-                                        physics: const NeverScrollableScrollPhysics(),
-                                        children: article['bulletPoints'].map<Widget>((item) {
-                                          return Row(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                "● ",
-                                                style: TextStyle(
-                                                  fontSize: 14.sp,
-                                                  color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withValues(alpha: 0.5) : AppColors.textColor,
-                                                  height: 1, // Ensures proper line height
-                                                ),
-                                              ),
-                                              width(width: 5.sp),
-                                              // Space between bullet & text
-                                              Expanded(
-                                                child: Text(
-                                                  item,
-                                                  strutStyle: StrutStyle(
-                                                    fontSize: 16.sp,
-                                                    height: 1, // Ensures consistent line height
-                                                  ),
-                                                  style: homeScreenFontStyle(
-                                                    color: article['subType'] == "BigBlackStandard" ? AppColors.textColor.withValues(alpha: 0.5) : AppColors.textColor,
-                                                    fontWeight: FontWeight.w400,
-                                                    fontSize: 16.sp,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          );
-                                        }).toList(), // Ensure it is converted to List<Widget>
-                                      ),
-                                    ),
-                                    RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          TextSpan(text: "\n\n"),
-                                          WidgetSpan(
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                if (article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
-                                                if (article['isReporter'] == 1)
-                                                  Text(
-                                                    ' ${article['reportedBy']} | ',
-                                                    style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
-                                                  ),
-                                                Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                                Text(
-                                                  " ${formatTimeDifference(article['created'])}",
-                                                  style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
+                                  ),
                                 )
-                                    : RichText(
-                                  text: TextSpan(
-                                    text: '',
-                                    children: [
-                                      ...(() {
-                                        String content = article['content']?.toString() ?? "";
-                                        List<String> words = content.split(RegExp(r'\s+'));
-                                        bool isOverflow = words.length > 30;
-                                        String displayContent = isOverflow ? words.take(30).join(' ') + "..." : content;
-                                        
-                                        List<TextSpan> spans = _parseText(context, displayContent, article['links'], article);
-                                        if (isOverflow) {
-                                          spans.add(
-                                            TextSpan(
-                                              text: " Read more",
-                                              style: homeScreenFontStyle(
-                                                color: Colors.blue,
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 16.sp,
-                                              ),
-                                              recognizer: TapGestureRecognizer()
-                                                ..onTap = () {
-                                                  _showBottomSheet(context, article);
-                                                },
-                                            ),
-                                          );
-                                        }
-                                        return spans;
-                                      })(),
-                                      if (article['isStickyPost'] != 1)
-                                        TextSpan(
-                                          children: [
-                                            TextSpan(text: "\n\n"),
-                                            WidgetSpan(
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  if (article['isReporter'] == 1) Icon(Icons.person, size: 14, color: Colors.grey),
-                                                  if (article['isReporter'] == 1)
-                                                    Text(
-                                                      ' ${article['reportedBy']} | ',
-                                                      style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
-                                                    ),
-                                                  Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                                  Text(
-                                                    " ${formatTimeDifference(article['created'])}",
-                                                    style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                    ],
+                              ],
+                            ),
+                          )
+                        : Stack(
+                            children: [
+                              MainScreenBytView(
+                                article: Map<String, dynamic>.from(article),
+                                isMainScreen: true,
+                              ),
+                              Positioned(
+                                top: 12,
+                                left: 14,
+                                child: InkWell(
+                                  onTap: () => Navigator.pop(context),
+                                  child: Container(
+                                    padding: const EdgeInsets.all(8),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withValues(alpha: 0.5),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: const Icon(
+                                      Icons.arrow_back,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ),
-            );
-          }),
+            ),
+          ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   void _showBottomSheet(BuildContext context, dynamic article) {
@@ -604,18 +354,18 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                               placeholder: (context, url) => Container(
                                 color: AppColors.borderColor.withValues(alpha: .2),
                               ),
-                              errorWidget: (context, url, error) => Center(
-                                child: Icon(
-                                  Icons.image,
-                                  size: 100,
-                                  color: Colors.grey.shade300,
-                                ),
+                              errorWidget: (context, url, error) => Image.asset(
+                                "assets/images/bigtv_default_post.png",
+                                width: double.infinity,
+                                height: 250.h,
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
                         SizedBox(height: 16.h),
-                        Text(
+                        TranslatedText(
                           article['title'] ?? "",
+                          translate: context.watch<HomeProvider>().isEnglishMode,
                           style: homeScreenFontStyle(
                             color: AppColorTokens.primaryRed,
                             fontSize: 20.sp,
@@ -623,16 +373,26 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                           ),
                         ),
                         SizedBox(height: 12.h),
-                        RichText(
-                          text: TextSpan(
-                            children: _parseText(
-                              context, 
-                              article['content'] ?? "", 
-                              article['links'], 
-                              {'subType': 'Standard'} // Force standard colors for bottom sheet
-                            ),
-                          ),
-                        ),
+                        (article['links'] != null && (article['links'] as List).isNotEmpty)
+                            ? RichText(
+                                text: TextSpan(
+                                  children: _parseText(
+                                    context, 
+                                    article['content'] ?? "", 
+                                    article['links'], 
+                                    {'subType': 'Standard'}
+                                  ),
+                                ),
+                              )
+                            : TranslatedText(
+                                article['content'] ?? "",
+                                translate: context.watch<HomeProvider>().isEnglishMode,
+                                style: homeScreenFontStyle(
+                                  color: AppColors.textColor,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16.sp,
+                                ),
+                              ),
                         SizedBox(height: 30.h),
                       ],
                     ),
@@ -649,6 +409,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
   List<TextSpan> _parseText(BuildContext context, String text, links, article) {
     RegExp linkRegExp = RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
     List<TextSpan> spans = [];
+    final isDark = _isDarkBg(article, context);
 
     text.splitMapJoin(linkRegExp, onMatch: (match) {
       String link = match.group(0)!;
@@ -673,7 +434,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
               .replaceFirst('<link3>', '')
               .replaceFirst('</link3>', ''),
           style: homeScreenFontStyle(
-            color: article['subType'] == "BigBlackStandard" ? Colors.white : Colors.blue,
+            color: _isBigBlackStandard(article) ? Colors.white : (isDark ? Colors.blue.shade200 : Colors.blue),
             fontWeight: FontWeight.w400,
             fontSize: 16.sp,
           ),
@@ -688,7 +449,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
       spans.add(TextSpan(
           text: nonMatch,
           style: homeScreenFontStyle(
-            color: article['subType'] == "BigBlackStandard" ? AppColors.cardBackgroundColor : AppColors.textColor.withValues(alpha: 0.5),
+            color: _isBigBlackStandard(article) ? AppColors.cardBackgroundColor : (isDark ? Colors.white : AppColors.textColor.withValues(alpha: 0.8)),
             fontWeight: FontWeight.w400,
             fontSize: 17.sp,
           )));

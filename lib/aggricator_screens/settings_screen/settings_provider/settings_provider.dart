@@ -34,9 +34,22 @@ class SettingsProvider extends ChangeNotifier {
   List feedbackList = [];
   List<String> selectedFeedbackList = [];
   TextEditingController feedbackController = TextEditingController();
+  int selectedStar = 0;
   List profileList = [];
   List<String> selectedProfileList = [];
   TextEditingController profileController = TextEditingController();
+
+  void setSelectedStar(int star) {
+    selectedStar = star;
+    notifyListeners();
+  }
+
+  void resetFeedback() {
+    selectedStar = 0;
+    feedbackController.clear();
+    selectedFeedbackList.clear();
+    notifyListeners();
+  }
 
   bool isBookMarkLoading = false;
 

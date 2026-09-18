@@ -53,9 +53,12 @@ Future<void> createAndSharePdf(BuildContext context, dynamic article) async {
     log("PDF saved at: $filePath");
 
     final String title = article['title']?.toString() ?? article['id'].toString();
-    final String appLink = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
-    final String postUrl = article['postUrl']?.toString() ?? "";
-    final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$appLink";
+    final String id = article['id']?.toString() ?? article['_id']?.toString() ?? '';
+    String appLink = Platform.isIOS ? (article['linkURLIos']?.toString() ?? "") : (article['linkURLAndroid']?.toString() ?? "");
+    if (appLink.isEmpty) {
+      appLink = "https://www.bigtv24x7.com/posts?postId=$id";
+    }
+    final String shareText = "$title\n$appLink";
 
     try {
       

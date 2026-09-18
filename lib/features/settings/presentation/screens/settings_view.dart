@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:chotanews/aggricator_screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/terms_conditions.dart';
@@ -10,6 +8,7 @@ import 'package:chotanews/core/theme/theme_provider.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
+import 'package:chotanews/features/settings/presentation/providers/settings_provider.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_fonts.dart';
@@ -35,27 +34,12 @@ class SettingsView extends StatefulWidget {
 
 class SettingsViewState extends State<SettingsView> {
   NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
-  bool isNotificationsEnabled = false;
-  String appVersion = "";
 
   @override
   void initState() {
-    getLogin();
+    context.read<SettingsProvider>().loadSettingsInfo();
     context.read<AuthenticationProvider>().sendEvent("SettingsView");
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
-  Future getLogin() async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    appVersion = sp.getString("app_version") ?? "";
-    isNotificationsEnabled = sp.getString("loginType") == "login" ? true : false;
-    log(isNotificationsEnabled.toString());
-    setState(() {});
   }
 
   @override
@@ -73,6 +57,7 @@ class SettingsViewState extends State<SettingsView> {
                       "visitPageName":"Edit Profile",
                       "createAt": DateTime.now().toString(),
                     }, "compliance_section");
+                    final isNotificationsEnabled = context.read<SettingsProvider>().isNotificationsEnabled;
                     if (isNotificationsEnabled == false) {
                       context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
                       Navigator.push(
@@ -163,36 +148,46 @@ class SettingsViewState extends State<SettingsView> {
                     }, "compliance_section");
                     Navigator.push(context, MaterialPageRoute(builder: (context) => ContestScreen()));
                   }),
-                  _buildSettingsRow(context, "Signout.svg", !isNotificationsEnabled ? "Login" : "Logout", () async {
-                    closeSubscribe();
-                    SharedPreferences preferences = await SharedPreferences.getInstance();
-                    String? deviceId = preferences.getString("deviceId");
-                    String? userId = preferences.getString("userId");
+                  Consumer<SettingsProvider>(
+                    builder: (context, settingsProvider, _) {
+                      return _buildSettingsRow(context, "Signout.svg", !settingsProvider.isNotificationsEnabled ? "Login" : "Logout", () async {
+                        closeSubscribe();
+                        SharedPreferences preferences = await SharedPreferences.getInstance();
+                        String? deviceId = preferences.getString("deviceId");
+                        String? userId = preferences.getString("userId");
 
-                    WebEngagePlugin.trackEvent('logout_user', {
-                      "device_id": "$deviceId",
-                      "date_time": DateTime.now().toString(),
-                      "user_id": userId ?? "",
-                    });
-                    WebEngagePlugin.userLogout();
-                    context.read<AuthenticationProvider>().setLogOutStatus(context, false);
-                    EventRepo().addEvent({
-                      "loginType": "logout",
-                      "mobileNumber": "",
-                      "createAt": DateTime.now().toString(),
-                    }, "login_event");
-                  }),
+                        WebEngagePlugin.trackEvent('logout_user', {
+                          "device_id": "$deviceId",
+                          "date_time": DateTime.now().toString(),
+                          "user_id": userId ?? "",
+                        });
+                        WebEngagePlugin.userLogout();
+                        if (context.mounted) {
+                          context.read<AuthenticationProvider>().setLogOutStatus(context, false);
+                        }
+                        EventRepo().addEvent({
+                          "loginType": "logout",
+                          "mobileNumber": "",
+                          "createAt": DateTime.now().toString(),
+                        }, "login_event");
+                      });
+                    },
+                  ),
                   height(height: 10),
                 ],
               ),
             ),),
 
-            Padding(
-              padding: const EdgeInsets.only(bottom: 70.0),
-              child: Text(
-                "V$appVersion",
-                style: fontStyle(fontWeight: FontWeight.normal),
-              ),
+            Consumer<SettingsProvider>(
+              builder: (context, settingsProvider, _) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 70.0),
+                  child: Text(
+                    "V${settingsProvider.appVersion}",
+                    style: fontStyle(fontWeight: FontWeight.normal),
+                  ),
+                );
+              },
             ),
           ],
         ),

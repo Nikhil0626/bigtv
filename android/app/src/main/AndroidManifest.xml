@@ -48,7 +48,7 @@
         android:allowBackup="false"
         android:fullBackupContent="false"
         android:hardwareAccelerated="true"
-
+        android:usesCleartextTraffic="true"
         android:theme="@style/LaunchTheme"
         android:windowSoftInputMode="adjustResize">
         <!-- Meta-Data -->

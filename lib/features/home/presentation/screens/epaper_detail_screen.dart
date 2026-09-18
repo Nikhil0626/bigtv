@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/features/home/presentation/providers/epaper_provider.dart';
+import 'package:chotanews/services/epaper_share_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
@@ -106,6 +107,49 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
                       ),
                       child: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
                     ),
+                  ),
+                ),
+
+              // Top Right Action Buttons (WhatsApp Direct Share & General Share)
+              if (provider.showOverlay)
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 10,
+                  right: 16,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          EpaperShareHelper.shareIndividualPage(
+                            context: context,
+                            epaper: widget.epaper,
+                            pageIndex: provider.currentPage,
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Image.asset("assets/images/WhatsApp_icon.png", height: 24, width: 24),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      InkWell(
+                        onTap: () {
+                          _showShareBottomSheet(context, widget.epaper, provider.currentPage);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: const BoxDecoration(
+                            color: Colors.black54,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.share, color: Colors.white, size: 22),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 
@@ -220,6 +264,76 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
           );
         },
       ),
+    );
+  }
+
+  void _showShareBottomSheet(BuildContext context, Map<String, dynamic> epaper, int currentPage) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (sheetContext) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const Text(
+                  'Share E-Paper',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: Padding(
+                    padding: const EdgeInsets.all(4.0),
+                    child: Image.asset("assets/images/WhatsApp_icon.png", height: 32, width: 32),
+                  ),
+                  title: const Text('Share Current Page to WhatsApp', style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Share page image directly with URL link'),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    EpaperShareHelper.shareIndividualPage(
+                      context: context,
+                      epaper: epaper,
+                      pageIndex: currentPage,
+                    );
+                  },
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const CircleAvatar(
+                    backgroundColor: Color(0xFFE31E24),
+                    child: Icon(Icons.picture_as_pdf, color: Colors.white),
+                  ),
+                  title: const Text('Share Full E-Paper (PDF)', style: TextStyle(fontWeight: FontWeight.w600)),
+                  subtitle: const Text('Compile all pages into a single PDF document'),
+                  onTap: () {
+                    Navigator.pop(sheetContext);
+                    EpaperShareHelper.shareAsPdf(
+                      context: context,
+                      epaper: epaper,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

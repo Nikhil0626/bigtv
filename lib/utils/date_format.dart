@@ -2,24 +2,19 @@ import 'dart:developer';
 
 import 'package:intl/intl.dart';
 
-String formatTimeDifference(String inputTime,{bool isComment= false} ) {
-
-
+String formatTimeDifference(String? inputTime, {bool isComment = false}) {
   final now = DateTime.now();
-
-
 
   DateFormat format = DateFormat('yyyy-MM-ddTHH:mm:ss');
   DateFormat format1 = DateFormat('yyyy-MM-dd HH:mm:ss');
 
   DateTime date;
   try {
-    if (inputTime.trim().isEmpty) {
+    if (inputTime == null || inputTime.trim().isEmpty) {
       date = now;
-
     } else {
-       date = isComment?format1.parse(inputTime).toLocal():DateTime.parse(inputTime).toLocal(); // Convert to local time
-       date.toString();
+      date = isComment ? format1.parse(inputTime).toLocal() : DateTime.parse(inputTime).toLocal();
+      date.toString();
     }
   } catch (e) {
     log(e.toString());

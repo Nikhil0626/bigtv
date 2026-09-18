@@ -9,6 +9,10 @@ import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'main_screen_byts_view.dart';
+import 'tag_video_grid_view_widget.dart';
+
+import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/services/translation_service.dart';
 
 class MainScreenPageView extends StatefulWidget {
   final int startIndex;
@@ -42,6 +46,9 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
     super.initState();
     homeProvider?.pageController?.addListener(homeProvider!.scrollListener);
     _pageStartTime = DateTime.now();
+    if (homeProvider?.isEnglishMode == true) {
+      TranslationService().preloadArticles(homeProvider?.getAllPostList ?? [], widget.startIndex, ahead: 5);
+    }
   }
 
   @override
@@ -52,6 +59,20 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
           : Colors.white,
       body: Consumer<HomeProvider>(
         builder: (_, homeProvider, __) {
+          if (homeProvider.isAiTagDataLoaded) {
+            if (widget.startIndex != homeProvider.selectedIndex) {
+              return const SizedBox.shrink();
+            }
+            return TagVideoGridViewWidget(
+              videos: homeProvider.tagVideosList,
+              isLoading: homeProvider.isTagVideosLoading,
+              tagTitle: homeProvider.currentTagTitle.isNotEmpty
+                  ? homeProvider.currentTagTitle
+                  : (homeProvider.currentTagSlug.isNotEmpty ? homeProvider.currentTagSlug : widget.tagName),
+              tagThumbnailUrl: homeProvider.currentTagThumbnailUrl,
+            );
+          }
+
           return Column(
             children: [
               Expanded(
@@ -66,7 +87,36 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                     ),
                     child: context.read<HomeProvider>().getAllPostList.isEmpty
                         ? Center(
-                            child: AppNoData(),
+                            child: widget.isAiTags
+                                ? const AppNoData()
+                                : Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const AppNoData(),
+                                      const SizedBox(height: 16),
+                                      ElevatedButton.icon(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: AppColorTokens.primaryRed,
+                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                        ),
+                                        onPressed: () {
+                                          homeProvider.getAllPostList = [];
+                                          homeProvider.getAllPost();
+                                        },
+                                        icon: const Icon(Icons.refresh, color: Colors.white),
+                                        label: const Text(
+                                          "Reload",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                           )
                         : PageView.builder(
                             physics: MediaQuery.of(context).orientation == Orientation.landscape
@@ -81,10 +131,12 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                 FocusScope.of(context).unfocus();
                               }
 
-
-                              if (homeProvider.isBottomEnable) {
-                                homeProvider.pageChange(isValue: false);
+                              if (homeProvider.isEnglishMode) {
+                                TranslationService().preloadArticles(homeProvider.getAllPostList, value, ahead: 5);
                               }
+
+
+                              homeProvider.setCurrentPageIndex(value);
                               if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
                                 Future.delayed(const Duration(milliseconds: 2000), () {
                                   homeProvider.aiTagDataLoaded(false);

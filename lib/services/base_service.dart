@@ -89,7 +89,10 @@ class BaseService {
       return response;
     } on DioException catch (e) {
       log('Request failed: ${e.response?.statusCode} - ${e.message}');
-    return e.response!;
+      if (e.response != null) {
+        return e.response!;
+      }
+      throw e;
     } catch (e,st) {
       log('Unexpected error: $e');
       log('Unexpected error: $st');

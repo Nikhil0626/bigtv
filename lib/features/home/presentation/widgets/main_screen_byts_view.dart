@@ -12,8 +12,11 @@ import 'package:chotanews/aggricator_screens/video_image_screen/video_preview.da
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/features/home/presentation/widgets/bulletin_view.dart';
 import 'package:chotanews/features/home/presentation/widgets/full_standed_video_view.dart';
+import 'package:chotanews/features/home/presentation/widgets/home_post_grid_widget.dart';
 import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
+import 'package:chotanews/features/home/presentation/widgets/more_follow_widget.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_player.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
@@ -42,6 +45,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'package:chotanews/utils/image_post_slider.dart';
+import 'package:chotanews/utils/translated_text.dart';
 class MainScreenBytView extends StatefulWidget {
   final article;
   final pageController;
@@ -85,8 +89,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
   // Helper method to get proper image URL
   String _getImageUrl(dynamic imageUrl) {
-    if (imageUrl == null) {
-      return "https://via.placeholder.com/400x300?text=No+Image";
+    if (imageUrl == null || imageUrl.toString().trim().isEmpty) {
+      return "";
     }
 
     String url = imageUrl.toString();
@@ -126,6 +130,100 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     // Default construction
     return "https://migwp.chotanews.com/$url";
   }
+
+  Color _getPostBackgroundColor(dynamic article, BuildContext context) {
+    if (article == null || article is! Map) {
+      return Theme.of(context).brightness == Brightness.dark
+          ? Colors.black
+          : Colors.white;
+    }
+    final type = article['type']?.toString().toLowerCase() ?? '';
+    final postType = article['post_type']?.toString().toLowerCase() ?? '';
+    final subType = article['subType']?.toString().toLowerCase() ?? '';
+
+    final isBigTvSpecial = type == 'bigtvspecial' ||
+        postType == 'bigtvspecial' ||
+        subType == 'bigtvspecial';
+
+    if (isBigTvSpecial || article['colorCode'] != null) {
+      final parsed = _parseHexColor(article['colorCode']);
+      if (parsed != null) {
+        return parsed;
+      }
+      if (isBigTvSpecial) {
+        return const Color(0xFFED1C24);
+      }
+    }
+
+    if (_isBigBlackStandard(article)) {
+      return Colors.black;
+    }
+
+    return Theme.of(context).brightness == Brightness.dark
+        ? Colors.black
+        : Colors.white;
+  }
+
+  Color? _parseHexColor(dynamic hexString) {
+    if (hexString == null) return null;
+    String str = hexString.toString().trim();
+    if (str.isEmpty || str == 'null' || str == 'string') return null;
+    str = str.replaceAll('#', '');
+    if (str.length == 6) {
+      str = 'FF$str';
+    }
+    final intVal = int.tryParse(str, radix: 16);
+    if (intVal != null) {
+      return Color(intVal);
+    }
+    return null;
+  }
+
+  bool _isDarkBg(dynamic article, BuildContext context) {
+    return _getPostBackgroundColor(article, context).computeLuminance() < 0.5;
+  }
+
+  bool _isBigTvSpecial(dynamic article) {
+    if (article == null || article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final subType = article['subType']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+
+    return type == 'bigtvspecial' ||
+        postType == 'bigtvspecial' ||
+        subType == 'bigtvspecial';
+  }
+
+  bool _isBigBlackStandard(dynamic article) {
+    if (article == null || article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final subType = article['subType']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+
+    return type == 'bigblackstandard' ||
+        postType == 'bigblackstandard' ||
+        subType == 'bigblackstandard';
+  }
+
+  bool _is70PercentPost(dynamic article) {
+    if (article == null || article is! Map) return false;
+    return _isBigTvSpecial(article) || _isBigBlackStandard(article);
+  }
+
+  bool _isBulletinPost(dynamic article) {
+    if (article == null || article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+    final subType = article['subType']?.toString().toLowerCase().replaceAll('_', '').replaceAll(' ', '') ?? '';
+
+    return type == 'bulletin' ||
+        postType == 'bulletin' ||
+        subType == 'bulletin' ||
+        type == 'bulletpost' ||
+        postType == 'bulletpost' ||
+        subType == 'bulletpost';
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -174,10 +272,25 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         : SizedBox(
             height: double.infinity,
             width: double.infinity,
-            child:
-                (widget.article['type'].toString() == "Standard" &&
-                        widget.article['subType'].toString().toLowerCase() ==
-                            "polls")
+            child: (widget.article['type'] == 'HomePostGrid' || widget.article['subType'] == 'HomePostGrid' || widget.article['homepost'] != null)
+                ? HomePostGridWidget(posts: widget.article['homepost'] as List? ?? [])
+                : (widget.article['type'] == 'MoreFollow' ||
+                        widget.article['subType'] == 'MoreFollow' ||
+                        widget.article['type']?.toString().toLowerCase() == 'morefollow' ||
+                        widget.article['subType']?.toString().toLowerCase() == 'morefollow' ||
+                        widget.article['post_type']?.toString().toLowerCase() == 'morefollow' ||
+                        widget.article['morefollow'] != null ||
+                        widget.article['moreFollowTags'] != null)
+                    ? MoreFollowWidget(
+                        moreFollowTags: (widget.article['morefollow'] is List
+                                ? widget.article['morefollow'] as List
+                                : (widget.article['moreFollowTags'] is List
+                                    ? widget.article['moreFollowTags'] as List
+                                    : [])),
+                      )
+                    : (widget.article['type'].toString() == "Standard" &&
+                            widget.article['subType'].toString().toLowerCase() ==
+                                "polls")
                     ? PollScreenDesign(
                         artical: widget.article,
                         index: widget.index,
@@ -190,7 +303,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                         ? MovieRatings(
                             article: widget.article,
                           )
-                        : GestureDetector(
+                        : _isBulletinPost(widget.article)
+                            ? BulletinView(
+                                article: Map<String, dynamic>.from(widget.article),
+                              )
+                            : GestureDetector(
                             onTap: () {
                               context.read<HomeProvider>().pageChange(
                                   isValue: !context
@@ -375,11 +492,52 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                   "assets/svg/new_refresh.svg",
                                                                                   height: 22,
                                                                                   width: 22,
-                                                                                  color: widget.article['subType'] == "BigBlackStandard" ? Colors.white : Colors.grey,
+                                                                                  color: _isBigBlackStandard(widget.article) ? Colors.white : Colors.grey,
                                                                                 ),
                                                                         ),
                                                                       );
                                                                     }),
+                                                                    width(
+                                                                        width:
+                                                                            12),
+                                                                    InkWell(
+                                                                      onTap: () async {
+                                                                        try {
+                                                                          final String title = widget.article['title']?.toString() ?? "";
+                                                                          final String link = Platform.isIOS ? (widget.article['linkURLIos']?.toString() ?? "") : (widget.article['linkURLAndroid']?.toString() ?? "");
+                                                                          final String postUrl = widget.article['postUrl']?.toString() ?? "";
+                                                                          final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
+                                                                          final imageBytes = await adsScreenshotController.capture(delay: const Duration(milliseconds: 10));
+                                                                          if (imageBytes != null) {
+                                                                            final directory = await getTemporaryDirectory();
+                                                                            final imagePath = await File(directory.path + "/screenshot_" + DateTime.now().millisecondsSinceEpoch.toString() + ".png").create();
+                                                                            await imagePath.writeAsBytes(imageBytes);
+                                                                            try {
+                                                                              if (Platform.isIOS) {
+                                                                                final Size size = MediaQuery.of(context).size;
+                                                                                await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+                                                                              } else {
+                                                                                const platform = MethodChannel('com.chotanews/whatsapp');
+                                                                                await platform.invokeMethod('shareToWhatsApp', {'imagePath': imagePath.path, 'text': shareText});
+                                                                              }
+                                                                            } catch (e) {
+                                                                              final Size size = MediaQuery.of(context).size;
+                                                                              await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+                                                                            }
+                                                                          } else {
+                                                                            final url = "whatsapp://send?text=" + Uri.encodeComponent(shareText);
+                                                                            if (await canLaunchUrl(Uri.parse(url))) {
+                                                                              await launchUrl(Uri.parse(url));
+                                                                            } else {
+                                                                              await Share.share(shareText);
+                                                                            }
+                                                                          }
+                                                                        } catch (e) {
+                                                                          debugPrint("WhatsApp share error: $e");
+                                                                        }
+                                                                      },
+                                                                      child: Image.asset("assets/images/WhatsApp_icon.png", height: 28, width: 28),
+                                                                    ),
                                                                   ],
                                                                 ),
                                                               ),
@@ -423,12 +581,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                   placeholder: (context, url) => Container(
                                                                     color: AppColors.borderColor.withValues(alpha: .2),
                                                                   ),
-                                                                  errorWidget: (context, url, error) => Center(
-                                                                    child: Icon(
-                                                                      Icons.image,
-                                                                      size: 100,
-                                                                      color: Colors.grey.shade300,
-                                                                    ),
+                                                                  errorWidget: (context, url, error) => Image.asset(
+                                                                    "assets/images/bigtv_default_post.png",
+                                                                    width: MediaQuery.of(context).size.width,
+                                                                    height: MediaQuery.of(context).size.height,
+                                                                    fit: BoxFit.cover,
                                                                   ),
                                                                 )
                                                               : ImagePostSlider(
@@ -442,12 +599,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                               placeholder: (context, url) => Container(
                                                                 color: AppColors.borderColor.withValues(alpha: .2),
                                                               ),
-                                                              errorWidget: (context, url, error) => Center(
-                                                                child: Icon(
-                                                                  Icons.image,
-                                                                  size: 100,
-                                                                  color: Colors.grey.shade300,
-                                                                ),
+                                                              errorWidget: (context, url, error) => Image.asset(
+                                                                "assets/images/bigtv_default_post.png",
+                                                                width: MediaQuery.of(context).size.width,
+                                                                height: MediaQuery.of(context).size.height,
+                                                                fit: BoxFit.cover,
                                                               ),
                                                             ))
                                                   : widget.article['type'] ==
@@ -478,16 +634,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                   Container(
                                                                   height: MediaQuery.of(context).orientation == Orientation.landscape 
                                                                       ? double.infinity
-                                                                      : (widget.article['subType'] ==
-                                                                          "BigBlackStandard"
-                                                                      ? MediaQuery.of(context)
-                                                                              .size
-                                                                              .height *
-                                                                          .60
-                                                                      : MediaQuery.of(context)
-                                                                              .size
-                                                                              .height *
-                                                                          .33),
+                                                                      : (_is70PercentPost(widget.article)
+                                                                          ? MediaQuery.of(context).size.height * .70
+                                                                          : MediaQuery.of(context).size.height * .33),
                                                                   child: widget.article['type'] ==
                                                                               "Video" &&
                                                                           widget.article['video_platform'] ==
@@ -503,7 +652,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                           ? SizedBox(
                                                                               height: MediaQuery.of(context).orientation == Orientation.landscape
                                                                                   ? double.infinity
-                                                                                  : MediaQuery.of(context).size.height * .33,
+                                                                                  : (_is70PercentPost(widget.article)
+                                                                                      ? MediaQuery.of(context).size.height * .70
+                                                                                      : MediaQuery.of(context).size.height * .33),
                                                                               width: MediaQuery.of(context).size.width,
                                                                               child: VideoPreview(
                                                                                 imageUrl: _getImageUrl(widget.article['image_url']),
@@ -524,34 +675,20 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                 );
                                                                               },
                                                                               child: SizedBox(
-                                                                                height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .60 : .35),
+                                                                                height: MediaQuery.of(context).size.height * (_is70PercentPost(widget.article) ? .70 : .35),
                                                                                 child: CachedNetworkImage(
                                                                                   imageUrl: _getImageUrl(widget.article['image_url']),
-                                                                                  height: MediaQuery.of(context).size.height * (widget.article['subType'] == "BigBlackStandard" ? .60 : .4),
+                                                                                  height: MediaQuery.of(context).size.height * (_is70PercentPost(widget.article) ? .70 : .4),
                                                                                   width: MediaQuery.of(context).size.width,
                                                                                   fit: BoxFit.fill,
                                                                                   placeholder: (context, url) => Container(
                                                                                     color: AppColors.borderColor.withValues(alpha: .2),
                                                                                   ),
-                                                                                  errorWidget: (context, url, error) => Center(
-                                                                                    child: Column(
-                                                                                      mainAxisAlignment: MainAxisAlignment.center,
-                                                                                      children: [
-                                                                                        Icon(
-                                                                                          Icons.error_outline,
-                                                                                          size: 50,
-                                                                                          color: Colors.grey.shade400,
-                                                                                        ),
-                                                                                        SizedBox(height: 8),
-                                                                                        Text(
-                                                                                          "Failed to load image",
-                                                                                          style: TextStyle(
-                                                                                            color: Colors.grey.shade400,
-                                                                                            fontSize: 12,
-                                                                                          ),
-                                                                                        ),
-                                                                                      ],
-                                                                                    ),
+                                                                                  errorWidget: (context, url, error) => Image.asset(
+                                                                                    "assets/images/bigtv_default_post.png",
+                                                                                    height: MediaQuery.of(context).size.height * (_is70PercentPost(widget.article) ? .70 : .4),
+                                                                                    width: MediaQuery.of(context).size.width,
+                                                                                    fit: BoxFit.cover,
                                                                                   ),
                                                                                 ),
                                                                               ),
@@ -650,29 +787,15 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                     0xFFED1C24),
                                                               ),
                                                               Expanded(
-                                                              child: Container(
-                                                                width: MediaQuery.of(
-                                                                        context)
-                                                                    .size
-                                                                    .width,
-                                                                color: widget.article[
-                                                                            'subType'] ==
-                                                                        "BigBlackStandard"
-                                                                    ? Colors
-                                                                        .black
-                                                                    : (Theme.of(context).brightness ==
-                                                                            Brightness
-                                                                                .dark
-                                                                        ? Colors
-                                                                            .black
-                                                                        : Colors
-                                                                            .white),
-                                                                child: Padding(
+                                                                child: Container(
+                                                                  width: MediaQuery.of(context).size.width,
+                                                                  color: _getPostBackgroundColor(widget.article, context),
+                                                                  child: Padding(
                                                                   padding: const EdgeInsets
                                                                       .symmetric(
                                                                       horizontal:
                                                                           16.0),
-                                                                  child: Column(
+                                                                    child: Column(
                                                                     mainAxisAlignment:
                                                                         MainAxisAlignment
                                                                             .start,
@@ -681,318 +804,406 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                             .start,
                                                                     children: [
                                                                       /// Title only (Action Icons moved below)
-                                                                      Padding(
-                                                                        padding: const EdgeInsets.symmetric(vertical: 5.0),
-                                                                        child: Text(
-                                                                          widget.article['title'] ?? "No Title",
-                                                                          style: homeScreenFontStyle(
-                                                                            color: const Color(0xFFED1C24),
-                                                                            fontSize: 18.sp,
-                                                                            fontWeight: FontWeight.w700,
-                                                                          ),
-                                                                          maxLines: 2,
-                                                                          overflow: TextOverflow.ellipsis,
-                                                                        ),
-                                                                      ),
-                                                                      height(
-                                                                          height:
-                                                                              0),
-                                                                      SizedBox(
-                                                                        height:
-                                                                            10,
-                                                                      ),
-                                                                      widget.article['subType'] ==
-                                                                              "BulletPost"
-                                                                          ? Column(
-                                                                              mainAxisAlignment: MainAxisAlignment.start,
-                                                                                crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                children: [
-                                                                                  (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
-                                                                                      ? (() {
-                                                                                          String content = widget.article['content'].toString();
-                                                                                          List<String> words = content.split(RegExp(r'\s+'));
-                                                                                          bool isOverflow = words.length > 50;
-                                                                                          String displayContent = isOverflow ? words.take(50).join(' ') + "..." : content;
-                                                                                          
-                                                                                          return RichText(
-                                                                                            text: TextSpan(
-                                                                                              text: displayContent,
-                                                                                              style: homeScreenFontStyle(
-                                                                                                color: AppColors.textColor,
-                                                                                                fontWeight: FontWeight.w600,
-                                                                                                fontSize: 16.sp,
-                                                                                              ),
-                                                                                              children: [
-                                                                                                if (isOverflow)
-                                                                                                  TextSpan(
-                                                                                                    text: " Read more",
-                                                                                                    style: homeScreenFontStyle(
-                                                                                                      color: Colors.blue,
-                                                                                                      fontWeight: FontWeight.w600,
-                                                                                                      fontSize: 16.sp,
+                                                                       Padding(
+                                                                         padding: const EdgeInsets.symmetric(vertical: 5.0),
+                                                                         child: TranslatedText(
+                                                                           widget.article['title'] ?? "No Title",
+                                                                           translate: context.watch<HomeProvider>().isEnglishMode,
+                                                                           style: homeScreenFontStyle(
+                                                                             color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context))
+                                                                                 ? Colors.white
+                                                                                 : const Color(0xFFED1C24),
+                                                                             fontSize: 18.sp,
+                                                                             fontWeight: FontWeight.w700,
+                                                                           ),
+                                                                           maxLines: 2,
+                                                                           overflow: TextOverflow.ellipsis,
+                                                                         ),
+                                                                       ),
+                                                                       height(
+                                                                           height:
+                                                                               0),
+                                                                       SizedBox(
+                                                                         height:
+                                                                             10,
+                                                                       ),
+                                                                       widget.article['subType'] ==
+                                                                               "BulletPost"
+                                                                           ? Column(
+                                                                               mainAxisAlignment: MainAxisAlignment.start,
+                                                                               crossAxisAlignment: CrossAxisAlignment.start,
+                                                                               children: [
+                                                                                 (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
+                                                                                     ? TranslatedText(
+                                                                                         widget.article['content'].toString(),
+                                                                                         translate: context.watch<HomeProvider>().isEnglishMode,
+                                                                                         style: homeScreenFontStyle(
+                                                                                           color: _isBigTvSpecial(widget.article) ? Colors.white70 : AppColors.textColor,
+                                                                                           fontWeight: FontWeight.w600,
+                                                                                           fontSize: 16.sp,
+                                                                                         ),
+                                                                                       )
+                                                                                     : const SizedBox.shrink(),
+                                                                                 if (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty) height(height: 8),
+                                                                                 ListView(
+                                                                                   shrinkWrap: true,
+                                                                                   padding: EdgeInsets.zero,
+                                                                                   physics: const NeverScrollableScrollPhysics(),
+                                                                                   children: (widget.article['bulletPoints'] as List? ?? []).map<Widget>((item) {
+                                                                                       return Row(
+                                                                                         crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                         children: [
+                                                                                           Text(
+                                                                                             "● ",
+                                                                                             style: TextStyle(
+                                                                                               fontSize: 14.sp,
+                                                                                               color: AppColors.textColor.withValues(alpha: 0.8),
+                                                                                               height: 1,
+                                                                                             ),
+                                                                                           ),
+                                                                                           width(width: 5.sp),
+                                                                                           Expanded(
+                                                                                             child: TranslatedText(
+                                                                                               item.toString(),
+                                                                                               translate: context.watch<HomeProvider>().isEnglishMode,
+                                                                                               strutStyle: StrutStyle(
+                                                                                                 fontSize: 16.sp,
+                                                                                                 height: 1,
+                                                                                               ),
+                                                                                               style: homeScreenFontStyle(
+                                                                                                 color: _isBigTvSpecial(widget.article) ? Colors.white70 : AppColors.textColor.withValues(alpha: 0.8),
+                                                                                                 fontWeight: FontWeight.w600,
+                                                                                                 fontSize: 16.sp,
+                                                                                               ),
+                                                                                             ),
+                                                                                           ),
+                                                                                         ],
+                                                                                       );
+                                                                                     }).toList(),
+                                                                                 ),
+                                                                               ],
+                                                                             )
+                                                                           : (widget.article['links'] != null && (widget.article['links'] as List).isNotEmpty)
+                                                                               ? RichText(
+                                                                                   text: TextSpan(
+                                                                                     text: '',
+                                                                                     children: _parseText(
+                                                                                       context, 
+                                                                                       widget.article['content']?.toString() ?? "", 
+                                                                                       widget.article['links'], 
+                                                                                       widget.article
+                                                                                     ),
+                                                                                   ),
+                                                                                 )
+                                                                               : TranslatedText(
+                                                                                   widget.article['content']?.toString() ?? "",
+                                                                                   translate: context.watch<HomeProvider>().isEnglishMode,
+                                                                                   englishFontSize: 14.sp,
+                                                                                   style: homeScreenFontStyle(
+                                                                                     color: _isBigTvSpecial(widget.article)
+                                                                                         ? Colors.white70
+                                                                                         : (_isBigBlackStandard(widget.article)
+                                                                                             ? Colors.white
+                                                                                             : (_isDarkBg(widget.article, context) ? Colors.white : AppColors.textColor.withValues(alpha: 0.8))),
+                                                                                     fontWeight: FontWeight.w600,
+                                                                                     fontSize: 17.sp,
+                                                                                   ),
+                                                                                 ),
+                                                                       if (widget.article['type'] != 'ImageAd' && widget.article['subType'] != 'ImageAd')
+                                                                         Padding(
+                                                                           padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                                                                           child: Row(
+                                                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                               crossAxisAlignment: CrossAxisAlignment.end,
+                                                                               children: [
+                                                                                 Column(
+                                                                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                                                                   mainAxisSize: MainAxisSize.min,
+                                                                                   children: [
+                                                                                     if (widget.article['isWebPost'] == true)
+                                                                                       Padding(
+                                                                                         padding: const EdgeInsets.only(bottom: 4.0),
+                                                                                         child: InkWell(
+                                                                                           onTap: () async {
+                                                                                             if (widget.article['postUrl'] != null && widget.article['postUrl'].toString().isNotEmpty) {
+                                                                                               await launchUrl(Uri.parse(widget.article['postUrl']));
+                                                                                             }
+                                                                                           },
+                                                                                           child: Text(
+                                                                                             "BIGTV.COM",
+                                                                                             style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : Colors.red),
+                                                                                           ),
+                                                                                         ),
+                                                                                       ),
+                                                                                     if (widget.article['isStickyPost'] != 1)
+                                                                                       Row(
+                                                                                         mainAxisSize: MainAxisSize.min,
+                                                                                         children: [
+                                                                                           if (widget.article['isReporter'] == 1) Icon(Icons.person, size: 14, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white70 : Colors.grey),
+                                                                                           if (widget.article['isReporter'] == 1)
+                                                                                             Text(
+                                                                                               ' ${widget.article['reportedBy']} | ',
+                                                                                               style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white70 : Colors.grey),
+                                                                                             ),
+                                                                                           Icon(Icons.access_time, size: 14, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white70 : Colors.grey),
+                                                                                           Text(
+                                                                                             " ${formatTimeDifference(widget.article['created']?.toString())}",
+                                                                                             style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white70 : Colors.grey),
+                                                                                           ),
+                                                                                         ],
+                                                                                       )
+                                                                                     else
+                                                                                       const SizedBox.shrink(),
+                                                                                   ],
+                                                                                 ),
+                                                                                 Row(
+                                                                                   mainAxisSize: MainAxisSize.min,
+                                                                                   children: [                  Row(
+                                                                                      mainAxisSize: MainAxisSize.min,
+                                                                                      children: [
+                                                                                      /// Like Icon
+                                                                                      Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
+                                                                                        return InkWell(
+                                                                                          onTap: () async {
+                                                                                            log("Like");
+                                                                                            settingsProvider.isLikePost(widget.article);
+                                                                                            EventRepo().addEvent({
+                                                                                              "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
+                                                                                              "postId": widget.article['id'].toString() ?? "000",
+                                                                                              "createAt": DateTime.now().toString(),
+                                                                                              "postTitle": widget.article['title'].toString()
+                                                                                            }, "liked_article");
+                                                                                          },
+                                                                                          child: Column(
+                                                                                            mainAxisSize: MainAxisSize.min,
+                                                                                            children: [
+                                                                                              Row(
+                                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                                children: [
+                                                                                                  SvgPicture.asset(
+                                                                                                    settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                                                                                    height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                    width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                    colorFilter: ColorFilter.mode(
+                                                                                                      (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : AppColorTokens.primaryRed,
+                                                                                                      BlendMode.srcIn,
                                                                                                     ),
-                                                                                                    recognizer: TapGestureRecognizer()
-                                                                                                      ..onTap = () {
-                                                                                                        _showBottomSheet(context, widget.article);
-                                                                                                      },
                                                                                                   ),
-                                                                                              ],
-                                                                                            ),
-                                                                                          );
-                                                                                        })()
-                                                                                      : const SizedBox.shrink(),
-                                                                                  if (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty) height(height: 8),
-                                                                                  ListView(
-                                                                                    shrinkWrap: true,
-                                                                                    padding: EdgeInsets.zero,
-                                                                                    physics: const NeverScrollableScrollPhysics(),
-                                                                                    children: widget.article['bulletPoints'].map<Widget>((item) {
-                                                                                        return Row(
-                                                                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                                                                          children: [
-                                                                                            Text(
-                                                                                              "● ",
-                                                                                              style: TextStyle(
-                                                                                                fontSize: 14.sp,
-                                                                                                color: AppColors.textColor.withValues(alpha: 0.8),
-                                                                                                height: 1,
+                                                                                                ],
                                                                                               ),
-                                                                                            ),
-                                                                                            width(width: 5.sp),
-                                                                                            Expanded(
-                                                                                              child: Text(
-                                                                                                item,
-                                                                                                strutStyle: StrutStyle(
-                                                                                                  fontSize: 16.sp,
-                                                                                                  height: 1,
-                                                                                                ),
-                                                                                                style: homeScreenFontStyle(
-                                                                                                  color: AppColors.textColor.withValues(alpha: 0.8),
-                                                                                                  fontWeight: FontWeight.w600,
-                                                                                                  fontSize: 16.sp,
-                                                                                                ),
-                                                                                              ),
-                                                                                            ),
-                                                                                          ],
-                                                                                        );
-                                                                                      }).toList(),
-                                                                                    ),
-                                                                                ],
-                                                                              )
-                                                                            : RichText(
-                                                                                text: TextSpan(
-                                                                                  text: '',
-                                                                                  children: [
-                                                                                    ...(() {
-                                                                                      String content = widget.article['content']?.toString() ?? "";
-                                                                                      List<String> words = content.split(RegExp(r'\s+'));
-                                                                                      bool isOverflow = words.length > 50;
-                                                                                      String displayContent = isOverflow ? words.take(50).join(' ') + "..." : content;
-                                                                                      
-                                                                                      List<TextSpan> spans = _parseText(context, displayContent, widget.article['links'], widget.article);
-                                                                                      if (isOverflow) {
-                                                                                        spans.add(
-                                                                                          TextSpan(
-                                                                                            text: " Read more",
-                                                                                            style: homeScreenFontStyle(
-                                                                                              color: Colors.blue,
-                                                                                              fontWeight: FontWeight.w600,
-                                                                                              fontSize: 16.sp,
-                                                                                            ),
-                                                                                            recognizer: TapGestureRecognizer()
-                                                                                              ..onTap = () {
-                                                                                                _showBottomSheet(context, widget.article);
-                                                                                              },
+                                                                                            ],
                                                                                           ),
                                                                                         );
-                                                                                      }
-                                                                                      return spans;
-                                                                                    })(),
-
-                                                                                  ],
-                                                                                ),
-                                                                              ),
-                                                                      if (widget.article['type'] != 'ImageAd' && widget.article['subType'] != 'ImageAd')
-                                                                        Padding(
-                                                                          padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                                                                          child: Row(
-                                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                            children: [
-                                                                              if (widget.article['isStickyPost'] != 1)
-                                                                                Row(
-                                                                                  mainAxisSize: MainAxisSize.min,
-                                                                                  children: [
-                                                                                    if (widget.article['isReporter'] == 1) const Icon(Icons.person, size: 14, color: Colors.grey),
-                                                                                    if (widget.article['isReporter'] == 1)
-                                                                                      Text(
-                                                                                        ' ${widget.article['reportedBy']} | ',
-                                                                                        style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
-                                                                                      ),
-                                                                                    if (widget.article['isWebPost'] == true)
+                                                                                      }),
+                                                                                        const SizedBox(width: 16),
+                                                                                      /// Comment Icon
                                                                                       InkWell(
-                                                                                        onTap: () async {
-                                                                                          if (widget.article['postUrl'] != null && widget.article['postUrl'].toString().isNotEmpty) {
-                                                                                            await launchUrl(Uri.parse(widget.article['postUrl']));
+                                                                                        onTap: () {
+                                                                                          log("Comment...");
+                                                                                          if (context.mounted) {
+                                                                                            context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                                                                            showComments(context, widget.article['id'], widget.article['title']);
                                                                                           }
                                                                                         },
-                                                                                        child: Padding(
-                                                                                          padding: const EdgeInsets.only(right: 8.0),
-                                                                                          child: Text(
-                                                                                            "BIGTV.COM",
-                                                                                            style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: Colors.red),
-                                                                                          ),
-                                                                                        ),
-                                                                                      ),
-                                                                                    const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                                                                                    Text(
-                                                                                      " ${formatTimeDifference(widget.article['created'])}",
-                                                                                      style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w400, color: Colors.grey),
-                                                                                    ),
-                                                                                  ],
-                                                                                )
-                                                                              else
-                                                                                const SizedBox.shrink(),
-                                                                              Row(
-                                                                                mainAxisSize: MainAxisSize.min,
-                                                                                children: [
-                                                                                /// Like Icon
-                                                                                Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                                                                  return InkWell(
-                                                                                    onTap: () async {
-                                                                                      log("Like");
-                                                                                      settingsProvider.isLikePost(widget.article);
-                                                                                      EventRepo().addEvent({
-                                                                                        "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                                                        "postId": widget.article['id'].toString() ?? "000",
-                                                                                        "createAt": DateTime.now().toString(),
-                                                                                        "postTitle": widget.article['title'].toString()
-                                                                                      }, "liked_article");
-                                                                                    },
-                                                                                    child: Column(
-                                                                                      mainAxisSize: MainAxisSize.min,
-                                                                                      children: [
-                                                                                        Row(
+                                                                                        child: Column(
                                                                                           mainAxisSize: MainAxisSize.min,
                                                                                           children: [
-                                                                                            SvgPicture.asset(
-                                                                                              settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                                                                              height: 22, width: 22,
-                                                                                              color: settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? AppColorTokens.primaryRed : AppColorTokens.primaryRed,
+                                                                                            Row(
+                                                                                              mainAxisSize: MainAxisSize.min,
+                                                                                              children: [
+                                                                                                SvgPicture.asset(
+                                                                                                  "assets/svg/new_comment.svg",
+                                                                                                  height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                  width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                  colorFilter: ColorFilter.mode(
+                                                                                                    (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : AppColorTokens.primaryRed,
+                                                                                                    BlendMode.srcIn,
+                                                                                                  ),
+                                                                                                ),
+                                                                                              ],
                                                                                             ),
                                                                                           ],
                                                                                         ),
-                                                                                      ],
-                                                                                    ),
-                                                                                  );
-                                                                                }),
-                                                                                  const SizedBox(width: 16),
-                                                                                /// Comment Icon
-                                                                                InkWell(
-                                                                                  onTap: () {
-                                                                                    log("Comment...");
-                                                                                    if (context.mounted) {
-                                                                                      context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                                                      showComments(context, widget.article['id'], widget.article['title']);
-                                                                                    }
-                                                                                  },
-                                                                                  child: Column(
-                                                                                    mainAxisSize: MainAxisSize.min,
-                                                                                    children: [
-                                                                                      Row(
-                                                                                        mainAxisSize: MainAxisSize.min,
-                                                                                        children: [
-                                                                                          SvgPicture.asset("assets/svg/new_comment.svg", height: 22, width: 22, color: const Color(0xFFED1C24)),
-                                                                                        ],
                                                                                       ),
-                                                                                    ],
-                                                                                  ),
-                                                                                ),
-                                                                                  const SizedBox(width: 16),
-                                                                                /// Reload Icon
-                                                                                Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                                                                                  return InkWell(
-                                                                                    onTap: () async {
-                                                                                      log("Refresh");
-                                                                                      EventRepo().addEvent({
-                                                                                        "refresh": true,
-                                                                                        "createAt": DateTime.now().toString()
-                                                                                      }, "reload_article");
-                                                                                      homeProvide.isReloadData();
-                                                                                      if (homeProvide.isAiTagDataLoaded) {
-                                                                                        homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
-                                                                                        homeProvide.isReloadFalse();
-                                                                                      } else {
-                                                                                        homeProvide.getAllPostList = [];
-                                                                                        homeProvide.getAllPost();
-                                                                                      }
-                                                                                    },
-                                                                                    child: Column(
-                                                                                      mainAxisSize: MainAxisSize.min,
-                                                                                      children: [
-                                                                                        Row(
+                                                                                        const SizedBox(width: 16),
+                                                                                      /// Reload Icon
+                                                                                      Consumer<HomeProvider>(builder: (_, homeProvide, __) {
+                                                                                        return InkWell(
+                                                                                          onTap: () async {
+                                                                                            log("Refresh");
+                                                                                            EventRepo().addEvent({
+                                                                                              "refresh": true,
+                                                                                              "createAt": DateTime.now().toString()
+                                                                                            }, "reload_article");
+                                                                                            homeProvide.isReloadData();
+                                                                                            if (homeProvide.isAiTagDataLoaded) {
+                                                                                              homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
+                                                                                              homeProvide.isReloadFalse();
+                                                                                            } else {
+                                                                                              homeProvide.getAllPostList = [];
+                                                                                              homeProvide.getAllPost();
+                                                                                            }
+                                                                                          },
+                                                                                          child: Column(
+                                                                                            mainAxisSize: MainAxisSize.min,
+                                                                                            children: [
+                                                                                              Row(
+                                                                                                mainAxisSize: MainAxisSize.min,
+                                                                                                children: [
+                                                                                                  homeProvide.isReload
+                                                                                                      ? SizedBox(
+                                                                                                          height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                          width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                          child: const AppLoadingScreen(),
+                                                                                                        )
+                                                                                                      : SvgPicture.asset(
+                                                                                                          "assets/svg/new_refresh.svg",
+                                                                                                          height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                          width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                          colorFilter: ColorFilter.mode(
+                                                                                                            (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : AppColorTokens.primaryRed,
+                                                                                                            BlendMode.srcIn,
+                                                                                                          ),
+                                                                                                        ),
+                                                                                                ],
+                                                                                              ),
+                                                                                            ],
+                                                                                          ),
+                                                                                        );
+                                                                                      }),
+                                                                                        const SizedBox(width: 16),
+                                                                                      /// WhatsApp Icon
+                                                                                      InkWell(
+                                                                                        onTap: () async {
+                                                                                          try {
+                                                                                            final String title = widget.article['title']?.toString() ?? "";
+                                                                                            final String link = Platform.isIOS ? (widget.article['linkURLIos']?.toString() ?? "") : (widget.article['linkURLAndroid']?.toString() ?? "");
+                                                                                            final String postUrl = widget.article['postUrl']?.toString() ?? "";
+                                                                                            final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
+                                                                                            final imageBytes = await adsScreenshotController.capture(delay: const Duration(milliseconds: 10));
+                                                                                            if (imageBytes != null) {
+                                                                                              final directory = await getTemporaryDirectory();
+                                                                                              final imagePath = await File(directory.path + "/screenshot_" + DateTime.now().millisecondsSinceEpoch.toString() + ".png").create();
+                                                                                              await imagePath.writeAsBytes(imageBytes);
+                                                                                              try {
+                                                                                                if (Platform.isIOS) {
+                                                                                                  final Size size = MediaQuery.of(context).size;
+                                                                                                  await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+                                                                                                } else {
+                                                                                                  const platform = MethodChannel('com.chotanews/whatsapp');
+                                                                                                  await platform.invokeMethod('shareToWhatsApp', {'imagePath': imagePath.path, 'text': shareText});
+                                                                                                }
+                                                                                              } catch (e) {
+                                                                                                if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
+                                                                                                  final Size size = MediaQuery.of(context).size;
+                                                                                                  await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+                                                                                                } else {
+                                                                                                  final Size size = MediaQuery.of(context).size;
+                                                                                                  await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+                                                                                                }
+                                                                                              }
+                                                                                            } else {
+                                                                                              final url = "whatsapp://send?text=" + Uri.encodeComponent(shareText);
+                                                                                              if (await canLaunchUrl(Uri.parse(url))) {
+                                                                                                await launchUrl(Uri.parse(url));
+                                                                                              } else {
+                                                                                                await Share.share(shareText);
+                                                                                              }
+                                                                                            }
+                                                                                          } catch (e) {
+                                                                                            debugPrint("WhatsApp share error: " + e.toString());
+                                                                                          }
+                                                                                        },
+                                                                                        child: Column(
                                                                                           mainAxisSize: MainAxisSize.min,
                                                                                           children: [
-                                                                                            homeProvide.isReload
-                                                                                                ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                                                                                : SvgPicture.asset("assets/svg/new_refresh.svg", height: 22, width: 22, color: const Color(0xFFED1C24)),
+                                                                                            Image.asset("assets/images/WhatsApp_icon.png", height: 30, width: 30),
                                                                                           ],
                                                                                         ),
+                                                                                      ),
+                                                                                      const SizedBox(width: 16),
+                                                                                      /// Language Translation Icon Dropdown Card
+                                                                                      PopupMenuButton<bool>(
+                                                                                        padding: EdgeInsets.zero,
+                                                                                        constraints: const BoxConstraints(),
+                                                                                        tooltip: "Select Language",
+                                                                                        offset: const Offset(0, -110),
+                                                                                        shape: RoundedRectangleBorder(
+                                                                                          borderRadius: BorderRadius.circular(12),
+                                                                                        ),
+                                                                                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade900 : Colors.white,
+                                                                                        elevation: 6,
+                                                                                        onSelected: (bool isEnglish) {
+                                                                                          context.read<HomeProvider>().setEnglishMode(isEnglish);
+                                                                                        },
+                                                                                        itemBuilder: (context) {
+                                                                                          final homeProvider = context.read<HomeProvider>();
+                                                                                          final isDark = Theme.of(context).brightness == Brightness.dark;
+                                                                                          final textColor = isDark ? Colors.white : Colors.black87;
+
+                                                                                          return [
+                                                                                            PopupMenuItem<bool>(
+                                                                                              value: false,
+                                                                                              height: 40,
+                                                                                              child: Row(
+                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                children: [
+                                                                                                  Text(
+                                                                                                    "తెలుగు (Telugu)",
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 14.sp,
+                                                                                                      fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
+                                                                                                      color: !homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  if (!homeProvider.isEnglishMode)
+                                                                                                    const Padding(
+                                                                                                      padding: EdgeInsets.only(left: 8.0),
+                                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
+                                                                                                    ),
+                                                                                                ],
+                                                                                              ),
+                                                                                            ),
+                                                                                            const PopupMenuDivider(height: 1),
+                                                                                            PopupMenuItem<bool>(
+                                                                                              value: true,
+                                                                                              height: 40,
+                                                                                              child: Row(
+                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                children: [
+                                                                                                  Text(
+                                                                                                    "English",
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 14.sp,
+                                                                                                      fontWeight: homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
+                                                                                                      color: homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  if (homeProvider.isEnglishMode)
+                                                                                                    const Padding(
+                                                                                                      padding: EdgeInsets.only(left: 8.0),
+                                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
+                                                                                                    ),
+                                                                                                ],
+                                                                                              ),
+                                                                                            ),
+                                                                                          ];
+                                                                                        },
+                                                                                        child: Column(
+                                                                                          mainAxisSize: MainAxisSize.min,
+                                                                                          children: [
+                                                                                            Icon(
+                                                                                              Icons.g_translate_rounded,
+                                                                                              size: 28,
+                                                                                              color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : const Color(0xFFED1C24),
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
+                                                                                      ),
                                                                                       ],
                                                                                     ),
-                                                                                  );
-                                                                                }),
-                                                                                  const SizedBox(width: 16),
-                                                                                /// WhatsApp Icon
-                                                                                InkWell(
-                                                                                  onTap: () async {
-                                                                                    try {
-                                                                                      final String title = widget.article['title']?.toString() ?? "";
-                                                                                      final String link = Platform.isIOS ? (widget.article['linkURLIos']?.toString() ?? "") : (widget.article['linkURLAndroid']?.toString() ?? "");
-                                                                                      final String postUrl = widget.article['postUrl']?.toString() ?? "";
-                                                                                      final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
-                                                                                      final imageBytes = await adsScreenshotController.capture(delay: const Duration(milliseconds: 10));
-                                                                                      if (imageBytes != null) {
-                                                                                        final directory = await getTemporaryDirectory();
-                                                                                        final imagePath = await File(directory.path + "/screenshot_" + DateTime.now().millisecondsSinceEpoch.toString() + ".png").create();
-                                                                                        await imagePath.writeAsBytes(imageBytes);
-                                                                                        try {
-                                                                                          if (Platform.isIOS) {
-                                                                                            final Size size = MediaQuery.of(context).size;
-                                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                                          } else {
-                                                                                            const platform = MethodChannel('com.chotanews/whatsapp');
-                                                                                            await platform.invokeMethod('shareToWhatsApp', {'imagePath': imagePath.path, 'text': shareText});
-                                                                                          }
-                                                                                        } catch (e) {
-                                                                                          if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
-                                                                                            final Size size = MediaQuery.of(context).size;
-                                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                                          } else {
-                                                                                            final Size size = MediaQuery.of(context).size;
-                                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                                          }
-                                                                                        }
-                                                                                      } else {
-                                                                                        final url = "whatsapp://send?text=" + Uri.encodeComponent(shareText);
-                                                                                        if (await canLaunchUrl(Uri.parse(url))) {
-                                                                                          await launchUrl(Uri.parse(url));
-                                                                                        } else {
-                                                                                          await Share.share(shareText);
-                                                                                        }
-                                                                                      }
-                                                                                    } catch (e) {
-                                                                                      debugPrint("WhatsApp share error: " + e.toString());
-                                                                                    }
-                                                                                  },
-                                                                                  child: Column(
-                                                                                    mainAxisSize: MainAxisSize.min,
-                                                                                    children: [
-                                                                                      Image.asset("assets/images/WhatsApp_icon.png", height: 30, width: 30),
-                                                                                    ],
-                                                                                  ),
+                                                                                  ],
                                                                                 ),
-                                                                                ],
-                                                                              ),
                                                                             ],
                                                                           ),
                                                                         ),
@@ -1083,19 +1294,19 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                               placeholder: (context, url) => Container(
                                 color: AppColors.borderColor.withValues(alpha: .2),
                               ),
-                              errorWidget: (context, url, error) => Center(
-                                child: Icon(
-                                  Icons.image,
-                                  size: 100,
-                                  color: Colors.grey.shade300,
-                                ),
+                              errorWidget: (context, url, error) => Image.asset(
+                                "assets/images/bigtv_default_post.png",
+                                width: double.infinity,
+                                height: 250.h,
+                                fit: BoxFit.cover,
                               ),
                             ),
                           ),
                         ),
                         SizedBox(height: 16.h),
-                        Text(
+                        TranslatedText(
                           article['title'] ?? "",
+                          translate: context.watch<HomeProvider>().isEnglishMode,
                           style: homeScreenFontStyle(
                             color: AppColorTokens.primaryRed,
                             fontSize: 20.sp,
@@ -1103,16 +1314,26 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                           ),
                         ),
                         SizedBox(height: 12.h),
-                        RichText(
-                          text: TextSpan(
-                            children: _parseText(
-                              context, 
-                              article['content'] ?? "", 
-                              article['links'], 
-                              {'subType': 'Standard'}
-                            ),
-                          ),
-                        ),
+                        (article['links'] != null && (article['links'] as List).isNotEmpty)
+                            ? RichText(
+                                text: TextSpan(
+                                  children: _parseText(
+                                    context, 
+                                    article['content'] ?? "", 
+                                    article['links'], 
+                                    {'subType': 'Standard'}
+                                  ),
+                                ),
+                              )
+                            : TranslatedText(
+                                article['content'] ?? "",
+                                translate: context.watch<HomeProvider>().isEnglishMode,
+                                style: homeScreenFontStyle(
+                                  color: AppColors.textColor,
+                                  fontWeight: FontWeight.w400,
+                                  fontSize: 16.sp,
+                                ),
+                              ),
                         SizedBox(height: 30.h),
                       ],
                     ),
@@ -1130,6 +1351,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
     RegExp linkRegExp =
         RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
     List<TextSpan> spans = [];
+    final isDark = _isDarkBg(article ?? widget.article, context);
 
     text.splitMapJoin(linkRegExp, onMatch: (match) {
       String link = match.group(0)!;
@@ -1155,9 +1377,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
             .replaceFirst('<link3>', '')
             .replaceFirst('</link3>', ''),
         style: homeScreenFontStyle(
-          color: article['subType'] == "BigBlackStandard"
+          color: _isBigBlackStandard(article)
               ? Colors.white
-              : Colors.blue,
+              : (isDark ? Colors.blue.shade200 : Colors.blue),
           fontWeight: FontWeight.w600,
           fontSize: 16.sp,
         ),
@@ -1173,9 +1395,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
       spans.add(TextSpan(
           text: nonMatch,
           style: homeScreenFontStyle(
-            color: widget.article['subType'] == "BigBlackStandard"
-                ? Colors.white
-                : AppColors.textColor.withValues(alpha: 0.8),
+            color: _isBigTvSpecial(article)
+                ? Colors.white70
+                : (_isBigBlackStandard(article)
+                    ? Colors.white
+                    : (isDark ? Colors.white : AppColors.textColor.withValues(alpha: 0.8))),
             fontWeight: FontWeight.w600,
             fontSize: 17.sp,
           )));

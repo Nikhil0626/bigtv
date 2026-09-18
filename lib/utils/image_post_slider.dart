@@ -46,7 +46,11 @@ class ImagePostSlider extends StatelessWidget {
                       color: Colors.red,
                     ),
                   ),
-                  errorWidget: (context, url, error) => const Icon(Icons.broken_image, size: 60, color: Colors.grey),
+                  errorWidget: (context, url, error) => Image.asset(
+                    'assets/images/bigtv_default_post.png',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  ),
                 ),
               ),
             );
