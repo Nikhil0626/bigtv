@@ -25,6 +25,7 @@ import FirebaseCore
         if #available(iOS 10.0, *) {
             UNUserNotificationCenter.current().delegate = self as? UNUserNotificationCenterDelegate
         }
+        application.registerForRemoteNotifications()
 
         if let controller = window?.rootViewController as? FlutterViewController {
             let whatsappChannel = FlutterMethodChannel(name: "com.chotanews/whatsapp",

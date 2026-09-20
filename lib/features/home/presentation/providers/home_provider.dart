@@ -16,11 +16,11 @@ import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/base_service.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/services/deviice_details.dart';
+import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/services/translation_service.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:dio/dio.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -28,13 +28,11 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:video_player/video_player.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'dart:typed_data';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 
@@ -773,7 +771,6 @@ class HomeProvider extends ChangeNotifier {
     return false;
   }
 
-  final WebEngagePlugin _webEngagePluginInstance = WebEngagePlugin();
   bool _isSubscribed = false;
   bool isComeFromLinkOrNotification = false;
   String? postId = "0";
@@ -952,25 +949,14 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future<void> getMobileNumber() async {
-    final plugin = WebEngagePlugin();
-    if (Platform.isIOS) {
-      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-      log('APNS Token: $apnsToken');
-      getUniqueDeviceId(apnsToken ?? "");
-    } else if (Platform.isAndroid) {
-      var token = await FirebaseMessaging.instance.getToken();
-      if (token != null) {
+    try {
+      String? token = await getAppFcmToken();
+      if (token != null && token.isNotEmpty) {
         getUniqueDeviceId(token);
-        log('FCM Token: $token');
-        plugin.tokenInvalidatedCallback(_onTokenInvalidated);
-        WebEngagePlugin.setPushToken(token);
       }
+    } catch (e) {
+      log('Error getting push token: $e');
     }
-  }
-
-  void _onTokenInvalidated(Map<String, dynamic>? message) {
-    log("tokenInvalidated callback received $message");
-    WebEngagePlugin.setSecureToken("siva kumar", message.toString());
   }
 
   final Map<int, GlobalKey> aiTagKeys = {};
@@ -1243,9 +1229,36 @@ class HomeProvider extends ChangeNotifier {
         "pincode": pincode
       };
 
-      await HomeRepo().postDeviceDetails(body);
+      final startTime = DateTime.now();
+      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
+      final String prettyJson = encoder.convert(body);
+
+      debugPrint("\n========================================================");
+      debugPrint("🚀 [API REQUEST - deviceDetails]");
+      debugPrint("📅 Date & Time : ${startTime.toIso8601String()}");
+      debugPrint("🌐 Method      : POST");
+      debugPrint("🔗 URL         : ${BaseUrls.newServerBaseUrl}${BaseUrls.deviceDetails}");
+      debugPrint("📦 Request Body:\n$prettyJson");
+      debugPrint("========================================================");
+
+      final response = await HomeRepo().postDeviceDetails(body);
+      final endTime = DateTime.now();
+      final duration = endTime.difference(startTime).inMilliseconds;
+
+      debugPrint("\n========================================================");
+      debugPrint("📥 [API RESPONSE - deviceDetails]");
+      debugPrint("📅 Date & Time : ${endTime.toIso8601String()}");
+      debugPrint("⏱️ Duration    : ${duration}ms");
+      debugPrint("📊 Status Code : ${response.statusCode}");
+      debugPrint("📄 Response Data:\n${response.data is Map || response.data is List ? encoder.convert(response.data) : response.data}");
+      debugPrint("========================================================\n");
       log("Device details sent successfully");
     } catch (e) {
+      debugPrint("\n========================================================");
+      debugPrint("❌ [API ERROR - deviceDetails]");
+      debugPrint("📅 Date & Time : ${DateTime.now().toIso8601String()}");
+      debugPrint("⚠️ Error Details: $e");
+      debugPrint("========================================================\n");
       log("Error sending device details: $e");
     }
   }

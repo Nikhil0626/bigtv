@@ -11,6 +11,7 @@ import 'package:chotanews/features/auth/data/repositories/authentication_repo.da
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/globel_keys/global_variables_data.dart';
+import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_toasts.dart';
@@ -286,12 +287,7 @@ class AuthenticationProvider extends ChangeNotifier {
       await preferences.setString("selectedLanguageCode", langCode);
     } catch (_) {}
 
-    String token = "";
-    if (Platform.isIOS) {
-      token = await FirebaseMessaging.instance.getAPNSToken() ?? "";
-    } else {
-      token = await FirebaseMessaging.instance.getToken() ?? "";
-    }
+    String token = await getAppFcmToken() ?? "";
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
 

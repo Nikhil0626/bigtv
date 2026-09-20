@@ -27,7 +27,7 @@
 
     <!-- Firebase -->
     <key>FirebaseAppDelegateProxyEnabled</key>
-    <false/>
+    <true/>
     <key>FirebaseDynamicLinksCustomDomains</key>
     <array>
         <string>https://chotanews.page.link</string>

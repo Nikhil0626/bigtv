@@ -10,6 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/services/deviice_details.dart';
+import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/terms_conditions.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/privacy_policy.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -47,26 +48,14 @@ class _UnifiedAuthViewState extends State<UnifiedAuthView> {
   }
 
   getMobileNumber() async {
-    WebEngagePlugin webEngagePlugin = WebEngagePlugin();
-    String fcmToken = "";
-    if (Platform.isIOS) {
-      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-      fcmToken = apnsToken ?? "";
-      await getUniqueDeviceId(fcmToken);
-    } else if (Platform.isAndroid) {
-      var token = await FirebaseMessaging.instance.getToken();
-      fcmToken = token ?? "";
-      if (token != null) {
-        await getUniqueDeviceId(token);
-        webEngagePlugin.tokenInvalidatedCallback(_onTokenInvalidated);
-        WebEngagePlugin.setPushToken(token);
+    try {
+      String? fcmToken = await getAppFcmToken();
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        await getUniqueDeviceId(fcmToken);
       }
+    } catch (e) {
+      debugPrint("Error getting push token: $e");
     }
-
-  }
-
-  void _onTokenInvalidated(Map<String, dynamic>? message) {
-    WebEngagePlugin.setSecureToken("siva kumar", message.toString());
   }
 
 

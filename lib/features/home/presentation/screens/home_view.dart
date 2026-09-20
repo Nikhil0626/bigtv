@@ -16,7 +16,6 @@ import 'package:chotanews/features/premium/data/repositories/premium_repo.dart';
 import 'package:chotanews/features/premium/presentation/screens/premium_screen.dart';
 import 'package:chotanews/services/app_update_servuce.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
-import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -62,12 +61,7 @@ class _HomeViewState extends State<HomeView> {
   Future<void> _sendDeviceDetails() async {
     try {
       SharedPreferences preferences = await SharedPreferences.getInstance();
-      String token = "";
-      if (Platform.isIOS) {
-        token = await FirebaseMessaging.instance.getAPNSToken() ?? "";
-      } else {
-        token = await FirebaseMessaging.instance.getToken() ?? "";
-      }
+      String token = await getAppFcmToken() ?? "";
       String? deviceId = preferences.getString("deviceId");
       String? userId = preferences.getString("userId");
       String langCode = preferences.getString("selectedLanguageCode") ?? "te";
@@ -85,7 +79,6 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void dispose() {
-    closeSubscribe();
     super.dispose();
   }
 

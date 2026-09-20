@@ -1,6 +1,9 @@
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
+import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
@@ -114,4 +117,56 @@ Future<Map<String, String>> getDeviceInfoData() async {
     "os_version": osVersion,
     "device_type": deviceType,
   };
+}
+
+Future<void> logFullDeviceAndFcmDetails() async {
+  try {
+    final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+    PackageInfo packageInfo = await PackageInfo.fromPlatform();
+    SharedPreferences sp = await SharedPreferences.getInstance();
+
+    String deviceId = sp.getString("deviceId") ?? "";
+    String brand = "";
+    String model = "";
+    String osVersion = "";
+    String deviceType = Platform.isIOS ? "ios" : "android";
+
+    if (Platform.isAndroid) {
+      AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+      deviceId = deviceId.isNotEmpty ? deviceId : androidInfo.id;
+      brand = androidInfo.brand;
+      model = androidInfo.model;
+      osVersion = "Android ${androidInfo.version.release} (SDK ${androidInfo.version.sdkInt})";
+    } else if (Platform.isIOS) {
+      IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+      deviceId = deviceId.isNotEmpty ? deviceId : (iosInfo.identifierForVendor ?? "");
+      brand = "Apple";
+      model = iosInfo.modelName;
+      osVersion = "iOS ${iosInfo.systemVersion}";
+    }
+
+    String? fcmToken = await getAppFcmToken();
+    String? apnsToken;
+    if (Platform.isIOS) {
+      try {
+        apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      } catch (_) {}
+    }
+
+    debugPrint("\n==================================================");
+    debugPrint("📱 CONNECTED DEVICE & FCM DETAILS:");
+    debugPrint("--------------------------------------------------");
+    debugPrint("• Device ID     : $deviceId");
+    debugPrint("• Device Type   : $deviceType");
+    debugPrint("• Brand / Model : $brand $model");
+    debugPrint("• OS Version    : $osVersion");
+    debugPrint("• App Version   : ${packageInfo.version}+${packageInfo.buildNumber}");
+    if (Platform.isIOS) {
+      debugPrint("• Apple APNs Hex Token (for Apple Developer Portal):\n$apnsToken");
+    }
+    debugPrint("• Firebase FCM Token (for Firebase Console / Backend):\n$fcmToken");
+    debugPrint("==================================================\n");
+  } catch (e) {
+    debugPrint("Error logging device details: $e");
+  }
 }

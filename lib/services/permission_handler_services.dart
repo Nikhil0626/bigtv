@@ -166,6 +166,32 @@ Future<void> requestNotificationPermission() async {
   );
 }
 
+Future<String?> getAppFcmToken() async {
+  try {
+    if (Platform.isIOS) {
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      int retries = 0;
+      while (apnsToken == null && retries < 5) {
+        await Future.delayed(const Duration(milliseconds: 1000));
+        apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        retries++;
+      }
+      log("APNS Token: $apnsToken");
+    }
+    String? fcmToken = await FirebaseMessaging.instance.getToken();
+    log("FCM Token: $fcmToken");
+    return fcmToken;
+  } catch (e) {
+    log("Error getting FCM token: $e");
+    return null;
+  }
+}
+
 final FirebaseAnalytics analytics = FirebaseAnalytics.instance;
 
 Future<void> getReferrerFromPlayStore() async {

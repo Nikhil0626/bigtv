@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/event_cron.dart';
 
+import 'package:chotanews/services/deviice_details.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/services/register_provider.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
@@ -18,7 +19,6 @@ import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:provider/provider.dart';
-import 'package:webengage_flutter/webengage_flutter.dart';
 import 'package:workmanager/workmanager.dart';
 
 import 'aggricator_screens/events_data/event_repo.dart';
@@ -61,33 +61,45 @@ Future<void> main() async {
   AnalyticsService.startSession();
   AnalyticsService.checkRetention();
 
+  // Configure foreground notification options for iOS
+  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+
+  // Request notification permissions
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+    provisional: false,
+  );
+
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    WebEngagePlugin.onPushMessageReceive(message.data);
+    debugPrint("Foreground FCM message received: ${message.data}");
   });
 
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    debugPrint("Notification opened app: ${message.data}");
     _handleBackgroundNotification(message.data);
   });
 
   FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
     if (message != null) {
+      debugPrint("Initial FCM message on launch: ${message.data}");
       _handleBackgroundNotification(message.data);
     }
   });
 
-  WebEngagePlugin().pushStream.listen((event) {
-    if (event.payload != null || event.deepLink != null) {
-      _handleBackgroundNotification(event.payload, deepLink: event.deepLink);
-    }
+  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+    debugPrint("FCM token refreshed: $newToken");
+    getUniqueDeviceId(newToken);
   });
 
-  WebEngagePlugin().pushActionStream.listen((event) {
-    if (event.payload != null || event.deepLink != null) {
-      _handleBackgroundNotification(event.payload, deepLink: event.deepLink);
-    }
-  });
+  logFullDeviceAndFcmDetails();
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -100,7 +112,7 @@ Future<void> main() async {
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  WebEngagePlugin.onPushMessageReceive(message.data);
+  debugPrint("Background FCM message received: ${message.data}");
 }
 
 Map<String, dynamic>? pendingPushPayload;
