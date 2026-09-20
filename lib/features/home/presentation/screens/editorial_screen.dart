@@ -54,6 +54,7 @@ class _EditorialScreenState extends State<EditorialScreen> {
   }
 
   Future<void> _shareEditorial(BuildContext context, Map<String, dynamic> article, {bool isWhatsAppOnly = false}) async {
+    final Size size = MediaQuery.of(context).size;
     final String title = article['title']?.toString() ?? 'Editorial';
     final String imageUrl = article['image_url']?.toString() ?? article['imageUrl']?.toString() ?? '';
     final String webUrl = article['link']?.toString() ?? '';
@@ -83,7 +84,6 @@ class _EditorialScreenState extends State<EditorialScreen> {
       try {
         if (imageFile != null && await imageFile.exists()) {
           if (Platform.isIOS) {
-            final Size size = MediaQuery.of(context).size;
             await Share.shareXFiles(
               [XFile(imageFile.path)],
               text: shareText,
@@ -94,7 +94,6 @@ class _EditorialScreenState extends State<EditorialScreen> {
               const platform = MethodChannel('com.chotanews/whatsapp');
               await platform.invokeMethod('shareToWhatsApp', {'imagePath': imageFile.path, 'text': shareText});
             } catch (_) {
-              final Size size = MediaQuery.of(context).size;
               await Share.shareXFiles(
                 [XFile(imageFile.path)],
                 text: shareText,
@@ -118,7 +117,6 @@ class _EditorialScreenState extends State<EditorialScreen> {
       }
     } else {
       try {
-        final Size size = MediaQuery.of(context).size;
         if (imageFile != null && await imageFile.exists()) {
           await Share.shareXFiles(
             [XFile(imageFile.path)],
@@ -310,7 +308,9 @@ class _EditorialScreenState extends State<EditorialScreen> {
                 final String imageUrl = article['image_url']?.toString() ?? '';
                 final String publishDate = article['publishDate']?.toString() ?? '';
                 final String webUrl = article['link']?.toString() ?? '';
-                final String shareUrl = webUrl.isNotEmpty ? webUrl : "https://www.bigtvlive.com/?p=${article['id']}";
+                final String targetUrl = webUrl.isNotEmpty
+                    ? webUrl
+                    : (article['id'] != null ? "https://www.bigtvlive.com/?p=${article['id']}" : "");
 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 16),
@@ -321,12 +321,12 @@ class _EditorialScreenState extends State<EditorialScreen> {
                   clipBehavior: Clip.antiAlias,
                   child: InkWell(
                     onTap: () {
-                      if (webUrl.isNotEmpty) {
+                      if (targetUrl.isNotEmpty) {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => InAppWebViewScreen(
-                              webUrl: webUrl,
+                              webUrl: targetUrl,
                               title: title,
                             ),
                           ),

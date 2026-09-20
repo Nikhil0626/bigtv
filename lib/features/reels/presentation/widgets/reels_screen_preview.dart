@@ -22,6 +22,7 @@ import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
@@ -202,13 +203,87 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           ),
         ),
         Positioned(
+          bottom: 65,
+          left: 0,
+          right: 80,
+          child: Container(
+            padding: EdgeInsets.only(top: 10.h, left: 20.w, right: 12.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.reelCard.title,
+                  style: newAppFont(
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white,
+                    fontSize: 12.sp,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                height(height: 10.h),
+                Row(
+                  children: [
+                    width(width: 10),
+                    InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => InAppWebViewScreen(
+                                webUrl: "https://www.youtube.com",
+                                title: "Videos",
+                              ),
+                            ));
+                      },
+                      child: SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(8)),
+                          child: CachedNetworkImage(
+                            imageUrl: widget.reelCard.publisherImage,
+                            fit: BoxFit.fill,
+                            placeholder: (context, url) => Container(
+                              color: AppColors.borderColor.withValues(alpha: .2),
+                            ),
+                            errorWidget: (context, url, error) => Center(
+                              child: Icon(
+                                Icons.image,
+                                size: 30,
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    width(width: 6.h),
+                    Text(
+                      widget.reelCard.publisher,
+                      style: fontStyle(
+                        color: Colors.white,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Spacer(),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        Positioned(
           right: 10,
           bottom: 120,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               BottomActions(
                 iconColor: Colors.white,
-                postType: widget.reelCard.postName ?? "",
+                postType: widget.reelCard.postName,
                 icon: context.read<ReelsProviders>().isLikeList.contains(widget.reelCard.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                 label: 'లైక్',
                 isLike: context.read<ReelsProviders>().isLikeList.contains(widget.reelCard.id.toString()),
@@ -217,10 +292,9 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                   context.read<ReelsProviders>().isLikePost(widget.reelCard);
                   EventRepo().addEvent({
                     "like": !context.read<ReelsProviders>().isLikeList.contains(widget.reelCard.id.toString()),
-                    "postId": widget.reelCard.id.toString() ?? "000",
+                    "postId": widget.reelCard.id.toString(),
                     "createAt": DateTime.now().toString(),
                     "postTitle": widget.reelCard.title.toString()
-
                   }, "liked_article");
                 },
               ),
@@ -232,7 +306,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                 iconColor: Colors.white,
                 onTap: () async {
                   context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                  showComments(context, widget.reelCard.id.toString(),widget.reelCard.title.toString(),);
+                  showComments(context, widget.reelCard.id.toString(), widget.reelCard.title.toString());
                 },
               ),
               height(height: 20),
@@ -242,121 +316,51 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                 label: 'షేర్',
                 iconColor: Colors.white,
                 onTap: () async {
-                  log("Share");
+                  print("🔥🔥🔥 REELS SHARE BUTTON TAPPED 🔥🔥🔥");
+                  log("Share Reel button tapped: ${widget.reelCard.id}");
 
+                  final Size size = MediaQuery.of(context).size;
+                  final Rect shareOrigin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
+
+                  final String title = widget.reelCard.title.trim();
+                  final String videoUrl = widget.reelCard.videoUrl.trim();
+                  final String fallbackUrl = "https://www.bigtv24x7.com/posts?postId=${widget.reelCard.id}";
+                  final String shareLink = videoUrl.isNotEmpty ? videoUrl : fallbackUrl;
+                  final String shareText = title.isNotEmpty ? "$title\n\n$shareLink" : shareLink;
+
+                  // Share immediately so there is zero UI delay
+                  try {
+                    await Share.share(
+                      shareText,
+                      sharePositionOrigin: shareOrigin,
+                    );
+                  } catch (e) {
+                    log("Error in Share.share: $e");
+                    try {
+                      await Share.share(shareText);
+                    } catch (err) {
+                      log("Fallback Share.share failed: $err");
+                    }
+                  }
+
+                  // Background event tracking
                   EventRepo().addEvent({
                     "share": "reels",
-                    "postId": widget.reelCard.id.toString() ?? "000", // ✅ postId converted to String
+                    "postId": widget.reelCard.id.toString(),
                     "createAt": DateTime.now().toString(),
                     "postTitle": widget.reelCard.title.toString()
-
                   }, "shared_article");
 
-                  SharedPreferences sp = await SharedPreferences.getInstance();
-                  String? userId = sp.getString("userId");
-
-                  sendShareDetails(userId, widget.reelCard.id, widget.reelCard.content.toString());
-
                   try {
-                    final image = await sc.capture(
-                      pixelRatio: 2,
-                    );
-                    if (image != null) {
-                      final directory = await getTemporaryDirectory();
-                      final imagePath = '${directory.path}/${widget.reelCard.id}.png';
-                      final imageFile = File(imagePath);
-                      await imageFile.writeAsBytes(image);
-
-                      Share.shareXFiles([XFile(imageFile.path)], text: widget.reelCard.videoUrl);
-                    } else {
-                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                    }
+                    SharedPreferences sp = await SharedPreferences.getInstance();
+                    String? userId = sp.getString("userId");
+                    sendShareDetails(userId, widget.reelCard.id, widget.reelCard.content.toString());
                   } catch (e) {
-                    log("Error sharing reel: $e");
-                    CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                    log("Error sending share details: $e");
                   }
                 },
               ),
             ],
-          ),
-        ),
-        Positioned(
-          bottom: 65,
-          left: 0,
-          right: 0,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 60.0),
-            child: Container(
-              padding: EdgeInsets.only(top: 10.h, left: 20.w, right: 12.w),
-              width: MediaQuery.of(context).size.width - 100,
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    widget.reelCard.title ?? "No title",
-                    style: newAppFont(
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
-                      fontSize: 12.sp,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  height(height: 10.h),
-
-                  Row(
-                    children: [
-                      width(width: 10),
-                      InkWell(
-                        onTap: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => InAppWebViewScreen(
-                                  webUrl: "https://www.youtube.com",
-                                  title: "Videos",
-                                ),
-                              ));
-                        },
-                        child: SizedBox(
-                          height: 30,
-                          width: 30,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
-                            child: CachedNetworkImage(
-                              imageUrl: widget.reelCard.publisherImage,
-                              fit: BoxFit.fill,
-                              placeholder: (context, url) => Container(
-                                color: AppColors.borderColor.withValues(alpha: .2),
-                              ),
-                              errorWidget: (context, url, error) => Center(
-                                child: Icon(
-                                  Icons.image,
-                                  size: 30,
-                                  color: Colors.grey.shade300,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                      width(width: 6.h),
-                      Text(
-                        widget.reelCard.publisher,
-                        style: fontStyle(
-                          color: Colors.white,
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Spacer(),
-                    ],
-                  ),
-                ],
-              ),
-            ),
           ),
         ),
       ],

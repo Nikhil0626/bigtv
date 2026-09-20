@@ -2,6 +2,7 @@ import 'package:chotanews/core/providers/web_view_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 import 'package:webview_flutter_wkwebview/webview_flutter_wkwebview.dart';
@@ -63,56 +64,65 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
-            context.read<WebViewProvider>().updateLoadingPercentage(progress);
+            if (mounted) {
+              context.read<WebViewProvider>().updateLoadingPercentage(progress);
+            }
           },
           onPageStarted: (String url) {
-            context.read<WebViewProvider>().updateLoadingPercentage(0);
+            if (mounted) {
+              context.read<WebViewProvider>().updateLoadingPercentage(0);
+            }
           },
           onPageFinished: (String url) async {
-            context.read<WebViewProvider>().updateLoadingPercentage(100);
-            final title = await controller.getTitle();
             if (mounted) {
-              context.read<WebViewProvider>().updatePageTitle(title);
+              context.read<WebViewProvider>().updateLoadingPercentage(100);
+              try {
+                final title = await controller.getTitle();
+                if (mounted && title != null && title.isNotEmpty) {
+                  context.read<WebViewProvider>().updatePageTitle(title);
+                }
+              } catch (_) {}
             }
           },
           onWebResourceError: (WebResourceError error) {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: ${error.description}')),
-              );
-            }
+            debugPrint('WebView Error: ${error.errorCode} - ${error.description}');
           },
-          onNavigationRequest: (request) {
-            // Allow only YouTube embed or safe domains
-            if (request.url.contains('youtube.com') ||
-                request.url.contains('youtube-nocookie.com') ||
-                request.url.contains('youtu.be') ||
-                request.url.contains('embed')) {
+          onNavigationRequest: (NavigationRequest request) {
+            final uri = Uri.tryParse(request.url);
+            if (uri != null && (uri.scheme == 'http' || uri.scheme == 'https')) {
               return NavigationDecision.navigate;
+            }
+            if (uri != null) {
+              launchUrl(uri, mode: LaunchMode.externalApplication);
             }
             return NavigationDecision.prevent;
           },
         ),
-      )
-      ..setUserAgent(
-          'Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36')
-      ..loadRequest(Uri.parse(widget.webUrl));
+      );
+
+    final cleanUrl = widget.webUrl.trim();
+    if (cleanUrl.isNotEmpty) {
+      final uri = Uri.tryParse(cleanUrl);
+      if (uri != null) {
+        controller.loadRequest(uri);
+      }
+    }
 
     webViewController = controller;
   }
 
-  Future<bool> _handleBackButton() async {
-    if (await webViewController.canGoBack()) {
-      await webViewController.goBack();
-      return false;
-    }
-    return true;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: _handleBackButton,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        if (await webViewController.canGoBack()) {
+          await webViewController.goBack();
+        } else if (context.mounted) {
+          Navigator.pop(context);
+        }
+      },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: widget.title.isEmpty
@@ -125,7 +135,7 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
                   onPressed: () async {
                     if (await webViewController.canGoBack()) {
                       await webViewController.goBack();
-                    } else if (mounted) {
+                    } else if (context.mounted) {
                       Navigator.pop(context);
                     }
                   },

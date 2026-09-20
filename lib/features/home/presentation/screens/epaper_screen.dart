@@ -25,11 +25,8 @@ class _EpaperScreenState extends State<EpaperScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      top: true,
-      bottom: false,
-      child: Scaffold(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Align(
           alignment: Alignment.centerLeft,
@@ -280,7 +277,7 @@ class _EpaperScreenState extends State<EpaperScreen> {
           );
         },
       ),
-      ));
+    );
   }
 
   void _showFilterOptions(BuildContext context) {

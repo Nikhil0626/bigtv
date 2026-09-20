@@ -19,13 +19,13 @@ import 'package:chotanews/utils/commant_screen.dart';
 import 'package:chotanews/utils/date_format.dart';
 import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
@@ -237,7 +237,7 @@ class _EachReelCardState extends State<EachReelCard> {
                         children: [
                           BottomActions(
                             iconColor: AppColors.iconColors,
-                            postType: widget.reel.postName ?? "",
+                            postType: widget.reel.postName,
                             icon: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
                             label: 'లైక్',
                             isLike: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
@@ -247,12 +247,10 @@ class _EachReelCardState extends State<EachReelCard> {
                               EventRepo().addEvent(
                                   {
                                     "like": !widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
-                                    "postId": widget.reel.id.toString() ?? "000",
+                                    "postId": widget.reel.id.toString(),
                                     "createAt": DateTime.now().toString(),
                                     "postTitle": widget.reel.title.toString(),
-
                                   },
-
                               "liked_article");
                             },
                           ),
@@ -264,7 +262,7 @@ class _EachReelCardState extends State<EachReelCard> {
                             onTap: () async {
                               context.read<AuthenticationProvider>().sendEvent("CommentPage");
 
-                              showComments(context, widget.reel.id.toString(),widget.reel.title.toString());
+                              showComments(context, widget.reel.id.toString(), widget.reel.title.toString());
                             },
                           ),
                           Spacer(),
@@ -274,43 +272,47 @@ class _EachReelCardState extends State<EachReelCard> {
                             label: 'షేర్',
                             iconColor: AppColors.iconColors,
                             onTap: () async {
-                              print("Share");
+                              print("🔥🔥🔥 EACH REEL CARD SHARE BUTTON TAPPED 🔥🔥🔥");
+                              log("Share Reel: ${widget.reel.id}");
 
-                              // ✅ Get userId first
-                              SharedPreferences sp = await SharedPreferences.getInstance();
-                              String? userId = sp.getString("userId");
+                              final Size size = MediaQuery.of(context).size;
+                              final Rect shareOrigin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
 
-                              // ✅ Now it's safe to use userId
+                              final String title = widget.reel.title.trim();
+                              final String videoUrl = widget.reel.videoUrl.trim();
+                              final String fallbackUrl = "https://www.bigtv24x7.com/posts?postId=${widget.reel.id}";
+                              final String shareLink = videoUrl.isNotEmpty ? videoUrl : fallbackUrl;
+                              final String shareText = title.isNotEmpty ? "$title\n\n$shareLink" : shareLink;
+
+                              // Share immediately so there is zero UI delay
+                              try {
+                                await Share.share(
+                                  shareText,
+                                  sharePositionOrigin: shareOrigin,
+                                );
+                              } catch (e) {
+                                log("Error in Share.share: $e");
+                                try {
+                                  await Share.share(shareText);
+                                } catch (err) {
+                                  log("Fallback Share.share failed: $err");
+                                }
+                              }
+
+                              // Background event tracking
                               EventRepo().addEvent({
                                 "share": "reels",
-                                "postId": widget.reel.id.toString() ?? "000",
+                                "postId": widget.reel.id.toString(),
                                 "createAt": DateTime.now().toString(),
                                 "postTitle": widget.reel.title.toString(),
-                              },
-                                  "shared_article");
-
-                              sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
+                              }, "shared_article");
 
                               try {
-                                final image = await sc.capture(
-                                  pixelRatio: 2,
-                                );
-                                if (image != null) {
-                                  final directory = await getTemporaryDirectory();
-                                  final imagePath = '${directory.path}/${widget.reel.id}.png';
-                                  final imageFile = File(imagePath);
-                                  await imageFile.writeAsBytes(image);
-
-                                  Share.shareXFiles(
-                                    [XFile(imageFile.path)],
-                                    text: widget.reel.videoUrl,
-                                  );
-                                } else {
-                                  CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                                }
+                                SharedPreferences sp = await SharedPreferences.getInstance();
+                                String? userId = sp.getString("userId");
+                                sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
                               } catch (e) {
-                                log("Error sharing reel: $e");
-                                CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
+                                log("Error sending share details: $e");
                               }
                             },
                           ),

@@ -30,19 +30,24 @@ class BottomActions extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
       final Color colorToUse = iconColor is Color ? iconColor : AppColorTokens.primaryRed;
-      return InkWell(
+      return GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: SizedBox(
-          width: 44,
-          child: SvgPicture.asset(
-            icon,
-            height: iconSize,
-            width: iconSize,
-            colorFilter: ColorFilter.mode(
-              isLike ? AppColorTokens.primaryRed : colorToUse,
-              BlendMode.srcIn,
-            ),
-          ),
+        child: Container(
+          width: 48,
+          height: 48,
+          alignment: Alignment.center,
+          color: Colors.transparent,
+          child: iconWidget ??
+              SvgPicture.asset(
+                icon,
+                height: iconSize,
+                width: iconSize,
+                colorFilter: ColorFilter.mode(
+                  isLike ? AppColorTokens.primaryRed : colorToUse,
+                  BlendMode.srcIn,
+                ),
+              ),
         ),
       );
     });

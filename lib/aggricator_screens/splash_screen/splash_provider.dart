@@ -10,14 +10,16 @@ class SplashProvider extends ChangeNotifier {
   bool showGif = false;
 
   Future<void> checkLastShownDate(BuildContext context) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? lastDate = prefs.getString('last_shown_date');
-    String? locationNames = prefs.getString("locationNames");
-    String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? lastDate = prefs.getString('last_shown_date');
+      String? locationNames = prefs.getString("locationNames");
+      String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
 
-    if (lastDate == today) {
-      showGif = true;
-      notifyListeners();
+      if (lastDate == today) {
+        showGif = true;
+        notifyListeners();
+      }
       await prefs.setString('last_shown_date', today);
       EventRepo().addEvent(
         {
@@ -27,12 +29,21 @@ class SplashProvider extends ChangeNotifier {
         },
         "opened_app",
       );
+    } catch (e) {
+      debugPrint("Splash error: $e");
     }
-    await Future.delayed(Duration(seconds: showGif ? 5 : 2));
+
+    await Future.delayed(Duration(milliseconds: showGif ? 1500 : 1000));
     if (context.mounted) {
-      context.read<HomeProvider>().getAppConfig();
-      await context.read<HomeProvider>().loadLanguage();
-      context.read<AuthenticationProvider>().isPageNavigation(context);
+      try {
+        context.read<HomeProvider>().getAppConfig();
+        await context.read<HomeProvider>().loadLanguage();
+      } catch (e) {
+        debugPrint("Error loading app config: $e");
+      }
+      if (context.mounted) {
+        context.read<AuthenticationProvider>().isPageNavigation(context);
+      }
     }
   }
 }

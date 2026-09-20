@@ -38,75 +38,94 @@ void callbackDispatcher() {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final appDocumentDir = await getApplicationDocumentsDirectory();
-  Hive.init(appDocumentDir.path);
-  await Hive.openBox('events');
-  await Hive.openBox('pollBox');
-  EventCron().start();
-
-  initPlugin();
-  getReferrerFromPlayStore();
-
+  
   SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
     statusBarColor: Colors.transparent,
     statusBarIconBrightness: Brightness.light,
     statusBarBrightness: Brightness.dark,
   ));
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  checkForUpdate();
 
-  await Firebase.initializeApp();
-  AnalyticsService.logAppOpen();
-  AnalyticsService().trackAppOpen();
-  AnalyticsService.startSession();
-  AnalyticsService.checkRetention();
+  try {
+    final appDocumentDir = await getApplicationDocumentsDirectory();
+    Hive.init(appDocumentDir.path);
+    await Hive.openBox('events');
+    await Hive.openBox('pollBox');
+    EventCron().start();
+  } catch (e) {
+    debugPrint("Hive init error: $e");
+  }
 
-  // Configure foreground notification options for iOS
-  await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-
-  // Request notification permissions
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-    provisional: false,
-  );
-
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint("Foreground FCM message received: ${message.data}");
-  });
-
-  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-    debugPrint("Notification opened app: ${message.data}");
-    _handleBackgroundNotification(message.data);
-  });
-
-  FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
-    if (message != null) {
-      debugPrint("Initial FCM message on launch: ${message.data}");
-      _handleBackgroundNotification(message.data);
-    }
-  });
-
-  FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
-    debugPrint("FCM token refreshed: $newToken");
-    getUniqueDeviceId(newToken);
-  });
-
-  logFullDeviceAndFcmDetails();
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint("Firebase init error: $e");
+  }
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
-  ]).then((_) {
-    runApp(AppLifecycleManager(child: MyApp()));
-  });
+  ]);
+
+  runApp(AppLifecycleManager(child: const MyApp()));
+
+  // Run non-blocking background initialization tasks
+  _initBackgroundServices();
+}
+
+void _initBackgroundServices() async {
+  try {
+    initPlugin();
+    getReferrerFromPlayStore();
+    checkForUpdate();
+
+    AnalyticsService.logAppOpen();
+    AnalyticsService().trackAppOpen();
+    AnalyticsService.startSession();
+    AnalyticsService.checkRetention();
+
+    // Configure foreground notification options for iOS
+    FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    // Request notification permissions
+    FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+      provisional: false,
+    );
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      debugPrint("Foreground FCM message received: ${message.data}");
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      debugPrint("Notification opened app: ${message.data}");
+      _handleBackgroundNotification(message.data);
+    });
+
+    FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
+      if (message != null) {
+        debugPrint("Initial FCM message on launch: ${message.data}");
+        _handleBackgroundNotification(message.data);
+      }
+    });
+
+    FirebaseMessaging.instance.onTokenRefresh.listen((newToken) {
+      debugPrint("FCM token refreshed: $newToken");
+      getUniqueDeviceId(newToken);
+    });
+
+    logFullDeviceAndFcmDetails();
+  } catch (e) {
+    debugPrint("Error in background services initialization: $e");
+  }
 }
 
 @pragma('vm:entry-point')
