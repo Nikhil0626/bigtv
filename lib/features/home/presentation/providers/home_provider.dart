@@ -186,6 +186,15 @@ class HomeProvider extends ChangeNotifier {
 
   void isPlayingYoutube(bool value) {
     isPlaying = value;
+    if (!value) {
+      try {
+        if (controller.value.isPlaying) {
+          controller.pause();
+        }
+      } catch (e) {
+        log("Error pausing YouTube controller: $e");
+      }
+    }
     notifyListeners();
   }
 

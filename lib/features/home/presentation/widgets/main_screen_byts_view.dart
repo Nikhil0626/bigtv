@@ -269,7 +269,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
               ),
             ),
           )
-        : SizedBox(
+        : Container(
+            color: _getPostBackgroundColor(widget.article, context),
             height: double.infinity,
             width: double.infinity,
             child: (widget.article['type'] == 'HomePostGrid' || widget.article['subType'] == 'HomePostGrid' || widget.article['homepost'] != null)
@@ -1072,6 +1073,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                           ),
                                                                                         );
                                                                                       }),
+                                                                                        const SizedBox(width: 16),
                                                                                         if (context.watch<HomeProvider>().englishLanguageEnable) ...[
                                                                                          /// Language Translation Icon Dropdown Card
                                                                                          PopupMenuButton<bool>(

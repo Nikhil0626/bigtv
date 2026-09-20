@@ -50,32 +50,17 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Consumer<SplashProvider>(
-        builder: (context, provider, child) {
-          return Center(
-            child: provider.showGif
-                ? Container(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    color: Theme.of(context).scaffoldBackgroundColor,
-                    child: Lottie.asset(
-                      "assets/svg/spinner.json",
-                      fit: BoxFit.contain,
-                    ),
-                  )
-                : SizedBox(
-                    height: MediaQuery.of(context).size.height,
-                    width: MediaQuery.of(context).size.width,
-                    child: Center(
-                      child: Image.asset(
-                        "assets/BIGTV-APP ICON.png",
-                        height: 100,
-                        width: 100,
-                      ),
-                    ),
-                  ),
-          );
-        },
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        width: MediaQuery.of(context).size.width,
+        child: Center(
+          child: Image.asset(
+            "assets/BIGTV-APP ICON.png",
+            height: 100,
+            width: 100,
+          ),
+        ),
       ),
     );
   }

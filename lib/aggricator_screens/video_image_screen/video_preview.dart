@@ -41,6 +41,14 @@ class VideoPreviewPage extends State<VideoPreview> {
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
+    try {
+      final homeProvider = context.read<HomeProvider>();
+      if (homeProvider.isPlaying) {
+        homeProvider.isPlayingYoutube(false);
+      }
+    } catch (e) {
+      log("Error pausing video preview on dispose: $e");
+    }
     super.dispose();
   }
 

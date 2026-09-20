@@ -17,7 +17,7 @@ class SplashProvider extends ChangeNotifier {
       String today = DateTime.now().toIso8601String().split('T')[0]; // YYYY-MM-DD
 
       if (lastDate == today) {
-        showGif = true;
+        showGif = false;
         notifyListeners();
       }
       await prefs.setString('last_shown_date', today);

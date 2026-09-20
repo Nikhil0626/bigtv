@@ -27,6 +27,7 @@ import '../../utils/in_app_web_view.dart';
 import '../settings_screen/settings_provider/settings_provider.dart';
 import '../video_image_screen/gallery_screen.dart';
 import '../video_image_screen/video_preview.dart';
+import '../video_image_screen/video_provider.dart';
 import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
@@ -147,6 +148,27 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
         subType == 'bulletpost';
   }
 
+  void _stopVideoPlayback() {
+    try {
+      final homeProvider = context.read<HomeProvider>();
+      if (homeProvider.isPlaying) {
+        homeProvider.isPlayingYoutube(false);
+      }
+    } catch (_) {}
+    try {
+      final videoProvider = context.read<VideoProvider>();
+      if (videoProvider.isPlaying) {
+        videoProvider.pauseVideo();
+      }
+    } catch (_) {}
+  }
+
+  @override
+  void dispose() {
+    _stopVideoPlayback();
+    super.dispose();
+  }
+
   @override
   void initState() {
     log("is come from lin----k ${widget.postId}");
@@ -169,6 +191,11 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
         ),
         child: PopScope(
           canPop: true,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) {
+              _stopVideoPlayback();
+            }
+          },
           child: Scaffold(
             backgroundColor: _getPostBackgroundColor(article, context),
             body: Column(
@@ -204,6 +231,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                       CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
                                     } else {
                                       if (article['postUrl'] != "" && article['postUrl'] != null) {
+                                        _stopVideoPlayback();
                                         Navigator.pop(context);
                                         context.read<HomeProvider>().sendAdsDataSend(
                                             article['id'], article['title'], article['image_url'], false, article['postUrl']);
@@ -245,7 +273,10 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                         top: 12,
                                         left: 14,
                                         child: InkWell(
-                                          onTap: () => Navigator.pop(context),
+                                          onTap: () {
+                                            _stopVideoPlayback();
+                                            Navigator.pop(context);
+                                          },
                                           child: Container(
                                             padding: const EdgeInsets.all(7),
                                             decoration: const BoxDecoration(
@@ -275,7 +306,10 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                       top: 12,
                                       left: 14,
                                       child: InkWell(
-                                        onTap: () => Navigator.pop(context),
+                                        onTap: () {
+                                          _stopVideoPlayback();
+                                          Navigator.pop(context);
+                                        },
                                         child: Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(

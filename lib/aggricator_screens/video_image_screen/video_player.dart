@@ -47,7 +47,12 @@ class _CustomVideoPlayerState extends State<CustomVideoPlayer> with WidgetsBindi
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    // Don't dispose the controller here - let the provider handle it
+    try {
+      final videoProvider = context.read<VideoProvider>();
+      videoProvider.pauseVideo();
+    } catch (e) {
+      log("Error pausing custom video player on dispose: $e");
+    }
     super.dispose();
   }
 
