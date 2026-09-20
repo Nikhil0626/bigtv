@@ -51,7 +51,7 @@ class BaseUrls {
   // static const String newServerBaseUrl = "http://192.168.70.251";
   static const String newServerBaseUrl = "https://api.pravasamedia.com";
   static const String deviceDetails = "/api/v1/deviceDetails";
-  static const String appConfig = "/api/v1/app-config";
+  static const String appConfig = "/api/v1/app-config/all";
   /// Python Dev Apis
   // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
 

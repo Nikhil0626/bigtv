@@ -590,6 +590,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                 )
                                                               : ImagePostSlider(
                                                                   imageUrl: widget.article['image_url'],
+                                                                  autoPlay: false,
                                                                 ))
                                                           : CachedNetworkImage(
                                                               imageUrl: _getImageUrl(widget.article['image_url']),
@@ -1071,7 +1072,87 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                           ),
                                                                                         );
                                                                                       }),
-                                                                                        const SizedBox(width: 16),
+                                                                                        if (context.watch<HomeProvider>().englishLanguageEnable) ...[
+                                                                                         /// Language Translation Icon Dropdown Card
+                                                                                         PopupMenuButton<bool>(
+                                                                                           padding: EdgeInsets.zero,
+                                                                                           constraints: const BoxConstraints(),
+                                                                                           tooltip: "Select Language",
+                                                                                           offset: const Offset(0, -110),
+                                                                                           shape: RoundedRectangleBorder(
+                                                                                             borderRadius: BorderRadius.circular(12),
+                                                                                           ),
+                                                                                           color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade900 : Colors.white,
+                                                                                           elevation: 6,
+                                                                                           onSelected: (bool isEnglish) {
+                                                                                             context.read<HomeProvider>().setEnglishMode(isEnglish);
+                                                                                           },
+                                                                                           itemBuilder: (context) {
+                                                                                             final homeProvider = context.read<HomeProvider>();
+                                                                                             final isDark = Theme.of(context).brightness == Brightness.dark;
+                                                                                             final textColor = isDark ? Colors.white : Colors.black87;
+
+                                                                                             return [
+                                                                                               PopupMenuItem<bool>(
+                                                                                                 value: false,
+                                                                                                 height: 40,
+                                                                                                 child: Row(
+                                                                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                   children: [
+                                                                                                     Text(
+                                                                                                       "తెలుగు (Telugu)",
+                                                                                                       style: TextStyle(
+                                                                                                         fontSize: 14.sp,
+                                                                                                         fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
+                                                                                                         color: !homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
+                                                                                                       ),
+                                                                                                     ),
+                                                                                                     if (!homeProvider.isEnglishMode)
+                                                                                                       const Padding(
+                                                                                                         padding: EdgeInsets.only(left: 8.0),
+                                                                                                         child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
+                                                                                                       ),
+                                                                                                   ],
+                                                                                                 ),
+                                                                                               ),
+                                                                                               const PopupMenuDivider(height: 1),
+                                                                                               PopupMenuItem<bool>(
+                                                                                                 value: true,
+                                                                                                 height: 40,
+                                                                                                 child: Row(
+                                                                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                   children: [
+                                                                                                     Text(
+                                                                                                       "English",
+                                                                                                       style: TextStyle(
+                                                                                                         fontSize: 14.sp,
+                                                                                                         fontWeight: homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
+                                                                                                         color: homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
+                                                                                                       ),
+                                                                                                     ),
+                                                                                                     if (homeProvider.isEnglishMode)
+                                                                                                       const Padding(
+                                                                                                         padding: EdgeInsets.only(left: 8.0),
+                                                                                                         child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
+                                                                                                       ),
+                                                                                                   ],
+                                                                                                 ),
+                                                                                               ),
+                                                                                             ];
+                                                                                           },
+                                                                                           child: Column(
+                                                                                             mainAxisSize: MainAxisSize.min,
+                                                                                             children: [
+                                                                                               Icon(
+                                                                                                 Icons.g_translate_rounded,
+                                                                                                 size: 28,
+                                                                                                 color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : const Color(0xFFED1C24),
+                                                                                               ),
+                                                                                             ],
+                                                                                           ),
+                                                                                         ),
+                                                                                         const SizedBox(width: 16),
+                                                                                       ],
                                                                                       /// WhatsApp Icon
                                                                                       InkWell(
                                                                                         onTap: () async {
@@ -1117,86 +1198,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                         child: Column(
                                                                                           mainAxisSize: MainAxisSize.min,
                                                                                           children: [
-                                                                                            Image.asset("assets/images/WhatsApp_icon.png", height: 30, width: 30),
-                                                                                          ],
-                                                                                        ),
-                                                                                      ),
-                                                                                      const SizedBox(width: 16),
-                                                                                      /// Language Translation Icon Dropdown Card
-                                                                                      PopupMenuButton<bool>(
-                                                                                        padding: EdgeInsets.zero,
-                                                                                        constraints: const BoxConstraints(),
-                                                                                        tooltip: "Select Language",
-                                                                                        offset: const Offset(0, -110),
-                                                                                        shape: RoundedRectangleBorder(
-                                                                                          borderRadius: BorderRadius.circular(12),
-                                                                                        ),
-                                                                                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade900 : Colors.white,
-                                                                                        elevation: 6,
-                                                                                        onSelected: (bool isEnglish) {
-                                                                                          context.read<HomeProvider>().setEnglishMode(isEnglish);
-                                                                                        },
-                                                                                        itemBuilder: (context) {
-                                                                                          final homeProvider = context.read<HomeProvider>();
-                                                                                          final isDark = Theme.of(context).brightness == Brightness.dark;
-                                                                                          final textColor = isDark ? Colors.white : Colors.black87;
-
-                                                                                          return [
-                                                                                            PopupMenuItem<bool>(
-                                                                                              value: false,
-                                                                                              height: 40,
-                                                                                              child: Row(
-                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                                children: [
-                                                                                                  Text(
-                                                                                                    "తెలుగు (Telugu)",
-                                                                                                    style: TextStyle(
-                                                                                                      fontSize: 14.sp,
-                                                                                                      fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
-                                                                                                      color: !homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  if (!homeProvider.isEnglishMode)
-                                                                                                    const Padding(
-                                                                                                      padding: EdgeInsets.only(left: 8.0),
-                                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
-                                                                                                    ),
-                                                                                                ],
-                                                                                              ),
-                                                                                            ),
-                                                                                            const PopupMenuDivider(height: 1),
-                                                                                            PopupMenuItem<bool>(
-                                                                                              value: true,
-                                                                                              height: 40,
-                                                                                              child: Row(
-                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                                children: [
-                                                                                                  Text(
-                                                                                                    "English",
-                                                                                                    style: TextStyle(
-                                                                                                      fontSize: 14.sp,
-                                                                                                      fontWeight: homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
-                                                                                                      color: homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  if (homeProvider.isEnglishMode)
-                                                                                                    const Padding(
-                                                                                                      padding: EdgeInsets.only(left: 8.0),
-                                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
-                                                                                                    ),
-                                                                                                ],
-                                                                                              ),
-                                                                                            ),
-                                                                                          ];
-                                                                                        },
-                                                                                        child: Column(
-                                                                                          mainAxisSize: MainAxisSize.min,
-                                                                                          children: [
-                                                                                            Icon(
-                                                                                              Icons.g_translate_rounded,
-                                                                                              size: 28,
-                                                                                              color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : const Color(0xFFED1C24),
-                                                                                            ),
+                                                                                            Image.asset("assets/images/WhatsApp_icon.png", height: 35, width: 35),
                                                                                           ],
                                                                                         ),
                                                                                       ),

@@ -23,19 +23,19 @@ TextStyle homeScreenFontStyle({
 
   if (isEnglish) {
     final double effectiveFontSize = (fontSize ?? 14) + 1.5;
-    return GoogleFonts.poppins(
-      textStyle: TextStyle(
-        fontSize: effectiveFontSize,
-        height: height ?? 1.4,
-        fontWeight: fontWeight,
-        color: color ?? defaultColor,
-        backgroundColor: backgroundColor,
-        letterSpacing: letterSpacing ?? 0.3,
-        decoration: decoration,
-        decorationColor: decorationColor,
-        decorationThickness: decorationThickness,
-        decorationStyle: decorationStyle,
-      ),
+    return TextStyle(
+      fontFamily: 'SF Pro',
+      fontFamilyFallback: const ['.SF Pro Text', '.SF Pro Display', 'SF Pro Text', 'SF Pro Display', 'Roboto'],
+      fontSize: effectiveFontSize,
+      height: height ?? 1.4,
+      fontWeight: fontWeight,
+      color: color ?? defaultColor,
+      backgroundColor: backgroundColor,
+      letterSpacing: letterSpacing ?? 0.3,
+      decoration: decoration,
+      decorationColor: decorationColor,
+      decorationThickness: decorationThickness,
+      decorationStyle: decorationStyle,
     );
   }
 

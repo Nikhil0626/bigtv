@@ -1,4 +1,5 @@
 import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/features/events/presentation/screens/payment_success_screen.dart';
 import 'package:chotanews/features/events/presentation/screens/ticket_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -60,8 +61,14 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
 
       if (!mounted) return;
       if (verifyResponse.statusCode == 200 || verifyResponse.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Payment Successful! Booking Confirmed.")),
+        final bookingData = (verifyResponse.data != null && verifyResponse.data['data'] != null)
+            ? verifyResponse.data['data']
+            : {"bookingCode": activeBookingCode};
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentSuccessScreen(booking: Map<String, dynamic>.from(bookingData)),
+          ),
         );
         fetchUserBookings();
       }

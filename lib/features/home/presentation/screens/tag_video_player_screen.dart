@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -6,6 +7,10 @@ import 'package:video_player/video_player.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 import 'package:chotanews/services/video_position_service.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 
@@ -38,6 +43,72 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   bool _isMuted = false;
   double _volume = 1.0;
   bool _showVolumeSlider = false;
+  final Set<String> _viewedVideoIds = {};
+
+  Future<void> _incrementViewCount(int index) async {
+    if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length) return;
+
+    final videoItem = widget.videos[index];
+    if (videoItem is! Map) return;
+
+    final Map<String, dynamic> itemMap = Map<String, dynamic>.from(videoItem);
+
+    final String videoId = (itemMap['videoId'] ??
+            itemMap['_id'] ??
+            itemMap['id'] ??
+            itemMap['video_id'] ??
+            '')
+        .toString()
+        .trim();
+
+    if (videoId.isEmpty) return;
+
+    if (_viewedVideoIds.contains(videoId)) return;
+    _viewedVideoIds.add(videoId);
+
+    String slug = (itemMap['slug'] ??
+            itemMap['tagSlug'] ??
+            itemMap['tag_slug'] ??
+            '')
+        .toString()
+        .trim();
+
+    if (slug.isEmpty) {
+      try {
+        final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+        slug = homeProvider.currentTagSlug;
+      } catch (_) {}
+    }
+
+    if (slug.isEmpty && widget.tagTitle.isNotEmpty && widget.tagTitle != "Videos") {
+      slug = widget.tagTitle;
+    }
+
+    if (slug.isEmpty) return;
+
+    try {
+      final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+      final int? newViews = await homeProvider.incrementTagVideoView(slug, videoId);
+
+      if (newViews != null) {
+        videoItem['views'] = newViews;
+        videoItem['viewCount'] = newViews;
+        videoItem['views_count'] = newViews;
+      } else {
+        final currentViews = _getViewCount(itemMap);
+        final updatedViews = currentViews + 1;
+        videoItem['views'] = updatedViews;
+        videoItem['viewCount'] = updatedViews;
+        videoItem['views_count'] = updatedViews;
+      }
+
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      log("Error triggering background view update: $e");
+    }
+  }
 
   String _getThumbnailUrl(BuildContext context, Map<String, dynamic> item) {
     final rawThumbnail = item['thumbnailUrl'] ??
@@ -168,11 +239,10 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
-    _isFullScreen = true;
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    _isFullScreen = false;
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
+      DeviceOrientation.portraitUp,
     ]);
     _initController(_currentIndex);
   }
@@ -198,6 +268,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
   Future<void> _initController(int index) async {
     if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length) return;
+
+    _incrementViewCount(index);
 
     if (_controller != null && _controller!.value.isInitialized && _currentIndex < widget.videos.length) {
       final pos = _controller!.value.position;
@@ -373,12 +445,111 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
     return "$twoDigitMinutes:$twoDigitSeconds";
   }
 
+  int _getViewCount(Map<String, dynamic>? item) {
+    if (item == null) return 0;
+    final raw = item['viewCount'] ??
+        item['view_count'] ??
+        item['viewsCount'] ??
+        item['views_count'] ??
+        item['views'] ??
+        item['view_cnt'] ??
+        0;
+    if (raw is int) return raw;
+    if (raw is double) return raw.toInt();
+    if (raw is String) return int.tryParse(raw) ?? 0;
+    return 0;
+  }
+
+  String _formatViewCount(int count) {
+    if (count >= 1000000) {
+      return "${(count / 1000000).toStringAsFixed(1)}M";
+    } else if (count >= 1000) {
+      return "${(count / 1000).toStringAsFixed(1)}K";
+    }
+    return "$count";
+  }
+
+  Future<void> _shareToWhatsApp(Map<String, dynamic>? currentVideo, String title) async {
+    if (currentVideo == null) return;
+    final String shareUrl = (currentVideo['videoUrl'] ??
+            currentVideo['postUrl'] ??
+            currentVideo['url'] ??
+            '')
+        .toString()
+        .trim();
+
+    final String imageUrl = _getThumbnailUrl(context, currentVideo);
+
+    final List<String> parts = [];
+    if (title.isNotEmpty) parts.add(title);
+    if (shareUrl.isNotEmpty) parts.add(shareUrl);
+
+    final String shareText = parts.join("\n\n");
+
+    File? imageFile;
+    if (imageUrl.isNotEmpty && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+      try {
+        final response = await http.get(Uri.parse(imageUrl));
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+          final file = File('${tempDir.path}/share_thumb_${DateTime.now().millisecondsSinceEpoch}.jpg');
+          await file.writeAsBytes(response.bodyBytes);
+          imageFile = file;
+        }
+      } catch (e) {
+        log("Error downloading thumbnail image for WhatsApp share: $e");
+      }
+    }
+
+    try {
+      if (imageFile != null && await imageFile.exists()) {
+        if (Platform.isIOS) {
+          final Size size = MediaQuery.of(context).size;
+          await Share.shareXFiles(
+            [XFile(imageFile.path)],
+            text: shareText,
+            sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+          );
+        } else {
+          try {
+            const platform = MethodChannel('com.chotanews/whatsapp');
+            await platform.invokeMethod('shareToWhatsApp', {'imagePath': imageFile.path, 'text': shareText});
+          } catch (e) {
+            final Size size = MediaQuery.of(context).size;
+            await Share.shareXFiles(
+              [XFile(imageFile.path)],
+              text: shareText,
+              sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+            );
+          }
+        }
+      } else {
+        final String fallbackText = imageUrl.isNotEmpty ? "$shareText\n\n$imageUrl" : shareText;
+        final String encodedText = Uri.encodeComponent(fallbackText);
+        final Uri whatsappUri = Uri.parse("whatsapp://send?text=$encodedText");
+        if (await canLaunchUrl(whatsappUri)) {
+          await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+        } else {
+          await Share.share(fallbackText);
+        }
+      }
+    } catch (e) {
+      log("WhatsApp share error: $e");
+      if (imageFile != null && await imageFile.exists()) {
+        await Share.shareXFiles([XFile(imageFile.path)], text: shareText);
+      } else {
+        await Share.share(shareText);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final currentVideo = (widget.videos.isNotEmpty && _currentIndex < widget.videos.length)
+    final currentItem = (widget.videos.isNotEmpty && _currentIndex < widget.videos.length)
         ? widget.videos[_currentIndex]
         : null;
-    final currentTitle = currentVideo != null ? _cleanFileName(currentVideo['fileName'] ?? '') : "Video Player";
+    final Map<String, dynamic>? currentVideoMap = currentItem is Map ? Map<String, dynamic>.from(currentItem) : null;
+    final currentTitle = currentVideoMap != null ? _cleanFileName(currentVideoMap['fileName'] ?? '') : "Video Player";
 
     return OrientationBuilder(
       builder: (context, orientation) {
@@ -422,7 +593,7 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                         const Center(child: CircularProgressIndicator(color: Colors.red)),
 
                       if (_showControls && _controller != null && _isInitialized)
-                        _buildFullscreenControls(currentTitle),
+                        _buildFullscreenControls(currentTitle, currentVideoMap),
                     ],
                   ),
                 ),
@@ -492,7 +663,7 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                               const Center(child: CircularProgressIndicator(color: Colors.red)),
 
                             if (_showControls && _controller != null && _isInitialized)
-                              _buildPlayerOverlayControls(currentTitle),
+                              _buildPlayerOverlayControls(currentTitle, currentVideoMap),
                           ],
                         ),
                       ),
@@ -653,13 +824,29 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 3),
-                                    Text(
-                                      date,
-                                      style: TextStyle(
-                                        color: isDark ? Colors.white38 : Colors.grey.shade600, 
-                                        fontSize: 10.sp,
-                                      ),
-                                    ),
+                                     Row(
+                                       children: [
+                                         Text(
+                                           date,
+                                           style: TextStyle(
+                                             color: isDark ? Colors.white38 : Colors.grey.shade600, 
+                                             fontSize: 10.sp,
+                                           ),
+                                         ),
+                                         if (context.watch<HomeProvider>().liveTvCountEnable) ...[
+                                           const SizedBox(width: 8),
+                                           Icon(Icons.remove_red_eye_outlined, size: 12.sp, color: isDark ? Colors.white38 : Colors.grey.shade600),
+                                           const SizedBox(width: 3),
+                                           Text(
+                                             _formatViewCount(_getViewCount(itemMap)),
+                                             style: TextStyle(
+                                               color: isDark ? Colors.white38 : Colors.grey.shade600, 
+                                               fontSize: 10.sp,
+                                             ),
+                                           ),
+                                         ],
+                                       ],
+                                     ),
                                   ],
                                 ),
                               ),
@@ -759,11 +946,44 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   }
 
   // Overlay Controls inside Video Player Frame
-  Widget _buildPlayerOverlayControls(String title) {
+  Widget _buildPlayerOverlayControls(String title, Map<String, dynamic>? currentVideo) {
+    final int count = _currentIndex + 1;
+    final int total = widget.videos.length;
+
     return Container(
       color: Colors.black38,
       child: Stack(
         children: [
+          // Top Left View Count Badge
+          if (context.watch<HomeProvider>().liveTvCountEnable)
+            Positioned(
+              top: 8,
+              left: 10,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.white24, width: 0.8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.remove_red_eye_outlined, color: Colors.white, size: 18),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatViewCount(_getViewCount(currentVideo)),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
           // Volume & Fullscreen icon top right
           Positioned(
             top: 4,
@@ -874,154 +1094,241 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
               ],
             ),
           ),
+
+          // Bottom Right WhatsApp Share Button (Portrait - Decreased Size)
+          Positioned(
+            bottom: 8,
+            right: 10,
+            child: GestureDetector(
+              onTap: () => _shareToWhatsApp(currentVideo, title),
+              child: Container(
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white24, width: 0.8),
+                ),
+                child: Image.asset(
+                  "assets/images/WhatsApp_icon.png",
+                  width: 20.w,
+                  height: 20.h,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.share,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // Fullscreen Overlay Controls
-  Widget _buildFullscreenControls(String title) {
+  // Fullscreen Overlay Controls (Landscape)
+  Widget _buildFullscreenControls(String title, Map<String, dynamic>? currentVideo) {
+    final int count = _currentIndex + 1;
+    final int total = widget.videos.length;
+
     return Container(
       color: Colors.black45,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Stack(
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-            child: Row(
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
-                  onPressed: () => Navigator.pop(context),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.w500),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (_showVolumeSlider)
-                  SizedBox(
-                    width: 90.w,
-                    child: SliderTheme(
-                      data: SliderThemeData(
-                        trackHeight: 2,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4),
-                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 8),
-                        activeTrackColor: Colors.red,
-                        inactiveTrackColor: Colors.white24,
-                        thumbColor: Colors.white,
-                      ),
-                      child: Slider(
-                        value: _isMuted ? 0.0 : _volume,
-                        min: 0.0,
-                        max: 1.0,
-                        onChanged: (val) {
-                          setState(() {
-                            _volume = val;
-                            _isMuted = val == 0;
-                            _controller?.setVolume(val);
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                IconButton(
-                  icon: Icon(
-                    _isMuted || _volume == 0 ? Icons.volume_off : Icons.volume_up,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _showVolumeSlider = !_showVolumeSlider;
-                    });
-                    _toggleMute();
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 22),
-                  onPressed: _toggleFullScreen,
-                ),
-              ],
-            ),
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              IconButton(
-                iconSize: 32,
-                icon: const Icon(Icons.skip_previous, color: Colors.white),
-                onPressed: _currentIndex > 0 ? _playPrevTrack : null,
-              ),
-              const SizedBox(width: 12),
-              IconButton(
-                iconSize: 34,
-                icon: const Icon(Icons.replay_10, color: Colors.white),
-                onPressed: () => _seekRelative(-10),
-              ),
-              const SizedBox(width: 16),
-              IconButton(
-                iconSize: 44,
-                icon: Icon(
-                  _controller!.value.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  setState(() {
-                    if (_controller!.value.isPlaying) {
-                      _controller!.pause();
-                    } else {
-                      _controller!.play();
-                    }
-                  });
-                },
-              ),
-              const SizedBox(width: 16),
-              IconButton(
-                iconSize: 34,
-                icon: const Icon(Icons.forward_10, color: Colors.white),
-                onPressed: () => _seekRelative(10),
-              ),
-              const SizedBox(width: 12),
-              IconButton(
-                iconSize: 32,
-                icon: const Icon(Icons.skip_next, color: Colors.white),
-                onPressed: _currentIndex + 1 < widget.videos.length ? _playNextTrack : null,
-              ),
-            ],
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-              children: [
-                VideoProgressIndicator(
-                  _controller!,
-                  allowScrubbing: true,
-                  colors: const VideoProgressColors(
-                    playedColor: Colors.red,
-                    bufferedColor: Colors.white30,
-                    backgroundColor: Colors.white12,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                child: Row(
                   children: [
-                    Text(
-                      _formatDuration(_controller!.value.position),
-                      style: TextStyle(color: Colors.white, fontSize: 9.sp),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                    Text(
-                      _formatDuration(_controller!.value.duration),
-                      style: TextStyle(color: Colors.white, fontSize: 9.sp),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.w500),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    if (_showVolumeSlider)
+                      SizedBox(
+                        width: 90.w,
+                        child: SliderTheme(
+                          data: SliderThemeData(
+                            trackHeight: 2,
+                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4),
+                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 8),
+                            activeTrackColor: Colors.red,
+                            inactiveTrackColor: Colors.white24,
+                            thumbColor: Colors.white,
+                          ),
+                          child: Slider(
+                            value: _isMuted ? 0.0 : _volume,
+                            min: 0.0,
+                            max: 1.0,
+                            onChanged: (val) {
+                              setState(() {
+                                _volume = val;
+                                _isMuted = val == 0;
+                                _controller?.setVolume(val);
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    IconButton(
+                      icon: Icon(
+                        _isMuted || _volume == 0 ? Icons.volume_off : Icons.volume_up,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _showVolumeSlider = !_showVolumeSlider;
+                        });
+                        _toggleMute();
+                      },
+                    ),
+                    // View count between Volume and Exit Fullscreen icons in Landscape mode
+                    if (context.watch<HomeProvider>().liveTvCountEnable)
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.remove_red_eye_outlined,
+                              color: Colors.white,
+                              size: 20, // Increased eye icon size
+                            ),
+                            const SizedBox(width: 3),
+                            Text(
+                              _formatViewCount(_getViewCount(currentVideo)),
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 9.sp, // Decreased number font size
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    IconButton(
+                      icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 22),
+                      onPressed: _toggleFullScreen,
                     ),
                   ],
                 ),
-              ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    iconSize: 32,
+                    icon: const Icon(Icons.skip_previous, color: Colors.white),
+                    onPressed: _currentIndex > 0 ? _playPrevTrack : null,
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    iconSize: 34,
+                    icon: const Icon(Icons.replay_10, color: Colors.white),
+                    onPressed: () => _seekRelative(-10),
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    iconSize: 44,
+                    icon: Icon(
+                      _controller!.value.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        if (_controller!.value.isPlaying) {
+                          _controller!.pause();
+                        } else {
+                          _controller!.play();
+                        }
+                      });
+                    },
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    iconSize: 34,
+                    icon: const Icon(Icons.forward_10, color: Colors.white),
+                    onPressed: () => _seekRelative(10),
+                  ),
+                  const SizedBox(width: 12),
+                  IconButton(
+                    iconSize: 32,
+                    icon: const Icon(Icons.skip_next, color: Colors.white),
+                    onPressed: _currentIndex + 1 < widget.videos.length ? _playNextTrack : null,
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  children: [
+                    VideoProgressIndicator(
+                      _controller!,
+                      allowScrubbing: true,
+                      colors: const VideoProgressColors(
+                        playedColor: Colors.red,
+                        bufferedColor: Colors.white30,
+                        backgroundColor: Colors.white12,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _formatDuration(_controller!.value.position),
+                          style: TextStyle(color: Colors.white, fontSize: 9.sp),
+                        ),
+                        Text(
+                          _formatDuration(_controller!.value.duration),
+                          style: TextStyle(color: Colors.white, fontSize: 9.sp),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          // Bottom Right WhatsApp Share Button in Fullscreen Mode (Landscape - Increased Size)
+          Positioned(
+            bottom: 45,
+            right: 16,
+            child: GestureDetector(
+              onTap: () => _shareToWhatsApp(currentVideo, title),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.7),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white38, width: 1.0),
+                ),
+                child: Image.asset(
+                  "assets/images/WhatsApp_icon.png",
+                  width: 36.w,
+                  height: 36.h,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Icon(
+                    Icons.share,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

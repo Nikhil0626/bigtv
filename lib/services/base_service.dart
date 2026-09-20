@@ -69,7 +69,8 @@ class BaseService {
           break;
         case RequestType.put:
           response = await dio.put(url,
-              options: options, data: json.encode(body));
+              options: options,
+              data: body != null ? (body is FormData ? body : json.encode(body)) : null);
           break;
         case RequestType.post:
           response = await dio.post(

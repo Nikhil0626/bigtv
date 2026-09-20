@@ -1,3 +1,5 @@
+import 'dart:developer';
+import 'dart:io';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
@@ -5,12 +7,15 @@ import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:chotanews/utils/translated_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
 
 class EditorialScreen extends StatefulWidget {
   const EditorialScreen({super.key});
@@ -46,6 +51,91 @@ class _EditorialScreenState extends State<EditorialScreen> {
   void dispose() {
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _shareEditorial(BuildContext context, Map<String, dynamic> article, {bool isWhatsAppOnly = false}) async {
+    final String title = article['title']?.toString() ?? 'Editorial';
+    final String imageUrl = article['image_url']?.toString() ?? article['imageUrl']?.toString() ?? '';
+    final String webUrl = article['link']?.toString() ?? '';
+    final String shareUrl = webUrl.isNotEmpty ? webUrl : "https://www.bigtvlive.com/?p=${article['id']}";
+
+    final List<String> parts = [];
+    if (title.isNotEmpty) parts.add(title);
+    if (shareUrl.isNotEmpty) parts.add(shareUrl);
+    final String shareText = parts.join("\n\n");
+
+    File? imageFile;
+    if (imageUrl.isNotEmpty && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+      try {
+        final response = await http.get(Uri.parse(imageUrl));
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+          final file = File('${tempDir.path}/editorial_thumb_${DateTime.now().millisecondsSinceEpoch}.jpg');
+          await file.writeAsBytes(response.bodyBytes);
+          imageFile = file;
+        }
+      } catch (e) {
+        log("Error downloading editorial thumbnail for sharing: $e");
+      }
+    }
+
+    if (isWhatsAppOnly) {
+      try {
+        if (imageFile != null && await imageFile.exists()) {
+          if (Platform.isIOS) {
+            final Size size = MediaQuery.of(context).size;
+            await Share.shareXFiles(
+              [XFile(imageFile.path)],
+              text: shareText,
+              sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+            );
+          } else {
+            try {
+              const platform = MethodChannel('com.chotanews/whatsapp');
+              await platform.invokeMethod('shareToWhatsApp', {'imagePath': imageFile.path, 'text': shareText});
+            } catch (_) {
+              final Size size = MediaQuery.of(context).size;
+              await Share.shareXFiles(
+                [XFile(imageFile.path)],
+                text: shareText,
+                sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+              );
+            }
+          }
+        } else {
+          final String fallbackText = imageUrl.isNotEmpty ? "$shareText\n\n$imageUrl" : shareText;
+          final String encodedText = Uri.encodeComponent(fallbackText);
+          final Uri whatsappUri = Uri.parse("whatsapp://send?text=$encodedText");
+          if (await canLaunchUrl(whatsappUri)) {
+            await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+          } else {
+            await Share.share(fallbackText);
+          }
+        }
+      } catch (e) {
+        log("WhatsApp share error: $e");
+        await Share.share(shareText);
+      }
+    } else {
+      try {
+        final Size size = MediaQuery.of(context).size;
+        if (imageFile != null && await imageFile.exists()) {
+          await Share.shareXFiles(
+            [XFile(imageFile.path)],
+            text: shareText,
+            sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+          );
+        } else {
+          await Share.share(
+            shareText,
+            sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+          );
+        }
+      } catch (e) {
+        log("General share error: $e");
+        await Share.share(shareText);
+      }
+    }
   }
 
   Widget _buildEditorialShimmer() {
@@ -343,22 +433,36 @@ class _EditorialScreenState extends State<EditorialScreen> {
                                       ),
                                     ],
                                   ),
-                                  GestureDetector(
-                                    onTap: () async {
-                                      final text = Uri.encodeComponent("$title\n$shareUrl");
-                                      final whatsappUrl = Uri.parse("whatsapp://send?text=$text");
-                                      if (await canLaunchUrl(whatsappUrl)) {
-                                        await launchUrl(whatsappUrl);
-                                      } else {
-                                        Share.share("$title\n$shareUrl");
-                                      }
-                                    },
-                                    child: Image.asset(
-                                      'assets/images/WhatsApp_icon.png',
-                                      height: 28,
-                                      width: 28,
-                                      fit: BoxFit.contain,
-                                    ),
+                                  Row(
+                                    children: [
+                                      // Quick WhatsApp Share
+                                      GestureDetector(
+                                        onTap: () => _shareEditorial(context, article, isWhatsAppOnly: true),
+                                        child: Image.asset(
+                                          'assets/images/WhatsApp_icon.png',
+                                          height: 28,
+                                          width: 28,
+                                          fit: BoxFit.contain,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      // All Social Media Share
+                                      GestureDetector(
+                                        onTap: () => _shareEditorial(context, article, isWhatsAppOnly: false),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(6),
+                                          decoration: BoxDecoration(
+                                            color: AppColorTokens.primaryRed.withValues(alpha: 0.1),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Icon(
+                                            Icons.share_rounded,
+                                            color: AppColorTokens.primaryRed,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),

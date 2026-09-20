@@ -42,10 +42,17 @@ class _EpaperScreenState extends State<EpaperScreen> {
         backgroundColor: AppColorTokens.primaryRed,
         elevation: 1,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.white),
-            onPressed: () {
-              _showFilterOptions(context);
+          Consumer<EpaperProvider>(
+            builder: (context, epaperProvider, child) {
+              if (epaperProvider.isLoading || epaperProvider.epapers.isEmpty) {
+                return const SizedBox.shrink();
+              }
+              return IconButton(
+                icon: const Icon(Icons.filter_list, color: Colors.white),
+                onPressed: () {
+                  _showFilterOptions(context);
+                },
+              );
             },
           ),
         ],
@@ -78,7 +85,54 @@ class _EpaperScreenState extends State<EpaperScreen> {
           }
 
           if (epaperProvider.epapers.isEmpty) {
-            return const Center(child: Text("No e-papers available for selected filters"));
+            final hasFilter = epaperProvider.selectedEdition != null || epaperProvider.selectedDate != null;
+            return Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/no_epaper_icon.png',
+                      width: 220,
+                      height: 220,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      hasFilter
+                          ? "No e-papers available for selected filters"
+                          : "No e-papers available",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? Colors.white70
+                            : Colors.black87,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (hasFilter) ...[
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          context.read<EpaperProvider>().clearFilters();
+                        },
+                        icon: const Icon(Icons.refresh, size: 18),
+                        label: const Text("Clear Filters"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColorTokens.primaryRed,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            );
           }
 
           return GridView.builder(

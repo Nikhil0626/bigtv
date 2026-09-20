@@ -1,6 +1,5 @@
 import 'package:chotanews/services/translation_service.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 /// A widget that translates text when [translate] is true,
 /// falls back to original text otherwise or on error.
@@ -111,10 +110,10 @@ class _TranslatedTextState extends State<TranslatedText> {
     if (baseStyle == null) return null;
     if (widget.translate) {
       final double targetFontSize = widget.englishFontSize ?? baseStyle.fontSize ?? 14.0;
-      return GoogleFonts.poppins(
-        textStyle: baseStyle.copyWith(
-          fontSize: targetFontSize,
-        ),
+      return baseStyle.copyWith(
+        fontFamily: 'SF Pro',
+        fontFamilyFallback: const ['.SF Pro Text', '.SF Pro Display', 'SF Pro Text', 'SF Pro Display', 'Roboto'],
+        fontSize: targetFontSize,
       );
     }
     return baseStyle;

@@ -203,7 +203,7 @@ class _MainScreenCardState extends State<MainScreenCard>
                             ),
                           ],
                           const SizedBox(width: 8),
-                          if (homeProvider.getAllAiTagsList.isNotEmpty)
+                          if (homeProvider.showTopNavTags && homeProvider.getAllAiTagsList.isNotEmpty)
                             Expanded(
                               child: ListView.separated(
                                 controller: homeProvider.aiTagScrollController,

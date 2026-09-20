@@ -5,7 +5,8 @@ import 'package:chotanews/features/home/presentation/widgets/image_preview.dart'
 
 class ImagePostSlider extends StatelessWidget {
   final List<dynamic> imageUrl;
-  const ImagePostSlider({super.key, required this.imageUrl});
+  final bool autoPlay;
+  const ImagePostSlider({super.key, required this.imageUrl, this.autoPlay = true});
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +16,7 @@ class ImagePostSlider extends StatelessWidget {
         child: CarouselSlider.builder(
           itemCount: imageUrl.length,
           options: CarouselOptions(
-            autoPlay: true,
+            autoPlay: autoPlay,
             aspectRatio: 1.0,
             enlargeCenterPage: true,
             viewportFraction: 1.0,

@@ -23,11 +23,25 @@ class HomeRepo extends BaseService{
     return response;
   }
 
+  Future getAiTags() async {
+    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev, url: BaseUrls.aiTags, method: RequestType.get);
+    return response;
+  }
+
   Future getTagVideos(String slug) async {
     Response response = await makeRequest(
       baseUrl: BaseUrls.newServerBaseUrl,
       url: "/api/v1/video-tags/$slug/videos",
       method: RequestType.get,
+    );
+    return response;
+  }
+
+  Future updateTagVideoView(String slug, String videoId) async {
+    Response response = await makeRequest(
+      baseUrl: BaseUrls.newServerBaseUrl,
+      url: "/api/v1/video-tags/$slug/videos/$videoId/view",
+      method: RequestType.put,
     );
     return response;
   }

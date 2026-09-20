@@ -161,128 +161,141 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
       final articleFromProvider = homeProvider.getSinglePostList.isEmpty ? <String, dynamic>{} : Map<String, dynamic>.from(homeProvider.getSinglePostList);
       final article = articleFromProvider.isNotEmpty ? articleFromProvider : (widget.initialArticle ?? <String, dynamic>{});
 
-      return PopScope(
-        canPop: true,
-        child: Scaffold(
-          backgroundColor: _getPostBackgroundColor(article, context),
-          body: SafeArea(
-            top: true,
-            bottom: false,
-            child: homeProvider.isPostLoading && article.isEmpty
-                ? const AppLoadingScreen()
-                : article.isEmpty
-                    ? const AppNoData()
-                    : SizedBox(
-                        height: MediaQuery.of(context).size.height,
-                        width: MediaQuery.of(context).size.width,
-                        child: Screenshot(
-                controller: adsScreenshotController,
-                child: article['type'].toString() == "WebUrl"
-                    ? Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: InAppWebViewScreen(
-                          webUrl: context.read<HomeProvider>().webUrl.toString(),
-                          title: '',
-                        ),
-                      )
-                    : (article['type'] == "Image" && article['subType'] == "ImageAd")
-                        ? InkWell(
-                            onTap: () async {
-                              SharedPreferences sp = await SharedPreferences.getInstance();
-                              bool isLogin = sp.getString("loginType") != "login" ? true : false;
-                              if (isLogin) {
-                                CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
-                              } else {
-                                if (article['postUrl'] != "" && article['postUrl'] != null) {
-                                  Navigator.pop(context);
-                                  context.read<HomeProvider>().sendAdsDataSend(
-                                      article['id'], article['title'], article['image_url'], false, article['postUrl']);
-                                }
-                              }
-                            },
-                            child: Stack(
-                              children: [
-                                (article['image_url'] is List)
-                                    ? (article['image_url'].length == 1
-                                        ? Image.network(
-                                            article['image_url'][0] ?? "",
-                                            width: MediaQuery.of(context).size.width,
-                                            height: MediaQuery.of(context).size.height,
-                                            fit: BoxFit.fill,
-                                            errorBuilder: (context, error, stackTrace) => Image.asset(
-                                              "assets/images/bigtv_default_post.png",
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: const SystemUiOverlayStyle(
+          statusBarColor: AppColorTokens.primaryRed,
+          statusBarIconBrightness: Brightness.light,
+          statusBarBrightness: Brightness.dark,
+        ),
+        child: PopScope(
+          canPop: true,
+          child: Scaffold(
+            backgroundColor: _getPostBackgroundColor(article, context),
+            body: Column(
+              children: [
+                Container(
+                  color: AppColorTokens.primaryRed,
+                  height: MediaQuery.of(context).padding.top,
+                ),
+                Expanded(
+                  child: homeProvider.isPostLoading && article.isEmpty
+                      ? const AppLoadingScreen()
+                      : article.isEmpty
+                          ? const AppNoData()
+                          : SizedBox(
+                              height: double.infinity,
+                              width: double.infinity,
+                              child: Screenshot(
+                      controller: adsScreenshotController,
+                      child: article['type'].toString() == "WebUrl"
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: InAppWebViewScreen(
+                                webUrl: context.read<HomeProvider>().webUrl.toString(),
+                                title: '',
+                              ),
+                            )
+                          : (article['type'] == "Image" && article['subType'] == "ImageAd")
+                              ? InkWell(
+                                  onTap: () async {
+                                    SharedPreferences sp = await SharedPreferences.getInstance();
+                                    bool isLogin = sp.getString("loginType") != "login" ? true : false;
+                                    if (isLogin) {
+                                      CustomToast.showErrorToast(msg: "Your a guest user, Please Login to Join Contest");
+                                    } else {
+                                      if (article['postUrl'] != "" && article['postUrl'] != null) {
+                                        Navigator.pop(context);
+                                        context.read<HomeProvider>().sendAdsDataSend(
+                                            article['id'], article['title'], article['image_url'], false, article['postUrl']);
+                                      }
+                                    }
+                                  },
+                                  child: Stack(
+                                    children: [
+                                      (article['image_url'] is List)
+                                          ? (article['image_url'].length == 1
+                                              ? Image.network(
+                                                  article['image_url'][0] ?? "",
+                                                  width: MediaQuery.of(context).size.width,
+                                                  height: MediaQuery.of(context).size.height,
+                                                  fit: BoxFit.fill,
+                                                  errorBuilder: (context, error, stackTrace) => Image.asset(
+                                                    "assets/images/bigtv_default_post.png",
+                                                    width: MediaQuery.of(context).size.width,
+                                                    height: MediaQuery.of(context).size.height,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                )
+                                              : ImagePostSlider(
+                                                  imageUrl: article['image_url'],
+                                                ))
+                                          : Image.network(
+                                              article['image_url'] ?? "",
                                               width: MediaQuery.of(context).size.width,
                                               height: MediaQuery.of(context).size.height,
-                                              fit: BoxFit.cover,
+                                              fit: BoxFit.fill,
+                                              errorBuilder: (context, error, stackTrace) => Image.asset(
+                                                "assets/images/bigtv_default_post.png",
+                                                width: MediaQuery.of(context).size.width,
+                                                height: MediaQuery.of(context).size.height,
+                                                fit: BoxFit.cover,
+                                              ),
                                             ),
-                                          )
-                                        : ImagePostSlider(
-                                            imageUrl: article['image_url'],
-                                          ))
-                                    : Image.network(
-                                        article['image_url'] ?? "",
-                                        width: MediaQuery.of(context).size.width,
-                                        height: MediaQuery.of(context).size.height,
-                                        fit: BoxFit.fill,
-                                        errorBuilder: (context, error, stackTrace) => Image.asset(
-                                          "assets/images/bigtv_default_post.png",
-                                          width: MediaQuery.of(context).size.width,
-                                          height: MediaQuery.of(context).size.height,
-                                          fit: BoxFit.cover,
+                                      Positioned(
+                                        top: 12,
+                                        left: 14,
+                                        child: InkWell(
+                                          onTap: () => Navigator.pop(context),
+                                          child: Container(
+                                            padding: const EdgeInsets.all(7),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              shape: BoxShape.circle,
+                                            ),
+                                            height: 40,
+                                            width: 40,
+                                            child: const Icon(
+                                              Icons.arrow_back,
+                                              color: Colors.black,
+                                              size: 20,
+                                            ),
+                                          ),
                                         ),
-                                      ),
-                                Positioned(
-                                  top: 40,
-                                  left: 30,
-                                  child: InkWell(
-                                    onTap: () => Navigator.pop(context),
-                                    child: Container(
-                                      padding: const EdgeInsets.all(7),
-                                      decoration: const BoxDecoration(
-                                        color: Colors.white,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      height: 40,
-                                      width: 40,
-                                      child: const Icon(
-                                        Icons.arrow_back,
-                                        color: Colors.black,
-                                        size: 20,
-                                      ),
-                                    ),
+                                      )
+                                    ],
                                   ),
                                 )
-                              ],
-                            ),
-                          )
-                        : Stack(
-                            children: [
-                              MainScreenBytView(
-                                article: Map<String, dynamic>.from(article),
-                                isMainScreen: true,
-                              ),
-                              Positioned(
-                                top: 12,
-                                left: 14,
-                                child: InkWell(
-                                  onTap: () => Navigator.pop(context),
-                                  child: Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withValues(alpha: 0.5),
-                                      shape: BoxShape.circle,
+                              : Stack(
+                                  children: [
+                                    MainScreenBytView(
+                                      article: Map<String, dynamic>.from(article),
+                                      isMainScreen: true,
                                     ),
-                                    child: const Icon(
-                                      Icons.arrow_back,
-                                      color: Colors.white,
-                                      size: 20,
+                                    Positioned(
+                                      top: 12,
+                                      left: 14,
+                                      child: InkWell(
+                                        onTap: () => Navigator.pop(context),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.black.withValues(alpha: 0.5),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: const Icon(
+                                            Icons.arrow_back,
+                                            color: Colors.white,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          ),
-              ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),

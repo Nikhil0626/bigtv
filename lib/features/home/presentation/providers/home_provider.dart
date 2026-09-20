@@ -101,6 +101,12 @@ class HomeProvider extends ChangeNotifier {
   }
 
   bool folkNight = false;
+  bool liveTvVideosEnable = true;
+  bool aiTagEnable = true;
+  bool englishLanguageEnable = true;
+  bool liveTvCountEnable = true;
+
+  bool get showTopNavTags => liveTvVideosEnable || aiTagEnable;
 
   bool isEnglishMode = false;
   void toggleEnglishMode() {
@@ -122,14 +128,39 @@ class HomeProvider extends ChangeNotifier {
   Future<void> getAppConfig() async {
     try {
       Response response = await HomeRepo().getAppConfig();
-      if (response.statusCode == 200) {
-        if (response.data != null && response.data['success'] == true) {
-          folkNight = response.data['data']['folkNight'] ?? false;
-          notifyListeners();
+      log("getAppConfig response [${response.statusCode}]: ${response.data}");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        var responseData = response.data;
+        if (responseData is String) {
+          try {
+            responseData = jsonDecode(responseData);
+          } catch (_) {}
+        }
+        if (responseData != null && responseData is Map && responseData['success'] == true) {
+          var dataList = responseData['data'];
+          Map<String, dynamic>? configMap;
+          if (dataList is List && dataList.isNotEmpty) {
+            configMap = Map<String, dynamic>.from(dataList.first);
+          } else if (dataList is Map) {
+            configMap = Map<String, dynamic>.from(dataList);
+          }
+
+          if (configMap != null) {
+            folkNight = configMap['folkNight'] == true;
+            liveTvVideosEnable = configMap['livetvvideos'] ?? true;
+            aiTagEnable = configMap['aitag'] ?? true;
+            englishLanguageEnable = configMap['englishLanguage'] ?? true;
+            liveTvCountEnable = configMap['livetvcount'] ?? true;
+
+            log("AppConfig updated: folkNight=$folkNight, liveTvVideosEnable=$liveTvVideosEnable, aiTagEnable=$aiTagEnable, englishLanguageEnable=$englishLanguageEnable, liveTvCountEnable=$liveTvCountEnable");
+            notifyListeners();
+
+            getAllAiTags();
+          }
         }
       }
-    } catch (e) {
-      log("Error fetching app config: $e");
+    } catch (e, st) {
+      log("Error fetching app config: $e", stackTrace: st);
     }
   }
 
@@ -565,8 +596,23 @@ class HomeProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     getAllAiTagsList = [];
+
+    if (!showTopNavTags) {
+      log("Top nav tags disabled by app config (livetvvideos: $liveTvVideosEnable, aitag: $aiTagEnable)");
+      notifyListeners();
+      return;
+    }
+
     try {
-      Response response = await HomeRepo().getAllAiTags({});
+      Response response;
+      if (liveTvVideosEnable) {
+        response = await HomeRepo().getAllAiTags({});
+      } else if (aiTagEnable) {
+        response = await HomeRepo().getAiTags();
+      } else {
+        notifyListeners();
+        return;
+      }
       
       var responseData = response.data;
       if (responseData is String) {
@@ -586,11 +632,11 @@ class HomeProvider extends ChangeNotifier {
         return item;
       }).toList();
       
-      log("Video Tags loaded: $getAllAiTagsList");
+      log("Tags loaded (liveTvVideos: $liveTvVideosEnable, aiTag: $aiTagEnable): ${getAllAiTagsList.length} items");
     } on DioException catch (e, st) {
-      log("Get Video Tags Api catch error $e", stackTrace: st);
+      log("Get Tags Api catch error $e", stackTrace: st);
     } catch (e, st) {
-      log("Get Video Tags Api catch error $e", stackTrace: st);
+      log("Get Tags Api catch error $e", stackTrace: st);
     } finally {
       notifyListeners();
     }
@@ -631,6 +677,33 @@ class HomeProvider extends ChangeNotifier {
       isTagVideosLoading = false;
       notifyListeners();
     }
+  }
+
+  Future<int?> incrementTagVideoView(String slug, String videoId) async {
+    try {
+      final encodedSlug = Uri.encodeComponent(slug);
+      Response response = await HomeRepo().updateTagVideoView(encodedSlug, videoId);
+      log("Update Tag Video View response [${response.statusCode}]: ${response.data}");
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        var data = response.data;
+        if (data is String) {
+          try {
+            data = jsonDecode(data);
+          } catch (_) {}
+        }
+        if (data != null && data is Map) {
+          final resData = data['data'];
+          if (resData != null && resData is Map && resData.containsKey('views')) {
+            final viewsRaw = resData['views'];
+            if (viewsRaw is int) return viewsRaw;
+            if (viewsRaw is String) return int.tryParse(viewsRaw);
+          }
+        }
+      }
+    } catch (e, st) {
+      log("Update Tag Video View catch error $e", stackTrace: st);
+    }
+    return null;
   }
 
   Future<void> getSurveyData() async {

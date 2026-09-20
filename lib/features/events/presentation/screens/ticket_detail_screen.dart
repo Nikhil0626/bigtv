@@ -1,12 +1,18 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/features/events/presentation/screens/payment_success_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:dio/dio.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 class TicketDetailScreen extends StatefulWidget {
   final Map<String, dynamic> booking;
@@ -87,10 +93,15 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
 
       if (!mounted) return;
       if (verifyResponse.statusCode == 200 || verifyResponse.statusCode == 201) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Payment Successful! Booking Confirmed.")),
+        final updatedData = (verifyResponse.data != null && verifyResponse.data['data'] != null)
+            ? verifyResponse.data['data']
+            : currentBooking;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PaymentSuccessScreen(booking: Map<String, dynamic>.from(updatedData)),
+          ),
         );
-        fetchBookingDetails();
       }
     } catch (e) {
       debugPrint("❌ Verification error: $e");
@@ -192,9 +203,302 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
     }
   }
 
-  void _downloadTickets() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Downloading ticket PDF... Saved to Downloads folder.")),
+  Future<void> _downloadTickets() async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+              ),
+              SizedBox(width: 12),
+              Text("Generating ticket PDF..."),
+            ],
+          ),
+          duration: Duration(seconds: 2),
+        ),
+      );
+
+      final pdf = pw.Document();
+
+      final event = currentBooking['event'] ?? {};
+      final String eventName = event['name'] ?? currentBooking['eventName'] ?? "Folk Night 2026";
+      final String location = event['location'] ?? currentBooking['eventLocation'] ?? "Hyderabad";
+      final String dateStr = _formatEventDate(event['date'] ?? currentBooking['date']);
+      final String bookingCode = currentBooking['bookingCode'] ?? currentBooking['id'] ?? "BK-0001";
+      final String userName = currentBooking['userName'] ?? currentBooking['name'] ?? "Guest";
+      final String userPhone = currentBooking['userPhone'] ?? currentBooking['phone'] ?? "";
+      final num totalAmount = currentBooking['totalAmount'] ?? currentBooking['amount'] ?? 0;
+      
+      final List tickets = currentBooking['tickets'] is List ? currentBooking['tickets'] : [];
+      Uint8List? qrBytes;
+      if (tickets.isNotEmpty) {
+        final firstTicket = tickets.first;
+        qrBytes = _getQrImageBytes(firstTicket['qrCode']);
+      }
+
+      pdf.addPage(
+        pw.Page(
+          pageFormat: PdfPageFormat.a4,
+          build: (pw.Context context) {
+            return pw.Container(
+              padding: const pw.EdgeInsets.all(24),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Container(
+                    padding: const pw.EdgeInsets.all(16),
+                    decoration: pw.BoxDecoration(
+                      color: PdfColors.red800,
+                      borderRadius: pw.BorderRadius.circular(8),
+                    ),
+                    child: pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        pw.Text(
+                          "BIGTV EVENTS - TICKET",
+                          style: pw.TextStyle(
+                            color: PdfColors.white,
+                            fontSize: 18,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                        pw.Text(
+                          bookingCode,
+                          style: pw.TextStyle(
+                            color: PdfColors.white,
+                            fontSize: 15,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  pw.SizedBox(height: 24),
+                  pw.Text(
+                    eventName,
+                    style: pw.TextStyle(
+                      fontSize: 22,
+                      fontWeight: pw.FontWeight.bold,
+                      color: PdfColors.black,
+                    ),
+                  ),
+                  pw.SizedBox(height: 12),
+                  pw.Text("Date & Time: $dateStr", style: const pw.TextStyle(fontSize: 14)),
+                  pw.SizedBox(height: 6),
+                  pw.Text("Location: $location", style: const pw.TextStyle(fontSize: 14)),
+                  pw.SizedBox(height: 6),
+                  pw.Text("Guest Name: $userName ($userPhone)", style: const pw.TextStyle(fontSize: 14)),
+                  pw.SizedBox(height: 6),
+                  pw.Text("Total Paid: Rs. $totalAmount", style: const pw.TextStyle(fontSize: 14)),
+                  pw.SizedBox(height: 24),
+                  pw.Divider(thickness: 1, color: PdfColors.grey400),
+                  pw.SizedBox(height: 20),
+                  if (qrBytes != null)
+                    pw.Center(
+                      child: pw.Column(
+                        children: [
+                          pw.Image(pw.MemoryImage(qrBytes), width: 180, height: 180),
+                          pw.SizedBox(height: 8),
+                          pw.Text("Scan QR Code at Event Entrance", style: pw.TextStyle(fontSize: 12, color: PdfColors.grey700)),
+                        ],
+                      ),
+                    ),
+                  pw.Spacer(),
+                  pw.Center(
+                    child: pw.Text(
+                      "Thank you for booking with BIG TV News! Present this ticket at entry.",
+                      style: pw.TextStyle(fontSize: 11, color: PdfColors.grey600),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+
+      final directory = await getApplicationDocumentsDirectory();
+      String targetPath = "${directory.path}/Ticket_$bookingCode.pdf";
+      try {
+        if (Platform.isAndroid) {
+          final downloadDir = Directory('/storage/emulated/0/Download');
+          if (await downloadDir.exists()) {
+            targetPath = "${downloadDir.path}/Ticket_$bookingCode.pdf";
+          }
+        }
+        final file = File(targetPath);
+        await file.writeAsBytes(await pdf.save());
+      } catch (e) {
+        final file = File(targetPath);
+        await file.writeAsBytes(await pdf.save());
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Ticket saved to $targetPath"),
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: "View",
+            onPressed: () {
+              _showTicketViewModal(context);
+            },
+          ),
+        ),
+      );
+
+      await Share.shareXFiles([XFile(targetPath)], text: "Ticket for $eventName");
+    } catch (e, st) {
+      debugPrint("Error downloading ticket PDF: $e\n$st");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to download ticket: $e")),
+        );
+      }
+    }
+  }
+
+  void _showTicketViewModal(BuildContext context) {
+    final event = currentBooking['event'] ?? {};
+    final String eventName = event['name'] ?? currentBooking['eventName'] ?? "Folk Night 2026";
+    final String location = event['location'] ?? currentBooking['eventLocation'] ?? "Hyderabad";
+    final String dateStr = _formatEventDate(event['date'] ?? currentBooking['date']);
+    final String bookingCode = currentBooking['bookingCode'] ?? currentBooking['id'] ?? "BK-0001";
+    final List tickets = currentBooking['tickets'] is List ? currentBooking['tickets'] : [];
+    Uint8List? qrBytes;
+    if (tickets.isNotEmpty) {
+      final firstTicket = tickets.first;
+      qrBytes = _getQrImageBytes(firstTicket['qrCode']);
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return Container(
+          height: MediaQuery.of(context).size.height * 0.85,
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Ticket Preview",
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF0F172A),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const Divider(),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: AppColorTokens.primaryRed,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "BIGTV PASS",
+                                  style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white24,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    bookingCode,
+                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              eventName,
+                              style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 8),
+                            Text("📅 $dateStr", style: const TextStyle(color: Colors.white70)),
+                            Text("📍 $location", style: const TextStyle(color: Colors.white70)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (qrBytes != null)
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                          child: Column(
+                            children: [
+                              Image.memory(qrBytes, width: 200, height: 200),
+                              const SizedBox(height: 12),
+                              Text(
+                                "Show this QR code at the entrance",
+                                style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 48.h,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _downloadTickets();
+                  },
+                  icon: const Icon(Icons.download_rounded, color: Colors.white),
+                  label: const Text("Download PDF Ticket", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColorTokens.primaryRed,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -453,46 +757,6 @@ class _TicketDetailScreenState extends State<TicketDetailScreen> {
                   ),
                 ),
 
-                // Fixed Bottom Download Button
-                Container(
-                  padding: EdgeInsets.only(
-                    left: 16,
-                    right: 16,
-                    top: 10,
-                    bottom: MediaQuery.of(context).padding.bottom + 10,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        offset: const Offset(0, -4),
-                        blurRadius: 8,
-                      ),
-                    ],
-                  ),
-                  child: SizedBox(
-                    width: double.infinity,
-                    height: 48.h,
-                    child: ElevatedButton(
-                      onPressed: _downloadTickets,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColorTokens.primaryRed,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: Text(
-                        "Download tickets",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
               ],
             ),
     );

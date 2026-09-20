@@ -65,29 +65,95 @@ class _MoreFollowWidgetState extends State<MoreFollowWidget> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 30.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              // Top Banner Section matching the design
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(20, 24, 16, 24),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? [const Color(0xFF1E151A), const Color(0xFF121212)]
+                        : [const Color(0xFFFFF0F2), Colors.white],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  borderRadius: const BorderRadius.vertical(bottom: Radius.circular(20)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      "The more you follow,\nthe better it is",
-                      style: TextStyle(
-                        fontSize: 28.sp,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Serif',
-                        height: 1.1,
-                        color: textColor,
+                    // Left Text Column
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Small red accent line + uppercase tag
+                          Row(
+                            children: [
+                              Container(
+                                width: 20,
+                                height: 3,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFED1C24),
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "FOLLOW WHAT MATTERS",
+                                style: TextStyle(
+                                  color: const Color(0xFFED1C24),
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Headline "The more you follow, the better it is"
+                          RichText(
+                            text: TextSpan(
+                              style: TextStyle(
+                                fontSize: 24.sp,
+                                fontWeight: FontWeight.w900,
+                                height: 1.15,
+                                color: textColor,
+                              ),
+                              children: const [
+                                TextSpan(text: "The more you\nfollow,\n"),
+                                TextSpan(
+                                  text: "the better it is",
+                                  style: TextStyle(
+                                    color: Color(0xFFED1C24),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+
+                          // Subtitle
+                          Text(
+                            "Personalize your feed by following topics you love",
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: subTextColor,
+                              height: 1.3,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    Text(
-                      "Personalize your feed by following topics",
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: subTextColor,
-                      ),
+                    const SizedBox(width: 12),
+
+                    // Right side 3D Illustration Graphic
+                    Image.asset(
+                      'assets/images/more_follow_3d_icon.png',
+                      width: 130.w,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
                     ),
                   ],
                 ),

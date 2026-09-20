@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/events/presentation/screens/folk_night_booking_screen.dart';
 import 'package:chotanews/features/events/presentation/screens/my_tickets_screen.dart';
@@ -11,6 +12,9 @@ import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 class FolkNightEventScreen extends StatefulWidget {
   const FolkNightEventScreen({super.key});
@@ -26,6 +30,7 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
   String description = "Experience the rich cultural heritage of Telangana and Andhra Pradesh with captivating folk music, dance and live performances by renowned artists.\n\nA celebration of our roots, our people and timeless traditions.";
   String dateStr = "Sat, 24 Oct • 6:00 PM";
   String location = "Hyderabad • Open Air Auditorium";
+  String postUrl = "";
   List<String> images = [];
   int currentImageIndex = 0;
 
@@ -73,6 +78,7 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
               eventId = event['id'] ?? eventId;
               name = event['name'] ?? name;
               description = event['description'] ?? description;
+              postUrl = event['postUrl']?.toString() ?? postUrl;
               
               if (event['images'] != null && event['images'].isNotEmpty) {
                 images = List<String>.from(event['images']);
@@ -115,6 +121,39 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
         });
         _startAutoScroll();
       }
+    }
+  }
+
+  Future<void> _shareEvent() async {
+    try {
+      final String shareLink = postUrl.isNotEmpty
+          ? postUrl
+          : "https://app.bigtv24x7.com/events?eventId=$eventId";
+      final String shareText = "$name\n📍 $location\n📅 $dateStr\n\n$shareLink";
+
+      if (images.isNotEmpty) {
+        final String imageUrl = images.first;
+        final response = await http.get(Uri.parse(imageUrl));
+        if (response.statusCode == 200) {
+          final tempDir = await getTemporaryDirectory();
+          final file = File('${tempDir.path}/event_share_${DateTime.now().millisecondsSinceEpoch}.jpg');
+          await file.writeAsBytes(response.bodyBytes);
+
+          await Share.shareXFiles(
+            [XFile(file.path)],
+            text: shareText,
+          );
+          return;
+        }
+      }
+      await Share.share(shareText);
+    } catch (e) {
+      debugPrint("Error sharing event: $e");
+      final String shareLink = postUrl.isNotEmpty
+          ? postUrl
+          : "https://app.bigtv24x7.com/events?eventId=$eventId";
+      final String shareText = "$name\n📍 $location\n📅 $dateStr\n\n$shareLink";
+      await Share.share(shareText);
     }
   }
 
@@ -470,44 +509,71 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
                   ),
                 ),
                 
-                // Static Floating Book Tickets Button (without background white card)
+                // Static Floating Book Tickets & Share Buttons
                 Positioned(
                   left: 16,
                   right: 16,
                   bottom: MediaQuery.of(context).padding.bottom + 16,
-                  child: SizedBox(
-                    height: 50.h,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FolkNightBookingScreen(
-                              eventId: eventId,
-                              eventName: name,
-                              eventDateStr: dateStr,
-                              eventLocation: location,
-                              eventImageUrl: images.isNotEmpty ? images.first : '',
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SizedBox(
+                          height: 50.h,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => FolkNightBookingScreen(
+                                    eventId: eventId,
+                                    eventName: name,
+                                    eventDateStr: dateStr,
+                                    eventLocation: location,
+                                    eventImageUrl: images.isNotEmpty ? images.first : '',
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColorTokens.primaryRed,
+                              elevation: 4,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              "Book tickets \u2192",
+                              style: GoogleFonts.poppins(
+                                color: Colors.white,
+                                fontSize: 16.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColorTokens.primaryRed,
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: Text(
-                        "Book tickets \u2192",
-                        style: GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
+                      const SizedBox(width: 12),
+                      SizedBox(
+                        height: 50.h,
+                        width: 50.h,
+                        child: ElevatedButton(
+                          onPressed: _shareEvent,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColorTokens.primaryRed,
+                            elevation: 4,
+                            padding: EdgeInsets.zero,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.share,
+                            color: Colors.white,
+                            size: 22,
+                          ),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
               ],

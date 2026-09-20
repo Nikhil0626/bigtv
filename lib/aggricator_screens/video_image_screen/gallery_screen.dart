@@ -38,8 +38,16 @@ class FullPageCarousel extends StatefulWidget {
   final String className;
   final postDetails;
   final bool isHome;
+  final bool? autoPlay;
 
-  const FullPageCarousel({super.key, required this.imageUrls, this.className = "", required this.postDetails, this.isHome = false});
+  const FullPageCarousel({
+    super.key,
+    required this.imageUrls,
+    this.className = "",
+    required this.postDetails,
+    this.isHome = false,
+    this.autoPlay,
+  });
 
   @override
   FullPageCarouselState createState() => FullPageCarouselState();
@@ -114,7 +122,7 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                   viewportFraction: 1.0,
                   enableInfiniteScroll: true,
                   pageSnapping: true,
-                  autoPlay: true,
+                  autoPlay: widget.autoPlay ?? !widget.isHome,
                   onPageChanged: (index, reason) {
                     _currentIndex.value = index;
                   },
