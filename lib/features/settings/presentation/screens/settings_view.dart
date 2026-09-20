@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:chotanews/aggricator_screens/chota_info_screens/advertise_with_us.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/privacy_policy.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/terms_conditions.dart';
@@ -11,15 +9,11 @@ import 'package:chotanews/features/auth/presentation/providers/authentication_pr
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:chotanews/aggricator_screens/chota_info_screens/about_us.dart';
 import 'package:chotanews/features/settings/presentation/providers/settings_provider.dart';
-import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/services/webengage_notification.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
-import 'package:chotanews/utils/app_toasts.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
@@ -40,41 +34,12 @@ class SettingsView extends StatefulWidget {
 
 class SettingsViewState extends State<SettingsView> {
   NewAppLoginStatus loginStatus = NewAppLoginStatus.none;
-  String? _fcmToken;
-  String? _apnsToken;
-  bool _isLoadingTokens = true;
 
   @override
   void initState() {
     context.read<SettingsProvider>().loadSettingsInfo();
     context.read<AuthenticationProvider>().sendEvent("SettingsView");
-    _fetchTokens();
     super.initState();
-  }
-
-  Future<void> _fetchTokens() async {
-    try {
-      final fcm = await getAppFcmToken();
-      String? apns;
-      if (Platform.isIOS) {
-        try {
-          apns = await FirebaseMessaging.instance.getAPNSToken();
-        } catch (_) {}
-      }
-      if (mounted) {
-        setState(() {
-          _fcmToken = fcm;
-          _apnsToken = apns;
-          _isLoadingTokens = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingTokens = false;
-        });
-      }
-    }
   }
 
   @override
@@ -169,22 +134,6 @@ class SettingsViewState extends State<SettingsView> {
                       ),
                     );
                   }),
-                  if (Platform.isIOS)
-                    _buildTokenCard(
-                      context,
-                      title: "Apple APNs Token",
-                      token: _apnsToken,
-                      copyLabel: "APNs Token",
-                      icon: Icons.apple,
-                    ),
-
-                  _buildTokenCard(
-                    context,
-                    title: "Firebase FCM Token",
-                    token: _fcmToken,
-                    copyLabel: "FCM Token",
-                    icon: Icons.notifications_active_outlined,
-                  ),
 
                   _buildSettingsRow(context, "Feedback.svg", "Feedback", () {
                     EventRepo().addEvent({
@@ -265,68 +214,6 @@ class SettingsViewState extends State<SettingsView> {
                 Icon(Icons.arrow_forward_ios, size: 16, color: context.subtitleColor),
               ],
             ),
-          ),
-        ),
-        Divider(height: 1, color: context.borderColor.withValues(alpha: 0.3)),
-      ],
-    );
-  }
-
-  Widget _buildTokenCard(
-    BuildContext context, {
-    required String title,
-    required String? token,
-    required String copyLabel,
-    required IconData icon,
-  }) {
-    final displayText = token != null && token.isNotEmpty
-        ? token
-        : (_isLoadingTokens ? "Loading token..." : "Not available");
-    final bool canCopy = token != null && token.isNotEmpty;
-
-    return Column(
-      children: [
-        Container(
-          width: MediaQuery.of(context).size.width,
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(icon, size: 24.w, color: context.iconTheme.color),
-              width(width: 16.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: context.typography.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      displayText,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.typography.bodySmall?.copyWith(
-                        color: context.subtitleColor,
-                        fontSize: 11.sp,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (canCopy) ...[
-                width(width: 8.w),
-                IconButton(
-                  icon: Icon(Icons.copy, size: 20, color: context.primaryColor),
-                  tooltip: "Copy $copyLabel",
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: token));
-                    CustomToast.showSuccessToast(msg: "$copyLabel copied to clipboard");
-                  },
-                ),
-              ],
-            ],
           ),
         ),
         Divider(height: 1, color: context.borderColor.withValues(alpha: 0.3)),
