@@ -1,7 +1,6 @@
-<<<<<<< HEAD
-# 📱 ChotaNews
+# 📱 BigTV News
 
-**ChotaNews** is a lightweight and fast news aggregator app that delivers bite-sized news in a
+**BigTV** is a lightweight and fast news aggregator app that delivers bite-sized news in a
 swipeable, visually engaging format.
 
 ---
@@ -23,16 +22,14 @@ swipeable, visually engaging format.
 ## ✅ Prerequisites
 
 * Flutter SDK (>= 3.29.3)
-* Android Studio / Vs code (with Dart and Flutter plugins)
-* Android device or emulator
+* Android Studio / VS Code (with Dart and Flutter plugins)
+* Android device / iOS device or emulator
 
 ---
 
 ## 🚀 Installation
 
 ```bash
-git clone https://github.com/bigtvsignitives/chotanews_application.git
-cd chotanews_application
 flutter pub get
 flutter run
 ```
@@ -86,9 +83,7 @@ pod install
 flutter build ios --release --config-only
 open Runner.xcworkspace
 ```
-```bash
-open Runner.xcworkspace
-```
+
 ### 📲 Build iOS (Release)
 
 ```bash
@@ -108,9 +103,3 @@ build/ios/iphoneos/Runner.app
 > Go to: `Product > Archive`
 > Follow the flow to upload to App Store Connect
 
----
-
-Feel free to add screenshots, contributors, or license sections below this!
-=======
-# bigtv
->>>>>>> 8272ea581eb7cb3a9fe29f9aafbae98c32f3510e

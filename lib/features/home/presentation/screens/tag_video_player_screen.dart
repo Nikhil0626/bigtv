@@ -511,8 +511,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
     try {
       if (imageFile != null && await imageFile.exists()) {
+        if (!mounted) return;
+        final Size size = MediaQuery.of(context).size;
         if (Platform.isIOS) {
-          final Size size = MediaQuery.of(context).size;
           await Share.shareXFiles(
             [XFile(imageFile.path)],
             text: shareText,
@@ -523,7 +524,6 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
             const platform = MethodChannel('com.chotanews/whatsapp');
             await platform.invokeMethod('shareToWhatsApp', {'imagePath': imageFile.path, 'text': shareText});
           } catch (e) {
-            final Size size = MediaQuery.of(context).size;
             await Share.shareXFiles(
               [XFile(imageFile.path)],
               text: shareText,
@@ -696,15 +696,38 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                         ),
                         const SizedBox(height: 4),
                         Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
                               _formatDuration(_controller!.value.position),
-                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 9.sp),
+                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14.sp, fontWeight: FontWeight.w500),
                             ),
+                            const Spacer(),
                             Text(
                               _formatDuration(_controller!.value.duration),
-                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 9.sp),
+                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                            ),
+                            const SizedBox(width: 8),
+                            GestureDetector(
+                              onTap: () => _shareToWhatsApp(currentVideoMap, currentTitle),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: isDark ? Colors.white10 : Colors.grey.shade200,
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: isDark ? Colors.white24 : Colors.black12, width: 0.8),
+                                ),
+                                child: Image.asset(
+                                  "assets/images/WhatsApp_icon.png",
+                                  width: 20.sp,
+                                  height: 20.sp,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) => Icon(
+                                    Icons.share,
+                                    color: isDark ? Colors.white : Colors.black87,
+                                    size: 16,
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
@@ -955,9 +978,6 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
   // Overlay Controls inside Video Player Frame
   Widget _buildPlayerOverlayControls(String title, Map<String, dynamic>? currentVideo) {
-    final int count = _currentIndex + 1;
-    final int total = widget.videos.length;
-
     return Container(
       color: Colors.black38,
       child: Stack(
@@ -983,8 +1003,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                       _formatViewCount(_getViewCount(currentVideo)),
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                   ],
@@ -1102,34 +1122,6 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
               ],
             ),
           ),
-
-          // Bottom Right WhatsApp Share Button (Portrait - Decreased Size)
-          Positioned(
-            bottom: 8,
-            right: 10,
-            child: GestureDetector(
-              onTap: () => _shareToWhatsApp(currentVideo, title),
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white24, width: 0.8),
-                ),
-                child: Image.asset(
-                  "assets/images/WhatsApp_icon.png",
-                  width: 20.w,
-                  height: 20.h,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.share,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -1137,9 +1129,6 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
   // Fullscreen Overlay Controls (Landscape)
   Widget _buildFullscreenControls(String title, Map<String, dynamic>? currentVideo) {
-    final int count = _currentIndex + 1;
-    final int total = widget.videos.length;
-
     return Container(
       color: Colors.black45,
       child: Stack(
@@ -1159,7 +1148,7 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                     Expanded(
                       child: Text(
                         title,
-                        style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.w500),
+                        style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w600),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1213,15 +1202,15 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                             const Icon(
                               Icons.remove_red_eye_outlined,
                               color: Colors.white,
-                              size: 20, // Increased eye icon size
+                              size: 18,
                             ),
-                            const SizedBox(width: 3),
+                            const SizedBox(width: 4),
                             Text(
                               _formatViewCount(_getViewCount(currentVideo)),
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 9.sp, // Decreased number font size
-                                fontWeight: FontWeight.bold,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                           ],
@@ -1292,17 +1281,40 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                         backgroundColor: Colors.white12,
                       ),
                     ),
-                    const SizedBox(height: 2),
+                    const SizedBox(height: 4),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           _formatDuration(_controller!.value.position),
-                          style: TextStyle(color: Colors.white, fontSize: 9.sp),
+                          style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
                         ),
+                        const Spacer(),
                         Text(
                           _formatDuration(_controller!.value.duration),
-                          style: TextStyle(color: Colors.white, fontSize: 9.sp),
+                          style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => _shareToWhatsApp(currentVideo, title),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.6),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: Colors.white24, width: 0.8),
+                            ),
+                            child: Image.asset(
+                              "assets/images/WhatsApp_icon.png",
+                              width: 22.sp,
+                              height: 22.sp,
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) => const Icon(
+                                Icons.share,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -1310,34 +1322,6 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                 ),
               ),
             ],
-          ),
-
-          // Bottom Right WhatsApp Share Button in Fullscreen Mode (Landscape - Increased Size)
-          Positioned(
-            bottom: 45,
-            right: 16,
-            child: GestureDetector(
-              onTap: () => _shareToWhatsApp(currentVideo, title),
-              child: Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.7),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white38, width: 1.0),
-                ),
-                child: Image.asset(
-                  "assets/images/WhatsApp_icon.png",
-                  width: 36.w,
-                  height: 36.h,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Icon(
-                    Icons.share,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-              ),
-            ),
           ),
         ],
       ),

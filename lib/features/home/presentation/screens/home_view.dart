@@ -53,8 +53,8 @@ class _HomeViewState extends State<HomeView> {
     });
     homeProvider?.initDeepLinks();
     homeProvider?.subscribeToPushCallbacks();
-    homeProvider?.selectedIndex = 0;
-    homeProvider?.homePageController = PageController(initialPage: 0);
+    final initialTab = homeProvider?.selectedIndex ?? 0;
+    homeProvider?.homePageController = PageController(initialPage: initialTab);
     super.initState();
   }
 

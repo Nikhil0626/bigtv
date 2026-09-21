@@ -9,6 +9,7 @@ import 'package:chotanews/services/register_provider.dart';
 import 'package:chotanews/utils/app_life_cycle.dart';
 
 
+import 'package:app_links/app_links.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -122,6 +123,22 @@ void _initBackgroundServices() async {
       getUniqueDeviceId(newToken);
     });
 
+    try {
+      final appLinks = AppLinks();
+      appLinks.getInitialLink().then((uri) {
+        if (uri != null) {
+          debugPrint("AppLinks initial link: $uri");
+          _handleBackgroundDeepLink(uri);
+        }
+      });
+      appLinks.uriLinkStream.listen((uri) {
+        debugPrint("AppLinks stream link: $uri");
+        _handleBackgroundDeepLink(uri);
+      });
+    } catch (e) {
+      debugPrint("Error initializing AppLinks in main: $e");
+    }
+
     logFullDeviceAndFcmDetails();
   } catch (e) {
     debugPrint("Error in background services initialization: $e");
@@ -143,6 +160,14 @@ void _handleBackgroundNotification(Map<String, dynamic>? payload, {String? deepL
   } else {
     pendingPushPayload = payload ?? {};
     pendingDeepLink = deepLink;
+  }
+}
+
+void _handleBackgroundDeepLink(Uri uri) {
+  if (mainNavigatorKey.currentContext != null) {
+    mainNavigatorKey.currentContext!.read<HomeProvider>().routeDeepLink(uri);
+  } else {
+    pendingDeepLink = uri.toString();
   }
 }
 

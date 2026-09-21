@@ -19,13 +19,13 @@ class LocationModel {
 
   factory LocationModel.fromJson(Map<String, dynamic> json) {
     return LocationModel(
-      stateId: json['locationId'] ?? json['stateId'] ?? 0,
-      stateName: json['locationName'] ?? json['stateName'] ?? '',
-      value: json['value'],
-      isActive: json['isActive'],
-      status: json['status'],
-      isFollowed: json['isFollowed'] ?? false,
-      imageUrl: json['imageUrl'],
+      stateId: (json['locationId'] ?? json['stateId'] ?? json['id'] ?? 0) as int,
+      stateName: (json['locationName'] ?? json['stateName'] ?? json['name'] ?? '').toString(),
+      value: json['value']?.toString(),
+      isActive: (json['isActive'] ?? json['is_active']) as bool?,
+      status: (json['status'] ?? json['is_active']) as bool?,
+      isFollowed: (json['isFollowed'] ?? json['is_followed'] ?? false) as bool,
+      imageUrl: (json['imageUrl'] ?? json['image_url'] ?? json['image'] ?? json['icon'] ?? json['logo'] ?? json['state_image'] ?? json['location_image'] ?? json['locationImage']) as String?,
     );
   }
 

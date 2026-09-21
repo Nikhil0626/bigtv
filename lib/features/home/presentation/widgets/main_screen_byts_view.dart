@@ -205,7 +205,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         subType == 'bigblackstandard';
   }
 
-  bool _is70PercentPost(dynamic article) {
+  bool _is50PercentPost(dynamic article) {
     if (article == null || article is! Map) return false;
     return _isBigTvSpecial(article) || _isBigBlackStandard(article);
   }
@@ -636,8 +636,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                   Container(
                                                                   height: MediaQuery.of(context).orientation == Orientation.landscape 
                                                                       ? double.infinity
-                                                                      : (_is70PercentPost(widget.article)
-                                                                          ? MediaQuery.of(context).size.height * .70
+                                                                      : (_is50PercentPost(widget.article)
+                                                                          ? MediaQuery.of(context).size.height * .50
                                                                           : MediaQuery.of(context).size.height * .33),
                                                                   child: widget.article['type'] ==
                                                                               "Video" &&
@@ -654,8 +654,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                           ? SizedBox(
                                                                               height: MediaQuery.of(context).orientation == Orientation.landscape
                                                                                   ? double.infinity
-                                                                                  : (_is70PercentPost(widget.article)
-                                                                                      ? MediaQuery.of(context).size.height * .70
+                                                                                  : (_is50PercentPost(widget.article)
+                                                                                      ? MediaQuery.of(context).size.height * .50
                                                                                       : MediaQuery.of(context).size.height * .33),
                                                                               width: MediaQuery.of(context).size.width,
                                                                               child: VideoPreview(
@@ -677,10 +677,10 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                 );
                                                                               },
                                                                               child: SizedBox(
-                                                                                height: MediaQuery.of(context).size.height * (_is70PercentPost(widget.article) ? .70 : .35),
+                                                                                height: MediaQuery.of(context).size.height * (_is50PercentPost(widget.article) ? .50 : .35),
                                                                                 child: CachedNetworkImage(
                                                                                   imageUrl: _getImageUrl(widget.article['image_url']),
-                                                                                  height: MediaQuery.of(context).size.height * (_is70PercentPost(widget.article) ? .70 : .4),
+                                                                                  height: MediaQuery.of(context).size.height * (_is50PercentPost(widget.article) ? .50 : .4),
                                                                                   width: MediaQuery.of(context).size.width,
                                                                                   fit: BoxFit.fill,
                                                                                   placeholder: (context, url) => Container(
@@ -688,7 +688,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                   ),
                                                                                   errorWidget: (context, url, error) => Image.asset(
                                                                                     "assets/images/bigtv_default_post.png",
-                                                                                    height: MediaQuery.of(context).size.height * (_is70PercentPost(widget.article) ? .70 : .4),
+                                                                                    height: MediaQuery.of(context).size.height * (_is50PercentPost(widget.article) ? .50 : .4),
                                                                                     width: MediaQuery.of(context).size.width,
                                                                                     fit: BoxFit.cover,
                                                                                   ),
@@ -984,8 +984,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                                 children: [
                                                                                                   SvgPicture.asset(
                                                                                                     settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                                                                                    height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
-                                                                                                    width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                    height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
+                                                                                                    width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
                                                                                                     colorFilter: ColorFilter.mode(
                                                                                                       (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : AppColorTokens.primaryRed,
                                                                                                       BlendMode.srcIn,
@@ -1015,8 +1015,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                               children: [
                                                                                                 SvgPicture.asset(
                                                                                                   "assets/svg/new_comment.svg",
-                                                                                                  height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
-                                                                                                  width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                  height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
+                                                                                                  width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
                                                                                                   colorFilter: ColorFilter.mode(
                                                                                                     (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : AppColorTokens.primaryRed,
                                                                                                     BlendMode.srcIn,
@@ -1054,14 +1054,14 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                                 children: [
                                                                                                   homeProvide.isReload
                                                                                                       ? SizedBox(
-                                                                                                          height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
-                                                                                                          width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                          height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
+                                                                                                          width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
                                                                                                           child: const AppLoadingScreen(),
                                                                                                         )
                                                                                                       : SvgPicture.asset(
                                                                                                           "assets/svg/new_refresh.svg",
-                                                                                                          height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
-                                                                                                          width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 28 : 20,
+                                                                                                          height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
+                                                                                                          width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
                                                                                                           colorFilter: ColorFilter.mode(
                                                                                                             (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : AppColorTokens.primaryRed,
                                                                                                             BlendMode.srcIn,

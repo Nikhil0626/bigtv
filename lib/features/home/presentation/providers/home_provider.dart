@@ -653,10 +653,73 @@ class HomeProvider extends ChangeNotifier {
     }
   }
 
+  Map<String, dynamic>? resolveVideoTag({String? showOrSlug, String? tagId}) {
+    final searchName = showOrSlug?.trim().toLowerCase() ?? '';
+    final searchId = tagId?.trim().toLowerCase() ?? '';
+
+    if (searchName.isEmpty && searchId.isEmpty) return null;
+
+    for (var item in getAllAiTagsList) {
+      if (item is! Map) continue;
+      final map = Map<String, dynamic>.from(item);
+      final s = (map['slug'] ?? '').toString().trim().toLowerCase();
+      final n = (map['name'] ?? '').toString().trim().toLowerCase();
+      final a = (map['aitagname'] ?? '').toString().trim().toLowerCase();
+      final id = (map['id'] ?? map['aitagid'] ?? '').toString().trim().toLowerCase();
+
+      if (searchId.isNotEmpty && id == searchId) {
+        return map;
+      }
+      if (searchName.isNotEmpty) {
+        if (s == searchName || n == searchName || a == searchName) {
+          return map;
+        }
+        final decodedName = Uri.decodeComponent(searchName).toLowerCase();
+        if (s == decodedName || n == decodedName || a == decodedName) {
+          return map;
+        }
+      }
+    }
+
+    // Direct fallback dictionary for show tags
+    if (searchName == 'suprabatham' || searchName == 'sb') {
+      return {'slug': 'SB', 'name': 'Suprabatham', 'aitagname': 'Suprabatham', 'id': '6c750528-160a-4963-9642-d63d7594c2e8'};
+    }
+    if (searchName == '50 reports' || searchName == '50reports' || searchName == '50rp' || searchName == '50%20reports') {
+      return {'slug': '50RP', 'name': '50 Reports', 'aitagname': '50 Reports', 'id': '485c4748-dc43-4231-85f6-f241b04a51b2'};
+    }
+    if (searchName == 'big show' || searchName == 'bigshow' || searchName == 'big%20show') {
+      return {'slug': 'bigshow', 'name': 'Big Show', 'aitagname': 'Big Show', 'id': 'f927304a-2239-4fae-92dd-204c02764da1'};
+    }
+    if (searchName == 'dna') {
+      return {'slug': 'DNA', 'name': 'DNA', 'aitagname': 'DNA', 'id': '77e02f18-f278-4334-ad74-9bfbd22d0af4'};
+    }
+
+    if (searchId == '6c750528-160a-4963-9642-d63d7594c2e8') {
+      return {'slug': 'SB', 'name': 'Suprabatham', 'aitagname': 'Suprabatham', 'id': '6c750528-160a-4963-9642-d63d7594c2e8'};
+    }
+    if (searchId == '485c4748-dc43-4231-85f6-f241b04a51b2') {
+      return {'slug': '50RP', 'name': '50 Reports', 'aitagname': '50 Reports', 'id': '485c4748-dc43-4231-85f6-f241b04a51b2'};
+    }
+    if (searchId == 'f927304a-2239-4fae-92dd-204c02764da1') {
+      return {'slug': 'bigshow', 'name': 'Big Show', 'aitagname': 'Big Show', 'id': 'f927304a-2239-4fae-92dd-204c02764da1'};
+    }
+    if (searchId == '77e02f18-f278-4334-ad74-9bfbd22d0af4') {
+      return {'slug': 'DNA', 'name': 'DNA', 'aitagname': 'DNA', 'id': '77e02f18-f278-4334-ad74-9bfbd22d0af4'};
+    }
+
+    return null;
+  }
+
   Future<void> fetchVideosByTagSlug(String slug, {String? displayTitle, String? thumbnailUrl}) async {
-    currentTagSlug = slug;
-    currentTagTitle = displayTitle ?? slug;
-    currentTagThumbnailUrl = thumbnailUrl;
+    final resolved = resolveVideoTag(showOrSlug: slug);
+    final effectiveSlug = resolved != null ? (resolved['slug']?.toString() ?? slug) : slug;
+    final effectiveTitle = displayTitle ?? (resolved != null ? (resolved['aitagname'] ?? resolved['name'] ?? slug) : slug);
+    final effectiveThumbnail = thumbnailUrl ?? (resolved != null ? (resolved['thumbnailUrl'] ?? resolved['thumbnail'])?.toString() : null);
+
+    currentTagSlug = effectiveSlug;
+    currentTagTitle = effectiveTitle;
+    currentTagThumbnailUrl = effectiveThumbnail;
     isTagVideosLoading = true;
     tagVideosList = [];
 
@@ -671,15 +734,31 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final encodedSlug = Uri.encodeComponent(slug);
+      final encodedSlug = Uri.encodeComponent(effectiveSlug);
       Response response = await HomeRepo().getTagVideos(encodedSlug);
       var responseData = response.data;
       if (responseData is String) {
         try { responseData = jsonDecode(responseData); } catch (_) {}
       }
       List data = responseData is List ? responseData : (responseData['data'] ?? []);
+
+      // If empty and effectiveSlug differed from original slug, try fallback to original slug
+      if (data.isEmpty && effectiveSlug != slug) {
+        try {
+          Response fallbackRes = await HomeRepo().getTagVideos(Uri.encodeComponent(slug));
+          var fallbackData = fallbackRes.data;
+          if (fallbackData is String) {
+            try { fallbackData = jsonDecode(fallbackData); } catch (_) {}
+          }
+          final fallbackList = fallbackData is List ? fallbackData : (fallbackData['data'] ?? []);
+          if (fallbackList is List && fallbackList.isNotEmpty) {
+            data = fallbackList;
+          }
+        } catch (_) {}
+      }
+
       tagVideosList = data;
-      log("Fetched ${tagVideosList.length} videos for tag slug: $slug");
+      log("Fetched ${tagVideosList.length} videos for tag slug: $effectiveSlug (original: $slug)");
     } on DioException catch (e, st) {
       log("Get Tag Videos Api catch error $e", stackTrace: st);
     } catch (e, st) {
@@ -899,9 +978,7 @@ class HomeProvider extends ChangeNotifier {
       final initialUri = await AppLinks().getInitialLink();
       if (initialUri != null) {
         debugPrint('getInitialLink: $initialUri');
-        Future.delayed(const Duration(milliseconds: 500), () {
-          _handleDeepLink(initialUri);
-        });
+        _handleDeepLink(initialUri);
       }
     } catch (e) {
       log("Error getting initial link: $e");
@@ -924,13 +1001,16 @@ class HomeProvider extends ChangeNotifier {
   Future<void> routeDeepLink(Uri uri, {bool isFromNotification = false}) async {
     log("Handling Deep Link: $uri (isNotification: $isFromNotification)");
 
-    // Wait if navigator is not yet mounted
+    // Wait until navigator state and context are available
+    int attempts = 0;
+    while ((mainNavigatorKey.currentState == null || mainNavigatorKey.currentContext == null) && attempts < 25) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      attempts++;
+    }
+
     if (mainNavigatorKey.currentState == null) {
-      await Future.delayed(const Duration(milliseconds: 400));
-      if (mainNavigatorKey.currentState == null) {
-        log("Navigator state is null, cannot route deep link");
-        return;
-      }
+      log("Navigator state is null, cannot route deep link: $uri");
+      return;
     }
 
     final path = uri.path.toLowerCase();
@@ -943,6 +1023,7 @@ class HomeProvider extends ChangeNotifier {
     }
 
     void switchTab(int index) {
+      selectedIndex = index;
       if (homePageController.hasClients) {
         try {
           homePageController.jumpToPage(index);
@@ -964,7 +1045,7 @@ class HomeProvider extends ChangeNotifier {
         (queryParams['id'] != null && queryParams['id']!.toLowerCase().startsWith('epaper'));
 
     if (isEpaperLink) {
-      log("Routing to Epaper deep link");
+      log("Routing to Epaper deep link: $uri");
       popToRoot();
       switchTab(3);
 
@@ -976,9 +1057,9 @@ class HomeProvider extends ChangeNotifier {
         }
       }
 
-      final context = mainNavigatorKey.currentContext;
-      if (context != null) {
-        final epaperProvider = context.read<EpaperProvider>();
+      final navContext = mainNavigatorKey.currentContext;
+      if (navContext != null) {
+        final epaperProvider = navContext.read<EpaperProvider>();
         if (epaperProvider.allEpapers.isEmpty) {
           await epaperProvider.fetchEpapers();
         }
@@ -993,9 +1074,8 @@ class HomeProvider extends ChangeNotifier {
             orElse: () => null,
           );
 
-          if (matched != null && mainNavigatorKey.currentContext != null) {
-            Navigator.push(
-              mainNavigatorKey.currentContext!,
+          if (matched != null && mainNavigatorKey.currentState != null) {
+            mainNavigatorKey.currentState!.push(
               MaterialPageRoute(
                 builder: (context) => EpaperDetailScreen(
                   epaper: Map<String, dynamic>.from(matched),
@@ -1008,7 +1088,34 @@ class HomeProvider extends ChangeNotifier {
       return;
     }
 
-    // 2. VIDEO TAGS / LIVE BIG TV DEEP LINK (e.g. DNA, SB, etc.)
+    // 2. FOLK NIGHT / EVENTS DEEP LINK
+    // Handles:
+    // https://app.bigtv24x7.com/events?eventId=e4d962de-5393-4541-a792-4c23f1429f9c
+    // https://app.bigtv24x7.com/folknight
+    // https://app.bigtv24x7.com/folk
+    final bool isEventsLink = path.contains('events') ||
+        path.contains('folknight') ||
+        path.contains('folk') ||
+        queryParams.containsKey('eventId');
+
+    if (isEventsLink) {
+      log("Routing to Folk Night / Events deep link: $uri");
+      popToRoot();
+      switchTab(0);
+
+      final String? targetEventId = queryParams['eventId'] ?? queryParams['id'];
+
+      if (mainNavigatorKey.currentState != null) {
+        mainNavigatorKey.currentState!.push(
+          MaterialPageRoute(
+            builder: (context) => FolkNightEventScreen(eventId: targetEventId),
+          ),
+        );
+      }
+      return;
+    }
+
+    // 3. VIDEO TAGS / LIVE BIG TV DEEP LINK (e.g. DNA, SB, etc.)
     // Handles:
     // https://app.bigtv24x7.com/livebigtv?showname=DNA&postId=77e02f18-f278-4334-ad74-9bfbd22d0af4&videoId=4b43709723b0b870629678a48e4c2e5c
     // https://app.bigtv24x7.com/livebigtv?showname=SB
@@ -1020,11 +1127,11 @@ class HomeProvider extends ChangeNotifier {
         queryParams.containsKey('tagSlug');
 
     if (isVideoTagLink) {
-      log("Routing to Video Tag / Live Big TV deep link");
+      log("Routing to Video Tag / Live Big TV deep link: $uri");
       popToRoot();
       switchTab(0);
 
-      final String tagSlug = queryParams['showname'] ??
+      final String rawShowOrSlug = queryParams['showname'] ??
           queryParams['tagSlug'] ??
           queryParams['tag'] ??
           queryParams['slug'] ??
@@ -1034,85 +1141,90 @@ class HomeProvider extends ChangeNotifier {
       final String? videoId = queryParams['videoId'] ?? queryParams['video_id'];
       final String? targetPostId = queryParams['postId'] ?? queryParams['post_id'];
 
-      if (tagSlug.isNotEmpty) {
-        setSelectedTagId(tagSlug);
-        aiTagDataLoaded(true);
-        pageChange(isValue: true);
+      // Ensure tags are loaded if not yet available
+      if (getAllAiTagsList.isEmpty) {
+        await getAllAiTags();
+      }
 
-        // Fetch videos for this tag
-        await fetchVideosByTagSlug(tagSlug, displayTitle: tagSlug);
+      final matchedTag = resolveVideoTag(
+        showOrSlug: rawShowOrSlug,
+        tagId: targetPostId,
+      );
 
-        // Scroll top navigation bar to the tag if available
-        if (getAllAiTagsList.isNotEmpty) {
-          int tagIndex = getAllAiTagsList.indexWhere((t) {
-            if (t is! Map) return false;
-            final s = (t['slug'] ?? t['name'] ?? t['aitagname'] ?? t['id'])?.toString();
-            return s?.toLowerCase() == tagSlug.toLowerCase();
-          });
-          if (tagIndex != -1) {
-            aiTagsScrollToCenter(tagIndex);
-          }
+      final String realSlug = matchedTag != null
+          ? (matchedTag['slug'] ?? rawShowOrSlug).toString()
+          : (rawShowOrSlug.isNotEmpty ? rawShowOrSlug : "DNA");
+      final String displayTitle = matchedTag != null
+          ? (matchedTag['aitagname'] ?? matchedTag['name'] ?? rawShowOrSlug).toString()
+          : (rawShowOrSlug.isNotEmpty ? rawShowOrSlug : realSlug);
+      final String? tagThumbnail = matchedTag != null
+          ? (matchedTag['thumbnailUrl'] ?? matchedTag['thumbnail'])?.toString()
+          : null;
+      final dynamic chosenId = matchedTag != null
+          ? (matchedTag['aitagid'] ?? matchedTag['id'] ?? realSlug)
+          : realSlug;
+
+      setSelectedTagId(chosenId);
+      aiTagDataLoaded(true);
+      pageChange(isValue: true);
+
+      // Fetch videos for this tag
+      await fetchVideosByTagSlug(
+        realSlug,
+        displayTitle: displayTitle,
+        thumbnailUrl: tagThumbnail,
+      );
+
+      // Scroll top navigation bar to the tag if available
+      if (getAllAiTagsList.isNotEmpty) {
+        int tagIndex = getAllAiTagsList.indexWhere((t) {
+          if (t is! Map) return false;
+          final s = (t['slug'] ?? t['name'] ?? t['aitagname'] ?? t['id'])?.toString();
+          return s?.toLowerCase() == realSlug.toLowerCase() ||
+              s?.toLowerCase() == displayTitle.toLowerCase() ||
+              (targetPostId != null &&
+                  (t['id']?.toString().toLowerCase() == targetPostId.toLowerCase() ||
+                      t['aitagid']?.toString().toLowerCase() == targetPostId.toLowerCase()));
+        });
+        if (tagIndex != -1) {
+          aiTagsScrollToCenter(tagIndex);
         }
+      }
 
-        // If specific video or post ID is given, find and play the video
-        final String? lookupId = videoId ?? targetPostId;
-        if (lookupId != null && lookupId.isNotEmpty && tagVideosList.isNotEmpty) {
-          int vIndex = tagVideosList.indexWhere((v) {
+      // If specific video or post ID is given, find and play the video
+      if (tagVideosList.isNotEmpty) {
+        int vIndex = -1;
+        if (videoId != null && videoId.isNotEmpty) {
+          vIndex = tagVideosList.indexWhere((v) {
             if (v is! Map) return false;
-            return v['videoId']?.toString() == lookupId ||
-                v['_id']?.toString() == lookupId ||
-                v['id']?.toString() == lookupId ||
-                v['postId']?.toString() == lookupId ||
-                v['video_id']?.toString() == lookupId;
+            final idStr = (v['id'] ?? v['videoId'] ?? v['_id'] ?? v['video_id'])?.toString();
+            return idStr == videoId;
           });
-
-          if (vIndex != -1 && mainNavigatorKey.currentContext != null) {
-            Navigator.push(
-              mainNavigatorKey.currentContext!,
-              MaterialPageRoute(
-                builder: (context) => TagVideoPlayerScreen(
-                  videos: tagVideosList,
-                  initialIndex: vIndex,
-                  tagTitle: currentTagTitle.isNotEmpty ? currentTagTitle : tagSlug,
-                  tagThumbnailUrl: currentTagThumbnailUrl,
-                ),
-              ),
-            );
-          }
         }
-      }
-      return;
-    }
+        if (vIndex == -1 && targetPostId != null && targetPostId.isNotEmpty) {
+          vIndex = tagVideosList.indexWhere((v) {
+            if (v is! Map) return false;
+            final idStr = (v['id'] ?? v['postId'] ?? v['_id'] ?? v['videoId'] ?? v['post_id'])?.toString();
+            return idStr == targetPostId;
+          });
+        }
+        // Fallback to first video if specific ID wasn't found or if URL pointed to tag show
+        if (vIndex == -1 && (videoId != null || targetPostId != null || rawShowOrSlug.isNotEmpty)) {
+          vIndex = 0;
+        }
 
-    // 3. FOLK NIGHT / EVENTS DEEP LINK
-    // Handles:
-    // https://app.bigtv24x7.com/events?eventId=e4d962de-5393-4541-a792-4c23f1429f9c
-    // https://app.bigtv24x7.com/folknight
-    // https://app.bigtv24x7.com/folk
-    final bool isEventsLink = path.contains('events') ||
-        path.contains('folknight') ||
-        path.contains('folk') ||
-        queryParams.containsKey('eventId');
-
-    if (isEventsLink) {
-      log("Routing to Folk Night / Events deep link");
-      if (langCode != 'te') {
-        CustomToast.showErrorToast(
-          msg: "Folk Night is not available for the selected language",
-          timeDuration: 2,
-        );
-        return;
-      }
-      popToRoot();
-      switchTab(0);
-
-      if (mainNavigatorKey.currentContext != null) {
-        Navigator.push(
-          mainNavigatorKey.currentContext!,
-          MaterialPageRoute(
-            builder: (context) => const FolkNightEventScreen(),
-          ),
-        );
+        if (vIndex != -1 && mainNavigatorKey.currentState != null) {
+          mainNavigatorKey.currentState!.push(
+            MaterialPageRoute(
+              builder: (context) => TagVideoPlayerScreen(
+                videos: tagVideosList,
+                initialIndex: vIndex,
+                tagTitle: currentTagTitle.isNotEmpty ? currentTagTitle : displayTitle,
+                tagThumbnailUrl: currentTagThumbnailUrl ?? tagThumbnail,
+              ),
+            ),
+          );
+        }
       }
       return;
     }

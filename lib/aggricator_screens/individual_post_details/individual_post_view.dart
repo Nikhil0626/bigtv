@@ -129,7 +129,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
         subType == 'bigblackstandard';
   }
 
-  bool _is70PercentPost(dynamic article) {
+  bool _is50PercentPost(dynamic article) {
     if (article == null || article is! Map) return false;
     return _isBigTvSpecial(article) || _isBigBlackStandard(article);
   }

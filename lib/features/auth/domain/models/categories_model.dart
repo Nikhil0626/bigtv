@@ -57,11 +57,11 @@ class CategoryModel {
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      categoryId: (json['categoryId'] ?? json['categoryid']) as int?,
-      categoryName: (json['categoryName'] ?? json['categoryname']) as String?,
-      isFollowed: json['isFollowed'] as bool?,
-      imageUrl: json['imageUrl'] as String?,
-      isActive: json['isActive'] as bool?,
+      categoryId: (json['categoryId'] ?? json['categoryid'] ?? json['id'] ?? json['category_id']) as int?,
+      categoryName: (json['categoryName'] ?? json['categoryname'] ?? json['category_name'] ?? json['name']) as String?,
+      isFollowed: (json['isFollowed'] ?? json['isfollowed'] ?? json['is_followed']) as bool?,
+      imageUrl: (json['imageUrl'] ?? json['image_url'] ?? json['cat_image'] ?? json['category_image'] ?? json['icon'] ?? json['image']) as String?,
+      isActive: (json['isActive'] ?? json['isactive'] ?? json['is_active']) as bool?,
     );
   }
 

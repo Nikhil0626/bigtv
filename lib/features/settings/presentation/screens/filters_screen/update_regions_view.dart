@@ -1,16 +1,11 @@
-
-import 'package:chotanews/core/theme/theme_extensions.dart';
-import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/features/auth/domain/models/location_model.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
-import 'package:chotanews/features/home/presentation/screens/home_view.dart';
-import 'package:chotanews/utils/app_enums.dart';
+import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:chotanews/utils/app_spaces.dart';
-import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 
 class UpdateRegionsView extends StatefulWidget {
   const UpdateRegionsView({super.key});
@@ -22,150 +17,210 @@ class UpdateRegionsView extends StatefulWidget {
 class _UpdateRegionsViewState extends State<UpdateRegionsView> {
   @override
   void initState() {
-    context.read<AuthenticationProvider>().getAllLocations();
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AuthenticationProvider>().getAllLocations();
+    });
+  }
+
+  Widget _buildFallbackStateImage(String stateName) {
+    String? imagePath;
+    final s = stateName.toLowerCase();
+    if (s.contains('telangana') || s.contains('తెలంగాణ')) {
+      imagePath = 'assets/images/Telangana logo.png';
+    } else if (s.contains('andhra') || s.contains('ap') || s.contains('ఆంధ్రప్రదేశ్')) {
+      imagePath = 'assets/images/AP logo.png';
+    }
+
+    if (imagePath != null) {
+      return Image.asset(
+        imagePath,
+        height: 42.sp,
+        width: 42.sp,
+        fit: BoxFit.contain,
+      );
+    }
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildStateLogo(LocationModel? location, String stateName) {
+    final hasApiImage = location?.imageUrl != null && location!.imageUrl!.trim().isNotEmpty;
+
+    return Padding(
+      padding: EdgeInsets.only(right: 12.w),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: hasApiImage
+            ? CachedNetworkImage(
+                imageUrl: location.imageUrl!,
+                height: 42.sp,
+                width: 42.sp,
+                fit: BoxFit.contain,
+                placeholder: (context, url) => const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xFFED1C24),
+                      strokeWidth: 2,
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => _buildFallbackStateImage(stateName),
+              )
+            : _buildFallbackStateImage(stateName),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer2<AuthenticationProvider, SettingsProvider>(builder: (_, authenticationProvider, settingsProvider, __) {
-      return Scaffold(
-        backgroundColor: context.theme.scaffoldBackgroundColor,
-        bottomNavigationBar: Padding(
-          padding: EdgeInsets.all(25.w),
-          child: InkWell(
-            onTap: authenticationProvider.selectedLocations.isNotEmpty && authenticationProvider.selectedLocations.length <= 5
-                ? () {
-                    authenticationProvider.sendLocationsToServer(context).then(
-                      (value) {
-                        if (context.mounted) {
-                          Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => HomeView()), (route) => false);
-                        }
-                      },
-                    );
-                  }
-                : () {
-                    CustomToast.showErrorToast(msg: "Please Select only 5 District ");
-                  },
-            child: Container(
-              width: double.infinity,
-              height: 48.h,
-              decoration: BoxDecoration(
-                color: (authenticationProvider.selectedLocations.isNotEmpty && authenticationProvider.selectedLocations.length <= 5) ? context.primaryColor : context.colors.outline.withValues(alpha: 0.5),
-                borderRadius: BorderRadius.all(Radius.circular(8.r)),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Consumer<AuthenticationProvider>(
+      builder: (_, authenticationProvider, __) {
+        final locations = authenticationProvider.getAllLocationList;
+        final selectedLocations = authenticationProvider.selectedLocations;
+
+        if (authenticationProvider.isLocationLoading) {
+          return const Center(child: AppLoadingScreen());
+        }
+
+        return Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+          child: Column(
+            children: [
+              // Section Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Districts to be selected',
+                        style: newAppFont(
+                          color: isDark ? Colors.white : const Color(0xFF1E2022),
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 1.h),
+                      Text(
+                        'Select up to 5 districts',
+                        style: newAppFont(
+                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.5.h),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFF0F0),
+                      borderRadius: BorderRadius.circular(10.r),
+                    ),
+                    child: Text(
+                      '${selectedLocations.length} selected',
+                      style: newAppFont(
+                        color: const Color(0xFFED1C24),
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              child: Center(
-                child: Text(
-                  'Update',
-                  style: context.typography.labelLarge?.copyWith(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16.sp),
-                ),
-              ),
-            ),
-          ),
-        ),
-        body: authenticationProvider.isLocationLoading
-            ? Center(
-                child: AppLoadingScreen(),
-              )
-            : Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
+
+              SizedBox(height: 8.h),
+
+              // State Cards List
+              Expanded(
+                child: ListView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.only(bottom: 8.h),
                   children: [
-                    height(height: (settingsProvider.bannerAdsLoading == BannerAdsLoading.success || settingsProvider.bannerAdsLoading == BannerAdsLoading.loading) ? 10 : 0),
-                    height(height: 10),
-                    Expanded(
-                      child: ListView(
-                        children: [
-                          height(height: 12.h),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: RichText(
-                              text: TextSpan(
-                                text: "Districts to be selected ",
-                                style: context.typography.bodyMedium?.copyWith(color: context.colors.onSurfaceVariant),
-                                children: [
-                                  if (authenticationProvider.selectedLocations.length > 5)
-                                    TextSpan(text: "\nYou Have Selected Maximum Number of Districts", style: context.typography.bodySmall?.copyWith(color: Colors.red, fontWeight: FontWeight.w400)),
-                                ],
+                    if (locations.isNotEmpty)
+                      ...locations.map((location) {
+                        final stateName = location.stateName;
+                        final isSelected = selectedLocations.contains(stateName);
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 8.h),
+                          child: GestureDetector(
+                            onTap: () {
+                              authenticationProvider.addToSelectedLocations(stateName);
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              height: 70.h,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1B1E2B) : Colors.white,
+                                borderRadius: BorderRadius.circular(10.r),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFFED1C24)
+                                      : (isDark ? const Color(0xFF2B2F42) : const Color(0xFFE2E4EA)),
+                                  width: isSelected ? 1.4 : 0.9,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: const Color(0xFFED1C24).withValues(alpha: 0.15),
+                                          blurRadius: 5,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ]
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                                          blurRadius: 3,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
                               ),
-                            ),
-                          ),
-                          height(height: 16),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: authenticationProvider.getAllLocationList.map((location) {
-                              String stateName = location.stateName;
-                              final isSelected = authenticationProvider.selectedLocations.contains(stateName);
-                              return Padding(
-                                padding: EdgeInsets.only(bottom: 16.h),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    authenticationProvider.addToSelectedLocations(stateName);
-                                  },
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: context.cardColor,
-                                      borderRadius: BorderRadius.circular(8.r),
-                                      border: Border.all(
-                                        color: isSelected ? context.primaryColor : context.borderColor,
-                                        width: isSelected ? 2.0 : 1.0,
-                                      ),
-                                    ),
-                                    child: Stack(
+                              child: Stack(
+                                children: [
+                                  // Logo on Right
+                                  _buildStateLogo(location, stateName),
+
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 14.w, right: 62.w),
+                                    child: Row(
                                       children: [
-                                        if (location.imageUrl != null && location.imageUrl!.isNotEmpty)
-                                          Positioned.fill(
-                                            child: ClipRRect(
-                                              borderRadius: BorderRadius.circular(6.r),
-                                              child: CachedNetworkImage(
-                                                imageUrl: location.imageUrl!,
-                                                fit: BoxFit.cover,
-                                                errorWidget: (context, url, error) => const SizedBox(),
-                                              ),
-                                            ),
-                                          ),
-                                        if (location.imageUrl != null && location.imageUrl!.isNotEmpty)
-                                          Positioned.fill(
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                color: Colors.black.withValues(alpha: 0.5),
-                                                borderRadius: BorderRadius.circular(6.r),
-                                              ),
-                                            ),
-                                          ),
-                                        
-                                        Padding(
-                                          padding: EdgeInsets.only(left: 16.w, right: 90.w, top: 20.h, bottom: 20.h),
-                                          child: Row(
+                                        Icon(
+                                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                                          color: isSelected
+                                              ? const Color(0xFFED1C24)
+                                              : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
+                                          size: 19.sp,
+                                        ),
+                                        SizedBox(width: 10.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
                                             children: [
-                                                Icon(
-                                                  isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                                                  color: (location.imageUrl != null && location.imageUrl!.isNotEmpty) ? Colors.white : (isSelected ? context.primaryColor : context.colors.outline),
-                                                  size: 24.sp,
+                                              Text(
+                                                stateName,
+                                                style: newAppFont(
+                                                  fontSize: 13.5.sp,
+                                                  color: isDark ? Colors.white : const Color(0xFF1E2022),
+                                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                                                 ),
-                                              SizedBox(width: 16.w),
-                                              Expanded(
-                                                child: Column(
-                                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Text(
-                                                      stateName,
-                                                      style: context.typography.titleMedium?.copyWith(
-                                                        color: (location.imageUrl != null && location.imageUrl!.isNotEmpty) ? Colors.white : context.textColor,
-                                                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                                                      ),
-                                                    ),
-                                                    SizedBox(height: 4.h),
-                                                    Text(
-                                                      "Local news, events and updates from $stateName",
-                                                      style: context.typography.bodySmall?.copyWith(
-                                                        color: (location.imageUrl != null && location.imageUrl!.isNotEmpty) ? Colors.white70 : context.colors.onSurfaceVariant,
-                                                        fontSize: 11.sp,
-                                                      ),
-                                                    ),
-                                                  ],
+                                              ),
+                                              SizedBox(height: 2.h),
+                                              Text(
+                                                "Local news, events and updates from $stateName",
+                                                style: newAppFont(
+                                                  fontSize: 10.sp,
+                                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                                  fontWeight: FontWeight.w400,
                                                 ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
                                               ),
                                             ],
                                           ),
@@ -173,18 +228,109 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                                       ],
                                     ),
                                   ),
-                                ),
-                              );
-                            }).toList(),
+                                ],
+                              ),
+                            ),
                           ),
-                          height(height: 20),
-                        ],
-                      ),
-                    ),
+                        );
+                      })
+                    else if (authenticationProvider.states != null && authenticationProvider.states!.isNotEmpty)
+                      ...authenticationProvider.states!.entries.map((entry) {
+                        final stateName = entry.value;
+                        final isSelected = selectedLocations.contains(stateName);
+
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 8.h),
+                          child: GestureDetector(
+                            onTap: () {
+                              authenticationProvider.addToSelectedLocations(stateName);
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 180),
+                              height: 70.h,
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF1B1E2B) : Colors.white,
+                                borderRadius: BorderRadius.circular(10.r),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? const Color(0xFFED1C24)
+                                      : (isDark ? const Color(0xFF2B2F42) : const Color(0xFFE2E4EA)),
+                                  width: isSelected ? 1.4 : 0.9,
+                                ),
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: const Color(0xFFED1C24).withValues(alpha: 0.15),
+                                          blurRadius: 5,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ]
+                                    : [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                                          blurRadius: 3,
+                                          offset: const Offset(0, 1),
+                                        ),
+                                      ],
+                              ),
+                              child: Stack(
+                                children: [
+                                  _buildStateLogo(null, stateName),
+                                  Padding(
+                                    padding: EdgeInsets.only(left: 14.w, right: 62.w),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                                          color: isSelected
+                                              ? const Color(0xFFED1C24)
+                                              : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
+                                          size: 19.sp,
+                                        ),
+                                        SizedBox(width: 10.w),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Text(
+                                                stateName,
+                                                style: newAppFont(
+                                                  fontSize: 13.5.sp,
+                                                  color: isDark ? Colors.white : const Color(0xFF1E2022),
+                                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+                                                ),
+                                              ),
+                                              SizedBox(height: 2.h),
+                                              Text(
+                                                "Local news, events and updates from $stateName",
+                                                style: newAppFont(
+                                                  fontSize: 10.sp,
+                                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
+                                                  fontWeight: FontWeight.w400,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
                   ],
                 ),
               ),
-      );
-    });
+            ],
+          ),
+        );
+      },
+    );
   }
 }

@@ -23,7 +23,8 @@ import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 
 class FolkNightEventScreen extends StatefulWidget {
-  const FolkNightEventScreen({super.key});
+  final String? eventId;
+  const FolkNightEventScreen({super.key, this.eventId});
 
   @override
   State<FolkNightEventScreen> createState() => _FolkNightEventScreenState();
@@ -46,6 +47,9 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.eventId != null && widget.eventId!.isNotEmpty) {
+      eventId = widget.eventId!;
+    }
     _pageController = PageController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final langCode = context.read<HomeProvider>().langCode;
