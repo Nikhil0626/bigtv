@@ -15,6 +15,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 
 class FolkNightEventScreen extends StatefulWidget {
   const FolkNightEventScreen({super.key});
@@ -520,19 +522,76 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
                         child: SizedBox(
                           height: 50.h,
                           child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => FolkNightBookingScreen(
-                                    eventId: eventId,
-                                    eventName: name,
-                                    eventDateStr: dateStr,
-                                    eventLocation: location,
-                                    eventImageUrl: images.isNotEmpty ? images.first : '',
+                            onPressed: () async {
+                              SharedPreferences sp = await SharedPreferences.getInstance();
+                              bool isGuest = sp.getString("loginType") != "login";
+
+                              if (!context.mounted) return;
+                              if (isGuest) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                      contentPadding: const EdgeInsets.all(24),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          const Text(
+                                            "Guest User",
+                                            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                                          ),
+                                          const SizedBox(height: 16),
+                                          const Text(
+                                            "You are using the app as a guest user. Please login with your mobile number to continue.",
+                                            textAlign: TextAlign.center,
+                                            style: TextStyle(fontSize: 16),
+                                          ),
+                                          const SizedBox(height: 24),
+                                          SizedBox(
+                                            width: double.infinity,
+                                            height: 48,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor: AppColorTokens.primaryRed,
+                                                padding: const EdgeInsets.symmetric(horizontal: 8),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                              ),
+                                              onPressed: () {
+                                                Navigator.pop(context); // close dialog
+                                                Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginBackgroundView()));
+                                              },
+                                              child: const FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                child: Text(
+                                                  "Login with mobile number",
+                                                  textAlign: TextAlign.center,
+                                                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              } else {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => FolkNightBookingScreen(
+                                      eventId: eventId,
+                                      eventName: name,
+                                      eventDateStr: dateStr,
+                                      eventLocation: location,
+                                      eventImageUrl: images.isNotEmpty ? images.first : '',
+                                    ),
                                   ),
-                                ),
-                              );
+                                );
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColorTokens.primaryRed,

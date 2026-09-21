@@ -108,7 +108,7 @@ class _MainScreenCardState extends State<MainScreenCard>
                                 homeProvider.pageChange(isValue: true);
                               },
                             ),
-                          if (homeProvider.folkNight) ...[
+                          if (homeProvider.folkNight && homeProvider.langCode != 'ml') ...[
                             const SizedBox(width: 8),
                             InkWell(
                               onTap: () async {
@@ -141,19 +141,27 @@ class _MainScreenCardState extends State<MainScreenCard>
                                               width: double.infinity,
                                               height: 48,
                                               child: ElevatedButton(
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: AppColorTokens.primaryRed,
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(8),
-                                                  ),
-                                                ),
-                                                onPressed: () {
-                                                  Navigator.pop(context); // close dialog
-                                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginBackgroundView()));
-                                                },
-                                                child: const Text("Login with mobile number", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                                              ),
-                                            )
+                                                 style: ElevatedButton.styleFrom(
+                                                   backgroundColor: AppColorTokens.primaryRed,
+                                                   padding: const EdgeInsets.symmetric(horizontal: 8),
+                                                   shape: RoundedRectangleBorder(
+                                                     borderRadius: BorderRadius.circular(8),
+                                                   ),
+                                                 ),
+                                                 onPressed: () {
+                                                   Navigator.pop(context); // close dialog
+                                                   Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginBackgroundView()));
+                                                 },
+                                                 child: const FittedBox(
+                                                   fit: BoxFit.scaleDown,
+                                                   child: Text(
+                                                     "Login with mobile number",
+                                                     textAlign: TextAlign.center,
+                                                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
+                                                   ),
+                                                 ),
+                                               ),
+                                            ),
                                           ],
                                         ),
                                       );
