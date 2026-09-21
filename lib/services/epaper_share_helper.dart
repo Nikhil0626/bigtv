@@ -9,10 +9,10 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
 
 class EpaperShareHelper {
-  /// Generates the official www.bigtv24x7.com app link for e-papers using the single e-paper ID
+  /// Generates the official app.bigtv24x7.com app link for e-papers using the single e-paper ID
   static String _getEpaperShareLink(Map<String, dynamic> epaper) {
     final String id = epaper['_id']?.toString() ?? epaper['id']?.toString() ?? epaper['epaperId']?.toString() ?? '';
-    return "https://www.bigtv24x7.com/epaper?id=$id";
+    return "https://app.bigtv24x7.com/epaper?id=$id";
   }
 
   /// Shares an individual e-paper page image attached with the clickable www.bigtv24x7.com link
