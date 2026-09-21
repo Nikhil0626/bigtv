@@ -11,6 +11,10 @@ import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/rating_provider.dart';
 import 'package:chotanews/features/home/data/repositories/home_repo.dart';
+import 'package:chotanews/features/home/presentation/providers/epaper_provider.dart';
+import 'package:chotanews/features/home/presentation/screens/epaper_detail_screen.dart';
+import 'package:chotanews/features/home/presentation/screens/tag_video_player_screen.dart';
+import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/base_service.dart';
@@ -858,49 +862,32 @@ class HomeProvider extends ChangeNotifier {
   void handleNotificationTap(Map<String, dynamic>? messagePayload, {String? deepLink}) async {
     log("Notification tapped with payload: $messagePayload, deepLink: $deepLink");
 
-    if (deepLink != null && deepLink.isNotEmpty) {
+    String? linkStr = deepLink;
+    if (linkStr == null || linkStr.isEmpty) {
+      if (messagePayload != null) {
+        linkStr = messagePayload['deepLink'] ??
+            messagePayload['deeplink'] ??
+            messagePayload['url'] ??
+            messagePayload['link'] ??
+            messagePayload['click_action'];
+      }
+    }
+
+    if (linkStr != null && linkStr.isNotEmpty && (linkStr.startsWith('http://') || linkStr.startsWith('https://') || linkStr.contains('://'))) {
       try {
-        Uri uri = Uri.parse(deepLink);
-        final String? id = uri.queryParameters['postId'] ?? uri.queryParameters['post_id'];
-        if (id != null) {
-          postId = id;
-        } else {
-          postId = _extractPostIdSafely(messagePayload);
-        }
-      } catch (e) {
-        postId = _extractPostIdSafely(messagePayload);
-      }
-    } else {
-      postId = _extractPostIdSafely(messagePayload);
-    }
-
-    if (postId == "0" || postId == null) return;
-
-    isComeFromLinkOrNotification = true;
-    isAiTagDataLoaded = false;
-    _selectedTagId = null;
-    getAllAiTagsPostList = [];
-    isHomeLoading = true;
-
-    if (mainNavigatorKey.currentState == null) {
-      await Future.delayed(const Duration(milliseconds: 300));
-      if (mainNavigatorKey.currentState == null) {
-        isHomeLoading = false;
-        notifyListeners();
+        final uri = Uri.parse(linkStr);
+        await routeDeepLink(uri, isFromNotification: true);
         return;
+      } catch (e) {
+        log("Error parsing deepLink string from notification: $e");
       }
     }
 
-    mainNavigatorKey.currentState!.popUntil((route) => route.isFirst);
-    if (homePageController.hasClients) {
-      homePageController.jumpToPage(0);
+    // Fallback: extract postId from payload
+    final String? extractedPostId = _extractPostIdSafely(messagePayload);
+    if (extractedPostId != null && extractedPostId != "0") {
+      await routeDeepLink(Uri.parse("https://app.bigtv24x7.com/individualPage?postId=$extractedPostId"), isFromNotification: true);
     }
-    getAllPostList = [];
-    notifyListeners();
-
-    await getIndividualPost(postId, isLink: true);
-    isHomeLoading = false;
-    notifyListeners();
   }
 
   StreamSubscription<Uri>? linkSubscription;
@@ -920,13 +907,9 @@ class HomeProvider extends ChangeNotifier {
       log("Error getting initial link: $e");
     }
 
+    linkSubscription?.cancel();
     linkSubscription = AppLinks().uriLinkStream.listen((uri) {
       debugPrint('onAppLink: $uri');
-      isHomeLoading = true;
-      getAllPostList = [];
-      postId = "0";
-      setSelectedTagId(0);
-      aiTagDataLoaded(false);
       _handleDeepLink(uri);
     }, onError: (err) {
       log("Error in deep link handling: $err");
@@ -935,26 +918,245 @@ class HomeProvider extends ChangeNotifier {
 
   void _handleDeepLink(Uri uri) async {
     log("Deep link path: $uri");
-    final String? id = uri.queryParameters['postId'] ?? uri.queryParameters['post_id'] ?? uri.queryParameters['epaperId'] ?? uri.queryParameters['id'];
-    if (id != null) {
-      postId = id;
-      isComeFromLinkOrNotification = true;
+    await routeDeepLink(uri, isFromNotification: false);
+  }
+
+  Future<void> routeDeepLink(Uri uri, {bool isFromNotification = false}) async {
+    log("Handling Deep Link: $uri (isNotification: $isFromNotification)");
+
+    // Wait if navigator is not yet mounted
+    if (mainNavigatorKey.currentState == null) {
+      await Future.delayed(const Duration(milliseconds: 400));
+      if (mainNavigatorKey.currentState == null) {
+        log("Navigator state is null, cannot route deep link");
+        return;
+      }
+    }
+
+    final path = uri.path.toLowerCase();
+    final queryParams = uri.queryParameters;
+
+    void popToRoot() {
       if (mainNavigatorKey.currentState != null) {
         mainNavigatorKey.currentState!.popUntil((route) => route.isFirst);
       }
+    }
+
+    void switchTab(int index) {
       if (homePageController.hasClients) {
         try {
-          if (homePageController.positions.length == 1) {
-            homePageController.jumpToPage(0);
-          }
+          homePageController.jumpToPage(index);
         } catch (e) {
-          log("Error jumping to page: $e");
+          log("Error jumping to tab $index: $e");
         }
       }
-      await getIndividualPost(postId, isLink: false);
+      onItemTapped(index);
+    }
+
+    // 1. EPAPER DEEP LINK
+    // Handles:
+    // https://www.bigtv24x7.com/epaper?id=epaper_f5276469
+    // https://app.bigtv24x7.com/epaper?id=epaper_f5276469
+    // https://app.bigtv24x7.com/epaper?epaperId=...
+    // https://www.bigtv24x7.com/epaper/epaper_f5276469
+    final bool isEpaperLink = path.contains('epaper') ||
+        queryParams.containsKey('epaperId') ||
+        (queryParams['id'] != null && queryParams['id']!.toLowerCase().startsWith('epaper'));
+
+    if (isEpaperLink) {
+      log("Routing to Epaper deep link");
+      popToRoot();
+      switchTab(3);
+
+      String? epaperId = queryParams['epaperId'] ?? queryParams['id'];
+      if ((epaperId == null || epaperId.isEmpty) && uri.pathSegments.contains('epaper')) {
+        final idx = uri.pathSegments.indexOf('epaper');
+        if (idx + 1 < uri.pathSegments.length) {
+          epaperId = uri.pathSegments[idx + 1];
+        }
+      }
+
+      final context = mainNavigatorKey.currentContext;
+      if (context != null) {
+        final epaperProvider = context.read<EpaperProvider>();
+        if (epaperProvider.allEpapers.isEmpty) {
+          await epaperProvider.fetchEpapers();
+        }
+
+        if (epaperId != null && epaperId.isNotEmpty) {
+          final matched = epaperProvider.allEpapers.firstWhere(
+            (e) =>
+                e is Map &&
+                (e['_id']?.toString() == epaperId ||
+                    e['id']?.toString() == epaperId ||
+                    e['epaperId']?.toString() == epaperId),
+            orElse: () => null,
+          );
+
+          if (matched != null && mainNavigatorKey.currentContext != null) {
+            Navigator.push(
+              mainNavigatorKey.currentContext!,
+              MaterialPageRoute(
+                builder: (context) => EpaperDetailScreen(
+                  epaper: Map<String, dynamic>.from(matched),
+                ),
+              ),
+            );
+          }
+        }
+      }
+      return;
+    }
+
+    // 2. VIDEO TAGS / LIVE BIG TV DEEP LINK (e.g. DNA, SB, etc.)
+    // Handles:
+    // https://app.bigtv24x7.com/livebigtv?showname=DNA&postId=77e02f18-f278-4334-ad74-9bfbd22d0af4&videoId=4b43709723b0b870629678a48e4c2e5c
+    // https://app.bigtv24x7.com/livebigtv?showname=SB
+    // https://app.bigtv24x7.com/videotags?tag=DNA
+    final bool isVideoTagLink = path.contains('livebigtv') ||
+        path.contains('videotag') ||
+        path.contains('video-tag') ||
+        queryParams.containsKey('showname') ||
+        queryParams.containsKey('tagSlug');
+
+    if (isVideoTagLink) {
+      log("Routing to Video Tag / Live Big TV deep link");
+      popToRoot();
+      switchTab(0);
+
+      final String tagSlug = queryParams['showname'] ??
+          queryParams['tagSlug'] ??
+          queryParams['tag'] ??
+          queryParams['slug'] ??
+          queryParams['show'] ??
+          "";
+
+      final String? videoId = queryParams['videoId'] ?? queryParams['video_id'];
+      final String? targetPostId = queryParams['postId'] ?? queryParams['post_id'];
+
+      if (tagSlug.isNotEmpty) {
+        setSelectedTagId(tagSlug);
+        aiTagDataLoaded(true);
+        pageChange(isValue: true);
+
+        // Fetch videos for this tag
+        await fetchVideosByTagSlug(tagSlug, displayTitle: tagSlug);
+
+        // Scroll top navigation bar to the tag if available
+        if (getAllAiTagsList.isNotEmpty) {
+          int tagIndex = getAllAiTagsList.indexWhere((t) {
+            if (t is! Map) return false;
+            final s = (t['slug'] ?? t['name'] ?? t['aitagname'] ?? t['id'])?.toString();
+            return s?.toLowerCase() == tagSlug.toLowerCase();
+          });
+          if (tagIndex != -1) {
+            aiTagsScrollToCenter(tagIndex);
+          }
+        }
+
+        // If specific video or post ID is given, find and play the video
+        final String? lookupId = videoId ?? targetPostId;
+        if (lookupId != null && lookupId.isNotEmpty && tagVideosList.isNotEmpty) {
+          int vIndex = tagVideosList.indexWhere((v) {
+            if (v is! Map) return false;
+            return v['videoId']?.toString() == lookupId ||
+                v['_id']?.toString() == lookupId ||
+                v['id']?.toString() == lookupId ||
+                v['postId']?.toString() == lookupId ||
+                v['video_id']?.toString() == lookupId;
+          });
+
+          if (vIndex != -1 && mainNavigatorKey.currentContext != null) {
+            Navigator.push(
+              mainNavigatorKey.currentContext!,
+              MaterialPageRoute(
+                builder: (context) => TagVideoPlayerScreen(
+                  videos: tagVideosList,
+                  initialIndex: vIndex,
+                  tagTitle: currentTagTitle.isNotEmpty ? currentTagTitle : tagSlug,
+                  tagThumbnailUrl: currentTagThumbnailUrl,
+                ),
+              ),
+            );
+          }
+        }
+      }
+      return;
+    }
+
+    // 3. FOLK NIGHT / EVENTS DEEP LINK
+    // Handles:
+    // https://app.bigtv24x7.com/events?eventId=e4d962de-5393-4541-a792-4c23f1429f9c
+    // https://app.bigtv24x7.com/folknight
+    // https://app.bigtv24x7.com/folk
+    final bool isEventsLink = path.contains('events') ||
+        path.contains('folknight') ||
+        path.contains('folk') ||
+        queryParams.containsKey('eventId');
+
+    if (isEventsLink) {
+      log("Routing to Folk Night / Events deep link");
+      popToRoot();
+      switchTab(0);
+
+      if (mainNavigatorKey.currentContext != null) {
+        Navigator.push(
+          mainNavigatorKey.currentContext!,
+          MaterialPageRoute(
+            builder: (context) => const FolkNightEventScreen(),
+          ),
+        );
+      }
+      return;
+    }
+
+    // 4. EDITORIAL DEEP LINK
+    if (path.contains('editorial')) {
+      log("Routing to Editorial deep link");
+      popToRoot();
+      switchTab(2);
+      return;
+    }
+
+    // 5. REELS DEEP LINK
+    if (path.contains('reels') || path.contains('reel') || path.contains('shorts')) {
+      log("Routing to Reels deep link");
+      popToRoot();
+      switchTab(1);
+      return;
+    }
+
+    // 6. POST / ARTICLE DEEP LINK (Default)
+    // Handles:
+    // https://app.bigtv24x7.com/individualPage?postId=214
+    // https://www.bigtv24x7.com/posts?postId=214
+    // https://app.bigtv24x7.com/posts?postId=214
+    final String? pId = queryParams['postId'] ??
+        queryParams['post_id'] ??
+        queryParams['id'] ??
+        (uri.pathSegments.isNotEmpty && int.tryParse(uri.pathSegments.last) != null ? uri.pathSegments.last : null);
+
+    if (pId != null && pId.isNotEmpty && pId != "0") {
+      log("Routing to Post ID: $pId");
+      postId = pId;
+      isComeFromLinkOrNotification = true;
+      isAiTagDataLoaded = false;
+      _selectedTagId = null;
+      getAllAiTagsPostList = [];
+      isHomeLoading = true;
+
+      popToRoot();
+      switchTab(0);
+      getAllPostList = [];
+      notifyListeners();
+
+      await getIndividualPost(postId, isLink: isFromNotification);
       isHomeLoading = false;
       notifyListeners();
+      return;
     }
+
+    log("Deep link not matched to specific handler: $uri");
   }
 
   Future<void> getMobileNumber() async {
