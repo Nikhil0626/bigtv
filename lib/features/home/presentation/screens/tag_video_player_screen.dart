@@ -334,6 +334,14 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
   Future<bool> _tryInitializeUrl(String url) async {
     try {
+      if (_controller != null) {
+        try {
+          _controller!.removeListener(_videoListener);
+          await _controller!.pause();
+          await _controller!.dispose();
+        } catch (_) {}
+        _controller = null;
+      }
       final Uri videoUri = Uri.parse(url);
       final controller = VideoPlayerController.networkUrl(videoUri);
       await controller.initialize();

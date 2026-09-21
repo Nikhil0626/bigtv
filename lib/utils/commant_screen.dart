@@ -8,6 +8,8 @@ import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 
 import '../aggricator_screens/events_data/event_repo.dart';
 import 'date_format.dart';
@@ -241,16 +243,22 @@ class _CommentSectionState extends State<CommentSection> {
 
                                       }
                                     } else {
-                                      if (context.mounted) {
-                                        Navigator.pop(context);
-                                        context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => const LoginBackgroundView(),
-                                          ),
-                                        );
-                                      }
+                                       if (context.mounted) {
+                                         try {
+                                           context.read<HomeProvider>().isPlayingYoutube(false);
+                                         } catch (_) {}
+                                         try {
+                                           context.read<VideoProvider>().pauseVideo();
+                                         } catch (_) {}
+                                         Navigator.pop(context);
+                                         context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+                                         Navigator.push(
+                                           context,
+                                           MaterialPageRoute(
+                                             builder: (context) => const LoginBackgroundView(),
+                                           ),
+                                         );
+                                       }
                                     }
                                   },
                                 ),

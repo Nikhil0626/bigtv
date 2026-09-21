@@ -16,6 +16,10 @@ import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 
 class FolkNightEventScreen extends StatefulWidget {
@@ -43,6 +47,18 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final langCode = context.read<HomeProvider>().langCode;
+      if (langCode != 'te') {
+        CustomToast.showErrorToast(
+          msg: "Folk Night is not available for the selected language",
+          timeDuration: 2,
+        );
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
+    });
     fetchEventData();
   }
 
@@ -560,6 +576,12 @@ class _FolkNightEventScreenState extends State<FolkNightEventScreen> {
                                                 ),
                                               ),
                                               onPressed: () {
+                                                try {
+                                                  context.read<HomeProvider>().isPlayingYoutube(false);
+                                                } catch (_) {}
+                                                try {
+                                                  context.read<VideoProvider>().pauseVideo();
+                                                } catch (_) {}
                                                 Navigator.pop(context); // close dialog
                                                 Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginBackgroundView()));
                                               },

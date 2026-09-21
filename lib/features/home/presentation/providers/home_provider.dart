@@ -1096,6 +1096,13 @@ class HomeProvider extends ChangeNotifier {
 
     if (isEventsLink) {
       log("Routing to Folk Night / Events deep link");
+      if (langCode != 'te') {
+        CustomToast.showErrorToast(
+          msg: "Folk Night is not available for the selected language",
+          timeDuration: 2,
+        );
+        return;
+      }
       popToRoot();
       switchTab(0);
 

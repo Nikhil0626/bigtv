@@ -12,6 +12,7 @@ class TranslatedText extends StatefulWidget {
   final TextOverflow? overflow;
   final StrutStyle? strutStyle;
   final double? englishFontSize;
+  final bool? isTitle;
 
   const TranslatedText(
     this.text, {
@@ -23,6 +24,7 @@ class TranslatedText extends StatefulWidget {
     this.overflow,
     this.strutStyle,
     this.englishFontSize,
+    this.isTitle,
   });
 
   @override
@@ -114,6 +116,7 @@ class _TranslatedTextState extends State<TranslatedText> {
         fontFamily: 'SF Pro',
         fontFamilyFallback: const ['.SF Pro Text', '.SF Pro Display', 'SF Pro Text', 'SF Pro Display', 'Roboto'],
         fontSize: targetFontSize,
+        fontWeight: FontWeight.w500,
       );
     }
     return baseStyle;

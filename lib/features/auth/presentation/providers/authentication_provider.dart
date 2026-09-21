@@ -578,16 +578,21 @@ class AuthenticationProvider extends ChangeNotifier {
   }
 
   void continueAsGuest(
-    context,
+    BuildContext context,
   ) async {
-    newAppLoginStatus = NewAppLoginStatus.language;
+    final canPop = Navigator.canPop(context);
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    preferences.setString("loginState", newAppLoginStatus.toString());
     preferences.setString("loginType", "skip");
 
-    // Device details API call moved to language selection
-
-    notifyListeners();
+    if (canPop) {
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+    } else {
+      newAppLoginStatus = NewAppLoginStatus.language;
+      preferences.setString("loginState", newAppLoginStatus.toString());
+      notifyListeners();
+    }
   }
 
   void setLogOutStatus(context, bool isLogout) async {

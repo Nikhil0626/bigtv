@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
 import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
 import 'package:chotanews/services/translation_service.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'main_screen_pageview.dart';
 
 class MainScreenCard extends StatefulWidget {
@@ -112,6 +113,14 @@ class _MainScreenCardState extends State<MainScreenCard>
                             const SizedBox(width: 8),
                             InkWell(
                               onTap: () async {
+                                if (homeProvider.langCode != 'te') {
+                                  CustomToast.showErrorToast(
+                                    msg: "Folk Night is not available for the selected language",
+                                    timeDuration: 2,
+                                  );
+                                  return;
+                                }
+
                                 SharedPreferences sp = await SharedPreferences.getInstance();
                                 bool isGuest = sp.getString("loginType") != "login";
                                 
@@ -149,6 +158,12 @@ class _MainScreenCardState extends State<MainScreenCard>
                                                    ),
                                                  ),
                                                  onPressed: () {
+                                                   try {
+                                                     context.read<HomeProvider>().isPlayingYoutube(false);
+                                                   } catch (_) {}
+                                                   try {
+                                                     context.read<VideoProvider>().pauseVideo();
+                                                   } catch (_) {}
                                                    Navigator.pop(context); // close dialog
                                                    Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginBackgroundView()));
                                                  },

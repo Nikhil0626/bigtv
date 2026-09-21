@@ -28,13 +28,21 @@ class LoginBackgroundView extends StatelessWidget {
         bool isDark = context.theme.brightness == Brightness.dark;
 
         return Scaffold(
+          resizeToAvoidBottomInset: true,
           backgroundColor: context.theme.scaffoldBackgroundColor,
           body: SafeArea(
-            child: SingleChildScrollView(
-              child: SizedBox(
-                height: screenHeight - mediaQuery.padding.top - mediaQuery.padding.bottom,
-                child: isAuthScreen ? _buildAuthLayout(context, authenticationProvider) : _buildOtherLayout(context, authenticationProvider, screenWidth, screenHeight),
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  physics: const ClampingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: IntrinsicHeight(
+                      child: isAuthScreen ? _buildAuthLayout(context, authenticationProvider) : _buildOtherLayout(context, authenticationProvider, screenWidth, screenHeight),
+                    ),
+                  ),
+                );
+              },
             ),
           ),
         );
