@@ -1414,10 +1414,22 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
   }
 
   Future<void> launchURL(Uri uri) async {
+    final String urlStr = uri.toString().toLowerCase();
+    if (urlStr.contains('bigtv24x7.com') ||
+        urlStr.contains('livebigtv') ||
+        urlStr.contains('videotag') ||
+        urlStr.contains('folknight') ||
+        urlStr.contains('epaper') ||
+        urlStr.contains('events')) {
+      if (context.mounted) {
+        context.read<HomeProvider>().routeDeepLink(uri);
+        return;
+      }
+    }
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     } else {
-      throw 'Could not launch ${uri.path}';
+      log('Could not launch ${uri.path}');
     }
   }
 }
