@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:chotanews/core/theme/theme_extensions.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/auth/domain/models/language_model.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:chotanews/utils/app_enums.dart';
-import 'package:chotanews/utils/app_spaces.dart';
+import 'package:chotanews/utils/top_right_wave_painter.dart';
 
 class LanguageSelectionScreen extends StatefulWidget {
   const LanguageSelectionScreen({super.key});
@@ -15,214 +14,377 @@ class LanguageSelectionScreen extends StatefulWidget {
 }
 
 class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
+  // Default fallback languages if API is loading or returns empty
+  final List<Map<String, dynamic>> _fallbackLanguages = [
+    {'id': 1, 'code': 'te', 'native': 'తెలుగు', 'english': 'Telugu'},
+    {'id': 2, 'code': 'en', 'native': 'English', 'english': 'English'},
+    {'id': 3, 'code': 'hi', 'native': 'हिन्दी', 'english': 'Hindi'},
+    {'id': 4, 'code': 'ta', 'native': 'தமிழ்', 'english': 'Tamil'},
+    {'id': 5, 'code': 'kn', 'native': 'ಕನ್ನಡ', 'english': 'Kannada'},
+    {'id': 6, 'code': 'ml', 'native': 'മലയാളം', 'english': 'Malayalam'},
+    {'id': 7, 'code': 'mr', 'native': 'मराठी', 'english': 'Marathi'},
+    {'id': 8, 'code': 'bn', 'native': 'বাংলা', 'english': 'Bengali'},
+  ];
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AuthenticationProvider>().getAllLanguages();
+      final authProvider = context.read<AuthenticationProvider>();
+      authProvider.getAllLanguages().then((_) {
+        // Default to Telugu if none selected
+        if (authProvider.selectedLanguageId == null && authProvider.getAllLanguageList.isNotEmpty) {
+          final teLang = authProvider.getAllLanguageList.firstWhere(
+            (l) => l.code == 'te',
+            orElse: () => authProvider.getAllLanguageList.first,
+          );
+          authProvider.setSelectedLanguageId(teLang.id);
+        } else if (authProvider.selectedLanguageId == null) {
+          authProvider.setSelectedLanguageId(1);
+        }
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.backgroundColor,
-      body: SafeArea(
-        child: Consumer<AuthenticationProvider>(
-          builder: (context, provider, child) {
-            if (provider.isLanguageLoading) {
-              return const Center(child: AppLoadingScreen());
-            }
+      backgroundColor: const Color(0xFFFBFBFC),
+      body: Stack(
+        children: [
+          // Background top right wave design
+          Positioned(
+            top: 0,
+            right: 0,
+            width: MediaQuery.of(context).size.width,
+            height: 350.h,
+            child: const CustomPaint(
+              painter: TopRightWavePainter(),
+            ),
+          ),
 
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Choose Language",
-                    style: context.typography.headlineMedium?.copyWith(
-                      color: context.textColor,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  height(height: 8.h),
-                  Text(
-                    "Select your preferred language for news.",
-                    style: context.typography.bodyLarge?.copyWith(
-                      color: context.subtitleColor,
-                    ),
-                  ),
-                  height(height: 24.h),
-                  Expanded(
-                    child: GridView.builder(
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: 16.w,
-                        mainAxisSpacing: 16.h,
-                        childAspectRatio: 2.5,
-                      ),
-                      itemCount: provider.getAllLanguageList.length,
-                      itemBuilder: (context, index) {
-                        final language = provider.getAllLanguageList[index];
-                        final isSelected = provider.selectedLanguageId == language.id;
-                        
-                        return GestureDetector(
-                          onTap: () {
-                            provider.setSelectedLanguageId(language.id!);
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: context.cardColor,
-                              border: Border.all(
-                                color: isSelected ? context.primaryColor : context.borderColor,
-                                width: isSelected ? 2 : 1,
-                              ),
-                              borderRadius: BorderRadius.circular(12.r),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: context.primaryColor.withValues(alpha: 0.1),
-                                        blurRadius: 8,
-                                        spreadRadius: 1,
-                                      )
-                                    ]
-                                  : [],
+          SafeArea(
+            child: Consumer<AuthenticationProvider>(
+              builder: (context, provider, child) {
+                if (provider.isLanguageLoading && provider.getAllLanguageList.isEmpty) {
+                  return const Center(child: AppLoadingScreen());
+                }
+
+                final List<LanguageModel> languages = provider.getAllLanguageList;
+                final bool useFallbacks = languages.isEmpty;
+
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Top pill badge: [🌐 LANGUAGE]
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.5.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFFECEC),
+                          borderRadius: BorderRadius.circular(16.r),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.language_rounded,
+                              size: 13.sp,
+                              color: const Color(0xFFED1C24),
                             ),
-                            child: Stack(
+                            SizedBox(width: 5.w),
+                            Text(
+                              "LANGUAGE",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 10.5.sp,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFFED1C24),
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: 12.h),
+
+                      // HERO SECTION: Title + Subtitle + Right Graphic Badge
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                if (language.symbol.isNotEmpty)
-                                  Positioned(
-                                    right: -10.w,
-                                    bottom: -15.h,
-                                    child: Text(
-                                      language.symbol,
-                                      style: context.typography.displayLarge?.copyWith(
-                                        fontSize: 60.sp,
-                                        color: isSelected 
-                                            ? context.primaryColor.withValues(alpha: 0.2) 
-                                            : context.textColor.withValues(alpha: 0.05),
-                                        fontWeight: FontWeight.bold,
+                                RichText(
+                                  text: TextSpan(
+                                    text: "Your news.\n",
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 25.sp,
+                                      fontWeight: FontWeight.w900,
+                                      color: const Color(0xFF181A20),
+                                      height: 1.15,
+                                    ),
+                                    children: const [
+                                      TextSpan(
+                                        text: "Your language.",
+                                        style: TextStyle(
+                                          color: Color(0xFFED1C24),
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                Center(
-                                  child: Text(
-                                    language.getDisplayName(),
-                                    style: context.typography.titleMedium?.copyWith(
-                                      color: isSelected ? context.primaryColor : context.textColor,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                                    ],
                                   ),
                                 ),
-                                if (isSelected)
-                                  Positioned(
-                                    top: 8.h,
-                                    right: 8.w,
-                                    child: Container(
-                                      padding: EdgeInsets.all(2.w),
-                                      decoration: BoxDecoration(
-                                        color: context.primaryColor,
-                                        shape: BoxShape.circle,
-                                      ),
-                                      child: Icon(
-                                        Icons.check,
-                                        color: context.colors.onPrimary,
-                                        size: 14.sp,
-                                      ),
-                                    ),
+                                SizedBox(height: 4.h),
+                                Text(
+                                  "Select your preferred language for news.",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: const Color(0xFF6C7278),
                                   ),
+                                ),
                               ],
                             ),
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50.h,
-                    child: ElevatedButton(
-                      onPressed: provider.selectedLanguageId == null
-                          ? null
-                          : () {
-                              provider.saveLanguageAndProceed(context, provider.selectedLanguageId!);
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: provider.selectedLanguageId == null ? Colors.grey.shade400 : context.primaryColor,
-                        disabledBackgroundColor: Colors.grey.shade400,
-                      ),
-                      child: Text(
-                        "Continue",
-                        style: context.typography.titleMedium?.copyWith(
-                          color: provider.selectedLanguageId == null ? Colors.white70 : context.colors.onPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  InkWell(
-                    onTap: () {
-                      context.read<AuthenticationProvider>().updateLoginStatus(NewAppLoginStatus.login);
-                    },
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.h),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.arrow_back, size: 16.sp, color: context.textColor),
-                          SizedBox(width: 8.w),
-                          Text(
-                            'Back',
-                            style: context.typography.bodyMedium?.copyWith(
-                              fontSize: 14.sp,
-                              color: context.textColor,
-                              fontWeight: FontWeight.w500,
+                          SizedBox(width: 10.w),
+                          // Right graphic badge with globe & chat speech bubbles
+                          Container(
+                            width: 66.w,
+                            height: 66.w,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFECEC),
+                              borderRadius: BorderRadius.circular(18.r),
+                            ),
+                            child: Center(
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.language_rounded,
+                                    size: 38.sp,
+                                    color: const Color(0xFFED1C24),
+                                  ),
+                                  Positioned(
+                                    right: 8.w,
+                                    bottom: 8.h,
+                                    child: Icon(
+                                      Icons.chat_bubble_outline_rounded,
+                                      size: 16.sp,
+                                      color: const Color(0xFFED1C24),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
                       ),
-                    ),
-                  ),
-                  SizedBox(height: 4.h),
-                  SizedBox(height: 24.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 6.w,
-                        height: 6.w,
-                        decoration: BoxDecoration(
-                          color: context.primaryColor,
-                          shape: BoxShape.circle,
+
+                      SizedBox(height: 18.h),
+
+                      // SECTION HEADER: "Choose language" / "Select one"
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            "Choose language",
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w800,
+                              color: const Color(0xFF181A20),
+                            ),
+                          ),
+                          Text(
+                            "Select one",
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFF7A7E85),
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 10.h),
+
+                      // 2-COLUMN LANGUAGE GRID
+                      Expanded(
+                        child: GridView.builder(
+                          physics: const BouncingScrollPhysics(),
+                          itemCount: useFallbacks ? _fallbackLanguages.length : languages.length,
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 10.w,
+                            mainAxisSpacing: 10.h,
+                            childAspectRatio: 2.15,
+                          ),
+                          itemBuilder: (context, index) {
+                            final int langId = useFallbacks
+                                ? _fallbackLanguages[index]['id'] as int
+                                : languages[index].id;
+                            final String nativeName = useFallbacks
+                                ? _fallbackLanguages[index]['native'] as String
+                                : languages[index].getNativeName();
+                            final String englishName = useFallbacks
+                                ? _fallbackLanguages[index]['english'] as String
+                                : languages[index].getEnglishName();
+
+                            final bool isSelected = provider.selectedLanguageId == langId;
+
+                            return GestureDetector(
+                              onTap: () {
+                                provider.setSelectedLanguageId(langId);
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                                decoration: BoxDecoration(
+                                  color: isSelected ? const Color(0xFFFFF7F7) : Colors.white,
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? const Color(0xFFED1C24)
+                                        : const Color(0xFFE2E4EA),
+                                    width: isSelected ? 1.4 : 0.9,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: isSelected
+                                          ? const Color(0xFFED1C24).withValues(alpha: 0.08)
+                                          : Colors.black.withValues(alpha: 0.02),
+                                      blurRadius: 6,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            nativeName,
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              fontSize: 15.sp,
+                                              fontWeight: FontWeight.w700,
+                                              color: const Color(0xFF181A20),
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          SizedBox(height: 2.h),
+                                          Text(
+                                            englishName,
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              fontSize: 11.5.sp,
+                                              fontWeight: FontWeight.w400,
+                                              color: const Color(0xFF7A7E85),
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 4.w),
+                                    // Custom Radio Button Indicator
+                                    Container(
+                                      width: 20.w,
+                                      height: 20.w,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? const Color(0xFFED1C24)
+                                              : const Color(0xFF9EA3AE),
+                                          width: isSelected ? 5.5.w : 1.5,
+                                        ),
+                                        color: isSelected ? Colors.white : Colors.transparent,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
-                      SizedBox(width: 8.w),
-                      Container(
-                        width: 6.w,
-                        height: 6.w,
-                        decoration: BoxDecoration(
-                          color: context.colors.outline,
-                          shape: BoxShape.circle,
+
+                      SizedBox(height: 12.h),
+
+                      // BOTTOM "Continue ->" BUTTON
+                      GestureDetector(
+                        onTap: provider.selectedLanguageId == null
+                            ? null
+                            : () {
+                                provider.saveLanguageAndProceed(
+                                  context,
+                                  provider.selectedLanguageId!,
+                                );
+                              },
+                        child: Container(
+                          width: double.infinity,
+                          height: 48.h,
+                          decoration: BoxDecoration(
+                            color: provider.selectedLanguageId == null
+                                ? const Color(0xFFE2E4EA)
+                                : const Color(0xFFED1C24),
+                            borderRadius: BorderRadius.circular(12.r),
+                            boxShadow: provider.selectedLanguageId == null
+                                ? []
+                                : [
+                                    BoxShadow(
+                                      color: const Color(0xFFED1C24).withValues(alpha: 0.25),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 3),
+                                    ),
+                                  ],
+                          ),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Continue",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(width: 6.w),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: 18.sp,
+                                  color: Colors.white,
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ),
-                      SizedBox(width: 8.w),
-                      Container(
-                        width: 6.w,
-                        height: 6.w,
-                        decoration: BoxDecoration(
-                          color: context.colors.outline,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
+                      SizedBox(height: 6.h),
                     ],
                   ),
-                ],
-              ),
-            );
-          },
-        ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
