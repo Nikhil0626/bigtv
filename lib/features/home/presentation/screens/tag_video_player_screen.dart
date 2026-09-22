@@ -46,7 +46,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   final Set<String> _viewedVideoIds = {};
 
   Future<void> _incrementViewCount(int index) async {
-    if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length) return;
+    if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length)
+      return;
 
     final videoItem = widget.videos[index];
     if (videoItem is! Map) return;
@@ -66,12 +67,10 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
     if (_viewedVideoIds.contains(videoId)) return;
     _viewedVideoIds.add(videoId);
 
-    String slug = (itemMap['slug'] ??
-            itemMap['tagSlug'] ??
-            itemMap['tag_slug'] ??
-            '')
-        .toString()
-        .trim();
+    String slug =
+        (itemMap['slug'] ?? itemMap['tagSlug'] ?? itemMap['tag_slug'] ?? '')
+            .toString()
+            .trim();
 
     if (slug.isEmpty) {
       try {
@@ -80,7 +79,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
       } catch (_) {}
     }
 
-    if (slug.isEmpty && widget.tagTitle.isNotEmpty && widget.tagTitle != "Videos") {
+    if (slug.isEmpty &&
+        widget.tagTitle.isNotEmpty &&
+        widget.tagTitle != "Videos") {
       slug = widget.tagTitle;
     }
 
@@ -88,7 +89,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
     try {
       final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-      final int? newViews = await homeProvider.incrementTagVideoView(slug, videoId);
+      final int? newViews =
+          await homeProvider.incrementTagVideoView(slug, videoId);
 
       if (newViews != null) {
         videoItem['views'] = newViews;
@@ -183,12 +185,15 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
       }
     }
 
-    if (widget.tagThumbnailUrl != null && widget.tagThumbnailUrl!.trim().isNotEmpty) {
+    if (widget.tagThumbnailUrl != null &&
+        widget.tagThumbnailUrl!.trim().isNotEmpty) {
       return widget.tagThumbnailUrl!.trim();
     }
 
     try {
-      final homeProviderThumb = Provider.of<HomeProvider>(context, listen: false).currentTagThumbnailUrl;
+      final homeProviderThumb =
+          Provider.of<HomeProvider>(context, listen: false)
+              .currentTagThumbnailUrl;
       if (homeProviderThumb != null && homeProviderThumb.trim().isNotEmpty) {
         return homeProviderThumb.trim();
       }
@@ -209,7 +214,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
         ),
       ),
       child: const Center(
-        child: Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 22),
+        child:
+            Icon(Icons.play_circle_fill_rounded, color: Colors.white, size: 22),
       ),
     );
   }
@@ -267,15 +273,20 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   }
 
   Future<void> _initController(int index) async {
-    if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length) return;
+    if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length)
+      return;
 
     _incrementViewCount(index);
 
-    if (_controller != null && _controller!.value.isInitialized && _currentIndex < widget.videos.length) {
+    if (_controller != null &&
+        _controller!.value.isInitialized &&
+        _currentIndex < widget.videos.length) {
       final pos = _controller!.value.position;
       final dur = _controller!.value.duration;
       final currentItem = widget.videos[_currentIndex];
-      if (pos.inSeconds > 1 && dur > Duration.zero && pos < dur - const Duration(seconds: 2)) {
+      if (pos.inSeconds > 1 &&
+          dur > Duration.zero &&
+          pos < dur - const Duration(seconds: 2)) {
         await VideoPositionService.savePosition(currentItem, pos);
       }
     }
@@ -347,11 +358,13 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
       await controller.initialize();
       controller.addListener(_videoListener);
 
-      final currentItem = (widget.videos.isNotEmpty && _currentIndex < widget.videos.length)
-          ? widget.videos[_currentIndex]
-          : null;
+      final currentItem =
+          (widget.videos.isNotEmpty && _currentIndex < widget.videos.length)
+              ? widget.videos[_currentIndex]
+              : null;
       if (currentItem != null) {
-        final savedPos = await VideoPositionService.getSavedPosition(currentItem);
+        final savedPos =
+            await VideoPositionService.getSavedPosition(currentItem);
         if (savedPos > const Duration(seconds: 1) &&
             controller.value.duration > Duration.zero &&
             savedPos < controller.value.duration - const Duration(seconds: 2)) {
@@ -379,11 +392,14 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   void _videoListener() {
     if (_controller != null && _controller!.value.isInitialized) {
       final value = _controller!.value;
-      final currentItem = (widget.videos.isNotEmpty && _currentIndex < widget.videos.length)
-          ? widget.videos[_currentIndex]
-          : null;
+      final currentItem =
+          (widget.videos.isNotEmpty && _currentIndex < widget.videos.length)
+              ? widget.videos[_currentIndex]
+              : null;
 
-      if (value.position >= value.duration && value.duration > Duration.zero && !_isChangingTrack) {
+      if (value.position >= value.duration &&
+          value.duration > Duration.zero &&
+          !_isChangingTrack) {
         if (currentItem != null) {
           VideoPositionService.clearPosition(currentItem);
         }
@@ -424,11 +440,14 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
       DeviceOrientation.portraitUp,
     ]);
     if (_controller != null) {
-      if (_controller!.value.isInitialized && _currentIndex < widget.videos.length) {
+      if (_controller!.value.isInitialized &&
+          _currentIndex < widget.videos.length) {
         final pos = _controller!.value.position;
         final dur = _controller!.value.duration;
         final currentItem = widget.videos[_currentIndex];
-        if (pos.inSeconds > 1 && dur > Duration.zero && pos < dur - const Duration(seconds: 2)) {
+        if (pos.inSeconds > 1 &&
+            dur > Duration.zero &&
+            pos < dur - const Duration(seconds: 2)) {
           VideoPositionService.savePosition(currentItem, pos);
         }
       }
@@ -440,7 +459,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
   String _cleanFileName(String name) {
     if (name.isEmpty) return "Video Track";
-    return name.replaceAll(RegExp(r'\.(mp4|mov|mkv|avi)$', caseSensitive: false), '');
+    return name.replaceAll(
+        RegExp(r'\.(mp4|mov|mkv|avi)$', caseSensitive: false), '');
   }
 
   String _formatDuration(Duration duration) {
@@ -477,7 +497,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
     return "$count";
   }
 
-  Future<void> _shareToWhatsApp(Map<String, dynamic>? currentVideo, String title) async {
+  Future<void> _shareToWhatsApp(
+      Map<String, dynamic>? currentVideo, String title) async {
     if (currentVideo == null) return;
     final String shareUrl = (currentVideo['videoUrl'] ??
             currentVideo['postUrl'] ??
@@ -495,12 +516,14 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
     final String shareText = parts.join("\n\n");
 
     File? imageFile;
-    if (imageUrl.isNotEmpty && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
+    if (imageUrl.isNotEmpty &&
+        (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
       try {
         final response = await http.get(Uri.parse(imageUrl));
         if (response.statusCode == 200) {
           final tempDir = await getTemporaryDirectory();
-          final file = File('${tempDir.path}/share_thumb_${DateTime.now().millisecondsSinceEpoch}.jpg');
+          final file = File(
+              '${tempDir.path}/share_thumb_${DateTime.now().millisecondsSinceEpoch}.jpg');
           await file.writeAsBytes(response.bodyBytes);
           imageFile = file;
         }
@@ -517,22 +540,26 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
           await Share.shareXFiles(
             [XFile(imageFile.path)],
             text: shareText,
-            sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+            sharePositionOrigin:
+                Rect.fromLTWH(0, 0, size.width, size.height / 2),
           );
         } else {
           try {
             const platform = MethodChannel('com.chotanews/whatsapp');
-            await platform.invokeMethod('shareToWhatsApp', {'imagePath': imageFile.path, 'text': shareText});
+            await platform.invokeMethod('shareToWhatsApp',
+                {'imagePath': imageFile.path, 'text': shareText});
           } catch (e) {
             await Share.shareXFiles(
               [XFile(imageFile.path)],
               text: shareText,
-              sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+              sharePositionOrigin:
+                  Rect.fromLTWH(0, 0, size.width, size.height / 2),
             );
           }
         }
       } else {
-        final String fallbackText = imageUrl.isNotEmpty ? "$shareText\n\n$imageUrl" : shareText;
+        final String fallbackText =
+            imageUrl.isNotEmpty ? "$shareText\n\n$imageUrl" : shareText;
         final String encodedText = Uri.encodeComponent(fallbackText);
         final Uri whatsappUri = Uri.parse("whatsapp://send?text=$encodedText");
         if (await canLaunchUrl(whatsappUri)) {
@@ -553,15 +580,20 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final currentItem = (widget.videos.isNotEmpty && _currentIndex < widget.videos.length)
-        ? widget.videos[_currentIndex]
-        : null;
-    final Map<String, dynamic>? currentVideoMap = currentItem is Map ? Map<String, dynamic>.from(currentItem) : null;
-    final currentTitle = currentVideoMap != null ? _cleanFileName(currentVideoMap['fileName'] ?? '') : "Video Player";
+    final currentItem =
+        (widget.videos.isNotEmpty && _currentIndex < widget.videos.length)
+            ? widget.videos[_currentIndex]
+            : null;
+    final Map<String, dynamic>? currentVideoMap =
+        currentItem is Map ? Map<String, dynamic>.from(currentItem) : null;
+    final currentTitle = currentVideoMap != null
+        ? _cleanFileName(currentVideoMap['fileName'] ?? '')
+        : "Video Player";
 
     return OrientationBuilder(
       builder: (context, orientation) {
-        final isLandscape = orientation == Orientation.landscape || _isFullScreen;
+        final isLandscape =
+            orientation == Orientation.landscape || _isFullScreen;
 
         if (isLandscape) {
           return Scaffold(
@@ -589,8 +621,12 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                             fit: BoxFit.cover,
                             child: SizedBox(
                               key: ValueKey(_controller),
-                              width: _controller!.value.size.width > 0 ? _controller!.value.size.width : 16,
-                              height: _controller!.value.size.height > 0 ? _controller!.value.size.height : 9,
+                              width: _controller!.value.size.width > 0
+                                  ? _controller!.value.size.width
+                                  : 16,
+                              height: _controller!.value.size.height > 0
+                                  ? _controller!.value.size.height
+                                  : 9,
                               child: VideoPlayer(_controller!),
                             ),
                           ),
@@ -598,9 +634,12 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                       else if (_hasError)
                         _buildErrorView()
                       else
-                        const Center(child: CircularProgressIndicator(color: Colors.red)),
-
-                      if (_showControls && _controller != null && _isInitialized)
+                        const Center(
+                            child:
+                                CircularProgressIndicator(color: Colors.red)),
+                      if (_showControls &&
+                          _controller != null &&
+                          _isInitialized)
                         _buildFullscreenControls(currentTitle, currentVideoMap),
                     ],
                   ),
@@ -611,7 +650,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
         }
 
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        final bgImage = isDark ? "assets/images/tag_bg_dark.png" : "assets/images/tag_bg_light.png";
+        final bgImage = isDark
+            ? "assets/images/tag_bg_dark.png"
+            : "assets/images/tag_bg_light.png";
 
         // Portrait Layout (matching screenshot design)
         return Scaffold(
@@ -633,287 +674,372 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                   // 2. Subheader Tag Info
                   _buildTagInfo(widget.tagTitle, context),
 
-                const SizedBox(height: 8),
+                  const SizedBox(height: 8),
 
-                // 3. Rounded Video Player Container & Controls
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 14.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      width: double.infinity,
-                      height: 200.h,
-                      color: Colors.black,
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _showControls = !_showControls;
-                          });
-                        },
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            if (_controller != null && _isInitialized)
-                              SizedBox.expand(
-                                child: FittedBox(
-                                  fit: BoxFit.cover,
-                                  child: SizedBox(
-                                    key: ValueKey(_controller),
-                                    width: _controller!.value.size.width > 0 ? _controller!.value.size.width : 16,
-                                    height: _controller!.value.size.height > 0 ? _controller!.value.size.height : 9,
-                                    child: VideoPlayer(_controller!),
+                  // 3. Rounded Video Player Container & Controls
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 14.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        width: double.infinity,
+                        height: 200.h,
+                        color: Colors.black,
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _showControls = !_showControls;
+                            });
+                          },
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              if (_controller != null && _isInitialized)
+                                SizedBox.expand(
+                                  child: FittedBox(
+                                    fit: BoxFit.cover,
+                                    child: SizedBox(
+                                      key: ValueKey(_controller),
+                                      width: _controller!.value.size.width > 0
+                                          ? _controller!.value.size.width
+                                          : 16,
+                                      height: _controller!.value.size.height > 0
+                                          ? _controller!.value.size.height
+                                          : 9,
+                                      child: VideoPlayer(_controller!),
+                                    ),
                                   ),
-                                ),
-                              )
-                            else if (_hasError)
-                              _buildErrorView()
-                            else
-                              const Center(child: CircularProgressIndicator(color: Colors.red)),
-
-                            if (_showControls && _controller != null && _isInitialized)
-                              _buildPlayerOverlayControls(currentTitle, currentVideoMap),
-                          ],
+                                )
+                              else if (_hasError)
+                                _buildErrorView()
+                              else
+                                const Center(
+                                    child: CircularProgressIndicator(
+                                        color: Colors.red)),
+                              if (_showControls &&
+                                  _controller != null &&
+                                  _isInitialized)
+                                _buildPlayerOverlayControls(
+                                    currentTitle, currentVideoMap),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
 
-                // 4. Progress bar & Timer row below video player box
-                if (_controller != null && _isInitialized)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 18.0, vertical: 6.0),
-                    child: Column(
-                      children: [
-                        VideoProgressIndicator(
-                          _controller!,
-                          allowScrubbing: true,
-                          colors: const VideoProgressColors(
-                            playedColor: Colors.red,
-                            bufferedColor: Colors.white24,
-                            backgroundColor: Colors.white12,
+                  // 4. Progress bar & Timer row below video player box
+                  if (_controller != null && _isInitialized)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 18.0, vertical: 6.0),
+                      child: Column(
+                        children: [
+                          VideoProgressIndicator(
+                            _controller!,
+                            allowScrubbing: true,
+                            colors: const VideoProgressColors(
+                              playedColor: Colors.red,
+                              bufferedColor: Colors.white24,
+                              backgroundColor: Colors.white12,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Text(
-                              _formatDuration(_controller!.value.position),
-                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14.sp, fontWeight: FontWeight.w500),
-                            ),
-                            const Spacer(),
-                            Text(
-                              _formatDuration(_controller!.value.duration),
-                              style: TextStyle(color: isDark ? Colors.white70 : Colors.black54, fontSize: 14.sp, fontWeight: FontWeight.w500),
-                            ),
-                            const SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: () => _shareToWhatsApp(currentVideoMap, currentTitle),
-                              child: Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: isDark ? Colors.white10 : Colors.grey.shade200,
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: isDark ? Colors.white24 : Colors.black12, width: 0.8),
-                                ),
-                                child: Image.asset(
-                                  "assets/images/WhatsApp_icon.png",
-                                  width: 20.sp,
-                                  height: 20.sp,
-                                  fit: BoxFit.contain,
-                                  errorBuilder: (context, error, stackTrace) => Icon(
-                                    Icons.share,
-                                    color: isDark ? Colors.white : Colors.black87,
-                                    size: 16,
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Text(
+                                _formatDuration(_controller!.value.position),
+                                style: TextStyle(
+                                    color: isDark
+                                        ? Colors.white70
+                                        : Colors.black54,
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              const Spacer(),
+                              Text(
+                                _formatDuration(_controller!.value.duration),
+                                style: TextStyle(
+                                    color: isDark
+                                        ? Colors.white70
+                                        : Colors.black54,
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                              const SizedBox(width: 8),
+                              GestureDetector(
+                                onTap: () => _shareToWhatsApp(
+                                    currentVideoMap, currentTitle),
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? Colors.white10
+                                        : Colors.grey.shade200,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                        color: isDark
+                                            ? Colors.white24
+                                            : Colors.black12,
+                                        width: 0.8),
+                                  ),
+                                  child: Image.asset(
+                                    "assets/images/WhatsApp_icon.png",
+                                    width: 20.sp,
+                                    height: 20.sp,
+                                    fit: BoxFit.contain,
+                                    errorBuilder:
+                                        (context, error, stackTrace) => Icon(
+                                      Icons.share,
+                                      color: isDark
+                                          ? Colors.white
+                                          : Colors.black87,
+                                      size: 16,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  const SizedBox(height: 4),
+                  Divider(
+                      color: isDark ? Colors.white12 : Colors.black12,
+                      height: 1),
+
+                  // 6. Playlist Section Header
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Playlist (${widget.videos.length} ${widget.videos.length == 1 ? 'Track' : 'Tracks'})",
+                          style: TextStyle(
+                              fontSize: 14.sp,
+                              color: isDark ? Colors.white : Colors.black87,
+                              fontWeight: FontWeight.bold),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            _currentIndex = 0;
+                            _initController(0);
+                          },
+                          child: Row(
+                            children: [
+                              const Icon(Icons.play_arrow_rounded,
+                                  color: Colors.redAccent, size: 18),
+                              const SizedBox(width: 2),
+                              Text(
+                                "Play All",
+                                style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: Colors.redAccent,
+                                    fontWeight: FontWeight.w600),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
 
-                const SizedBox(height: 4),
-                Divider(color: isDark ? Colors.white12 : Colors.black12, height: 1),
+                  // 7. Playlist Track Items List
+                  Expanded(
+                    child: ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 4),
+                      itemCount: widget.videos.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final isSelected = index == _currentIndex;
+                        final item = widget.videos[index];
+                        final Map<String, dynamic> itemMap = item is Map
+                            ? Map<String, dynamic>.from(item)
+                            : <String, dynamic>{};
+                        final itemTitle = _cleanFileName(
+                            (itemMap['fileName'] ?? '').toString());
+                        final date = itemMap['createdAt'] != null
+                            ? itemMap['createdAt'].toString().split('T').first
+                            : "2026-09-16";
 
-                // 6. Playlist Section Header
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Playlist (${widget.videos.length} ${widget.videos.length == 1 ? 'Track' : 'Tracks'})",
-                        style: TextStyle(fontSize: 14.sp, color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.bold),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          _currentIndex = 0;
-                          _initController(0);
-                        },
-                        child: Row(
-                          children: [
-                            const Icon(Icons.play_arrow_rounded, color: Colors.redAccent, size: 18),
-                            const SizedBox(width: 2),
-                            Text(
-                              "Play All",
-                              style: TextStyle(fontSize: 12.sp, color: Colors.redAccent, fontWeight: FontWeight.w600),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                        final String imageUrl =
+                            _getThumbnailUrl(context, itemMap);
+                        final bool hasImage = imageUrl.isNotEmpty &&
+                            (imageUrl.startsWith('http://') ||
+                                imageUrl.startsWith('https://'));
 
-                // 7. Playlist Track Items List
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
-                    itemCount: widget.videos.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      final isSelected = index == _currentIndex;
-                      final item = widget.videos[index];
-                      final Map<String, dynamic> itemMap = item is Map ? Map<String, dynamic>.from(item) : <String, dynamic>{};
-                      final itemTitle = _cleanFileName((itemMap['fileName'] ?? '').toString());
-                      final date = itemMap['createdAt'] != null ? itemMap['createdAt'].toString().split('T').first : "2026-09-16";
-
-                      final String imageUrl = _getThumbnailUrl(context, itemMap);
-                      final bool hasImage = imageUrl.isNotEmpty && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'));
-
-                      return InkWell(
-                        onTap: () {
-                          _currentIndex = index;
-                          _initController(index);
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: isSelected 
-                                ? (isDark ? const Color(0xFF191D2B) : const Color(0xFFFFF0F2))
-                                : (isDark ? const Color(0xFF131520) : Colors.white.withValues(alpha: 0.9)),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: isSelected ? Colors.red.withValues(alpha: 0.5) : (isDark ? Colors.white10 : Colors.grey.shade300),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              // Track Thumbnail Box with Playing Equalizer Overlay
-                              Stack(
-                                alignment: Alignment.center,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Container(
-                                      width: 58.w,
-                                      height: 44.h,
-                                      color: Colors.grey.shade900,
-                                      child: hasImage
-                                          ? CachedNetworkImage(
-                                              imageUrl: imageUrl,
-                                              fit: BoxFit.cover,
-                                              placeholder: (context, url) => Container(color: Colors.grey.shade900),
-                                              errorWidget: (context, url, error) => _buildDefaultThumbnailBox(),
-                                            )
-                                          : _buildDefaultThumbnailBox(),
-                                    ),
-                                  ),
-                                  if (isSelected)
-                                    Container(
-                                      width: 58.w,
-                                      height: 44.h,
-                                      decoration: BoxDecoration(
-                                        color: Colors.black45,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Icon(Icons.equalizer, color: Colors.red, size: 24),
-                                    ),
-                                ],
+                        return InkWell(
+                          onTap: () {
+                            _currentIndex = index;
+                            _initController(index);
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? (isDark
+                                      ? const Color(0xFF191D2B)
+                                      : const Color(0xFFFFF0F2))
+                                  : (isDark
+                                      ? const Color(0xFF131520)
+                                      : Colors.white.withValues(alpha: 0.9)),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? Colors.red.withValues(alpha: 0.5)
+                                    : (isDark
+                                        ? Colors.white10
+                                        : Colors.grey.shade300),
                               ),
-                              const SizedBox(width: 12),
-
-                              // Track Info
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                            ),
+                            child: Row(
+                              children: [
+                                // Track Thumbnail Box with Playing Equalizer Overlay
+                                Stack(
+                                  alignment: Alignment.center,
                                   children: [
-                                    Text(
-                                      itemTitle,
-                                      style: TextStyle(
-                                        color: isSelected 
-                                            ? Colors.redAccent 
-                                            : (isDark ? Colors.white : Colors.black87),
-                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                                        fontSize: 13.sp, // Decreased video title font size
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Container(
+                                        width: 58.w,
+                                        height: 44.h,
+                                        color: Colors.grey.shade900,
+                                        child: hasImage
+                                            ? CachedNetworkImage(
+                                                imageUrl: imageUrl,
+                                                fit: BoxFit.cover,
+                                                placeholder: (context, url) =>
+                                                    Container(
+                                                        color: Colors
+                                                            .grey.shade900),
+                                                errorWidget: (context, url,
+                                                        error) =>
+                                                    _buildDefaultThumbnailBox(),
+                                              )
+                                            : _buildDefaultThumbnailBox(),
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 3),
-                                     Row(
-                                       children: [
-                                         Text(
-                                           date,
-                                           style: TextStyle(
-                                             color: isDark ? Colors.white38 : Colors.grey.shade600, 
-                                             fontSize: 10.sp,
-                                           ),
-                                         ),
-                                         if (context.watch<HomeProvider>().liveTvCountEnable) ...[
-                                           const SizedBox(width: 8),
-                                           Icon(Icons.remove_red_eye_outlined, size: 12.sp, color: isDark ? Colors.white38 : Colors.grey.shade600),
-                                           const SizedBox(width: 3),
-                                           Text(
-                                             _formatViewCount(_getViewCount(itemMap)),
-                                             style: TextStyle(
-                                               color: isDark ? Colors.white38 : Colors.grey.shade600, 
-                                               fontSize: 10.sp,
-                                             ),
-                                           ),
-                                         ],
-                                       ],
-                                     ),
+                                    if (isSelected)
+                                      Container(
+                                        width: 58.w,
+                                        height: 44.h,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black45,
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: const Icon(Icons.equalizer,
+                                            color: Colors.red, size: 24),
+                                      ),
                                   ],
                                 ),
-                              ),
+                                const SizedBox(width: 12),
 
-                              // Playing Pill Badge
-                              if (isSelected)
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF3D121B),
-                                    borderRadius: BorderRadius.circular(16),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
+                                // Track Info
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      const Icon(Icons.equalizer, color: Colors.red, size: 14),
-                                      const SizedBox(width: 4),
                                       Text(
-                                        "Playing",
-                                        style: TextStyle(color: Colors.red, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                                        itemTitle,
+                                        style: TextStyle(
+                                          color: isSelected
+                                              ? Colors.redAccent
+                                              : (isDark
+                                                  ? Colors.white
+                                                  : Colors.black87),
+                                          fontWeight: isSelected
+                                              ? FontWeight.bold
+                                              : FontWeight.w500,
+                                          fontSize: 13
+                                              .sp, // Decreased video title font size
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      const SizedBox(height: 3),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            date,
+                                            style: TextStyle(
+                                              color: isDark
+                                                  ? Colors.white38
+                                                  : Colors.grey.shade600,
+                                              fontSize: 10.sp,
+                                            ),
+                                          ),
+                                          if (context
+                                              .watch<HomeProvider>()
+                                              .liveTvCountEnable) ...[
+                                            const SizedBox(width: 8),
+                                            Icon(Icons.remove_red_eye_outlined,
+                                                size: 12.sp,
+                                                color: isDark
+                                                    ? Colors.white38
+                                                    : Colors.grey.shade600),
+                                            const SizedBox(width: 3),
+                                            Text(
+                                              _formatViewCount(
+                                                  _getViewCount(itemMap)),
+                                              style: TextStyle(
+                                                color: isDark
+                                                    ? Colors.white38
+                                                    : Colors.grey.shade600,
+                                                fontSize: 10.sp,
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ),
-                            ],
+
+                                // Playing Pill Badge
+                                if (isSelected)
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 10, vertical: 5),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF3D121B),
+                                      borderRadius: BorderRadius.circular(16),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        const Icon(Icons.equalizer,
+                                            color: Colors.red, size: 14),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          "Playing",
+                                          style: TextStyle(
+                                              color: Colors.red,
+                                              fontSize: 10.sp,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-        ),
-      );
+        );
       },
     );
   }
@@ -927,7 +1053,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black87, size: 22),
+            icon: Icon(Icons.arrow_back,
+                color: isDark ? Colors.white : Colors.black87, size: 22),
             onPressed: () => Navigator.pop(context),
           ),
           Image.asset(
@@ -936,7 +1063,10 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) => Text(
               "BIG TV",
-              style: TextStyle(color: Colors.red, fontSize: 18.sp, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.red,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(width: 48), // Spacer to balance back button
@@ -977,7 +1107,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   }
 
   // Overlay Controls inside Video Player Frame
-  Widget _buildPlayerOverlayControls(String title, Map<String, dynamic>? currentVideo) {
+  Widget _buildPlayerOverlayControls(
+      String title, Map<String, dynamic>? currentVideo) {
     return Container(
       color: Colors.black38,
       child: Stack(
@@ -988,7 +1119,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
               top: 8,
               left: 10,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.6),
                   borderRadius: BorderRadius.circular(12),
@@ -997,7 +1129,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.remove_red_eye_outlined, color: Colors.white, size: 18),
+                    const Icon(Icons.remove_red_eye_outlined,
+                        color: Colors.white, size: 18),
                     const SizedBox(width: 4),
                     Text(
                       _formatViewCount(_getViewCount(currentVideo)),
@@ -1025,8 +1158,10 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                     child: SliderTheme(
                       data: SliderThemeData(
                         trackHeight: 2,
-                        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4),
-                        overlayShape: const RoundSliderOverlayShape(overlayRadius: 8),
+                        thumbShape:
+                            const RoundSliderThumbShape(enabledThumbRadius: 4),
+                        overlayShape:
+                            const RoundSliderOverlayShape(overlayRadius: 8),
                         activeTrackColor: Colors.red,
                         inactiveTrackColor: Colors.white24,
                         thumbColor: Colors.white,
@@ -1047,7 +1182,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                   ),
                 IconButton(
                   icon: Icon(
-                    _isMuted || _volume == 0 ? Icons.volume_off : Icons.volume_up,
+                    _isMuted || _volume == 0
+                        ? Icons.volume_off
+                        : Icons.volume_up,
                     color: Colors.white,
                     size: 18,
                   ),
@@ -1094,7 +1231,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                   child: IconButton(
                     iconSize: 36,
                     icon: Icon(
-                      _controller!.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                      _controller!.value.isPlaying
+                          ? Icons.pause
+                          : Icons.play_arrow,
                       color: Colors.white,
                     ),
                     onPressed: () {
@@ -1117,7 +1256,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                 IconButton(
                   iconSize: 26,
                   icon: const Icon(Icons.skip_next, color: Colors.white),
-                  onPressed: _currentIndex + 1 < widget.videos.length ? _playNextTrack : null,
+                  onPressed: _currentIndex + 1 < widget.videos.length
+                      ? _playNextTrack
+                      : null,
                 ),
               ],
             ),
@@ -1128,7 +1269,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   }
 
   // Fullscreen Overlay Controls (Landscape)
-  Widget _buildFullscreenControls(String title, Map<String, dynamic>? currentVideo) {
+  Widget _buildFullscreenControls(
+      String title, Map<String, dynamic>? currentVideo) {
     return Container(
       color: Colors.black45,
       child: Stack(
@@ -1137,18 +1279,24 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
+                      icon: const Icon(Icons.arrow_back,
+                          color: Colors.white, size: 20),
                       onPressed: () => Navigator.pop(context),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         title,
-                        style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w600),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w600,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -1159,8 +1307,10 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                         child: SliderTheme(
                           data: SliderThemeData(
                             trackHeight: 2,
-                            thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 4),
-                            overlayShape: const RoundSliderOverlayShape(overlayRadius: 8),
+                            thumbShape: const RoundSliderThumbShape(
+                                enabledThumbRadius: 4),
+                            overlayShape:
+                                const RoundSliderOverlayShape(overlayRadius: 8),
                             activeTrackColor: Colors.red,
                             inactiveTrackColor: Colors.white24,
                             thumbColor: Colors.white,
@@ -1181,7 +1331,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                       ),
                     IconButton(
                       icon: Icon(
-                        _isMuted || _volume == 0 ? Icons.volume_off : Icons.volume_up,
+                        _isMuted || _volume == 0
+                            ? Icons.volume_off
+                            : Icons.volume_up,
                         color: Colors.white,
                         size: 20,
                       ),
@@ -1202,14 +1354,14 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                             const Icon(
                               Icons.remove_red_eye_outlined,
                               color: Colors.white,
-                              size: 18,
+                              size: 24,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               _formatViewCount(_getViewCount(currentVideo)),
-                              style: TextStyle(
+                              style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 14.sp,
+                                fontSize: 18,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -1217,7 +1369,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                         ),
                       ),
                     IconButton(
-                      icon: const Icon(Icons.fullscreen_exit, color: Colors.white, size: 22),
+                      icon: const Icon(Icons.fullscreen_exit,
+                          color: Colors.white, size: 22),
                       onPressed: _toggleFullScreen,
                     ),
                   ],
@@ -1241,7 +1394,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                   IconButton(
                     iconSize: 44,
                     icon: Icon(
-                      _controller!.value.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                      _controller!.value.isPlaying
+                          ? Icons.pause_circle_filled
+                          : Icons.play_circle_filled,
                       color: Colors.white,
                     ),
                     onPressed: () {
@@ -1264,12 +1419,15 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                   IconButton(
                     iconSize: 32,
                     icon: const Icon(Icons.skip_next, color: Colors.white),
-                    onPressed: _currentIndex + 1 < widget.videos.length ? _playNextTrack : null,
+                    onPressed: _currentIndex + 1 < widget.videos.length
+                        ? _playNextTrack
+                        : null,
                   ),
                 ],
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Column(
                   children: [
                     VideoProgressIndicator(
@@ -1286,12 +1444,18 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                       children: [
                         Text(
                           _formatDuration(_controller!.value.position),
-                          style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500),
                         ),
                         const Spacer(),
                         Text(
                           _formatDuration(_controller!.value.duration),
-                          style: TextStyle(color: Colors.white, fontSize: 14.sp, fontWeight: FontWeight.w500),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w500),
                         ),
                         const SizedBox(width: 8),
                         GestureDetector(
@@ -1301,14 +1465,16 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.6),
                               shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white24, width: 0.8),
+                              border:
+                                  Border.all(color: Colors.white24, width: 0.8),
                             ),
                             child: Image.asset(
                               "assets/images/WhatsApp_icon.png",
-                              width: 22.sp,
-                              height: 22.sp,
+                              width: 30,
+                              height: 30,
                               fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) => const Icon(
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
                                 Icons.share,
                                 color: Colors.white,
                                 size: 16,
@@ -1345,7 +1511,8 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, foregroundColor: Colors.white),
                 onPressed: () => _initController(_currentIndex),
                 icon: const Icon(Icons.refresh, size: 14),
                 label: Text("Retry", style: TextStyle(fontSize: 11.sp)),

@@ -45,7 +45,7 @@ class BaseUrls {
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
   /// Python live apis
-  static const String baseUrlAwsDev = "https://apidev.chotanews.com";
+  static const String baseUrlAwsDev = "https://api.chotanews.com";
 
   /// New Server API
   // static const String newServerBaseUrl = "http://192.168.70.251";
