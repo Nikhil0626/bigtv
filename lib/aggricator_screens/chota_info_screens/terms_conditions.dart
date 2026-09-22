@@ -23,19 +23,21 @@ class _TermsConditionsState extends State<TermsConditions> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
         body: Stack(
           children: [
             Positioned.fill(
               child: CustomPaint(
-                painter: TopRightWavePainter(),
+                painter: TopRightWavePainter(isDark: isDark),
               ),
             ),
             SafeArea(
@@ -44,16 +46,21 @@ class _TermsConditionsState extends State<TermsConditions> {
                   buildSettingsPageHeader(context, "Terms & Conditions"),
                   Expanded(
                     child: ListView(
+                      physics: const BouncingScrollPhysics(),
                       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                       children: [
                         Container(
                           padding: EdgeInsets.all(18.w),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
                             borderRadius: BorderRadius.circular(16.r),
+                            border: Border.all(
+                              color: isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA),
+                              width: 0.9,
+                            ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.04),
+                                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
                                 blurRadius: 16,
                                 offset: const Offset(0, 4),
                               ),
@@ -67,61 +74,59 @@ class _TermsConditionsState extends State<TermsConditions> {
                                 style: TextStyle(
                                   fontSize: 14.sp,
                                   height: 1.5,
-                                  color: const Color(0xFF334155),
+                                  color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF334155),
                                 ),
                               ),
                               height(height: 20),
                               headlineWithContent(
                                 "1. What is Bigtv News Network",
                                 "Bigtv News Network is the easiest way to publish articles on Bigtv News app if you have a zeal to write and make some earnings additionally. Network by Bigtv News is an easy citizen powered, content publishing option to reach millions of readers and monetize content.",
+                                isDark: isDark,
                               ),
                               headlineWithContent(
                                 "2. Why contribute to us?",
                                 "Bigtv News assures your content reaches to the right audience. A very unique and classy reading experience has enabled us to engage millions of active readers who are constantly consuming interesting content just like yours. Various categories and proper localization helped us to connect vernacular readers with diverse tastes and preferences. We want you to have a great experience when using Bigtv News. We are a small team working extremely hard on a mission to build great vernacular content for India and also power every locality, by building a 'civic Reporting' community.",
+                                isDark: isDark,
                               ),
                               headlineWithContent(
                                 "3. Registration",
                                 "You need to register as a contributor on Bigtv News Network to publish your articles and videos so that the content can reach millions of readers on the Bigtv News App. We are open to common people, writers, and bloggers who want to write, gain weight, and make some earnings.",
+                                isDark: isDark,
                               ),
                               headlineWithContent(
                                 "4. Note",
                                 "Name should be as per your photo ID. Do not use fake, alias, celebrity, or corporate names of any person or entity.",
+                                isDark: isDark,
                               ),
                               headlineWithContent(
                                 "5. Content Policy",
                                 "Bigtv News Network provides a platform for people to put their views as well as news for the audience. In order to ensure a good experience for both contributors and writers, read our content policy carefully.",
+                                isDark: isDark,
                               ),
                               headlineWithContent(
                                 "6. Title",
                                 "No wrong usage of punctuation. The title should be related to the story and informative. It should not be less than 20 characters.",
+                                isDark: isDark,
                               ),
                               headlineWithContent(
                                 "7. Content",
                                 "Minimum 200 characters and a maximum of 400. Only relevant content/news needs to be submitted. Outdated and fake news will lead to escalations on the contributor. Content that is obscene in any form (text, image, or video) will not be accepted. No sensitive content or content that creates visual discomfort will be published. Religiously provoking, criminal, and sensitive content is strictly prohibited. Content should be original and should not be the property of any person or entity.",
+                                isDark: isDark,
                               ),
                               headlineWithContent(
-                                "8. Quality of the article",
-                                "Articles should be complete and should have the elements of What, Why, Where, Who, When, and How. The image should be clear and of decent visual quality. The story should be understandable and error-free with no biased or plagiarized content.",
+                                "8. Images",
+                                "The image should be landscape and clear. Irrelevant images will be rejected. Watermarked, copyright, and promotional images will not be published.",
+                                isDark: isDark,
                               ),
                               headlineWithContent(
-                                "9. Copy Rights",
-                                "Images play a vital role in enhancing your articles. Ensure all images are relevant, high-quality, and appropriately credited. Avoid using copyrighted material without permission. With strong checks in place, there is no scope for plagiarized content. Contributors will face escalations if observed doing any practices of this sort. Unauthorized use of images, videos, or articles is prohibited. Unauthorized use of corporate names, logos, or titles should be strictly avoided. Unauthorized use of personal fame, image, or privacy will lead to legal escalations.",
+                                "9. Payment Policy",
+                                "Payments are done on a monthly basis. Payouts are made directly to the bank accounts after PAN card verification.",
+                                isDark: isDark,
                               ),
                               headlineWithContent(
-                                "10. Image",
-                                "Image should be relevant to content only. Multiple images cannot be sent. No sensitive or sexually explicit images.",
-                              ),
-                              headlineWithContent(
-                                "11. Video",
-                                "Video should be relevant to content only. Shaky and amateur videos will not be accepted. No sensitive or sexually explicit videos.",
-                              ),
-                              headlineWithContent(
-                                "12. Advertising & promotion",
-                                "No links or landing pages will be accepted. Ads and promotional posts will not be accepted. No content will be promoted on our app. Content on how to buy/sell products or make easy money is prohibited. Content containing any kind of job offers or self-promotions is restricted.",
-                              ),
-                              headlineWithContent(
-                                "13. Terms",
-                                "Bigtv News reserves the right to remove any content that it feels is not relevant on the platform without any prior notice. Please go through the revenue model carefully to understand all financial terms. Signing up on Bigtv News Network allows Bigtv News to use your content on its app. Our app may transmit your personal information to our internal servers, which may be situated outside India. This personal information is deleted from our servers 180 days after you delete the app or cancel/terminate your user account on the app, except to the extent storage of such data, including your personal information, is necessary for our purposes and/or required under applicable laws.",
+                                "10. Termination",
+                                "We can terminate user registration at any time if they violate any of our policies. Further legal action will be taken based on the severity.",
+                                isDark: isDark,
                               ),
                             ],
                           ),
@@ -138,31 +143,29 @@ class _TermsConditionsState extends State<TermsConditions> {
     );
   }
 
-  Widget headlineWithContent(String headline, String content) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: 16.h),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            headline,
-            style: TextStyle(
-              fontSize: 15.sp,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF1E293B),
-            ),
+  Widget headlineWithContent(String headline, String content, {bool isDark = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          headline,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+            color: isDark ? Colors.white : const Color(0xFF1E293B),
           ),
-          SizedBox(height: 6.h),
-          Text(
-            content,
-            style: TextStyle(
-              fontSize: 14.sp,
-              height: 1.5,
-              color: const Color(0xFF475569),
-            ),
+        ),
+        height(height: 6),
+        Text(
+          content,
+          style: TextStyle(
+            fontSize: 14.sp,
+            height: 1.5,
+            color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF64748B),
           ),
-        ],
-      ),
+        ),
+        height(height: 16),
+      ],
     );
   }
 }

@@ -14,20 +14,21 @@ class AboutUs extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read<AuthenticationProvider>().sendEvent("AdvertisePage");
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
         body: Stack(
           children: [
             Positioned.fill(
               child: CustomPaint(
-                painter: TopRightWavePainter(),
+                painter: TopRightWavePainter(isDark: isDark),
               ),
             ),
             SafeArea(
@@ -36,15 +37,20 @@ class AboutUs extends StatelessWidget {
                   buildSettingsPageHeader(context, "Help & Support"),
                   Expanded(
                     child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
                       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                       child: Container(
                         padding: EdgeInsets.all(18.w),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
                           borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA),
+                            width: 0.9,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
+                              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
                               blurRadius: 16,
                               offset: const Offset(0, 4),
                             ),
@@ -61,7 +67,7 @@ class AboutUs extends StatelessWidget {
                                     style: TextStyle(
                                       fontSize: 20.sp,
                                       fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF1E293B),
+                                      color: isDark ? Colors.white : const Color(0xFF1E293B),
                                     ),
                                   ),
                                   const SizedBox(height: 4),
@@ -82,7 +88,7 @@ class AboutUs extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 height: 1.5,
-                                color: const Color(0xFF334155),
+                                color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF334155),
                               ),
                               textAlign: TextAlign.justify,
                             ),
@@ -92,7 +98,7 @@ class AboutUs extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 16.sp,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1E293B),
+                                color: isDark ? Colors.white : const Color(0xFF1E293B),
                               ),
                             ),
                             height(height: 12),
@@ -101,7 +107,7 @@ class AboutUs extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w600,
-                                color: const Color(0xFF475569),
+                                color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF475569),
                               ),
                             ),
                             height(height: 6),
@@ -110,7 +116,7 @@ class AboutUs extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 height: 1.5,
-                                color: const Color(0xFF64748B),
+                                color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF64748B),
                               ),
                             ),
                             height(height: 14),
@@ -125,11 +131,11 @@ class AboutUs extends StatelessWidget {
                                       children: [
                                         TextSpan(
                                           text: "Phone: ",
-                                          style: TextStyle(fontSize: 14.sp, color: const Color(0xFF334155)),
+                                          style: TextStyle(fontSize: 14.sp, color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF334155)),
                                         ),
                                         TextSpan(
                                           text: "+91 81210 31061",
-                                          style: TextStyle(fontSize: 14.sp, color: const Color(0xFF0284C7), fontWeight: FontWeight.w600),
+                                          style: TextStyle(fontSize: 14.sp, color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7), fontWeight: FontWeight.w600),
                                         ),
                                       ],
                                     ),
@@ -150,7 +156,6 @@ class AboutUs extends StatelessWidget {
       ),
     );
   }
-
 
   void _launchPhone(String phoneNumber) async {
     final Uri phoneUri = Uri(scheme: 'tel', path: phoneNumber);

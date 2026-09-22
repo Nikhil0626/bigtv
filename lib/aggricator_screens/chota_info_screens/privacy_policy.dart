@@ -23,19 +23,21 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
         body: Stack(
           children: [
             Positioned.fill(
               child: CustomPaint(
-                painter: TopRightWavePainter(),
+                painter: TopRightWavePainter(isDark: isDark),
               ),
             ),
             SafeArea(
@@ -44,15 +46,20 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                   buildSettingsPageHeader(context, "Privacy Policy"),
                   Expanded(
                     child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
                       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                       child: Container(
                         padding: EdgeInsets.all(18.w),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
                           borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA),
+                            width: 0.9,
+                          ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
+                              color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
                               blurRadius: 16,
                               offset: const Offset(0, 4),
                             ),
@@ -63,64 +70,41 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
                           children: [
                             sectionContent(
                               "Please carefully read our privacy policies. This provides important details on Your rights and obligations. The data collection, use, storage, and disclosure procedures for the desktop and mobile apps of Bigtv News are described in this privacy statement (hereafter referred to as You, Your, or User). This privacy statement applies to the Bigtv News mobile application (hereinafter referred to as App), which is owned by Bigtv News Private Limited. By downloading, installing, or using this App, you consent to the use of Your personal information as stated in this privacy notice. By downloading, installing, using, or creating a Bigtv News profile, you consent to the collection, transfer, storage, disclosure, and other uses of Your information as outlined in this Privacy Policy.",
+                              isDark: isDark,
                             ),
                             height(height: 12),
                             sectionContent(
                               "This privacy notice does not cover any websites, services, applications, or businesses provided by third parties that Bigtv News does not own, control, or have any influence over Third Party Services. Bigtv News explicitly disclaims liability for any privacy policies or data collection procedures used by third-party services.",
+                              isDark: isDark,
                             ),
                             height(height: 12),
                             sectionContent(
                               "If you don't agree with any of the terms and conditions of the App, you shouldn't download, install, or use it. Bigtv News has the right to make changes at any moment and without prior notice. By downloading, installing, and/or using this programme, you consent to be governed by any such revisions, additions, amendments, or modifications.",
+                              isDark: isDark,
                             ),
                             height(height: 20),
-                            sectionTitle("Information the user provides to Bigtv News:"),
+                            sectionTitle("Information the user provides to Bigtv News:", isDark: isDark),
                             height(height: 8),
-                            Text(
-                              "• Information That Identifies Any Individual: Email is used solely for user identification and authentication.",
-                              style: TextStyle(fontSize: 14.sp, height: 1.5, color: const Color(0xFF475569)),
-                            ),
+                            bulletText("Information That Identifies Any Individual: Email is used solely for user identification and authentication.", isDark: isDark),
                             height(height: 6),
-                            Text(
-                              "• Device Data: We collect data about the user in order to uniquely validate and authenticate the device.",
-                              style: TextStyle(fontSize: 14.sp, height: 1.5, color: const Color(0xFF475569)),
-                            ),
+                            bulletText("Device Data: We collect data about the user in order to uniquely validate and authenticate the device.", isDark: isDark),
                             height(height: 6),
-                            Text(
-                              "• Storage Access: To keep the user's selected images, videos, and offline news, the software needs access to the device's storage.",
-                              style: TextStyle(fontSize: 14.sp, height: 1.5, color: const Color(0xFF475569)),
-                            ),
+                            bulletText("Storage Access: To keep the user's selected images, videos, and offline news, the software needs access to the device's storage.", isDark: isDark),
                             height(height: 6),
-                            Text(
-                              "• Location: The programme delivers news and content to users in accordance with their consent and in accordance with their location.",
-                              style: TextStyle(fontSize: 14.sp, height: 1.5, color: const Color(0xFF475569)),
+                            bulletText("Location: The programme delivers news and content to users in accordance with their consent and in accordance with their location.", isDark: isDark),
+                            height(height: 20),
+                            sectionTitle("What makes use of the data that Bigtv News gathers?", isDark: isDark),
+                            height(height: 8),
+                            sectionContent(
+                              "We make use of the information to make sure the app functions properly, fix technical issues, customize content, and show relevant updates.",
+                              isDark: isDark,
                             ),
                             height(height: 20),
-                            sectionTitle("What makes use of the data that Bigtv News gathers?"),
+                            sectionTitle("Children's Privacy Protection:", isDark: isDark),
                             height(height: 8),
                             sectionContent(
-                              "When you login to the App, we recognise you using your email address or mobile number. Based on the content and personally identifiable information pertaining to You, Bigtv News may be able to control Your access to and use of the App, communicate with the User, customise Your experience using the App, and send relevant updates.",
-                            ),
-                            height(height: 8),
-                            sectionContent(
-                              "Bigtv News adheres to the necessary data collection, storage, and processing policies and security measures to guard against unauthorised access, alteration, disclosure, or destruction of Your personal information.",
-                            ),
-                            height(height: 20),
-                            sectionTitle("Sharing identity and security details"),
-                            height(height: 8),
-                            sectionContent(
-                              "Except as indicated in this Policy, Bigtv News does not transfer, sell, or rent Your personally identifiable information to outsiders. For the aforementioned reasons, Bigtv News may divulge generic aggregated demographic data about its users and visitors to its business partners and dependable affiliates.",
-                            ),
-                            height(height: 20),
-                            sectionTitle("Modifications to this Terms Of service"),
-                            height(height: 8),
-                            sectionContent(
-                              "This Privacy Policy could be revised and updated from time to time by Bigtv News. The updated Privacy Policy will be made available here. It is advised that you often visit this page to learn about updates to the Privacy Policy.",
-                            ),
-                            height(height: 20),
-                            sectionTitle("Your Assent to These Privacy Terms"),
-                            height(height: 8),
-                            sectionContent(
-                              "You confirm that you have read and agree to the Privacy Policy by using this App. If you disagree with our privacy policy, you are not allowed to use or access this application.",
+                              "Our services do not target anyone under the age of 13. We do not knowingly collect personally identifiable information from children under 13.",
+                              isDark: isDark,
                             ),
                           ],
                         ),
@@ -136,24 +120,36 @@ class _PrivacyPolicyState extends State<PrivacyPolicy> {
     );
   }
 
-  Widget sectionTitle(String title) {
+  Widget sectionTitle(String title, {bool isDark = false}) {
     return Text(
       title,
       style: TextStyle(
-        fontSize: 15.sp,
+        fontSize: 16.sp,
         fontWeight: FontWeight.bold,
-        color: const Color(0xFF1E293B),
+        color: isDark ? Colors.white : const Color(0xFF1E293B),
       ),
     );
   }
 
-  Widget sectionContent(String content) {
+  Widget sectionContent(String content, {bool isDark = false}) {
     return Text(
       content,
       style: TextStyle(
         fontSize: 14.sp,
         height: 1.5,
-        color: const Color(0xFF475569),
+        color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF334155),
+      ),
+      textAlign: TextAlign.justify,
+    );
+  }
+
+  Widget bulletText(String text, {bool isDark = false}) {
+    return Text(
+      "• $text",
+      style: TextStyle(
+        fontSize: 14.sp,
+        height: 1.5,
+        color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF475569),
       ),
     );
   }

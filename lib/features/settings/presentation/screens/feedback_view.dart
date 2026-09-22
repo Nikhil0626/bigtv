@@ -2,6 +2,7 @@ import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/s
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/utils/top_right_wave_painter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 
@@ -109,6 +110,7 @@ class FeedbackFormState extends State<FeedbackForm> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final settingsProvider = context.watch<SettingsProvider>();
 
     List<Map<String, dynamic>> optionsToDisplay = [];
@@ -125,472 +127,450 @@ class FeedbackFormState extends State<FeedbackForm> {
       optionsToDisplay = _defaultOptions;
     }
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFC),
-      body: Stack(
-        children: [
-          // Background top right wave design
-          Positioned(
-            top: 0,
-            right: 0,
-            width: MediaQuery.of(context).size.width,
-            height: 350.h,
-            child: CustomPaint(
-              painter: const TopRightWavePainter(),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+      ),
+      child: Scaffold(
+        backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
+        body: Stack(
+          children: [
+            // Background top right wave design
+            Positioned(
+              top: 0,
+              right: 0,
+              width: MediaQuery.of(context).size.width,
+              height: 350.h,
+              child: CustomPaint(
+                painter: TopRightWavePainter(isDark: isDark),
+              ),
             ),
-          ),
 
-          SafeArea(
-            child: Column(
-              children: [
-                // Compact Top App Bar
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: Container(
-                          width: 34.w,
-                          height: 34.w,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFF0F0F3),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Center(
-                            child: Icon(
-                              Icons.chevron_left_rounded,
-                              size: 24,
-                              color: Color(0xFF1E2022),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            "Feedback",
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF191C1F),
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 34.w),
-                    ],
-                  ),
-                ),
+            SafeArea(
+              child: Column(
+                children: [
+                  buildSettingsPageHeader(context, "Feedback"),
 
-                // Main Content
-                Expanded(
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // HERO SECTION
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  RichText(
-                                    text: TextSpan(
-                                      text: "Your voice\n",
+                  // Main Content
+                  Expanded(
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // HERO SECTION
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    RichText(
+                                      text: TextSpan(
+                                        text: "Your voice\n",
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 25.sp,
+                                          fontWeight: FontWeight.w900,
+                                          color: isDark ? Colors.white : const Color(0xFF181A20),
+                                          height: 1.15,
+                                        ),
+                                        children: const [
+                                          TextSpan(
+                                            text: "matters.",
+                                            style: TextStyle(
+                                              color: Color(0xFFED1C24),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 4.h),
+                                    Text(
+                                      "Help us make BIGTV better.",
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
-                                        fontSize: 25.sp,
-                                        fontWeight: FontWeight.w900,
-                                        color: const Color(0xFF181A20),
-                                        height: 1.15,
-                                      ),
-                                      children: const [
-                                        TextSpan(
-                                          text: "matters.",
-                                          style: TextStyle(
-                                            color: Color(0xFFED1C24),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(height: 4.h),
-                                  Text(
-                                    "Help us make BIGTV better.",
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 12.5.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: const Color(0xFF6C7278),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(width: 10.w),
-                            // Compact badge with heart chat bubble
-                            Container(
-                              width: 64.w,
-                              height: 64.w,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFECEC),
-                                borderRadius: BorderRadius.circular(18.r),
-                              ),
-                              child: Center(
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    const Icon(
-                                      Icons.chat_bubble_outline_rounded,
-                                      size: 38,
-                                      color: Color(0xFFED1C24),
-                                    ),
-                                    Positioned(
-                                      top: 11,
-                                      child: const Icon(
-                                        Icons.favorite_rounded,
-                                        size: 15,
-                                        color: Color(0xFFED1C24),
+                                        fontSize: 12.5.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF6C7278),
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // CARD 1: "How was your experience?" + Stars
-                        Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(14.r),
-                            border: Border.all(color: const Color(0xFFEFEFF4), width: 1.0),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.025),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                "How was your experience?",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w800,
-                                  color: const Color(0xFF181A20),
-                                ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                "Rate your experience with BIGTV",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: const Color(0xFF7A7E85),
-                                ),
-                              ),
-                              SizedBox(height: 10.h),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(5, (index) {
-                                  final starIndex = index + 1;
-                                  final isFilled = starIndex <= _selectedRating;
-                                  return GestureDetector(
-                                    behavior: HitTestBehavior.opaque,
-                                    onTap: () {
-                                      setState(() {
-                                        _selectedRating = starIndex;
-                                      });
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 4.w),
-                                      child: Icon(
-                                        isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
-                                        color: isFilled ? const Color(0xFFED1C24) : const Color(0xFF9EA3AE),
-                                        size: 32.sp,
-                                      ),
-                                    ),
-                                  );
-                                }),
-                              ),
-                              SizedBox(height: 6.h),
-                              Text(
-                                _getRatingLabel(_selectedRating),
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF555B66),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // SECTION 2: "What can we improve?" + Chips Grid
-                        Text(
-                          "What can we improve?",
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w800,
-                            color: const Color(0xFF181A20),
-                          ),
-                        ),
-                        SizedBox(height: 1.h),
-                        Text(
-                          "Select all that apply",
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 12.sp,
-                            fontWeight: FontWeight.w400,
-                            color: const Color(0xFF7A7E85),
-                          ),
-                        ),
-                        SizedBox(height: 10.h),
-
-                        // 2-Column Grid for options (Compact)
-                        GridView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: optionsToDisplay.length,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 8.w,
-                            mainAxisSpacing: 8.h,
-                            childAspectRatio: 3.1,
-                          ),
-                          itemBuilder: (context, index) {
-                            final option = optionsToDisplay[index];
-                            final title = option['title'] as String;
-                            final icon = option['icon'] as IconData;
-                            final isSelected = _selectedOptions.contains(title);
-
-                            return GestureDetector(
-                              onTap: () => _toggleOption(title),
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 160),
-                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                              SizedBox(width: 10.w),
+                              // Compact badge with heart chat bubble
+                              Container(
+                                width: 64.w,
+                                height: 64.w,
                                 decoration: BoxDecoration(
-                                  color: isSelected ? const Color(0xFFFFF7F7) : Colors.white,
-                                  borderRadius: BorderRadius.circular(10.r),
-                                  border: Border.all(
-                                    color: isSelected ? const Color(0xFFED1C24) : const Color(0xFFE2E4EA),
-                                    width: isSelected ? 1.3 : 0.9,
-                                  ),
+                                  color: isDark ? const Color(0xFF331012) : const Color(0xFFFFECEC),
+                                  borderRadius: BorderRadius.circular(18.r),
                                 ),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      icon,
-                                      size: 17.sp,
-                                      color: isSelected ? const Color(0xFFED1C24) : const Color(0xFF2A2D34),
-                                    ),
-                                    SizedBox(width: 6.w),
-                                    Expanded(
-                                      child: Text(
-                                        title,
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 11.5.sp,
-                                          fontWeight: FontWeight.w600,
-                                          color: isSelected ? const Color(0xFFED1C24) : const Color(0xFF1E2022),
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
+                                child: Center(
+                                  child: Stack(
+                                    alignment: Alignment.center,
+                                    children: [
+                                      const Icon(
+                                        Icons.chat_bubble_outline_rounded,
+                                        size: 38,
+                                        color: Color(0xFFED1C24),
                                       ),
-                                    ),
-                                    if (isSelected) ...[
-                                      SizedBox(width: 3.w),
-                                      Container(
-                                        width: 15.w,
-                                        height: 15.w,
-                                        decoration: const BoxDecoration(
+                                      Positioned(
+                                        top: 11,
+                                        child: const Icon(
+                                          Icons.favorite_rounded,
+                                          size: 15,
                                           color: Color(0xFFED1C24),
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: Center(
-                                          child: Icon(
-                                            Icons.check,
-                                            size: 9.5.sp,
-                                            color: Colors.white,
-                                          ),
                                         ),
                                       ),
                                     ],
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-
-                        SizedBox(height: 16.h),
-
-                        // SECTION 3: "Anything else? (optional)" + Input
-                        RichText(
-                          text: TextSpan(
-                            text: "Anything else? ",
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 14.5.sp,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF181A20),
-                            ),
-                            children: [
-                              TextSpan(
-                                text: "(optional)",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: const Color(0xFF7A7E85),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
-
-                        Container(
-                          padding: EdgeInsets.all(10.w),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12.r),
-                            border: Border.all(color: const Color(0xFFE2E4EA), width: 0.9),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              TextField(
-                                controller: _feedbackTextController,
-                                maxLength: 500,
-                                maxLines: 2,
-                                minLines: 2,
-                                onChanged: (_) => setState(() {}),
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 13.sp,
-                                  color: const Color(0xFF1E2022),
-                                ),
-                                decoration: InputDecoration(
-                                  isDense: true,
-                                  contentPadding: EdgeInsets.zero,
-                                  border: InputBorder.none,
-                                  hintText: "Tell us a little more...",
-                                  hintStyle: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 13.sp,
-                                    color: const Color(0xFF9EA3AE),
-                                    fontWeight: FontWeight.w400,
                                   ),
-                                  counterText: "",
-                                ),
-                              ),
-                              Text(
-                                "${_feedbackTextController.text.length}/500",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 11.sp,
-                                  color: const Color(0xFF9EA3AE),
                                 ),
                               ),
                             ],
                           ),
-                        ),
 
-                        SizedBox(height: 18.h),
+                          SizedBox(height: 16.h),
 
-                        // SECTION 4: Submit Button & Footer
-                        GestureDetector(
-                          onTap: settingsProvider.isFeedbackLoading ? null : _submitFeedback,
-                          child: Container(
+                          // CARD 1: "How was your experience?" + Stars
+                          Container(
                             width: double.infinity,
-                            height: 46.h,
+                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFED1C24),
-                              borderRadius: BorderRadius.circular(12.r),
+                              color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                              borderRadius: BorderRadius.circular(14.r),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF2E2E2E) : const Color(0xFFEFEFF4),
+                                width: 1.0,
+                              ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0xFFED1C24).withValues(alpha: 0.25),
-                                  blurRadius: 10,
+                                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.025),
+                                  blurRadius: 8,
                                   offset: const Offset(0, 3),
                                 ),
                               ],
                             ),
-                            child: Center(
-                              child: settingsProvider.isFeedbackLoading
-                                  ? SizedBox(
-                                      width: 20.w,
-                                      height: 20.w,
-                                      child: const CircularProgressIndicator(
-                                        color: Colors.white,
-                                        strokeWidth: 2.2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "How was your experience?",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: isDark ? Colors.white : const Color(0xFF181A20),
+                                  ),
+                                ),
+                                SizedBox(height: 2.h),
+                                Text(
+                                  "Rate your experience with BIGTV",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF7A7E85),
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: List.generate(5, (index) {
+                                    final starIndex = index + 1;
+                                    final isFilled = starIndex <= _selectedRating;
+                                    return GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () {
+                                        setState(() {
+                                          _selectedRating = starIndex;
+                                        });
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 4.w),
+                                        child: Icon(
+                                          isFilled ? Icons.star_rounded : Icons.star_outline_rounded,
+                                          color: isFilled ? const Color(0xFFED1C24) : (isDark ? const Color(0xFF555555) : const Color(0xFF9EA3AE)),
+                                          size: 32.sp,
+                                        ),
                                       ),
-                                    )
-                                  : Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          "Submit feedback",
-                                          style: TextStyle(
-                                            fontFamily: 'Poppins',
-                                            fontSize: 14.5.sp,
-                                            fontWeight: FontWeight.w700,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        SizedBox(width: 6.w),
-                                        Icon(
-                                          Icons.arrow_forward_rounded,
-                                          size: 17.sp,
-                                          color: Colors.white,
-                                        ),
-                                      ],
-                                    ),
+                                    );
+                                  }),
+                                ),
+                                SizedBox(height: 6.h),
+                                Text(
+                                  _getRatingLabel(_selectedRating),
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? const Color(0xFFE0E0E0) : const Color(0xFF555B66),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Center(
-                          child: Text(
-                            "Thanks for helping us improve.",
+
+                          SizedBox(height: 16.h),
+
+                          // SECTION 2: "What can we improve?" + Chips Grid
+                          Text(
+                            "What can we improve?",
                             style: TextStyle(
                               fontFamily: 'Poppins',
-                              fontSize: 11.5.sp,
-                              fontWeight: FontWeight.w400,
-                              color: const Color(0xFF7A7E85),
+                              fontSize: 15.sp,
+                              fontWeight: FontWeight.w800,
+                              color: isDark ? Colors.white : const Color(0xFF181A20),
                             ),
                           ),
-                        ),
-                        SizedBox(height: 16.h),
-                      ],
+                          SizedBox(height: 1.h),
+                          Text(
+                            "Select all that apply",
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w400,
+                              color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF7A7E85),
+                            ),
+                          ),
+                          SizedBox(height: 10.h),
+
+                          // 2-Column Grid for options (Compact)
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: optionsToDisplay.length,
+                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 8.w,
+                              mainAxisSpacing: 8.h,
+                              childAspectRatio: 3.1,
+                            ),
+                            itemBuilder: (context, index) {
+                              final option = optionsToDisplay[index];
+                              final title = option['title'] as String;
+                              final icon = option['icon'] as IconData;
+                              final isSelected = _selectedOptions.contains(title);
+
+                              return GestureDetector(
+                                onTap: () => _toggleOption(title),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 160),
+                                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? (isDark ? const Color(0xFF3B1012) : const Color(0xFFFFF7F7))
+                                        : (isDark ? const Color(0xFF1A1A1A) : Colors.white),
+                                    borderRadius: BorderRadius.circular(10.r),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? const Color(0xFFED1C24)
+                                          : (isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA)),
+                                      width: isSelected ? 1.3 : 0.9,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        icon,
+                                        size: 17.sp,
+                                        color: isSelected ? const Color(0xFFED1C24) : (isDark ? Colors.white70 : const Color(0xFF2A2D34)),
+                                      ),
+                                      SizedBox(width: 6.w),
+                                      Expanded(
+                                        child: Text(
+                                          title,
+                                          style: TextStyle(
+                                            fontFamily: 'Poppins',
+                                            fontSize: 11.5.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: isSelected ? const Color(0xFFED1C24) : (isDark ? Colors.white : const Color(0xFF1E2022)),
+                                          ),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ),
+                                      if (isSelected) ...[
+                                        SizedBox(width: 3.w),
+                                        Container(
+                                          width: 15.w,
+                                          height: 15.w,
+                                          decoration: const BoxDecoration(
+                                            color: Color(0xFFED1C24),
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: Icon(
+                                              Icons.check,
+                                              size: 9.5.sp,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+
+                          SizedBox(height: 16.h),
+
+                          // SECTION 3: "Anything else? (optional)" + Input
+                          RichText(
+                            text: TextSpan(
+                              text: "Anything else? ",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 14.5.sp,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? Colors.white : const Color(0xFF181A20),
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: "(optional)",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF7A7E85),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+
+                          Container(
+                            padding: EdgeInsets.all(10.w),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA),
+                                width: 0.9,
+                              ),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                TextField(
+                                  controller: _feedbackTextController,
+                                  maxLength: 500,
+                                  maxLines: 2,
+                                  minLines: 2,
+                                  onChanged: (_) => setState(() {}),
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 13.sp,
+                                    color: isDark ? Colors.white : const Color(0xFF1E2022),
+                                  ),
+                                  decoration: InputDecoration(
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                    border: InputBorder.none,
+                                    hintText: "Tell us a little more...",
+                                    hintStyle: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: 13.sp,
+                                      color: isDark ? const Color(0xFF757575) : const Color(0xFF9EA3AE),
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                    counterText: "",
+                                  ),
+                                ),
+                                Text(
+                                  "${_feedbackTextController.text.length}/500",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 11.sp,
+                                    color: isDark ? const Color(0xFF757575) : const Color(0xFF9EA3AE),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 18.h),
+
+                          // SECTION 4: Submit Button & Footer
+                          GestureDetector(
+                            onTap: settingsProvider.isFeedbackLoading ? null : _submitFeedback,
+                            child: Container(
+                              width: double.infinity,
+                              height: 46.h,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFED1C24),
+                                borderRadius: BorderRadius.circular(12.r),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: const Color(0xFFED1C24).withValues(alpha: 0.25),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
+                              child: Center(
+                                child: settingsProvider.isFeedbackLoading
+                                    ? SizedBox(
+                                        width: 20.w,
+                                        height: 20.w,
+                                        child: const CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 2.2,
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            "Submit feedback",
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              fontSize: 14.5.sp,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          SizedBox(width: 6.w),
+                                          Icon(
+                                            Icons.arrow_forward_rounded,
+                                            size: 17.sp,
+                                            color: Colors.white,
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Center(
+                            child: Text(
+                              "Thanks for helping us improve.",
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 11.5.sp,
+                                fontWeight: FontWeight.w400,
+                                color: isDark ? const Color(0xFF9E9E9E) : const Color(0xFF7A7E85),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 16.h),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
