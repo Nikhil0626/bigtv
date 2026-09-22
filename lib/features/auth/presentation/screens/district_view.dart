@@ -48,16 +48,16 @@ class _DistrictViewState extends State<DistrictView> {
     });
   }
 
-  Widget _buildLocationHeroGraphic() {
+  Widget _buildLocationHeroGraphic(bool isDark) {
     return Container(
       width: 78.w,
       height: 78.w,
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF1F1),
+        color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFF1F1),
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: const Color(0xFFED1C24).withValues(alpha: 0.06),
+            color: const Color(0xFFED1C24).withValues(alpha: isDark ? 0.15 : 0.06),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -174,8 +174,10 @@ class _DistrictViewState extends State<DistrictView> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFBFBFC),
+      backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
       body: Stack(
         children: [
           // Background top right wave design
@@ -184,8 +186,8 @@ class _DistrictViewState extends State<DistrictView> {
             right: 0,
             width: MediaQuery.of(context).size.width,
             height: 350.h,
-            child: const CustomPaint(
-              painter: TopRightWavePainter(),
+            child: CustomPaint(
+              painter: TopRightWavePainter(isDark: isDark),
             ),
           ),
 
@@ -215,7 +217,7 @@ class _DistrictViewState extends State<DistrictView> {
                             Container(
                               padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFFECEC),
+                                color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFECEC),
                                 borderRadius: BorderRadius.circular(20.r),
                               ),
                               child: Row(
@@ -258,7 +260,7 @@ class _DistrictViewState extends State<DistrictView> {
                                             fontFamily: 'Poppins',
                                             fontSize: 27.sp,
                                             fontWeight: FontWeight.w900,
-                                            color: const Color(0xFF181A20),
+                                            color: isDark ? Colors.white : const Color(0xFF181A20),
                                             height: 1.1,
                                           ),
                                           children: const [
@@ -278,7 +280,7 @@ class _DistrictViewState extends State<DistrictView> {
                                           fontFamily: 'Poppins',
                                           fontSize: 12.5.sp,
                                           fontWeight: FontWeight.w500,
-                                          color: const Color(0xFF6C7278),
+                                          color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
                                           height: 1.3,
                                         ),
                                       ),
@@ -286,7 +288,7 @@ class _DistrictViewState extends State<DistrictView> {
                                   ),
                                 ),
                                 SizedBox(width: 10.w),
-                                _buildLocationHeroGraphic(),
+                                _buildLocationHeroGraphic(isDark),
                               ],
                             ),
 
@@ -306,7 +308,7 @@ class _DistrictViewState extends State<DistrictView> {
                                         fontFamily: 'Poppins',
                                         fontSize: 16.sp,
                                         fontWeight: FontWeight.w800,
-                                        color: const Color(0xFF181A20),
+                                        color: isDark ? Colors.white : const Color(0xFF181A20),
                                       ),
                                     ),
                                     SizedBox(height: 1.h),
@@ -316,7 +318,7 @@ class _DistrictViewState extends State<DistrictView> {
                                         fontFamily: 'Poppins',
                                         fontSize: 12.sp,
                                         fontWeight: FontWeight.w500,
-                                        color: const Color(0xFF6C7278),
+                                        color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
                                       ),
                                     ),
                                   ],
@@ -325,7 +327,7 @@ class _DistrictViewState extends State<DistrictView> {
                                   Container(
                                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.5.h),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFFFFECEC),
+                                      color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFECEC),
                                       borderRadius: BorderRadius.circular(14.r),
                                     ),
                                     child: Text(
@@ -383,19 +385,21 @@ class _DistrictViewState extends State<DistrictView> {
                                         duration: const Duration(milliseconds: 150),
                                         padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
                                         decoration: BoxDecoration(
-                                          color: isSelected ? const Color(0xFFFFF8F8) : Colors.white,
+                                          color: isSelected
+                                              ? (isDark ? const Color(0xFF2A1517) : const Color(0xFFFFF8F8))
+                                              : (isDark ? const Color(0xFF1A1A1A) : Colors.white),
                                           borderRadius: BorderRadius.circular(16.r),
                                           border: Border.all(
                                             color: isSelected
                                                 ? const Color(0xFFED1C24)
-                                                : const Color(0xFFE2E4EA),
+                                                : (isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA)),
                                             width: isSelected ? 1.4 : 0.9,
                                           ),
                                           boxShadow: [
                                             BoxShadow(
                                               color: isSelected
-                                                  ? const Color(0xFFED1C24).withValues(alpha: 0.08)
-                                                  : Colors.black.withValues(alpha: 0.02),
+                                                  ? const Color(0xFFED1C24).withValues(alpha: isDark ? 0.18 : 0.08)
+                                                  : (isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.02)),
                                               blurRadius: 8,
                                               offset: const Offset(0, 2),
                                             ),
@@ -410,7 +414,7 @@ class _DistrictViewState extends State<DistrictView> {
                                               height: 64.w,
                                               padding: EdgeInsets.all(6.w),
                                               decoration: BoxDecoration(
-                                                color: const Color(0xFFFFF6F6),
+                                                color: isDark ? const Color(0xFF251A1C) : const Color(0xFFFFF6F6),
                                                 borderRadius: BorderRadius.circular(12.r),
                                               ),
                                               child: Center(
@@ -436,7 +440,7 @@ class _DistrictViewState extends State<DistrictView> {
                                                       fontFamily: 'Poppins',
                                                       fontSize: 16.sp,
                                                       fontWeight: FontWeight.w800,
-                                                      color: const Color(0xFF181A20),
+                                                      color: isDark ? Colors.white : const Color(0xFF181A20),
                                                     ),
                                                   ),
                                                   SizedBox(height: 2.h),
@@ -446,7 +450,7 @@ class _DistrictViewState extends State<DistrictView> {
                                                       fontFamily: 'Poppins',
                                                       fontSize: 12.5.sp,
                                                       fontWeight: FontWeight.w500,
-                                                      color: const Color(0xFF6C7278),
+                                                      color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
                                                     ),
                                                   ),
                                                 ],
@@ -463,7 +467,7 @@ class _DistrictViewState extends State<DistrictView> {
                                                 border: isSelected
                                                     ? null
                                                     : Border.all(
-                                                        color: const Color(0xFFD0D4DC),
+                                                        color: isDark ? const Color(0xFF5E5E5E) : const Color(0xFFD0D4DC),
                                                         width: 1.4,
                                                       ),
                                               ),
@@ -495,10 +499,10 @@ class _DistrictViewState extends State<DistrictView> {
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFBFBFC),
+                        color: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
+                            color: isDark ? Colors.black.withValues(alpha: 0.35) : Colors.black.withValues(alpha: 0.03),
                             blurRadius: 6,
                             offset: const Offset(0, -2),
                           ),
@@ -525,7 +529,7 @@ class _DistrictViewState extends State<DistrictView> {
                           height: 42.h,
                           decoration: BoxDecoration(
                             color: authProvider.selectedLocations.isEmpty
-                                ? const Color(0xFFE2E4EA)
+                                ? (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE2E4EA))
                                 : const Color(0xFFED1C24),
                             borderRadius: BorderRadius.circular(10.r),
                             boxShadow: authProvider.selectedLocations.isEmpty
