@@ -1,15 +1,12 @@
-import 'package:chotanews/aggricator_screens/settings_screen/settings_view/filters_screen/update_categories_view.dart';
-import 'package:chotanews/aggricator_screens/settings_screen/settings_view/filters_screen/update_regions_view.dart';
-import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
-import 'package:chotanews/features/home/presentation/screens/home_view.dart';
-import 'package:chotanews/utils/app_colors.dart';
-import 'package:chotanews/utils/app_fonts.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:chotanews/utils/app_toasts.dart';
-import 'package:chotanews/utils/top_right_wave_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/home/presentation/screens/home_view.dart';
+import 'package:chotanews/utils/app_toasts.dart';
+import 'package:chotanews/utils/top_right_wave_painter.dart';
+import 'update_categories_view.dart';
+import 'update_regions_view.dart';
 
 class FilterView extends StatefulWidget {
   const FilterView({super.key});
@@ -41,373 +38,420 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
     super.dispose();
   }
 
-  Widget _buildBottomNavigationBar(bool isDark) {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Consumer<AuthenticationProvider>(
-      builder: (context, authenticationProvider, _) {
+      builder: (context, authProvider, _) {
         final isTopicsTab = _selectedTabIndex == 0;
-        final selectedCategories = authenticationProvider.selectedCategories;
-        final selectedLocations = authenticationProvider.selectedLocations;
+        final selectedCategories = authProvider.selectedCategories;
+        final selectedLocations = authProvider.selectedLocations;
 
         final canUpdate = isTopicsTab
             ? selectedCategories.isNotEmpty
             : (selectedLocations.isNotEmpty && selectedLocations.length <= 5);
 
         final isLoading = isTopicsTab
-            ? authenticationProvider.isCatSaveLoading
-            : authenticationProvider.isLocationSendingLoading;
+            ? authProvider.isCatSaveLoading
+            : authProvider.isLocationSendingLoading;
 
-        return Container(
-          color: isDark ? const Color(0xFF10121A) : Colors.white,
-          padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 12.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+        return Scaffold(
+          backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
+          body: Stack(
             children: [
-              InkWell(
-                borderRadius: BorderRadius.circular(10.r),
-                onTap: canUpdate
-                    ? () {
-                        if (isTopicsTab) {
-                          authenticationProvider.sendCategoriesToServer(isFilter: true).then(
-                            (value) {
-                              if (context.mounted) {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const HomeView(),
-                                  ),
-                                  (route) => false,
-                                );
-                              }
-                            },
-                          );
-                        } else {
-                          authenticationProvider.sendLocationsToServer(context, isFilter: true).then(
-                            (value) {
-                              if (context.mounted) {
-                                Navigator.pushAndRemoveUntil(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => const HomeView(),
-                                  ),
-                                  (route) => false,
-                                );
-                              }
-                            },
-                          );
-                        }
-                      }
-                    : () {
-                        if (!isTopicsTab && selectedLocations.length > 5) {
-                          CustomToast.showErrorToast(msg: "Please Select up to 5 Districts");
-                        }
-                      },
-                child: Container(
-                  width: double.infinity,
-                  height: 42.h,
-                  decoration: BoxDecoration(
-                    color: canUpdate
-                        ? const Color(0xFFED1C24)
-                        : (isDark ? Colors.white12 : AppColors.bodyTextColor.withValues(alpha: .2)),
-                    borderRadius: BorderRadius.circular(10.r),
-                    boxShadow: canUpdate
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFFED1C24).withValues(alpha: 0.3),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: isLoading
-                      ? const AppLoadingScreen()
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Update preferences',
-                              style: newAppFont(
-                                color: Colors.white,
-                                fontSize: 14.5.sp,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            SizedBox(width: 6.w),
-                            Icon(
-                              Icons.arrow_forward_rounded,
-                              color: Colors.white,
-                              size: 16.sp,
-                            ),
-                          ],
-                        ),
+              // Top Right Wave Ripple Art
+              Positioned(
+                top: 0,
+                right: 0,
+                width: MediaQuery.of(context).size.width,
+                height: 350.h,
+                child: CustomPaint(
+                  painter: TopRightWavePainter(isDark: isDark),
                 ),
               ),
-              SizedBox(height: 4.h),
-              Text(
-                'Your feed, tailored to you.',
-                style: newAppFont(
-                  color: isDark ? Colors.grey.shade500 : Colors.grey.shade500,
-                  fontSize: 10.5.sp,
-                  fontWeight: FontWeight.w400,
+
+              SafeArea(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // TOP BAR: Back button + Pill Badge [ 🎯 FILTER ]
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(18.w, 10.h, 18.w, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              InkWell(
+                                onTap: () => Navigator.pop(context),
+                                borderRadius: BorderRadius.circular(20.r),
+                                child: Container(
+                                  padding: EdgeInsets.all(7.5.w),
+                                  decoration: BoxDecoration(
+                                    color: isDark ? const Color(0xFF1E2026) : Colors.white,
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: isDark
+                                            ? Colors.black.withValues(alpha: 0.35)
+                                            : Colors.black.withValues(alpha: 0.06),
+                                        blurRadius: 8,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Icon(
+                                    Icons.arrow_back_ios_new_rounded,
+                                    size: 15.sp,
+                                    color: isDark ? Colors.white : const Color(0xFF181A20),
+                                  ),
+                                ),
+                              ),
+                              Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFECEC),
+                                  borderRadius: BorderRadius.circular(16.r),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.tune_rounded,
+                                      size: 13.sp,
+                                      color: const Color(0xFFED1C24),
+                                    ),
+                                    SizedBox(width: 5.w),
+                                    Text(
+                                      "FILTER",
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 10.5.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFFED1C24),
+                                        letterSpacing: 0.8,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: 10.h),
+
+                          // HERO SECTION: Title + Subtitle + Right Graphic Badge
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    RichText(
+                                      text: TextSpan(
+                                        text: "Your news.\n",
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 24.sp,
+                                          fontWeight: FontWeight.w900,
+                                          color: isDark ? Colors.white : const Color(0xFF181A20),
+                                          height: 1.15,
+                                        ),
+                                        children: const [
+                                          TextSpan(
+                                            text: "Your preferences.",
+                                            style: TextStyle(
+                                              color: Color(0xFFED1C24),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 3.h),
+                                    Text(
+                                      "Choose what matters to you.",
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              // Right graphic badge
+                              Container(
+                                width: 60.w,
+                                height: 60.w,
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFECEC),
+                                  borderRadius: BorderRadius.circular(16.r),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(0xFFED1C24).withValues(alpha: isDark ? 0.12 : 0.06),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.tune_rounded,
+                                    size: 30.sp,
+                                    color: const Color(0xFFED1C24),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+
+                          SizedBox(height: 14.h),
+
+                          // Pill Segmented Tab Switcher (Topics / Regions)
+                          Container(
+                            padding: EdgeInsets.all(3.5.w),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF0F2F5),
+                              borderRadius: BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA),
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      _tabController.animateTo(0);
+                                      setState(() => _selectedTabIndex = 0);
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 180),
+                                      padding: EdgeInsets.symmetric(vertical: 7.h),
+                                      decoration: BoxDecoration(
+                                        color: _selectedTabIndex == 0 ? const Color(0xFFED1C24) : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(9.r),
+                                        boxShadow: _selectedTabIndex == 0
+                                            ? [
+                                                BoxShadow(
+                                                  color: const Color(0xFFED1C24).withValues(alpha: 0.25),
+                                                  blurRadius: 6,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ]
+                                            : [],
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.grid_view_rounded,
+                                            size: 14.sp,
+                                            color: _selectedTabIndex == 0
+                                                ? Colors.white
+                                                : (isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278)),
+                                          ),
+                                          SizedBox(width: 6.w),
+                                          Text(
+                                            'Topics',
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              color: _selectedTabIndex == 0
+                                                  ? Colors.white
+                                                  : (isDark ? const Color(0xFFBDBDBD) : const Color(0xFF4A4E5A)),
+                                              fontSize: 12.5.sp,
+                                              fontWeight: _selectedTabIndex == 0 ? FontWeight.w700 : FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      _tabController.animateTo(1);
+                                      setState(() => _selectedTabIndex = 1);
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 180),
+                                      padding: EdgeInsets.symmetric(vertical: 7.h),
+                                      decoration: BoxDecoration(
+                                        color: _selectedTabIndex == 1 ? const Color(0xFFED1C24) : Colors.transparent,
+                                        borderRadius: BorderRadius.circular(9.r),
+                                        boxShadow: _selectedTabIndex == 1
+                                            ? [
+                                                BoxShadow(
+                                                  color: const Color(0xFFED1C24).withValues(alpha: 0.25),
+                                                  blurRadius: 6,
+                                                  offset: const Offset(0, 2),
+                                                ),
+                                              ]
+                                            : [],
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.location_on_rounded,
+                                            size: 14.sp,
+                                            color: _selectedTabIndex == 1
+                                                ? Colors.white
+                                                : (isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278)),
+                                          ),
+                                          SizedBox(width: 6.w),
+                                          Text(
+                                            'Regions',
+                                            style: TextStyle(
+                                              fontFamily: 'Poppins',
+                                              color: _selectedTabIndex == 1
+                                                  ? Colors.white
+                                                  : (isDark ? const Color(0xFFBDBDBD) : const Color(0xFF4A4E5A)),
+                                              fontSize: 12.5.sp,
+                                              fontWeight: _selectedTabIndex == 1 ? FontWeight.w700 : FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // TAB VIEW BODY (SCROLLABLE ONLY)
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: const [
+                          UpdateCategoriesView(),
+                          UpdateRegionsView(),
+                        ],
+                      ),
+                    ),
+
+                    // FIXED PINNED BOTTOM BUTTON (NOT IN SCROLL)
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 12.h),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark ? Colors.black.withValues(alpha: 0.35) : Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 6,
+                            offset: const Offset(0, -2),
+                          ),
+                        ],
+                      ),
+                      child: GestureDetector(
+                        onTap: canUpdate
+                            ? () {
+                                if (isTopicsTab) {
+                                  authProvider.sendCategoriesToServer(isFilter: true).then(
+                                    (value) {
+                                      if (context.mounted) {
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const HomeView(),
+                                          ),
+                                          (route) => false,
+                                        );
+                                      }
+                                    },
+                                  );
+                                } else {
+                                  authProvider.sendLocationsToServer(context, isFilter: true).then(
+                                    (value) {
+                                      if (context.mounted) {
+                                        Navigator.pushAndRemoveUntil(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => const HomeView(),
+                                          ),
+                                          (route) => false,
+                                        );
+                                      }
+                                    },
+                                  );
+                                }
+                              }
+                            : () {
+                                if (!isTopicsTab && selectedLocations.length > 5) {
+                                  CustomToast.showErrorToast(msg: "Please Select up to 5 Districts");
+                                }
+                              },
+                        child: Container(
+                          width: double.infinity,
+                          height: 42.h,
+                          decoration: BoxDecoration(
+                            color: canUpdate
+                                ? const Color(0xFFED1C24)
+                                : (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE2E4EA)),
+                            borderRadius: BorderRadius.circular(10.r),
+                            boxShadow: canUpdate
+                                ? [
+                                    BoxShadow(
+                                      color: const Color(0xFFED1C24).withValues(alpha: 0.22),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ]
+                                : [],
+                          ),
+                          child: Center(
+                            child: isLoading
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.0,
+                                    ),
+                                  )
+                                : Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Update preferences",
+                                        style: TextStyle(
+                                          fontFamily: 'Poppins',
+                                          fontSize: 14.5.sp,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      SizedBox(width: 6.w),
+                                      Icon(
+                                        Icons.arrow_forward_rounded,
+                                        size: 16.sp,
+                                        color: Colors.white,
+                                      ),
+                                    ],
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
           ),
         );
       },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF10121A) : Colors.white,
-      body: Stack(
-        children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: TopRightWavePainter(isDark: isDark),
-            ),
-          ),
-          SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                // Top Navigation Bar
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                  child: Row(
-                    children: [
-                      InkWell(
-                        onTap: () => Navigator.pop(context),
-                        borderRadius: BorderRadius.circular(18.r),
-                        child: Container(
-                          width: 32.w,
-                          height: 32.w,
-                          decoration: BoxDecoration(
-                            color: isDark ? const Color(0xFF1F2230) : const Color(0xFFF2F4F7),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Center(
-                            child: Icon(
-                              Icons.arrow_back_ios_new_rounded,
-                              size: 14.sp,
-                              color: isDark ? Colors.white : const Color(0xFF1E2022),
-                            ),
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            'Filter',
-                            style: newAppFont(
-                              color: isDark ? Colors.white : const Color(0xFF1E2022),
-                              fontSize: 16.5.sp,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 32.w), // Balance back button
-                    ],
-                  ),
-                ),
-
-                // "Your interests." Hero Section
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            text: TextSpan(
-                              text: "Your ",
-                              style: newAppFont(
-                                color: isDark ? Colors.white : const Color(0xFF1E2022),
-                                fontSize: 21.sp,
-                                fontWeight: FontWeight.w800,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: "interests.",
-                                  style: newAppFont(
-                                    color: const Color(0xFFED1C24),
-                                    fontSize: 21.sp,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 2.h),
-                          Text(
-                            "Choose what matters to you.",
-                            style: newAppFont(
-                              color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                              fontSize: 11.5.sp,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // Tune / sliders badge
-                      Container(
-                        width: 38.w,
-                        height: 38.w,
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFF0F0),
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        child: Center(
-                          child: Icon(
-                            Icons.tune_rounded,
-                            color: const Color(0xFFED1C24),
-                            size: 20.sp,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                SizedBox(height: 6.h),
-
-                // Pill Segmented Tab Control
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
-                  child: Container(
-                    padding: EdgeInsets.all(3.w),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF1B1E2B) : const Color(0xFFF2F4F7),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              _tabController.animateTo(0);
-                              setState(() => _selectedTabIndex = 0);
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: EdgeInsets.symmetric(vertical: 6.5.h),
-                              decoration: BoxDecoration(
-                                color: _selectedTabIndex == 0 ? const Color(0xFFED1C24) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8.r),
-                                boxShadow: _selectedTabIndex == 0
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFFED1C24).withValues(alpha: 0.3),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ]
-                                    : [],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.grid_view_rounded,
-                                    size: 15.sp,
-                                    color: _selectedTabIndex == 0
-                                        ? Colors.white
-                                        : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
-                                  ),
-                                  SizedBox(width: 6.w),
-                                  Text(
-                                    'Topics',
-                                    style: newAppFont(
-                                      color: _selectedTabIndex == 0
-                                          ? Colors.white
-                                          : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
-                                      fontSize: 12.5.sp,
-                                      fontWeight: _selectedTabIndex == 0 ? FontWeight.w700 : FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          child: GestureDetector(
-                            onTap: () {
-                              _tabController.animateTo(1);
-                              setState(() => _selectedTabIndex = 1);
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: EdgeInsets.symmetric(vertical: 6.5.h),
-                              decoration: BoxDecoration(
-                                color: _selectedTabIndex == 1 ? const Color(0xFFED1C24) : Colors.transparent,
-                                borderRadius: BorderRadius.circular(8.r),
-                                boxShadow: _selectedTabIndex == 1
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFFED1C24).withValues(alpha: 0.3),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ]
-                                    : [],
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.location_on_outlined,
-                                    size: 15.sp,
-                                    color: _selectedTabIndex == 1
-                                        ? Colors.white
-                                        : (isDark ? Colors.grey.shade400 : Colors.grey.shade600),
-                                  ),
-                                  SizedBox(width: 6.w),
-                                  Text(
-                                    'Regions',
-                                    style: newAppFont(
-                                      color: _selectedTabIndex == 1
-                                          ? Colors.white
-                                          : (isDark ? Colors.grey.shade300 : Colors.grey.shade700),
-                                      fontSize: 12.5.sp,
-                                      fontWeight: _selectedTabIndex == 1 ? FontWeight.w700 : FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                SizedBox(height: 4.h),
-
-                // Tab View Body
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: const [
-                      UpdateCategoriesView(),
-                      UpdateRegionsView(),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: _buildBottomNavigationBar(isDark),
     );
   }
 }
