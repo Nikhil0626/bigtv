@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
@@ -48,6 +49,50 @@ class _CategoriesViewState extends State<CategoriesView> {
     if (lower.contains('హెల్త్') || lower.contains('health')) return Icons.favorite_outline_rounded;
     if (lower.contains('జనరల్') || lower.contains('general')) return Icons.newspaper_rounded;
     return Icons.grid_view_rounded;
+  }
+
+  Widget _buildCategoryImage(String? imageUrl, String categoryName) {
+    if (imageUrl != null && imageUrl.trim().isNotEmpty) {
+      final cleanUrl = imageUrl.trim();
+      if (cleanUrl.toLowerCase().endsWith('.svg') || cleanUrl.toLowerCase().contains('.svg')) {
+        return SvgPicture.network(
+          cleanUrl,
+          height: 42.h,
+          width: 42.h,
+          fit: BoxFit.contain,
+          placeholderBuilder: (_) => const Center(
+            child: SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(color: Color(0xFFED1C24), strokeWidth: 1.8),
+            ),
+          ),
+        );
+      }
+      return CachedNetworkImage(
+        imageUrl: cleanUrl,
+        height: 42.h,
+        width: 42.h,
+        fit: BoxFit.contain,
+        placeholder: (_, __) => const Center(
+          child: SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(color: Color(0xFFED1C24), strokeWidth: 1.8),
+          ),
+        ),
+        errorWidget: (_, __, ___) => Icon(
+          _getCategoryFallbackIcon(categoryName),
+          size: 34.sp,
+          color: const Color(0xFFED1C24),
+        ),
+      );
+    }
+    return Icon(
+      _getCategoryFallbackIcon(categoryName),
+      size: 36.sp,
+      color: const Color(0xFFED1C24),
+    );
   }
 
   @override
@@ -243,26 +288,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                                               children: [
                                                 SizedBox(height: 4.h),
                                                 // Category Illustration / Icon
-                                                if (imageUrl != null && imageUrl.isNotEmpty)
-                                                  CachedNetworkImage(
-                                                    imageUrl: imageUrl,
-                                                    height: 42.h,
-                                                    width: 42.h,
-                                                    fit: BoxFit.contain,
-                                                    color: const Color(0xFFED1C24),
-                                                    errorWidget: (_, __, ___) => Icon(
-                                                      _getCategoryFallbackIcon(categoryName),
-                                                      size: 34.sp,
-                                                      color: const Color(0xFFED1C24),
-                                                    ),
-                                                  )
-                                                else
-                                                  Icon(
-                                                    _getCategoryFallbackIcon(categoryName),
-                                                    size: 36.sp,
-                                                    color: const Color(0xFFED1C24),
-                                                  ),
-
+                                                _buildCategoryImage(imageUrl, categoryName),
                                                 SizedBox(height: 8.h),
 
                                                 // Category Name
