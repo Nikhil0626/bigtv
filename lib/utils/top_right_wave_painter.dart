@@ -10,10 +10,10 @@ class TopRightWavePainter extends CustomPainter {
 
   const TopRightWavePainter({
     this.isDark = false,
-    this.gap = 3.0,
-    this.baseRadius = 14.0,
+    this.gap = 22.0,
+    this.baseRadius = 30.0,
     this.maxRadius = 380.0,
-    this.strokeWidth = 0.8,
+    this.strokeWidth = 1.15,
   });
 
   @override
@@ -40,15 +40,15 @@ class TopRightWavePainter extends CustomPainter {
       ).createShader(Rect.fromCircle(center: center, radius: maxRadius));
     canvas.drawCircle(center, maxRadius, glowPaint);
 
-    // Fine concentric wave ripple lines with tighter line-to-line gap
-    final double safeGap = gap > 0 ? gap : 3.0;
+    // Concentric wave ripple lines with balanced spacing (~22px gap)
+    final double safeGap = gap > 0 ? gap : 22.0;
     final int count = ((maxRadius - baseRadius) / safeGap).floor() + 1;
 
     for (int i = 0; i < count; i++) {
       final double r = baseRadius + (i * safeGap);
       final double progress = count > 1 ? i / (count - 1) : 0.0;
-      final double baseOpacity = 0.38 * (1.0 - progress * 0.92);
-      final double opacity = (isDark ? baseOpacity * 0.75 : baseOpacity).clamp(0.015, 0.40);
+      final double baseOpacity = 0.44 * (1.0 - progress * 0.90);
+      final double opacity = (isDark ? baseOpacity * 0.75 : baseOpacity).clamp(0.02, 0.44);
 
       final linePaint = Paint()
         ..color = const Color(0xFFED1C24).withValues(alpha: opacity)
