@@ -78,218 +78,236 @@ class _CategoriesViewState extends State<CategoriesView> {
                 final bool useFallbacks = categories.isEmpty;
                 final int selectedCount = authProvider.selectedCategories.length;
 
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 12.h),
+                return Column(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 8.h),
 
-                      // HERO SECTION: Telugu Title & Subtitle
-                      RichText(
-                        text: TextSpan(
-                          text: "మీ ఆసక్తులను\n",
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 27.sp,
-                            fontWeight: FontWeight.w900,
-                            color: const Color(0xFF181A20),
-                            height: 1.15,
-                          ),
-                          children: const [
-                            TextSpan(
-                              text: "ఎంచుకోండి",
+                            // HERO SECTION: Telugu Title & Subtitle
+                            RichText(
+                              text: TextSpan(
+                                text: "మీ ఆసక్తులను\n",
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: 25.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: const Color(0xFF181A20),
+                                  height: 1.15,
+                                ),
+                                children: const [
+                                  TextSpan(
+                                    text: "ఎంచుకోండి",
+                                    style: TextStyle(
+                                      color: Color(0xFFED1C24),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 3.h),
+                            Text(
+                              "మీకు నచ్చిన అంశాలను ఎంచుకోండి",
                               style: TextStyle(
-                                color: Color(0xFFED1C24),
+                                fontFamily: 'Poppins',
+                                fontSize: 12.5.sp,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF6C7278),
+                              ),
+                            ),
+
+                            SizedBox(height: 16.h),
+
+                            // SUBHEADER: "మీ కోసం వార్తలు" & "[ 3 selected ]"
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "మీ కోసం వార్తలు",
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 15.5.sp,
+                                    fontWeight: FontWeight.w800,
+                                    color: const Color(0xFF181A20),
+                                  ),
+                                ),
+                                if (selectedCount > 0)
+                                  Container(
+                                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.5.h),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFFFECEC),
+                                      borderRadius: BorderRadius.circular(14.r),
+                                    ),
+                                    child: Text(
+                                      "$selectedCount selected",
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xFFED1C24),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+
+                            SizedBox(height: 10.h),
+
+                            // 3-COLUMN CATEGORY GRID
+                            Expanded(
+                              child: GridView.builder(
+                                physics: const BouncingScrollPhysics(),
+                                itemCount: useFallbacks ? _fallbackCategories.length : categories.length,
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 10.w,
+                                  mainAxisSpacing: 10.h,
+                                  childAspectRatio: 0.84,
+                                ),
+                                itemBuilder: (context, index) {
+                                  final String categoryName = useFallbacks
+                                      ? _fallbackCategories[index]['name'] as String
+                                      : (categories[index].categoryName ?? '');
+                                  final String? imageUrl = useFallbacks
+                                      ? null
+                                      : categories[index].imageUrl;
+
+                                  final bool isSelected = authProvider.selectedCategories.contains(categoryName);
+
+                                  return GestureDetector(
+                                    onTap: () {
+                                      authProvider.addToSelectedEngagements(categoryName);
+                                    },
+                                    child: AnimatedContainer(
+                                      duration: const Duration(milliseconds: 150),
+                                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
+                                      decoration: BoxDecoration(
+                                        color: isSelected ? const Color(0xFFFFF7F7) : Colors.white,
+                                        borderRadius: BorderRadius.circular(14.r),
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? const Color(0xFFED1C24)
+                                              : const Color(0xFFE2E4EA),
+                                          width: isSelected ? 1.3 : 0.9,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: isSelected
+                                                ? const Color(0xFFED1C24).withValues(alpha: 0.08)
+                                                : Colors.black.withValues(alpha: 0.02),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Stack(
+                                        children: [
+                                          // Top right selection indicator
+                                          Positioned(
+                                            top: 0,
+                                            right: 0,
+                                            child: Container(
+                                              width: 17.w,
+                                              height: 17.w,
+                                              decoration: BoxDecoration(
+                                                shape: BoxShape.circle,
+                                                color: isSelected ? const Color(0xFFED1C24) : Colors.transparent,
+                                                border: isSelected
+                                                    ? null
+                                                    : Border.all(
+                                                        color: const Color(0xFF9EA3AE),
+                                                        width: 1.3,
+                                                      ),
+                                              ),
+                                              child: isSelected
+                                                  ? Center(
+                                                      child: Icon(
+                                                        Icons.check,
+                                                        color: Colors.white,
+                                                        size: 11.sp,
+                                                      ),
+                                                    )
+                                                  : null,
+                                            ),
+                                          ),
+
+                                          // Main card content: Icon / Image + Title
+                                          Center(
+                                            child: Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                SizedBox(height: 4.h),
+                                                // Category Illustration / Icon
+                                                if (imageUrl != null && imageUrl.isNotEmpty)
+                                                  CachedNetworkImage(
+                                                    imageUrl: imageUrl,
+                                                    height: 42.h,
+                                                    width: 42.h,
+                                                    fit: BoxFit.contain,
+                                                    color: const Color(0xFFED1C24),
+                                                    errorWidget: (_, __, ___) => Icon(
+                                                      _getCategoryFallbackIcon(categoryName),
+                                                      size: 34.sp,
+                                                      color: const Color(0xFFED1C24),
+                                                    ),
+                                                  )
+                                                else
+                                                  Icon(
+                                                    _getCategoryFallbackIcon(categoryName),
+                                                    size: 36.sp,
+                                                    color: const Color(0xFFED1C24),
+                                                  ),
+
+                                                SizedBox(height: 8.h),
+
+                                                // Category Name
+                                                Text(
+                                                  categoryName,
+                                                  style: TextStyle(
+                                                    fontFamily: 'Poppins',
+                                                    fontSize: 12.sp,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: const Color(0xFF181A20),
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        "మీకు నచ్చిన అంశాలను ఎంచుకోండి",
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF6C7278),
-                        ),
-                      ),
+                    ),
 
-                      SizedBox(height: 20.h),
-
-                      // SUBHEADER: "మీ కోసం వార్తలు" & "[ 3 selected ]"
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            "మీ కోసం వార్తలు",
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w800,
-                              color: const Color(0xFF181A20),
-                            ),
+                    // STICKY BOTTOM "Continue ->" BUTTON (Compact Height: 42.h)
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFBFBFC),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 6,
+                            offset: const Offset(0, -2),
                           ),
-                          if (selectedCount > 0)
-                            Container(
-                              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.5.h),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFFFECEC),
-                                borderRadius: BorderRadius.circular(14.r),
-                              ),
-                              child: Text(
-                                "$selectedCount selected",
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 11.5.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: const Color(0xFFED1C24),
-                                ),
-                              ),
-                            ),
                         ],
                       ),
-
-                      SizedBox(height: 12.h),
-
-                      // 3-COLUMN CATEGORY GRID
-                      Expanded(
-                        child: GridView.builder(
-                          physics: const BouncingScrollPhysics(),
-                          itemCount: useFallbacks ? _fallbackCategories.length : categories.length,
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 10.w,
-                            mainAxisSpacing: 10.h,
-                            childAspectRatio: 0.84,
-                          ),
-                          itemBuilder: (context, index) {
-                            final String categoryName = useFallbacks
-                                ? _fallbackCategories[index]['name'] as String
-                                : (categories[index].categoryName ?? '');
-                            final String? imageUrl = useFallbacks
-                                ? null
-                                : categories[index].imageUrl;
-
-                            final bool isSelected = authProvider.selectedCategories.contains(categoryName);
-
-                            return GestureDetector(
-                              onTap: () {
-                                authProvider.addToSelectedEngagements(categoryName);
-                              },
-                              child: AnimatedContainer(
-                                duration: const Duration(milliseconds: 150),
-                                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
-                                decoration: BoxDecoration(
-                                  color: isSelected ? const Color(0xFFFFF7F7) : Colors.white,
-                                  borderRadius: BorderRadius.circular(14.r),
-                                  border: Border.all(
-                                    color: isSelected
-                                        ? const Color(0xFFED1C24)
-                                        : const Color(0xFFE2E4EA),
-                                    width: isSelected ? 1.3 : 0.9,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: isSelected
-                                          ? const Color(0xFFED1C24).withValues(alpha: 0.08)
-                                          : Colors.black.withValues(alpha: 0.02),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Stack(
-                                  children: [
-                                    // Top right selection indicator
-                                    Positioned(
-                                      top: 0,
-                                      right: 0,
-                                      child: Container(
-                                        width: 17.w,
-                                        height: 17.w,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: isSelected ? const Color(0xFFED1C24) : Colors.transparent,
-                                          border: isSelected
-                                              ? null
-                                              : Border.all(
-                                                  color: const Color(0xFF9EA3AE),
-                                                  width: 1.3,
-                                                ),
-                                        ),
-                                        child: isSelected
-                                            ? Center(
-                                                child: Icon(
-                                                  Icons.check,
-                                                  color: Colors.white,
-                                                  size: 11.sp,
-                                                ),
-                                              )
-                                            : null,
-                                      ),
-                                    ),
-
-                                    // Main card content: Icon / Image + Title
-                                    Center(
-                                      child: Column(
-                                        mainAxisAlignment: MainAxisAlignment.center,
-                                        children: [
-                                          SizedBox(height: 4.h),
-                                          // Category Illustration / Icon
-                                          if (imageUrl != null && imageUrl.isNotEmpty)
-                                            CachedNetworkImage(
-                                              imageUrl: imageUrl,
-                                              height: 44.h,
-                                              width: 44.h,
-                                              fit: BoxFit.contain,
-                                              color: const Color(0xFFED1C24),
-                                              errorWidget: (_, __, ___) => Icon(
-                                                _getCategoryFallbackIcon(categoryName),
-                                                size: 36.sp,
-                                                color: const Color(0xFFED1C24),
-                                              ),
-                                            )
-                                          else
-                                            Icon(
-                                              _getCategoryFallbackIcon(categoryName),
-                                              size: 38.sp,
-                                              color: const Color(0xFFED1C24),
-                                            ),
-
-                                          SizedBox(height: 8.h),
-
-                                          // Category Name
-                                          Text(
-                                            categoryName,
-                                            style: TextStyle(
-                                              fontFamily: 'Poppins',
-                                              fontSize: 12.5.sp,
-                                              fontWeight: FontWeight.w700,
-                                              color: const Color(0xFF181A20),
-                                            ),
-                                            textAlign: TextAlign.center,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      SizedBox(height: 12.h),
-
-                      // BOTTOM "Continue ->" BUTTON
-                      GestureDetector(
+                      child: GestureDetector(
                         onTap: authProvider.selectedCategories.isNotEmpty && !authProvider.isCatSaveLoading
                             ? () {
                                 authProvider.sendCategoriesToServer();
@@ -297,30 +315,30 @@ class _CategoriesViewState extends State<CategoriesView> {
                             : null,
                         child: Container(
                           width: double.infinity,
-                          height: 48.h,
+                          height: 42.h,
                           decoration: BoxDecoration(
                             color: authProvider.selectedCategories.isEmpty
                                 ? const Color(0xFFE2E4EA)
                                 : const Color(0xFFED1C24),
-                            borderRadius: BorderRadius.circular(12.r),
+                            borderRadius: BorderRadius.circular(10.r),
                             boxShadow: authProvider.selectedCategories.isEmpty
                                 ? []
                                 : [
                                     BoxShadow(
-                                      color: const Color(0xFFED1C24).withValues(alpha: 0.25),
-                                      blurRadius: 10,
-                                      offset: const Offset(0, 3),
+                                      color: const Color(0xFFED1C24).withValues(alpha: 0.22),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 2),
                                     ),
                                   ],
                           ),
                           child: Center(
                             child: authProvider.isCatSaveLoading
                                 ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
+                                    height: 18,
+                                    width: 18,
                                     child: CircularProgressIndicator(
                                       color: Colors.white,
-                                      strokeWidth: 2.2,
+                                      strokeWidth: 2.0,
                                     ),
                                   )
                                 : Row(
@@ -330,7 +348,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                                         "Continue",
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
-                                          fontSize: 15.sp,
+                                          fontSize: 14.5.sp,
                                           fontWeight: FontWeight.w700,
                                           color: Colors.white,
                                         ),
@@ -338,7 +356,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                                       SizedBox(width: 6.w),
                                       Icon(
                                         Icons.arrow_forward_rounded,
-                                        size: 18.sp,
+                                        size: 16.sp,
                                         color: Colors.white,
                                       ),
                                     ],
@@ -346,9 +364,8 @@ class _CategoriesViewState extends State<CategoriesView> {
                           ),
                         ),
                       ),
-                      SizedBox(height: 6.h),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             ),
