@@ -148,11 +148,23 @@ class HomeProvider extends ChangeNotifier {
           }
 
           if (configMap != null) {
-            folkNight = configMap['folkNight'] == true;
-            liveTvVideosEnable = configMap['livetvvideos'] ?? true;
-            aiTagEnable = configMap['aitag'] ?? true;
-            englishLanguageEnable = configMap['englishLanguage'] ?? true;
-            liveTvCountEnable = configMap['livetvcount'] ?? true;
+            bool parseBool(dynamic val, {bool defaultValue = false}) {
+              if (val == null) return defaultValue;
+              if (val is bool) return val;
+              if (val is num) return val != 0;
+              if (val is String) {
+                final lower = val.toLowerCase().trim();
+                if (lower == 'true' || lower == '1') return true;
+                if (lower == 'false' || lower == '0') return false;
+              }
+              return defaultValue;
+            }
+
+            folkNight = parseBool(configMap['folkNight'], defaultValue: false);
+            liveTvVideosEnable = parseBool(configMap['livetvvideos'], defaultValue: true);
+            aiTagEnable = parseBool(configMap['aitag'], defaultValue: true);
+            englishLanguageEnable = parseBool(configMap['englishLanguage'], defaultValue: true);
+            liveTvCountEnable = parseBool(configMap['livetvcount'], defaultValue: true);
 
             log("AppConfig updated: folkNight=$folkNight, liveTvVideosEnable=$liveTvVideosEnable, aiTagEnable=$aiTagEnable, englishLanguageEnable=$englishLanguageEnable, liveTvCountEnable=$liveTvCountEnable");
             notifyListeners();
@@ -1168,12 +1180,16 @@ class HomeProvider extends ChangeNotifier {
       aiTagDataLoaded(true);
       pageChange(isValue: true);
 
-      // Fetch videos for this tag
-      await fetchVideosByTagSlug(
-        realSlug,
-        displayTitle: displayTitle,
-        thumbnailUrl: tagThumbnail,
-      );
+      // Fetch videos or posts for this tag depending on config
+      if (liveTvVideosEnable) {
+        await fetchVideosByTagSlug(
+          realSlug,
+          displayTitle: displayTitle,
+          thumbnailUrl: tagThumbnail,
+        );
+      } else {
+        await getAllPostsByAiId(chosenId);
+      }
 
       // Scroll top navigation bar to the tag if available
       if (getAllAiTagsList.isNotEmpty) {

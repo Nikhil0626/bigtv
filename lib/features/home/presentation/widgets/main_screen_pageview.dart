@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
@@ -59,7 +58,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
           : Colors.white,
       body: Consumer<HomeProvider>(
         builder: (_, homeProvider, __) {
-          if (homeProvider.isAiTagDataLoaded) {
+          if (homeProvider.isAiTagDataLoaded && homeProvider.liveTvVideosEnable) {
             if (widget.startIndex != homeProvider.selectedIndex) {
               return const SizedBox.shrink();
             }
@@ -76,99 +75,96 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
           return Column(
             children: [
               Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-                  child: ScrollConfiguration(
-                    behavior: ScrollConfiguration.of(context).copyWith(
-                      dragDevices: {
-                        PointerDeviceKind.touch,
-                        PointerDeviceKind.mouse,
-                      },
-                    ),
-                    child: context.read<HomeProvider>().getAllPostList.isEmpty
-                        ? Center(
-                            child: widget.isAiTags
-                                ? const AppNoData()
-                                : Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      const AppNoData(),
-                                      const SizedBox(height: 16),
-                                      ElevatedButton.icon(
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: AppColorTokens.primaryRed,
-                                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(8),
-                                          ),
-                                        ),
-                                        onPressed: () {
-                                          homeProvider.getAllPostList = [];
-                                          homeProvider.getAllPost();
-                                        },
-                                        icon: const Icon(Icons.refresh, color: Colors.white),
-                                        label: const Text(
-                                          "Reload",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.bold,
-                                          ),
+                child: ScrollConfiguration(
+                  behavior: ScrollConfiguration.of(context).copyWith(
+                    dragDevices: {
+                      PointerDeviceKind.touch,
+                      PointerDeviceKind.mouse,
+                    },
+                  ),
+                  child: context.read<HomeProvider>().getAllPostList.isEmpty
+                      ? Center(
+                          child: widget.isAiTags
+                              ? const AppNoData()
+                              : Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    const AppNoData(),
+                                    const SizedBox(height: 16),
+                                    ElevatedButton.icon(
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColorTokens.primaryRed,
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(8),
                                         ),
                                       ),
-                                    ],
-                                  ),
-                          )
-                        : PageView.builder(
-                            physics: MediaQuery.of(context).orientation == Orientation.landscape
-                                ? const NeverScrollableScrollPhysics()
-                                : const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
-                            controller: homeProvider.pageController!,
-                            scrollDirection: Axis.vertical,
-                            itemCount: homeProvider.getAllPostList.length,
-                            onPageChanged: (value) {
-                              context.read<VideoProvider>().pauseVideo();
-                              if (FocusScope.of(context).hasFocus) {
-                                FocusScope.of(context).unfocus();
-                              }
+                                      onPressed: () {
+                                        homeProvider.getAllPostList = [];
+                                        homeProvider.getAllPost();
+                                      },
+                                      icon: const Icon(Icons.refresh, color: Colors.white),
+                                      label: const Text(
+                                        "Reload",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        )
+                      : PageView.builder(
+                          physics: MediaQuery.of(context).orientation == Orientation.landscape
+                              ? const NeverScrollableScrollPhysics()
+                              : const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
+                          controller: homeProvider.pageController!,
+                          scrollDirection: Axis.vertical,
+                          itemCount: homeProvider.getAllPostList.length,
+                          onPageChanged: (value) {
+                            context.read<VideoProvider>().pauseVideo();
+                            if (FocusScope.of(context).hasFocus) {
+                              FocusScope.of(context).unfocus();
+                            }
 
-                              if (homeProvider.isEnglishMode) {
-                                TranslationService().preloadArticles(homeProvider.getAllPostList, value, ahead: 5);
-                              }
+                            if (homeProvider.isEnglishMode) {
+                              TranslationService().preloadArticles(homeProvider.getAllPostList, value, ahead: 5);
+                            }
 
 
-                              homeProvider.setCurrentPageIndex(value);
-                              if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
-                                Future.delayed(const Duration(milliseconds: 2000), () {
-                                  homeProvider.aiTagDataLoaded(false);
-                                  homeProvider.setSelectedTagId(0);
-                                  homeProvider.getAllPost(postIds: "0");
-                                });
-                              }
+                            homeProvider.setCurrentPageIndex(value);
+                            if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
+                              Future.delayed(const Duration(milliseconds: 2000), () {
+                                homeProvider.aiTagDataLoaded(false);
+                                homeProvider.setSelectedTagId(0);
+                                homeProvider.getAllPost(postIds: "0");
+                              });
+                            }
 
-                              context.read<HomeProvider>().flipEvent(
-                                    'news',
-                                    homeProvider.getAllPostList[value]['id'],
-                                    value > autoIndex ? true : false,
-                                  );
-                              autoIndex = value;
+                            context.read<HomeProvider>().flipEvent(
+                                  'news',
+                                  homeProvider.getAllPostList[value]['id'],
+                                  value > autoIndex ? true : false,
+                                );
+                            autoIndex = value;
 
-                              final now = DateTime.now();
-                              final duration = now.difference(_pageStartTime ?? now);
-                              AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
+                            final now = DateTime.now();
+                            final duration = now.difference(_pageStartTime ?? now);
+                            AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
 
-                              _pageStartTime = now;
-                            },
-                            itemBuilder: (context, index) {
-                              return MainScreenBytView(
-                                article: homeProvider.getAllPostList[index],
-                                pageController: homeProvider.pageController!,
-                                length: homeProvider.getAllPostList.length,
-                                index: index,
-                                aiTagName: "",
-                              );
-                            },
-                          ),
-                  ),
+                            _pageStartTime = now;
+                          },
+                          itemBuilder: (context, index) {
+                            return MainScreenBytView(
+                              article: homeProvider.getAllPostList[index],
+                              pageController: homeProvider.pageController!,
+                              length: homeProvider.getAllPostList.length,
+                              index: index,
+                              aiTagName: "",
+                            );
+                          },
+                        ),
                 ),
               ),
               if (context.watch<HomeProvider>().isAiTagDataLoaded && widget.isAiTags == false && homeProvider.getAllPostList.isNotEmpty)

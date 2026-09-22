@@ -223,27 +223,20 @@ class _EditorialScreenState extends State<EditorialScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        backgroundColor: AppColorTokens.primaryRed,
-        elevation: 0,
-        centerTitle: true,
-        title: Consumer<HomeProvider>(
-          builder: (_, homeProvider, __) {
-            final title = homeProvider.langCode == 'ml' ? 'എഡിറ്റോറിയൽ' : 'ఎడిటోరియల్';
-            return Text(
-              title,
-              style: homeScreenFontStyle(
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            );
-          },
-        ),
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: const SystemUiOverlayStyle(
+        statusBarColor: AppColorTokens.primaryRed,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
       ),
-      body: Consumer<HomeProvider>(
+      child: Scaffold(
+        backgroundColor: AppColorTokens.primaryRed,
+        body: SafeArea(
+          top: true,
+          bottom: false,
+          child: Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: Consumer<HomeProvider>(
         builder: (context, homeProvider, child) {
           if (homeProvider.isEditorialLoading && homeProvider.editorialPosts.isEmpty) {
             return _buildEditorialShimmer();
@@ -472,12 +465,15 @@ class _EditorialScreenState extends State<EditorialScreen> {
                       ],
                     ),
                   ),
-                );
-              },
-            ),
-          );
-        },
+                  );
+                },
+              ),
+            );
+          },
+        ),
       ),
-    );
-  }
+    ),
+  ),
+);
+}
 }

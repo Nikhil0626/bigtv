@@ -6,54 +6,10 @@ import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_toasts.dart';
+import 'package:chotanews/utils/top_right_wave_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
-class _TopRightWavePainter extends CustomPainter {
-  final bool isDark;
-  _TopRightWavePainter({this.isDark = false});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.95, -size.height * 0.05);
-
-    // Rich background radial glow
-    final glowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: isDark
-            ? [
-                const Color(0xFF420D11).withValues(alpha: 0.85),
-                const Color(0xFF2B090C).withValues(alpha: 0.55),
-                const Color(0xFF190608).withValues(alpha: 0.25),
-                Colors.transparent,
-              ]
-            : [
-                const Color(0xFFFFBDBD).withValues(alpha: 0.95),
-                const Color(0xFFFFDEDE).withValues(alpha: 0.75),
-                const Color(0xFFFFF0F0).withValues(alpha: 0.40),
-                Colors.white.withValues(alpha: 0.0),
-              ],
-        stops: const [0.0, 0.4, 0.7, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: 300));
-    canvas.drawCircle(center, 300, glowPaint);
-
-    // Prominent concentric wave ripple lines
-    final radii = [45.0, 75.0, 110.0, 150.0, 195.0, 245.0, 300.0];
-    final opacities = [0.45, 0.38, 0.30, 0.24, 0.18, 0.12, 0.06];
-
-    for (int i = 0; i < radii.length; i++) {
-      final linePaint = Paint()
-        ..color = const Color(0xFFED1C24).withValues(alpha: isDark ? opacities[i] * 0.7 : opacities[i])
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.2;
-      canvas.drawCircle(center, radii[i], linePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _TopRightWavePainter oldDelegate) => oldDelegate.isDark != isDark;
-}
 
 class FilterView extends StatefulWidget {
   const FilterView({super.key});
@@ -208,10 +164,14 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF10121A) : Colors.white,
-      body: SizedBox.expand(
-        child: CustomPaint(
-          painter: _TopRightWavePainter(isDark: isDark),
-          child: SafeArea(
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: CustomPaint(
+              painter: TopRightWavePainter(isDark: isDark),
+            ),
+          ),
+          SafeArea(
             bottom: false,
             child: Column(
               children: [
@@ -445,7 +405,7 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
               ],
             ),
           ),
-        ),
+        ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(isDark),
     );

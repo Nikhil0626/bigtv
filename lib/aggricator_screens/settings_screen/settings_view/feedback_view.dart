@@ -1,43 +1,9 @@
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/utils/app_toasts.dart';
+import 'package:chotanews/utils/top_right_wave_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-
-class _TopRightWavePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * 0.95, -size.height * 0.05);
-
-    // Rich background radial glow
-    final glowPaint = Paint()
-      ..shader = RadialGradient(
-        colors: [
-          const Color(0xFFFFBDBD).withValues(alpha: 0.95),
-          const Color(0xFFFFDEDE).withValues(alpha: 0.75),
-          const Color(0xFFFFF0F0).withValues(alpha: 0.40),
-          Colors.white.withValues(alpha: 0.0),
-        ],
-        stops: const [0.0, 0.4, 0.7, 1.0],
-      ).createShader(Rect.fromCircle(center: center, radius: 340));
-    canvas.drawCircle(center, 340, glowPaint);
-
-    // Prominent concentric wave ripple lines
-    final radii = [50.0, 85.0, 120.0, 160.0, 205.0, 255.0, 310.0, 370.0];
-    final opacities = [0.45, 0.38, 0.30, 0.24, 0.18, 0.13, 0.08, 0.04];
-
-    for (int i = 0; i < radii.length; i++) {
-      final linePaint = Paint()
-        ..color = const Color(0xFFED1C24).withValues(alpha: opacities[i])
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.3;
-      canvas.drawCircle(center, radii[i], linePaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
 
 class FeedbackForm extends StatefulWidget {
   const FeedbackForm({super.key});
@@ -170,7 +136,7 @@ class FeedbackFormState extends State<FeedbackForm> {
             width: MediaQuery.of(context).size.width,
             height: 350.h,
             child: CustomPaint(
-              painter: _TopRightWavePainter(),
+              painter: const TopRightWavePainter(),
             ),
           ),
 
