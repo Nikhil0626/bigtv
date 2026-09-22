@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -44,6 +45,77 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   double _volume = 1.0;
   bool _showVolumeSlider = false;
   final Set<String> _viewedVideoIds = {};
+
+  Timer? _controlsTimer;
+  bool _isDraggingSeekBar = false;
+  double _dragPosition = 0.0;
+
+  void _startHideControlsTimer() {
+    _controlsTimer?.cancel();
+    if (_controller != null &&
+        _controller!.value.isInitialized &&
+        _controller!.value.isPlaying &&
+        !_isDraggingSeekBar) {
+      _controlsTimer = Timer(const Duration(seconds: 2), () {
+        if (mounted &&
+            _controller != null &&
+            _controller!.value.isPlaying &&
+            !_isDraggingSeekBar) {
+          setState(() {
+            _showControls = false;
+          });
+        }
+      });
+    }
+  }
+
+  Widget _buildSeekBar({required bool isDark}) {
+    if (_controller == null || !_isInitialized) return const SizedBox.shrink();
+
+    final duration = _controller!.value.duration;
+    final position = _controller!.value.position;
+    final double durationMs = duration.inMilliseconds.toDouble();
+    final double positionMs = _isDraggingSeekBar
+        ? _dragPosition
+        : position.inMilliseconds.toDouble();
+    final double currentVal =
+        positionMs.clamp(0.0, durationMs > 0 ? durationMs : 1.0);
+
+    return SliderTheme(
+      data: SliderThemeData(
+        trackHeight: 3.h,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+        overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+        activeTrackColor: Colors.red,
+        inactiveTrackColor: isDark ? Colors.white24 : Colors.grey.shade300,
+        thumbColor: Colors.red,
+      ),
+      child: Slider(
+        value: currentVal,
+        min: 0.0,
+        max: durationMs > 0 ? durationMs : 1.0,
+        onChangeStart: (val) {
+          setState(() {
+            _isDraggingSeekBar = true;
+            _dragPosition = val;
+          });
+          _controlsTimer?.cancel();
+        },
+        onChanged: (val) {
+          setState(() {
+            _dragPosition = val;
+          });
+        },
+        onChangeEnd: (val) {
+          _controller?.seekTo(Duration(milliseconds: val.toInt()));
+          setState(() {
+            _isDraggingSeekBar = false;
+          });
+          _startHideControlsTimer();
+        },
+      ),
+    );
+  }
 
   Future<void> _incrementViewCount(int index) async {
     if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length)
@@ -380,7 +452,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
           _controller = controller;
           _isInitialized = true;
           _hasError = false;
+          _showControls = true;
         });
+        _startHideControlsTimer();
       }
       return true;
     } catch (e, st) {
@@ -410,7 +484,7 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
         if (currentItem != null && value.position.inSeconds > 1) {
           VideoPositionService.savePosition(currentItem, value.position);
         }
-        if (mounted) setState(() {});
+        if (!_isDraggingSeekBar && mounted) setState(() {});
       }
     }
   }
@@ -435,6 +509,7 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
 
   @override
   void dispose() {
+    _controlsTimer?.cancel();
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -605,20 +680,26 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                   _toggleFullScreen();
                 }
               },
-              child: GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _showControls = !_showControls;
-                  });
-                },
-                child: SizedBox.expand(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      if (_controller != null && _isInitialized)
-                        SizedBox.expand(
+              child: SizedBox.expand(
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    if (_controller != null && _isInitialized)
+                      GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          setState(() {
+                            _showControls = !_showControls;
+                          });
+                          if (_showControls) {
+                            _startHideControlsTimer();
+                          } else {
+                            _controlsTimer?.cancel();
+                          }
+                        },
+                        child: SizedBox.expand(
                           child: FittedBox(
-                            fit: BoxFit.cover,
+                            fit: BoxFit.fill,
                             child: SizedBox(
                               key: ValueKey(_controller),
                               width: _controller!.value.size.width > 0
@@ -630,19 +711,26 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                               child: VideoPlayer(_controller!),
                             ),
                           ),
-                        )
-                      else if (_hasError)
-                        _buildErrorView()
-                      else
-                        const Center(
-                            child:
-                                CircularProgressIndicator(color: Colors.red)),
-                      if (_showControls &&
-                          _controller != null &&
-                          _isInitialized)
-                        _buildFullscreenControls(currentTitle, currentVideoMap),
-                    ],
-                  ),
+                        ),
+                      )
+                    else if (_hasError)
+                      _buildErrorView()
+                    else
+                      const Center(
+                          child:
+                              CircularProgressIndicator(color: Colors.red)),
+                    if (_controller != null &&
+                        _isInitialized &&
+                        _controller!.value.isBuffering)
+                      const Center(
+                          child:
+                              CircularProgressIndicator(color: Colors.red)),
+                    if (_showControls &&
+                        _controller != null &&
+                        _isInitialized &&
+                        !_controller!.value.isBuffering)
+                      _buildFullscreenControls(currentTitle, currentVideoMap),
+                  ],
                 ),
               ),
             ),
@@ -681,32 +769,44 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 14.0),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        width: double.infinity,
-                        height: 200.h,
-                        color: Colors.black,
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _showControls = !_showControls;
-                            });
-                          },
+                      child: AspectRatio(
+                        aspectRatio: (_controller != null &&
+                                _isInitialized &&
+                                _controller!.value.aspectRatio > 0)
+                            ? _controller!.value.aspectRatio
+                            : (16 / 9),
+                        child: Container(
+                          width: double.infinity,
+                          color: Colors.black,
                           child: Stack(
                             alignment: Alignment.center,
                             children: [
                               if (_controller != null && _isInitialized)
-                                SizedBox.expand(
-                                  child: FittedBox(
-                                    fit: BoxFit.cover,
-                                    child: SizedBox(
-                                      key: ValueKey(_controller),
-                                      width: _controller!.value.size.width > 0
-                                          ? _controller!.value.size.width
-                                          : 16,
-                                      height: _controller!.value.size.height > 0
-                                          ? _controller!.value.size.height
-                                          : 9,
-                                      child: VideoPlayer(_controller!),
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    setState(() {
+                                      _showControls = !_showControls;
+                                    });
+                                    if (_showControls) {
+                                      _startHideControlsTimer();
+                                    } else {
+                                      _controlsTimer?.cancel();
+                                    }
+                                  },
+                                  child: SizedBox.expand(
+                                    child: FittedBox(
+                                      fit: BoxFit.fill,
+                                      child: SizedBox(
+                                        key: ValueKey(_controller),
+                                        width: _controller!.value.size.width > 0
+                                            ? _controller!.value.size.width
+                                            : 16,
+                                        height: _controller!.value.size.height > 0
+                                            ? _controller!.value.size.height
+                                            : 9,
+                                        child: VideoPlayer(_controller!),
+                                      ),
                                     ),
                                   ),
                                 )
@@ -716,9 +816,16 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                                 const Center(
                                     child: CircularProgressIndicator(
                                         color: Colors.red)),
+                              if (_controller != null &&
+                                  _isInitialized &&
+                                  _controller!.value.isBuffering)
+                                const Center(
+                                    child: CircularProgressIndicator(
+                                        color: Colors.red)),
                               if (_showControls &&
                                   _controller != null &&
-                                  _isInitialized)
+                                  _isInitialized &&
+                                  !_controller!.value.isBuffering)
                                 _buildPlayerOverlayControls(
                                     currentTitle, currentVideoMap),
                             ],
@@ -732,40 +839,35 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                   if (_controller != null && _isInitialized)
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 18.0, vertical: 6.0),
+                          horizontal: 14.0, vertical: 2.0),
                       child: Column(
                         children: [
-                          VideoProgressIndicator(
-                            _controller!,
-                            allowScrubbing: true,
-                            colors: const VideoProgressColors(
-                              playedColor: Colors.red,
-                              bufferedColor: Colors.white24,
-                              backgroundColor: Colors.white12,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Text(
-                                _formatDuration(_controller!.value.position),
-                                style: TextStyle(
-                                    color: isDark
-                                        ? Colors.white70
-                                        : Colors.black54,
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w500),
-                              ),
-                              const Spacer(),
-                              Text(
-                                _formatDuration(_controller!.value.duration),
-                                style: TextStyle(
-                                    color: isDark
-                                        ? Colors.white70
-                                        : Colors.black54,
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w500),
-                              ),
+                          _buildSeekBar(isDark: isDark),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                            child: Row(
+                              children: [
+                                Text(
+                                  _formatDuration(_isDraggingSeekBar
+                                      ? Duration(milliseconds: _dragPosition.toInt())
+                                      : _controller!.value.position),
+                                  style: TextStyle(
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black54,
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                                const Spacer(),
+                                Text(
+                                  _formatDuration(_controller!.value.duration),
+                                  style: TextStyle(
+                                      color: isDark
+                                          ? Colors.white70
+                                          : Colors.black54,
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w500),
+                                ),
                               const SizedBox(width: 8),
                               GestureDetector(
                                 onTap: () => _shareToWhatsApp(
@@ -800,6 +902,7 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                                 ),
                               ),
                             ],
+                          ),
                           ),
                         ],
                       ),
@@ -1109,161 +1212,191 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   // Overlay Controls inside Video Player Frame
   Widget _buildPlayerOverlayControls(
       String title, Map<String, dynamic>? currentVideo) {
-    return Container(
-      color: Colors.black38,
-      child: Stack(
-        children: [
-          // Top Left View Count Badge
-          if (context.watch<HomeProvider>().liveTvCountEnable)
-            Positioned(
-              top: 8,
-              left: 10,
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.6),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.white24, width: 0.8),
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        setState(() {
+          _showControls = false;
+        });
+        _controlsTimer?.cancel();
+      },
+      child: Container(
+        color: Colors.black38,
+        child: Stack(
+          children: [
+            // Top Left View Count Badge
+            if (context.watch<HomeProvider>().liveTvCountEnable)
+              Positioned(
+                top: 8,
+                left: 10,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.white24, width: 0.8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.remove_red_eye_outlined,
+                          color: Colors.white, size: 18),
+                      const SizedBox(width: 4),
+                      Text(
+                        _formatViewCount(_getViewCount(currentVideo)),
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+              ),
+
+            // Volume & Fullscreen icon top right
+            Positioned(
+              top: 4,
+              right: 4,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (_showVolumeSlider)
+                    SizedBox(
+                      width: 70.w,
+                      child: SliderTheme(
+                        data: SliderThemeData(
+                          trackHeight: 2,
+                          thumbShape:
+                              const RoundSliderThumbShape(enabledThumbRadius: 4),
+                          overlayShape:
+                              const RoundSliderOverlayShape(overlayRadius: 8),
+                          activeTrackColor: Colors.red,
+                          inactiveTrackColor: Colors.white24,
+                          thumbColor: Colors.white,
+                        ),
+                        child: Slider(
+                          value: _isMuted ? 0.0 : _volume,
+                          min: 0.0,
+                          max: 1.0,
+                          onChanged: (val) {
+                            setState(() {
+                              _volume = val;
+                              _isMuted = val == 0;
+                              _controller?.setVolume(val);
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                  IconButton(
+                    icon: Icon(
+                      _isMuted || _volume == 0
+                          ? Icons.volume_off
+                          : Icons.volume_up,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _showVolumeSlider = !_showVolumeSlider;
+                      });
+                      _toggleMute();
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      _isFullScreen ? Icons.fullscreen_exit : Icons.crop_free,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    onPressed: _toggleFullScreen,
+                  ),
+                ],
+              ),
+            ),
+
+            // Center controls: Skip Prev | Rewind 10s | Play/Pause | Forward 10s | Skip Next
+            Center(
+              child: GestureDetector(
+                onTap: () {},
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.remove_red_eye_outlined,
-                        color: Colors.white, size: 18),
-                    const SizedBox(width: 4),
-                    Text(
-                      _formatViewCount(_getViewCount(currentVideo)),
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
+                    IconButton(
+                      iconSize: 26,
+                      icon: const Icon(Icons.skip_previous, color: Colors.white),
+                      onPressed: _currentIndex > 0
+                          ? () {
+                              _playPrevTrack();
+                              _startHideControlsTimer();
+                            }
+                          : null,
+                    ),
+                    IconButton(
+                      iconSize: 28,
+                      icon: const Icon(Icons.replay_10, color: Colors.white),
+                      onPressed: () {
+                        _seekRelative(-10);
+                        _startHideControlsTimer();
+                      },
+                    ),
+                    const SizedBox(width: 6),
+                    Container(
+                      decoration: const BoxDecoration(
+                        color: Colors.black45,
+                        shape: BoxShape.circle,
                       ),
+                      child: IconButton(
+                        iconSize: 36,
+                        icon: Icon(
+                          _controller!.value.isPlaying
+                              ? Icons.pause
+                              : Icons.play_arrow,
+                          color: Colors.white,
+                        ),
+                        onPressed: () {
+                          if (_controller != null && _isInitialized) {
+                            if (_controller!.value.isPlaying) {
+                              _controller!.pause();
+                              _controlsTimer?.cancel();
+                            } else {
+                              _controller!.play();
+                              _startHideControlsTimer();
+                            }
+                            setState(() {});
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    IconButton(
+                      iconSize: 28,
+                      icon: const Icon(Icons.forward_10, color: Colors.white),
+                      onPressed: () {
+                        _seekRelative(10);
+                        _startHideControlsTimer();
+                      },
+                    ),
+                    IconButton(
+                      iconSize: 26,
+                      icon: const Icon(Icons.skip_next, color: Colors.white),
+                      onPressed: _currentIndex + 1 < widget.videos.length
+                          ? () {
+                              _playNextTrack();
+                              _startHideControlsTimer();
+                            }
+                          : null,
                     ),
                   ],
                 ),
               ),
             ),
-
-          // Volume & Fullscreen icon top right
-          Positioned(
-            top: 4,
-            right: 4,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (_showVolumeSlider)
-                  SizedBox(
-                    width: 70.w,
-                    child: SliderTheme(
-                      data: SliderThemeData(
-                        trackHeight: 2,
-                        thumbShape:
-                            const RoundSliderThumbShape(enabledThumbRadius: 4),
-                        overlayShape:
-                            const RoundSliderOverlayShape(overlayRadius: 8),
-                        activeTrackColor: Colors.red,
-                        inactiveTrackColor: Colors.white24,
-                        thumbColor: Colors.white,
-                      ),
-                      child: Slider(
-                        value: _isMuted ? 0.0 : _volume,
-                        min: 0.0,
-                        max: 1.0,
-                        onChanged: (val) {
-                          setState(() {
-                            _volume = val;
-                            _isMuted = val == 0;
-                            _controller?.setVolume(val);
-                          });
-                        },
-                      ),
-                    ),
-                  ),
-                IconButton(
-                  icon: Icon(
-                    _isMuted || _volume == 0
-                        ? Icons.volume_off
-                        : Icons.volume_up,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _showVolumeSlider = !_showVolumeSlider;
-                    });
-                    _toggleMute();
-                  },
-                ),
-                IconButton(
-                  icon: Icon(
-                    _isFullScreen ? Icons.fullscreen_exit : Icons.crop_free,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                  onPressed: _toggleFullScreen,
-                ),
-              ],
-            ),
-          ),
-
-          // Center controls: Skip Prev | Rewind 10s | Play/Pause | Forward 10s | Skip Next
-          Center(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                  iconSize: 26,
-                  icon: const Icon(Icons.skip_previous, color: Colors.white),
-                  onPressed: _currentIndex > 0 ? _playPrevTrack : null,
-                ),
-                IconButton(
-                  iconSize: 28,
-                  icon: const Icon(Icons.replay_10, color: Colors.white),
-                  onPressed: () => _seekRelative(-10),
-                ),
-                const SizedBox(width: 6),
-                Container(
-                  decoration: const BoxDecoration(
-                    color: Colors.black45,
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    iconSize: 36,
-                    icon: Icon(
-                      _controller!.value.isPlaying
-                          ? Icons.pause
-                          : Icons.play_arrow,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (_controller!.value.isPlaying) {
-                          _controller!.pause();
-                        } else {
-                          _controller!.play();
-                        }
-                      });
-                    },
-                  ),
-                ),
-                const SizedBox(width: 6),
-                IconButton(
-                  iconSize: 28,
-                  icon: const Icon(Icons.forward_10, color: Colors.white),
-                  onPressed: () => _seekRelative(10),
-                ),
-                IconButton(
-                  iconSize: 26,
-                  icon: const Icon(Icons.skip_next, color: Colors.white),
-                  onPressed: _currentIndex + 1 < widget.videos.length
-                      ? _playNextTrack
-                      : null,
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -1271,225 +1404,255 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   // Fullscreen Overlay Controls (Landscape)
   Widget _buildFullscreenControls(
       String title, Map<String, dynamic>? currentVideo) {
-    return Container(
-      color: Colors.black45,
-      child: Stack(
-        children: [
-          Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-                child: Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back,
-                          color: Colors.white, size: 20),
-                      onPressed: () => Navigator.pop(context),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () {
+        setState(() {
+          _showControls = false;
+        });
+        _controlsTimer?.cancel();
+      },
+      child: Container(
+        color: Colors.black45,
+        child: Stack(
+          children: [
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.arrow_back,
+                            color: Colors.white, size: 20),
+                        onPressed: () => Navigator.pop(context),
                       ),
-                    ),
-                    if (_showVolumeSlider)
-                      SizedBox(
-                        width: 90.w,
-                        child: SliderTheme(
-                          data: SliderThemeData(
-                            trackHeight: 2,
-                            thumbShape: const RoundSliderThumbShape(
-                                enabledThumbRadius: 4),
-                            overlayShape:
-                                const RoundSliderOverlayShape(overlayRadius: 8),
-                            activeTrackColor: Colors.red,
-                            inactiveTrackColor: Colors.white24,
-                            thumbColor: Colors.white,
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.w600,
                           ),
-                          child: Slider(
-                            value: _isMuted ? 0.0 : _volume,
-                            min: 0.0,
-                            max: 1.0,
-                            onChanged: (val) {
-                              setState(() {
-                                _volume = val;
-                                _isMuted = val == 0;
-                                _controller?.setVolume(val);
-                              });
-                            },
-                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                    IconButton(
-                      icon: Icon(
-                        _isMuted || _volume == 0
-                            ? Icons.volume_off
-                            : Icons.volume_up,
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _showVolumeSlider = !_showVolumeSlider;
-                        });
-                        _toggleMute();
-                      },
-                    ),
-                    // View count between Volume and Exit Fullscreen icons in Landscape mode
-                    if (context.watch<HomeProvider>().liveTvCountEnable)
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.remove_red_eye_outlined,
-                              color: Colors.white,
-                              size: 24,
+                      if (_showVolumeSlider)
+                        SizedBox(
+                          width: 90.w,
+                          child: SliderTheme(
+                            data: SliderThemeData(
+                              trackHeight: 2,
+                              thumbShape: const RoundSliderThumbShape(
+                                  enabledThumbRadius: 4),
+                              overlayShape:
+                                  const RoundSliderOverlayShape(overlayRadius: 8),
+                              activeTrackColor: Colors.red,
+                              inactiveTrackColor: Colors.white24,
+                              thumbColor: Colors.white,
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              _formatViewCount(_getViewCount(currentVideo)),
-                              style: const TextStyle(
+                            child: Slider(
+                              value: _isMuted ? 0.0 : _volume,
+                              min: 0.0,
+                              max: 1.0,
+                              onChanged: (val) {
+                                setState(() {
+                                  _volume = val;
+                                  _isMuted = val == 0;
+                                  _controller?.setVolume(val);
+                                });
+                              },
+                            ),
+                          ),
+                        ),
+                      IconButton(
+                        icon: Icon(
+                          _isMuted || _volume == 0
+                              ? Icons.volume_off
+                              : Icons.volume_up,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _showVolumeSlider = !_showVolumeSlider;
+                          });
+                          _toggleMute();
+                        },
+                      ),
+                      // View count between Volume and Exit Fullscreen icons in Landscape mode
+                      if (context.watch<HomeProvider>().liveTvCountEnable)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.remove_red_eye_outlined,
+                                color: Colors.white,
+                                size: 24,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                _formatViewCount(_getViewCount(currentVideo)),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      IconButton(
+                        icon: const Icon(Icons.fullscreen_exit,
+                            color: Colors.white, size: 22),
+                        onPressed: _toggleFullScreen,
+                      ),
+                    ],
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () {},
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        iconSize: 32,
+                        icon: const Icon(Icons.skip_previous, color: Colors.white),
+                        onPressed: _currentIndex > 0
+                            ? () {
+                                _playPrevTrack();
+                                _startHideControlsTimer();
+                              }
+                            : null,
+                      ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        iconSize: 34,
+                        icon: const Icon(Icons.replay_10, color: Colors.white),
+                        onPressed: () {
+                          _seekRelative(-10);
+                          _startHideControlsTimer();
+                        },
+                      ),
+                      const SizedBox(width: 16),
+                      Container(
+                        decoration: const BoxDecoration(
+                          color: Colors.black45,
+                          shape: BoxShape.circle,
+                        ),
+                        child: IconButton(
+                          iconSize: 44,
+                          icon: Icon(
+                            _controller!.value.isPlaying
+                                ? Icons.pause_circle_filled
+                                : Icons.play_circle_filled,
+                            color: Colors.white,
+                          ),
+                          onPressed: () {
+                            if (_controller != null && _isInitialized) {
+                              if (_controller!.value.isPlaying) {
+                                _controller!.pause();
+                                _controlsTimer?.cancel();
+                              } else {
+                                _controller!.play();
+                                _startHideControlsTimer();
+                              }
+                              setState(() {});
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      IconButton(
+                        iconSize: 34,
+                        icon: const Icon(Icons.forward_10, color: Colors.white),
+                        onPressed: () {
+                          _seekRelative(10);
+                          _startHideControlsTimer();
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      IconButton(
+                        iconSize: 32,
+                        icon: const Icon(Icons.skip_next, color: Colors.white),
+                        onPressed: _currentIndex + 1 < widget.videos.length
+                            ? () {
+                                _playNextTrack();
+                                _startHideControlsTimer();
+                              }
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Column(
+                    children: [
+                      _buildSeekBar(isDark: true),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Text(
+                            _formatDuration(_isDraggingSeekBar
+                                ? Duration(milliseconds: _dragPosition.toInt())
+                                : _controller!.value.position),
+                            style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    IconButton(
-                      icon: const Icon(Icons.fullscreen_exit,
-                          color: Colors.white, size: 22),
-                      onPressed: _toggleFullScreen,
-                    ),
-                  ],
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    iconSize: 32,
-                    icon: const Icon(Icons.skip_previous, color: Colors.white),
-                    onPressed: _currentIndex > 0 ? _playPrevTrack : null,
-                  ),
-                  const SizedBox(width: 12),
-                  IconButton(
-                    iconSize: 34,
-                    icon: const Icon(Icons.replay_10, color: Colors.white),
-                    onPressed: () => _seekRelative(-10),
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    iconSize: 44,
-                    icon: Icon(
-                      _controller!.value.isPlaying
-                          ? Icons.pause_circle_filled
-                          : Icons.play_circle_filled,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (_controller!.value.isPlaying) {
-                          _controller!.pause();
-                        } else {
-                          _controller!.play();
-                        }
-                      });
-                    },
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    iconSize: 34,
-                    icon: const Icon(Icons.forward_10, color: Colors.white),
-                    onPressed: () => _seekRelative(10),
-                  ),
-                  const SizedBox(width: 12),
-                  IconButton(
-                    iconSize: 32,
-                    icon: const Icon(Icons.skip_next, color: Colors.white),
-                    onPressed: _currentIndex + 1 < widget.videos.length
-                        ? _playNextTrack
-                        : null,
-                  ),
-                ],
-              ),
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Column(
-                  children: [
-                    VideoProgressIndicator(
-                      _controller!,
-                      allowScrubbing: true,
-                      colors: const VideoProgressColors(
-                        playedColor: Colors.red,
-                        bufferedColor: Colors.white30,
-                        backgroundColor: Colors.white12,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Text(
-                          _formatDuration(_controller!.value.position),
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500),
-                        ),
-                        const Spacer(),
-                        Text(
-                          _formatDuration(_controller!.value.duration),
-                          style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w500),
-                        ),
-                        const SizedBox(width: 8),
-                        GestureDetector(
-                          onTap: () => _shareToWhatsApp(currentVideo, title),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withValues(alpha: 0.6),
-                              shape: BoxShape.circle,
-                              border:
-                                  Border.all(color: Colors.white24, width: 0.8),
-                            ),
-                            child: Image.asset(
-                              "assets/images/WhatsApp_icon.png",
-                              width: 30,
-                              height: 30,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(
-                                Icons.share,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          const Spacer(),
+                          Text(
+                            _formatDuration(_controller!.value.duration),
+                            style: const TextStyle(
                                 color: Colors.white,
-                                size: 16,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500),
+                          ),
+                          const SizedBox(width: 8),
+                          GestureDetector(
+                            onTap: () => _shareToWhatsApp(currentVideo, title),
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.6),
+                                shape: BoxShape.circle,
+                                border:
+                                    Border.all(color: Colors.white24, width: 0.8),
+                              ),
+                              child: Image.asset(
+                                "assets/images/WhatsApp_icon.png",
+                                width: 30,
+                                height: 30,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(
+                                  Icons.share,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
