@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
@@ -130,31 +131,35 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                   enlargeCenterPage: true,
                 ),
                 items: widget.imageUrls.map((image) {
+                  final String imgUrl = image is String ? image : (image['Url'] ?? "");
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ImagePreview(
-                            imageUrl: image is String ? image : (image['Url'] ?? ""),
+                            imageUrl: imgUrl,
                             title: widget.postDetails['title'] ?? "",
                           ),
                         ),
                       );
                     },
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.easeInOut,
+                    child: CachedNetworkImage(
+                      imageUrl: imgUrl,
                       width: MediaQuery.of(context).size.width,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(
-                            image is String ? image : (image['Url'] ?? ""),
-                          ),
-                          fit: isFoldable ? BoxFit.fill : BoxFit.cover,
-                          filterQuality: FilterQuality.medium,
-                          isAntiAlias: true,
+                      height: MediaQuery.of(context).size.height,
+                      fit: isFoldable ? BoxFit.fill : BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: Colors.black26,
+                        child: const Center(
+                          child: CircularProgressIndicator(color: Colors.red),
                         ),
+                      ),
+                      errorWidget: (context, url, error) => Image.asset(
+                        "assets/images/bigtv_default_post.png",
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                        fit: isFoldable ? BoxFit.fill : BoxFit.cover,
                       ),
                     ),
                   );

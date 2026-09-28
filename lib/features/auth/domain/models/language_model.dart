@@ -33,10 +33,63 @@ class LanguageModel {
     };
   }
 
+  static const Map<String, String> _nativeNameMap = {
+    'te': 'తెలుగు',
+    'en': 'English',
+    'hi': 'हिन्दी',
+    'ta': 'தமிழ்',
+    'kn': 'ಕನ್ನಡ',
+    'ml': 'മലയാളം',
+    'mr': 'मराठी',
+    'bn': 'বাংলা',
+    'gu': 'ગુજરાતી',
+    'pa': 'ਪੰਜਾਬੀ',
+    'or': 'ଓଡ଼ିଆ',
+  };
+
+  static const Map<String, String> _englishNameMap = {
+    'te': 'Telugu',
+    'en': 'English',
+    'hi': 'Hindi',
+    'ta': 'Tamil',
+    'kn': 'Kannada',
+    'ml': 'Malayalam',
+    'mr': 'Marathi',
+    'bn': 'Bengali',
+    'gu': 'Gujarati',
+    'pa': 'Punjabi',
+    'or': 'Odia',
+  };
+
+  String getNativeName() {
+    final c = code?.toLowerCase() ?? '';
+    if (_nativeNameMap.containsKey(c)) {
+      return _nativeNameMap[c]!;
+    }
+    if (name.containsKey(c)) {
+      return name[c]?.toString() ?? getDisplayName();
+    }
+    if (symbol.isNotEmpty) {
+      return symbol;
+    }
+    return getDisplayName();
+  }
+
+  String getEnglishName() {
+    final c = code?.toLowerCase() ?? '';
+    if (_englishNameMap.containsKey(c)) {
+      return _englishNameMap[c]!;
+    }
+    if (name.containsKey('en')) {
+      return name['en']?.toString() ?? getDisplayName();
+    }
+    return getDisplayName();
+  }
+
   String getDisplayName() {
-    // We can prefer English display name or based on current locale, but for now
-    // English seems good as a fallback, or we can use the symbol/native logic.
-    // Given the names, 'en' contains the English name.
-    return name['en']?.toString() ?? "Unknown";
+    return name['en']?.toString() ??
+        (name.values.isNotEmpty ? name.values.first?.toString() : null) ??
+        code ??
+        "Telugu";
   }
 }

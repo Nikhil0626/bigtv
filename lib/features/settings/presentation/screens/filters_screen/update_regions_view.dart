@@ -1,11 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/features/auth/domain/models/location_model.dart';
-import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
-import 'package:chotanews/utils/app_fonts.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/auth/domain/models/location_model.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 
 class UpdateRegionsView extends StatefulWidget {
   const UpdateRegionsView({super.key});
@@ -15,6 +15,28 @@ class UpdateRegionsView extends StatefulWidget {
 }
 
 class _UpdateRegionsViewState extends State<UpdateRegionsView> {
+  // Default fallback locations with Telugu & English names
+  final List<Map<String, dynamic>> _fallbackLocations = [
+    {
+      'id': 1,
+      'nativeName': 'తెలంగాణ',
+      'englishName': 'Telangana',
+      'asset': 'assets/images/Telangana logo.png',
+    },
+    {
+      'id': 2,
+      'nativeName': 'ఆంధ్రప్రదేశ్',
+      'englishName': 'Andhra Pradesh',
+      'asset': 'assets/images/AP logo.png',
+    },
+    {
+      'id': 3,
+      'nativeName': 'కేరళ',
+      'englishName': 'Kerala',
+      'asset': null,
+    },
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -23,53 +45,76 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
     });
   }
 
-  Widget _buildFallbackStateImage(String stateName) {
-    String? imagePath;
-    final s = stateName.toLowerCase();
-    if (s.contains('telangana') || s.contains('తెలంగాణ')) {
-      imagePath = 'assets/images/Telangana logo.png';
-    } else if (s.contains('andhra') || s.contains('ap') || s.contains('ఆంధ్రప్రదేశ్')) {
-      imagePath = 'assets/images/AP logo.png';
-    }
-
-    if (imagePath != null) {
-      return Image.asset(
-        imagePath,
-        height: 42.sp,
-        width: 42.sp,
+  Widget _buildLocationImage({
+    required String? imageUrl,
+    required String stateName,
+    String? fallbackAsset,
+  }) {
+    if (imageUrl != null && imageUrl.trim().isNotEmpty) {
+      final cleanUrl = imageUrl.trim();
+      if (cleanUrl.toLowerCase().endsWith('.svg') || cleanUrl.toLowerCase().contains('.svg')) {
+        return SvgPicture.network(
+          cleanUrl,
+          fit: BoxFit.contain,
+          placeholderBuilder: (_) => const Center(
+            child: SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(color: Color(0xFFED1C24), strokeWidth: 1.8),
+            ),
+          ),
+        );
+      }
+      return CachedNetworkImage(
+        imageUrl: cleanUrl,
         fit: BoxFit.contain,
+        placeholder: (_, __) => const Center(
+          child: SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(color: Color(0xFFED1C24), strokeWidth: 1.8),
+          ),
+        ),
+        errorWidget: (_, __, ___) => _buildFallbackStateWidget(stateName, fallbackAsset),
       );
     }
-    return const SizedBox.shrink();
+
+    return _buildFallbackStateWidget(stateName, fallbackAsset);
   }
 
-  Widget _buildStateLogo(LocationModel? location, String stateName) {
-    final hasApiImage = location?.imageUrl != null && location!.imageUrl!.trim().isNotEmpty;
+  Widget _buildFallbackStateWidget(String stateName, String? fallbackAsset) {
+    if (fallbackAsset != null && fallbackAsset.isNotEmpty) {
+      return Image.asset(
+        fallbackAsset,
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => _buildStateIcon(stateName),
+      );
+    }
 
-    return Padding(
-      padding: EdgeInsets.only(right: 12.w),
-      child: Align(
-        alignment: Alignment.centerRight,
-        child: hasApiImage
-            ? CachedNetworkImage(
-                imageUrl: location.imageUrl!,
-                height: 42.sp,
-                width: 42.sp,
-                fit: BoxFit.contain,
-                placeholder: (context, url) => const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: Color(0xFFED1C24),
-                      strokeWidth: 2,
-                    ),
-                  ),
-                ),
-                errorWidget: (context, url, error) => _buildFallbackStateImage(stateName),
-              )
-            : _buildFallbackStateImage(stateName),
-      ),
+    final lower = stateName.toLowerCase();
+    if (lower.contains('telangana') || lower.contains('తెలంగాణ')) {
+      return Image.asset(
+        'assets/images/Telangana logo.png',
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => _buildStateIcon(stateName),
+      );
+    }
+    if (lower.contains('andhra') || lower.contains('ఆంధ్రప్రదేశ్')) {
+      return Image.asset(
+        'assets/images/AP logo.png',
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, ___) => _buildStateIcon(stateName),
+      );
+    }
+
+    return _buildStateIcon(stateName);
+  }
+
+  Widget _buildStateIcon(String stateName) {
+    return Icon(
+      Icons.account_balance_rounded,
+      size: 30.sp,
+      color: const Color(0xFFED1C24),
     );
   }
 
@@ -78,253 +123,216 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Consumer<AuthenticationProvider>(
-      builder: (_, authenticationProvider, __) {
-        final locations = authenticationProvider.getAllLocationList;
-        final selectedLocations = authenticationProvider.selectedLocations;
-
-        if (authenticationProvider.isLocationLoading) {
+      builder: (_, authProvider, __) {
+        if (authProvider.isLocationLoading && authProvider.getAllLocationList.isEmpty) {
           return const Center(child: AppLoadingScreen());
         }
 
+        final List<LocationModel> locations = authProvider.getAllLocationList;
+        final bool useFallbacks = locations.isEmpty &&
+            (authProvider.states == null || authProvider.states!.isEmpty);
+        final int totalItems = useFallbacks ? _fallbackLocations.length : locations.length;
+        final int selectedCount = authProvider.selectedLocations.length;
+
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+          padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section Header
+              // SECTION BAR: "Districts to be selected" & "[ N selected ]"
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Districts to be selected',
-                        style: newAppFont(
-                          color: isDark ? Colors.white : const Color(0xFF1E2022),
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
+                        "Districts to be selected",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : const Color(0xFF181A20),
                         ),
                       ),
                       SizedBox(height: 1.h),
                       Text(
-                        'Select up to 5 districts',
-                        style: newAppFont(
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w400,
+                        "Select up to 5 districts",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
                         ),
                       ),
                     ],
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.5.h),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFF0F0),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Text(
-                      '${selectedLocations.length} selected',
-                      style: newAppFont(
-                        color: const Color(0xFFED1C24),
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w600,
+                  if (selectedCount > 0)
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.5.h),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFECEC),
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                      child: Text(
+                        "$selectedCount selected",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFED1C24),
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
 
-              SizedBox(height: 8.h),
+              SizedBox(height: 10.h),
 
-              // State Cards List
+              // VERTICAL LOCATION LIST
               Expanded(
-                child: ListView(
+                child: ListView.builder(
                   physics: const BouncingScrollPhysics(),
                   padding: EdgeInsets.only(bottom: 8.h),
-                  children: [
-                    if (locations.isNotEmpty)
-                      ...locations.map((location) {
-                        final stateName = location.stateName;
-                        final isSelected = selectedLocations.contains(stateName);
+                  itemCount: totalItems,
+                  itemBuilder: (context, index) {
+                    final String stateKey;
+                    final String nativeName;
+                    final String englishName;
+                    final String? imageUrl;
+                    final String? fallbackAsset;
 
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 8.h),
-                          child: GestureDetector(
-                            onTap: () {
-                              authenticationProvider.addToSelectedLocations(stateName);
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              height: 70.h,
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1B1E2B) : Colors.white,
-                                borderRadius: BorderRadius.circular(10.r),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? const Color(0xFFED1C24)
-                                      : (isDark ? const Color(0xFF2B2F42) : const Color(0xFFE2E4EA)),
-                                  width: isSelected ? 1.4 : 0.9,
-                                ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFFED1C24).withValues(alpha: 0.15),
-                                          blurRadius: 5,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ]
-                                    : [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                                          blurRadius: 3,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ],
-                              ),
-                              child: Stack(
-                                children: [
-                                  // Logo on Right
-                                  _buildStateLogo(location, stateName),
+                    if (useFallbacks) {
+                      final item = _fallbackLocations[index];
+                      nativeName = item['nativeName'] as String;
+                      englishName = item['englishName'] as String;
+                      stateKey = nativeName;
+                      imageUrl = null;
+                      fallbackAsset = item['asset'] as String?;
+                    } else {
+                      final loc = locations[index];
+                      stateKey = loc.stateName;
+                      nativeName = loc.getNativeName();
+                      englishName = loc.getEnglishName();
+                      imageUrl = loc.imageUrl;
+                      fallbackAsset = null;
+                    }
 
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 14.w, right: 62.w),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                                          color: isSelected
-                                              ? const Color(0xFFED1C24)
-                                              : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
-                                          size: 19.sp,
-                                        ),
-                                        SizedBox(width: 10.w),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                stateName,
-                                                style: newAppFont(
-                                                  fontSize: 13.5.sp,
-                                                  color: isDark ? Colors.white : const Color(0xFF1E2022),
-                                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                                                ),
-                                              ),
-                                              SizedBox(height: 2.h),
-                                              Text(
-                                                "Local news, events and updates from $stateName",
-                                                style: newAppFont(
-                                                  fontSize: 10.sp,
-                                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
+                    final bool isSelected = authProvider.selectedLocations.contains(stateKey);
+
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 10.h),
+                      child: GestureDetector(
+                        onTap: () {
+                          authProvider.addToSelectedLocations(stateKey);
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 150),
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? (isDark ? const Color(0xFF2A1517) : const Color(0xFFFFF8F8))
+                                : (isDark ? const Color(0xFF1A1A1A) : Colors.white),
+                            borderRadius: BorderRadius.circular(14.r),
+                            border: Border.all(
+                              color: isSelected
+                                  ? const Color(0xFFED1C24)
+                                  : (isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA)),
+                              width: isSelected ? 1.4 : 0.9,
                             ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: isSelected
+                                    ? const Color(0xFFED1C24).withValues(alpha: isDark ? 0.18 : 0.08)
+                                    : (isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.02)),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                        );
-                      })
-                    else if (authenticationProvider.states != null && authenticationProvider.states!.isNotEmpty)
-                      ...authenticationProvider.states!.entries.map((entry) {
-                        final stateName = entry.value;
-                        final isSelected = selectedLocations.contains(stateName);
-
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 8.h),
-                          child: GestureDetector(
-                            onTap: () {
-                              authenticationProvider.addToSelectedLocations(stateName);
-                            },
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 180),
-                              height: 70.h,
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF1B1E2B) : Colors.white,
-                                borderRadius: BorderRadius.circular(10.r),
-                                border: Border.all(
-                                  color: isSelected
-                                      ? const Color(0xFFED1C24)
-                                      : (isDark ? const Color(0xFF2B2F42) : const Color(0xFFE2E4EA)),
-                                  width: isSelected ? 1.4 : 0.9,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              // State Artwork / Sketch Container
+                              Container(
+                                width: 56.w,
+                                height: 56.w,
+                                padding: EdgeInsets.all(5.w),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF251A1C) : const Color(0xFFFFF6F6),
+                                  borderRadius: BorderRadius.circular(10.r),
                                 ),
-                                boxShadow: isSelected
-                                    ? [
-                                        BoxShadow(
-                                          color: const Color(0xFFED1C24).withValues(alpha: 0.15),
-                                          blurRadius: 5,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ]
-                                    : [
-                                        BoxShadow(
-                                          color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                                          blurRadius: 3,
-                                          offset: const Offset(0, 1),
-                                        ),
-                                      ],
-                              ),
-                              child: Stack(
-                                children: [
-                                  _buildStateLogo(null, stateName),
-                                  Padding(
-                                    padding: EdgeInsets.only(left: 14.w, right: 62.w),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                                          color: isSelected
-                                              ? const Color(0xFFED1C24)
-                                              : (isDark ? Colors.grey.shade600 : Colors.grey.shade400),
-                                          size: 19.sp,
-                                        ),
-                                        SizedBox(width: 10.w),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                stateName,
-                                                style: newAppFont(
-                                                  fontSize: 13.5.sp,
-                                                  color: isDark ? Colors.white : const Color(0xFF1E2022),
-                                                  fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                                                ),
-                                              ),
-                                              SizedBox(height: 2.h),
-                                              Text(
-                                                "Local news, events and updates from $stateName",
-                                                style: newAppFont(
-                                                  fontSize: 10.sp,
-                                                  color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                                                  fontWeight: FontWeight.w400,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                child: Center(
+                                  child: _buildLocationImage(
+                                    imageUrl: imageUrl,
+                                    stateName: nativeName,
+                                    fallbackAsset: fallbackAsset,
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+
+                              SizedBox(width: 12.w),
+
+                              // State Names (Native & English)
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      nativeName,
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 15.sp,
+                                        fontWeight: FontWeight.w800,
+                                        color: isDark ? Colors.white : const Color(0xFF181A20),
+                                      ),
+                                    ),
+                                    SizedBox(height: 2.h),
+                                    Text(
+                                      englishName,
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // Checkbox Indicator
+                              Container(
+                                width: 20.w,
+                                height: 20.w,
+                                decoration: BoxDecoration(
+                                  color: isSelected ? const Color(0xFFED1C24) : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(6.r),
+                                  border: isSelected
+                                      ? null
+                                      : Border.all(
+                                          color: isDark ? const Color(0xFF5E5E5E) : const Color(0xFFD0D4DC),
+                                          width: 1.4,
+                                        ),
+                                ),
+                                child: isSelected
+                                    ? Center(
+                                        child: Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 14.sp,
+                                        ),
+                                      )
+                                    : null,
+                              ),
+                            ],
                           ),
-                        );
-                      }),
-                  ],
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

@@ -1,12 +1,11 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/features/auth/domain/models/categories_model.dart';
-import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
-import 'package:chotanews/utils/app_fonts.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
-import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/auth/domain/models/categories_model.dart';
+import 'package:chotanews/utils/app_loading_screen.dart';
 
 class UpdateCategoriesView extends StatefulWidget {
   const UpdateCategoriesView({super.key});
@@ -16,6 +15,19 @@ class UpdateCategoriesView extends StatefulWidget {
 }
 
 class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
+  // Default fallback categories with Telugu names & icons
+  final List<Map<String, dynamic>> _fallbackCategories = [
+    {'name': 'బిజినెస్', 'icon': Icons.trending_up_rounded},
+    {'name': 'స్పోర్ట్స్', 'icon': Icons.directions_run_rounded},
+    {'name': 'టెక్నాలజీ', 'icon': Icons.devices_rounded},
+    {'name': 'సినిమా', 'icon': Icons.movie_creation_outlined},
+    {'name': 'లైఫ్ స్టైల్', 'icon': Icons.self_improvement_rounded},
+    {'name': 'ఎడ్యుకేషన్', 'icon': Icons.school_outlined},
+    {'name': 'రాజకీయాలు', 'icon': Icons.account_balance_outlined},
+    {'name': 'హెల్త్', 'icon': Icons.favorite_outline_rounded},
+    {'name': 'జనరల్', 'icon': Icons.newspaper_rounded},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -24,82 +36,62 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
     });
   }
 
-  String _getCategorySubtitle(String name) {
-    final lower = name.trim().toLowerCase();
-    if (lower.contains('business') || lower.contains('వ్యాపార') || lower.contains('వాణిజ్య')) return 'Business';
-    if (lower.contains('sport') || lower.contains('క్రీడ')) return 'Sports';
-    if (lower.contains('tech') || lower.contains('సాంకేతిక')) return 'Technology';
-    if (lower.contains('entertain') || lower.contains('వినోద') || lower.contains('సినిమా') || lower.contains('movie')) return 'Entertainment';
-    if (lower.contains('life') || lower.contains('జీవన')) return 'Lifestyle';
-    if (lower.contains('educat') || lower.contains('విద్య') || lower.contains('చదువు')) return 'Education';
-    if (lower.contains('politic') || lower.contains('రాజకీయ')) return 'Politics';
-    if (lower.contains('scien') || lower.contains('విజ్ఞాన') || lower.contains('సైన్స్')) return 'Science';
-    if (lower.contains('startup') || lower.contains('స్టార్టప్')) return 'Startup';
-    if (lower.contains('nation') || lower.contains('జాతీయ')) return 'National';
-    if (lower.contains('internation') || lower.contains('అంతర్జాతీయ') || lower.contains('world')) return 'International';
-    if (lower.contains('crime') || lower.contains('క్రైమ్')) return 'Crime';
-    if (lower.contains('health') || lower.contains('ఆరోగ్య')) return 'Health';
-    if (lower.contains('spirit') || lower.contains('భక్తి') || lower.contains('ఆధ్యాత్మిక')) return 'Spiritual';
-    if (lower.contains('auto') || lower.contains('ఆటో')) return 'Automobile';
-    return '';
+  IconData _getCategoryFallbackIcon(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('బిజినెస్') || lower.contains('business')) return Icons.trending_up_rounded;
+    if (lower.contains('స్పోర్ట్స్') || lower.contains('sport')) return Icons.directions_run_rounded;
+    if (lower.contains('టెక్నాలజీ') || lower.contains('tech')) return Icons.devices_rounded;
+    if (lower.contains('సినిమా') || lower.contains('cinema') || lower.contains('movie')) return Icons.movie_creation_outlined;
+    if (lower.contains('లైఫ్') || lower.contains('life')) return Icons.self_improvement_rounded;
+    if (lower.contains('ఎడ్యుకేషన్') || lower.contains('education')) return Icons.school_outlined;
+    if (lower.contains('రాజకీయాలు') || lower.contains('politics')) return Icons.account_balance_outlined;
+    if (lower.contains('హెల్త్') || lower.contains('health')) return Icons.favorite_outline_rounded;
+    if (lower.contains('జనరల్') || lower.contains('general')) return Icons.newspaper_rounded;
+    return Icons.grid_view_rounded;
   }
 
-  String _getFallbackImage(String categoryName, int index) {
-    final name = categoryName.trim().toLowerCase();
-    if (name.contains('business') || name.contains('వ్యాపారం')) return 'assets/images/business_icon.png';
-    if (name.contains('sports') || name.contains('క్రీడలు')) return 'assets/images/sports_icon.png';
-    if (name.contains('entertainment') || name.contains('వినోదం') || name.contains('cinema')) return 'assets/images/entertainment_icon.png';
-    if (name.contains('politics') || name.contains('రాజకీయాలు')) return 'assets/images/politics_icon.png';
-    if (name.contains('technology') || name.contains('సాంకేతికత') || name.contains('tech')) return 'assets/images/tech_icon.png';
-    if (name.contains('lifestyle') || name.contains('జీవనశైలి')) return 'assets/images/lifestyle_icon.png';
-    if (name.contains('science') || name.contains('సైన్స్') || name.contains('విజ్ఞాన')) return 'assets/images/science.jpg';
-    if (name.contains('education') || name.contains('విద్య')) return 'assets/images/education_icon.png';
-    if (name.contains('health') || name.contains('ఆరోగ్య')) return 'assets/images/health_icon.png';
-    if (name.contains('auto') || name.contains('ఆటో')) return 'assets/images/auto_icon.png';
-
-    final fallbacks = [
-      'assets/images/business.jpg',
-      'assets/images/sports.jpg',
-      'assets/images/entertainment.jpg',
-      'assets/images/politics.jpg',
-      'assets/images/technology.jpg',
-      'assets/images/lifestyle.jpg',
-      'assets/images/science.jpg',
-      'assets/images/startup.jpg',
-      'assets/images/education.jpg'
-    ];
-    return fallbacks[index % fallbacks.length];
-  }
-
-  Widget _buildCategoryImage(CategoryModel category, int index) {
-    final hasApiImage = category.imageUrl != null && category.imageUrl!.trim().isNotEmpty;
-    final fallbackAsset = _getFallbackImage(category.categoryName ?? '', index);
-
-    if (hasApiImage) {
-      return CachedNetworkImage(
-        imageUrl: category.imageUrl!,
-        fit: BoxFit.contain,
-        placeholder: (context, url) => const Center(
-          child: SizedBox(
-            width: 16,
-            height: 16,
-            child: CircularProgressIndicator(
-              color: Color(0xFFED1C24),
-              strokeWidth: 2,
+  Widget _buildCategoryImage(String? imageUrl, String categoryName) {
+    if (imageUrl != null && imageUrl.trim().isNotEmpty) {
+      final cleanUrl = imageUrl.trim();
+      if (cleanUrl.toLowerCase().endsWith('.svg') || cleanUrl.toLowerCase().contains('.svg')) {
+        return SvgPicture.network(
+          cleanUrl,
+          height: 38.h,
+          width: 38.h,
+          fit: BoxFit.contain,
+          placeholderBuilder: (_) => const Center(
+            child: SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(color: Color(0xFFED1C24), strokeWidth: 1.8),
             ),
           ),
-        ),
-        errorWidget: (context, url, error) => Image.asset(
-          fallbackAsset,
-          fit: BoxFit.contain,
-        ),
-      );
-    } else {
-      return Image.asset(
-        fallbackAsset,
+        );
+      }
+      return CachedNetworkImage(
+        imageUrl: cleanUrl,
+        height: 38.h,
+        width: 38.h,
         fit: BoxFit.contain,
+        placeholder: (_, __) => const Center(
+          child: SizedBox(
+            width: 14,
+            height: 14,
+            child: CircularProgressIndicator(color: Color(0xFFED1C24), strokeWidth: 1.8),
+          ),
+        ),
+        errorWidget: (_, __, ___) => Icon(
+          _getCategoryFallbackIcon(categoryName),
+          size: 32.sp,
+          color: const Color(0xFFED1C24),
+        ),
       );
     }
+    return Icon(
+      _getCategoryFallbackIcon(categoryName),
+      size: 34.sp,
+      color: const Color(0xFFED1C24),
+    );
   }
 
   @override
@@ -107,147 +99,138 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Consumer<AuthenticationProvider>(
-      builder: (context, authenticationProvider, _) {
-        final categories = authenticationProvider.getAllCategoryList;
-        final selectedCategories = authenticationProvider.selectedCategories;
-
-        if (authenticationProvider.isCatLoading) {
+      builder: (context, authProvider, __) {
+        if (authProvider.isCatLoading && authProvider.getAllCategoryList.isEmpty) {
           return const Center(child: AppLoadingScreen());
         }
 
-        if (categories.isEmpty) {
-          return const Center(child: AppNoData());
-        }
+        final List<CategoryModel> categories = authProvider.getAllCategoryList;
+        final bool useFallbacks = categories.isEmpty;
+        final int selectedCount = authProvider.selectedCategories.length;
 
         return Padding(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 4.h),
+          padding: EdgeInsets.fromLTRB(18.w, 8.h, 18.w, 0),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Section Header
+              // SUBHEADER: "మీ కోసం వార్తలు" & "[ 3 selected ]"
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Choose categories',
-                        style: newAppFont(
-                          color: isDark ? Colors.white : const Color(0xFF1E2022),
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
+                        "మీ కోసం వార్తలు",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w800,
+                          color: isDark ? Colors.white : const Color(0xFF181A20),
                         ),
                       ),
                       SizedBox(height: 1.h),
                       Text(
-                        'Select all that apply',
-                        style: newAppFont(
-                          color: isDark ? Colors.grey.shade400 : Colors.grey.shade500,
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w400,
+                        "మీకు నచ్చిన అంశాలను ఎంచుకోండి",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.w500,
+                          color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
                         ),
                       ),
                     ],
                   ),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.5.h),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFF0F0),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Text(
-                      '${selectedCategories.length} selected',
-                      style: newAppFont(
-                        color: const Color(0xFFED1C24),
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w600,
+                  if (selectedCount > 0)
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.5.h),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFECEC),
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                      child: Text(
+                        "$selectedCount selected",
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFFED1C24),
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
 
-              SizedBox(height: 8.h),
+              SizedBox(height: 10.h),
 
-              // Categories Grid
+              // 3-COLUMN CATEGORY GRID
               Expanded(
                 child: GridView.builder(
-                  physics: const BouncingScrollPhysics(),
                   padding: EdgeInsets.only(bottom: 8.h),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: useFallbacks ? _fallbackCategories.length : categories.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 1.10,
-                    crossAxisSpacing: 9.w,
-                    mainAxisSpacing: 9.h,
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 10.w,
+                    mainAxisSpacing: 10.h,
+                    childAspectRatio: 0.84,
                   ),
-                  itemCount: categories.length,
                   itemBuilder: (context, index) {
-                    final category = categories[index];
-                    final categoryName = category.categoryName?.toString() ?? '';
-                    final isSelected = selectedCategories.contains(categoryName);
-                    final subtitle = _getCategorySubtitle(categoryName);
+                    final String categoryName = useFallbacks
+                        ? _fallbackCategories[index]['name'] as String
+                        : (categories[index].categoryName ?? '');
+                    final String? imageUrl = useFallbacks
+                        ? null
+                        : categories[index].imageUrl;
+
+                    final bool isSelected = authProvider.selectedCategories.contains(categoryName);
 
                     return GestureDetector(
                       onTap: () {
-                        authenticationProvider.addToSelectedEngagements(categoryName);
+                        authProvider.addToSelectedEngagements(categoryName);
                       },
                       child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
+                        duration: const Duration(milliseconds: 150),
+                        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 8.h),
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF1B1E2B) : Colors.white,
-                          borderRadius: BorderRadius.circular(10.r),
+                          color: isSelected
+                              ? (isDark ? const Color(0xFF2A1517) : const Color(0xFFFFF7F7))
+                              : (isDark ? const Color(0xFF1A1A1A) : Colors.white),
+                          borderRadius: BorderRadius.circular(14.r),
                           border: Border.all(
                             color: isSelected
                                 ? const Color(0xFFED1C24)
-                                : (isDark ? const Color(0xFF2B2F42) : const Color(0xFFE2E4EA)),
-                            width: isSelected ? 1.4 : 0.9,
+                                : (isDark ? const Color(0xFF2E2E2E) : const Color(0xFFE2E4EA)),
+                            width: isSelected ? 1.3 : 0.9,
                           ),
-                          boxShadow: isSelected
-                              ? [
-                                  BoxShadow(
-                                    color: const Color(0xFFED1C24).withValues(alpha: 0.15),
-                                    blurRadius: 5,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ]
-                              : [
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 1),
-                                  ),
-                                ],
+                          boxShadow: [
+                            BoxShadow(
+                              color: isSelected
+                                  ? const Color(0xFFED1C24).withValues(alpha: isDark ? 0.18 : 0.08)
+                                  : (isDark ? Colors.black.withValues(alpha: 0.2) : Colors.black.withValues(alpha: 0.02)),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Stack(
                           children: [
-                            // Top & Center Image Area
-                            Positioned.fill(
-                              bottom: 36.h,
-                              child: Padding(
-                                padding: EdgeInsets.fromLTRB(8.w, 6.h, 8.w, 2.h),
-                                child: Center(
-                                  child: _buildCategoryImage(category, index),
-                                ),
-                              ),
-                            ),
-
-                            // Top-Right Checkmark Indicator
+                            // Top right selection indicator
                             Positioned(
-                              top: 6.h,
-                              right: 6.w,
+                              top: 0,
+                              right: 0,
                               child: Container(
                                 width: 17.w,
                                 height: 17.w,
                                 decoration: BoxDecoration(
-                                  color: isSelected
-                                      ? const Color(0xFFED1C24)
-                                      : (isDark ? const Color(0xFF242838) : Colors.white),
                                   shape: BoxShape.circle,
+                                  color: isSelected ? const Color(0xFFED1C24) : Colors.transparent,
                                   border: isSelected
                                       ? null
                                       : Border.all(
-                                          color: isDark ? const Color(0xFF454B64) : Colors.grey.shade400,
-                                          width: 1.1,
+                                          color: isDark ? const Color(0xFF5E5E5E) : const Color(0xFF9EA3AE),
+                                          width: 1.3,
                                         ),
                                 ),
                                 child: isSelected
@@ -262,36 +245,29 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                               ),
                             ),
 
-                            // Bottom Category Titles
-                            Positioned(
-                              left: 8.w,
-                              right: 8.w,
-                              bottom: 5.h,
+                            // Main card content: Icon / Image + Title
+                            Center(
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
+                                  SizedBox(height: 4.h),
+                                  // Category Illustration / Icon
+                                  _buildCategoryImage(imageUrl, categoryName),
+                                  SizedBox(height: 8.h),
+
+                                  // Category Name
                                   Text(
                                     categoryName,
-                                    style: newAppFont(
-                                      color: isDark ? Colors.white : const Color(0xFF1E2022),
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
                                       fontSize: 12.sp,
                                       fontWeight: FontWeight.w700,
+                                      color: isDark ? Colors.white : const Color(0xFF181A20),
                                     ),
+                                    textAlign: TextAlign.center,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
-                                  if (subtitle.isNotEmpty)
-                                    Text(
-                                      subtitle,
-                                      style: newAppFont(
-                                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
-                                        fontSize: 9.5.sp,
-                                        fontWeight: FontWeight.w400,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
                                 ],
                               ),
                             ),

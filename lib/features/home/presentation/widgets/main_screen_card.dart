@@ -71,20 +71,24 @@ class _MainScreenCardState extends State<MainScreenCard>
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: AppColorTokens.primaryRed,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-      child: Consumer2<HomeProvider, SettingsProvider>(
-        builder: (_, homeProvider, settingsProvider, __) {
-          return Scaffold(
+    return Consumer2<HomeProvider, SettingsProvider>(
+      builder: (_, homeProvider, settingsProvider, __) {
+        final bool hasTopBarContent = (homeProvider.langCode == 'ml') ||
+            (homeProvider.folkNight && homeProvider.langCode != 'ml') ||
+            (homeProvider.showTopNavTags && homeProvider.getAllAiTagsList.isNotEmpty);
+
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: AppColorTokens.primaryRed,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          ),
+          child: Scaffold(
             backgroundColor:
                 MediaQuery.of(context).orientation != Orientation.landscape
                     ? AppColorTokens.primaryRed
                     : Colors.black,
-            appBar: MediaQuery.of(context).orientation != Orientation.landscape
+            appBar: (MediaQuery.of(context).orientation != Orientation.landscape && hasTopBarContent)
                 ? AppBar(
                     toolbarHeight: 35.h,
                     backgroundColor: AppColorTokens.primaryRed,
@@ -279,11 +283,15 @@ class _MainScreenCardState extends State<MainScreenCard>
                                       final chosenId = tagId ?? tagSlug;
 
                                       homeProvider.setSelectedTagId(chosenId);
-                                      homeProvider.fetchVideosByTagSlug(
-                                        tagSlug.toString(),
-                                        displayTitle: displayTitle.toString(),
-                                        thumbnailUrl: tagThumbnail?.toString(),
-                                      );
+                                      if (homeProvider.liveTvVideosEnable) {
+                                        homeProvider.fetchVideosByTagSlug(
+                                          tagSlug.toString(),
+                                          displayTitle: displayTitle.toString(),
+                                          thumbnailUrl: tagThumbnail?.toString(),
+                                        );
+                                      } else {
+                                        homeProvider.getAllPostsByAiId(tag['aitagid'] ?? chosenId);
+                                      }
                                       homeProvider.aiTagDataLoaded(true);
                                       homeProvider.pageChange(isValue: true);
                                       context
@@ -337,7 +345,7 @@ class _MainScreenCardState extends State<MainScreenCard>
               left: MediaQuery.of(context).orientation != Orientation.landscape,
               right:
                   MediaQuery.of(context).orientation != Orientation.landscape,
-              top: false,
+              top: !hasTopBarContent,
               bottom: false,
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
@@ -356,9 +364,9 @@ class _MainScreenCardState extends State<MainScreenCard>
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

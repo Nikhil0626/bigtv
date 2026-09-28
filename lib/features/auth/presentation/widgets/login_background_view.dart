@@ -27,6 +27,18 @@ class LoginBackgroundView extends StatelessWidget {
             authenticationProvider.newAppLoginStatus == NewAppLoginStatus.otp;
         bool isDark = context.theme.brightness == Brightness.dark;
 
+        if (!isAuthScreen) {
+          return AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            switchInCurve: Curves.easeInOut,
+            switchOutCurve: Curves.easeInOut,
+            child: Container(
+              key: ValueKey(authenticationProvider.newAppLoginStatus),
+              child: _getLoginContent(authenticationProvider.newAppLoginStatus),
+            ),
+          );
+        }
+
         return Scaffold(
           resizeToAvoidBottomInset: true,
           backgroundColor: context.theme.scaffoldBackgroundColor,
@@ -38,7 +50,7 @@ class LoginBackgroundView extends StatelessWidget {
                   child: ConstrainedBox(
                     constraints: BoxConstraints(minHeight: constraints.maxHeight),
                     child: IntrinsicHeight(
-                      child: isAuthScreen ? _buildAuthLayout(context, authenticationProvider) : _buildOtherLayout(context, authenticationProvider, screenWidth, screenHeight),
+                      child: _buildAuthLayout(context, authenticationProvider),
                     ),
                   ),
                 );

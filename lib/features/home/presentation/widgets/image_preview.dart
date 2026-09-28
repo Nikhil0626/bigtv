@@ -30,8 +30,10 @@ class ImagePreview extends StatelessWidget {
                     tag: imageUrl,
                     child: CachedNetworkImage(
                       imageUrl: imageUrl,
-                      placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-                      errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red),
+                      errorWidget: (context, url, error) => Image.asset(
+                        "assets/images/bigtv_default_post.png",
+                        fit: BoxFit.contain,
+                      ),
                       fit: BoxFit.contain,
                     ),
                   ),
