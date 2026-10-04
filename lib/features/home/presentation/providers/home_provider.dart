@@ -107,6 +107,43 @@ class HomeProvider extends ChangeNotifier {
   bool aiTagEnable = true;
   bool englishLanguageEnable = true;
   bool liveTvCountEnable = true;
+  bool isLiveTvLoading = false;
+
+  Future<Map<String, dynamic>?> fetchLiveTvStream() async {
+    isLiveTvLoading = true;
+    notifyListeners();
+
+    try {
+      log("Calling Live TV API: https://api.pravasamedia.com/api/v1/live");
+      final response = await http.get(
+        Uri.parse('https://api.pravasamedia.com/api/v1/live'),
+        headers: {'accept': '*/*'},
+      ).timeout(const Duration(seconds: 10));
+
+      log("Live TV API Response Status Code: ${response.statusCode}");
+      log("Live TV API Response Body: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is Map<String, dynamic>) {
+          return data;
+        }
+      } else {
+        CustomToast.showErrorToast(
+          msg: "Unable to load Live TV stream (Code: ${response.statusCode})",
+        );
+      }
+    } catch (e) {
+      log("Error calling Live TV API: $e");
+      CustomToast.showErrorToast(
+        msg: "Failed to connect to Live TV server. Please try again.",
+      );
+    } finally {
+      isLiveTvLoading = false;
+      notifyListeners();
+    }
+    return null;
+  }
 
   bool get showTopNavTags => liveTvVideosEnable || aiTagEnable;
 
@@ -388,11 +425,21 @@ class HomeProvider extends ChangeNotifier {
       userId = int.tryParse(userIdStr) ?? 0;
     }
 
+    String categoriesStr = preferences.getString("categoriesId") ?? "";
+    List<int> categoriesIdList = categoriesStr.isNotEmpty
+        ? categoriesStr.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList()
+        : [];
+
+    String locationStr = preferences.getString("locationIds") ?? "";
+    List<int> locationIdList = locationStr.isNotEmpty
+        ? locationStr.split(',').map((e) => int.tryParse(e.trim())).whereType<int>().toList()
+        : [];
+
     Map<String, dynamic> body = {
       "device_id": deviceId ?? "",
       "postId": int.tryParse(postIds) ?? 0,
-      "locationIds": [],
-      "categoriesId": [],
+      "locationIds": locationIdList,
+      "categoriesId": categoriesIdList,
       "userId": userId,
       "isAdManager": false,
       "isBigTv": true,
@@ -424,13 +471,13 @@ class HomeProvider extends ChangeNotifier {
       List homePosts = [];
       if (responseData is Map && responseData['homepost'] != null && responseData['homepost'] is List) {
         homePosts = responseData['homepost'];
-      } else if (data.isNotEmpty && data[0] is Map && data[0]['homepost'] != null) {
+      } else if (data.isNotEmpty && data[0] is Map && data[0]['homepost'] != null && data[0]['homepost'] is List) {
         final raw = data[0]['homepost'];
         if (raw is List) {
           homePosts = raw;
+          // Remove the homepost wrapper element from regular data
+          data = data.sublist(1);
         }
-        // Remove the homepost wrapper element from regular data
-        data = data.sublist(1);
       }
       log("Extracted homePosts count: ${homePosts.length}");
 
@@ -470,6 +517,22 @@ class HomeProvider extends ChangeNotifier {
             postTypeStr == 'morefollow' ||
             e['morefollow'] != null ||
             e['moreFollowTags'] != null) {
+          return true;
+        }
+        if (typeStr.contains('showalert') ||
+            subTypeStr.contains('showalert') ||
+            postTypeStr.contains('showalert') ||
+            typeStr == 'showreminder' ||
+            subTypeStr == 'showreminder' ||
+            postTypeStr == 'showreminder' ||
+            typeStr == 'suprabhatam' ||
+            subTypeStr == 'suprabhatam' ||
+            postTypeStr == 'suprabhatam') {
+          // Allow ShowAlert posts to be displayed
+          final id = e['id'];
+          if (id != null && id is int) {
+            return seenIds.add(id);
+          }
           return true;
         }
         if (typeStr == 'homepostgrid' ||
@@ -865,6 +928,19 @@ class HomeProvider extends ChangeNotifier {
         article['homepost'] != null;
   }
 
+  bool isShowAlertPost(dynamic article) {
+    if (article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    final subType = article['subType']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    return type.contains('showalert') ||
+        subType.contains('showalert') ||
+        postType.contains('showalert') ||
+        type == 'showreminder' ||
+        subType == 'showreminder' ||
+        type == 'suprabhatam';
+  }
+
   bool get isCurrentArticleGrid {
     if (selectedIndex != 0) return false;
     if (isAiTagDataLoaded) return false;
@@ -874,6 +950,40 @@ class HomeProvider extends ChangeNotifier {
     }
     return false;
   }
+
+  bool isBulletinPost(dynamic article) {
+    if (article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    final subType = article['subType']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    return type.contains('bulletin') ||
+        subType.contains('bulletin') ||
+        postType.contains('bulletin') ||
+        type == 'bulletpost' ||
+        subType == 'bulletpost';
+  }
+
+  bool get isCurrentArticleBulletin {
+    if (selectedIndex != 0) return false;
+    if (isAiTagDataLoaded) return false;
+    if (getAllPostList.isEmpty) return false;
+    if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
+      return isBulletinPost(getAllPostList[_currentPageIndex]);
+    }
+    return false;
+  }
+
+  bool get isCurrentArticleShowAlert {
+    if (selectedIndex != 0) return false;
+    if (isAiTagDataLoaded) return false;
+    if (getAllPostList.isEmpty) return false;
+    if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
+      return isShowAlertPost(getAllPostList[_currentPageIndex]);
+    }
+    return false;
+  }
+
+
 
   bool _isSubscribed = false;
   bool isComeFromLinkOrNotification = false;

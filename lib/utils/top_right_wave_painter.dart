@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TopRightWavePainter extends CustomPainter {
   final bool isDark;
+  final bool isRedHeader;
   final double gap;
   final double baseRadius;
   final double maxRadius;
@@ -10,6 +11,7 @@ class TopRightWavePainter extends CustomPainter {
 
   const TopRightWavePainter({
     this.isDark = false,
+    this.isRedHeader = false,
     this.gap = 22.0,
     this.baseRadius = 30.0,
     this.maxRadius = 380.0,
@@ -23,19 +25,26 @@ class TopRightWavePainter extends CustomPainter {
     // Rich background radial glow
     final glowPaint = Paint()
       ..shader = RadialGradient(
-        colors: isDark
+        colors: isRedHeader
             ? [
-                const Color(0xFF420D11).withValues(alpha: 0.85),
-                const Color(0xFF2B090C).withValues(alpha: 0.55),
-                const Color(0xFF190608).withValues(alpha: 0.25),
+                Colors.white.withValues(alpha: 0.25),
+                Colors.white.withValues(alpha: 0.12),
+                Colors.white.withValues(alpha: 0.04),
                 Colors.transparent,
               ]
-            : [
-                const Color(0xFFFFBDBD).withValues(alpha: 0.95),
-                const Color(0xFFFFDEDE).withValues(alpha: 0.75),
-                const Color(0xFFFFF0F0).withValues(alpha: 0.40),
-                Colors.white.withValues(alpha: 0.0),
-              ],
+            : isDark
+                ? [
+                    const Color(0xFF420D11).withValues(alpha: 0.85),
+                    const Color(0xFF2B090C).withValues(alpha: 0.55),
+                    const Color(0xFF190608).withValues(alpha: 0.25),
+                    Colors.transparent,
+                  ]
+                : [
+                    const Color(0xFFFFBDBD).withValues(alpha: 0.95),
+                    const Color(0xFFFFDEDE).withValues(alpha: 0.75),
+                    const Color(0xFFFFF0F0).withValues(alpha: 0.40),
+                    Colors.white.withValues(alpha: 0.0),
+                  ],
         stops: const [0.0, 0.4, 0.7, 1.0],
       ).createShader(Rect.fromCircle(center: center, radius: maxRadius));
     canvas.drawCircle(center, maxRadius, glowPaint);
@@ -51,7 +60,9 @@ class TopRightWavePainter extends CustomPainter {
       final double opacity = (isDark ? baseOpacity * 0.75 : baseOpacity).clamp(0.02, 0.44);
 
       final linePaint = Paint()
-        ..color = const Color(0xFFED1C24).withValues(alpha: opacity)
+        ..color = isRedHeader
+            ? Colors.white.withValues(alpha: opacity * 0.7)
+            : const Color(0xFFED1C24).withValues(alpha: opacity)
         ..style = PaintingStyle.stroke
         ..strokeWidth = strokeWidth;
       canvas.drawCircle(center, r, linePaint);
@@ -61,6 +72,7 @@ class TopRightWavePainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant TopRightWavePainter oldDelegate) =>
       oldDelegate.isDark != isDark ||
+      oldDelegate.isRedHeader != isRedHeader ||
       oldDelegate.gap != gap ||
       oldDelegate.baseRadius != baseRadius ||
       oldDelegate.maxRadius != maxRadius ||

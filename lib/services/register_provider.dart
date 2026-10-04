@@ -19,6 +19,8 @@ import 'package:chotanews/features/home/presentation/providers/epaper_provider.d
 import '../core/providers/web_view_provider.dart';
 import '../core/theme/theme_provider.dart';
 
+import 'package:chotanews/features/reporters/presentation/providers/reporters_provider.dart';
+
 class AppProviders {
   static List<ChangeNotifierProvider> all = [
     ChangeNotifierProvider<HomeProvider>(create: (_) => HomeProvider()),
@@ -30,6 +32,7 @@ class AppProviders {
     ChangeNotifierProvider<ProfileProvider>(create: (_) => ProfileProvider()),
     ChangeNotifierProvider<ReferralProvider>(create: (_) => ReferralProvider()),
     ChangeNotifierProvider<RatingProvider>(create: (_) => RatingProvider()),
+    ChangeNotifierProvider<ReportersProvider>(create: (_) => ReportersProvider()),
 
     ChangeNotifierProvider<PollProvider>(create: (_) => PollProvider()),
     ChangeNotifierProvider<AdsContestProvider>(create: (_) => AdsContestProvider()),

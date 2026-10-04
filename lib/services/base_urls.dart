@@ -9,6 +9,7 @@ class BaseUrls {
 
   /// Reels Apis
   static const String getAllReels = "/reels";
+  static const String getReelsApi = "/api/v1/reels";
 
   /// all posts
   static const String getNews = "/allposts";
@@ -45,15 +46,17 @@ class BaseUrls {
   ///  https://chn-app-be-dev.azurewebsites.net/api/menuposts?type=2
 
   /// Python live apis
-  static const String baseUrlAwsDev = "https://api.chotanews.com";
+  // static const String baseUrlAwsDev = "https://api.chotanews.com";
 
   /// New Server API
   // static const String newServerBaseUrl = "http://192.168.70.251";
   static const String newServerBaseUrl = "https://api.pravasamedia.com";
+  static const String getReportersApi = "/api/v1/reporters";
   static const String deviceDetails = "/api/v1/deviceDetails";
   static const String appConfig = "/api/v1/app-config/all";
   /// Python Dev Apis
-  // static const String baseUrlAwsDev = "https://devapi.chotanews.com";
+  static const String baseUrlAwsDev = "https://apidev.chotanews.com";
+  static const String showAlertSubscribeApi = "/show-alerts/subscribe";
 
   ///Login login
   static const String sendOtpPy = "/send-otp";

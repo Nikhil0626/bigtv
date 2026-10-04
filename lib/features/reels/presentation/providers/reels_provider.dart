@@ -25,24 +25,22 @@ class ReelsProviders extends ChangeNotifier {
   Future getAllReels({String postId = "0"}) async {
     reelsLoading = true;
     notifyListeners();
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    String? userId = preferences.getString('userId');
     try {
-      String langCode = preferences.getString("selectedLanguageCode") ?? "te";
-      Map<String,dynamic> body =
-      {
-        "user_id":userId??"0",
-        "lang": langCode,
-      };
-      Response response = await ReelsRepo().getAllReels(body);
+      Response response = await ReelsRepo().getAllReels();
 
-      if (response.statusCode == 200) {
-        List data = response.data['data'];
-        log(data.toString());
-        getAllReelsList = data
-            .map(
-              (e) => ReelsModel.fromJson(e),
-            )
+      if (response.statusCode == 200 && response.data != null) {
+        dynamic responseData = response.data;
+        List rawList = [];
+
+        if (responseData is Map && responseData['data'] is List) {
+          rawList = responseData['data'] as List;
+        } else if (responseData is List) {
+          rawList = responseData;
+        }
+
+        log("Fetched ${rawList.length} reels from pravasamedia API");
+        getAllReelsList = rawList
+            .map((e) => ReelsModel.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList();
       }
     } on DioException catch (e, st) {

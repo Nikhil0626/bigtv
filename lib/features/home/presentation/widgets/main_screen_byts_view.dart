@@ -17,6 +17,7 @@ import 'package:chotanews/features/home/presentation/widgets/full_standed_video_
 import 'package:chotanews/features/home/presentation/widgets/home_post_grid_widget.dart';
 import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
 import 'package:chotanews/features/home/presentation/widgets/more_follow_widget.dart';
+import 'package:chotanews/features/home/presentation/widgets/show_alerts_widget.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_player.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
@@ -304,6 +305,13 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                         ? MovieRatings(
                             article: widget.article,
                           )
+                    : (widget.article['type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').contains('showalert') == true ||
+                            widget.article['subType']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').contains('showalert') == true ||
+                            widget.article['post_type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').contains('showalert') == true ||
+                            widget.article['type']?.toString().toLowerCase() == 'showreminder' ||
+                            widget.article['subType']?.toString().toLowerCase() == 'showreminder' ||
+                            widget.article['type']?.toString().toLowerCase() == 'suprabhatam')
+                        ? ShowAlertsWidget(articleData: Map<String, dynamic>.from(widget.article))
                         : _isBulletinPost(widget.article)
                             ? BulletinView(
                                 article: Map<String, dynamic>.from(widget.article),
