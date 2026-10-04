@@ -19,6 +19,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
+import 'package:chotanews/features/reporters/presentation/screens/reporters_screen.dart';
 import 'filters_screen/filter_view.dart';
 import 'profile_view.dart';
 import 'feedback_view.dart';
@@ -78,6 +79,17 @@ class SettingsViewState extends State<SettingsView> {
 
                   _buildSettingsRow(context, "Filter.svg", "Filter", () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => FilterView()));
+                  }),
+
+                  _buildSettingsRow(context, Icons.mic_none_outlined, "Reporters", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Reporters",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ReportersScreen()),
+                    );
                   }),
                   //
                   // _buildSettingsRow(context, "Share_our_app.svg", "Share Our App", () async {
@@ -196,22 +208,61 @@ class SettingsViewState extends State<SettingsView> {
     );
   }
 
-  Widget _buildSettingsRow(BuildContext context, String iconName, String title, VoidCallback onTap) {
+  Widget _buildSettingsRow(
+    BuildContext context,
+    dynamic iconName,
+    String title,
+    VoidCallback onTap, {
+    Color? accentColor,
+  }) {
+    final effectiveIconColor = accentColor ?? context.iconTheme.color ?? Colors.grey;
+    final effectiveTextColor = accentColor ?? context.typography.bodyLarge?.color;
+    final effectiveChevronColor = accentColor ?? context.subtitleColor;
+
+    Widget iconWidget;
+    if (iconName is IconData) {
+      iconWidget = Icon(iconName, size: 24.w, color: effectiveIconColor);
+    } else if (iconName is String) {
+      if (iconName == "profile.png") {
+        iconWidget = Image.asset(
+          'assets/svg/$iconName',
+          height: 24.w,
+          width: 24.w,
+          color: effectiveIconColor,
+        );
+      } else {
+        iconWidget = SvgPicture.asset(
+          'assets/svg/$iconName',
+          height: 24.w,
+          width: 24.w,
+          colorFilter: ColorFilter.mode(effectiveIconColor, BlendMode.srcIn),
+        );
+      }
+    } else {
+      iconWidget = SizedBox(width: 24.w, height: 24.w);
+    }
+
     return Column(
       children: [
         GestureDetector(
           onTap: onTap,
           child: Container(
-            color: Colors.transparent,
+            color: accentColor != null ? accentColor.withValues(alpha: 0.05) : Colors.transparent,
             width: MediaQuery.of(context).size.width,
-            padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
             child: Row(
               children: [
-                iconName =="profile.png"?Image.asset('assets/svg/$iconName',height: 24.w, width: 24.w, color: context.iconTheme.color): SvgPicture.asset('assets/svg/$iconName', height: 24.w, width: 24.w, colorFilter: ColorFilter.mode(context.iconTheme.color ?? Colors.grey, BlendMode.srcIn)),
+                iconWidget,
                 width(width: 16.w),
-                Text(title, style: context.typography.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
-                Spacer(),
-                Icon(Icons.arrow_forward_ios, size: 16, color: context.subtitleColor),
+                Text(
+                  title,
+                  style: context.typography.bodyLarge?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: effectiveTextColor,
+                  ),
+                ),
+                const Spacer(),
+                Icon(Icons.arrow_forward_ios, size: 16, color: effectiveChevronColor),
               ],
             ),
           ),

@@ -142,7 +142,11 @@ class _HomeViewState extends State<HomeView> {
                 left: 0,
                 right: 0,
                 child: Visibility(
-                  visible: !homeProvider.isCurrentArticleGrid && (homeProvider.isBottomEnable || homeProvider.isAiTagDataLoaded) && MediaQuery.of(context).orientation != Orientation.landscape,
+                  visible: !homeProvider.isCurrentArticleGrid &&
+                      !homeProvider.isCurrentArticleShowAlert &&
+                      !homeProvider.isCurrentArticleBulletin &&
+                      (homeProvider.isBottomEnable || homeProvider.isAiTagDataLoaded) &&
+                      MediaQuery.of(context).orientation != Orientation.landscape,
                   child: Container(
                     color: AppColorTokens.primaryRed,
                     child: SafeArea(

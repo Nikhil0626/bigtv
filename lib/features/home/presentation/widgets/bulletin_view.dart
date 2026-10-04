@@ -1,13 +1,9 @@
-import 'dart:async';
-import 'dart:math' as math;
-
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:chotanews/utils/app_fonts.dart';
-import 'package:chotanews/utils/translated_text.dart';
-import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:provider/provider.dart';
+
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/utils/translated_text.dart';
 
 class BulletinView extends StatefulWidget {
   final Map<String, dynamic> article;
@@ -20,21 +16,24 @@ class BulletinView extends StatefulWidget {
 
 class _BulletinViewState extends State<BulletinView>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  Timer? _timer;
-
-  int _currentIndex = 0;
+  late final AnimationController _animController;
 
   @override
   void initState() {
     super.initState();
-
-    _controller = AnimationController(
+    final points = _getPoints();
+    final totalMs = (points.length * 450).clamp(1000, 5000);
+    _animController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: Duration(milliseconds: totalMs),
     );
+    _animController.forward();
+  }
 
-    _startAutoFlipTimer();
+  @override
+  void dispose() {
+    _animController.dispose();
+    super.dispose();
   }
 
   List<String> _getPoints() {
@@ -51,7 +50,7 @@ class _BulletinViewState extends State<BulletinView>
       }
     }
 
-    // If no bullet points, check content split by lines
+    // Check content split by newlines if bulletPoints is empty
     if (points.isEmpty &&
         widget.article['content'] != null &&
         widget.article['content'].toString().trim().isNotEmpty) {
@@ -74,234 +73,231 @@ class _BulletinViewState extends State<BulletinView>
     return points;
   }
 
-  void _startAutoFlipTimer() {
-    _timer?.cancel();
-    final points = _getPoints();
-    if (points.length > 1) {
-      _timer = Timer.periodic(const Duration(seconds: 5), (_) {
-        _flipCard();
-      });
-    }
+  Widget _buildLiveBadge({required bool isTopItem, required bool isDark}) {
+    final redColor = const Color(0xFFFF0033);
+    final bgColor = isTopItem
+        ? (isDark ? const Color(0xFF4A191D) : const Color(0xFFFFE5E8))
+        : (isDark ? const Color(0xFF331D20) : const Color(0xFFFFF0F2));
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 7.w,
+            height: 7.w,
+            decoration: BoxDecoration(
+              color: redColor,
+              shape: BoxShape.circle,
+              boxShadow: isTopItem
+                  ? [
+                      BoxShadow(
+                        color: redColor.withValues(alpha: 0.6),
+                        blurRadius: 4,
+                        spreadRadius: 1,
+                      ),
+                    ]
+                  : null,
+            ),
+          ),
+          SizedBox(width: 4.w),
+          Text(
+            'LIVE',
+            style: TextStyle(
+              color: redColor,
+              fontSize: 10.sp,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
-  Future<void> _flipCard({bool forward = true}) async {
-    if (_controller.isAnimating) return;
+  Widget _buildBulletinCard({
+    required BuildContext context,
+    required String text,
+    required int index,
+    required bool isDark,
+  }) {
+    final isTop = index == 0;
 
-    final points = _getPoints();
-    if (points.length <= 1) return;
+    final cardBg = isTop
+        ? (isDark ? const Color(0xFF241517) : const Color(0xFFFFF0F2))
+        : (isDark ? const Color(0xFF1E1E1E) : Colors.white);
 
-    await _controller.forward(from: 0);
+    final borderColor = isTop
+        ? (isDark ? Colors.red.shade900.withValues(alpha: 0.6) : const Color(0xFFFFC2C8))
+        : (isDark ? Colors.grey.shade800 : const Color(0xFFE2E8F0));
 
-    if (!mounted) return;
-
-    setState(() {
-      if (forward) {
-        _currentIndex = (_currentIndex + 1) % points.length;
-      } else {
-        _currentIndex = (_currentIndex - 1 + points.length) % points.length;
-      }
-    });
-
-    _controller.reset();
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _controller.dispose();
-    super.dispose();
-  }
-
-  Widget _buildPointCard(
-    BuildContext context,
-    String pointText,
-    int index,
-    int totalPoints,
-    String title,
-  ) {
-    return Center(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 24.w),
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          child: TranslatedText(
-            pointText,
-            translate: context.watch<HomeProvider>().isEnglishMode,
-            textAlign: TextAlign.center,
-            style: homeScreenFontStyle(
-              color: Colors.white,
-              fontSize: 22.sp,
-              fontWeight: FontWeight.w700,
-              height: 1.45,
-            ).copyWith(
-              shadows: [
-                Shadow(
-                  color: Colors.black.withValues(alpha: 0.8),
-                  blurRadius: 10,
+    return Container(
+      margin: EdgeInsets.only(bottom: 10.h),
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: borderColor,
+          width: isTop ? 1.4 : 1.0,
+        ),
+        boxShadow: isTop
+            ? [
+                BoxShadow(
+                  color: Colors.red.withValues(alpha: 0.08),
+                  blurRadius: 8,
+                  offset: const Offset(0, 3),
+                )
+              ]
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 4,
                   offset: const Offset(0, 2),
+                )
+              ],
+      ),
+      child: Stack(
+        children: [
+          if (isTop)
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                width: 4.w,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFF0033),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12.r),
+                    bottomLeft: Radius.circular(12.r),
+                  ),
+                ),
+              ),
+            ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(isTop ? 14.w : 12.w, 12.h, 12.w, 12.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    _buildLiveBadge(isTopItem: isTop, isDark: isDark),
+                  ],
+                ),
+                SizedBox(height: 8.h),
+                TranslatedText(
+                  text,
+                  translate: context.watch<HomeProvider>().isEnglishMode,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w700,
+                    height: 1.35,
+                  ),
                 ),
               ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final points = _getPoints();
-    final title = widget.article['title']?.toString() ?? '';
 
-    String imageUrl = widget.article['image_url']?.toString() ?? '';
-    if (imageUrl.startsWith('/')) {
-      imageUrl = "https://admin.pravasamedia.com$imageUrl";
-    }
-
-    return GestureDetector(
-      onTap: () {
-        if (points.length > 1) {
-          _startAutoFlipTimer();
-          _flipCard();
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        height: double.infinity,
-        color: Colors.black,
-        child: Stack(
-          children: [
-            // 1. Background Image (defaults to evening_bulletins_bg.jpg)
-            Positioned.fill(
-              child: (imageUrl.isNotEmpty && imageUrl.startsWith('http'))
-                  ? CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      placeholder: (context, url) => Image.asset(
-                        'assets/images/evening_bulletins_bg.jpg',
-                        fit: BoxFit.cover,
-                      ),
-                      errorWidget: (context, url, error) => Image.asset(
-                        'assets/images/evening_bulletins_bg.jpg',
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Image.asset(
-                      'assets/images/evening_bulletins_bg.jpg',
-                      fit: BoxFit.cover,
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: isDark ? const Color(0xFF121212) : const Color(0xFFF8FAFC),
+      child: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Row: "Live bulletin" | "LATEST FIRST"
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Live bulletin',
+                    style: TextStyle(
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
+                      fontSize: 22.sp,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
                     ),
-            ),
-
-            // 2. Dark Gradient Overlay
-            Positioned.fill(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.black.withValues(alpha: 0.2),
-                      Colors.black.withValues(alpha: 0.5),
-                      Colors.black.withValues(alpha: 0.85),
-                    ],
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
                   ),
-                ),
+                  Text(
+                    'LATEST FIRST',
+                    style: TextStyle(
+                      color: isDark ? Colors.grey.shade400 : const Color(0xFF64748B),
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                ],
               ),
-            ),
+              SizedBox(height: 14.h),
 
-            // 3. Top Title Header
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 70.h,
-              left: 20.w,
-              right: 20.w,
-              child: title.isNotEmpty
-                  ? Center(
-                      child: TranslatedText(
-                        title,
-                        translate: context.watch<HomeProvider>().isEnglishMode,
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: homeScreenFontStyle(
-                          color: const Color(0xFFFFD700),
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
+              // Sequential Left-Slide Entrance Animation for Cards
+              Expanded(
+                child: ListView.builder(
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: points.length,
+                  itemBuilder: (context, index) {
+                    final int count = points.length;
+                    final double step = 1.0 / count;
+                    final double start = (index * step).clamp(0.0, 1.0 - step);
+                    final double end = ((index + 1) * step).clamp(start + 0.01, 1.0);
 
-            // 4. Centered Flipping Card Content
-            Positioned.fill(
-              child: AnimatedBuilder(
-                animation: _controller,
-                builder: (context, child) {
-                  final isFront = _controller.value < 0.5;
-                  final angle = _controller.value * math.pi;
-                  final activeIndex = isFront
-                      ? _currentIndex
-                      : (_currentIndex + 1) % (points.isEmpty ? 1 : points.length);
+                    final Animation<double> opacityAnim = CurvedAnimation(
+                      parent: _animController,
+                      curve: Interval(start, end, curve: Curves.easeIn),
+                    );
 
-                  final currentText = points.isNotEmpty
-                      ? points[activeIndex]
-                      : title;
+                    final Animation<Offset> slideAnim = Tween<Offset>(
+                      begin: const Offset(-1.2, 0.0), // Offscreen Left
+                      end: Offset.zero,
+                    ).animate(CurvedAnimation(
+                      parent: _animController,
+                      curve: Interval(start, end, curve: Curves.easeOutCubic),
+                    ));
 
-                  return Transform(
-                    alignment: Alignment.center,
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.001)
-                      ..rotateY(angle),
-                    child: isFront
-                        ? _buildPointCard(
-                            context,
-                            currentText,
-                            activeIndex,
-                            points.length,
-                            title,
-                          )
-                        : Transform(
-                            alignment: Alignment.center,
-                            transform: Matrix4.identity()..rotateY(math.pi),
-                            child: _buildPointCard(
-                              context,
-                              currentText,
-                              activeIndex,
-                              points.length,
-                              title,
+                    return AnimatedBuilder(
+                      animation: _animController,
+                      builder: (context, child) {
+                        if (_animController.value < start) {
+                          return const SizedBox.shrink();
+                        }
+                        return FadeTransition(
+                          opacity: opacityAnim,
+                          child: SlideTransition(
+                            position: slideAnim,
+                            child: _buildBulletinCard(
+                              context: context,
+                              text: points[index],
+                              index: index,
+                              isDark: isDark,
                             ),
                           ),
-                  );
-                },
-              ),
-            ),
-
-            // 5. Bottom Left Indicators
-            if (points.length > 1)
-              Positioned(
-                bottom: MediaQuery.of(context).padding.bottom + 60.h,
-                left: 24.w,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: points.asMap().entries.map((entry) {
-                    final isActive = _currentIndex == entry.key;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      width: isActive ? 14.w : 5.w,
-                      height: 4.h,
-                      margin: EdgeInsets.only(right: 4.w),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(2.r),
-                        color: isActive
-                            ? const Color(0xFFED1C24)
-                            : Colors.white.withValues(alpha: 0.5),
-                      ),
+                        );
+                      },
                     );
-                  }).toList(),
+                  },
                 ),
               ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -369,6 +369,7 @@ class AuthenticationProvider extends ChangeNotifier {
 
   Future sendCategoriesToServer({bool isFilter = false}) async {
     isCatSaveLoading = true;
+    notifyListeners();
     List<int> selectedCategoryIds = getAllCategoryList.where((item) => selectedCategories.contains(item.categoryName.toString()) && item.categoryId != null).map((item) => item.categoryId as int).toList();
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String result = selectedCategoryIds.toSet().join(',');
@@ -387,11 +388,6 @@ class AuthenticationProvider extends ChangeNotifier {
     try {
       Response response = await AuthenticationRepo().sendSelectCategories(body);
       if (response.statusCode == 200) {
-        if (!isFilter) {
-          saveLoginState();
-          newAppLoginStatus = NewAppLoginStatus.location;
-
-        }
         log(response.data.toString());
         EventRepo().addEvent({"listOfCategoriesIds": result, "listOfCategoriesNames": catNames, "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_categories");
       }
@@ -402,6 +398,10 @@ class AuthenticationProvider extends ChangeNotifier {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
       EventRepo().addEvent({"listOfCategoriesIds": result, "listOfCategoriesNames": catNames, "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_categories");
     } finally {
+      if (!isFilter) {
+        newAppLoginStatus = NewAppLoginStatus.location;
+        saveLoginState();
+      }
       isCatSaveLoading = false;
       notifyListeners();
     }
@@ -507,11 +507,6 @@ class AuthenticationProvider extends ChangeNotifier {
       log("response.data.toString123");
       Response response = await AuthenticationRepo().sendSelectLocations(body);
       if (response.statusCode == 200) {
-        if (!isFilter) {
-          newAppLoginStatus = NewAppLoginStatus.home;
-          saveLoginState();
-        }
-
         log(response.data.toString());
         EventRepo().addEvent({"listOfLocationsIds": result, "listOfLocationsNames": nameOfDistrict, "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_locations");
       }
@@ -522,6 +517,10 @@ class AuthenticationProvider extends ChangeNotifier {
       log("Error get all cat --- ${e.toString()} --- ${st.toString()}");
       EventRepo().addEvent({"listOfLocationsIds": result, "listOfLocationsNames": "", "updateStatus": "fail", "createAt": DateTime.now().toString()}, "update_locations");
     } finally {
+      if (!isFilter) {
+        newAppLoginStatus = NewAppLoginStatus.home;
+        saveLoginState();
+      }
       isLocationSendingLoading = false;
       notifyListeners();
     }

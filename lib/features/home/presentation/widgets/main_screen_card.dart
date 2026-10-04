@@ -16,6 +16,7 @@ import 'package:chotanews/features/auth/presentation/widgets/login_background_vi
 import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
 import 'package:chotanews/services/translation_service.dart';
 import 'package:chotanews/utils/app_toasts.dart';
+import 'package:chotanews/features/home/presentation/screens/live_tv_screen.dart';
 import 'main_screen_pageview.dart';
 
 class MainScreenCard extends StatefulWidget {
@@ -73,7 +74,8 @@ class _MainScreenCardState extends State<MainScreenCard>
   Widget build(BuildContext context) {
     return Consumer2<HomeProvider, SettingsProvider>(
       builder: (_, homeProvider, settingsProvider, __) {
-        final bool hasTopBarContent = (homeProvider.langCode == 'ml') ||
+        final bool hasTopBarContent = homeProvider.liveTvVideosEnable ||
+            (homeProvider.langCode == 'ml') ||
             (homeProvider.folkNight && homeProvider.langCode != 'ml') ||
             (homeProvider.showTopNavTags && homeProvider.getAllAiTagsList.isNotEmpty);
 
@@ -88,7 +90,10 @@ class _MainScreenCardState extends State<MainScreenCard>
                 MediaQuery.of(context).orientation != Orientation.landscape
                     ? AppColorTokens.primaryRed
                     : Colors.black,
-            appBar: (MediaQuery.of(context).orientation != Orientation.landscape && hasTopBarContent)
+            appBar: (MediaQuery.of(context).orientation != Orientation.landscape &&
+                    hasTopBarContent &&
+                    !homeProvider.isCurrentArticleShowAlert &&
+                    !homeProvider.isCurrentArticleBulletin)
                 ? AppBar(
                     toolbarHeight: 35.h,
                     backgroundColor: AppColorTokens.primaryRed,
@@ -105,6 +110,90 @@ class _MainScreenCardState extends State<MainScreenCard>
                       height: 35.h,
                       child: Row(
                         children: [
+                          if (homeProvider.liveTvVideosEnable) ...[
+                            const SizedBox(width: 8),
+                            InkWell(
+                              onTap: () async {
+                                try {
+                                  context.read<VideoProvider>().pauseVideo();
+                                } catch (_) {}
+                                final liveData = await homeProvider.fetchLiveTvStream();
+                                if (!context.mounted) return;
+                                if (liveData != null &&
+                                    liveData['stream_url'] != null &&
+                                    liveData['stream_url'].toString().isNotEmpty) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => LiveTvScreen(
+                                        streamUrl: liveData['stream_url'].toString(),
+                                        channelName: (liveData['channel_name'] ?? "BIGTV").toString(),
+                                        playbackType: (liveData['playback_type'] ?? "hls").toString(),
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(4),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.25),
+                                      blurRadius: 4,
+                                      spreadRadius: 1,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (homeProvider.isLiveTvLoading)
+                                      SizedBox(
+                                        width: 12.w,
+                                        height: 12.w,
+                                        child: const CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: AppColorTokens.primaryRed,
+                                        ),
+                                      )
+                                    else
+                                      Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.live_tv_rounded,
+                                            size: 14.sp,
+                                            color: AppColorTokens.primaryRed,
+                                          ),
+                                          const SizedBox(width: 3),
+                                          Container(
+                                            width: 6,
+                                            height: 6,
+                                            decoration: const BoxDecoration(
+                                              color: Colors.red,
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "Live TV",
+                                      style: TextStyle(
+                                        color: AppColorTokens.primaryRed,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12.sp,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                           if (homeProvider.langCode == 'ml')
                             PremiumAnimatedButton(
                               onTap: () {

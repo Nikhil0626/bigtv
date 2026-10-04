@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/events/presentation/screens/my_tickets_screen.dart';
 import 'package:chotanews/features/events/presentation/screens/ticket_detail_screen.dart';
@@ -789,105 +790,11 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
                     child: Divider(),
                   ),
                   
-                  // Tickets
-                  Text(
-                    "Choose your tickets",
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  
+                  // Tickets Section - Visual Stage Zone & Row Selector
                   if (tickets.isEmpty)
                     Text("No tickets available currently.", style: TextStyle(color: Colors.grey.shade600))
-                  else ...[
-                    // Dropdown for ticket type
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade300),
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: selectedTicketId,
-                          isExpanded: true,
-                          hint: const Text("Select Ticket Type"),
-                          icon: Icon(Icons.keyboard_arrow_down, color: AppColorTokens.primaryRed),
-                          items: tickets.map<DropdownMenuItem<String>>((t) {
-                            final name = t['name'] ?? 'Ticket';
-                            final price = (t['price'] as num?)?.toInt() ?? 0;
-                            return DropdownMenuItem<String>(
-                              value: t['id'],
-                              child: Text(
-                                "$name - ₹$price",
-                                style: TextStyle(
-                                  fontSize: 16.sp,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                          onChanged: (value) async {
-                            setState(() {
-                              selectedTicketId = value;
-                              selectedTicketCount = 0; // reset count on change
-                            });
-                            if (value != null) {
-                              await _showQuantitySelector();
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                    
-                    // Quantity selector
-                    if (selectedTicketId != null)
-                      Container(
-                        margin: const EdgeInsets.only(top: 16),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Quantity",
-                              style: TextStyle(
-                                fontSize: 16.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () => _showQuantitySelector(),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: selectedTicketCount > 0 ? Colors.white : AppColorTokens.primaryRed,
-                                  border: Border.all(color: AppColorTokens.primaryRed),
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  selectedTicketCount > 0 ? "$selectedTicketCount Tickets \u270E" : "Select",
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: selectedTicketCount > 0 ? AppColorTokens.primaryRed : Colors.white,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                  ],
+                  else
+                    _buildStageZoneSelector(),
                   
                   const SizedBox(height: 24),
                   
@@ -1167,4 +1074,615 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
       ),
     );
   }
+
+  Map<String, dynamic>? _getTicketForZone(String zoneKey) {
+    if (tickets.isEmpty) return null;
+    for (var t in tickets) {
+      final name = (t['name'] ?? '').toString().toUpperCase();
+      if (name.contains(zoneKey)) {
+        return Map<String, dynamic>.from(t);
+      }
+    }
+    final zoneKeys = ['VIP', 'PLATINUM', 'GOLD', 'SILVER'];
+    int idx = zoneKeys.indexOf(zoneKey);
+    if (idx >= 0 && idx < tickets.length) {
+      return Map<String, dynamic>.from(tickets[idx]);
+    }
+    return Map<String, dynamic>.from(tickets.first);
+  }
+
+  Future<void> _selectZone(String zoneKey) async {
+    final ticket = _getTicketForZone(zoneKey);
+    if (ticket != null) {
+      setState(() {
+        selectedTicketId = ticket['id'];
+        selectedTicketCount = 0;
+      });
+      await _showQuantitySelector();
+    }
+  }
+
+  Widget _buildStageZoneSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Choose your zone",
+          style: TextStyle(
+            fontSize: 22.sp,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF0F172A),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          "Pick your preferred view of the stage.",
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: const Color(0xFF64748B),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        const SizedBox(height: 16),
+        
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 12),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: const Color(0xFFE2E8F0)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(8),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            children: [
+              Text(
+                "STAGE VIEW",
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF64748B),
+                  letterSpacing: 1.2,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Container(
+                width: 140.w,
+                height: 38.h,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF2C3E50),
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF2C3E50).withAlpha(77),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  "STAGE",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14.sp,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              _buildInteractiveStageCanvas(),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 16),
+        
+        _buildZoneListCards(),
+
+        if (selectedTicketId != null) ...[
+          const SizedBox(height: 16),
+          _buildSelectedTicketSummaryCard(),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildInteractiveStageCanvas() {
+    String? currentSelectedZoneKey;
+    if (selectedTicketId != null) {
+      for (var zoneKey in ['VIP', 'PLATINUM', 'GOLD', 'SILVER']) {
+        final t = _getTicketForZone(zoneKey);
+        if (t != null && t['id'] == selectedTicketId) {
+          currentSelectedZoneKey = zoneKey;
+          break;
+        }
+      }
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double width = constraints.maxWidth;
+        final double height = 260.h;
+
+        return GestureDetector(
+          onTapUp: (details) {
+            final Offset localPos = details.localPosition;
+            final double cx = width / 2;
+            final double cy = -10;
+            final double dx = localPos.dx - cx;
+            final double dy = localPos.dy - cy;
+            final double dist = math.sqrt(dx * dx + dy * dy);
+
+            String? tappedZone;
+            if (dist >= 50 && dist < 100) {
+              tappedZone = 'VIP';
+            } else if (dist >= 100 && dist < 150) {
+              tappedZone = 'PLATINUM';
+            } else if (dist >= 150 && dist < 200) {
+              tappedZone = 'GOLD';
+            } else if (dist >= 200 && dist < 270) {
+              tappedZone = 'SILVER';
+            }
+
+            if (tappedZone != null) {
+              _selectZone(tappedZone);
+            }
+          },
+          child: CustomPaint(
+            size: Size(width, height),
+            painter: StageSeatingCustomPainter(
+              selectedZoneKey: currentSelectedZoneKey,
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildZoneListCards() {
+    final List<Map<String, dynamic>> zoneConfigs = [
+      {
+        'key': 'VIP',
+        'label': 'VIP Zone',
+        'color': const Color(0xFFEF4444),
+        'lightColor': const Color(0xFFFEF2F2),
+      },
+      {
+        'key': 'PLATINUM',
+        'label': 'Platinum Zone',
+        'color': const Color(0xFF8B5CF6),
+        'lightColor': const Color(0xFFF5F3FF),
+      },
+      {
+        'key': 'GOLD',
+        'label': 'Gold Zone',
+        'color': const Color(0xFFF59E0B),
+        'lightColor': const Color(0xFFFFFBEB),
+      },
+      {
+        'key': 'SILVER',
+        'label': 'Silver Zone',
+        'color': const Color(0xFF94A3B8),
+        'lightColor': const Color(0xFFF8FAFC),
+      },
+    ];
+
+    return Column(
+      children: zoneConfigs.map((cfg) {
+        final String zoneKey = cfg['key'];
+        final Color color = cfg['color'];
+        final Color lightColor = cfg['lightColor'];
+        
+        final ticket = _getTicketForZone(zoneKey);
+        final bool isAvailable = (ticket != null);
+        final bool isSelected = isAvailable && (selectedTicketId == ticket['id']);
+        final int price = isAvailable ? ((ticket['price'] as num?)?.toInt() ?? 0) : 0;
+        final String name = isAvailable ? (ticket['name'] ?? cfg['label']) : cfg['label'];
+
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          child: Material(
+            color: isSelected ? lightColor : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: isAvailable ? () => _selectZone(zoneKey) : null,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isSelected ? color : Colors.grey.shade300,
+                    width: isSelected ? 2 : 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 14,
+                      height: 14,
+                      decoration: BoxDecoration(
+                        color: color,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            name,
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          if (isAvailable) ...[
+                            const SizedBox(height: 2),
+                            Text(
+                              "₹$price per ticket",
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ] else ...[
+                            Text(
+                              "Sold out",
+                              style: TextStyle(
+                                fontSize: 13.sp,
+                                color: Colors.red.shade400,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (isSelected)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: color,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.check, size: 14, color: Colors.white),
+                            const SizedBox(width: 4),
+                            Text(
+                              selectedTicketCount > 0 ? "$selectedTicketCount Tickets" : "Selected",
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: isAvailable ? Colors.grey.shade100 : Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          isAvailable ? "Select Row" : "Unavailable",
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: isAvailable ? Colors.black87 : Colors.grey.shade400,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildSelectedTicketSummaryCard() {
+    final ticket = tickets.firstWhere(
+      (t) => t['id'] == selectedTicketId,
+      orElse: () => null,
+    );
+    if (ticket == null) return const SizedBox.shrink();
+
+    final name = ticket['name'] ?? 'Ticket';
+    final price = (ticket['price'] as num?)?.toInt() ?? 0;
+    final total = price * selectedTicketCount;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: AppColorTokens.primaryRed.withAlpha(102)),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColorTokens.primaryRed.withAlpha(13),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Selected: $name",
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                selectedTicketCount > 0 
+                    ? "$selectedTicketCount \u00d7 ₹$price = ₹$total"
+                    : "Tap 'Select' to pick ticket count",
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: AppColorTokens.primaryRed,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+          InkWell(
+            onTap: () => _showQuantitySelector(),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: selectedTicketCount > 0 ? Colors.white : AppColorTokens.primaryRed,
+                border: Border.all(color: AppColorTokens.primaryRed),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                selectedTicketCount > 0 ? "Change ($selectedTicketCount) \u270E" : "Select Members",
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.bold,
+                  color: selectedTicketCount > 0 ? AppColorTokens.primaryRed : Colors.white,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StageSeatingCustomPainter extends CustomPainter {
+  final String? selectedZoneKey;
+
+  StageSeatingCustomPainter({
+    required this.selectedZoneKey,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double cx = size.width / 2;
+    final double cy = -10;
+
+    final List<_ZonePaintConfig> configs = [
+      _ZonePaintConfig(
+        key: 'VIP',
+        label: 'VIP',
+        radius: 75,
+        seatColor: const Color(0xFFEF4444),
+        borderColor: const Color(0xFFDC2626),
+        seatRows: 2,
+        seatsPerSide: 7,
+      ),
+      _ZonePaintConfig(
+        key: 'PLATINUM',
+        label: 'PLATINUM',
+        radius: 125,
+        seatColor: const Color(0xFF8B5CF6),
+        borderColor: const Color(0xFF7C3AED),
+        seatRows: 2,
+        seatsPerSide: 10,
+      ),
+      _ZonePaintConfig(
+        key: 'GOLD',
+        label: 'GOLD',
+        radius: 175,
+        seatColor: const Color(0xFFF59E0B),
+        borderColor: const Color(0xFFD97706),
+        seatRows: 2,
+        seatsPerSide: 13,
+      ),
+      _ZonePaintConfig(
+        key: 'SILVER',
+        label: 'SILVER',
+        radius: 225,
+        seatColor: const Color(0xFF94A3B8),
+        borderColor: const Color(0xFF64748B),
+        seatRows: 2,
+        seatsPerSide: 16,
+      ),
+    ];
+
+    final Paint aislePaint = Paint()
+      ..color = const Color(0xFFCBD5E1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5;
+
+    for (double r = 60; r <= 245; r += 12) {
+      final double y = cy + r;
+      canvas.drawLine(Offset(cx - 10, y), Offset(cx + 10, y), aislePaint);
+    }
+
+    for (final cfg in configs) {
+      final bool isSelected = (selectedZoneKey == cfg.key);
+
+      if (isSelected) {
+        final Paint glowPaint = Paint()
+          ..color = cfg.seatColor.withAlpha(46)
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 42.0;
+
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(cx, cy), radius: cfg.radius),
+          1.57 - 1.1,
+          2.2,
+          false,
+          glowPaint,
+        );
+
+        final Paint borderGlow = Paint()
+          ..color = cfg.seatColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.0;
+
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(cx, cy), radius: cfg.radius - 20),
+          1.57 - 1.1,
+          2.2,
+          false,
+          borderGlow,
+        );
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(cx, cy), radius: cfg.radius + 20),
+          1.57 - 1.1,
+          2.2,
+          false,
+          borderGlow,
+        );
+      }
+
+      for (int row = 0; row < cfg.seatRows; row++) {
+        final double rowRadius = cfg.radius - 9 + (row * 18);
+        final double seatWidth = 10;
+        final double seatHeight = 8;
+
+        final double leftStart = 1.57 + 0.18;
+        final double leftEnd = 1.57 + 1.12;
+        final double leftStep = (leftEnd - leftStart) / (cfg.seatsPerSide - 1);
+
+        for (int s = 0; s < cfg.seatsPerSide; s++) {
+          final double angle = leftStart + (s * leftStep);
+          _drawSeat(canvas, cx, cy, rowRadius, angle, seatWidth, seatHeight, cfg.seatColor, cfg.borderColor, isSelected);
+        }
+
+        final double rightStart = 1.57 - 0.18;
+        final double rightEnd = 1.57 - 1.12;
+        final double rightStep = (rightEnd - rightStart) / (cfg.seatsPerSide - 1);
+
+        for (int s = 0; s < cfg.seatsPerSide; s++) {
+          final double angle = rightStart + (s * rightStep);
+          _drawSeat(canvas, cx, cy, rowRadius, angle, seatWidth, seatHeight, cfg.seatColor, cfg.borderColor, isSelected);
+        }
+      }
+
+      TextSpan span = TextSpan(
+        style: TextStyle(
+          color: isSelected ? cfg.seatColor : cfg.borderColor,
+          fontWeight: FontWeight.bold,
+          fontSize: isSelected ? 13 : 11,
+          letterSpacing: 1.0,
+          shadows: isSelected
+              ? [
+                  Shadow(color: cfg.seatColor.withAlpha(102), blurRadius: 4)
+                ]
+              : null,
+        ),
+        text: cfg.label,
+      );
+      TextPainter tp = TextPainter(
+        text: span,
+        textAlign: TextAlign.center,
+        textDirection: TextDirection.ltr,
+      );
+      tp.layout();
+      tp.paint(canvas, Offset(cx - (tp.width / 2), cy + cfg.radius - (tp.height / 2)));
+    }
+  }
+
+  void _drawSeat(
+    Canvas canvas,
+    double cx,
+    double cy,
+    double radius,
+    double angle,
+    double width,
+    double height,
+    Color color,
+    Color borderColor,
+    bool isSelected,
+  ) {
+    final double sx = cx + radius * math.cos(angle);
+    final double sy = cy + radius * math.sin(angle);
+
+    canvas.save();
+    canvas.translate(sx, sy);
+    canvas.rotate(angle - 1.57);
+
+    final RRect seatRRect = RRect.fromRectAndRadius(
+      Rect.fromCenter(center: Offset.zero, width: width, height: height),
+      const Radius.circular(2.5),
+    );
+
+    final Paint fillPaint = Paint()
+      ..color = isSelected ? color : color.withAlpha(217)
+      ..style = PaintingStyle.fill;
+
+    final Paint borderPaint = Paint()
+      ..color = borderColor
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 0.8;
+
+    canvas.drawRRect(seatRRect, fillPaint);
+    canvas.drawRRect(seatRRect, borderPaint);
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant StageSeatingCustomPainter oldDelegate) {
+    return oldDelegate.selectedZoneKey != selectedZoneKey;
+  }
+}
+
+class _ZonePaintConfig {
+  final String key;
+  final String label;
+  final double radius;
+  final Color seatColor;
+  final Color borderColor;
+  final int seatRows;
+  final int seatsPerSide;
+
+  _ZonePaintConfig({
+    required this.key,
+    required this.label,
+    required this.radius,
+    required this.seatColor,
+    required this.borderColor,
+    required this.seatRows,
+    required this.seatsPerSide,
+  });
 }

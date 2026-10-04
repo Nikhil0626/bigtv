@@ -8,15 +8,25 @@ import 'package:dio/dio.dart';
 
 class ReelsRepo  extends BaseService{
 
-  Future getAllReels(Map<String, dynamic> body) async {
-    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
-        url: BaseUrls.getAllReels, method: RequestType.get,queryParameters: body);
+  Future getAllReels([Map<String, dynamic>? body]) async {
+    Response response = await makeRequest(
+      baseUrl: BaseUrls.newServerBaseUrl,
+      url: BaseUrls.getReelsApi,
+      method: RequestType.get,
+      queryParameters: body,
+      headers: {'accept': '*/*'},
+    );
     return response;
   }
 
   Future getSingleReelData(Map<String, dynamic> body) async {
-    Response response = await makeRequest(baseUrl: BaseUrls.baseUrlAwsDev,
-        url: BaseUrls.getAllReels, method: RequestType.get,queryParameters: body);
+    Response response = await makeRequest(
+      baseUrl: BaseUrls.newServerBaseUrl,
+      url: BaseUrls.getReelsApi,
+      method: RequestType.get,
+      queryParameters: body,
+      headers: {'accept': '*/*'},
+    );
     return response;
   }
 
