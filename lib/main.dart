@@ -29,6 +29,7 @@ import 'aggricator_screens/splash_screen/splash_screen_view.dart';
 import 'globel_keys/globel_keys.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
+import 'features/home/presentation/widgets/html_notification_dialog.dart';
 
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -104,6 +105,7 @@ void _initBackgroundServices() async {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint("Foreground FCM message received: ${message.data}");
+      _handleForegroundNotification(message);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
@@ -142,6 +144,43 @@ void _initBackgroundServices() async {
     logFullDeviceAndFcmDetails();
   } catch (e) {
     debugPrint("Error in background services initialization: $e");
+  }
+}
+
+void _handleForegroundNotification(RemoteMessage message) {
+  final Map<String, dynamic> payload = Map<String, dynamic>.from(message.data);
+  if (message.notification != null) {
+    if (message.notification!.title != null) {
+      payload['title'] ??= message.notification!.title;
+    }
+    if (message.notification!.body != null) {
+      payload['body'] ??= message.notification!.body;
+      payload['content'] ??= message.notification!.body;
+    }
+    if (message.notification!.android?.imageUrl != null) {
+      payload['imageUrl'] ??= message.notification!.android!.imageUrl;
+    }
+    if (message.notification!.apple?.imageUrl != null) {
+      payload['imageUrl'] ??= message.notification!.apple!.imageUrl;
+    }
+  }
+
+  final String? content = payload['content'] ??
+      payload['html_content'] ??
+      payload['html'] ??
+      payload['message'] ??
+      payload['body'];
+
+  if (content != null && content.isNotEmpty && (content.contains('<') && content.contains('>'))) {
+    showHtmlNotificationDialog(
+      content: content,
+      title: payload['title']?.toString(),
+      imageUrl: payload['image']?.toString() ?? payload['imageUrl']?.toString() ?? payload['image_url']?.toString(),
+      ctaUrl: payload['deepLink'] ?? payload['deeplink'] ?? payload['url'] ?? payload['link'],
+      rawPayload: payload,
+    );
+  } else if (mainNavigatorKey.currentContext != null) {
+    mainNavigatorKey.currentContext!.read<HomeProvider>().handleNotificationTap(payload);
   }
 }
 

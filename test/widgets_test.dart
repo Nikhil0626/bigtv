@@ -49,8 +49,8 @@ void main() {
     });
 
     test('TopRightWavePainter can be instantiated and compared', () {
-      const painter1 = TopRightWavePainter(isDark: true, isRedHeader: false);
-      const painter2 = TopRightWavePainter(isDark: false, isRedHeader: true);
+      final painter1 = TopRightWavePainter(isDark: true, isRedHeader: false);
+      final painter2 = TopRightWavePainter(isDark: false, isRedHeader: true);
 
       expect(painter1.isDark, isTrue);
       expect(painter2.isRedHeader, isTrue);

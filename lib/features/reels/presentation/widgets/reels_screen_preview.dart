@@ -274,6 +274,10 @@ class _ReelsCardViewState extends State<ReelsCardView> {
   ScreenshotController sc = ScreenshotController();
 
   Widget _buildVideoBody(BuildContext context) {
+    final screenSize = MediaQuery.of(context).size;
+    final screenWidth = screenSize.width;
+    final screenHeight = screenSize.height;
+
     // 1. Direct Network Video Player (pre-buffered from user server)
     if (widget.videoController != null &&
         widget.videoController!.value.isInitialized) {
@@ -282,8 +286,8 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           widget.videoController!
               .setVolume(homeProvider.isMuted ? 0.0 : 1.0);
           final size = widget.videoController!.value.size;
-          final double vWidth = size.width > 0 ? size.width : 9;
-          final double vHeight = size.height > 0 ? size.height : 16;
+          final double vWidth = size.width > 0 ? size.width : screenWidth;
+          final double vHeight = size.height > 0 ? size.height : screenHeight;
 
           return GestureDetector(
             onTap: () {
@@ -295,7 +299,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
             },
             child: SizedBox.expand(
               child: FittedBox(
-                fit: BoxFit.fill,
+                fit: BoxFit.cover,
                 child: SizedBox(
                   width: vWidth,
                   height: vHeight,
@@ -308,7 +312,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
       );
     }
 
-    // 2. YouTube Video Player
+    // 2. YouTube Video Player with full device resolution viewport
     if (widget.youtubeController != null) {
       return Consumer<HomeProvider>(
         builder: (_, homeProvider, __) {
@@ -317,12 +321,13 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           } else {
             widget.youtubeController!.unMute();
           }
+          final double targetHeight = screenWidth / (9 / 16);
           return SizedBox.expand(
             child: FittedBox(
-              fit: BoxFit.fill,
+              fit: BoxFit.cover,
               child: SizedBox(
-                width: 9,
-                height: 16,
+                width: screenWidth,
+                height: targetHeight > screenHeight ? targetHeight : screenHeight,
                 child: YoutubePlayer(
                   controller: widget.youtubeController!,
                   aspectRatio: 9 / 16,
@@ -341,12 +346,12 @@ class _ReelsCardViewState extends State<ReelsCardView> {
       );
     }
 
-    // 3. Instant Thumbnail Cover (Fills screen without cropping or top/bottom black bars)
+    // 3. Instant Thumbnail Cover (Fills screen with BoxFit.cover)
     if (widget.reelCard.thumbnailUrl.isNotEmpty) {
       return SizedBox.expand(
         child: CachedNetworkImage(
           imageUrl: widget.reelCard.thumbnailUrl,
-          fit: BoxFit.fill,
+          fit: BoxFit.cover,
           placeholder: (_, __) => Container(color: Colors.black),
           errorWidget: (_, __, ___) => Container(color: Colors.black),
         ),
@@ -403,20 +408,20 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                           );
                         },
                         child: SizedBox(
-                          height: 30,
-                          width: 30,
+                          height: 36.r,
+                          width: 36.r,
                           child: ClipRRect(
-                            borderRadius: const BorderRadius.all(Radius.circular(8)),
+                            borderRadius: BorderRadius.all(Radius.circular(18.r)),
                             child: CachedNetworkImage(
                               imageUrl: widget.reelCard.publisherImage,
-                              fit: BoxFit.fill,
+                              fit: BoxFit.cover,
                               placeholder: (context, url) => Container(
                                 color: AppColors.borderColor.withValues(alpha: .2),
                               ),
                               errorWidget: (context, url, error) => Center(
                                 child: Icon(
-                                  Icons.image,
-                                  size: 30,
+                                  Icons.account_circle,
+                                  size: 36.r,
                                   color: Colors.grey.shade300,
                                 ),
                               ),
@@ -424,7 +429,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                           ),
                         ),
                       ),
-                      width(width: 6.h),
+                      width(width: 8.w),
                     ],
                     if (widget.reelCard.publisher.isNotEmpty)
                       Text(

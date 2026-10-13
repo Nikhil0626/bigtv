@@ -11,11 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:chotanews/utils/app_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
-import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
 import 'package:chotanews/services/translation_service.dart';
-import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/features/home/presentation/screens/live_tv_screen.dart';
 import 'main_screen_pageview.dart';
 
@@ -76,7 +72,6 @@ class _MainScreenCardState extends State<MainScreenCard>
       builder: (_, homeProvider, settingsProvider, __) {
         final bool hasTopBarContent = homeProvider.liveTvVideosEnable ||
             (homeProvider.langCode == 'ml') ||
-            (homeProvider.folkNight && homeProvider.langCode != 'ml') ||
             (homeProvider.showTopNavTags && homeProvider.getAllAiTagsList.isNotEmpty);
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -91,11 +86,9 @@ class _MainScreenCardState extends State<MainScreenCard>
                     ? AppColorTokens.primaryRed
                     : Colors.black,
             appBar: (MediaQuery.of(context).orientation != Orientation.landscape &&
-                    hasTopBarContent &&
-                    !homeProvider.isCurrentArticleShowAlert &&
-                    !homeProvider.isCurrentArticleBulletin)
+                    hasTopBarContent)
                 ? AppBar(
-                    toolbarHeight: 35.h,
+                    toolbarHeight: 40.h,
                     backgroundColor: AppColorTokens.primaryRed,
                     elevation: 0,
                     automaticallyImplyLeading: false,
@@ -107,7 +100,7 @@ class _MainScreenCardState extends State<MainScreenCard>
                     ),
                     title: Container(
                       color: AppColorTokens.primaryRed,
-                      height: 35.h,
+                      height: 40.h,
                       child: Row(
                         children: [
                           if (homeProvider.liveTvVideosEnable) ...[
@@ -202,122 +195,6 @@ class _MainScreenCardState extends State<MainScreenCard>
                                 homeProvider.pageChange(isValue: true);
                               },
                             ),
-                          if (homeProvider.folkNight && homeProvider.langCode != 'ml') ...[
-                            const SizedBox(width: 8),
-                            InkWell(
-                              onTap: () async {
-                                if (homeProvider.langCode != 'te') {
-                                  CustomToast.showErrorToast(
-                                    msg: "Folk Night is not available for the selected language",
-                                    timeDuration: 2,
-                                  );
-                                  return;
-                                }
-
-                                SharedPreferences sp = await SharedPreferences.getInstance();
-                                bool isGuest = sp.getString("loginType") != "login";
-                                
-                                if (!context.mounted) return;
-                                if (isGuest) {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return AlertDialog(
-                                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                                        contentPadding: const EdgeInsets.all(24),
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Text(
-                                              "Guest User",
-                                              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                                            ),
-                                            const SizedBox(height: 16),
-                                            const Text(
-                                              "You are using the app as a guest user. Please login with your mobile number to continue.",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(fontSize: 16),
-                                            ),
-                                            const SizedBox(height: 24),
-                                            SizedBox(
-                                              width: double.infinity,
-                                              height: 48,
-                                              child: ElevatedButton(
-                                                 style: ElevatedButton.styleFrom(
-                                                   backgroundColor: AppColorTokens.primaryRed,
-                                                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                                                   shape: RoundedRectangleBorder(
-                                                     borderRadius: BorderRadius.circular(8),
-                                                   ),
-                                                 ),
-                                                 onPressed: () {
-                                                   try {
-                                                     context.read<HomeProvider>().isPlayingYoutube(false);
-                                                   } catch (_) {}
-                                                   try {
-                                                     context.read<VideoProvider>().pauseVideo();
-                                                   } catch (_) {}
-                                                   Navigator.pop(context); // close dialog
-                                                   Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginBackgroundView()));
-                                                 },
-                                                 child: const FittedBox(
-                                                   fit: BoxFit.scaleDown,
-                                                   child: Text(
-                                                     "Login with mobile number",
-                                                     textAlign: TextAlign.center,
-                                                     style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15),
-                                                   ),
-                                                 ),
-                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                      );
-                                    },
-                                  );
-                                } else {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (context) => const FolkNightEventScreen()),
-                                  );
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(4),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.25),
-                                      blurRadius: 4,
-                                      spreadRadius: 1,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.confirmation_number_outlined,
-                                      size: 14.sp,
-                                      color: AppColorTokens.primaryRed,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      "Folk Night",
-                                      style: TextStyle(
-                                        color: AppColorTokens.primaryRed,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12.sp,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
                           const SizedBox(width: 8),
                           if (homeProvider.showTopNavTags && homeProvider.getAllAiTagsList.isNotEmpty)
                             Expanded(
