@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -118,11 +119,14 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   }
 
   Future<void> _incrementViewCount(int index) async {
-    if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length)
+    if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length) {
       return;
+    }
 
     final videoItem = widget.videos[index];
-    if (videoItem is! Map) return;
+    if (videoItem is! Map) {
+      return;
+    }
 
     final Map<String, dynamic> itemMap = Map<String, dynamic>.from(videoItem);
 
@@ -345,8 +349,9 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   }
 
   Future<void> _initController(int index) async {
-    if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length)
+    if (widget.videos.isEmpty || index < 0 || index >= widget.videos.length) {
       return;
+    }
 
     _incrementViewCount(index);
 
@@ -1033,12 +1038,30 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                                         width: 58.w,
                                         height: 44.h,
                                         decoration: BoxDecoration(
-                                          color: Colors.black45,
+                                          color: Colors.black.withValues(alpha: 0.55),
                                           borderRadius:
                                               BorderRadius.circular(8),
                                         ),
-                                        child: const Icon(Icons.equalizer,
-                                            color: Colors.red, size: 24),
+                                        child: Center(
+                                          child: Container(
+                                            padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 4.h),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withValues(alpha: 0.6),
+                                              shape: BoxShape.circle,
+                                              border: Border.all(
+                                                color: Colors.red.withValues(alpha: 0.5),
+                                                width: 1.0,
+                                              ),
+                                            ),
+                                            child: PlayingEqualizerAnimation(
+                                              color: const Color(0xFFED1C24),
+                                              height: 16.h,
+                                              barWidth: 2.2.w,
+                                              barCount: 3,
+                                              isPlaying: _controller?.value.isPlaying ?? true,
+                                            ),
+                                          ),
+                                        ),
                                       ),
                                   ],
                                 ),
@@ -1109,22 +1132,31 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                                 // Playing Pill Badge
                                 if (isSelected)
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 10, vertical: 5),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 8.w, vertical: 4.h),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF3D121B),
-                                      borderRadius: BorderRadius.circular(16),
+                                      color: isDark ? const Color(0xFF3D121B) : const Color(0xFFFFEBEE),
+                                      borderRadius: BorderRadius.circular(16.r),
+                                      border: Border.all(
+                                        color: const Color(0xFFED1C24).withValues(alpha: 0.35),
+                                        width: 0.8,
+                                      ),
                                     ),
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        const Icon(Icons.equalizer,
-                                            color: Colors.red, size: 14),
-                                        const SizedBox(width: 4),
+                                        PlayingEqualizerAnimation(
+                                          color: const Color(0xFFED1C24),
+                                          height: 11.h,
+                                          barWidth: 2.0.w,
+                                          barCount: 3,
+                                          isPlaying: _controller?.value.isPlaying ?? true,
+                                        ),
+                                        SizedBox(width: 4.w),
                                         Text(
                                           "Playing",
                                           style: TextStyle(
-                                              color: Colors.red,
+                                              color: const Color(0xFFED1C24),
                                               fontSize: 10.sp,
                                               fontWeight: FontWeight.bold),
                                         ),
@@ -1696,6 +1728,92 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class PlayingEqualizerAnimation extends StatefulWidget {
+  final Color color;
+  final double height;
+  final double barWidth;
+  final int barCount;
+  final bool isPlaying;
+
+  const PlayingEqualizerAnimation({
+    super.key,
+    this.color = const Color(0xFFED1C24),
+    this.height = 14,
+    this.barWidth = 2.2,
+    this.barCount = 3,
+    this.isPlaying = true,
+  });
+
+  @override
+  State<PlayingEqualizerAnimation> createState() => _PlayingEqualizerAnimationState();
+}
+
+class _PlayingEqualizerAnimationState extends State<PlayingEqualizerAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    if (widget.isPlaying) {
+      _controller.repeat();
+    }
+  }
+
+  @override
+  void didUpdateWidget(PlayingEqualizerAnimation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isPlaying != oldWidget.isPlaying) {
+      if (widget.isPlaying) {
+        _controller.repeat();
+      } else {
+        _controller.stop();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: List.generate(widget.barCount, (i) {
+            final phase = (i * 0.38 * 2 * math.pi);
+            final freq = 1.0 + (i % 2) * 0.6;
+            final progress = (_controller.value * 2 * math.pi * freq + phase);
+            final normalized = (math.sin(progress) + 1) / 2;
+            final minHeight = widget.height * 0.25;
+            final dynamicHeight = minHeight + (widget.height - minHeight) * normalized;
+
+            return Container(
+              margin: EdgeInsets.symmetric(horizontal: widget.barWidth * 0.35),
+              width: widget.barWidth,
+              height: widget.isPlaying ? dynamicHeight : minHeight,
+              decoration: BoxDecoration(
+                color: widget.color,
+                borderRadius: BorderRadius.circular(widget.barWidth / 2),
+              ),
+            );
+          }),
+        );
+      },
     );
   }
 }

@@ -1,23 +1,28 @@
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:webengage_flutter/webengage_flutter.dart';
 
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import '../globel_keys/globel_keys.dart';
 
+import '../features/home/presentation/widgets/html_notification_dialog.dart';
+
 WebEngagePlugin _webEngagePlugin = WebEngagePlugin();
-bool _isSubscribed = false;
 
 void onPushClick(Map<String, dynamic>? message, String? s) {
   log("This is a push click callback from native to flutter. Payload $message");
+  if (message != null && mainNavigatorKey.currentContext != null) {
+    mainNavigatorKey.currentContext!.read<HomeProvider>().handleNotificationTap(message);
+  }
 }
 
 void onPushActionClick(Map<String, dynamic>? message, String? s) {
   log("This is a Push action click callback from native to flutter. Payload $message");
   log("This is a Push action click callback from native to flutter. SelectedId $s");
+  if (message != null && mainNavigatorKey.currentContext != null) {
+    mainNavigatorKey.currentContext!.read<HomeProvider>().handleNotificationTap(message);
+  }
 }
 
 void onInAppPrepared(Map<String, dynamic>? message) {
@@ -26,6 +31,9 @@ void onInAppPrepared(Map<String, dynamic>? message) {
 
 void onInAppClick(Map<String, dynamic>? message, String? s) {
   log("This is a inapp click callback from native to flutter. Payload $message");
+  if (message != null && mainNavigatorKey.currentContext != null) {
+    mainNavigatorKey.currentContext!.read<HomeProvider>().handleNotificationTap(message);
+  }
 }
 
 void onInAppShown(Map<String, dynamic>? message) {
@@ -35,7 +43,6 @@ void onInAppShown(Map<String, dynamic>? message) {
 void onInAppDismiss(Map<String, dynamic>? message) {
   log("This is a callback on inapp dismiss from native to flutter. Payload $message");
 }
-
 
 void subscribeToTrackDeeplink() {
   log("pushActionStream:1111111");
@@ -52,26 +59,7 @@ void closeSubscribe() {
 }
 
 void showDialogWithMessage(String msg) {
-  showDialog(
-      context: mainNavigatorKey.currentState!.overlay!.context,
-      builder: (BuildContext context) {
-        return Dialog(
-            insetPadding: EdgeInsets.all(5.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-              ),
-              child: Text(
-                msg,
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 18.0,
-                  fontFamily: 'helvetica_neue_light',
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ));
-      });
+  showHtmlNotificationDialog(content: msg);
 }
 
 // void list

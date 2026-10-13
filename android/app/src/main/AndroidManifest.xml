@@ -134,10 +134,5 @@
 <!--            android:authorities="com.facebook.app.FacebookContentProvider565418025640844"-->
 <!--            android:exported="true" />-->
 
-        <!-- Developer Settings -->
-        <activity
-            android:name="com.facebook.react.devsupport.DevSettingsActivity"
-            android:exported="false" />
-
     </application>
 </manifest>

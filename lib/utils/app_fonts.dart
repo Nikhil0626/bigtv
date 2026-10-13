@@ -39,12 +39,12 @@ TextStyle homeScreenFontStyle({
     );
   }
 
-  return GoogleFonts.anekTelugu(
+  return GoogleFonts.notoSerifTelugu(
     textStyle: TextStyle(
       fontSize: fontSize,
       height: height ?? 1.4,
       wordSpacing: 2,
-      fontWeight: fontWeight,
+      fontWeight: fontWeight ?? FontWeight.normal,
       color: color ?? defaultColor,
       backgroundColor: backgroundColor,
       letterSpacing: letterSpacing ?? 0.5,
@@ -71,7 +71,7 @@ TextStyle fontStyle({
   final BuildContext? ctx = mainNavigatorKey.currentContext;
   final defaultColor = ctx?.textColor ?? Colors.black;
 
-  return GoogleFonts.poppins(
+  return GoogleFonts.notoSerifTelugu(
     textStyle: TextStyle(
       fontSize: fontSize,
       fontWeight: fontWeight,
@@ -101,7 +101,7 @@ TextStyle newAppFont({
   final BuildContext? ctx = mainNavigatorKey.currentContext;
   final defaultColor = ctx?.textColor ?? Colors.black;
 
-  return GoogleFonts.poppins(
+  return GoogleFonts.notoSerifTelugu(
     textStyle: TextStyle(
       fontSize: fontSize?.sp,
       fontWeight: fontWeight,

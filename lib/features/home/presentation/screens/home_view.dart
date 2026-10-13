@@ -8,6 +8,7 @@ import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/widgets/main_screen_card.dart';
 import 'package:chotanews/features/reels/presentation/screens/reels_view.dart';
+import 'package:chotanews/features/events/presentation/widgets/folk_night_floating_button.dart';
 import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart';
 import 'package:chotanews/features/home/presentation/screens/editorial_screen.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -18,14 +19,11 @@ import 'package:chotanews/services/app_update_servuce.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
 import 'package:chotanews/utils/app_toasts.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
-import 'dart:io';
-// import 'package:social_share/social_share.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeView extends StatefulWidget {
@@ -145,7 +143,7 @@ class _HomeViewState extends State<HomeView> {
                   visible: !homeProvider.isCurrentArticleGrid &&
                       !homeProvider.isCurrentArticleShowAlert &&
                       !homeProvider.isCurrentArticleBulletin &&
-                      (homeProvider.isBottomEnable || homeProvider.isAiTagDataLoaded) &&
+                      homeProvider.isBottomEnable &&
                       MediaQuery.of(context).orientation != Orientation.landscape,
                   child: Container(
                     color: AppColorTokens.primaryRed,
@@ -213,9 +211,29 @@ class _HomeViewState extends State<HomeView> {
                   ),
                 ),
               ),
-                ],
-              ),
-            );
+              if (homeProvider.langCode != 'ml')
+                Positioned(
+                  bottom: (!homeProvider.isCurrentArticleGrid &&
+                          !homeProvider.isCurrentArticleShowAlert &&
+                          !homeProvider.isCurrentArticleBulletin &&
+                          homeProvider.isBottomEnable &&
+                          MediaQuery.of(context).orientation != Orientation.landscape)
+                      ? (60.0 + MediaQuery.of(context).padding.bottom + 12.0)
+                      : (MediaQuery.of(context).padding.bottom + 16.0),
+                  right: 16.0,
+                  child: Visibility(
+                    visible: homeProvider.folkNight &&
+                        homeProvider.langCode != 'ml' &&
+                        !homeProvider.isCurrentArticleGrid &&
+                        !homeProvider.isCurrentArticleShowAlert &&
+                        !homeProvider.isCurrentArticleBulletin &&
+                        MediaQuery.of(context).orientation != Orientation.landscape,
+                    child: const FolkNightFloatingButton(),
+                  ),
+                ),
+            ],
+          ),
+        );
           },
         ),
       ),
