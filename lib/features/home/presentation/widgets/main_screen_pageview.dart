@@ -6,6 +6,7 @@ import 'package:chotanews/features/home/presentation/providers/home_provider.dar
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 import 'main_screen_byts_view.dart';
 import 'tag_video_grid_view_widget.dart';
@@ -22,7 +23,7 @@ class MainScreenPageView extends StatefulWidget {
   const MainScreenPageView({super.key, this.startIndex = 0, this.isAiTags = false, this.tagName = "", this.tagId = ""});
 
   @override
-  _MainScreenPageViewState createState() => _MainScreenPageViewState();
+  State<MainScreenPageView> createState() => _MainScreenPageViewState();
 }
 
 class _MainScreenPageViewState extends State<MainScreenPageView> {
@@ -115,55 +116,73 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                   ],
                                 ),
                         )
-                      : PageView.builder(
-                          physics: MediaQuery.of(context).orientation == Orientation.landscape
-                              ? const NeverScrollableScrollPhysics()
-                              : const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
-                          controller: homeProvider.pageController!,
-                          scrollDirection: Axis.vertical,
-                          itemCount: homeProvider.getAllPostList.length,
-                          onPageChanged: (value) {
-                            context.read<VideoProvider>().pauseVideo();
-                            if (FocusScope.of(context).hasFocus) {
-                              FocusScope.of(context).unfocus();
+                      : NotificationListener<ScrollNotification>(
+                          onNotification: (notification) {
+                            if (notification is UserScrollNotification &&
+                                notification.direction != ScrollDirection.idle) {
+                              if (homeProvider.isBottomEnable) {
+                                homeProvider.pageChange(isValue: false);
+                              }
+                            } else if (notification is ScrollUpdateNotification &&
+                                notification.dragDetails != null) {
+                              if (homeProvider.isBottomEnable) {
+                                homeProvider.pageChange(isValue: false);
+                              }
                             }
-
-                            if (homeProvider.isEnglishMode) {
-                              TranslationService().preloadArticles(homeProvider.getAllPostList, value, ahead: 5);
-                            }
-
-
-                            homeProvider.setCurrentPageIndex(value);
-                            if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
-                              Future.delayed(const Duration(milliseconds: 2000), () {
-                                homeProvider.aiTagDataLoaded(false);
-                                homeProvider.setSelectedTagId(0);
-                                homeProvider.getAllPost(postIds: "0");
-                              });
-                            }
-
-                            context.read<HomeProvider>().flipEvent(
-                                  'news',
-                                  homeProvider.getAllPostList[value]['id'],
-                                  value > autoIndex ? true : false,
-                                );
-                            autoIndex = value;
-
-                            final now = DateTime.now();
-                            final duration = now.difference(_pageStartTime ?? now);
-                            AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
-
-                            _pageStartTime = now;
+                            return false;
                           },
-                          itemBuilder: (context, index) {
-                            return MainScreenBytView(
-                              article: homeProvider.getAllPostList[index],
-                              pageController: homeProvider.pageController!,
-                              length: homeProvider.getAllPostList.length,
-                              index: index,
-                              aiTagName: "",
-                            );
-                          },
+                          child: PageView.builder(
+                            physics: MediaQuery.of(context).orientation == Orientation.landscape
+                                ? const NeverScrollableScrollPhysics()
+                                : const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
+                            controller: homeProvider.pageController!,
+                            scrollDirection: Axis.vertical,
+                            itemCount: homeProvider.getAllPostList.length,
+                            onPageChanged: (value) {
+                              if (homeProvider.isBottomEnable) {
+                                homeProvider.pageChange(isValue: false);
+                              }
+                              context.read<VideoProvider>().pauseVideo();
+                              if (FocusScope.of(context).hasFocus) {
+                                FocusScope.of(context).unfocus();
+                              }
+
+                              if (homeProvider.isEnglishMode) {
+                                TranslationService().preloadArticles(homeProvider.getAllPostList, value, ahead: 5);
+                              }
+
+                              homeProvider.setCurrentPageIndex(value);
+                              if (homeProvider.getAllPostList.length == value + 1 && homeProvider.isAiTagDataLoaded) {
+                                Future.delayed(const Duration(milliseconds: 2000), () {
+                                  homeProvider.aiTagDataLoaded(false);
+                                  homeProvider.setSelectedTagId(0);
+                                  homeProvider.getAllPost(postIds: "0");
+                                });
+                              }
+
+                              context.read<HomeProvider>().flipEvent(
+                                    'news',
+                                    homeProvider.getAllPostList[value]['id'],
+                                    value > autoIndex ? true : false,
+                                  );
+                              autoIndex = value;
+
+                              final now = DateTime.now();
+                              final duration = now.difference(_pageStartTime ?? now);
+                              AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
+
+                              _pageStartTime = now;
+                            },
+                            itemBuilder: (context, index) {
+                              return MainScreenBytView(
+                                article: homeProvider.getAllPostList[index],
+                                pageController: homeProvider.pageController!,
+                                length: homeProvider.getAllPostList.length,
+                                index: index,
+                                aiTagName: "",
+                              );
+                            },
+                          ),
                         ),
                 ),
               ),

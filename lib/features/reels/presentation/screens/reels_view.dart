@@ -177,20 +177,20 @@ class _EachReelCardState extends State<EachReelCard> {
                                   ));
                             },
                             child: SizedBox(
-                              height: 30,
-                              width: 30,
+                              height: 36.r,
+                              width: 36.r,
                               child: ClipRRect(
-                                borderRadius: BorderRadius.all(Radius.circular(8)),
+                                borderRadius: BorderRadius.all(Radius.circular(18.r)),
                                 child: CachedNetworkImage(
                                   imageUrl: widget.reel.publisherImage,
-                                  fit: BoxFit.fill,
+                                  fit: BoxFit.cover,
                                   placeholder: (context, url) => Container(
                                     color: AppColors.borderColor.withValues(alpha: .2),
                                   ),
                                   errorWidget: (context, url, error) => Center(
                                     child: Icon(
-                                      Icons.image,
-                                      size: 30,
+                                      Icons.account_circle,
+                                      size: 36.r,
                                       color: Colors.grey.shade300,
                                     ),
                                   ),
@@ -198,7 +198,7 @@ class _EachReelCardState extends State<EachReelCard> {
                               ),
                             ),
                           ),
-                          width(width: 6.h),
+                          width(width: 8.w),
                           Text(
                             widget.reel.publisher,
                             style: fontStyle(

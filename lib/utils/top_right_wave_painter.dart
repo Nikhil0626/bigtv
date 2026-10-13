@@ -8,19 +8,22 @@ class TopRightWavePainter extends CustomPainter {
   final double baseRadius;
   final double maxRadius;
   final double strokeWidth;
+  final Animation<double>? waveAnimation;
 
-  const TopRightWavePainter({
+  TopRightWavePainter({
     this.isDark = false,
     this.isRedHeader = false,
     this.gap = 22.0,
     this.baseRadius = 30.0,
     this.maxRadius = 380.0,
     this.strokeWidth = 1.15,
-  });
+    this.waveAnimation,
+  }) : super(repaint: waveAnimation);
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width * 0.95, -size.height * 0.05);
+    final double animValue = waveAnimation?.value ?? 0.0;
 
     // Rich background radial glow
     final glowPaint = Paint()
@@ -51,13 +54,21 @@ class TopRightWavePainter extends CustomPainter {
 
     // Concentric wave ripple lines with balanced spacing (~22px gap)
     final double safeGap = gap > 0 ? gap : 22.0;
-    final int count = ((maxRadius - baseRadius) / safeGap).floor() + 1;
+    final int count = ((maxRadius - baseRadius) / safeGap).floor() + 2;
 
     for (int i = 0; i < count; i++) {
-      final double r = baseRadius + (i * safeGap);
-      final double progress = count > 1 ? i / (count - 1) : 0.0;
-      final double baseOpacity = 0.44 * (1.0 - progress * 0.90);
-      final double opacity = (isDark ? baseOpacity * 0.75 : baseOpacity).clamp(0.02, 0.44);
+      final double r = baseRadius + ((i + animValue) * safeGap);
+      if (r > maxRadius) continue;
+
+      final double progress = ((r - baseRadius) / (maxRadius - baseRadius)).clamp(0.0, 1.0);
+      
+      // Smooth fade-in at base and fade-out at outer edge for seamless infinite loop
+      final double fadeIn = (progress / 0.08).clamp(0.0, 1.0);
+      final double fadeOut = (1.0 - progress);
+      final double baseOpacity = 0.48 * fadeIn * fadeOut;
+      final double opacity = (isDark ? baseOpacity * 0.75 : baseOpacity).clamp(0.0, 0.48);
+
+      if (opacity <= 0.005) continue;
 
       final linePaint = Paint()
         ..color = isRedHeader
@@ -76,7 +87,8 @@ class TopRightWavePainter extends CustomPainter {
       oldDelegate.gap != gap ||
       oldDelegate.baseRadius != baseRadius ||
       oldDelegate.maxRadius != maxRadius ||
-      oldDelegate.strokeWidth != strokeWidth;
+      oldDelegate.strokeWidth != strokeWidth ||
+      oldDelegate.waveAnimation != waveAnimation;
 }
 
 Widget buildSettingsPageHeader(BuildContext context, String title) {

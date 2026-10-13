@@ -1,11 +1,8 @@
 import 'dart:core';
 
 class BaseUrls {
-
-
   /// event states
   static const String eventUrl = "/events";
-
 
   /// Reels Apis
   static const String getAllReels = "/reels";
@@ -54,9 +51,10 @@ class BaseUrls {
   static const String getReportersApi = "/api/v1/reporters";
   static const String deviceDetails = "/api/v1/deviceDetails";
   static const String appConfig = "/api/v1/app-config/all";
+
   /// Python Dev Apis
-  static const String baseUrlAwsDev = "https://apidev.chotanews.com";
-  static const String showAlertSubscribeApi = "/show-alerts/subscribe";
+  static const String baseUrlAwsDev = "https://api.chotanews.com";
+  static const String showAlertSubscribeApi = "/api/show-alerts/subscribe";
 
   ///Login login
   static const String sendOtpPy = "/send-otp";
@@ -75,10 +73,9 @@ class BaseUrls {
   ///Rating
   static const String postRating = "/moviereviews/submit";
   static const String getReviewsById = "/moviereviews/";
-  static const String postPoll ="/polls/submit";
+  static const String postPoll = "/polls/submit";
   static const String getPollCommentsById = "/polls/";
   static const String postProcessReferral = "/process-referral";
-
 
   ///Categories Apis
   static const String getAllCategories = "/categories";
@@ -101,8 +98,8 @@ class BaseUrls {
   static const String like = "/like";
 
   /// Polls apis
-  static const String submitPolls="/polls/submit";
-  static const String getAllPolls="/polls";
+  static const String submitPolls = "/polls/submit";
+  static const String getAllPolls = "/polls";
 
   ///Update profile
   static const String getProfile = "/profile";
@@ -120,5 +117,3 @@ class BaseUrls {
   /// Premium Content Apis
   static const String seriesContent = "/api/content";
 }
-
-

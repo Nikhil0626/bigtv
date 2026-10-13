@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 6.0.2+3034
+version: 6.0.3+3050
 environment:
   sdk: ^3.5.4
 dependencies:
@@ -85,6 +85,24 @@ flutter:
     - assets/new_app_icon/
     - shorebird.yaml
     - assets/BIGTV-APP ICON.png
+
+  fonts:
+    - family: PottiSreeramulu
+      fonts:
+        - asset: assets/fonts/PottiSreeramulu-Regular.otf
+          weight: 400
+    - family: KohinoorTelugu
+      fonts:
+        - asset: assets/fonts/KohinoorTelugu-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/KohinoorTelugu-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/KohinoorTelugu-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/KohinoorTelugu-Light.ttf
+          weight: 300
+        - asset: assets/fonts/KohinoorTelugu-Semibold.ttf
+          weight: 600
 
 flutter_launcher_icons:
   android: true

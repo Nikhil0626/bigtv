@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'color_tokens.dart';
 import 'typography.dart';
 import 'spacing.dart';
 
 class AppTheme {
   static ThemeData get lightTheme {
+    final fontName = GoogleFonts.notoSerifTelugu().fontFamily;
     return ThemeData(
       useMaterial3: true,
+      fontFamily: fontName,
       brightness: Brightness.light,
       colorScheme: const ColorScheme.light(
         primary: AppColorTokens.primaryRed,
@@ -21,6 +24,7 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: AppColorTokens.lightBackground,
       textTheme: AppTypography.textTheme.apply(
+        fontFamily: fontName,
         bodyColor: AppColorTokens.lightTextPrimary,
         displayColor: AppColorTokens.lightTextPrimary,
       ),
@@ -76,8 +80,10 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
+    final fontName = GoogleFonts.notoSerifTelugu().fontFamily;
     return ThemeData(
       useMaterial3: true,
+      fontFamily: fontName,
       brightness: Brightness.dark,
       colorScheme: const ColorScheme.dark(
         primary: AppColorTokens.darkPrimaryRed,
@@ -92,6 +98,7 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: AppColorTokens.darkBackground,
       textTheme: AppTypography.textTheme.apply(
+        fontFamily: fontName,
         bodyColor: AppColorTokens.darkTextPrimary,
         displayColor: AppColorTokens.darkTextPrimary,
       ),

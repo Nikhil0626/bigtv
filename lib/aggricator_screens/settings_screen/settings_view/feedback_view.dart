@@ -134,17 +134,104 @@ class FeedbackFormState extends State<FeedbackForm> {
         statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
         body: Stack(
           children: [
-            // Background top right wave design
+            // 1. Base Gradient Canvas Mesh
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [
+                            const Color(0xFF180A0D),
+                            const Color(0xFF0F0F12),
+                            const Color(0xFF13090B),
+                          ]
+                        : [
+                            const Color(0xFFFFF2F4),
+                            const Color(0xFFFBFBFC),
+                            const Color(0xFFFFF6F7),
+                          ],
+                    stops: const [0.0, 0.5, 1.0],
+                  ),
+                ),
+              ),
+            ),
+
+            // 2. Top Right Wave Ripple Art
             Positioned(
               top: 0,
               right: 0,
               width: MediaQuery.of(context).size.width,
-              height: 350.h,
+              height: 380.h,
               child: CustomPaint(
                 painter: TopRightWavePainter(isDark: isDark),
+              ),
+            ),
+
+            // 3. Bottom-Left Radiant Glow Orb
+            Positioned(
+              bottom: -60.h,
+              left: -60.w,
+              width: 280.w,
+              height: 280.w,
+              child: IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: isDark
+                          ? [
+                              const Color(0xFFED1C24).withValues(alpha: 0.16),
+                              const Color(0xFFED1C24).withValues(alpha: 0.06),
+                              Colors.transparent,
+                            ]
+                          : [
+                              const Color(0xFFED1C24).withValues(alpha: 0.13),
+                              const Color(0xFFFFDEDE).withValues(alpha: 0.05),
+                              Colors.transparent,
+                            ],
+                      stops: const [0.0, 0.5, 1.0],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+            // 4. Floating Translucent Feedback Watermarks
+            Positioned(
+              top: 260.h,
+              left: -20.w,
+              child: IgnorePointer(
+                child: Icon(
+                  Icons.chat_bubble_outline_rounded,
+                  size: 120.sp,
+                  color: const Color(0xFFED1C24).withValues(alpha: isDark ? 0.045 : 0.04),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 80.h,
+              right: -30.w,
+              child: IgnorePointer(
+                child: Icon(
+                  Icons.star_rounded,
+                  size: 160.sp,
+                  color: const Color(0xFFED1C24).withValues(alpha: isDark ? 0.045 : 0.04),
+                ),
+              ),
+            ),
+            Positioned(
+              top: 480.h,
+              right: 15.w,
+              child: IgnorePointer(
+                child: Icon(
+                  Icons.favorite_outline_rounded,
+                  size: 45.sp,
+                  color: const Color(0xFFED1C24).withValues(alpha: isDark ? 0.035 : 0.03),
+                ),
               ),
             ),
 

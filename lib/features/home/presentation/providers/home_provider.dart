@@ -15,6 +15,7 @@ import 'package:chotanews/features/home/presentation/providers/epaper_provider.d
 import 'package:chotanews/features/home/presentation/screens/epaper_detail_screen.dart';
 import 'package:chotanews/features/home/presentation/screens/tag_video_player_screen.dart';
 import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
+import 'package:chotanews/features/home/presentation/widgets/html_notification_dialog.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 import 'package:chotanews/services/analytics_service.dart';
 import 'package:chotanews/services/base_service.dart';
@@ -197,7 +198,7 @@ class HomeProvider extends ChangeNotifier {
               return defaultValue;
             }
 
-            folkNight = parseBool(configMap['folkNight'], defaultValue: false);
+            folkNight = parseBool(configMap['folkNight'] ?? configMap['folknight'] ?? configMap['folk_night'], defaultValue: false);
             liveTvVideosEnable = parseBool(configMap['livetvvideos'], defaultValue: true);
             aiTagEnable = parseBool(configMap['aitag'], defaultValue: true);
             englishLanguageEnable = parseBool(configMap['englishLanguage'], defaultValue: true);
@@ -558,48 +559,8 @@ class HomeProvider extends ChangeNotifier {
               e['morefollow'] != null ||
               e['moreFollowTags'] != null));
 
-      if (!hasMoreFollow && isGetAllPost == false && postIds == "0" && getAllPostList.isNotEmpty) {
-        final tagsToInsert = moreFollowList.isNotEmpty
-            ? moreFollowList
-            : [
-                {
-                  "id": 1,
-                  "morefollowId": 1,
-                  "morefollowName": "డిఎస్సి",
-                  "morefollowNameTranslations": {"te": "డిఎస్సి"},
-                  "imageUrl": "https://chotanews-wordpress-files-mig.s3.ap-south-1.amazonaws.com/uploads/2026/09/dsc_tag.jpg",
-                  "isActive": true,
-                  "isFollowed": false
-                },
-                {
-                  "id": 2,
-                  "morefollowId": 2,
-                  "morefollowName": "నేపాల్ వరదలు",
-                  "morefollowNameTranslations": {"te": "నేపాల్ వరదలు"},
-                  "imageUrl": "https://chotanews-wordpress-files-mig.s3.ap-south-1.amazonaws.com/uploads/2026/09/nepal_floods.jpg",
-                  "isActive": true,
-                  "isFollowed": false
-                },
-                {
-                  "id": 3,
-                  "morefollowId": 3,
-                  "morefollowName": "క్రికెట్",
-                  "morefollowNameTranslations": {"te": "క్రికెట్"},
-                  "imageUrl": "",
-                  "isActive": true,
-                  "isFollowed": false
-                },
-                {
-                  "id": 4,
-                  "morefollowId": 4,
-                  "morefollowName": "ట్రెండింగ్",
-                  "morefollowNameTranslations": {"te": "ట్రెండింగ్"},
-                  "imageUrl": "",
-                  "isActive": true,
-                  "isFollowed": false
-                }
-              ];
-
+      // Insert top-level morefollow items from API if not already present in feed
+      if (!hasMoreFollow && isGetAllPost == false && postIds == "0" && getAllPostList.isNotEmpty && moreFollowList.isNotEmpty) {
         final insertIdx = getAllPostList.length >= 3 ? 3 : getAllPostList.length;
         getAllPostList.insert(insertIdx, {
           'id': -998,
@@ -607,7 +568,7 @@ class HomeProvider extends ChangeNotifier {
           'post_type': 'morefollow',
           'subType': 'morefollow',
           'isAd': false,
-          'morefollow': tagsToInsert,
+          'morefollow': moreFollowList,
         });
       }
 
@@ -1062,6 +1023,36 @@ class HomeProvider extends ChangeNotifier {
 
   void handleNotificationTap(Map<String, dynamic>? messagePayload, {String? deepLink}) async {
     log("Notification tapped with payload: $messagePayload, deepLink: $deepLink");
+
+    // Check if payload contains rich HTML content (e.g. Breaking News or announcement popup)
+    final String? htmlContent = messagePayload?['content'] ??
+        messagePayload?['html_content'] ??
+        messagePayload?['html'] ??
+        messagePayload?['message'] ??
+        messagePayload?['body'];
+
+    if (htmlContent != null &&
+        htmlContent.isNotEmpty &&
+        (htmlContent.contains('<') && htmlContent.contains('>'))) {
+      final String? title = messagePayload?['title']?.toString();
+      final String? imageUrl = messagePayload?['image']?.toString() ??
+          messagePayload?['imageUrl']?.toString() ??
+          messagePayload?['image_url']?.toString();
+      final String? link = messagePayload?['deepLink'] ??
+          messagePayload?['deeplink'] ??
+          messagePayload?['url'] ??
+          messagePayload?['link'] ??
+          deepLink;
+
+      showHtmlNotificationDialog(
+        content: htmlContent,
+        title: title,
+        imageUrl: imageUrl,
+        ctaUrl: link,
+        rawPayload: messagePayload,
+      );
+      return;
+    }
 
     String? linkStr = deepLink;
     if (linkStr == null || linkStr.isEmpty) {
