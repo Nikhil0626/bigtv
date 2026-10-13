@@ -126,18 +126,20 @@ class AboutUs extends StatelessWidget {
                                 children: [
                                   Icon(Icons.phone_outlined, size: 18.sp, color: const Color(0xFFED1C24)),
                                   const SizedBox(width: 8),
-                                  RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        TextSpan(
-                                          text: "Phone: ",
-                                          style: TextStyle(fontSize: 14.sp, color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF334155)),
-                                        ),
-                                        TextSpan(
-                                          text: "+91 81210 31061",
-                                          style: TextStyle(fontSize: 14.sp, color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7), fontWeight: FontWeight.w600),
-                                        ),
-                                      ],
+                                  Expanded(
+                                    child: RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text: "Phone: ",
+                                            style: TextStyle(fontSize: 14.sp, color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF334155)),
+                                          ),
+                                          TextSpan(
+                                            text: "+91 81210 31061",
+                                            style: TextStyle(fontSize: 14.sp, color: isDark ? const Color(0xFF38BDF8) : const Color(0xFF0284C7), fontWeight: FontWeight.w600),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ],

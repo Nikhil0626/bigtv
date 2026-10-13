@@ -399,12 +399,15 @@ class ReporterDetailsScreen extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
-            color: context.typography.bodyLarge?.color,
+        Flexible(
+          child: Text(
+            value,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              color: context.typography.bodyLarge?.color,
+            ),
           ),
         ),
       ],

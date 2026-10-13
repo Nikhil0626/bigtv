@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:chotanews/utils/date_format.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:chotanews/utils/app_strings.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
+import 'package:chotanews/utils/local_data.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   group('Utils Tests', () {
     test('formatTimeDifference handles various inputs', () {
@@ -80,11 +85,36 @@ void main() {
       expect(AppColors.appButtonColor, isNotNull);
     });
 
-    test('fontStyle creates TextStyle with standard properties', () {
+    testWidgets('fontStyle creates TextStyle with standard properties', (tester) async {
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: const Size(390, 844),
+          builder: (context, child) => const SizedBox(),
+        ),
+      );
       final style = fontStyle(fontSize: 16.0, fontWeight: FontWeight.bold, color: Colors.blue);
       expect(style.fontSize, equals(16.0));
       expect(style.fontWeight, equals(FontWeight.bold));
       expect(style.color, equals(Colors.blue));
+
+      final homeStyle = homeScreenFontStyle(fontSize: 18.0, fontWeight: FontWeight.w600);
+      expect(homeStyle, isNotNull);
+
+      final nStyle = newAppFont(fontSize: 14.0, fontWeight: FontWeight.normal);
+      expect(nStyle, isNotNull);
+    });
+
+    test('local_data persists and retrieves login status and user id', () async {
+      SharedPreferences.setMockInitialValues({});
+
+      expect(await getLoginStatus(), equals(LoginStatus.none));
+      expect(await getUserid(), equals(''));
+
+      await saveLoginStatus(LoginStatus.home);
+      expect(await getLoginStatus(), equals(LoginStatus.home));
+
+      await saveUserid('user_456');
+      expect(await getUserid(), equals('user_456'));
     });
   });
 }

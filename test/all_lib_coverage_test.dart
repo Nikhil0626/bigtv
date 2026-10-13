@@ -39,7 +39,6 @@ import 'package:chotanews/aggricator_screens/referral_screen/referral_view/redee
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/referal_dialog.dart';
 import 'package:chotanews/aggricator_screens/referral_screen/referral_view/refer_earn.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_model/bookmarks_model.dart';
-import 'package:chotanews/aggricator_screens/settings_screen/settings_model/settings_model_view.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/settings_repo.dart';
@@ -56,10 +55,8 @@ import 'package:chotanews/aggricator_screens/video_image_screen/fullscreen_video
 import 'package:chotanews/aggricator_screens/video_image_screen/gallery_screen.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/small_cube.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_player.dart';
-import 'package:chotanews/aggricator_screens/video_image_screen/video_player1.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_preview.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
-import 'package:chotanews/aggricator_screens/video_image_screen/video_provider1.dart';
 import 'package:chotanews/core/providers/web_view_provider.dart';
 import 'package:chotanews/core/theme/app_theme.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
@@ -124,7 +121,6 @@ import 'package:chotanews/features/reporters/presentation/providers/reporters_pr
 import 'package:chotanews/features/reporters/presentation/screens/reporters_screen.dart';
 import 'package:chotanews/features/reporters/presentation/screens/reporter_details_screen.dart';
 import 'package:chotanews/features/settings/data/models/bookmarks_model.dart';
-import 'package:chotanews/features/settings/data/models/settings_model_view.dart';
 import 'package:chotanews/features/settings/data/repositories/settings_repo.dart';
 import 'package:chotanews/features/settings/presentation/providers/profile_provider.dart';
 import 'package:chotanews/features/settings/presentation/providers/settings_provider.dart';

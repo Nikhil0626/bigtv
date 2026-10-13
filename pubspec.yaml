@@ -76,11 +76,6 @@ flutter:
     - shorebird.yaml
     - assets/BIGTV-APP ICON.png
 
-  fonts:
-    - family: PottiSreeramulu
-      fonts:
-        - asset: assets/fonts/PottiSreeramulu-Regular.otf
-          weight: 400
 
 flutter_launcher_icons:
   android: true

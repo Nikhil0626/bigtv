@@ -274,5 +274,112 @@ void main() {
       expect(outJson['available_contests'], isNotEmpty);
       expect(outJson['joined_contests'], isNotEmpty);
     });
+
+    test('LocationModel branch coverage for getNativeName and getEnglishName', () {
+      final locTelangana = LocationModel.fromJson({'id': 1, 'name': 'Telangana'});
+      expect(locTelangana.getNativeName(), equals('తెలంగాణ'));
+      expect(locTelangana.getEnglishName(), equals('Telangana'));
+
+      final locAndhra = LocationModel.fromJson({'id': 2, 'name': 'Andhra Pradesh'});
+      expect(locAndhra.getNativeName(), equals('ఆంధ్రప్రదేశ్'));
+      expect(locAndhra.getEnglishName(), equals('Andhra Pradesh'));
+
+      final locKerala = LocationModel.fromJson({'id': 3, 'name': 'Kerala'});
+      expect(locKerala.getNativeName(), equals('కేరళ'));
+      expect(locKerala.getEnglishName(), equals('Kerala'));
+
+      final locTamil = LocationModel.fromJson({'id': 4, 'name': 'Tamil Nadu'});
+      expect(locTamil.getNativeName(), equals('తమిళనాడు'));
+      expect(locTamil.getEnglishName(), equals('Tamil Nadu'));
+
+      final locKarnataka = LocationModel.fromJson({'id': 5, 'name': 'Karnataka'});
+      expect(locKarnataka.getNativeName(), equals('కర్ణాటక'));
+      expect(locKarnataka.getEnglishName(), equals('Karnataka'));
+
+      final locOther = LocationModel.fromJson({'id': 6, 'name': 'Other State'});
+      expect(locOther.getNativeName(), equals('Other State'));
+      expect(locOther.getEnglishName(), equals('Other State'));
+
+      // Image extraction variations
+      final locImg1 = LocationModel.fromJson({'id': 10, 'name': 'Test', 'image_url': 'https://example.com/1.png'});
+      expect(locImg1.imageUrl, equals('https://example.com/1.png'));
+
+      final locImg2 = LocationModel.fromJson({'id': 11, 'name': 'Test', 'state_image': 'https://example.com/2.png'});
+      expect(locImg2.imageUrl, equals('https://example.com/2.png'));
+
+      final locImg3 = LocationModel.fromJson({'id': 12, 'name': 'Test', 'icon': 'https://example.com/3.png'});
+      expect(locImg3.imageUrl, equals('https://example.com/3.png'));
+
+      final locImg4 = LocationModel.fromJson({'id': 13, 'name': 'Test', 'image': {'url': 'https://example.com/4.png'}});
+      expect(locImg4.imageUrl, equals('https://example.com/4.png'));
+    });
+
+    test('ReporterModel branches with mediaChannel, address, and relative image', () {
+      final json = {
+        'id': '101',
+        'name': 'Babu Rao',
+        'address': {
+          'city': 'Vijayawada',
+          'state': 'AP',
+        },
+        'employment': {
+          'designation': 'Chief Bureau',
+          'department': 'Crime',
+          'workPhone': '9876543210',
+          'workEmail': 'babu@bigtv.com',
+          'employeeId': 'EMP101',
+        },
+        'mediaChannel': {
+          'name': 'BigTV News',
+        },
+        'profileImageUrl': '/uploads/reporters/babu.png',
+        'socialMediaProfiles': {
+          'twitter': '@baburao',
+        },
+      };
+
+      final reporter = ReporterModel.fromJson(json);
+      expect(reporter.id, equals('101'));
+      expect(reporter.name, equals('Babu Rao'));
+      expect(reporter.title, equals('Chief Bureau'));
+      expect(reporter.location, equals('Vijayawada'));
+      expect(reporter.state, equals('Andhra Pradesh'));
+      expect(reporter.fullLocation, equals('Vijayawada, Andhra Pradesh'));
+      expect(reporter.category, equals('Crime'));
+      expect(reporter.phone, equals('9876543210'));
+      expect(reporter.imageUrl, equals('https://api.pravasamedia.com/uploads/reporters/babu.png'));
+      expect(reporter.mediaChannelName, equals('BigTV News'));
+      expect(reporter.socialMediaProfiles!['twitter'], equals('@baburao'));
+    });
+
+    test('ReelsModel branches with nested brand, analytics, and durationSeconds', () {
+      final json = {
+        'id': 'reel_99',
+        'videoUrl': 'https://example.com/reel.mp4',
+        'title': 'Viral Reel',
+        'brand': {
+          'name': 'BigTV Originals',
+          'logoUrl': 'https://example.com/logo.png',
+        },
+        'analytics': {
+          'likeCount': 1200,
+          'commentCount': 350,
+          'shareCount': 80,
+        },
+        'durationSeconds': 45,
+        'description': 'Description text here',
+        'gallery': ['https://example.com/g1.jpg'],
+      };
+
+      final reel = ReelsModel.fromJson(json);
+      expect(reel.publisher, equals('BigTV Originals'));
+      expect(reel.publisherImage, equals('https://example.com/logo.png'));
+      expect(reel.likes, equals(1200));
+      expect(reel.comments, equals(350));
+      expect(reel.shares, equals(80));
+      expect(reel.duration, equals('45s'));
+      expect(reel.content, equals('Description text here'));
+      expect(reel.gallery!.length, equals(1));
+    });
   });
 }
