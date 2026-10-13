@@ -1,7 +1,7 @@
 name: chotanews
 description: "A New Flutter project."
 publish_to: 'none'
-version: 6.0.2+3034
+version: 6.0.2+3052
 environment:
   sdk: ^3.5.4
 dependencies:
@@ -14,11 +14,9 @@ dependencies:
   flutter_screenutil: ^5.9.3
   dio: ^5.8.0+1
   intl: ^0.20.2
-  whatsapp_share2: ^2.1.1
   video_player: ^2.9.2
   youtube_player_flutter: ^9.1.2
   carousel_slider: ^5.0.0
-  flutter_card_swiper: ^7.0.2
   firebase_core: ^3.13.0
   shared_preferences: ^2.4.0
   url_launcher: ^6.3.1
@@ -41,7 +39,6 @@ dependencies:
   firebase_analytics: ^11.4.4
   package_info_plus: ^8.3.0
   app_links: ^6.4.0
-  image_picker: ^1.1.2
   app_tracking_transparency: ^2.0.6+1
   shimmer: ^3.0.0
   file_picker: ^10.1.2
@@ -49,7 +46,6 @@ dependencies:
   device_info_plus: ^11.3.0
   in_app_update: ^4.2.3
   flutter_upgrade_version: ^1.1.8
-  timeago: ^3.7.1
   lottie: ^3.3.1
   hive: ^2.2.3
   workmanager: ^0.6.0
@@ -58,16 +54,11 @@ dependencies:
   webview_flutter: ^4.13.0
   webview_flutter_android: ^4.1.0
   webview_flutter_wkwebview: ^3.16.0
-  circle_nav_bar: 2.2.0
   flutter_bloc: ^9.1.1
   equatable: ^2.1.0
   bloc: ^9.2.1
-  page_curl_effect: ^1.0.2
-  book_page_flip: ^0.1.0
   razorpay_flutter: ^1.4.6
-  google_mlkit_translation: ^0.15.1
   qr_flutter: ^4.1.0
-  ticketcher: ^2.2.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -81,7 +72,6 @@ flutter:
   assets:
     - assets/svg/
     - assets/images/
-    - assets/fonts/
     - assets/new_app_icon/
     - shorebird.yaml
     - assets/BIGTV-APP ICON.png
