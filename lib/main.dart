@@ -30,6 +30,13 @@ import 'globel_keys/globel_keys.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/home/presentation/widgets/html_notification_dialog.dart';
+import 'features/zip_puzzle/presentation/screens/zip_level_selection_screen.dart';
+import 'features/patches_puzzle/presentation/screens/patches_level_selection_screen.dart';
+import 'features/patches_puzzle/presentation/screens/patches_gameplay_screen.dart';
+import 'features/patches_puzzle/data/repositories/patches_catalog.dart';
+import 'features/sudoku_puzzle/presentation/screens/sudoku_level_selection_screen.dart';
+import 'features/sudoku_puzzle/presentation/screens/sudoku_gameplay_screen.dart';
+import 'features/sudoku_puzzle/data/repositories/sudoku_catalog.dart';
 
 void callbackDispatcher() {
   Workmanager().executeTask((task, inputData) async {
@@ -248,6 +255,11 @@ class _MyAppState extends State<MyApp> {
               routes: {
                 '/': (context) => SplashScreen(),
                 '/settings': (context) => SettingsView(),
+                '/zip_puzzle': (context) => const ZipLevelSelectionScreen(),
+                '/patches_puzzle': (context) => const PatchesLevelSelectionScreen(),
+                '/patches_gameplay': (context) => PatchesGameplayScreen(level: PatchesCatalog.getLevel(1)),
+                '/sudoku_puzzle': (context) => const SudokuLevelSelectionScreen(),
+                '/sudoku_gameplay': (context) => SudokuGameplayScreen(level: SudokuCatalog.getLevel(1)),
               },
               debugShowCheckedModeBanner: false,
             );

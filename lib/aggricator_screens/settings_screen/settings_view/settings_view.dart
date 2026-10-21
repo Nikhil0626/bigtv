@@ -23,6 +23,9 @@ import 'filters_screen/filter_view.dart';
 import 'profile_view.dart';
 import 'feedback_view.dart';
 import 'package:chotanews/features/reporters/presentation/screens/reporters_screen.dart';
+import 'package:chotanews/features/zip_puzzle/presentation/screens/zip_level_selection_screen.dart';
+import 'package:chotanews/features/patches_puzzle/presentation/screens/patches_level_selection_screen.dart';
+import 'package:chotanews/features/sudoku_puzzle/presentation/screens/sudoku_level_selection_screen.dart';
 
 class SettingsView extends StatefulWidget {
   const SettingsView({
@@ -94,6 +97,39 @@ class SettingsViewState extends State<SettingsView> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => const ReportersScreen()),
+                    );
+                  }),
+
+                  _buildSettingsRow(context, Icons.grid_view_rounded, "Zip Puzzle Game", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Zip Puzzle Game",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const ZipLevelSelectionScreen()),
+                    );
+                  }),
+
+                  _buildSettingsRow(context, Icons.crop_square_rounded, "Patches Puzzle Game", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Patches Puzzle Game",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const PatchesLevelSelectionScreen()),
+                    );
+                  }),
+
+                  _buildSettingsRow(context, Icons.grid_on_rounded, "Sudoku Puzzle Game", () {
+                    EventRepo().addEvent({
+                      "visitPageName": "Sudoku Puzzle Game",
+                      "createAt": DateTime.now().toString(),
+                    }, "compliance_section");
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const SudokuLevelSelectionScreen()),
                     );
                   }),
 
