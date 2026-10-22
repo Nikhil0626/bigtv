@@ -1,19 +1,14 @@
-import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/loading_screen/home_shimmer.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
-import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
-import 'package:chotanews/utils/app_colors.dart';
-import 'package:chotanews/utils/app_spaces.dart';
-import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:chotanews/utils/app_spaces.dart';
 import 'package:provider/provider.dart';
-import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/services/translation_service.dart';
-import 'package:chotanews/features/home/presentation/screens/live_tv_screen.dart';
 import 'main_screen_pageview.dart';
+import 'infocus_bar_widget.dart';
 
 class MainScreenCard extends StatefulWidget {
   const MainScreenCard({
@@ -40,291 +35,44 @@ class _MainScreenCardState extends State<MainScreenCard>
     TranslationService().init();
   }
 
-  Map<int, GlobalKey> aiTagKeys = {};
-  ScrollController aiTagScrollController = ScrollController();
 
-  void aiTagsScrollToCenter(int index) {
-    final keyContext = aiTagKeys[index]?.currentContext;
-    if (keyContext != null) {
-      final box = keyContext.findRenderObject() as RenderBox;
-      final size = box.size;
-      final position = box.localToGlobal(Offset.zero);
-      final screenWidth = WidgetsBinding
-              .instance.platformDispatcher.views.first.physicalSize.width /
-          WidgetsBinding
-              .instance.platformDispatcher.views.first.devicePixelRatio;
-
-      final itemCenter = position.dx + size.width / 2;
-      final targetOffset =
-          aiTagScrollController.offset + itemCenter - screenWidth / 2;
-
-      aiTagScrollController.animateTo(
-        targetOffset.clamp(0.0, aiTagScrollController.position.maxScrollExtent),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Consumer2<HomeProvider, SettingsProvider>(
       builder: (_, homeProvider, settingsProvider, __) {
-        final bool hasTopBarContent = homeProvider.liveTvVideosEnable ||
-            (homeProvider.langCode == 'ml') ||
-            (homeProvider.showTopNavTags && homeProvider.getAllAiTagsList.isNotEmpty);
+        final bool showInFocusBar = MediaQuery.of(context).orientation != Orientation.landscape &&
+            homeProvider.showTopNavTags &&
+            (homeProvider.getAllAiTagsList.isNotEmpty || homeProvider.isAiTagsLoading);
+
+        final Color topBarColor = showInFocusBar
+            ? InFocusBarWidget.barBackgroundColor
+            : Theme.of(context).scaffoldBackgroundColor;
+        final isTopBarDark = ThemeData.estimateBrightnessForColor(topBarColor) == Brightness.dark;
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: const SystemUiOverlayStyle(
-            statusBarColor: AppColorTokens.primaryRed,
-            statusBarIconBrightness: Brightness.light,
-            statusBarBrightness: Brightness.dark,
+          value: SystemUiOverlayStyle(
+            statusBarColor: topBarColor,
+            statusBarIconBrightness: isTopBarDark ? Brightness.light : Brightness.dark,
+            statusBarBrightness: isTopBarDark ? Brightness.dark : Brightness.light,
           ),
           child: Scaffold(
-            backgroundColor:
-                MediaQuery.of(context).orientation != Orientation.landscape
-                    ? AppColorTokens.primaryRed
-                    : Colors.black,
-            appBar: (MediaQuery.of(context).orientation != Orientation.landscape &&
-                    hasTopBarContent)
-                ? AppBar(
-                    toolbarHeight: 40.h,
-                    backgroundColor: AppColorTokens.primaryRed,
-                    elevation: 0,
-                    automaticallyImplyLeading: false,
-                    titleSpacing: 0,
-                    systemOverlayStyle: const SystemUiOverlayStyle(
-                      statusBarColor: Colors.transparent,
-                      statusBarIconBrightness: Brightness.light,
-                      statusBarBrightness: Brightness.dark,
-                    ),
-                    title: Container(
-                      color: AppColorTokens.primaryRed,
-                      height: 40.h,
-                      child: Row(
-                        children: [
-                          if (homeProvider.liveTvVideosEnable) ...[
-                            const SizedBox(width: 8),
-                            InkWell(
-                              onTap: () async {
-                                try {
-                                  context.read<VideoProvider>().pauseVideo();
-                                } catch (_) {}
-                                final liveData = await homeProvider.fetchLiveTvStream();
-                                if (!context.mounted) return;
-                                if (liveData != null &&
-                                    liveData['stream_url'] != null &&
-                                    liveData['stream_url'].toString().isNotEmpty) {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => LiveTvScreen(
-                                        streamUrl: liveData['stream_url'].toString(),
-                                        channelName: (liveData['channel_name'] ?? "BIGTV").toString(),
-                                        playbackType: (liveData['playback_type'] ?? "hls").toString(),
-                                      ),
-                                    ),
-                                  );
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(4),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.25),
-                                      blurRadius: 4,
-                                      spreadRadius: 1,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    if (homeProvider.isLiveTvLoading)
-                                      SizedBox(
-                                        width: 12.w,
-                                        height: 12.w,
-                                        child: const CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: AppColorTokens.primaryRed,
-                                        ),
-                                      )
-                                    else
-                                      Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.live_tv_rounded,
-                                            size: 14.sp,
-                                            color: AppColorTokens.primaryRed,
-                                          ),
-                                          const SizedBox(width: 3),
-                                          Container(
-                                            width: 6,
-                                            height: 6,
-                                            decoration: const BoxDecoration(
-                                              color: Colors.red,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      "Live TV",
-                                      style: TextStyle(
-                                        color: AppColorTokens.primaryRed,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12.sp,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                          if (homeProvider.langCode == 'ml')
-                            PremiumAnimatedButton(
-                              onTap: () {
-                                homeProvider.onItemTapped(2);
-                                homeProvider.homePageController.jumpToPage(2);
-                                homeProvider.pageChange(isValue: true);
-                              },
-                            ),
-                          const SizedBox(width: 8),
-                          if (homeProvider.showTopNavTags && homeProvider.getAllAiTagsList.isNotEmpty)
-                            Expanded(
-                              child: ListView.separated(
-                                controller: homeProvider.aiTagScrollController,
-                                scrollDirection: Axis.horizontal,
-                                itemCount: homeProvider.getAllAiTagsList.length,
-                                separatorBuilder: (context, index) {
-                                  return Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(vertical: 12.h),
-                                    child: VerticalDivider(
-                                      color: Colors.grey.withAlpha(5),
-                                      thickness: 1,
-                                      width: 2.w,
-                                    ),
-                                  );
-                                },
-                                itemBuilder: (context, index) {
-                                  if (!homeProvider.aiTagKeys
-                                      .containsKey(index)) {
-                                    homeProvider.aiTagKeys[index] = GlobalKey();
-                                  }
-
-                                  final tag =
-                                      homeProvider.getAllAiTagsList[index];
-                                  final tagId = tag['aitagid'] ?? tag['id'] ?? tag['slug'] ?? tag['aitagname'];
-                                  final selectedId = homeProvider.selectedTagId;
-
-                                  final bool isSelected = homeProvider.isAiTagDataLoaded &&
-                                      selectedId != null &&
-                                      selectedId != 0 &&
-                                      selectedId != "0" &&
-                                      (selectedId.toString() == tagId?.toString() ||
-                                       (tag['aitagid'] != null && selectedId.toString() == tag['aitagid'].toString()) ||
-                                       (tag['slug'] != null && selectedId.toString() == tag['slug'].toString()) ||
-                                       (tag['aitagname'] != null && selectedId.toString() == tag['aitagname'].toString()));
-
-                                  return InkWell(
-                                    key: homeProvider.aiTagKeys[index],
-                                    onTap: () async {
-                                      if (isSelected && homeProvider.isAiTagDataLoaded) {
-                                        homeProvider.setSelectedTagId(0);
-                                        homeProvider.aiTagDataLoaded(false);
-                                        homeProvider.getAllPost(postIds: "0");
-                                        return;
-                                      }
-
-                                      final tagSlug = tag['slug'] ?? tag['name'] ?? tag['aitagname'] ?? tagId;
-                                      final displayTitle = tag['aitagname'] ?? tag['name'] ?? tagSlug;
-                                      final tagThumbnail = tag['thumbnailUrl'] ?? tag['thumbnail_url'] ?? tag['thumbnail'];
-                                      final chosenId = tagId ?? tagSlug;
-
-                                      homeProvider.setSelectedTagId(chosenId);
-                                      if (homeProvider.liveTvVideosEnable) {
-                                        homeProvider.fetchVideosByTagSlug(
-                                          tagSlug.toString(),
-                                          displayTitle: displayTitle.toString(),
-                                          thumbnailUrl: tagThumbnail?.toString(),
-                                        );
-                                      } else {
-                                        homeProvider.getAllPostsByAiId(tag['aitagid'] ?? chosenId);
-                                      }
-                                      homeProvider.aiTagDataLoaded(true);
-                                      homeProvider.pageChange(isValue: true);
-                                      context
-                                          .read<VideoProvider>()
-                                          .pauseVideo();
-                                      homeProvider.aiTagsScrollToCenter(index);
-                                      EventRepo().addEvent({
-                                        "aiTagName":
-                                            (tag['aitagname'] ?? "").toString(),
-                                        "aiTagId": (tag['aitagid'] ?? chosenId ?? "").toString(),
-                                        "createAt": DateTime.now().toString(),
-                                      }, "ai_tag_click");
-                                    },
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 6.w, vertical: 8),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          top: const BorderSide(
-                                            color: Colors.transparent,
-                                            width: 3,
-                                          ),
-                                          bottom: BorderSide(
-                                            color: isSelected
-                                                ? Colors.white
-                                                : Colors.transparent,
-                                            width: 3,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        tag['aitagname'].toString(),
-                                        style: homeScreenFontStyle(
-                                          color: AppColors.wColor,
-                                          fontSize: 16.sp,
-                                          fontWeight: FontWeight.w600,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                      ],
-                    ),
-                  ),
-                )
-                : null,
+            backgroundColor: topBarColor,
             body: SafeArea(
-              left: MediaQuery.of(context).orientation != Orientation.landscape,
-              right:
-                  MediaQuery.of(context).orientation != Orientation.landscape,
-              top: !hasTopBarContent,
+              left: false,
+              right: MediaQuery.of(context).orientation != Orientation.landscape,
+              top: MediaQuery.of(context).orientation != Orientation.landscape,
               bottom: false,
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 child: Center(
                   child: homeProvider.isHomeLoading
                       ? HomeShimmer()
-                      : Stack(
+                      : Column(
                           children: [
-                            Column(
-                              children: [
-                                Expanded(child: MainScreenPageView()),
-                              ],
-                            ),
+                            if (showInFocusBar)
+                              const InFocusBarWidget(),
+                            Expanded(child: MainScreenPageView()),
                           ],
                         ),
                 ),

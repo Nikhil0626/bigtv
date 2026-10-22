@@ -20,6 +20,10 @@ import '../core/providers/web_view_provider.dart';
 import '../core/theme/theme_provider.dart';
 
 import 'package:chotanews/features/reporters/presentation/providers/reporters_provider.dart';
+import 'package:chotanews/features/zip_puzzle/presentation/providers/zip_catalog_provider.dart';
+import 'package:chotanews/features/patches_puzzle/presentation/providers/patches_catalog_provider.dart';
+import 'package:chotanews/features/sudoku_puzzle/presentation/providers/sudoku_catalog_provider.dart';
+import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
 
 class AppProviders {
   static List<ChangeNotifierProvider> all = [
@@ -41,5 +45,9 @@ class AppProviders {
     ChangeNotifierProvider<ThemeProvider>(create: (_) => ThemeProvider()),
     ChangeNotifierProvider<WebViewProvider>(create: (_) => WebViewProvider()),
     ChangeNotifierProvider<SplashProvider>(create: (_) => SplashProvider()),
+    ChangeNotifierProvider<ZipCatalogProvider>(create: (_) => ZipCatalogProvider()),
+    ChangeNotifierProvider<PatchesCatalogProvider>(create: (_) => PatchesCatalogProvider()),
+    ChangeNotifierProvider<SudokuCatalogProvider>(create: (_) => SudokuCatalogProvider()),
+    ChangeNotifierProvider<BookmarksProvider>(create: (_) => BookmarksProvider()),
   ];
 }

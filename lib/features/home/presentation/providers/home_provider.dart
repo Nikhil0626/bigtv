@@ -60,7 +60,7 @@ class HomeProvider extends ChangeNotifier {
 
   var getSinglePostList = {};
   int aiCurrentPostId = 0;
-  int selectedIndex = 0;
+  int selectedIndex = 1; // 0: Search, 1: Home, 2: Bigtv daily, 3: Marrini
   bool isSwitched = false;
   bool isWebView = false;
   String webUrl = '';
@@ -643,9 +643,11 @@ class HomeProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     getAllAiTagsList = [];
+    isAiTagsLoading = true;
 
     if (!showTopNavTags) {
       log("Top nav tags disabled by app config (livetvvideos: $liveTvVideosEnable, aitag: $aiTagEnable)");
+      isAiTagsLoading = false;
       notifyListeners();
       return;
     }
@@ -657,6 +659,7 @@ class HomeProvider extends ChangeNotifier {
       } else if (aiTagEnable) {
         response = await HomeRepo().getAiTags();
       } else {
+        isAiTagsLoading = false;
         notifyListeners();
         return;
       }
@@ -672,9 +675,20 @@ class HomeProvider extends ChangeNotifier {
         item['aitagid'] = item['id'] ?? item['aitagid'];
         item['slug'] = item['slug'] ?? item['name'] ?? item['aitagname'] ?? item['id'];
         item['aitagname'] = item['name'] ?? item['aitagname'] ?? item['slug'];
-        item['thumbnailUrl'] = item['thumbnailUrl'] ?? item['thumbnail_url'] ?? item['thumbnail'];
+        item['thumbnailUrl'] = item['thumbnailUrl'] ??
+            item['thumbnail_url'] ??
+            item['thumbnail'] ??
+            item['imageUrl'] ??
+            item['image_url'];
+        item['description'] = item['description'] ??
+            item['desc'] ??
+            item['title'] ??
+            item['aitagname'];
         if (item['aitagnameTranslations'] != null && item['aitagnameTranslations'][langCode] != null) {
           item['aitagname'] = item['aitagnameTranslations'][langCode];
+        }
+        if (item['descriptionTranslations'] != null && item['descriptionTranslations'][langCode] != null) {
+          item['description'] = item['descriptionTranslations'][langCode];
         }
         return item;
       }).toList();
@@ -685,6 +699,7 @@ class HomeProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Get Tags Api catch error $e", stackTrace: st);
     } finally {
+      isAiTagsLoading = false;
       notifyListeners();
     }
   }
@@ -903,7 +918,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   bool get isCurrentArticleGrid {
-    if (selectedIndex != 0) return false;
+    if (selectedIndex != 1) return false;
     if (isAiTagDataLoaded) return false;
     if (getAllPostList.isEmpty) return false;
     if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
@@ -925,7 +940,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   bool get isCurrentArticleBulletin {
-    if (selectedIndex != 0) return false;
+    if (selectedIndex != 1) return false;
     if (isAiTagDataLoaded) return false;
     if (getAllPostList.isEmpty) return false;
     if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
@@ -935,7 +950,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   bool get isCurrentArticleShowAlert {
-    if (selectedIndex != 0) return false;
+    if (selectedIndex != 1) return false;
     if (isAiTagDataLoaded) return false;
     if (getAllPostList.isEmpty) return false;
     if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {

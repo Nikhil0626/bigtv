@@ -9,12 +9,8 @@ import 'package:chotanews/features/home/presentation/providers/home_provider.dar
 import 'package:chotanews/features/home/presentation/widgets/main_screen_card.dart';
 import 'package:chotanews/features/reels/presentation/screens/reels_view.dart';
 import 'package:chotanews/features/events/presentation/widgets/folk_night_floating_button.dart';
-import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart';
-import 'package:chotanews/features/home/presentation/screens/editorial_screen.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chotanews/features/premium/presentation/bloc/premium_bloc.dart';
-import 'package:chotanews/features/premium/data/repositories/premium_repo.dart';
-import 'package:chotanews/features/premium/presentation/screens/premium_screen.dart';
+import 'package:chotanews/features/home/presentation/screens/live_tv_screen.dart';
+import 'package:chotanews/features/home/presentation/screens/search_discover_screen.dart';
 import 'package:chotanews/services/app_update_servuce.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
@@ -51,7 +47,7 @@ class _HomeViewState extends State<HomeView> {
     });
     homeProvider?.initDeepLinks();
     homeProvider?.subscribeToPushCallbacks();
-    final initialTab = homeProvider?.selectedIndex ?? 0;
+    final initialTab = homeProvider?.selectedIndex ?? 1;
     homeProvider?.homePageController = PageController(initialPage: initialTab);
     super.initState();
   }
@@ -85,27 +81,31 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
-      ),
-      child: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) async {
-          if (didPop) return;
-          final now = DateTime.now();
-          if (lastBackPressed == null || now.difference(lastBackPressed!) > Duration(seconds: 2)) {
-            lastBackPressed = now;
-            CustomToast.showInfoToast(msg: "Swipe again to exit");
-            return;
-          }
-          SystemNavigator.pop();
-        },
-        child: Consumer<HomeProvider>(
-          builder: (_, homeProvider, __) {
-            return Scaffold(
+    return Consumer<HomeProvider>(
+      builder: (_, homeProvider, __) {
+        final Color systemStatusBarColor = (homeProvider.selectedIndex == 0)
+            ? AppColorTokens.primaryRed
+            : Colors.transparent;
+
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: SystemUiOverlayStyle(
+            statusBarColor: systemStatusBarColor,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          ),
+          child: PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) async {
+              if (didPop) return;
+              final now = DateTime.now();
+              if (lastBackPressed == null || now.difference(lastBackPressed!) > Duration(seconds: 2)) {
+                lastBackPressed = now;
+                CustomToast.showInfoToast(msg: "Swipe again to exit");
+                return;
+              }
+              SystemNavigator.pop();
+            },
+            child: Scaffold(
               extendBody: true,
               floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
               floatingActionButton: null,
@@ -119,20 +119,22 @@ class _HomeViewState extends State<HomeView> {
                   context.read<VideoProvider>().pauseVideo();
                 },
                 children: [
+                  // Index 0: Search
+                  SearchDiscoverScreen(
+                    onGoToHome: () {
+                      homeProvider.onItemTapped(1);
+                      homeProvider.homePageController.jumpToPage(1);
+                    },
+                  ),
+                  // Index 1: Home
                   Screenshot(
                     controller: screenshotController,
                     child: const MainScreenCard(),
                   ),
+                  // Index 2: Bigtv daily (Reels)
                   const ReelsScreen(),
-                  const EditorialScreen(),
-                  if (homeProvider.langCode == 'ml')
-                    BlocProvider(
-                      create: (context) => PremiumBloc(premiumRepo: PremiumRepo()),
-                      child: const PremiumScreen(),
-                    ),
-                  if (homeProvider.langCode != 'ml')
-                    const EpaperScreen(),
-                  const KeepAlivePage(keepAlive: true, child: SettingsView())
+                  // Index 3: Marrini (Settings)
+                  const KeepAlivePage(keepAlive: true, child: SettingsView()),
                 ],
               ),
               Positioned(
@@ -146,65 +148,56 @@ class _HomeViewState extends State<HomeView> {
                       homeProvider.isBottomEnable &&
                       MediaQuery.of(context).orientation != Orientation.landscape,
                   child: Container(
-                    color: AppColorTokens.primaryRed,
-                    child: SafeArea(
-                      top: false,
-                      child: SizedBox(
-                        height: 60,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildNavItem(
-                              context,
-                              homeProvider,
-                              index: 0,
-                              iconPath: "assets/new_app_icon/bytes.svg",
-                              labelMl: 'വാർത്തകൾ',
-                              labelTe: 'వార్తలు',
-                            ),
-                            _buildNavItem(
-                              context,
-                              homeProvider,
-                              index: 1,
-                              iconPath: "assets/new_app_icon/reel.svg",
-                              labelMl: 'റീൽസ്',
-                              labelTe: 'రీల్స్',
-                            ),
-                            _buildNavItem(
-                              context,
-                              homeProvider,
-                              index: 2,
-                              iconData: Icons.article_outlined,
-                              labelMl: 'എഡിറ്റോറിയൽ',
-                              labelTe: 'ఎడిటోరియల్',
-                            ),
-                            if (homeProvider.langCode == 'ml')
+                    color: const Color(0xFFF03B5A),
+                    child: CustomPaint(
+                      painter: const DottedPatternPainter(),
+                      child: SafeArea(
+                        top: false,
+                        child: SizedBox(
+                          height: 50,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            children: [
+                              // 1. Search button
+                              _buildNavItem(
+                                context,
+                                homeProvider,
+                                index: 0,
+                                iconData: Icons.search_rounded,
+                                labelMl: 'തിരയുക',
+                                labelTe: 'శోధన',
+                              ),
+                              // 2. Live button
+                              _buildLiveTvNavItem(context, homeProvider),
+                              // 3. Home button
+                              _buildNavItem(
+                                context,
+                                homeProvider,
+                                index: 1,
+                                iconPath: "assets/new_app_icon/bytes.svg",
+                                labelMl: 'വാർത്തകൾ',
+                                labelTe: 'వార్తలు',
+                              ),
+                              // 4. Bigtv daily button
+                              _buildNavItem(
+                                context,
+                                homeProvider,
+                                index: 2,
+                                iconPath: "assets/new_app_icon/reel.svg",
+                                labelMl: 'റീൽస్',
+                                labelTe: 'బిగ్‌టీవీ డైలీ',
+                              ),
+                              // 5. Marrini button
                               _buildNavItem(
                                 context,
                                 homeProvider,
                                 index: 3,
-                                iconData: Icons.workspace_premium,
-                                labelMl: 'പ്രീമിയം',
-                                labelTe: 'ప్రీమియం',
+                                iconPath: "assets/new_app_icon/menu.svg",
+                                labelMl: 'ആൽമരം',
+                                labelTe: 'మరిన్ని',
                               ),
-                            if (homeProvider.langCode != 'ml')
-                              _buildNavItem(
-                                context,
-                                homeProvider,
-                                index: 3,
-                                iconData: Icons.newspaper,
-                                labelMl: 'ഇ-പേപ്പർ',
-                                labelTe: 'ఈ-పేపర్',
-                              ),
-                            _buildNavItem(
-                              context,
-                              homeProvider,
-                              index: 4,
-                              iconPath: "assets/new_app_icon/menu.svg",
-                              labelMl: 'ആൽമരം',
-                              labelTe: 'మరిన్ని',
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -218,7 +211,7 @@ class _HomeViewState extends State<HomeView> {
                           !homeProvider.isCurrentArticleBulletin &&
                           homeProvider.isBottomEnable &&
                           MediaQuery.of(context).orientation != Orientation.landscape)
-                      ? (60.0 + MediaQuery.of(context).padding.bottom + 12.0)
+                      ? (50.0 + MediaQuery.of(context).padding.bottom + 12.0)
                       : (MediaQuery.of(context).padding.bottom + 16.0),
                   right: 16.0,
                   child: Visibility(
@@ -231,14 +224,14 @@ class _HomeViewState extends State<HomeView> {
                     child: const FolkNightFloatingButton(),
                   ),
                 ),
-            ],
+              ],
+            ),
           ),
-        );
-          },
         ),
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   Widget _buildNavItem(
     BuildContext context,
@@ -262,34 +255,28 @@ class _HomeViewState extends State<HomeView> {
         homeProvider.pageChange(isValue: true);
 
         if (index == 0) {
+          EventRepo().addEvent({"aiTagName": "search", "aiTagId": "-2", "createAt": DateTime.now().toString()}, "ai_tag_click");
+        } else if (index == 1) {
           if (homeProvider.getAllPostList.isEmpty) {
             homeProvider.getAllPost();
           }
           homeProvider.aiTagDataLoaded(false);
           homeProvider.setSelectedTagId(0);
           EventRepo().addEvent({"aiTagName": "news", "aiTagId": "-1", "createAt": DateTime.now().toString()}, "ai_tag_click");
-        } else if (index == 1) {
-          EventRepo().addEvent({"aiTagName": "reels", "aiTagId": "-3", "createAt": DateTime.now().toString()}, "ai_tag_click");
         } else if (index == 2) {
-          EventRepo().addEvent({"aiTagName": "editorial", "aiTagId": "-7", "createAt": DateTime.now().toString()}, "ai_tag_click");
+          EventRepo().addEvent({"aiTagName": "reels", "aiTagId": "-3", "createAt": DateTime.now().toString()}, "ai_tag_click");
         } else if (index == 3) {
-          if (homeProvider.langCode == 'ml') {
-            EventRepo().addEvent({"aiTagName": "premium", "aiTagId": "-6", "createAt": DateTime.now().toString()}, "ai_tag_click");
-          } else {
-            EventRepo().addEvent({"aiTagName": "epaper", "aiTagId": "-4", "createAt": DateTime.now().toString()}, "ai_tag_click");
-          }
-        } else if (index == 4) {
           EventRepo().addEvent({"aiTagName": "more", "aiTagId": "-5", "createAt": DateTime.now().toString()}, "ai_tag_click");
         }
       },
       child: Container(
-        height: 60,
-        padding: const EdgeInsets.symmetric(horizontal: 12),
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: isSelected ? const EdgeInsets.only(top: 4) : EdgeInsets.zero,
+              padding: isSelected ? const EdgeInsets.only(top: 2) : EdgeInsets.zero,
               decoration: isSelected
                   ? BoxDecoration(
                       border: Border(top: BorderSide(color: itemColor, width: 2)),
@@ -298,26 +285,140 @@ class _HomeViewState extends State<HomeView> {
               child: iconPath != null
                   ? SvgPicture.asset(
                       iconPath,
-                      height: 22,
+                      height: 20,
                       colorFilter: ColorFilter.mode(itemColor, BlendMode.srcIn),
                     )
                   : Icon(
                       iconData,
                       color: itemColor,
-                      size: 22,
+                      size: 20,
                     ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 2),
             Text(
               label,
               style: TextStyle(
                 color: itemColor,
-                fontSize: 12,
+                fontSize: 11,
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildLiveTvNavItem(BuildContext context, HomeProvider homeProvider) {
+    String label = homeProvider.langCode == 'ml' ? 'ലൈവ് ടിവി' : 'లైవ్ టీవీ';
+    Color itemColor = context.colors.onPrimary;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () async {
+        try {
+          context.read<VideoProvider>().pauseVideo();
+        } catch (_) {}
+        final liveData = await homeProvider.fetchLiveTvStream();
+        if (!context.mounted) return;
+        if (liveData != null &&
+            liveData['stream_url'] != null &&
+            liveData['stream_url'].toString().isNotEmpty) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => LiveTvScreen(
+                streamUrl: liveData['stream_url'].toString(),
+                channelName: (liveData['channel_name'] ?? "BIGTV").toString(),
+                playbackType: (liveData['playback_type'] ?? "hls").toString(),
+              ),
+            ),
+          );
+        }
+      },
+      child: Container(
+        height: 50,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            homeProvider.isLiveTvLoading
+                ? SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: itemColor,
+                    ),
+                  )
+                : Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Icon(
+                        Icons.live_tv_rounded,
+                        color: itemColor,
+                        size: 20,
+                      ),
+                      Positioned(
+                        top: 0,
+                        right: -2,
+                        child: Container(
+                          width: 5,
+                          height: 5,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                color: itemColor,
+                fontSize: 11,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Custom painter to draw an elegant dotted grid texture on the red bottom navigation bar.
+class DottedPatternPainter extends CustomPainter {
+  final double spacing;
+  final double dotRadius;
+  final Color dotColor;
+
+  const DottedPatternPainter({
+    this.spacing = 19.0,
+    this.dotRadius = 1.2,
+    this.dotColor = const Color(0x66FFFFFF), // ~40% opacity white
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = dotColor
+      ..style = PaintingStyle.fill;
+
+    final double startX = (size.width % spacing) / 2;
+    final double startY = (size.height % spacing) / 2;
+
+    for (double x = startX; x < size.width; x += spacing) {
+      for (double y = startY; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), dotRadius, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant DottedPatternPainter oldDelegate) {
+    return oldDelegate.spacing != spacing ||
+        oldDelegate.dotRadius != dotRadius ||
+        oldDelegate.dotColor != dotColor;
   }
 }

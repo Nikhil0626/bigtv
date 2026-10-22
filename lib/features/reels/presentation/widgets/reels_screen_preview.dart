@@ -371,8 +371,34 @@ class _ReelsCardViewState extends State<ReelsCardView> {
             child: _buildVideoBody(context),
           ),
         ),
+        // Full-width bottom-to-top black gradient shade for contrast & readability
         Positioned(
-          bottom: 65,
+          bottom: 0,
+          left: 0,
+          right: 0,
+          height: 320.h,
+          child: IgnorePointer(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.bottomCenter,
+                  end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.90),
+                    Colors.black.withValues(alpha: 0.65),
+                    Colors.black.withValues(alpha: 0.35),
+                    Colors.black.withValues(alpha: 0.10),
+                    Colors.transparent,
+                  ],
+                  stops: const [0.0, 0.30, 0.60, 0.85, 1.0],
+                ),
+              ),
+            ),
+          ),
+        ),
+        // Description content directly on gradient (no box)
+        Positioned(
+          bottom: 55,
           left: 0,
           right: 80,
           child: Container(
@@ -384,9 +410,17 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                 Text(
                   widget.reelCard.title,
                   style: newAppFont(
-                    fontWeight: FontWeight.w400,
+                    fontWeight: FontWeight.w500,
                     color: Colors.white,
-                    fontSize: 12.sp,
+                    fontSize: 12.5.sp,
+                  ).copyWith(
+                    shadows: const [
+                      Shadow(
+                        offset: Offset(0, 1),
+                        blurRadius: 3,
+                        color: Colors.black87,
+                      ),
+                    ],
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -438,6 +472,14 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                           color: Colors.white,
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
+                        ).copyWith(
+                          shadows: const [
+                            Shadow(
+                              offset: Offset(0, 1),
+                              blurRadius: 3,
+                              color: Colors.black87,
+                            ),
+                          ],
                         ),
                       ),
                     const Spacer(),
@@ -449,7 +491,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
         ),
         Positioned(
           right: 10,
-          bottom: 120,
+          bottom: 110,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

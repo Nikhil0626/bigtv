@@ -230,9 +230,25 @@ class _EditorialScreenState extends State<EditorialScreen> {
         statusBarBrightness: Brightness.dark,
       ),
       child: Scaffold(
+        appBar: Navigator.canPop(context)
+            ? AppBar(
+                title: Consumer<HomeProvider>(
+                  builder: (_, homeProvider, __) => Text(
+                    homeProvider.langCode == 'ml' ? 'എഡിറ്റോറിയൽ' : 'ఎడిటోరియల్',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                backgroundColor: AppColorTokens.primaryRed,
+                elevation: 1,
+                leading: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              )
+            : null,
         backgroundColor: AppColorTokens.primaryRed,
         body: SafeArea(
-          top: true,
+          top: !Navigator.canPop(context),
           bottom: false,
           child: Container(
             color: Theme.of(context).scaffoldBackgroundColor,

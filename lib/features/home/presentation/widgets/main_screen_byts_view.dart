@@ -47,6 +47,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:chotanews/utils/image_post_slider.dart';
 import 'package:chotanews/utils/translated_text.dart';
+import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
 class MainScreenBytView extends StatefulWidget {
   final article;
   final pageController;
@@ -455,6 +456,42 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                               widget.article['id'],
                                                                               widget.article['title']);
                                                                         }
+                                                                      },
+                                                                    ),
+                                                                    width(
+                                                                        width:
+                                                                            6),
+                                                                    Consumer<BookmarksProvider>(
+                                                                      builder: (context, bookmarksProvider, _) {
+                                                                        final isBookmarked = bookmarksProvider.isPostBookmarked(
+                                                                          widget.article['id'],
+                                                                          fallbackIsBookmarked: widget.article['isBookmarked'] == true ||
+                                                                              widget.article['isBookmarked'] == 1 ||
+                                                                              widget.article['isBookmarked'] == 'true',
+                                                                        );
+                                                                        return BottomActions(
+                                                                          postType: widget.article['subType']?.toString() ?? "",
+                                                                          icon: "",
+                                                                          iconWidget: Icon(
+                                                                            isBookmarked
+                                                                                ? Icons.bookmark_rounded
+                                                                                : Icons.bookmark_border_rounded,
+                                                                            color: isBookmarked
+                                                                                ? AppColorTokens.primaryRed
+                                                                                : (_isBigBlackStandard(widget.article)
+                                                                                    ? Colors.white
+                                                                                    : Colors.grey),
+                                                                            size: 22,
+                                                                          ),
+                                                                          label: 'Bookmark',
+                                                                          onTap: () async {
+                                                                            await bookmarksProvider.toggleBookmark(
+                                                                              postId: widget.article['id'],
+                                                                              article: widget.article,
+                                                                              context: context,
+                                                                            );
+                                                                          },
+                                                                        );
                                                                       },
                                                                     ),
                                                                     const Spacer(),
@@ -1034,6 +1071,48 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                             ),
                                                                                           ],
                                                                                         ),
+                                                                                      ),
+                                                                                        const SizedBox(width: 16),
+                                                                                      /// Bookmark Icon
+                                                                                      Consumer<BookmarksProvider>(
+                                                                                        builder: (context, bookmarksProvider, _) {
+                                                                                          final isBookmarked = bookmarksProvider.isPostBookmarked(
+                                                                                            widget.article['id'],
+                                                                                            fallbackIsBookmarked: widget.article['isBookmarked'] == true ||
+                                                                                                widget.article['isBookmarked'] == 1 ||
+                                                                                                widget.article['isBookmarked'] == 'true',
+                                                                                          );
+                                                                                          final Color normalColor = (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context))
+                                                                                              ? Colors.white
+                                                                                              : AppColorTokens.primaryRed;
+
+                                                                                          return InkWell(
+                                                                                            onTap: () async {
+                                                                                              await bookmarksProvider.toggleBookmark(
+                                                                                                postId: widget.article['id'],
+                                                                                                article: widget.article,
+                                                                                                context: context,
+                                                                                              );
+                                                                                            },
+                                                                                            child: Column(
+                                                                                              mainAxisSize: MainAxisSize.min,
+                                                                                              children: [
+                                                                                                Row(
+                                                                                                  mainAxisSize: MainAxisSize.min,
+                                                                                                  children: [
+                                                                                                    Icon(
+                                                                                                      isBookmarked
+                                                                                                          ? Icons.bookmark_rounded
+                                                                                                          : Icons.bookmark_border_rounded,
+                                                                                                      size: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
+                                                                                                      color: isBookmarked ? AppColorTokens.primaryRed : normalColor,
+                                                                                                    ),
+                                                                                                  ],
+                                                                                                ),
+                                                                                              ],
+                                                                                            ),
+                                                                                          );
+                                                                                        },
                                                                                       ),
                                                                                         const SizedBox(width: 16),
                                                                                       /// Reload Icon
