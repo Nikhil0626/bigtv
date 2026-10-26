@@ -590,13 +590,15 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
                 constraints: BoxConstraints(minHeight: availableHeight),
                 child: IntrinsicHeight(
                   child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      SizedBox(height: 6.h),
+                      const Spacer(),
 
                       // Controls Row: [Difficulty Pill] | [Undo] [Reset]
                       _buildControlsRow(context, level, isDark),
 
-                      SizedBox(height: 10.h),
+                      SizedBox(height: 12.h),
 
                       // Main Game Board with direct drag-to-select
                       _buildBoard(context, level, boardSize, isDark),

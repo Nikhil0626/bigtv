@@ -172,7 +172,7 @@ class _CommentSectionState extends State<CommentSection> {
                                                 Center(
                                                   child: Text(
                                                     formatTimeDifference(
-                                                      filteredComments[index].createdAt.toString(),
+                                                      filteredComments[index].createdAt.toIso8601String(),
                                                       isComment: true,
                                                     ),
                                                     textAlign: TextAlign.center,

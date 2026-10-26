@@ -12,6 +12,9 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
+
 import '../../../services/base_urls.dart';
 
 class ProfileProvider extends ChangeNotifier {
@@ -26,10 +29,114 @@ class ProfileProvider extends ChangeNotifier {
   File? selectedFile;
   bool isMainLoading = false;
 
+  void setDob(DateTime dt) {
+    dayController.text = dt.day.toString().padLeft(2, '0');
+    monthController.text = dt.month.toString().padLeft(2, '0');
+    yearController.text = dt.year.toString().padLeft(4, '0');
+    notifyListeners();
+  }
+
+  void _clearDobControllers() {
+    dayController.text = "";
+    monthController.text = "";
+    yearController.text = "";
+  }
+
+  void _parseAndPopulateDob(dynamic rawDob) {
+    if (rawDob == null) {
+      _clearDobControllers();
+      return;
+    }
+    String dobStr = rawDob.toString().trim();
+    if (dobStr.isEmpty || dobStr.toLowerCase() == "null" || dobStr == "--") {
+      _clearDobControllers();
+      return;
+    }
+
+    // Strip time portion if present (e.g. 1995-05-20T00:00:00 or 1995-05-20 00:00:00)
+    if (dobStr.contains('T')) {
+      dobStr = dobStr.split('T').first.trim();
+    } else if (dobStr.contains(' ')) {
+      dobStr = dobStr.split(' ').first.trim();
+    }
+
+    // Try DateTime.tryParse (handles ISO YYYY-MM-DD)
+    final parsed = DateTime.tryParse(dobStr);
+    if (parsed != null) {
+      dayController.text = parsed.day.toString().padLeft(2, '0');
+      monthController.text = parsed.month.toString().padLeft(2, '0');
+      yearController.text = parsed.year.toString().padLeft(4, '0');
+      return;
+    }
+
+    // Try splitting by '-' or '/'
+    final separator = dobStr.contains('-') ? '-' : (dobStr.contains('/') ? '/' : null);
+    if (separator != null) {
+      final parts = dobStr.split(separator).map((e) => e.trim()).toList();
+      if (parts.length == 3) {
+        final p0 = int.tryParse(parts[0]);
+        final p1 = int.tryParse(parts[1]);
+        final p2 = int.tryParse(parts[2]);
+
+        if (p0 != null && p1 != null && p2 != null) {
+          // Check if parts[0] is year (e.g. 1995-05-15)
+          if (parts[0].length == 4 || p0 > 1000) {
+            yearController.text = p0.toString().padLeft(4, '0');
+            monthController.text = p1.toString().padLeft(2, '0');
+            dayController.text = p2.toString().padLeft(2, '0');
+            return;
+          }
+          // Check if parts[2] is year (e.g. 15-05-1995)
+          else if (parts[2].length == 4 || p2 > 1000) {
+            dayController.text = p0.toString().padLeft(2, '0');
+            monthController.text = p1.toString().padLeft(2, '0');
+            yearController.text = p2.toString().padLeft(4, '0');
+            return;
+          }
+        }
+      }
+    }
+
+    _clearDobControllers();
+  }
+
+  String? _formatDateStringToYmd(String raw) {
+    String dobStr = raw.trim();
+    if (dobStr.isEmpty || dobStr.toLowerCase() == "null" || dobStr == "--") {
+      return null;
+    }
+    if (dobStr.contains('T')) {
+      dobStr = dobStr.split('T').first.trim();
+    } else if (dobStr.contains(' ')) {
+      dobStr = dobStr.split(' ').first.trim();
+    }
+    final parsed = DateTime.tryParse(dobStr);
+    if (parsed != null) {
+      return '${parsed.year.toString().padLeft(4, '0')}-${parsed.month.toString().padLeft(2, '0')}-${parsed.day.toString().padLeft(2, '0')}';
+    }
+    final separator = dobStr.contains('-') ? '-' : (dobStr.contains('/') ? '/' : null);
+    if (separator != null) {
+      final parts = dobStr.split(separator).map((e) => e.trim()).toList();
+      if (parts.length == 3) {
+        final p0 = int.tryParse(parts[0]);
+        final p1 = int.tryParse(parts[1]);
+        final p2 = int.tryParse(parts[2]);
+        if (p0 != null && p1 != null && p2 != null) {
+          if (parts[0].length == 4 || p0 > 1000) {
+            return '${p0.toString().padLeft(4, '0')}-${p1.toString().padLeft(2, '0')}-${p2.toString().padLeft(2, '0')}';
+          } else if (parts[2].length == 4 || p2 > 1000) {
+            return '${p2.toString().padLeft(4, '0')}-${p1.toString().padLeft(2, '0')}-${p0.toString().padLeft(2, '0')}';
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   Future getProfile() async {
     isMainLoading = true;
+    notifyListeners();
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    // String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
       "user_id": userId,
@@ -37,67 +144,148 @@ class ProfileProvider extends ChangeNotifier {
 
     try {
       Response response = await SettingsRepo().getProfile(body);
-      log("data -- ${response.data}");
-      if (response.statusCode == 200) {
+      log("profile data -- ${response.data}");
+      if (response.statusCode == 200 && response.data != null) {
         profileData = response.data;
-        phoneController.text = response.data['profile']['mobileNumber']??"";
+        final profile = response.data['profile'];
+        if (profile is Map) {
+          phoneController.text = profile['mobileNumber']?.toString() ?? "";
+          nameController.text = profile['name']?.toString() ?? "";
+          uploadImageUrl = profile['photo']?.toString() ?? "";
 
-
-        String dob = response.data['profile']['dob'].toString();
-       List data = dob.split("-");
-        dayController.text = data[2]??"";
-        monthController.text = data[1]??"";
-        yearController.text = data[0]??"";
-        nameController.text = response.data['profile']['name']??"";
-        uploadImageUrl = response.data['profile']['photo']??"";
+          final rawDob = profile['dob'];
+          _parseAndPopulateDob(rawDob);
+        }
         notifyListeners();
-        log("Like posted successfully: ${response.data}");
+        log("Profile fetched successfully: ${response.data}");
       } else {
-        log("Failed to post like: ${response.statusCode}");
+        log("Failed to get profile: ${response.statusCode}");
       }
     } on DioException catch (e, st) {
-      log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
+      log("Dio error while fetching profile: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
-
-      log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
+      log("Unexpected error while fetching profile: ${e.toString()} ---- ${st.toString()}");
     } finally {
-    Future.delayed(Duration(seconds: 1),() {
       isMainLoading = false;
       notifyListeners();
-
-    },);
     }
   }
+
   bool isProfileUpdate = false;
 
   Future postProfile() async {
-    isProfileUpdate = true;
-    SharedPreferences preferences = await SharedPreferences.getInstance();
+    final String name = nameController.text.trim();
+    if (name.isEmpty) {
+      CustomToast.showErrorToast(msg: "Please enter your name");
+      return;
+    }
 
+    final String dayStr = dayController.text.trim();
+    final String monthStr = monthController.text.trim();
+    final String yearStr = yearController.text.trim();
+
+    final bool hasAnyDobField = dayStr.isNotEmpty || monthStr.isNotEmpty || yearStr.isNotEmpty;
+    final bool hasAllDobFields = dayStr.isNotEmpty && monthStr.isNotEmpty && yearStr.isNotEmpty;
+
+    String? formattedDob;
+
+    if (hasAnyDobField) {
+      if (!hasAllDobFields) {
+        CustomToast.showErrorToast(msg: "Please enter complete date of birth");
+        return;
+      }
+
+      final int? day = int.tryParse(dayStr);
+      final int? month = int.tryParse(monthStr);
+      final int? year = int.tryParse(yearStr);
+
+      if (day == null || month == null || year == null ||
+          day < 1 || day > 31 ||
+          month < 1 || month > 12 ||
+          year < 1900 || year > DateTime.now().year) {
+        CustomToast.showErrorToast(msg: "Please enter a valid date of birth");
+        return;
+      }
+
+      try {
+        final date = DateTime(year, month, day);
+        if (date.year != year || date.month != month || date.day != day) {
+          CustomToast.showErrorToast(msg: "Please enter a valid date of birth");
+          return;
+        }
+        if (date.isAfter(DateTime.now())) {
+          CustomToast.showErrorToast(msg: "Date of birth cannot be in the future");
+          return;
+        }
+      } catch (_) {
+        CustomToast.showErrorToast(msg: "Please enter a valid date of birth");
+        return;
+      }
+
+      formattedDob = '${year.toString().padLeft(4, '0')}-${month.toString().padLeft(2, '0')}-${day.toString().padLeft(2, '0')}';
+      dayController.text = day.toString().padLeft(2, '0');
+      monthController.text = month.toString().padLeft(2, '0');
+      yearController.text = year.toString().padLeft(4, '0');
+    } else {
+      // If user hasn't filled DOB fields, check if there was already an existing valid DOB in profileData
+      final existingDob = profileData != null && profileData['profile'] != null
+          ? profileData['profile']['dob']?.toString()
+          : null;
+      if (existingDob != null &&
+          existingDob.trim().isNotEmpty &&
+          existingDob.trim() != "null" &&
+          existingDob.trim() != "--") {
+        formattedDob = _formatDateStringToYmd(existingDob);
+      }
+    }
+
+    isProfileUpdate = true;
+    notifyListeners();
+
+    SharedPreferences preferences = await SharedPreferences.getInstance();
     String? userId = preferences.getString("userId");
 
     Map<String, dynamic> body = {
-      "user_id":int.parse(userId.toString()),
-      "name":nameController.text.toString(),
-      "dob":'${yearController.text}-${monthController.text}-${dayController.text}',
-      "photo_url":uploadImageUrl.toString(),
+      "user_id": int.tryParse(userId.toString()) ?? userId,
+      "name": name,
+      "dob": formattedDob,
+      "photo_url": uploadImageUrl.toString(),
     };
-    log('body $body');
+    log('postProfile body: $body');
+
     try {
       Response response = await SettingsRepo().postProfile(body);
       if (response.statusCode == 200) {
+        AnalyticsService.instance.track(AnalyticsEventName.userProfileUpdate, properties: {
+          'updated_fields': ['name', if (formattedDob != null) 'dob', 'photo_url'],
+        });
+        if (profileData != null && profileData['profile'] != null) {
+          profileData['profile']['name'] = name;
+          if (formattedDob != null) {
+            profileData['profile']['dob'] = formattedDob;
+          }
+          profileData['profile']['photo'] = uploadImageUrl.toString();
+        }
+        preferences.setString("userName", name);
         CustomToast.showSuccessToast(msg: "Profile data updated");
-        log("Like posted successfully: ${response.data}");
+        log("Profile updated successfully: ${response.data}");
       } else {
-        CustomToast.showErrorToast(msg: "${response.data['detail']}");
-        log("Failed to post like: ${response.statusCode}");
+        final errorMsg = response.data is Map && response.data['detail'] != null
+            ? response.data['detail'].toString()
+            : "Failed to update profile";
+        CustomToast.showErrorToast(msg: errorMsg);
+        log("Failed to update profile: ${response.statusCode}");
       }
     } on DioException catch (e, st) {
-      CustomToast.showSuccessToast(msg: "Profile data not updated");
-      log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
+      String errorMsg = "Profile data not updated";
+      if (e.response?.data is Map && e.response?.data['detail'] != null) {
+        errorMsg = e.response!.data['detail'].toString();
+      }
+      CustomToast.showErrorToast(msg: errorMsg);
+      log("Dio error while updating profile: ${e.toString()} ---- ${st.toString()}");
     } catch (e, st) {
-      CustomToast.showSuccessToast(msg: "Profile data not updated");
-      log("Unexpected error while posting like: ${e.toString()} ---- ${st.toString()}");
+      CustomToast.showErrorToast(msg: "Profile data not updated");
+      log("Unexpected error while updating profile: ${e.toString()} ---- ${st.toString()}");
     } finally {
       isProfileUpdate = false;
       notifyListeners();
