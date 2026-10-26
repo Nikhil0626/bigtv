@@ -15,6 +15,7 @@ import 'package:chotanews/features/notifications/data/models/app_notification_mo
 import 'package:chotanews/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:chotanews/features/notifications/presentation/widgets/notification_item_card.dart';
 import 'package:chotanews/features/notifications/presentation/widgets/notification_shimmer_list.dart';
+import 'package:chotanews/features/reporters/presentation/providers/reporters_provider.dart';
 import 'package:chotanews/features/reporters/presentation/screens/reporters_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/utils/in_app_web_view.dart';
@@ -107,13 +108,18 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      final notifProvider = context.read<NotificationsProvider>();
-      if (notifProvider.notifications.isEmpty) {
-        notifProvider.fetchNotifications();
-      }
       final homeProvider = context.read<HomeProvider>();
-      if (homeProvider.editorialPosts.isEmpty) {
-        homeProvider.fetchEditorialPosts();
+      final expectedNotifLang = (homeProvider.langCode == 'ml') ? 'ml' : 'te';
+      final notifProvider = context.read<NotificationsProvider>();
+      if (notifProvider.notifications.isEmpty || notifProvider.currentLanguage != expectedNotifLang) {
+        notifProvider.fetchNotifications(languageCode: expectedNotifLang);
+      }
+      if (homeProvider.editorialPosts.isEmpty || homeProvider.editorialLanguage != homeProvider.langCode) {
+        homeProvider.fetchEditorialPosts(refresh: true);
+      }
+      final expectedVideoLang = (homeProvider.langCode == 'ml') ? 'ml' : 'te';
+      if (homeProvider.getAllAiTagsList.isEmpty || homeProvider.videoTagsLanguage != expectedVideoLang) {
+        homeProvider.getAllAiTags();
       }
     });
 
@@ -141,18 +147,45 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     BuildContext context,
     AppNotificationModel notification,
   ) {
-    final String? targetPostId = notification.postId != null && notification.postId != 0
-        ? notification.postId.toString()
-        : (notification.link != null
-            ? Uri.tryParse(notification.link!)?.queryParameters['postId']
-            : null);
+    String? targetPostId;
+    if (notification.postId != null && notification.postId != 0) {
+      targetPostId = notification.postId.toString();
+    } else if (notification.link != null && notification.link!.isNotEmpty) {
+      final uri = Uri.tryParse(notification.link!);
+      if (uri != null) {
+        targetPostId = uri.queryParameters['postId'] ??
+            uri.queryParameters['post_id'] ??
+            uri.queryParameters['articleId'] ??
+            uri.queryParameters['article_id'] ??
+            uri.queryParameters['id'];
 
-    if (targetPostId != null && targetPostId.isNotEmpty) {
+        if (targetPostId == null || targetPostId.isEmpty) {
+          for (final seg in uri.pathSegments) {
+            if (int.tryParse(seg) != null && seg != "0") {
+              targetPostId = seg;
+              break;
+            }
+          }
+        }
+
+        // If it's a non-post deep link (e.g. epaper, live, events), route it
+        if ((targetPostId == null || targetPostId.isEmpty) &&
+            (uri.path.contains('epaper') ||
+                uri.path.contains('events') ||
+                uri.path.contains('live') ||
+                uri.path.contains('reel'))) {
+          context.read<HomeProvider>().routeDeepLink(uri, isFromNotification: true);
+          return;
+        }
+      }
+    }
+
+    if (targetPostId != null && targetPostId.isNotEmpty && targetPostId != "0") {
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => IndividualPostView1(
-            postId: targetPostId,
+            postId: targetPostId!,
             isComeFrom: true,
             initialArticle: notification.toInitialArticleMap(),
           ),
@@ -292,7 +325,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                       SizedBox(width: 6.w),
                       Flexible(
                         child: Text(
-                          isTelugu ? "డిస్కవర్" : "Discoveries",
+                          isTelugu ? "డిస్కవర్" : "ഡിസ്കവർ",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -320,6 +353,14 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                   setState(() {
                     _selectedTabIndex = 1;
                   });
+                  final homeProvider = context.read<HomeProvider>();
+                  final expectedNotifLang = (homeProvider.langCode == 'ml') ? 'ml' : 'te';
+                  if (notifProvider.notifications.isEmpty || notifProvider.currentLanguage != expectedNotifLang) {
+                    notifProvider.fetchNotifications(
+                      isRefresh: notifProvider.currentLanguage != expectedNotifLang,
+                      languageCode: expectedNotifLang,
+                    );
+                  }
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -351,7 +392,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                       SizedBox(width: 6.w),
                       Flexible(
                         child: Text(
-                          "${isTelugu ? "నోటిఫికేషన్‌లు" : "Notifications"}${notifProvider.total > 0 ? " (${notifProvider.total})" : ""}",
+                          "${isTelugu ? "నోటిఫికేషన్‌లు" : "അറിയിപ്പുകൾ"}${notifProvider.total > 0 ? " (${notifProvider.total})" : ""}",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -389,7 +430,10 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
       child: RefreshIndicator(
         color: AppColorTokens.primaryRed,
         onRefresh: () async {
-          await notifProvider.fetchNotifications(isRefresh: true);
+          await notifProvider.fetchNotifications(
+            isRefresh: true,
+            languageCode: homeProvider.langCode == 'ml' ? 'ml' : 'te',
+          );
         },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -421,7 +465,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                       ),
                       SizedBox(width: 8.w),
                       Text(
-                        isTelugu ? "తాజా నోటిఫికేషన్‌లు" : "അറിയിപ്പുകൾ / Notifications",
+                        isTelugu ? "తాజా నోటిఫికేషన్‌లు" : "ഏറ്റവും പുതിയ അറിയിപ്പുകൾ",
                         style: TextStyle(
                           color: isDark ? Colors.white : const Color(0xFF0F172A),
                           fontSize: 14.5.sp,
@@ -440,7 +484,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                         border: Border.all(color: const Color(0xFFFECACA), width: 0.8),
                       ),
                       child: Text(
-                        "${notifProvider.total} ${isTelugu ? "అలర్ట్‌లు" : "alerts"}",
+                        "${notifProvider.total} ${isTelugu ? "అలర్ట్‌లు" : "അറിയിപ്പുകൾ"}",
                         style: TextStyle(
                           color: AppColorTokens.primaryRed,
                           fontSize: 10.sp,
@@ -520,7 +564,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             icon: Icons.article_rounded,
             iconColor: const Color(0xFFFF2A2A),
             imagePath: 'assets/images/editorial_3d_icon.png',
-            label: isTelugu ? "ఎడిటోరియల్" : "Editorial",
+            label: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
             onTap: () {
               Navigator.push(
                 context,
@@ -530,21 +574,23 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
           ),
           SizedBox(width: 8.w),
 
-          // 2. E-PAPER
-          _buildCompactChip(
-            index: 1,
-            icon: Icons.newspaper_rounded,
-            iconColor: const Color(0xFFD97706),
-            imagePath: 'assets/images/epaper_3d_icon.png',
-            label: isTelugu ? "ఈ-పేపర్" : "E-Paper",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const EpaperScreen()),
-              );
-            },
-          ),
-          SizedBox(width: 8.w),
+          // 2. E-PAPER (Removed for Malayalam)
+          if (isTelugu) ...[
+            _buildCompactChip(
+              index: 1,
+              icon: Icons.newspaper_rounded,
+              iconColor: const Color(0xFFD97706),
+              imagePath: 'assets/images/epaper_3d_icon.png',
+              label: "ఈ-పేపర్",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const EpaperScreen()),
+                );
+              },
+            ),
+            SizedBox(width: 8.w),
+          ],
 
           // 3. GAMES
           _buildCompactChip(
@@ -552,7 +598,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             icon: Icons.sports_esports_rounded,
             iconColor: const Color(0xFF059669),
             imagePath: 'assets/images/game_3d_icon.png',
-            label: isTelugu ? "గేమ్స్" : "Games",
+            label: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
             onTap: () => GamesBottomSheet.show(context, isTelugu),
           ),
           SizedBox(width: 8.w),
@@ -563,8 +609,13 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             icon: Icons.mic_rounded,
             iconColor: const Color(0xFF7C3AED),
             imagePath: 'assets/images/reporters_3d_icon.png',
-            label: isTelugu ? "రిపోర్టర్లు" : "Reporters",
+            label: isTelugu ? "రిపోర్టర్లు" : "റിപ്പോർട്ടർമാർ",
             onTap: () {
+              final targetLang = isTelugu ? 'te' : 'ml';
+              final repProvider = context.read<ReportersProvider>();
+              if (repProvider.currentLanguage != targetLang) {
+                repProvider.loadReporters(languageCode: targetLang, force: true);
+              }
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ReportersScreen()),
@@ -579,7 +630,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             icon: Icons.bookmark_rounded,
             iconColor: const Color(0xFFBE185D),
             imagePath: 'assets/images/bookmarks_3d_icon.png',
-            label: isTelugu ? "బుక్‌మార్క్స్" : "Bookmarks",
+            label: isTelugu ? "బుక్‌మార్క్స్" : "ബുക്ക്‌മാർക്കുകൾ",
             onTap: () {
               Navigator.push(
                 context,
@@ -595,7 +646,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             icon: Icons.dynamic_feed_rounded,
             iconColor: const Color(0xFF2563EB),
             imagePath: 'assets/images/myfeed_3d_icon.png',
-            label: isTelugu ? "న్యూస్" : "Feed",
+            label: isTelugu ? "న్యూస్" : "വാർത്തകൾ",
             onTap: () => _navigateToHome(context, homeProvider),
           ),
           SizedBox(width: 8.w),
@@ -606,7 +657,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             icon: Icons.local_fire_department_rounded,
             iconColor: const Color(0xFFFF4B2B),
             imagePath: 'assets/images/trending_3d_icon.png',
-            label: isTelugu ? "ట్రెండింగ్" : "Trending",
+            label: isTelugu ? "ట్రెండింగ్" : "ട്രെൻഡിംഗ്",
             onTap: () {
               if (homeProvider.getAllAiTagsList.isNotEmpty) {
                 final firstTag = homeProvider.getAllAiTagsList.first;
@@ -723,10 +774,10 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               notifProvider.searchQuery.isNotEmpty
                   ? (isTelugu
                       ? "'${notifProvider.searchQuery}' సంబంధిత సమాచారం లభించలేదు"
-                      : "No notifications match '${notifProvider.searchQuery}'")
+                      : "'${notifProvider.searchQuery}' എന്നതുമായി ബന്ധപ്പെട്ട വിവരങ്ങൾ ലഭ്യമല്ല")
                   : (isTelugu
                       ? "తాజా నోటిఫికేషన్‌లు ఇక్కడ కనిపిస్తాయి"
-                      : "Fresh notifications will appear here"),
+                      : "പുതിയ അറിയിപ്പുകൾ ഇവിടെ ദൃശ്യമാകും"),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: const Color(0xFF64748B),
@@ -758,7 +809,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             ),
             SizedBox(height: 12.h),
             Text(
-              isTelugu ? "కనెక్షన్ లోపం ఏర్పడింది" : "Connection Error",
+              isTelugu ? "కనెక్షన్ లోపం ఏర్పడింది" : "കണക്ഷൻ തകരാർ",
               style: TextStyle(
                 color: const Color(0xFF0F172A),
                 fontSize: 14.sp,
@@ -769,7 +820,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             Text(
               isTelugu
                   ? "నోటిఫికేషన్‌లు లోడ్ చేయడం సాధ్యం కాలేదు. దయచేసి మళ్ళీ ప్రయత్నించండి."
-                  : "Unable to load notifications. Please try again.",
+                  : "അറിയിപ്പുകൾ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: const Color(0xFF64748B),
@@ -779,11 +830,14 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             SizedBox(height: 14.h),
             ElevatedButton.icon(
               onPressed: () {
-                notifProvider.fetchNotifications(isRefresh: true);
+                notifProvider.fetchNotifications(
+                  isRefresh: true,
+                  languageCode: isTelugu ? 'te' : 'ml',
+                );
               },
               icon: const Icon(Icons.refresh_rounded, size: 16, color: Colors.white),
               label: Text(
-                isTelugu ? "మళ్ళీ ప్రయత్నించండి" : "Retry",
+                isTelugu ? "మళ్ళీ ప్రయత్నించండి" : "വീണ്ടും ശ്രമിക്കുക",
                 style: TextStyle(color: Colors.white, fontSize: 12.sp, fontWeight: FontWeight.w700),
               ),
               style: ElevatedButton.styleFrom(
@@ -949,7 +1003,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                             ? " (${provider.totalBookmarks})"
                             : "";
                         return Text(
-                          "${isTelugu ? "బుక్‌మార్క్స్" : "Saved"}$countText",
+                          "${isTelugu ? "బుక్‌మార్క్స్" : "ബുക്ക്‌മാർക്കുകൾ"}$countText",
                           style: TextStyle(
                             color: isDark ? const Color(0xFFFF6B6B) : const Color(0xFFDC2626),
                             fontSize: 10.sp,
@@ -1161,7 +1215,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               _buildModernShortcutTile(
                 index: 0,
                 title: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
-                subtitle: "Editorial",
+                subtitle: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
                 icon: Icons.article_rounded,
                 iconGradient: const [Color(0xFFFF5E62), Color(0xFFFF2A2A)],
                 shadowColor: const Color(0xFFFF2A2A).withValues(alpha: 0.25),
@@ -1177,31 +1231,33 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               ),
               SizedBox(width: 10.w),
 
-              // 2. E-PAPER
-              _buildModernShortcutTile(
-                index: 1,
-                title: isTelugu ? "ఈ-పేపర్" : "ഇ-പേപ്പർ",
-                subtitle: "E-Paper",
-                icon: Icons.newspaper_rounded,
-                iconGradient: const [Color(0xFFFBBF24), Color(0xFFD97706)],
-                shadowColor: const Color(0xFFD97706).withValues(alpha: 0.25),
-                imagePath: 'assets/images/epaper_3d_icon.png',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EpaperScreen(),
-                    ),
-                  );
-                },
-              ),
-              SizedBox(width: 10.w),
+              // 2. E-PAPER (Removed for Malayalam)
+              if (isTelugu) ...[
+                _buildModernShortcutTile(
+                  index: 1,
+                  title: "ఈ-పేపర్",
+                  subtitle: "E-Paper",
+                  icon: Icons.newspaper_rounded,
+                  iconGradient: const [Color(0xFFFBBF24), Color(0xFFD97706)],
+                  shadowColor: const Color(0xFFD97706).withValues(alpha: 0.25),
+                  imagePath: 'assets/images/epaper_3d_icon.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EpaperScreen(),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(width: 10.w),
+              ],
 
               // 3. GAMES (Dynamic from API)
               _buildModernShortcutTile(
                 index: 2,
                 title: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
-                subtitle: "Games",
+                subtitle: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
                 icon: Icons.sports_esports_rounded,
                 iconGradient: const [Color(0xFF10B981), Color(0xFF059669)],
                 shadowColor: const Color(0xFF10B981).withValues(alpha: 0.25),
@@ -1214,12 +1270,17 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               _buildModernShortcutTile(
                 index: 3,
                 title: isTelugu ? "రిపోర్టర్లు" : "റിപ്പോർട്ടർമാർ",
-                subtitle: "Reporters",
+                subtitle: isTelugu ? "రిపోర్టర్లు" : "റിപ്പോർട്ടർമാർ",
                 icon: Icons.mic_rounded,
                 iconGradient: const [Color(0xFFA855F7), Color(0xFF7C3AED)],
                 shadowColor: const Color(0xFF7C3AED).withValues(alpha: 0.25),
                 imagePath: 'assets/images/reporters_3d_icon.png',
                 onTap: () {
+                  final targetLang = isTelugu ? 'te' : 'ml';
+                  final repProvider = context.read<ReportersProvider>();
+                  if (repProvider.currentLanguage != targetLang) {
+                    repProvider.loadReporters(languageCode: targetLang, force: true);
+                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -1233,8 +1294,8 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               // 5. BOOKMARKS
               _buildModernShortcutTile(
                 index: 4,
-                title: isTelugu ? "బుక్‌మార్క్స్" : "Bookmarks",
-                subtitle: "Bookmarks",
+                title: isTelugu ? "బుక్‌మార్క్స్" : "ബുക്ക്‌മാർക്കുകൾ",
+                subtitle: isTelugu ? "బుక్‌మార్క్స్" : "ബുക്ക്‌മാർക്കുകൾ",
                 icon: Icons.bookmark_rounded,
                 iconGradient: const [Color(0xFFEC4899), Color(0xFFBE185D)],
                 shadowColor: const Color(0xFFEC4899).withValues(alpha: 0.25),
@@ -1253,8 +1314,8 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               // 6. MY FEED / NEWS
               _buildModernShortcutTile(
                 index: 5,
-                title: isTelugu ? "న్యూస్" : "Feed",
-                subtitle: "Feed",
+                title: isTelugu ? "న్యూస్" : "വാർത്തകൾ",
+                subtitle: isTelugu ? "వార్తలు" : "വാർത്തകൾ",
                 icon: Icons.dynamic_feed_rounded,
                 iconGradient: const [Color(0xFF60A5FA), Color(0xFF2563EB)],
                 shadowColor: const Color(0xFF2563EB).withValues(alpha: 0.25),
@@ -1267,7 +1328,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               _buildModernShortcutTile(
                 index: 6,
                 title: isTelugu ? "ట్రెండింగ్" : "ട്രെൻഡിംഗ്",
-                subtitle: "Trending",
+                subtitle: isTelugu ? "ట్రెండింగ్" : "ട്രെൻഡിംഗ്",
                 icon: Icons.local_fire_department_rounded,
                 iconGradient: const [Color(0xFFFF416C), Color(0xFFFF4B2B)],
                 shadowColor: const Color(0xFFFF416C).withValues(alpha: 0.25),
@@ -1744,7 +1805,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                           ),
                           SizedBox(height: 3.h),
                           Text(
-                            "No data found",
+                            isTelugu ? "సమాచారం అందుబాటులో లేదు" : "വിവരങ്ങൾ ലഭ്യമല്ല",
                             style: TextStyle(
                               color: const Color(0xFF94A3B8),
                               fontSize: 11.sp,
@@ -1846,7 +1907,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildSectionHeader(
-          title: isTelugu ? "ఎడిటోరియల్స్" : "എഡിറ്റോറിയലുകൾ / Editorials",
+          title: isTelugu ? "ఎడిటోరియల్స్" : "എഡിറ്റോറിയലുകൾ",
           trailing: GestureDetector(
             onTap: () {
               Navigator.push(
@@ -1971,9 +2032,10 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     final String imageUrl = article['image_url']?.toString() ?? '';
     final String publishDate = article['publishDate']?.toString() ?? '';
     final String webUrl = article['link']?.toString() ?? '';
+    final String fallbackHost = homeProvider.langCode == 'ml' ? "https://bigtv24x7.com" : "https://www.bigtvlive.com";
     final String targetUrl = webUrl.isNotEmpty
         ? webUrl
-        : (article['id'] != null ? "https://www.bigtvlive.com/?p=${article['id']}" : "");
+        : (article['id'] != null ? "$fallbackHost/?p=${article['id']}" : "");
 
     return Material(
       color: isDark ? const Color(0xFF1E2026) : Colors.white,
@@ -2254,7 +2316,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               ),
               SizedBox(height: 4.h),
               Text(
-                "Editorial",
+                isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
                 style: TextStyle(
                   color: AppColorTokens.primaryRed,
                   fontSize: 10.sp,
@@ -2323,9 +2385,11 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     final String title = article['title']?.toString() ?? 'Editorial';
     final String imageUrl = article['image_url']?.toString() ?? '';
     final String webUrl = article['link']?.toString() ?? '';
+    final homeProvider = context.read<HomeProvider>();
+    final String fallbackHost = homeProvider.langCode == 'ml' ? "https://bigtv24x7.com" : "https://www.bigtvlive.com";
     final String shareUrl = webUrl.isNotEmpty
         ? webUrl
-        : (article['id'] != null ? "https://www.bigtvlive.com/?p=${article['id']}" : "");
+        : (article['id'] != null ? "$fallbackHost/?p=${article['id']}" : "");
 
     final List<String> parts = [];
     if (title.isNotEmpty) parts.add(title);
@@ -2416,10 +2480,12 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     final liveData = await homeProvider.fetchLiveTvStream();
     final String channelName = (liveData?['channel_name'] ?? "BIG TV").toString();
 
+    if (!context.mounted) return;
     await LiveTvShareHelper.shareLiveTv(
       context: context,
       channelName: channelName,
       isTelugu: isTelugu,
+      langCode: isTelugu ? 'te' : 'ml',
       source: 'discover_banner',
     );
   }

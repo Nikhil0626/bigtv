@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTypography {
+  static final _malayalamFallback = [
+    if (GoogleFonts.notoSerifMalayalam().fontFamily != null)
+      GoogleFonts.notoSerifMalayalam().fontFamily!,
+  ];
+
   static TextTheme get textTheme {
     return GoogleFonts.notoSerifTeluguTextTheme().copyWith(
       displayLarge: GoogleFonts.notoSerifTelugu(fontSize: 57, fontWeight: FontWeight.bold, letterSpacing: -0.25),
@@ -19,10 +24,14 @@ class AppTypography {
       labelLarge: GoogleFonts.notoSerifTelugu(fontSize: 14, fontWeight: FontWeight.w500, letterSpacing: 0.1),
       labelMedium: GoogleFonts.notoSerifTelugu(fontSize: 12, fontWeight: FontWeight.w500, letterSpacing: 0.5),
       labelSmall: GoogleFonts.notoSerifTelugu(fontSize: 11, fontWeight: FontWeight.w500, letterSpacing: 0.5),
-    );
+    ).apply(fontFamilyFallback: _malayalamFallback);
   }
 
   static TextTheme get teluguTextTheme {
     return textTheme;
+  }
+
+  static TextTheme get malayalamTextTheme {
+    return GoogleFonts.notoSerifMalayalamTextTheme();
   }
 }

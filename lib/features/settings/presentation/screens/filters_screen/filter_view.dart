@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/utils/top_right_wave_painter.dart';
@@ -44,6 +45,7 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
 
     return Consumer<AuthenticationProvider>(
       builder: (context, authProvider, _) {
+        final bool isMalayalam = context.watch<HomeProvider>().langCode == 'ml';
         final isTopicsTab = _selectedTabIndex == 0;
         final selectedCategories = authProvider.selectedCategories;
         final selectedLocations = authProvider.selectedLocations;
@@ -125,7 +127,7 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
                                     ),
                                     SizedBox(width: 5.w),
                                     Text(
-                                      "FILTER",
+                                      isMalayalam ? "ഫിൽട്ടർ" : "FILTER",
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 10.5.sp,
@@ -152,7 +154,7 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
                                   children: [
                                     RichText(
                                       text: TextSpan(
-                                        text: "Your news.\n",
+                                        text: isMalayalam ? "നിങ്ങളുടെ വാർത്തകൾ.\n" : "Your news.\n",
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 24.sp,
@@ -160,9 +162,9 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
                                           color: isDark ? Colors.white : const Color(0xFF181A20),
                                           height: 1.15,
                                         ),
-                                        children: const [
+                                        children: [
                                           TextSpan(
-                                            text: "Your preferences.",
+                                            text: isMalayalam ? "നിങ്ങളുടെ മുൻഗണനകൾ." : "Your preferences.",
                                             style: TextStyle(
                                               color: Color(0xFFED1C24),
                                             ),
@@ -172,7 +174,7 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
                                     ),
                                     SizedBox(height: 3.h),
                                     Text(
-                                      "Choose what matters to you.",
+                                      isMalayalam ? "നിങ്ങൾക്ക് പ്രധാനപ്പെട്ടവ തിരഞ്ഞെടുക്കുക." : "Choose what matters to you.",
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 12.sp,
@@ -259,7 +261,7 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
                                           ),
                                           SizedBox(width: 6.w),
                                           Text(
-                                            'Topics',
+                                            isMalayalam ? 'വിഷയങ്ങൾ' : 'Topics',
                                             style: TextStyle(
                                               fontFamily: 'Poppins',
                                               color: _selectedTabIndex == 0
@@ -308,7 +310,7 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
                                           ),
                                           SizedBox(width: 6.w),
                                           Text(
-                                            'Regions',
+                                            isMalayalam ? 'പ്രദേശങ്ങൾ' : 'Regions',
                                             style: TextStyle(
                                               fontFamily: 'Poppins',
                                               color: _selectedTabIndex == 1
@@ -390,7 +392,9 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
                               }
                             : () {
                                 if (!isTopicsTab && selectedLocations.length > 5) {
-                                  CustomToast.showErrorToast(msg: "Please Select up to 5 Districts");
+                                  CustomToast.showErrorToast(
+                                    msg: isMalayalam ? "പരമാവധി 5 ജില്ലകൾ തിരഞ്ഞെടുക്കുക" : "Please Select up to 5 Districts",
+                                  );
                                 }
                               },
                         child: Container(
@@ -425,7 +429,7 @@ class FilterViewState extends State<FilterView> with SingleTickerProviderStateMi
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        "Update preferences",
+                                        isMalayalam ? "മുൻഗണനകൾ അപ്‌ഡേറ്റ് ചെയ്യുക" : "Update preferences",
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 14.5.sp,

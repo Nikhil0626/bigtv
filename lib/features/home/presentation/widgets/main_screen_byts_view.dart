@@ -450,7 +450,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                 children: [
                                                                                   Text(
-                                                                                    "తెలుగు (Telugu)",
+                                                                                    homeProvider.langCode == 'ml' ? "മലയാളം (Malayalam)" : homeProvider.langCode == 'ml' ? "മലയാളം (Malayalam)" : "తెలుగు (Telugu)",
                                                                                     style: TextStyle(
                                                                                       fontSize: 14.sp,
                                                                                       fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
@@ -1017,7 +1017,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                                                 children: [
                                                                                                   Text(
-                                                                                                    "తెలుగు (Telugu)",
+                                                                                                    homeProvider.langCode == 'ml' ? "മലയാളം (Malayalam)" : "తెలుగు (Telugu)",
                                                                                                     style: TextStyle(
                                                                                                       fontSize: 14.sp,
                                                                                                       fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
@@ -1186,11 +1186,14 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
   Future<void> launchURL(Uri uri) async {
     final String urlStr = uri.toString().toLowerCase();
     if (urlStr.contains('bigtv24x7.com') ||
+        urlStr.contains('bigtvlive.com') ||
         urlStr.contains('livebigtv') ||
         urlStr.contains('videotag') ||
         urlStr.contains('folknight') ||
         urlStr.contains('epaper') ||
-        urlStr.contains('events')) {
+        urlStr.contains('events') ||
+        urlStr.contains('postid=') ||
+        urlStr.contains('/posts/')) {
       if (context.mounted) {
         context.read<HomeProvider>().routeDeepLink(uri);
         return;

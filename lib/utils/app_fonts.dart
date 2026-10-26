@@ -4,6 +4,11 @@ import 'package:google_fonts/google_fonts.dart';
 import '../globel_keys/globel_keys.dart';
 import '../core/theme/theme_extensions.dart';
 
+final List<String> _malayalamFallback = [
+  if (GoogleFonts.notoSerifMalayalam().fontFamily != null)
+    GoogleFonts.notoSerifMalayalam().fontFamily!,
+];
+
 @Deprecated('Use context.typography from theme_extensions.dart instead.')
 TextStyle homeScreenFontStyle({
   Color? color,
@@ -41,6 +46,7 @@ TextStyle homeScreenFontStyle({
 
   return GoogleFonts.notoSerifTelugu(
     textStyle: TextStyle(
+      fontFamilyFallback: _malayalamFallback,
       fontSize: fontSize,
       height: height ?? 1.4,
       wordSpacing: 2,
@@ -73,6 +79,7 @@ TextStyle fontStyle({
 
   return GoogleFonts.notoSerifTelugu(
     textStyle: TextStyle(
+      fontFamilyFallback: _malayalamFallback,
       fontSize: fontSize,
       fontWeight: fontWeight,
       color: color ?? defaultColor,
@@ -103,6 +110,7 @@ TextStyle newAppFont({
 
   return GoogleFonts.notoSerifTelugu(
     textStyle: TextStyle(
+      fontFamilyFallback: _malayalamFallback,
       fontSize: fontSize?.sp,
       fontWeight: fontWeight,
       color: color ?? defaultColor,

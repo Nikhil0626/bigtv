@@ -23,6 +23,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/features/home/presentation/widgets/epaper_first_open_dialog.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -46,12 +47,36 @@ class _HomeViewState extends State<HomeView> {
       homeProvider?.getMobileNumber();
       homeProvider?.loadLanguage();
       _sendDeviceDetails();
+      _checkAndShowFirstOpenEpaperPopup();
     });
     homeProvider?.initDeepLinks();
     homeProvider?.subscribeToPushCallbacks();
     final initialTab = homeProvider?.selectedIndex ?? 1;
     homeProvider?.homePageController = PageController(initialPage: initialTab);
     super.initState();
+  }
+
+  Future<void> _checkAndShowFirstOpenEpaperPopup() async {
+    try {
+      final bool shouldShow = await shouldShowEpaperFirstOpenDialog();
+      if (!shouldShow) return;
+
+      // Small delay so home screen loads smoothly before modal appears
+      await Future.delayed(const Duration(milliseconds: 900));
+      if (!mounted) return;
+
+      final String langCode = homeProvider?.langCode ?? 'te';
+      if (langCode == 'ml') return;
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(kFirstOpenEpaperPopupShownKey, true);
+
+      if (mounted) {
+        showEpaperFirstOpenDialog(context);
+      }
+    } catch (e) {
+      debugPrint("Error checking first open epaper popup: $e");
+    }
   }
 
   Future<void> _sendDeviceDetails() async {
@@ -61,6 +86,7 @@ class _HomeViewState extends State<HomeView> {
       String? deviceId = preferences.getString("deviceId");
       String? userId = preferences.getString("userId");
       String langCode = preferences.getString("selectedLanguageCode") ?? "te";
+      homeProvider?.loadLanguage();
 
       homeProvider?.sendDeviceDetailsApi(
         userId: userId ?? "0",
@@ -190,7 +216,7 @@ class _HomeViewState extends State<HomeView> {
                                 homeProvider,
                                 index: 2,
                                 iconPath: "assets/new_app_icon/reel.svg",
-                                labelMl: 'റീൽస్',
+                                labelMl: 'ബിഗ് ടിവി ഡെയ്‌ലി',
                                 labelTe: 'బిగ్‌టీవీ డైలీ',
                               ),
                               // 5. Marrini button
@@ -199,7 +225,7 @@ class _HomeViewState extends State<HomeView> {
                                 homeProvider,
                                 index: 3,
                                 iconPath: "assets/new_app_icon/menu.svg",
-                                labelMl: 'ആൽമരം',
+                                labelMl: 'കൂടുതൽ',
                                 labelTe: 'మరిన్ని',
                               ),
                             ],

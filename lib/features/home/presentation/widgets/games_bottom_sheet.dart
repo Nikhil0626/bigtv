@@ -187,7 +187,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
               SizedBox(width: 12.w),
               Expanded(
                 child: Text(
-                  widget.isTelugu ? 'లాగిన్ అవసరం' : 'Login Required',
+                  widget.isTelugu ? 'లాగిన్ అవసరం' : 'ലോഗിൻ ആവശ്യമാണ്',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -200,7 +200,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
           content: Text(
             widget.isTelugu
                 ? 'గేమ్స్ ఆడటానికి మరియు మీ ర్యాంక్, స్ట్రీక్స్ నమోదు చేయడానికి దయచేసి లాగిన్ అవ్వండి.'
-                : 'Please login with your mobile number to play games, track your daily streaks, and compete on the leaderboard.',
+                : 'ഗെയിമുകൾ കളിക്കാനും നിങ്ങളുടെ റാങ്ക്, സ്‌ട്രീക്കുകൾ രേഖപ്പെടുത്താനും ദയവായി ലോഗിൻ ചെയ്യുക.',
             style: TextStyle(
               fontSize: 13.sp,
               color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -212,7 +212,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
               child: Text(
-                widget.isTelugu ? 'రద్దు' : 'Cancel',
+                widget.isTelugu ? 'రద్దు' : 'റദ്ദാക്കുക',
                 style: TextStyle(color: const Color(0xFF64748B), fontSize: 13.sp),
               ),
             ),
@@ -233,7 +233,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                 );
               },
               child: Text(
-                widget.isTelugu ? 'లాగిన్ అవ్వండి' : 'Login Now',
+                widget.isTelugu ? 'లాగిన్ అవ్వండి' : 'ഇപ്പോൾ ലോഗിൻ ചെയ്യുക',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -365,7 +365,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isTelugu ? "బిగ్ టీవీ గేమ్స్ & పజిల్స్" : "Big TV Games & Puzzles",
+                        isTelugu ? "బిగ్ టీవీ గేమ్స్ & పజిల్స్" : "ബിഗ് ടിവി ഗെയിംസ് & പസിലുകൾ",
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w800,
@@ -374,7 +374,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        isTelugu ? "మీ మెదడుకు పదును పెట్టే సరికొత్త పజిల్స్" : "Challenge your mind with puzzles",
+                        isTelugu ? "మీ మెదడుకు పదును పెట్టే సరికొత్త పజిల్స్" : "നിങ്ങളുടെ മനസ്സിന് മൂർച്ച കൂട്ടുന്ന ഏറ്റവും പുതിയ പസിലുകൾ",
                         style: TextStyle(
                           fontSize: 11.5.sp,
                           color: const Color(0xFF64748B),
@@ -413,7 +413,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                           Icon(Icons.cloud_off_rounded, size: 40.sp, color: Colors.grey),
                           SizedBox(height: 10.h),
                           Text(
-                            isTelugu ? "గేమ్స్ లోడ్ చేయడం విఫలమైంది" : "Unable to load games from server",
+                            isTelugu ? "గేమ్స్ లోడ్ చేయడం విఫలమైంది" : "ഗെയിമുകൾ ലോഡ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു",
                             style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B)),
                           ),
                           SizedBox(height: 12.h),
@@ -424,7 +424,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                               });
                             },
                             icon: const Icon(Icons.refresh_rounded, size: 18),
-                            label: Text(isTelugu ? "మళ్లీ ప్రయత్నించండి" : "Retry"),
+                            label: Text(isTelugu ? "మళ్లీ ప్రయత్నించండి" : "വീണ്ടും ശ്രമിക്കുക"),
                           ),
                         ],
                       ),
@@ -439,7 +439,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                     padding: EdgeInsets.symmetric(vertical: 30.h),
                     child: Center(
                       child: Text(
-                        isTelugu ? "ప్రస్తుతం గేమ్స్ అందుబాటులో లేవు" : "No games available currently",
+                        isTelugu ? "ప్రస్తుతం గేమ్స్ అందుబాటులో లేవు" : "നിലവിൽ ഗെയിമുകൾ ലഭ്യമല്ല",
                         style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B)),
                       ),
                     ),

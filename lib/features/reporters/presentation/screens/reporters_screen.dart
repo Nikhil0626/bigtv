@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/utils/top_right_wave_painter.dart';
 import '../../../../core/theme/theme_extensions.dart';
 import '../../data/models/reporter_model.dart';
@@ -9,6 +10,7 @@ import '../providers/reporters_provider.dart';
 import 'reporter_details_screen.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 
 class ReportersScreen extends StatefulWidget {
   const ReportersScreen({super.key});
@@ -24,6 +26,17 @@ class _ReportersScreenState extends State<ReportersScreen> {
   void initState() {
     super.initState();
     AnalyticsService.instance.track(AnalyticsEventName.reporterListOpen);
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final provider = context.read<ReportersProvider>();
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      final langCode = prefs.getString("selectedLanguageCode") ?? "te";
+      final targetLang = (langCode == 'ml') ? 'ml' : 'te';
+      if (provider.currentLanguage != targetLang || provider.allReporters.isEmpty) {
+        provider.loadReporters(languageCode: targetLang, force: true);
+      }
+    });
   }
 
   @override
@@ -55,6 +68,9 @@ class _ReportersScreenState extends State<ReportersScreen> {
             child: Consumer<ReportersProvider>(
               builder: (context, provider, child) {
                 final reporters = provider.filteredReporters;
+                final homeProvider = context.watch<HomeProvider>();
+                final isMalayalam = homeProvider.langCode == 'ml';
+                final isTelugu = homeProvider.langCode == 'te' || (!isMalayalam && !homeProvider.isEnglishMode);
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -109,7 +125,7 @@ class _ReportersScreenState extends State<ReportersScreen> {
                                     ),
                                     SizedBox(width: 5.w),
                                     Text(
-                                      "REPORTERS",
+                                      isMalayalam ? "റിപ്പോർട്ടർമാർ" : (isTelugu ? "రిపోర్టర్లు" : "REPORTERS"),
                                       style: TextStyle(
                                         fontSize: 11.sp,
                                         fontWeight: FontWeight.bold,
@@ -124,7 +140,7 @@ class _ReportersScreenState extends State<ReportersScreen> {
                           ),
                           SizedBox(height: 14.h),
                           Text(
-                            "Reporters",
+                            isMalayalam ? "റിപ്പോർട്ടർമാർ" : (isTelugu ? "రిపోర్టర్లు" : "Reporters"),
                             style: TextStyle(
                               fontSize: 24.sp,
                               fontWeight: FontWeight.w800,
@@ -135,7 +151,11 @@ class _ReportersScreenState extends State<ReportersScreen> {
                           ),
                           SizedBox(height: 4.h),
                           Text(
-                            "Meet our dedicated journalists & field correspondents",
+                            isMalayalam
+                                ? "ഞങ്ങളുടെ സമർപ്പിത മാധ്യമപ്രവർത്തകരെ പരിചയപ്പെടൂ"
+                                : (isTelugu
+                                    ? "మా అంకితభావం గల జర్నలిస్టులు & ఫీల్డ్ కరస్పాండెంట్లను కలవండి"
+                                    : "Meet our dedicated journalists & field correspondents"),
                             style: TextStyle(
                               fontSize: 13.sp,
                               color: isDark ? Colors.grey.shade400 : const Color(0xFF6C727F),
@@ -166,7 +186,9 @@ class _ReportersScreenState extends State<ReportersScreen> {
                       color: context.typography.bodyLarge?.color,
                     ),
                     decoration: InputDecoration(
-                      hintText: 'Search name or location',
+                      hintText: isMalayalam
+                          ? 'പേരോ സ്ഥലമോ തിരയുക'
+                          : (isTelugu ? 'పేరు లేదా ప్రాంతం కోసం వెతకండి' : 'Search name or location'),
                       hintStyle: TextStyle(
                         color: Colors.grey.shade500,
                         fontSize: 14.sp,
@@ -198,59 +220,67 @@ class _ReportersScreenState extends State<ReportersScreen> {
                 ),
               ),
 
-              // Filter Chips Row
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-                child: Row(
-                  children: provider.availableFilters.map((filter) {
-                    final isSelected = provider.selectedStateFilter == filter;
-                    return Padding(
-                      padding: EdgeInsets.only(right: 8.w),
-                      child: GestureDetector(
-                        onTap: () => provider.setStateFilter(filter),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 20.w,
-                            vertical: 8.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? primaryColor
-                                : (Theme.of(context).brightness == Brightness.dark
-                                    ? context.cardColor
-                                    : Colors.white),
-                            borderRadius: BorderRadius.circular(20.r),
-                            border: Border.all(
+              // Filter Chips Row (Only for Telugu, hidden for Malayalam as districts are not needed)
+              if (!isMalayalam && provider.availableFilters.isNotEmpty)
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                  child: Row(
+                    children: provider.availableFilters.map((filter) {
+                      final isSelected = provider.selectedStateFilter == filter;
+                      final filterLabel = (filter == 'All')
+                          ? (isTelugu ? 'అన్నీ' : 'All')
+                          : (filter == 'Telangana'
+                              ? (isTelugu ? 'తెలంగాణ' : 'Telangana')
+                              : (filter == 'Andhra Pradesh'
+                                  ? (isTelugu ? 'ఆంధ్రప్రదేశ్' : 'Andhra Pradesh')
+                                  : filter));
+                      return Padding(
+                        padding: EdgeInsets.only(right: 8.w),
+                        child: GestureDetector(
+                          onTap: () => provider.setStateFilter(filter),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 20.w,
+                              vertical: 8.h,
+                            ),
+                            decoration: BoxDecoration(
                               color: isSelected
                                   ? primaryColor
                                   : (Theme.of(context).brightness == Brightness.dark
-                                      ? context.borderColor
-                                      : const Color(0xFFCCCCCC)),
-                              width: 1,
+                                      ? context.cardColor
+                                      : Colors.white),
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(
+                                color: isSelected
+                                    ? primaryColor
+                                    : (Theme.of(context).brightness == Brightness.dark
+                                        ? context.borderColor
+                                        : const Color(0xFFCCCCCC)),
+                                width: 1,
+                              ),
                             ),
-                          ),
-                          child: Text(
-                            filter,
-                            style: TextStyle(
-                              color: isSelected
-                                  ? Colors.white
-                                  : (Theme.of(context).brightness == Brightness.dark
-                                      ? Colors.white
-                                      : const Color(0xFF333333)),
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              fontSize: 13.sp,
+                            child: Text(
+                              filterLabel,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? Colors.white
+                                    : (Theme.of(context).brightness == Brightness.dark
+                                        ? Colors.white
+                                        : const Color(0xFF333333)),
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.normal,
+                                fontSize: 13.sp,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      );
+                    }).toList(),
+                  ),
                 ),
-              ),
 
               SizedBox(height: 8.h),
 
@@ -272,7 +302,9 @@ class _ReportersScreenState extends State<ReportersScreen> {
                                 ),
                                 SizedBox(height: 8.h),
                                 Text(
-                                  'No reporters found',
+                                  isMalayalam
+                                      ? 'റിപ്പോർട്ടർമാരെ കണ്ടെത്താനായില്ല'
+                                      : (isTelugu ? 'రిపోర్టర్లు కనుగొనబడలేదు' : 'No reporters found'),
                                   style: TextStyle(
                                     fontSize: 14.sp,
                                     color: Colors.grey.shade600,
@@ -390,22 +422,26 @@ class _ReportersScreenState extends State<ReportersScreen> {
                       color: context.typography.bodyLarge?.color,
                     ),
                   ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    reporter.title,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: Colors.grey.shade600,
+                  if (reporter.title.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    Text(
+                      reporter.title,
+                      style: TextStyle(
+                        fontSize: 13.sp,
+                        color: Colors.grey.shade600,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 2.h),
-                  Text(
-                    reporter.location,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.grey.shade500,
+                  ],
+                  if (reporter.location.isNotEmpty) ...[
+                    SizedBox(height: 2.h),
+                    Text(
+                      reporter.location,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.grey.shade500,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),

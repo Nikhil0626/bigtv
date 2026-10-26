@@ -7,6 +7,8 @@ import 'spacing.dart';
 class AppTheme {
   static ThemeData get lightTheme {
     final fontName = GoogleFonts.notoSerifTelugu().fontFamily;
+    final fallbackFont = GoogleFonts.notoSerifMalayalam().fontFamily;
+    final fontFallbacks = fallbackFont != null ? [fallbackFont] : <String>[];
     return ThemeData(
       useMaterial3: true,
       fontFamily: fontName,
@@ -25,6 +27,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColorTokens.lightBackground,
       textTheme: AppTypography.textTheme.apply(
         fontFamily: fontName,
+        fontFamilyFallback: fontFallbacks,
         bodyColor: AppColorTokens.lightTextPrimary,
         displayColor: AppColorTokens.lightTextPrimary,
       ),
@@ -81,6 +84,8 @@ class AppTheme {
 
   static ThemeData get darkTheme {
     final fontName = GoogleFonts.notoSerifTelugu().fontFamily;
+    final fallbackFont = GoogleFonts.notoSerifMalayalam().fontFamily;
+    final fontFallbacks = fallbackFont != null ? [fallbackFont] : <String>[];
     return ThemeData(
       useMaterial3: true,
       fontFamily: fontName,
@@ -99,6 +104,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColorTokens.darkBackground,
       textTheme: AppTypography.textTheme.apply(
         fontFamily: fontName,
+        fontFamilyFallback: fontFallbacks,
         bodyColor: AppColorTokens.darkTextPrimary,
         displayColor: AppColorTokens.darkTextPrimary,
       ),

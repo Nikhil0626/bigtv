@@ -32,8 +32,8 @@ class _EditorialScreenState extends State<EditorialScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final homeProvider = context.read<HomeProvider>();
-      if (homeProvider.editorialPosts.isEmpty) {
-        homeProvider.fetchEditorialPosts();
+      if (homeProvider.editorialPosts.isEmpty || homeProvider.editorialLanguage != homeProvider.langCode) {
+        homeProvider.fetchEditorialPosts(refresh: true);
       }
     });
 
@@ -58,7 +58,9 @@ class _EditorialScreenState extends State<EditorialScreen> {
     final String title = article['title']?.toString() ?? 'Editorial';
     final String imageUrl = article['image_url']?.toString() ?? article['imageUrl']?.toString() ?? '';
     final String webUrl = article['link']?.toString() ?? '';
-    final String shareUrl = webUrl.isNotEmpty ? webUrl : "https://www.bigtvlive.com/?p=${article['id']}";
+    final homeProvider = context.read<HomeProvider>();
+    final String fallbackHost = homeProvider.langCode == 'ml' ? "https://bigtv24x7.com" : "https://www.bigtvlive.com";
+    final String shareUrl = webUrl.isNotEmpty ? webUrl : "$fallbackHost/?p=${article['id']}";
 
     final List<String> parts = [];
     if (title.isNotEmpty) parts.add(title);
@@ -317,9 +319,10 @@ class _EditorialScreenState extends State<EditorialScreen> {
                 final String imageUrl = article['image_url']?.toString() ?? '';
                 final String publishDate = article['publishDate']?.toString() ?? '';
                 final String webUrl = article['link']?.toString() ?? '';
+                final String fallbackHost = homeProvider.langCode == 'ml' ? "https://bigtv24x7.com" : "https://www.bigtvlive.com";
                 final String targetUrl = webUrl.isNotEmpty
                     ? webUrl
-                    : (article['id'] != null ? "https://www.bigtvlive.com/?p=${article['id']}" : "");
+                    : (article['id'] != null ? "$fallbackHost/?p=${article['id']}" : "");
 
                 return Card(
                   margin: const EdgeInsets.only(bottom: 16),

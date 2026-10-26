@@ -296,7 +296,9 @@ class AuthenticationProvider extends ChangeNotifier {
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
 
-    Provider.of<HomeProvider>(context, listen: false).sendDeviceDetailsApi(
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    homeProvider.setLangCode(langCode);
+    homeProvider.sendDeviceDetailsApi(
         userId: userId ?? "0",
         deviceId: deviceId ?? "",
         fcmToken: token,

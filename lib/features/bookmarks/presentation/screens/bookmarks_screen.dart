@@ -83,7 +83,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             ),
             const SizedBox(width: 10),
             Text(
-              isTelugu ? "బుక్‌మార్క్‌లు" : "Bookmarks",
+              isTelugu ? "బుక్‌మార్క్‌లు" : "ബുക്ക്‌മാർക്കുകൾ",
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -179,7 +179,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   ) {
     final String category = post.categoryName.isNotEmpty
         ? post.categoryName.first
-        : (isTelugu ? "తాజా వార్తలు" : "Latest News");
+        : (isTelugu ? "తాజా వార్తలు" : "ഏറ്റവും പുതിയ വാർത്തകൾ");
 
     final String timeDisplay = _formatCreatedDate(post.created);
 
@@ -362,7 +362,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  isTelugu ? "తీసివేయి" : "Remove",
+                                  isTelugu ? "తీసివేయి" : "നീക്കം ചെയ്യുക",
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w600,
@@ -409,7 +409,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             ),
             SizedBox(height: 18.h),
             Text(
-              isTelugu ? "బుక్‌మార్క్‌లు ఏవీ లేవు" : "No Bookmarks Yet",
+              isTelugu ? "బుక్‌మార్క్‌లు ఏవీ లేవు" : "ബുക്ക്‌മാർക്കുകളൊന്നും ലഭ്യമല്ല",
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
@@ -420,7 +420,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             Text(
               isTelugu
                   ? "మీకు నచ్చిన వార్తలను తరువాత చదవడానికి బుక్‌మార్క్ చిహ్నాన్ని నొక్కండి."
-                  : "Tap the bookmark icon on any news post to save and read it later here.",
+                  : "നിങ്ങൾക്ക് ഇഷ്ടമുള്ള വാർത്തകൾ പിന്നീട് വായിക്കാൻ ബുക്ക്‌മാർക്ക് ഐക്കൺ ടാപ്പ് ചെയ്യുക.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13.sp,
@@ -433,7 +433,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.explore_rounded, size: 18, color: Colors.white),
               label: Text(
-                isTelugu ? "వార్తలు అన్వేషించండి" : "Explore News",
+                isTelugu ? "వార్తలు అన్వేషించండి" : "വാർത്തകൾ പര്യവേക്ഷണം ചെയ്യുക",
                 style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(

@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/app_notification_model.dart';
 import '../../data/repositories/notifications_repository.dart';
 
@@ -16,6 +17,7 @@ class NotificationsProvider extends ChangeNotifier {
   String? _errorMessage;
   String _searchQuery = "";
   int _total = 0;
+  String _currentLanguage = 'te';
   static const int _pageSize = 20;
 
   List<AppNotificationModel> get notifications => _notifications;
@@ -27,10 +29,39 @@ class NotificationsProvider extends ChangeNotifier {
   String? get errorMessage => _errorMessage;
   String get searchQuery => _searchQuery;
   int get total => _total;
+  String get currentLanguage => _currentLanguage;
 
   /// Fetch first page or refresh notifications
-  Future<void> fetchNotifications({bool isRefresh = false}) async {
-    if (isRefresh) {
+  Future<void> fetchNotifications({
+    bool isRefresh = false,
+    String? languageCode,
+  }) async {
+    String targetLang = 'te';
+    if (languageCode != null && languageCode.isNotEmpty) {
+      targetLang = (languageCode == 'ml') ? 'ml' : 'te';
+    } else {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final saved = prefs.getString("selectedLanguageCode") ??
+            prefs.getString("selectedLanguage") ??
+            "te";
+        targetLang = (saved == 'ml') ? 'ml' : 'te';
+      } catch (_) {
+        targetLang = _currentLanguage;
+      }
+    }
+
+    final bool languageChanged = _currentLanguage != targetLang;
+    _currentLanguage = targetLang;
+
+    if (languageChanged) {
+      _notifications = [];
+      _filteredNotifications = [];
+      _total = 0;
+      _hasMore = true;
+    }
+
+    if (isRefresh || languageChanged) {
       _isRefreshing = true;
     } else {
       if (_notifications.isEmpty) {
@@ -44,6 +75,7 @@ class NotificationsProvider extends ChangeNotifier {
       final response = await _repository.getNotifications(
         skip: 0,
         take: _pageSize,
+        language: _currentLanguage,
       );
 
       _notifications = response.items;
@@ -72,6 +104,7 @@ class NotificationsProvider extends ChangeNotifier {
       final response = await _repository.getNotifications(
         skip: _notifications.length,
         take: _pageSize,
+        language: _currentLanguage,
       );
 
       if (response.items.isEmpty) {

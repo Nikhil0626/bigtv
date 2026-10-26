@@ -1,13 +1,11 @@
 import 'dart:developer';
 
-import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/aggricator_screens/settings_screen/settings_repository/settings_repo.dart';
 import 'package:chotanews/features/reels/data/models/reels_model.dart';
 import 'package:chotanews/features/reels/data/repositories/reels_repository.dart';
 import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -16,6 +14,7 @@ class ReelsProviders extends ChangeNotifier {
   List<ReelsModel> getAllReelsList = [];
   List<String> isLikeList = [];
   bool isMuted = false;
+  String? reelsLanguage;
 
   void toggleMute() {
     isMuted = !isMuted;
@@ -26,7 +25,19 @@ class ReelsProviders extends ChangeNotifier {
     reelsLoading = true;
     notifyListeners();
     try {
-      Response response = await ReelsRepo().getAllReels();
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      String langCode = preferences.getString("selectedLanguageCode") ?? "te";
+      final currentLang = (langCode == 'ml') ? 'ml' : 'te';
+      reelsLanguage = currentLang;
+
+      final Map<String, dynamic> queryParams = {
+        'language': currentLang,
+        'lan': currentLang,
+        'lang': currentLang,
+        'segregated': 'false',
+      };
+
+      Response response = await ReelsRepo().getAllReels(queryParams);
 
       if (response.statusCode == 200 && response.data != null) {
         dynamic responseData = response.data;
@@ -34,11 +45,17 @@ class ReelsProviders extends ChangeNotifier {
 
         if (responseData is Map && responseData['data'] is List) {
           rawList = responseData['data'] as List;
+        } else if (responseData is Map && responseData['data'] is Map) {
+          final mapData = responseData['data'] as Map;
+          final langList = mapData[currentLang] ?? mapData[langCode];
+          if (langList is List) {
+            rawList = langList;
+          }
         } else if (responseData is List) {
           rawList = responseData;
         }
 
-        log("Fetched ${rawList.length} reels from pravasamedia API");
+        log("Fetched ${rawList.length} reels from pravasamedia API for lang: $currentLang");
         getAllReelsList = rawList
             .map((e) => ReelsModel.fromJson(Map<String, dynamic>.from(e as Map)))
             .toList();
