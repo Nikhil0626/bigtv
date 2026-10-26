@@ -135,42 +135,39 @@ class _PatchDashboardScreenState extends State<PatchDashboardScreen>
         actions: [
           Consumer<DailyPuzzleProvider>(
             builder: (context, provider, _) {
-              if (provider.isTodayCompleted) {
-                final last = provider.lastSubmissionResult;
-                return Padding(
-                  padding: EdgeInsets.only(right: 6.w),
-                  child: InkWell(
-                    onTap: () {
-                      GameShareHelper.shareGame(
-                        context: context,
-                        gameSlug: 'patch',
-                        gameTitle: 'Patch Puzzle',
-                        formattedTime: last != null ? '${(last.durationMs / 1000).toStringAsFixed(1)}s' : null,
-                        rank: last?.rank,
-                        streak: last?.streak.currentStreak,
-                      );
-                    },
-                    borderRadius: BorderRadius.circular(14.r),
-                    child: Container(
-                      padding: EdgeInsets.all(8.w),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(14.r),
-                        border: Border.all(
-                          color: const Color(0xFF10B981).withValues(alpha: 0.4),
-                          width: 1,
-                        ),
-                      ),
-                      child: Icon(
-                        Icons.share_rounded,
-                        size: 18.sp,
-                        color: const Color(0xFF10B981),
+              final last = provider.isTodayCompleted ? provider.lastSubmissionResult : null;
+              return Padding(
+                padding: EdgeInsets.only(right: 6.w),
+                child: InkWell(
+                  onTap: () {
+                    GameShareHelper.shareGame(
+                      context: context,
+                      gameSlug: 'patch',
+                      gameTitle: 'Patch Puzzle',
+                      formattedTime: last != null ? '${(last.durationMs / 1000).toStringAsFixed(1)}s' : null,
+                      rank: last?.rank,
+                      streak: last?.streak.currentStreak,
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(14.r),
+                  child: Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.4),
+                        width: 1,
                       ),
                     ),
+                    child: Icon(
+                      Icons.share_rounded,
+                      size: 18.sp,
+                      color: const Color(0xFF10B981),
+                    ),
                   ),
-                );
-              }
-              return const SizedBox.shrink();
+                ),
+              );
             },
           ),
           Padding(

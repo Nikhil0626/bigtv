@@ -22,14 +22,16 @@ class GameShareHelper {
     required BuildContext context,
     required String gameSlug,
     required String gameTitle,
+    int? levelNumber,
     String? formattedTime,
     int? rank,
     int? streak,
   }) async {
     final url = getGameShareUrl(gameSlug);
 
+    final title = levelNumber != null ? '$gameTitle Level $levelNumber' : gameTitle;
     final buffer = StringBuffer();
-    buffer.writeln('🎮 I just solved today\'s $gameTitle on Big TV Games!');
+    buffer.writeln('🎮 I just solved $title on Big TV Games!');
 
     final stats = <String>[];
     if (formattedTime != null && formattedTime.isNotEmpty) {

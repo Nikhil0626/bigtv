@@ -7,6 +7,7 @@ class ZipLevelApiModel {
   final int schemaVersion;
   final String difficulty;
   final Map<String, dynamic>? content;
+  final String? logoUrl;
 
   const ZipLevelApiModel({
     required this.gameId,
@@ -17,6 +18,7 @@ class ZipLevelApiModel {
     required this.schemaVersion,
     required this.difficulty,
     this.content,
+    this.logoUrl,
   });
 
   factory ZipLevelApiModel.fromJson(Map<String, dynamic> json) {
@@ -52,6 +54,11 @@ class ZipLevelApiModel {
 
     final lvlNum = readInt('levelNumber');
 
+    final rawLogo = json['logoUrl'] ??
+        json['completionImageUrl'] ??
+        json['backgroundImageUrl'] ??
+        (parsedContent != null ? parsedContent['backgroundImage'] : null);
+
     return ZipLevelApiModel(
       gameId: readString('gameId', fallback: 'zip_puzzle'),
       gameType: readString('gameType', fallback: 'zip'),
@@ -63,6 +70,7 @@ class ZipLevelApiModel {
           json['schemaVersion'] is int ? json['schemaVersion'] as int : 1,
       difficulty: readString('difficulty', fallback: 'easy'),
       content: parsedContent,
+      logoUrl: rawLogo?.toString(),
     );
   }
 
@@ -75,6 +83,7 @@ class ZipLevelApiModel {
         'schemaVersion': schemaVersion,
         'difficulty': difficulty,
         if (content != null) 'content': content,
+        if (logoUrl != null) 'logoUrl': logoUrl,
       };
 }
 

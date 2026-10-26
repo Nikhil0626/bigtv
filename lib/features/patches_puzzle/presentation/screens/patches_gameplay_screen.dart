@@ -9,6 +9,7 @@ import '../widgets/patches_board_widget.dart';
 import '../widgets/patches_completion_dialog.dart';
 import '../widgets/patches_how_to_play_card.dart';
 import 'patches_leaderboard_screen.dart';
+import '../../../../services/game_share_helper.dart';
 
 class PatchesGameplayScreen extends StatefulWidget {
   final PatchesLevelDefinition level;
@@ -192,42 +193,91 @@ class _PatchesGameplayScreenState extends State<PatchesGameplayScreen> {
                             ),
                           ),
 
-                          // Right: Reset Button matching LinkedIn style capsule
-                          InkWell(
-                            onTap: game.placedPatches.isEmpty
-                                ? null
-                                : () => game.reset(),
-                            borderRadius: BorderRadius.circular(20),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 14, vertical: 6),
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? const Color(0xFF1E2024)
-                                    : Colors.white,
+                          // Right: Share & Reset Buttons
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  GameShareHelper.shareGame(
+                                    context: context,
+                                    gameSlug: 'patch',
+                                    gameTitle: 'Patch Puzzle',
+                                    levelNumber: _currentLevel.levelNumber,
+                                    formattedTime: game.placedPatches.isNotEmpty ? game.formattedTime : null,
+                                  );
+                                },
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: isDark
-                                      ? const Color(0xFF33363D)
-                                      : const Color(0xFFD1D5DB),
-                                  width: 1.2,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.share_rounded,
+                                        size: 14,
+                                        color: Color(0xFF10B981),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Share',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : const Color(0xFF111827),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              child: Text(
-                                'Reset',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w600,
-                                  color: game.placedPatches.isEmpty
-                                      ? (isDark
-                                          ? const Color(0xFF555555)
-                                          : const Color(0xFF9CA3AF))
-                                      : (isDark
-                                          ? Colors.white
-                                          : const Color(0xFF111827)),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: game.placedPatches.isEmpty
+                                    ? null
+                                    : () => game.reset(),
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: isDark
+                                        ? const Color(0xFF1E2024)
+                                        : Colors.white,
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: isDark
+                                          ? const Color(0xFF33363D)
+                                          : const Color(0xFFD1D5DB),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Reset',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w600,
+                                      color: game.placedPatches.isEmpty
+                                          ? (isDark
+                                              ? const Color(0xFF555555)
+                                              : const Color(0xFF9CA3AF))
+                                          : (isDark
+                                              ? Colors.white
+                                              : const Color(0xFF111827)),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
                         ],
                       ),

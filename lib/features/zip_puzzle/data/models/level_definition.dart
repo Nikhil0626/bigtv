@@ -69,6 +69,7 @@ class LevelDefinition {
   final List<GridPoint> solutionPath;
   final int totalRequiredCells;
   final Set<Wall> walls;
+  final String? logoUrl;
 
   const LevelDefinition({
     required this.levelNumber,
@@ -82,6 +83,7 @@ class LevelDefinition {
     required this.solutionPath,
     required this.totalRequiredCells,
     this.walls = const {},
+    this.logoUrl,
   });
 
   String get id => levelId ?? 'zip_${levelNumber.toString().padLeft(3, '0')}';
@@ -98,6 +100,7 @@ class LevelDefinition {
     List<GridPoint>? solutionPath,
     int? totalRequiredCells,
     Set<Wall>? walls,
+    String? logoUrl,
   }) {
     return LevelDefinition(
       levelNumber: levelNumber ?? this.levelNumber,
@@ -111,6 +114,7 @@ class LevelDefinition {
       solutionPath: solutionPath ?? this.solutionPath,
       totalRequiredCells: totalRequiredCells ?? this.totalRequiredCells,
       walls: walls ?? this.walls,
+      logoUrl: logoUrl ?? this.logoUrl,
     );
   }
 

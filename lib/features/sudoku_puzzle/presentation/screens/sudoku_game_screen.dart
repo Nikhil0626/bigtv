@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../../data/models/sudoku_model.dart';
 import '../../../../services/puzzle_api_service.dart';
 import '../../../../services/game_share_helper.dart';
+import '../../../../core/widgets/game_watermark_widget.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
@@ -50,6 +51,9 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
   bool _isCompleted = false;
   String? _errorMessage;
   Set<Point<int>> _conflictingCells = const {};
+  int? _cachedRank;
+  int? _cachedStreak;
+  int? _cachedDurationMs;
 
   final Stopwatch _stopwatch = Stopwatch();
   Timer? _timer;
@@ -326,6 +330,18 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
       'rank': rank,
     });
 
+    setState(() {
+      _cachedDurationMs = duration;
+      _cachedRank = rank;
+      _cachedStreak = streak;
+    });
+  }
+
+  void _showResultDialog() {
+    final duration = _cachedDurationMs ?? _stopwatch.elapsedMilliseconds;
+    final rank = _cachedRank ?? 1;
+    final streak = _cachedStreak ?? 1;
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -368,6 +384,15 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
               );
             },
           ),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            icon: const Icon(Icons.visibility_rounded, size: 18),
+            label: const Text('View Game'),
+            onPressed: () => Navigator.pop(context),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFE50914),
@@ -383,6 +408,17 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _shareCurrentGame() {
+    final elapsedSec = _stopwatch.elapsed.inSeconds;
+    final formattedTime = '${(elapsedSec ~/ 60).toString().padLeft(2, '0')}:${(elapsedSec % 60).toString().padLeft(2, '0')}';
+    GameShareHelper.shareGame(
+      context: context,
+      gameSlug: 'sudoku',
+      gameTitle: 'Sudoku',
+      formattedTime: widget.isViewOnly ? null : formattedTime,
     );
   }
 
@@ -408,11 +444,15 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF121417) : const Color(0xFFF7F8FA),
       appBar: AppBar(
-        title: Text(
-          widget.isViewOnly
-              ? 'Sudoku (${level.rows}x${level.columns}) - Solved'
-              : 'Sudoku (${level.rows}x${level.columns})',
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            widget.isViewOnly
+                ? 'Sudoku (${level.rows}x${level.columns}) - Solved'
+                : 'Sudoku (${level.rows}x${level.columns})',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
+          ),
         ),
         elevation: 0,
         backgroundColor: isDark ? const Color(0xFF121417) : const Color(0xFFF7F8FA),
@@ -423,50 +463,85 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
         actions: [
           if (!widget.isViewOnly)
             Padding(
-              padding: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.only(right: 12),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  InkWell(
+                    onTap: _shareCurrentGame,
+                    borderRadius: BorderRadius.circular(10),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.share_rounded,
+                            size: 14,
+                            color: Color(0xFF10B981),
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            'Share',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: isDark ? Colors.white : const Color(0xFF0F172A),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
                   if (totalErrors > 0) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
                       decoration: BoxDecoration(
                         color: Colors.red.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(10),
                         border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.cancel_outlined, size: 14, color: Colors.red),
-                          const SizedBox(width: 4),
+                          const Icon(Icons.cancel_outlined, size: 13, color: Colors.red),
+                          const SizedBox(width: 3),
                           Text(
                             'Errors: $totalErrors',
                             style: const TextStyle(
                               color: Colors.red,
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                   ],
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
                       color: isDark ? const Color(0xFF1E2024) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
                     child: Row(
                       children: [
-                        const Icon(Icons.timer_outlined, size: 16, color: Colors.blueAccent),
-                        const SizedBox(width: 4),
+                        const Icon(Icons.timer_outlined, size: 14, color: Colors.blueAccent),
+                        const SizedBox(width: 3),
                         Text(
                           '${(elapsedSec ~/ 60).toString().padLeft(2, '0')}:${(elapsedSec % 60).toString().padLeft(2, '0')}',
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                         ),
                       ],
                     ),
@@ -589,13 +664,15 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
                       child: SizedBox(
                         width: size,
                         height: size,
-                        child: Container(
-                      decoration: BoxDecoration(
-                        border: Border.all(color: palette.blockBorder, width: 2.5),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Column(
-                        children: List.generate(level.rows, (r) {
+                        child: Stack(
+                          children: [
+                            Container(
+                              decoration: BoxDecoration(
+                                border: Border.all(color: palette.blockBorder, width: 2.5),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Column(
+                                children: List.generate(level.rows, (r) {
                           return Expanded(
                             child: Row(
                               children: List.generate(level.columns, (c) {
@@ -687,14 +764,68 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
                         }),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ),
+                    if (_isCompleted || widget.isViewOnly)
+                      Positioned.fill(
+                        child: GameWatermarkWidget(
+                          logoUrl: level.logoUrl,
+                          size: size * 0.55,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
+      ),
+    ),
 
-            if (widget.isViewOnly)
+            if (_isCompleted && !widget.isViewOnly)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF10B981),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          elevation: 2,
+                        ),
+                        icon: const Icon(Icons.check_circle_rounded, size: 22),
+                        label: const Text(
+                          'Done',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: _showResultDialog,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF6366F1),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(24),
+                        ),
+                        elevation: 2,
+                      ),
+                      icon: const Icon(Icons.share_rounded, size: 20),
+                      label: const Text(
+                        'Share',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: _shareCurrentGame,
+                    ),
+                  ],
+                ),
+              )
+            else if (widget.isViewOnly)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Container(
@@ -716,23 +847,33 @@ class _SudokuGameScreenState extends State<SudokuGameScreen> {
                         ),
                       ),
                       const SizedBox(width: 6),
-                      OutlinedButton.icon(
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.green,
-                          side: const BorderSide(color: Colors.green, width: 1.5),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF10B981),
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          visualDensity: VisualDensity.compact,
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                         ),
-                        icon: const Icon(Icons.share_rounded, size: 14),
-                        label: const Text('Share', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
-                        onPressed: () {
-                          GameShareHelper.shareGame(
-                            context: context,
-                            gameSlug: 'sudoku',
-                            gameTitle: 'Sudoku',
-                          );
-                        },
+                        onPressed: _showResultDialog,
+                        child: const Text('Done', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(width: 6),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF6366F1),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        ),
+                        onPressed: _shareCurrentGame,
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.share_rounded, size: 14),
+                            SizedBox(width: 4),
+                            Text('Share', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                          ],
+                        ),
                       ),
                       const SizedBox(width: 6),
                       ElevatedButton(

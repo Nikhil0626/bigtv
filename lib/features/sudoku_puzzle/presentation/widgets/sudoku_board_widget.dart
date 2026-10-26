@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/widgets/game_watermark_widget.dart';
 import '../../data/models/sudoku_cell.dart';
 import '../providers/sudoku_game_provider.dart';
 
@@ -64,13 +65,23 @@ class SudokuBoardWidget extends StatelessWidget {
                     ],
                   ),
                   clipBehavior: Clip.antiAlias,
-                  child: CustomPaint(
-                    size: Size(boardSize, boardSize),
-                    painter: _SudokuBoardPainter(
-                      game: game,
-                      cellSize: cellSize,
-                      isDark: isDark,
-                    ),
+                  child: Stack(
+                    children: [
+                      CustomPaint(
+                        size: Size(boardSize, boardSize),
+                        painter: _SudokuBoardPainter(
+                          game: game,
+                          cellSize: cellSize,
+                          isDark: isDark,
+                        ),
+                      ),
+                      if (game.isCompleted)
+                        Positioned.fill(
+                          child: GameWatermarkWidget(
+                            size: boardSize * 0.55,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ),

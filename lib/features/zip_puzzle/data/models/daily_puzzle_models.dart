@@ -80,6 +80,7 @@ class DailyGameData {
   final int schemaVersion;
   final int contentVersion;
   final Map<String, dynamic> content;
+  final String? logoUrl;
 
   const DailyGameData({
     required this.gameId,
@@ -94,9 +95,15 @@ class DailyGameData {
     required this.schemaVersion,
     required this.contentVersion,
     required this.content,
+    this.logoUrl,
   });
 
   factory DailyGameData.fromJson(Map<String, dynamic> json) {
+    final rawLogo = json['logoUrl'] ??
+        json['completionImageUrl'] ??
+        json['backgroundImageUrl'] ??
+        (json['content'] is Map ? json['content']['backgroundImage'] : null);
+
     return DailyGameData(
       gameId: json['gameId']?.toString() ?? json['slug']?.toString() ?? 'zip',
       gameName: json['gameName']?.toString() ??
@@ -115,6 +122,7 @@ class DailyGameData {
       schemaVersion: json['schemaVersion'] is int ? json['schemaVersion'] as int : 1,
       contentVersion: json['contentVersion'] is int ? json['contentVersion'] as int : 1,
       content: json['content'] is Map ? Map<String, dynamic>.from(json['content'] as Map) : {},
+      logoUrl: rawLogo?.toString(),
     );
   }
 
@@ -152,6 +160,7 @@ class DailyGameData {
       schemaVersion: schemaVersion,
       difficulty: difficulty,
       content: content,
+      logoUrl: logoUrl,
     );
   }
 }

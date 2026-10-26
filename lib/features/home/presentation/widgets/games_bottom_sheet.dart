@@ -9,9 +9,7 @@ import '../../../auth/presentation/providers/authentication_provider.dart';
 import '../../../auth/presentation/widgets/login_background_view.dart';
 import '../../../patches_puzzle/presentation/screens/patch_game_screen.dart';
 import '../../../patches_puzzle/presentation/screens/patch_dashboard_screen.dart';
-import '../../../patches_puzzle/presentation/screens/patches_level_selection_screen.dart';
 import '../../../sudoku_puzzle/presentation/screens/sudoku_game_screen.dart';
-import '../../../sudoku_puzzle/presentation/screens/sudoku_level_selection_screen.dart';
 import '../../../zip_puzzle/data/models/daily_puzzle_models.dart';
 import '../../../zip_puzzle/data/repositories/puzzle_games_api_client.dart';
 import '../../../zip_puzzle/presentation/providers/daily_puzzle_provider.dart';
@@ -20,6 +18,7 @@ import '../../../zip_puzzle/presentation/screens/zip_level_selection_screen.dart
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/features/home/presentation/widgets/lottie_3d_icon.dart';
+import 'package:chotanews/services/game_share_helper.dart';
 
 class GamesBottomSheet extends StatefulWidget {
   final bool isTelugu;
@@ -466,6 +465,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                         gradient: gradient,
                         iconUrl: game.iconUrl,
                         asset3dIcon: asset3dIcon,
+                        gameSlug: game.slug,
                         onTap: () => _onGameTap(context, game),
                       ),
                     );
@@ -489,6 +489,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
     required List<Color> gradient,
     String? iconUrl,
     String? asset3dIcon,
+    String? gameSlug,
     required VoidCallback onTap,
   }) {
     return Material(
@@ -590,6 +591,33 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                   ],
                 ),
               ),
+              IconButton(
+                icon: const Icon(Icons.share_rounded, size: 20, color: Color(0xFF10B981)),
+                tooltip: 'Share Game',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                onPressed: () {
+                  final slugLower = (gameSlug ?? '').toLowerCase();
+                  String canonicalSlug = 'zip';
+                  String canonicalTitle = title;
+                  if (slugLower.contains('patch')) {
+                    canonicalSlug = 'patch';
+                    canonicalTitle = 'Patch Puzzle';
+                  } else if (slugLower.contains('sudoku')) {
+                    canonicalSlug = 'sudoku';
+                    canonicalTitle = 'Sudoku';
+                  } else {
+                    canonicalSlug = 'zip';
+                    canonicalTitle = 'Zip Puzzle';
+                  }
+                  GameShareHelper.shareGame(
+                    context: context,
+                    gameSlug: canonicalSlug,
+                    gameTitle: canonicalTitle,
+                  );
+                },
+              ),
+              SizedBox(width: 4.w),
               Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: const Color(0xFF94A3B8)),
             ],
           ),

@@ -9,8 +9,10 @@ import 'patch_dashboard_screen.dart';
 import '../widgets/patch_completion_dialog.dart';
 import '../../../zip_puzzle/presentation/screens/zip_leaderboard_screen.dart';
 import '../../../../services/game_share_helper.dart';
+import '../../../../core/widgets/game_watermark_widget.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/utils/top_right_wave_painter.dart';
 
 class PatchGameScreen extends StatefulWidget {
   final String playerId;
@@ -26,13 +28,18 @@ class PatchGameScreen extends StatefulWidget {
   State<PatchGameScreen> createState() => _PatchGameScreenState();
 }
 
-class _PatchGameScreenState extends State<PatchGameScreen> {
+class _PatchGameScreenState extends State<PatchGameScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _waveController;
   PatchLevel? _level;
   final List<PlacedPatch> _placedPatches = [];
   final List<List<PlacedPatch>> _undoHistory = [];
   bool _isLoading = true;
   bool _isCompleted = false;
   String? _errorMessage;
+  int? _cachedRank;
+  int? _cachedStreak;
+  int? _cachedDurationMs;
 
   final Stopwatch _stopwatch = Stopwatch();
   Timer? _timer;
@@ -59,11 +66,20 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
   @override
   void initState() {
     super.initState();
+    _waveController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3800),
+    );
+    final isTesting = WidgetsBinding.instance.runtimeType.toString().contains('Test');
+    if (!isTesting) {
+      _waveController.repeat();
+    }
     _loadDailyPatch();
   }
 
   @override
   void dispose() {
+    _waveController.dispose();
     _timer?.cancel();
     if (!_isCompleted && !widget.isViewOnly) {
       AnalyticsService.instance.track(AnalyticsEventName.gameIncomplete, properties: {
@@ -454,47 +470,72 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
         'rank': rank,
       });
 
-      final formattedTime = '${(duration / 1000).toStringAsFixed(1)}s';
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogCtx) => PatchCompletionDialog(
-          formattedTime: formattedTime,
-          rank: rank,
-          streak: streak,
-          onViewGame: () {
-            Navigator.pop(dialogCtx);
-          },
-          onDashboard: () {
-            Navigator.pop(dialogCtx);
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PatchDashboardScreen(playerId: widget.playerId),
-              ),
-            );
-          },
-          onReplay: () {
-            Navigator.pop(dialogCtx);
-            _onReset();
-            _stopwatch.reset();
-            _stopwatch.start();
-            setState(() => _isCompleted = false);
-          },
-          onViewLeaderboard: () {
-            Navigator.pop(dialogCtx);
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const ZipLeaderboardScreen(
-                  isDailyLeaderboard: true,
-                ),
-              ),
-            );
-          },
-        ),
-      );
+      setState(() {
+        _cachedDurationMs = duration;
+        _cachedRank = rank;
+        _cachedStreak = streak;
+      });
     });
+  }
+
+  void _showCompletionDialog() {
+    final duration = _cachedDurationMs ?? _stopwatch.elapsedMilliseconds;
+    final rank = _cachedRank ?? 1;
+    final streak = _cachedStreak ?? 1;
+    final formattedTime = '${(duration / 1000).toStringAsFixed(1)}s';
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogCtx) => PatchCompletionDialog(
+        formattedTime: formattedTime,
+        rank: rank,
+        streak: streak,
+        onViewGame: () {
+          Navigator.pop(dialogCtx);
+        },
+        onDashboard: () {
+          Navigator.pop(dialogCtx);
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PatchDashboardScreen(playerId: widget.playerId),
+            ),
+          );
+        },
+        onReplay: () {
+          Navigator.pop(dialogCtx);
+          _onReset();
+          _stopwatch.reset();
+          _stopwatch.start();
+          setState(() => _isCompleted = false);
+        },
+        onViewLeaderboard: () {
+          Navigator.pop(dialogCtx);
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const ZipLeaderboardScreen(
+                isDailyLeaderboard: true,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  void _shareCurrentGame() {
+    final duration = _cachedDurationMs ?? _stopwatch.elapsedMilliseconds;
+    final formattedTime = '${(duration / 1000).toStringAsFixed(1)}s';
+    GameShareHelper.shareGame(
+      context: context,
+      gameSlug: 'patch',
+      gameTitle: 'Patch Puzzle',
+      formattedTime: formattedTime,
+      rank: _cachedRank,
+      streak: _cachedStreak,
+    );
   }
 
   @override
@@ -572,50 +613,102 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
 
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF121417) : const Color(0xFFF7F8FA),
+      extendBodyBehindAppBar: true,
       appBar: _buildAppBar(context, isDark, level),
-      body: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final double availableWidth = constraints.maxWidth;
-            final double availableHeight = constraints.maxHeight;
-
-            final double horizontalPadding = 16.w;
-            final double maxBoardWidth = (availableWidth - (horizontalPadding * 2)).clamp(200.0, 360.0);
-            final double maxBoardHeight = (availableHeight - 190.h).clamp(200.0, 360.0);
-            final double boardSize = min(maxBoardWidth, maxBoardHeight);
-
-            return SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: availableHeight),
-                child: IntrinsicHeight(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      const Spacer(),
-
-                      // Controls Row: [Difficulty Pill] | [Undo] [Reset]
-                      _buildControlsRow(context, level, isDark),
-
-                      SizedBox(height: 12.h),
-
-                      // Main Game Board with direct drag-to-select
-                      _buildBoard(context, level, boardSize, isDark),
-
-                      SizedBox(height: 14.h),
-
-                      // Interactive Status Card or View-Only Completion Banner
-                      _buildInteractionStatusArea(context, level, isDark),
-
-                      const Spacer(),
-                    ],
-                  ),
+      body: Stack(
+        children: [
+          // 1. Base Gradient Canvas Mesh (like feedback screen)
+          Positioned.fill(
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: isDark
+                      ? [
+                          const Color(0xFF180A0D),
+                          const Color(0xFF0F0F12),
+                          const Color(0xFF13090B),
+                        ]
+                      : [
+                          const Color(0xFFFFF2F4),
+                          const Color(0xFFFBFBFC),
+                          const Color(0xFFFFF6F7),
+                        ],
+                  stops: const [0.0, 0.5, 1.0],
                 ),
               ),
-            );
-          },
-        ),
+            ),
+          ),
+
+          // 2. Top Right Wave Ripple Art (like feedback screen)
+          Positioned(
+            top: 0,
+            right: 0,
+            width: MediaQuery.of(context).size.width,
+            height: 380.h,
+            child: IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _waveController,
+                builder: (context, _) {
+                  return CustomPaint(
+                    painter: TopRightWavePainter(
+                      waveAnimation: _waveController,
+                      isDark: isDark,
+                      maxRadius: 380.0,
+                      gap: 22.0,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // 3. Foreground Gameplay Content
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final double availableWidth = constraints.maxWidth;
+                final double availableHeight = constraints.maxHeight;
+
+                final double horizontalPadding = 16.w;
+                final double maxBoardWidth = (availableWidth - (horizontalPadding * 2)).clamp(200.0, 360.0);
+                final double maxBoardHeight = (availableHeight - 190.h).clamp(200.0, 360.0);
+                final double boardSize = min(maxBoardWidth, maxBoardHeight);
+
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: availableHeight),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Spacer(),
+
+                          // Controls Row: [Difficulty Pill] | [Undo] [Reset]
+                          _buildControlsRow(context, level, isDark),
+
+                          SizedBox(height: 12.h),
+
+                          // Main Game Board with direct drag-to-select
+                          _buildBoard(context, level, boardSize, isDark),
+
+                          SizedBox(height: 16.h),
+
+                          // Interactive Status Card or View-Only Completion Banner
+                          _buildInteractionStatusArea(context, level, isDark),
+
+                          const Spacer(),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -628,33 +721,91 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
     final elapsedSec = _stopwatch.elapsed.inSeconds;
 
     return AppBar(
-      title: Text(
-        level != null
-            ? (widget.isViewOnly
-                ? 'Patch (${level.rows}x${level.columns}) - Solved'
-                : 'Patch (${level.rows}x${level.columns})')
-            : 'Patch Game',
-        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+      centerTitle: true,
+      title: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          level != null
+              ? 'Patch (${level.rows}x${level.columns})'
+              : 'Patch Game',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp),
+        ),
       ),
       elevation: 0,
-      backgroundColor: isDark ? const Color(0xFF121417) : const Color(0xFFF7F8FA),
+      backgroundColor: Colors.transparent,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
         onPressed: () => Navigator.pop(context),
       ),
       actions: [
-        if (level != null && !widget.isViewOnly)
+        if (level != null && !widget.isViewOnly) ...[
+          Padding(
+            padding: EdgeInsets.only(right: 6.w),
+            child: Center(
+              child: InkWell(
+                onTap: _shareCurrentGame,
+                borderRadius: BorderRadius.circular(12.r),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 5.h),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? const Color(0xFF1E2024).withValues(alpha: 0.9)
+                        : Colors.white.withValues(alpha: 0.95),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: isDark ? const Color(0xFF33363D) : Colors.grey.shade300,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.share_rounded,
+                        size: 15.sp,
+                        color: const Color(0xFF10B981),
+                      ),
+                      SizedBox(width: 4.w),
+                      Text(
+                        'Share',
+                        style: TextStyle(
+                          fontSize: 11.5.sp,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF0F172A),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
           Padding(
             padding: EdgeInsets.only(right: 16.w),
             child: Center(
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E2024) : Colors.white,
+                  color: isDark
+                      ? const Color(0xFF1E2024).withValues(alpha: 0.9)
+                      : Colors.white.withValues(alpha: 0.95),
                   borderRadius: BorderRadius.circular(12.r),
                   border: Border.all(
                     color: isDark ? const Color(0xFF33363D) : Colors.grey.shade300,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
                 ),
                 child: Row(
                   children: [
@@ -668,20 +819,14 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
                 ),
               ),
             ),
-          )
-        else if (level != null && widget.isViewOnly) ...[
+          ),
+        ] else if (level != null && widget.isViewOnly) ...[
           Padding(
             padding: EdgeInsets.only(right: 4.w),
             child: IconButton(
               icon: const Icon(Icons.share_rounded, color: Colors.green, size: 20),
               tooltip: 'Share Game',
-              onPressed: () {
-                GameShareHelper.shareGame(
-                  context: context,
-                  gameSlug: 'patch',
-                  gameTitle: 'Patch Puzzle',
-                );
-              },
+              onPressed: _shareCurrentGame,
             ),
           ),
           Padding(
@@ -713,9 +858,12 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
     final bool canUndo = _undoHistory.isNotEmpty && !_isCompleted && !widget.isViewOnly;
     final bool canReset = _placedPatches.isNotEmpty && !_isCompleted && !widget.isViewOnly;
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
-      child: Row(
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 400.w),
+          child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           // Difficulty Capsule
@@ -856,6 +1004,8 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
           ),
         ],
       ),
+          ),
+        ),
     );
   }
 
@@ -868,6 +1018,15 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
     final double innerSize = boardSize - (8.w);
     final double cellW = innerSize / level.columns;
     final double cellH = innerSize / level.rows;
+
+    bool isCellInDrag(int r, int c) {
+      if (!_isDragging || _dragStart == null || _dragCurrent == null) return false;
+      final minR = min(_dragStart!.y, _dragCurrent!.y);
+      final maxR = max(_dragStart!.y, _dragCurrent!.y);
+      final minC = min(_dragStart!.x, _dragCurrent!.x);
+      final maxC = max(_dragStart!.x, _dragCurrent!.x);
+      return r >= minR && r <= maxR && c >= minC && c <= maxC;
+    }
 
     return Center(
       child: Listener(
@@ -895,102 +1054,151 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
               ),
             ],
           ),
-          child: Column(
-            children: List.generate(level.rows, (r) {
-              return Expanded(
-                child: Row(
-                  children: List.generate(level.columns, (c) {
-                    return Expanded(
-                      child: _buildBoardCell(context, level, r, c, cellW, cellH, isDark),
-                    );
-                  }),
+          child: SizedBox(
+            width: innerSize,
+            height: innerSize,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                // 1. Grid background cells
+                Positioned.fill(
+                  child: Column(
+                    children: List.generate(level.rows, (r) {
+                      return Expanded(
+                        child: Row(
+                          children: List.generate(level.columns, (c) {
+                            return Expanded(
+                              child: Container(
+                                margin: EdgeInsets.all(1.w),
+                                decoration: BoxDecoration(
+                                  color: isDark ? const Color(0xFF16181C) : Colors.white,
+                                  borderRadius: BorderRadius.circular(6.r),
+                                  border: Border.all(
+                                    color: isDark
+                                        ? const Color(0xFF2A2D35)
+                                        : level.gridBorder.withValues(alpha: 0.35),
+                                    width: 0.8,
+                                  ),
+                                ),
+                              ),
+                            );
+                          }),
+                        ),
+                      );
+                    }),
+                  ),
                 ),
-              );
-            }),
+
+                // 2. Placed Patches - EACH COLOUR IS A SINGLE UNIFIED BOX
+                for (final patch in _placedPatches)
+                  Positioned(
+                    left: patch.minCol * cellW,
+                    top: patch.minRow * cellH,
+                    width: patch.width * cellW,
+                    height: patch.height * cellH,
+                    child: Container(
+                      margin: EdgeInsets.all(1.2.w),
+                      decoration: BoxDecoration(
+                        color: patch.color,
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.18),
+                          width: 1.5,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: patch.color.withValues(alpha: isDark ? 0.35 : 0.28),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1.5),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+
+                // 3. Active drag selection - SINGLE UNIFIED PREVIEW RECTANGLE
+                if (_isDragging && _dragStart != null && _dragCurrent != null) () {
+                  final minR = min(_dragStart!.y, _dragCurrent!.y);
+                  final maxR = max(_dragStart!.y, _dragCurrent!.y);
+                  final minC = min(_dragStart!.x, _dragCurrent!.x);
+                  final maxC = max(_dragStart!.x, _dragCurrent!.x);
+                  final dragW = (maxC - minC + 1) * cellW;
+                  final dragH = (maxR - minR + 1) * cellH;
+
+                  return Positioned(
+                    left: minC * cellW,
+                    top: minR * cellH,
+                    width: dragW,
+                    height: dragH,
+                    child: Container(
+                      margin: EdgeInsets.all(1.2.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF2563EB).withValues(alpha: 0.32),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: const Color(0xFF2563EB),
+                          width: 2.2,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF2563EB).withValues(alpha: 0.25),
+                            blurRadius: 6,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }(),
+
+                // 4. Clues and indicators for all clue cells
+                for (final clue in level.clues) () {
+                  final patch = _getPatchAt(clue.row, clue.col);
+                  final inDrag = isCellInDrag(clue.row, clue.col);
+
+                  // Center the clue inside the entire patch rectangle when covered
+                  final double clueLeft = (patch != null)
+                      ? patch.minCol * cellW
+                      : clue.col * cellW;
+                  final double clueTop = (patch != null)
+                      ? patch.minRow * cellH
+                      : clue.row * cellH;
+                  final double clueWidth = (patch != null)
+                      ? patch.width * cellW
+                      : cellW;
+                  final double clueHeight = (patch != null)
+                      ? patch.height * cellH
+                      : cellH;
+
+                  return Positioned(
+                    left: clueLeft,
+                    top: clueTop,
+                    width: clueWidth,
+                    height: clueHeight,
+                    child: IgnorePointer(
+                      child: Center(
+                        child: _buildCellContent(
+                          clue,
+                          patch,
+                          inDrag,
+                          isDark,
+                        ),
+                      ),
+                    ),
+                  );
+                }(),
+
+                // 5. Watermark overlay when completed or viewOnly
+                if (_isCompleted || widget.isViewOnly)
+                  Positioned.fill(
+                    child: GameWatermarkWidget(
+                      logoUrl: level.logoUrl,
+                      size: boardSize * 0.55,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildBoardCell(
-    BuildContext context,
-    PatchLevel level,
-    int r,
-    int c,
-    double cellW,
-    double cellH,
-    bool isDark,
-  ) {
-    // Check if cell is within the active drag bounding box
-    bool isDragSelected = false;
-    if (_isDragging && _dragStart != null && _dragCurrent != null) {
-      final minR = min(_dragStart!.y, _dragCurrent!.y);
-      final maxR = max(_dragStart!.y, _dragCurrent!.y);
-      final minC = min(_dragStart!.x, _dragCurrent!.x);
-      final maxC = max(_dragStart!.x, _dragCurrent!.x);
-      isDragSelected = r >= minR && r <= maxR && c >= minC && c <= maxC;
-    }
-
-    final PlacedPatch? placedPatch = _getPatchAt(r, c);
-    final clue = level.getClueAt(r, c);
-
-    // Color logic
-    Color cellBgColor;
-    if (isDragSelected) {
-      cellBgColor = const Color(0xFF2563EB).withValues(alpha: 0.32);
-    } else if (placedPatch != null) {
-      cellBgColor = placedPatch.color;
-    } else if (clue != null) {
-      cellBgColor = isDark ? const Color(0xFF232730) : const Color(0xFFEEF2F6);
-    } else {
-      cellBgColor = isDark ? const Color(0xFF16181C) : Colors.white;
-    }
-
-    // Border logic (uniform border to comply with Flutter borderRadius constraints)
-    Color borderColor;
-    double borderWidth;
-    if (isDragSelected) {
-      borderColor = const Color(0xFF2563EB);
-      borderWidth = 2.0;
-    } else if (placedPatch != null) {
-      borderColor = Colors.black.withValues(alpha: 0.22);
-      borderWidth = 1.0;
-    } else {
-      borderColor = isDark ? const Color(0xFF2A2D35) : level.gridBorder.withValues(alpha: 0.55);
-      borderWidth = 0.8;
-    }
-
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 140),
-      margin: EdgeInsets.all(isDragSelected ? 0.6.w : (placedPatch != null ? 0.8.w : 1.5.w)),
-      decoration: BoxDecoration(
-        color: cellBgColor,
-        borderRadius: BorderRadius.circular(7.r),
-        border: Border.all(
-          color: borderColor,
-          width: borderWidth,
-        ),
-        boxShadow: placedPatch != null
-            ? [
-                BoxShadow(
-                  color: placedPatch.color.withValues(alpha: 0.28),
-                  blurRadius: 3,
-                  offset: const Offset(0, 1),
-                ),
-              ]
-            : (isDragSelected
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFF2563EB).withValues(alpha: 0.25),
-                      blurRadius: 4,
-                      offset: const Offset(0, 1),
-                    ),
-                  ]
-                : null),
-      ),
-      child: Center(
-        child: _buildCellContent(clue, placedPatch, isDragSelected, isDark),
       ),
     );
   }
@@ -1019,13 +1227,15 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           '${clue.value}',
+          textAlign: TextAlign.center,
           style: TextStyle(
             color: textColor,
-            fontSize: 16.sp,
+            fontSize: (placedPatch != null && placedPatch.area > 2) ? 18.sp : 16.sp,
             fontWeight: FontWeight.w900,
             shadows: (isCovered || isDragSelected)
                 ? [
@@ -1087,15 +1297,78 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
   }
 
   Widget _buildInteractionStatusArea(BuildContext context, PatchLevel level, bool isDark) {
-    if (widget.isViewOnly) {
-      return _buildViewOnlyBanner(context, isDark);
+    Widget content;
+    if (_isCompleted && !widget.isViewOnly) {
+      content = _buildDoneBanner(context, isDark);
+    } else if (widget.isViewOnly) {
+      content = _buildViewOnlyBanner(context, isDark);
+    } else if (_isDragging && _dragStart != null && _dragCurrent != null) {
+      content = _buildActiveDragStatus(context, level, isDark);
+    } else {
+      content = _buildDefaultStatusCard(context, level, isDark);
     }
 
-    if (_isDragging && _dragStart != null && _dragCurrent != null) {
-      return _buildActiveDragStatus(context, level, isDark);
-    }
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 400.w),
+        child: content,
+      ),
+    );
+  }
 
-    return _buildDefaultStatusCard(context, level, isDark);
+  Widget _buildDoneBanner(BuildContext context, bool isDark) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Row(
+        children: [
+          Expanded(
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF10B981),
+                foregroundColor: Colors.white,
+                padding: EdgeInsets.symmetric(vertical: 14.h),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24.r),
+                ),
+                elevation: 2,
+              ),
+              icon: Icon(Icons.check_circle_rounded, size: 22.sp),
+              label: Text(
+                'Done',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              onPressed: _showCompletionDialog,
+            ),
+          ),
+          SizedBox(width: 12.w),
+          ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isDark ? const Color(0xFF1E2024) : Colors.white,
+              foregroundColor: const Color(0xFF10B981),
+              side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24.r),
+              ),
+              elevation: 2,
+            ),
+            icon: Icon(Icons.share_rounded, size: 20.sp, color: const Color(0xFF10B981)),
+            label: Text(
+              'Share',
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF10B981),
+              ),
+            ),
+            onPressed: _shareCurrentGame,
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildActiveDragStatus(BuildContext context, PatchLevel level, bool isDark) {
@@ -1125,7 +1398,7 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
       bannerColor = const Color(0xFF2563EB).withValues(alpha: 0.1);
       borderColor = const Color(0xFF2563EB).withValues(alpha: 0.35);
       icon = Icons.crop_free_rounded;
-      title = '$area boxes selected (${w}×$h)';
+      title = '$area boxes selected ($w×$h)';
       subtitle = 'Drag over a number to form its patch';
     } else if (cluesInside.length == 1) {
       final clue = cluesInside.first;
@@ -1133,13 +1406,13 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
         bannerColor = Colors.green.withValues(alpha: 0.12);
         borderColor = Colors.green.withValues(alpha: 0.45);
         icon = Icons.check_circle_rounded;
-        title = '✓ $area boxes for clue ${clue.value} (${w}×$h)';
+        title = '✓ $area boxes for clue ${clue.value} ($w×$h)';
         subtitle = 'Release to place patch!';
       } else {
         bannerColor = Colors.orange.withValues(alpha: 0.12);
         borderColor = Colors.orange.withValues(alpha: 0.45);
         icon = Icons.straighten_rounded;
-        title = 'Selected $area boxes (${w}×$h)';
+        title = 'Selected $area boxes ($w×$h)';
         subtitle = 'Clue ${clue.value} requires ${clue.value} boxes';
       }
     } else {
@@ -1286,45 +1559,78 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
 
   Widget _buildViewOnlyBanner(BuildContext context, bool isDark) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(14.w),
+        padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: Colors.green.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(color: Colors.green.withValues(alpha: 0.3)),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const Icon(Icons.check_circle_rounded, color: Colors.green, size: 28),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Text(
-                'You have completed today\'s Patch puzzle!',
-                style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.bold),
-              ),
-            ),
             Row(
-              mainAxisSize: MainAxisSize.min,
               children: [
+                const Icon(Icons.check_circle_rounded, color: Colors.green, size: 22),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    'You have completed today\'s Patch puzzle!',
+                    style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 8.h),
+            Wrap(
+              alignment: WrapAlignment.end,
+              spacing: 6.w,
+              runSpacing: 4.h,
+              children: [
+                OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF10B981),
+                    side: const BorderSide(color: Color(0xFF10B981), width: 1.2),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: Icon(Icons.share_rounded, size: 13.sp, color: const Color(0xFF10B981)),
+                  label: const Text('Share', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                  onPressed: _shareCurrentGame,
+                ),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF10B981),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: _showCompletionDialog,
+                  child: const Text('Done', style: TextStyle(fontSize: 11)),
+                ),
                 OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.green,
                     side: const BorderSide(color: Colors.green, width: 1.2),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                    visualDensity: VisualDensity.compact,
                   ),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Back'),
+                  child: const Text('Back', style: TextStyle(fontSize: 11)),
                 ),
-                SizedBox(width: 8.w),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    visualDensity: VisualDensity.compact,
                   ),
                   onPressed: () {
                     Navigator.pushReplacement(
@@ -1334,7 +1640,7 @@ class _PatchGameScreenState extends State<PatchGameScreen> {
                       ),
                     );
                   },
-                  child: const Text('Dashboard'),
+                  child: const Text('Dashboard', style: TextStyle(fontSize: 11)),
                 ),
               ],
             ),

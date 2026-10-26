@@ -1438,7 +1438,15 @@ class HomeProvider extends ChangeNotifier {
               MaterialPageRoute(builder: (_) => SudokuGameScreen(playerId: userId)),
             );
           } else if (g.contains('patch')) {
-            if (navContext != null) {
+            final isViewOnlyRequested = queryParams['view'] == 'true' || queryParams['solved'] == 'true';
+            final isPlayRequested = queryParams['play'] == 'true';
+            if (isViewOnlyRequested) {
+              navState.push(
+                MaterialPageRoute(builder: (_) => PatchGameScreen(playerId: userId, isViewOnly: true)),
+              );
+              return;
+            }
+            if (navContext != null && !isPlayRequested) {
               try {
                 final dailyProvider = navContext.read<DailyPuzzleProvider>();
                 dailyProvider.init(gameId: 'patch');
