@@ -1,300 +1,259 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import '../../../../core/theme/color_tokens.dart';
-import '../../data/models/level_definition.dart';
-import '../providers/zip_catalog_provider.dart';
-import '../widgets/zip_level_tile.dart';
-import 'zip_gameplay_screen.dart';
+import '../../../../utils/top_right_wave_painter.dart';
+import '../providers/daily_puzzle_provider.dart';
+import '../widgets/zip_daily_challenge_view.dart';
 import 'zip_leaderboard_screen.dart';
+import '../../../../services/game_share_helper.dart';
 
-class ZipLevelSelectionScreen extends StatelessWidget {
+class ZipLevelSelectionScreen extends StatefulWidget {
   const ZipLevelSelectionScreen({super.key});
+
+  @override
+  State<ZipLevelSelectionScreen> createState() => _ZipLevelSelectionScreenState();
+}
+
+class _ZipLevelSelectionScreenState extends State<ZipLevelSelectionScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _waveController;
+
+  @override
+  void initState() {
+    super.initState();
+    _waveController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3800),
+    )..repeat();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        final provider = context.read<DailyPuzzleProvider>();
+        if (provider.gameId != 'zip' || provider.todayPuzzle == null) {
+          provider.init(gameId: 'zip');
+        }
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _waveController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Consumer<ZipCatalogProvider>(
-      builder: (context, catalog, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text(
-              'Zip Puzzle',
-              style: TextStyle(fontWeight: FontWeight.bold),
+    return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0C0E14) : const Color(0xFFF4F6FB),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        leading: Padding(
+          padding: EdgeInsets.all(8.w),
+          child: InkWell(
+            onTap: () => Navigator.pop(context),
+            borderRadius: BorderRadius.circular(14.r),
+            child: Container(
+              decoration: BoxDecoration(
+                color: isDark
+                    ? const Color(0xFF1E222D).withValues(alpha: 0.9)
+                    : Colors.white.withValues(alpha: 0.95),
+                borderRadius: BorderRadius.circular(14.r),
+                border: Border.all(
+                  color: isDark ? const Color(0xFF2C3242) : const Color(0xFFE2E8F0),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 16.sp,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
             ),
-            centerTitle: true,
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.leaderboard_rounded),
-                tooltip: 'Leaderboards',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const ZipLeaderboardScreen(initialLevel: 1),
+          ),
+        ),
+        title: Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+          decoration: BoxDecoration(
+            color: isDark
+                ? const Color(0xFF161922).withValues(alpha: 0.85)
+                : Colors.white.withValues(alpha: 0.9),
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: isDark ? const Color(0xFF282E3E) : const Color(0xFFE2E8F0),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/zip_puzzle_3d_icon.png',
+                width: 24.w,
+                height: 24.w,
+                errorBuilder: (_, __, ___) => const Icon(Icons.flash_on_rounded, color: Colors.amber, size: 22),
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                'Zip Puzzle',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16.5.sp,
+                  letterSpacing: 0.4,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
+                ),
+              ),
+              SizedBox(width: 6.w),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE50914).withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
+                child: Text(
+                  'ARENA',
+                  style: TextStyle(
+                    fontSize: 8.5.sp,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.8,
+                    color: const Color(0xFFE50914),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          Consumer<DailyPuzzleProvider>(
+            builder: (context, provider, _) {
+              if (provider.isTodayCompleted) {
+                final last = provider.lastSubmissionResult;
+                return Padding(
+                  padding: EdgeInsets.only(right: 6.w),
+                  child: InkWell(
+                    onTap: () {
+                      GameShareHelper.shareGame(
+                        context: context,
+                        gameSlug: 'zip',
+                        gameTitle: 'Zip Puzzle',
+                        formattedTime: last != null ? '${(last.durationMs / 1000).toStringAsFixed(1)}s' : null,
+                        rank: last?.rank,
+                        streak: last?.streak.currentStreak,
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(14.r),
+                    child: Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.4),
+                          width: 1,
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.share_rounded,
+                        size: 18.sp,
+                        color: const Color(0xFF10B981),
+                      ),
+                    ),
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+          Padding(
+            padding: EdgeInsets.only(right: 12.w),
+            child: InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ZipLeaderboardScreen(
+                      initialLevel: 1,
+                      isDailyLeaderboard: true,
+                    ),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(14.r),
+              child: Container(
+                padding: EdgeInsets.all(8.w),
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? const Color(0xFF1E222D).withValues(alpha: 0.9)
+                      : Colors.white.withValues(alpha: 0.95),
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(
+                    color: isDark ? const Color(0xFF2C3242) : const Color(0xFFE2E8F0),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Icon(
+                  Icons.leaderboard_rounded,
+                  size: 20.sp,
+                  color: Colors.amber.shade600,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          // 1. Signature animated wave ripple across the top
+          Positioned(
+            top: 0,
+            right: 0,
+            width: MediaQuery.of(context).size.width,
+            height: 360.h,
+            child: IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _waveController,
+                builder: (context, _) {
+                  return CustomPaint(
+                    painter: TopRightWavePainter(
+                      waveAnimation: _waveController,
+                      isDark: isDark,
+                      maxRadius: 380.0,
+                      gap: 22.0,
                     ),
                   );
                 },
               ),
-            ],
+            ),
           ),
-          body: catalog.isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : RefreshIndicator(
-                  onRefresh: () => catalog.refresh(),
-                  child: CustomScrollView(
-                    slivers: [
-                      // Header Progress Card
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-                          child: Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: isDark
-                                    ? [
-                                        const Color(0xFF2B1D1D),
-                                        const Color(0xFF1E1E1E)
-                                      ]
-                                    : [
-                                        const Color(0xFFFFF1F1),
-                                        const Color(0xFFFFFFFF)
-                                      ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(16),
-                              border: Border.all(
-                                color: isDark
-                                    ? const Color(0xFF442222)
-                                    : const Color(0xFFFFD5D5),
-                              ),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Progress Overview',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.w600,
-                                              color: isDark
-                                                  ? const Color(0xFFBDBDBD)
-                                                  : const Color(0xFF6B7280),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            '${catalog.completedCount} / ${catalog.totalLevels} Solved',
-                                            style: const TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColorTokens.primaryRed,
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                          horizontal: 10, vertical: 6),
-                                      decoration: BoxDecoration(
-                                        color: AppColorTokens.primaryRed
-                                            .withValues(alpha: 0.12),
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      child: Text(
-                                        'Current: Lvl ${catalog.highestUnlockedLevel}',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColorTokens.primaryRed,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 12),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(6),
-                                  child: LinearProgressIndicator(
-                                    value: catalog.progressFraction,
-                                    minHeight: 8,
-                                    backgroundColor: isDark
-                                        ? const Color(0xFF333333)
-                                        : const Color(0xFFE5E7EB),
-                                    valueColor:
-                                        const AlwaysStoppedAnimation<Color>(
-                                            AppColorTokens.primaryRed),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
 
-                      // Difficulty Filter Tabs
-                      SliverToBoxAdapter(
-                        child: SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          child: Row(
-                            children: [
-                              _buildFilterChip(
-                                context: context,
-                                label: 'All (100)',
-                                isSelected:
-                                    catalog.selectedDifficultyFilter == null,
-                                onTap: () => catalog.setFilter(null),
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                context: context,
-                                label: 'Easy (20)',
-                                isSelected: catalog.selectedDifficultyFilter ==
-                                    ZipDifficulty.easy,
-                                onTap: () =>
-                                    catalog.setFilter(ZipDifficulty.easy),
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                context: context,
-                                label: 'Medium (30)',
-                                isSelected: catalog.selectedDifficultyFilter ==
-                                    ZipDifficulty.medium,
-                                onTap: () =>
-                                    catalog.setFilter(ZipDifficulty.medium),
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                context: context,
-                                label: 'Hard (30)',
-                                isSelected: catalog.selectedDifficultyFilter ==
-                                    ZipDifficulty.hard,
-                                onTap: () =>
-                                    catalog.setFilter(ZipDifficulty.hard),
-                              ),
-                              const SizedBox(width: 8),
-                              _buildFilterChip(
-                                context: context,
-                                label: 'Expert (20)',
-                                isSelected: catalog.selectedDifficultyFilter ==
-                                    ZipDifficulty.expert,
-                                onTap: () =>
-                                    catalog.setFilter(ZipDifficulty.expert),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-
-                      // 100 Levels Responsive Grid
-                      SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                        sliver: SliverGrid(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            mainAxisSpacing: 10,
-                            crossAxisSpacing: 10,
-                            childAspectRatio: 0.85,
-                          ),
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              final level = catalog.filteredLevels[index];
-                              final progress =
-                                  catalog.getProgress(level.levelNumber);
-
-                              return ZipLevelTile(
-                                level: level,
-                                progress: progress,
-                                onTap: () {
-                                  if (!progress.isUnlocked) {
-                                    ScaffoldMessenger.of(context)
-                                        .hideCurrentSnackBar();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                            'Level ${level.levelNumber} is locked. Complete Level ${level.levelNumber - 1} to unlock!'),
-                                        duration: const Duration(seconds: 2),
-                                        behavior: SnackBarBehavior.floating,
-                                      ),
-                                    );
-                                    return;
-                                  }
-
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          ZipGameplayScreen(level: level),
-                                    ),
-                                  ).then((_) {
-                                    catalog.refresh();
-                                  });
-                                },
-                              );
-                            },
-                            childCount: catalog.filteredLevels.length,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-        );
-      },
-    );
-  }
-
-  Widget _buildFilterChip({
-    required BuildContext context,
-    required String label,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColorTokens.primaryRed
-              : (isDark ? const Color(0xFF222222) : const Color(0xFFF3F4F6)),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected
-                ? AppColorTokens.primaryRed
-                : (isDark ? const Color(0xFF333333) : const Color(0xFFE5E7EB)),
+          // 2. Gaming Content
+          const SafeArea(
+            child: ZipDailyChallengeView(),
           ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-            color: isSelected
-                ? Colors.white
-                : (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF4B5563)),
-          ),
-        ),
+        ],
       ),
     );
   }

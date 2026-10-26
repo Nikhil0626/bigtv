@@ -21,6 +21,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
 class ReelPreviewScreen extends StatefulWidget {
   final int initialIndex;
@@ -39,14 +41,26 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
   final Map<int, YoutubePlayerController> _youtubeControllers = {};
   final Map<int, bool> _initializingIndices = {};
 
+  DateTime? _reelStartTime;
+
   @override
   void initState() {
     super.initState();
     currentIndex = widget.initialIndex;
+    _reelStartTime = DateTime.now();
     _pageController = PageController(initialPage: widget.initialIndex);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final reelsList = context.read<ReelsProviders>().getAllReelsList;
+      if (reelsList.isNotEmpty && currentIndex < reelsList.length) {
+        AnalyticsService.instance.track(AnalyticsEventName.reelOpen, properties: {
+          'reel_id': reelsList[currentIndex].id,
+          'position': currentIndex,
+        });
+        AnalyticsService.instance.track(AnalyticsEventName.reelPlay, properties: {
+          'reel_id': reelsList[currentIndex].id,
+        });
+      }
       _preloadControllers(currentIndex, reelsList);
     });
   }
@@ -172,11 +186,32 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
     _preloadControllers(newIndex, reelsList);
 
     // Track analytics
+    final watchDuration = _reelStartTime != null
+        ? DateTime.now().difference(_reelStartTime!).inSeconds
+        : 0;
+
+    if (currentIndex < reelsList.length) {
+      AnalyticsService.instance.track(AnalyticsEventName.reelSkip, properties: {
+        'reel_id': reelsList[currentIndex].id,
+        'watch_duration_seconds': watchDuration,
+      });
+    }
+
+    _reelStartTime = DateTime.now();
+
     if (newIndex < reelsList.length) {
+      final newReel = reelsList[newIndex];
+      AnalyticsService.instance.track(AnalyticsEventName.reelOpen, properties: {
+        'reel_id': newReel.id,
+        'position': newIndex,
+      });
+      AnalyticsService.instance.track(AnalyticsEventName.reelPlay, properties: {
+        'reel_id': newReel.id,
+      });
       EventRepo().addEvent({
-        "postid": reelsList[newIndex].id,
+        "postid": newReel.id,
         "createAt": DateTime.now().toString(),
-        "postTitle": reelsList[newIndex].title.toString(),
+        "postTitle": newReel.title.toString(),
       }, "reel_viewed");
     }
   }
@@ -272,6 +307,55 @@ class ReelsCardView extends StatefulWidget {
 
 class _ReelsCardViewState extends State<ReelsCardView> {
   ScreenshotController sc = ScreenshotController();
+  bool _hasCompleted = false;
+  int _playCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.videoController?.addListener(_controllerListener);
+  }
+
+  @override
+  void didUpdateWidget(ReelsCardView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.videoController != widget.videoController) {
+      oldWidget.videoController?.removeListener(_controllerListener);
+      widget.videoController?.addListener(_controllerListener);
+      _hasCompleted = false;
+      _playCount = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.videoController?.removeListener(_controllerListener);
+    super.dispose();
+  }
+
+  void _controllerListener() {
+    final controller = widget.videoController;
+    if (controller != null && controller.value.isInitialized) {
+      final pos = controller.value.position;
+      final dur = controller.value.duration;
+      if (dur > Duration.zero) {
+        if (pos >= dur && !_hasCompleted) {
+          _hasCompleted = true;
+          _playCount++;
+          AnalyticsService.instance.track(AnalyticsEventName.reelComplete, properties: {
+            'reel_id': widget.reelCard.id,
+            'watch_duration_seconds': dur.inSeconds,
+          });
+          widget.onVideoEnded?.call();
+        } else if (pos < const Duration(milliseconds: 500) && _hasCompleted && _playCount > 0) {
+          _hasCompleted = false;
+          AnalyticsService.instance.track(AnalyticsEventName.reelRewatch, properties: {
+            'reel_id': widget.reelCard.id,
+          });
+        }
+      }
+    }
+  }
 
   Widget _buildVideoBody(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -293,8 +377,14 @@ class _ReelsCardViewState extends State<ReelsCardView> {
             onTap: () {
               if (widget.videoController!.value.isPlaying) {
                 widget.videoController!.pause();
+                AnalyticsService.instance.track(AnalyticsEventName.reelPause, properties: {
+                  'reel_id': widget.reelCard.id,
+                });
               } else {
                 widget.videoController!.play();
+                AnalyticsService.instance.track(AnalyticsEventName.reelPlay, properties: {
+                  'reel_id': widget.reelCard.id,
+                });
               }
             },
             child: SizedBox.expand(
@@ -511,6 +601,9 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                     .contains(widget.reelCard.id.toString()),
                 onTap: () async {
                   log("Like");
+                  AnalyticsService.instance.track(AnalyticsEventName.reelLike, properties: {
+                    'reel_id': widget.reelCard.id,
+                  });
                   context.read<ReelsProviders>().isLikePost(widget.reelCard);
                   EventRepo().addEvent({
                     "like": !context
@@ -543,6 +636,10 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                 iconColor: Colors.white,
                 onTap: () async {
                   log("Share Reel button tapped: ${widget.reelCard.id}");
+                  AnalyticsService.instance.track(AnalyticsEventName.reelShare, properties: {
+                    'reel_id': widget.reelCard.id,
+                    'share_target': 'general',
+                  });
 
                   final Size size = MediaQuery.of(context).size;
                   final Rect shareOrigin =

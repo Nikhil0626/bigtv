@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../data/models/grid_point.dart';
 import '../../data/models/level_definition.dart';
 import '../../data/repositories/zip_puzzle_repository.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
 class ZipGameProvider extends ChangeNotifier with WidgetsBindingObserver {
   final LevelDefinition level;
@@ -21,14 +23,27 @@ class ZipGameProvider extends ChangeNotifier with WidgetsBindingObserver {
   bool _hasStarted = false;
   int _remainingHints = ZipPuzzleRepository.maxDailyHints;
   bool _isDisposed = false;
+  final bool isViewOnly;
 
   ZipGameProvider({
     required this.level,
     ZipPuzzleRepository? repository,
     this.onLevelCompleted,
+    this.isViewOnly = false,
+    List<GridPoint>? initialPath,
+    int? initialElapsedMs,
   }) : _repository = repository ?? ZipPuzzleRepository() {
     WidgetsBinding.instance.addObserver(this);
-    _loadDailyHints();
+    if (isViewOnly && initialPath != null && initialPath.isNotEmpty) {
+      _currentPath.addAll(initialPath);
+      _isCompleted = true;
+      _hasStarted = true;
+      _finalElapsedMs = initialElapsedMs ?? 0;
+      _lastVisitedCheckpoint = level.checkpoints.length;
+      _isOrderCorrect = true;
+    } else {
+      _loadDailyHints();
+    }
   }
 
   Future<void> _loadDailyHints() async {
@@ -104,6 +119,10 @@ class ZipGameProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (_stopwatch.isRunning) {
       _stopwatch.stop();
       _isPaused = true;
+      AnalyticsService.instance.track(AnalyticsEventName.gamePause, properties: {
+        'game_id': 'zip_puzzle',
+        'round_id': level.levelNumber.toString(),
+      });
       notifyListeners();
     }
   }
@@ -112,6 +131,10 @@ class ZipGameProvider extends ChangeNotifier with WidgetsBindingObserver {
     if (_isPaused && !_isCompleted && _hasStarted) {
       _stopwatch.start();
       _isPaused = false;
+      AnalyticsService.instance.track(AnalyticsEventName.gameResume, properties: {
+        'game_id': 'zip_puzzle',
+        'round_id': level.levelNumber.toString(),
+      });
       notifyListeners();
     }
   }

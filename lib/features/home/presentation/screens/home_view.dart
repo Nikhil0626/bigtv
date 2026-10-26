@@ -21,6 +21,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
@@ -83,15 +85,20 @@ class _HomeViewState extends State<HomeView> {
   Widget build(BuildContext context) {
     return Consumer<HomeProvider>(
       builder: (_, homeProvider, __) {
-        final Color systemStatusBarColor = (homeProvider.selectedIndex == 0)
+        final bool isDark = Theme.of(context).brightness == Brightness.dark;
+        final bool isSearchTab = homeProvider.selectedIndex == 0;
+
+        final Color systemStatusBarColor = isSearchTab
             ? AppColorTokens.primaryRed
-            : Colors.transparent;
+            : (isDark ? const Color(0xFF0F0F12) : Colors.white);
+
+        final bool isSystemDark = isSearchTab || isDark;
 
         return AnnotatedRegion<SystemUiOverlayStyle>(
           value: SystemUiOverlayStyle(
             statusBarColor: systemStatusBarColor,
-            statusBarIconBrightness: Brightness.light,
-            statusBarBrightness: Brightness.dark,
+            statusBarIconBrightness: isSystemDark ? Brightness.light : Brightness.dark,
+            statusBarBrightness: isSystemDark ? Brightness.dark : Brightness.light,
           ),
           child: PopScope(
             canPop: false,
@@ -106,6 +113,7 @@ class _HomeViewState extends State<HomeView> {
               SystemNavigator.pop();
             },
             child: Scaffold(
+              backgroundColor: systemStatusBarColor,
               extendBody: true,
               floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
               floatingActionButton: null,
@@ -149,13 +157,11 @@ class _HomeViewState extends State<HomeView> {
                       MediaQuery.of(context).orientation != Orientation.landscape,
                   child: Container(
                     color: const Color(0xFFF03B5A),
-                    child: CustomPaint(
-                      painter: const DottedPatternPainter(),
-                      child: SafeArea(
-                        top: false,
-                        child: SizedBox(
-                          height: 50,
-                          child: Row(
+                    child: SafeArea(
+                      top: false,
+                      child: SizedBox(
+                        height: 50,
+                        child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               // 1. Search button
@@ -202,7 +208,6 @@ class _HomeViewState extends State<HomeView> {
                       ),
                     ),
                   ),
-                ),
               ),
               if (homeProvider.langCode != 'ml')
                 Positioned(
@@ -250,6 +255,16 @@ class _HomeViewState extends State<HomeView> {
       behavior: HitTestBehavior.opaque,
       onTap: () {
         context.read<VideoProvider>().pauseVideo();
+        final itemNames = ['search', 'news', 'reels', 'more'];
+        final itemName = index < itemNames.length ? itemNames[index] : index.toString();
+        AnalyticsService.instance.track(AnalyticsEventName.bottomNavClick, properties: {
+          'item_name': itemName,
+          'destination': itemName,
+        });
+        AnalyticsService.instance.track(AnalyticsEventName.navigationClick, properties: {
+          'type': 'bottom_nav',
+          'destination': itemName,
+        });
         homeProvider.isTabChange();
         homeProvider.homePageController.jumpToPage(index);
         homeProvider.pageChange(isValue: true);
@@ -315,6 +330,10 @@ class _HomeViewState extends State<HomeView> {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: () async {
+        AnalyticsService.instance.track(AnalyticsEventName.bottomNavClick, properties: {
+          'item_name': 'live_tv',
+          'destination': 'live_tv',
+        });
         try {
           context.read<VideoProvider>().pauseVideo();
         } catch (_) {}
@@ -350,27 +369,10 @@ class _HomeViewState extends State<HomeView> {
                       color: itemColor,
                     ),
                   )
-                : Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Icon(
-                        Icons.live_tv_rounded,
-                        color: itemColor,
-                        size: 20,
-                      ),
-                      Positioned(
-                        top: 0,
-                        right: -2,
-                        child: Container(
-                          width: 5,
-                          height: 5,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                    ],
+                : Icon(
+                    Icons.live_tv_rounded,
+                    color: itemColor,
+                    size: 20,
                   ),
             const SizedBox(height: 2),
             Text(
@@ -387,38 +389,3 @@ class _HomeViewState extends State<HomeView> {
   }
 }
 
-/// Custom painter to draw an elegant dotted grid texture on the red bottom navigation bar.
-class DottedPatternPainter extends CustomPainter {
-  final double spacing;
-  final double dotRadius;
-  final Color dotColor;
-
-  const DottedPatternPainter({
-    this.spacing = 19.0,
-    this.dotRadius = 1.2,
-    this.dotColor = const Color(0x66FFFFFF), // ~40% opacity white
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = dotColor
-      ..style = PaintingStyle.fill;
-
-    final double startX = (size.width % spacing) / 2;
-    final double startY = (size.height % spacing) / 2;
-
-    for (double x = startX; x < size.width; x += spacing) {
-      for (double y = startY; y < size.height; y += spacing) {
-        canvas.drawCircle(Offset(x, y), dotRadius, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant DottedPatternPainter oldDelegate) {
-    return oldDelegate.spacing != spacing ||
-        oldDelegate.dotRadius != dotRadius ||
-        oldDelegate.dotColor != dotColor;
-  }
-}

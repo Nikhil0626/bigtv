@@ -1,0 +1,26 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "74NBJBC965.com.chotanewstelugu.app",
+        "paths": [
+          "/live*",
+          "/games*",
+          "/events*",
+          "/folknight*",
+          "/individualPage*",
+          "/posts*",
+          "/epaper*",
+          "/editorial*",
+          "*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "74NBJBC965.com.chotanewstelugu.app"
+    ]
+  }
+}

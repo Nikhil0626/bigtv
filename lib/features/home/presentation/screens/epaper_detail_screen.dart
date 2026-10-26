@@ -4,6 +4,8 @@ import 'package:chotanews/services/epaper_share_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
 
 class EpaperDetailScreen extends StatefulWidget {
@@ -17,16 +19,36 @@ class EpaperDetailScreen extends StatefulWidget {
 
 class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
   late PageController _pageController;
+  late DateTime _readStartTime;
+  int _lastPageIndex = 0;
+  int _pagesViewedCount = 1;
 
   @override
   void initState() {
     super.initState();
+    _readStartTime = DateTime.now();
     _pageController = PageController(initialPage: 0);
     context.read<EpaperProvider>().resetDetailState();
+    final editionId = widget.epaper['id'] ?? widget.epaper['edition_id'] ?? '';
+    AnalyticsService.instance.track(AnalyticsEventName.epaperOpen, properties: {
+      'edition_id': editionId,
+      'edition_name': widget.epaper['edition'] ?? widget.epaper['name'] ?? '',
+      'language': widget.epaper['language'] ?? 'te',
+    });
+    AnalyticsService.instance.track(AnalyticsEventName.epaperPageOpen, properties: {
+      'edition_id': editionId,
+      'page_number': 1,
+    });
   }
 
   @override
   void dispose() {
+    final durationSeconds = DateTime.now().difference(_readStartTime).inSeconds;
+    AnalyticsService.instance.track(AnalyticsEventName.epaperReadComplete, properties: {
+      'edition_id': widget.epaper['id'] ?? widget.epaper['edition_id'] ?? '',
+      'pages_viewed': _pagesViewedCount,
+      'duration_seconds': durationSeconds,
+    });
     _pageController.dispose();
     super.dispose();
   }
@@ -53,6 +75,18 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
                       itemCount: paperImages.length,
                       onPageChanged: (index) {
                         provider.setCurrentPage(index);
+                        final editionId = widget.epaper['id'] ?? widget.epaper['edition_id'] ?? '';
+                        AnalyticsService.instance.track(AnalyticsEventName.epaperPageChange, properties: {
+                          'edition_id': editionId,
+                          'from_page': _lastPageIndex + 1,
+                          'to_page': index + 1,
+                        });
+                        AnalyticsService.instance.track(AnalyticsEventName.epaperPageOpen, properties: {
+                          'edition_id': editionId,
+                          'page_number': index + 1,
+                        });
+                        _lastPageIndex = index;
+                        _pagesViewedCount++;
                       },
                       itemBuilder: (context, index) {
                         final imageUrl = paperImages[index];
@@ -306,6 +340,10 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
                   subtitle: const Text('Share page image directly with URL link'),
                   onTap: () {
                     Navigator.pop(sheetContext);
+                    AnalyticsService.instance.track(AnalyticsEventName.epaperShare, properties: {
+                      'edition_id': epaper['id'] ?? epaper['edition_id'] ?? '',
+                      'share_type': 'page',
+                    });
                     EpaperShareHelper.shareIndividualPage(
                       context: context,
                       epaper: epaper,
@@ -323,6 +361,14 @@ class _EpaperDetailScreenState extends State<EpaperDetailScreen> {
                   subtitle: const Text('Compile all pages into a single PDF document'),
                   onTap: () {
                     Navigator.pop(sheetContext);
+                    AnalyticsService.instance.track(AnalyticsEventName.epaperDownload, properties: {
+                      'edition_id': epaper['id'] ?? epaper['edition_id'] ?? '',
+                      'download_format': 'pdf',
+                    });
+                    AnalyticsService.instance.track(AnalyticsEventName.epaperShare, properties: {
+                      'edition_id': epaper['id'] ?? epaper['edition_id'] ?? '',
+                      'share_type': 'pdf',
+                    });
                     EpaperShareHelper.shareAsPdf(
                       context: context,
                       epaper: epaper,

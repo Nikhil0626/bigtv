@@ -3,7 +3,9 @@ import 'dart:ui';
 
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
-import 'package:chotanews/services/analytics_service.dart';
+import 'package:chotanews/services/analytics_service.dart' as legacy_analytics;
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -28,6 +30,41 @@ class MainScreenPageView extends StatefulWidget {
 
 class _MainScreenPageViewState extends State<MainScreenPageView> {
   DateTime? _pageStartTime;
+  int _lastTrackedIndex = -1;
+  Timer? _progressTimer25;
+  Timer? _progressTimer50;
+  Timer? _progressTimer75;
+
+  void _scheduleProgressTrackers(dynamic articleId) {
+    _progressTimer25?.cancel();
+    _progressTimer50?.cancel();
+    _progressTimer75?.cancel();
+
+    _progressTimer25 = Timer(const Duration(seconds: 4), () {
+      AnalyticsService.instance.track(AnalyticsEventName.articleReadProgress, properties: {
+        'article_id': articleId,
+        'progress_percent': 25,
+      });
+    });
+    _progressTimer50 = Timer(const Duration(seconds: 8), () {
+      AnalyticsService.instance.track(AnalyticsEventName.articleReadProgress, properties: {
+        'article_id': articleId,
+        'progress_percent': 50,
+      });
+    });
+    _progressTimer75 = Timer(const Duration(seconds: 15), () {
+      AnalyticsService.instance.track(AnalyticsEventName.articleReadProgress, properties: {
+        'article_id': articleId,
+        'progress_percent': 75,
+      });
+    });
+  }
+
+  void _cancelProgressTrackers() {
+    _progressTimer25?.cancel();
+    _progressTimer50?.cancel();
+    _progressTimer75?.cancel();
+  }
 
   int autoIndex = 0;
   final Gradient rainbowGradient = LinearGradient(
@@ -46,9 +83,41 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
     super.initState();
     homeProvider?.pageController?.addListener(homeProvider!.scrollListener);
     _pageStartTime = DateTime.now();
+    _lastTrackedIndex = widget.startIndex;
     if (homeProvider?.isEnglishMode == true) {
       TranslationService().preloadArticles(homeProvider?.getAllPostList ?? [], widget.startIndex, ahead: 5);
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && (homeProvider?.getAllPostList.isNotEmpty ?? false)) {
+        final list = homeProvider!.getAllPostList;
+        final idx = widget.startIndex < list.length ? widget.startIndex : 0;
+        final article = list[idx];
+        AnalyticsService.instance.track(AnalyticsEventName.articleOpen, properties: {
+          'article_id': article['id'],
+          'article_category': article['category_name'] ?? article['category'] ?? '',
+          'language': article['language'] ?? 'te',
+          'source_screen': 'home',
+          'position': idx,
+        });
+        AnalyticsService.instance.track(AnalyticsEventName.articleReadStart, properties: {
+          'article_id': article['id'],
+        });
+        if (article['isReporter'] == 1) {
+          AnalyticsService.instance.track(AnalyticsEventName.reporterContentOpen, properties: {
+            'reporter_id': article['reportedBy'] ?? article['reporterId'] ?? article['author'] ?? 'unknown',
+            'content_id': article['id'],
+            'content_type': 'article',
+          });
+        }
+        _scheduleProgressTrackers(article['id']);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _cancelProgressTrackers();
+    super.dispose();
   }
 
   @override
@@ -60,9 +129,6 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
       body: Consumer<HomeProvider>(
         builder: (_, homeProvider, __) {
           if (homeProvider.isAiTagDataLoaded && homeProvider.liveTvVideosEnable) {
-            if (widget.startIndex != homeProvider.selectedIndex) {
-              return const SizedBox.shrink();
-            }
             return TagVideoGridViewWidget(
               videos: homeProvider.tagVideosList,
               isLoading: homeProvider.isTagVideosLoading,
@@ -169,7 +235,39 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
                               final now = DateTime.now();
                               final duration = now.difference(_pageStartTime ?? now);
-                              AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
+                              legacy_analytics.AnalyticsService().trackArticleReadingTime(duration, homeProvider.getAllPostList[value]['id']);
+
+                              if (_lastTrackedIndex >= 0 && _lastTrackedIndex < homeProvider.getAllPostList.length) {
+                                final prevArticle = homeProvider.getAllPostList[_lastTrackedIndex];
+                                AnalyticsService.instance.track(AnalyticsEventName.articleReadComplete, properties: {
+                                  'article_id': prevArticle['id'],
+                                  'read_duration_seconds': duration.inSeconds,
+                                });
+                              }
+
+                              _cancelProgressTrackers();
+                              if (value >= 0 && value < homeProvider.getAllPostList.length) {
+                                final currentArticle = homeProvider.getAllPostList[value];
+                                AnalyticsService.instance.track(AnalyticsEventName.articleOpen, properties: {
+                                  'article_id': currentArticle['id'],
+                                  'article_category': currentArticle['category_name'] ?? currentArticle['category'] ?? '',
+                                  'language': currentArticle['language'] ?? 'te',
+                                  'source_screen': 'home',
+                                  'position': value,
+                                });
+                                AnalyticsService.instance.track(AnalyticsEventName.articleReadStart, properties: {
+                                  'article_id': currentArticle['id'],
+                                });
+                                if (currentArticle['isReporter'] == 1) {
+                                  AnalyticsService.instance.track(AnalyticsEventName.reporterContentOpen, properties: {
+                                    'reporter_id': currentArticle['reportedBy'] ?? currentArticle['reporterId'] ?? currentArticle['author'] ?? 'unknown',
+                                    'content_id': currentArticle['id'],
+                                    'content_type': 'article',
+                                  });
+                                }
+                                _scheduleProgressTrackers(currentArticle['id']);
+                                _lastTrackedIndex = value;
+                              }
 
                               _pageStartTime = now;
                             },

@@ -25,6 +25,8 @@ import 'package:chotanews/features/auth/domain/models/categories_model.dart';
 import 'package:chotanews/features/auth/domain/models/location_model.dart';
 import 'package:chotanews/features/auth/domain/models/language_model.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
 class AuthenticationProvider extends ChangeNotifier {
   final TextEditingController phoneController = TextEditingController();
@@ -206,9 +208,12 @@ class AuthenticationProvider extends ChangeNotifier {
         WebEngagePlugin.setUserPhone(phoneController.text.toString());
         mobileVerificationDetails(phoneController.text.toString(), true);
 
-        GlobalVariables().userId = "";
+        final loggedInUserId = response.data['user']['id'].toString();
+        GlobalVariables().userId = loggedInUserId;
         SharedPreferences preferences = await SharedPreferences.getInstance();
-        saveUserid("");
+        saveUserid(loggedInUserId);
+        AnalyticsService.instance.setUser(loggedInUserId);
+        AnalyticsService.instance.track(AnalyticsEventName.login, properties: {'method': 'otp'});
         preferences.setString("userName", "User${phoneController.text.substring(phoneController.text.length - 4)}");
         preferences.setString("referralCode", "");
         EventRepo().addEvent({"otpStatus": "complete", "otp": otpController.text, "mobileNumber": phoneController.text, "createAt": DateTime.now().toString()}, "otp_verify");
@@ -298,6 +303,19 @@ class AuthenticationProvider extends ChangeNotifier {
         lan: langCode,
     );
 
+    final prevLang = preferences.getString("selectedLanguageCode");
+    if (prevLang != null && prevLang.isNotEmpty && prevLang != langCode) {
+      AnalyticsService.instance.track(AnalyticsEventName.languageChanged, properties: {
+        'previous_language': prevLang,
+        'new_language': langCode,
+      });
+    }
+
+    AnalyticsService.instance.track(AnalyticsEventName.languageSelected, properties: {
+      'language_id': languageId,
+      'language_code': langCode,
+    });
+
     newAppLoginStatus = NewAppLoginStatus.category;
     saveLoginState();
     getAllCategories();
@@ -360,9 +378,15 @@ class AuthenticationProvider extends ChangeNotifier {
     if (!selectedCategories.contains(profileName)) {
       selectedCategories.add(profileName);
       log(selectedCategories.toString());
+      AnalyticsService.instance.track(AnalyticsEventName.categorySelected, properties: {
+        'category_name': profileName,
+      });
       notifyListeners(); // Notify listeners if using ChangeNotifier
     } else {
       selectedCategories.remove(profileName);
+      AnalyticsService.instance.track(AnalyticsEventName.categoryDeselected, properties: {
+        'category_name': profileName,
+      });
       notifyListeners();
     }
   }
@@ -389,6 +413,9 @@ class AuthenticationProvider extends ChangeNotifier {
       Response response = await AuthenticationRepo().sendSelectCategories(body);
       if (response.statusCode == 200) {
         log(response.data.toString());
+        AnalyticsService.instance.track(AnalyticsEventName.categoryPreferenceUpdated, properties: {
+          'selected_category_ids': selectedCategoryIds,
+        });
         EventRepo().addEvent({"listOfCategoriesIds": result, "listOfCategoriesNames": catNames, "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_categories");
       }
     } on DioException catch (e, st) {
@@ -508,6 +535,10 @@ class AuthenticationProvider extends ChangeNotifier {
       Response response = await AuthenticationRepo().sendSelectLocations(body);
       if (response.statusCode == 200) {
         log(response.data.toString());
+        AnalyticsService.instance.track(AnalyticsEventName.userLocationCaptured, properties: {
+          'location_ids': selectedCategoryIds,
+          'location_names': nameOfDistrict,
+        });
         EventRepo().addEvent({"listOfLocationsIds": result, "listOfLocationsNames": nameOfDistrict, "updateStatus": "complete", "createAt": DateTime.now().toString()}, "update_locations");
       }
     } on DioException catch (e, st) {
@@ -520,6 +551,7 @@ class AuthenticationProvider extends ChangeNotifier {
       if (!isFilter) {
         newAppLoginStatus = NewAppLoginStatus.home;
         saveLoginState();
+        AnalyticsService.instance.track(AnalyticsEventName.registrationComplete, properties: {'method': 'otp'});
       }
       isLocationSendingLoading = false;
       notifyListeners();
@@ -596,6 +628,8 @@ class AuthenticationProvider extends ChangeNotifier {
 
   void setLogOutStatus(context, bool isLogout) async {
     newAppLoginStatus = isLogout ? NewAppLoginStatus.skip : NewAppLoginStatus.login;
+    AnalyticsService.instance.track(AnalyticsEventName.logout);
+    AnalyticsService.instance.setUser(null);
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.clear();
     preferences.setString("loginState", newAppLoginStatus.toString());

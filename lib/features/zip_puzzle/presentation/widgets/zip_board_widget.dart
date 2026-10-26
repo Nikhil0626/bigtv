@@ -42,18 +42,24 @@ class ZipBoardWidget extends StatelessWidget {
             return Center(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onPanStart: (details) {
-                  final pt = pointFromOffset(details.localPosition);
-                  if (pt != null) game.moveTo(pt);
-                },
-                onPanUpdate: (details) {
-                  final pt = pointFromOffset(details.localPosition);
-                  if (pt != null) game.moveTo(pt);
-                },
-                onTapDown: (details) {
-                  final pt = pointFromOffset(details.localPosition);
-                  if (pt != null) game.moveTo(pt);
-                },
+                onPanStart: game.isViewOnly
+                    ? null
+                    : (details) {
+                        final pt = pointFromOffset(details.localPosition);
+                        if (pt != null) game.moveTo(pt);
+                      },
+                onPanUpdate: game.isViewOnly
+                    ? null
+                    : (details) {
+                        final pt = pointFromOffset(details.localPosition);
+                        if (pt != null) game.moveTo(pt);
+                      },
+                onTapDown: game.isViewOnly
+                    ? null
+                    : (details) {
+                        final pt = pointFromOffset(details.localPosition);
+                        if (pt != null) game.moveTo(pt);
+                      },
                 child: Container(
                   width: boardWidth,
                   height: boardHeight,

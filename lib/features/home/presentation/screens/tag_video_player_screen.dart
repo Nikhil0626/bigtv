@@ -15,6 +15,8 @@ import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:chotanews/services/video_position_service.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
 class TagVideoPlayerScreen extends StatefulWidget {
   final List videos;
@@ -46,6 +48,19 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   double _volume = 1.0;
   bool _showVolumeSlider = false;
   final Set<String> _viewedVideoIds = {};
+  final Set<int> _milestonesSent = {};
+  bool _videoCompleted = false;
+
+  String _getCurrentVideoId() {
+    if (widget.videos.isEmpty || _currentIndex < 0 || _currentIndex >= widget.videos.length) {
+      return '';
+    }
+    final item = widget.videos[_currentIndex];
+    if (item is Map) {
+      return (item['videoId'] ?? item['_id'] ?? item['id'] ?? item['video_id'] ?? '').toString();
+    }
+    return '';
+  }
 
   Timer? _controlsTimer;
   bool _isDraggingSeekBar = false;
@@ -304,6 +319,11 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
       final clampedPos = targetPos < Duration.zero
           ? Duration.zero
           : (targetPos > duration ? duration : targetPos);
+      if (clampedPos == Duration.zero) {
+        AnalyticsService.instance.track(AnalyticsEventName.videoReplay, properties: {
+          'video_id': _getCurrentVideoId(),
+        });
+      }
       _controller!.seekTo(clampedPos);
     }
   }
@@ -354,6 +374,16 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
     }
 
     _incrementViewCount(index);
+    _milestonesSent.clear();
+    _videoCompleted = false;
+
+    final videoId = _getCurrentVideoId();
+    final item = widget.videos[index];
+    final title = item is Map ? (item['fileName'] ?? item['title'] ?? '') : '';
+    AnalyticsService.instance.track(AnalyticsEventName.videoOpen, properties: {
+      'video_id': videoId,
+      'video_title': title,
+    });
 
     if (_controller != null &&
         _controller!.value.isInitialized &&
@@ -451,6 +481,10 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
       }
 
       await controller.play();
+      AnalyticsService.instance.track(AnalyticsEventName.videoPlay, properties: {
+        'video_id': _getCurrentVideoId(),
+        'video_duration_seconds': controller.value.duration.inSeconds,
+      });
 
       if (mounted) {
         setState(() {
@@ -464,6 +498,10 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
       return true;
     } catch (e, st) {
       log("Error initializing video at URL $url: $e", stackTrace: st);
+      AnalyticsService.instance.track(AnalyticsEventName.videoError, properties: {
+        'video_id': _getCurrentVideoId(),
+        'error_code': e.toString(),
+      });
       return false;
     }
   }
@@ -476,9 +514,32 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
               ? widget.videos[_currentIndex]
               : null;
 
+      final dur = value.duration;
+      final pos = value.position;
+      if (dur > Duration.zero) {
+        final pct = (pos.inMilliseconds / dur.inMilliseconds * 100).toInt();
+        for (final milestone in [25, 50, 75]) {
+          if (pct >= milestone && !_milestonesSent.contains(milestone)) {
+            _milestonesSent.add(milestone);
+            AnalyticsService.instance.track(AnalyticsEventName.videoProgress, properties: {
+              'video_id': _getCurrentVideoId(),
+              'progress_percent': milestone,
+              'playback_position_seconds': pos.inSeconds,
+            });
+          }
+        }
+      }
+
       if (value.position >= value.duration &&
           value.duration > Duration.zero &&
           !_isChangingTrack) {
+        if (!_videoCompleted) {
+          _videoCompleted = true;
+          AnalyticsService.instance.track(AnalyticsEventName.videoComplete, properties: {
+            'video_id': _getCurrentVideoId(),
+            'watch_duration_seconds': value.duration.inSeconds,
+          });
+        }
         if (currentItem != null) {
           VideoPositionService.clearPosition(currentItem);
         }
@@ -580,6 +641,10 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
   Future<void> _shareToWhatsApp(
       Map<String, dynamic>? currentVideo, String title) async {
     if (currentVideo == null) return;
+    AnalyticsService.instance.track(AnalyticsEventName.videoShare, properties: {
+      'video_id': _getCurrentVideoId(),
+      'share_target': 'whatsapp',
+    });
     final String shareUrl = (currentVideo['videoUrl'] ??
             currentVideo['postUrl'] ??
             currentVideo['url'] ??
@@ -1395,9 +1460,17 @@ class _TagVideoPlayerScreenState extends State<TagVideoPlayerScreen> {
                             if (_controller!.value.isPlaying) {
                               _controller!.pause();
                               _controlsTimer?.cancel();
+                              AnalyticsService.instance.track(AnalyticsEventName.videoPause, properties: {
+                                'video_id': _getCurrentVideoId(),
+                                'playback_position_seconds': _controller!.value.position.inSeconds,
+                              });
                             } else {
                               _controller!.play();
                               _startHideControlsTimer();
+                              AnalyticsService.instance.track(AnalyticsEventName.videoResume, properties: {
+                                'video_id': _getCurrentVideoId(),
+                                'playback_position_seconds': _controller!.value.position.inSeconds,
+                              });
                             }
                             setState(() {});
                           }

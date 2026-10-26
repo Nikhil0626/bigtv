@@ -7,6 +7,8 @@ import '../../../../core/theme/theme_extensions.dart';
 import '../../data/models/reporter_model.dart';
 import '../providers/reporters_provider.dart';
 import 'reporter_details_screen.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
 class ReportersScreen extends StatefulWidget {
   const ReportersScreen({super.key});
@@ -17,6 +19,12 @@ class ReportersScreen extends StatefulWidget {
 
 class _ReportersScreenState extends State<ReportersScreen> {
   final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.instance.track(AnalyticsEventName.reporterListOpen);
+  }
 
   @override
   void dispose() {
@@ -301,6 +309,9 @@ class _ReportersScreenState extends State<ReportersScreen> {
   Widget _buildReporterListItem(BuildContext context, ReporterModel reporter) {
     return InkWell(
       onTap: () {
+        AnalyticsService.instance.track(AnalyticsEventName.reporterProfileOpen, properties: {
+          'reporter_id': reporter.id,
+        });
         Navigator.push(
           context,
           MaterialPageRoute(

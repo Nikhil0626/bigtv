@@ -27,7 +27,7 @@ class ZipPuzzleRepository {
     try {
       final prefs = await _getPrefs();
       final level = prefs.getInt(_keyHighestUnlocked) ?? 1;
-      return level.clamp(1, 100);
+      return level < 1 ? 1 : level;
     } catch (e) {
       debugPrint('ZipPuzzleRepository getHighestUnlockedLevel error: $e');
       return 1;
@@ -37,21 +37,24 @@ class ZipPuzzleRepository {
   Future<void> setHighestUnlockedLevel(int level) async {
     try {
       final prefs = await _getPrefs();
-      final clamped = level.clamp(1, 100);
+      final clamped = level < 1 ? 1 : level;
       await prefs.setInt(_keyHighestUnlocked, clamped);
     } catch (e) {
       debugPrint('ZipPuzzleRepository setHighestUnlockedLevel error: $e');
     }
   }
 
-  Future<Map<int, LevelProgress>> getAllLevelProgress() async {
+  Future<Map<int, LevelProgress>> getAllLevelProgress(
+      {int? totalLevels}) async {
     final Map<int, LevelProgress> result = {};
     try {
       final prefs = await _getPrefs();
       final highestUnlocked = prefs.getInt(_keyHighestUnlocked) ?? 1;
+      final ceiling =
+          totalLevels ?? (highestUnlocked > 100 ? highestUnlocked : 100);
 
       // Populate base unlock states
-      for (int i = 1; i <= 100; i++) {
+      for (int i = 1; i <= ceiling; i++) {
         result[i] = LevelProgress(
           levelNumber: i,
           isUnlocked: i <= highestUnlocked,
@@ -63,7 +66,7 @@ class ZipPuzzleRepository {
         final decoded = jsonDecode(rawJson) as Map<String, dynamic>;
         for (final entry in decoded.entries) {
           final lvl = int.tryParse(entry.key);
-          if (lvl != null && lvl >= 1 && lvl <= 100) {
+          if (lvl != null && lvl >= 1) {
             final data = entry.value as Map<String, dynamic>;
             final parsed = LevelProgress.fromJson(data);
             result[lvl] = parsed.copyWith(
@@ -94,7 +97,7 @@ class ZipPuzzleRepository {
       final prefs = await _getPrefs();
       final currentHighest = prefs.getInt(_keyHighestUnlocked) ?? 1;
       int newHighest = currentHighest;
-      if (level >= currentHighest && level < 100) {
+      if (level >= currentHighest) {
         newHighest = level + 1;
         await prefs.setInt(_keyHighestUnlocked, newHighest);
       }

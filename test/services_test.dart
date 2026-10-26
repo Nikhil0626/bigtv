@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/services/video_position_service.dart';
 import 'package:chotanews/services/base_service.dart';
+import 'package:chotanews/services/game_share_helper.dart';
+import 'package:chotanews/services/live_tv_share_helper.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:dio/dio.dart';
 
@@ -126,6 +128,39 @@ void main() {
       );
       expect(resp, isA<Response>());
       expect((resp as Response).statusCode, equals(404));
+    });
+
+    test('GameShareHelper uses app.bigtv24x7.com and generates correct deep link URLs for each game', () {
+      expect(GameShareHelper.baseUrl, equals('https://app.bigtv24x7.com'));
+      expect(
+        GameShareHelper.getGameShareUrl('sudoku'),
+        equals('https://app.bigtv24x7.com/games?game=sudoku'),
+      );
+      expect(
+        GameShareHelper.getGameShareUrl('patch'),
+        equals('https://app.bigtv24x7.com/games?game=patch'),
+      );
+      expect(
+        GameShareHelper.getGameShareUrl('patches'),
+        equals('https://app.bigtv24x7.com/games?game=patch'),
+      );
+      expect(
+        GameShareHelper.getGameShareUrl('zip'),
+        equals('https://app.bigtv24x7.com/games?game=zip'),
+      );
+    });
+
+    test('LiveTvShareHelper uses app.bigtv24x7.com and generates correct deep link URLs and share text', () {
+      expect(LiveTvShareHelper.baseUrl, equals('https://app.bigtv24x7.com'));
+      expect(LiveTvShareHelper.getLiveTvShareUrl(), equals('https://app.bigtv24x7.com/live'));
+      expect(LiveTvShareHelper.liveShareUrl, equals('https://app.bigtv24x7.com/live'));
+
+      final englishText = LiveTvShareHelper.getShareText(channelName: 'BIG TV', isTelugu: false);
+      expect(englishText, contains('https://app.bigtv24x7.com/live'));
+      expect(englishText, contains('BIG TV'));
+
+      final teluguText = LiveTvShareHelper.getShareText(channelName: 'BIG TV', isTelugu: true);
+      expect(teluguText, contains('https://app.bigtv24x7.com/live'));
     });
   });
 }

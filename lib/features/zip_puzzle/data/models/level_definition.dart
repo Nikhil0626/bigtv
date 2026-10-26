@@ -34,6 +34,21 @@ enum ZipDifficulty {
     }
   }
 
+  static ZipDifficulty fromString(String val) {
+    switch (val.toLowerCase().trim()) {
+      case 'easy':
+        return ZipDifficulty.easy;
+      case 'medium':
+        return ZipDifficulty.medium;
+      case 'hard':
+        return ZipDifficulty.hard;
+      case 'expert':
+        return ZipDifficulty.expert;
+      default:
+        throw FormatException('Unknown difficulty: "$val"');
+    }
+  }
+
   static ZipDifficulty fromLevelNumber(int level) {
     if (level <= 20) return ZipDifficulty.easy;
     if (level <= 50) return ZipDifficulty.medium;
@@ -44,6 +59,8 @@ enum ZipDifficulty {
 
 class LevelDefinition {
   final int levelNumber;
+  final String? levelId;
+  final String? title;
   final ZipDifficulty difficulty;
   final int checkpointCount;
   final int rows;
@@ -55,6 +72,8 @@ class LevelDefinition {
 
   const LevelDefinition({
     required this.levelNumber,
+    this.levelId,
+    this.title,
     required this.difficulty,
     required this.checkpointCount,
     required this.rows,
@@ -65,8 +84,12 @@ class LevelDefinition {
     this.walls = const {},
   });
 
+  String get id => levelId ?? 'zip_${levelNumber.toString().padLeft(3, '0')}';
+
   LevelDefinition copyWith({
     int? levelNumber,
+    String? levelId,
+    String? title,
     ZipDifficulty? difficulty,
     int? checkpointCount,
     int? rows,
@@ -78,6 +101,8 @@ class LevelDefinition {
   }) {
     return LevelDefinition(
       levelNumber: levelNumber ?? this.levelNumber,
+      levelId: levelId ?? this.levelId,
+      title: title ?? this.title,
       difficulty: difficulty ?? this.difficulty,
       checkpointCount: checkpointCount ?? this.checkpointCount,
       rows: rows ?? this.rows,
@@ -188,4 +213,3 @@ class ZipColorTheme {
     required this.cellTintColor,
   });
 }
-

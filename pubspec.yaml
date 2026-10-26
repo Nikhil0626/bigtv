@@ -59,6 +59,8 @@ dependencies:
   bloc: ^9.2.1
   razorpay_flutter: ^1.4.6
   qr_flutter: ^4.1.0
+  uuid: ^4.5.1
+  connectivity_plus: ^6.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

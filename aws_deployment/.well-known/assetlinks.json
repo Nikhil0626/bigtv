@@ -1,0 +1,13 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.chotanews",
+      "sha256_cert_fingerprints": [
+        "91:F9:BB:B7:8C:01:A8:49:6B:32:78:88:A1:9C:21:AB:8F:1D:BA:19:DE:77:06:63:DD:78:E4:C5:A9:05:D3:06",
+        "49:54:FA:54:4A:69:B0:D2:DF:7E:AE:CC:0F:8A:AB:7C:71:35:FB:B1:F7:A2:9D:D6:E5:90:40:EB:84:1E:36:E4"
+      ]
+    }
+  }
+]

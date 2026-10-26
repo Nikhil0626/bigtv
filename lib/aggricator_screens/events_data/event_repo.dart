@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:hive/hive.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
 
 import '../../../../services/base_service.dart';
 import '../../../../services/base_urls.dart';
@@ -36,8 +37,11 @@ class EventRepo extends BaseService {
 
     log("Event Body: $newEvent");
 
-    final box = Hive.box('events');
+    final box = Hive.isBoxOpen('events') ? Hive.box('events') : await Hive.openBox('events');
     await box.add(newEvent);
+
+    // Also store event in AnalyticsService according to the MD specification
+    AnalyticsService.instance.track(eventName, properties: eventData);
 
     final firebaseParams = <String, Object>{
       'userId': userId,
@@ -53,6 +57,7 @@ class EventRepo extends BaseService {
   }
 
   Future<void> processAndPushEvents() async {
+    if (!Hive.isBoxOpen('events')) return;
     final box = Hive.box('events');
     final events = box.values.map((e) => _convertEventToJson(e)).toList();
     log("Event Data Push $events");

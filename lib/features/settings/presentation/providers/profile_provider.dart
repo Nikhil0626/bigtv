@@ -12,6 +12,8 @@ import 'package:http_parser/http_parser.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
 
 class ProfileProvider extends ChangeNotifier {
@@ -86,6 +88,9 @@ class ProfileProvider extends ChangeNotifier {
     try {
       Response response = await SettingsRepo().postProfile(body);
       if (response.statusCode == 200) {
+        AnalyticsService.instance.track(AnalyticsEventName.userProfileUpdate, properties: {
+          'updated_fields': ['name', 'dob', 'photo_url'],
+        });
         CustomToast.showSuccessToast(msg: "Profile data updated");
         log("Like posted successfully: ${response.data}");
       } else {

@@ -45,36 +45,45 @@ class _MainScreenCardState extends State<MainScreenCard>
             homeProvider.showTopNavTags &&
             (homeProvider.getAllAiTagsList.isNotEmpty || homeProvider.isAiTagsLoading);
 
-        final Color topBarColor = showInFocusBar
-            ? InFocusBarWidget.barBackgroundColor
-            : Theme.of(context).scaffoldBackgroundColor;
-        final isTopBarDark = ThemeData.estimateBrightnessForColor(topBarColor) == Brightness.dark;
+        final bool isDark = Theme.of(context).brightness == Brightness.dark;
+        final Color topBarColor = isDark ? const Color(0xFF0F0F12) : Colors.white;
 
-        return AnnotatedRegion<SystemUiOverlayStyle>(
-          value: SystemUiOverlayStyle(
-            statusBarColor: topBarColor,
-            statusBarIconBrightness: isTopBarDark ? Brightness.light : Brightness.dark,
-            statusBarBrightness: isTopBarDark ? Brightness.dark : Brightness.light,
-          ),
-          child: Scaffold(
-            backgroundColor: topBarColor,
-            body: SafeArea(
-              left: false,
-              right: MediaQuery.of(context).orientation != Orientation.landscape,
-              top: MediaQuery.of(context).orientation != Orientation.landscape,
-              bottom: false,
-              child: Container(
-                color: Theme.of(context).scaffoldBackgroundColor,
-                child: Center(
-                  child: homeProvider.isHomeLoading
-                      ? HomeShimmer()
-                      : Column(
-                          children: [
-                            if (showInFocusBar)
-                              const InFocusBarWidget(),
-                            Expanded(child: MainScreenPageView()),
-                          ],
-                        ),
+        return PopScope(
+          canPop: !homeProvider.isAiTagDataLoaded,
+          onPopInvokedWithResult: (didPop, result) {
+            if (didPop) return;
+            if (homeProvider.isAiTagDataLoaded) {
+              homeProvider.setSelectedTagId(0);
+              homeProvider.aiTagDataLoaded(false);
+              homeProvider.getAllPost(postIds: "0");
+            }
+          },
+          child: AnnotatedRegion<SystemUiOverlayStyle>(
+            value: SystemUiOverlayStyle(
+              statusBarColor: topBarColor,
+              statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+              statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+            ),
+            child: Scaffold(
+              backgroundColor: topBarColor,
+              body: SafeArea(
+                left: false,
+                right: MediaQuery.of(context).orientation != Orientation.landscape,
+                top: MediaQuery.of(context).orientation != Orientation.landscape,
+                bottom: false,
+                child: Container(
+                  color: topBarColor,
+                  child: Center(
+                    child: homeProvider.isHomeLoading
+                        ? HomeShimmer()
+                        : Column(
+                            children: [
+                              if (showInFocusBar)
+                                const InFocusBarWidget(),
+                              Expanded(child: MainScreenPageView()),
+                            ],
+                          ),
+                  ),
                 ),
               ),
             ),

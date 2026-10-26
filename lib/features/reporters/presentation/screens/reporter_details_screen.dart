@@ -1,17 +1,45 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/theme_extensions.dart';
 import '../../data/models/reporter_model.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
-class ReporterDetailsScreen extends StatelessWidget {
+class ReporterDetailsScreen extends StatefulWidget {
   final ReporterModel reporter;
 
   const ReporterDetailsScreen({
     super.key,
     required this.reporter,
   });
+
+  @override
+  State<ReporterDetailsScreen> createState() => _ReporterDetailsScreenState();
+}
+
+class _ReporterDetailsScreenState extends State<ReporterDetailsScreen> {
+  bool _isFollowing = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFollowStatus();
+  }
+
+  Future<void> _loadFollowStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (mounted) {
+      setState(() {
+        _isFollowing = prefs.getBool('reporter_following_${widget.reporter.id}') ?? false;
+      });
+    }
+  }
+
+  ReporterModel get reporter => widget.reporter;
 
   Future<void> _makePhoneCall(String phoneNumber) async {
     final Uri launchUri = Uri(
@@ -57,6 +85,17 @@ class ReporterDetailsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.share, color: Colors.white, size: 20),
+            onPressed: () {
+              Share.share('Connect with reporter ${reporter.name} (${reporter.title}) on BIG TV!');
+              AnalyticsService.instance.track(AnalyticsEventName.reporterShare, properties: {
+                'reporter_id': reporter.id,
+              });
+            },
+          ),
+        ],
         title: const Text(
           'Reporter details',
           style: TextStyle(
@@ -162,24 +201,62 @@ class ReporterDetailsScreen extends StatelessWidget {
                           ),
                         ),
                         SizedBox(height: 10.h),
-                        // Tag Pill
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.w,
-                            vertical: 5.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFDE8E8),
-                            borderRadius: BorderRadius.circular(14.r),
-                          ),
-                          child: Text(
-                            reporter.category,
-                            style: TextStyle(
-                              color: const Color(0xFFD32F2F),
-                              fontSize: 11.sp,
-                              fontWeight: FontWeight.w600,
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 5.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFFDE8E8),
+                                borderRadius: BorderRadius.circular(14.r),
+                              ),
+                              child: Text(
+                                reporter.category,
+                                style: TextStyle(
+                                  color: const Color(0xFFD32F2F),
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
-                          ),
+                            const Spacer(),
+                            InkWell(
+                              onTap: () async {
+                                setState(() {
+                                  _isFollowing = !_isFollowing;
+                                });
+                                final prefs = await SharedPreferences.getInstance();
+                                await prefs.setBool('reporter_following_${reporter.id}', _isFollowing);
+                                if (_isFollowing) {
+                                  AnalyticsService.instance.track(AnalyticsEventName.reporterFollow, properties: {
+                                    'reporter_id': reporter.id,
+                                  });
+                                } else {
+                                  AnalyticsService.instance.track(AnalyticsEventName.reporterUnfollow, properties: {
+                                    'reporter_id': reporter.id,
+                                  });
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(14.r),
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+                                decoration: BoxDecoration(
+                                  color: _isFollowing ? (isDark ? Colors.grey.shade800 : Colors.grey.shade300) : primaryColor,
+                                  borderRadius: BorderRadius.circular(14.r),
+                                ),
+                                child: Text(
+                                  _isFollowing ? 'Following' : 'Follow',
+                                  style: TextStyle(
+                                    color: _isFollowing ? (isDark ? Colors.white70 : Colors.black87) : Colors.white,
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/bookmark_post_model.dart';
 import '../../data/repositories/bookmarks_repository.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
 class BookmarksProvider extends ChangeNotifier {
   final BookmarksRepository _repository = BookmarksRepository();
@@ -174,6 +176,8 @@ class BookmarksProvider extends ChangeNotifier {
     if (targetStatus) {
       _bookmarkedPostIds.add(id);
       _unbookmarkedSessionIds.remove(id);
+      AnalyticsService.instance.track(AnalyticsEventName.articleLike, properties: {'article_id': id});
+      AnalyticsService.instance.track(AnalyticsEventName.articleFavorite, properties: {'article_id': id});
       if (article != null && !_bookmarks.any((b) => b.id == id)) {
         try {
           final copy = Map<String, dynamic>.from(article);
@@ -185,6 +189,8 @@ class BookmarksProvider extends ChangeNotifier {
     } else {
       _bookmarkedPostIds.remove(id);
       _unbookmarkedSessionIds.add(id);
+      AnalyticsService.instance.track(AnalyticsEventName.articleUnlike, properties: {'article_id': id});
+      AnalyticsService.instance.track(AnalyticsEventName.articleUnfavorite, properties: {'article_id': id});
       _bookmarks.removeWhere((b) => b.id == id);
       if (_totalBookmarks > 0) _totalBookmarks--;
     }

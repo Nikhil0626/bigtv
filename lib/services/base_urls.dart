@@ -48,7 +48,9 @@ class BaseUrls {
   /// New Server API
   // static const String newServerBaseUrl = "http://192.168.70.251";
   static const String newServerBaseUrl = "https://api.pravasamedia.com";
+  static const String sendNotificationApi = "/api/v1/sendNotification";
   static const String getReportersApi = "/api/v1/reporters";
+  static const String gamesApi = "/api/v1/games";
   static const String deviceDetails = "/api/v1/deviceDetails";
   static const String appConfig = "/api/v1/app-config/all";
 

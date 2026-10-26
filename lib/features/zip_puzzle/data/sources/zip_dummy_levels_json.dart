@@ -1,0 +1,108 @@
+/// Dummy JSON catalogue used only for test fixtures
+/// constructed according to the specification in
+/// `zip_puzzle_api_dynamic_levels_implementation.md`.
+final Map<String, dynamic> zipDummyCatalogueJson = {
+  'schemaVersion': 1,
+  'gameId': 'zip_puzzle',
+  'gameType': 'zip',
+  'total': 2,
+  'page': 1,
+  'pageSize': 2,
+  'items': [
+    {
+      'gameId': 'zip_puzzle',
+      'gameType': 'zip',
+      'levelId': 'zip_001',
+      'levelNumber': 1,
+      'title': 'First Steps',
+      'schemaVersion': 1,
+      'difficulty': 'easy',
+      'puzzleDate': '2026-10-22',
+      'content': {
+        'grid': {
+          'rows': 4,
+          'columns': 4,
+        },
+        'checkpoints': [
+          {'number': 1, 'row': 0, 'col': 0},
+          {'number': 2, 'row': 1, 'col': 2},
+          {'number': 3, 'row': 3, 'col': 3},
+          {'number': 4, 'row': 3, 'col': 0},
+        ],
+        'walls': [
+          {
+            'from': {'row': 0, 'col': 1},
+            'to': {'row': 0, 'col': 2},
+          },
+          {
+            'from': {'row': 2, 'col': 0},
+            'to': {'row': 3, 'col': 0},
+          },
+        ],
+        'solutionPath': [
+          {'row': 0, 'col': 0},
+          {'row': 0, 'col': 1},
+          {'row': 1, 'col': 1},
+          {'row': 1, 'col': 0},
+          {'row': 2, 'col': 0},
+          {'row': 2, 'col': 1},
+          {'row': 2, 'col': 2},
+          {'row': 1, 'col': 2},
+          {'row': 0, 'col': 2},
+          {'row': 0, 'col': 3},
+          {'row': 1, 'col': 3},
+          {'row': 2, 'col': 3},
+          {'row': 3, 'col': 3},
+          {'row': 3, 'col': 2},
+          {'row': 3, 'col': 1},
+          {'row': 3, 'col': 0},
+        ],
+        'palette': {
+          'path': '#5D7CF6',
+          'cell': '#EAF0FF',
+          'checkpoint': '#FFFFFF',
+          'warning': '#E5484D',
+        },
+      },
+    },
+    {
+      'gameId': 'zip_puzzle',
+      'gameType': 'zip',
+      'levelId': 'zip_002',
+      'levelNumber': 2,
+      'title': 'Level 2',
+      'schemaVersion': 1,
+      'difficulty': 'medium',
+      'puzzleDate': '2026-10-22',
+      'content': {
+        'grid': {
+          'rows': 4,
+          'columns': 4,
+        },
+        'checkpoints': [
+          {'number': 1, 'row': 0, 'col': 0},
+          {'number': 2, 'row': 3, 'col': 0},
+        ],
+        'walls': [],
+        'solutionPath': [
+          {'row': 0, 'col': 0},
+          {'row': 0, 'col': 1},
+          {'row': 0, 'col': 2},
+          {'row': 0, 'col': 3},
+          {'row': 1, 'col': 3},
+          {'row': 1, 'col': 2},
+          {'row': 1, 'col': 1},
+          {'row': 1, 'col': 0},
+          {'row': 2, 'col': 0},
+          {'row': 2, 'col': 1},
+          {'row': 2, 'col': 2},
+          {'row': 2, 'col': 3},
+          {'row': 3, 'col': 3},
+          {'row': 3, 'col': 2},
+          {'row': 3, 'col': 1},
+          {'row': 3, 'col': 0},
+        ],
+      },
+    },
+  ],
+};
