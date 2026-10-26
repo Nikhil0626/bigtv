@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/color_tokens.dart';
+import '../../../../services/game_share_helper.dart';
 
 class PatchesCompletionDialog extends StatelessWidget {
   final int levelNumber;
@@ -137,6 +138,39 @@ class PatchesCompletionDialog extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 16),
+
+                // Share Button
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      GameShareHelper.shareGame(
+                        context: context,
+                        gameSlug: 'patch',
+                        gameTitle: 'Patch Puzzle Level $levelNumber',
+                        formattedTime: formattedTime,
+                      );
+                    },
+                    icon: const Icon(Icons.share_rounded, size: 18, color: Color(0xFF10B981)),
+                    label: const Text(
+                      'Share My Score',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF10B981),
+                      ),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF10B981),
+                      side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 10),
 
                 // Action Buttons
                 if (hasNextLevel)

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/zip_puzzle/data/models/level_definition.dart';
+import 'package:chotanews/services/game_share_helper.dart';
 import '../providers/sudoku_catalog_provider.dart';
 import '../widgets/sudoku_level_tile.dart';
 import 'sudoku_gameplay_screen.dart';
@@ -49,6 +50,20 @@ class _SudokuLevelSelectionScreenState
               ),
             ),
             actions: [
+              IconButton(
+                icon: const Icon(
+                  Icons.share_rounded,
+                  color: Color(0xFF10B981),
+                ),
+                tooltip: 'Share Game',
+                onPressed: () {
+                  GameShareHelper.shareGame(
+                    context: context,
+                    gameSlug: 'sudoku',
+                    gameTitle: 'Sudoku',
+                  );
+                },
+              ),
               IconButton(
                 icon: const Icon(Icons.leaderboard_rounded,
                     color: AppColorTokens.primaryRed),

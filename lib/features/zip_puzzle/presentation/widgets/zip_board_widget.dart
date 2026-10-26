@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/widgets/game_watermark_widget.dart';
 import '../../data/models/grid_point.dart';
 import '../providers/zip_game_provider.dart';
 
@@ -83,13 +84,24 @@ class ZipBoardWidget extends StatelessWidget {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(18),
-                    child: CustomPaint(
-                      size: Size(boardWidth, boardHeight),
-                      painter: _ZipBoardPainter(
-                        game: game,
-                        cellSize: cellSize,
-                        isDark: isDark,
-                      ),
+                    child: Stack(
+                      children: [
+                        CustomPaint(
+                          size: Size(boardWidth, boardHeight),
+                          painter: _ZipBoardPainter(
+                            game: game,
+                            cellSize: cellSize,
+                            isDark: isDark,
+                          ),
+                        ),
+                        if (game.isCompleted || game.isViewOnly)
+                          Positioned.fill(
+                            child: GameWatermarkWidget(
+                              logoUrl: level.logoUrl,
+                              size: boardWidth * 0.55,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

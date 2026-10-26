@@ -198,6 +198,7 @@ class ZipLevelDefinitionMapper {
       solutionPath: solutionPath,
       totalRequiredCells: totalCells,
       walls: walls,
+      logoUrl: remote.logoUrl,
     );
   }
 

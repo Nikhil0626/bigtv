@@ -73,6 +73,7 @@ class PatchLevel {
   final List<PatchSolutionPiece> solution;
   final Color gridBorder;
   final Color boardBackground;
+  final String? logoUrl;
 
   PatchLevel({
     required this.levelId,
@@ -85,6 +86,7 @@ class PatchLevel {
     this.solution = const [],
     required this.gridBorder,
     required this.boardBackground,
+    this.logoUrl,
   });
 
   PatchClueData? getClueAt(int row, int col) {
@@ -122,6 +124,14 @@ class PatchLevel {
     final rawClues = content['clues'] as List? ?? [];
     final rawSolution = content['solution'] as List? ?? [];
 
+    final rawLogo = json['logoUrl'] ??
+        json['completionImageUrl'] ??
+        json['backgroundImageUrl'] ??
+        content['logoUrl'] ??
+        content['completionImageUrl'] ??
+        content['backgroundImageUrl'] ??
+        content['backgroundImage'];
+
     return PatchLevel(
       levelId: json['levelId']?.toString() ?? 'patch_01',
       levelNumber: (json['levelNumber'] as num?)?.toInt() ?? 1,
@@ -139,6 +149,7 @@ class PatchLevel {
           .toList(),
       gridBorder: parseHex(palette['gridBorder']?.toString(), const Color(0xFFBDC3C7)),
       boardBackground: parseHex(palette['boardBackground']?.toString(), const Color(0xFFF4F6F7)),
+      logoUrl: rawLogo?.toString(),
     );
   }
 }

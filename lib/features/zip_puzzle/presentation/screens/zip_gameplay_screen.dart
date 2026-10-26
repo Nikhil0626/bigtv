@@ -15,6 +15,7 @@ import 'zip_leaderboard_screen.dart';
 import 'zip_level_selection_screen.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import '../../../../services/game_share_helper.dart';
 
 class ZipGameplayScreen extends StatefulWidget {
   final LevelDefinition level;
@@ -67,6 +68,11 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
     super.dispose();
   }
 
+  DailySubmissionResult? _cachedDailyResult;
+  bool? _cachedIsPersonalBest;
+  bool? _cachedHasNext;
+  LevelDefinition? _cachedNextLevel;
+
   void _onLevelCompleted(ZipGameProvider game) async {
     if (_dialogShown) return;
     _dialogShown = true;
@@ -96,7 +102,7 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
       AnalyticsService.instance.track(AnalyticsEventName.gameScoreRecorded, properties: {
         'game_id': 'zip_puzzle',
         'score': game.elapsedMilliseconds,
-        'rank': dailyResult.rank ?? 1,
+        'rank': dailyResult.rank,
       });
     }
 
@@ -116,6 +122,19 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
       catalog.refreshProgressOnly();
     } catch (_) {}
 
+    setState(() {
+      _cachedDailyResult = dailyResult;
+      _cachedIsPersonalBest = isPersonalBest;
+      _cachedHasNext = hasNext;
+      _cachedNextLevel = nextLevel;
+    });
+  }
+
+  void _showCompletionDialog(ZipGameProvider game) {
+    final catalog = context.read<ZipCatalogProvider>();
+    final nextLevel = _cachedNextLevel ?? catalog.getNextLevel(_currentLevel);
+    final hasNext = _cachedHasNext ?? (!widget.isDailyPuzzle && nextLevel != null);
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -123,10 +142,10 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
         return ZipCompletionDialog(
           levelNumber: _currentLevel.levelNumber,
           formattedTime: game.formattedTime,
-          isPersonalBest: isPersonalBest,
+          isPersonalBest: _cachedIsPersonalBest ?? true,
           hasNextLevel: hasNext,
           isDailyPuzzle: widget.isDailyPuzzle,
-          dailyResult: dailyResult,
+          dailyResult: _cachedDailyResult,
           onViewGame: () {
             Navigator.pop(dialogCtx);
           },
@@ -159,6 +178,7 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
           onReplay: () {
             Navigator.pop(dialogCtx);
             _dialogShown = false;
+            _cachedDailyResult = null;
             game.reset();
           },
           onViewLeaderboard: () {
@@ -186,6 +206,17 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
           },
         );
       },
+    );
+  }
+
+  void _shareCurrentGame(ZipGameProvider game) {
+    GameShareHelper.shareGame(
+      context: context,
+      gameSlug: 'zip',
+      gameTitle: widget.isDailyPuzzle ? 'Zip Puzzle' : 'Zip Level ${_currentLevel.levelNumber}',
+      formattedTime: widget.isViewOnly && widget.initialElapsedMs != null
+          ? '${(widget.initialElapsedMs! / 1000).toStringAsFixed(1)}s'
+          : (game.currentPath.isNotEmpty ? game.formattedTime : null),
     );
   }
 
@@ -292,6 +323,46 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
                       ],
                     ),
               actions: [
+                // Share Button Capsule
+                Padding(
+                  padding: const EdgeInsets.only(right: 6),
+                  child: Center(
+                    child: InkWell(
+                      onTap: () => _shareCurrentGame(game),
+                      borderRadius: BorderRadius.circular(16),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.share_rounded,
+                              size: 15,
+                              color: Color(0xFF10B981),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Share',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: isDark ? Colors.white : const Color(0xFF0F172A),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
                 if (widget.isViewOnly)
                   Padding(
                     padding: const EdgeInsets.only(right: 16),
@@ -531,6 +602,26 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
                                 ],
                               ),
                             ),
+                            OutlinedButton.icon(
+                              onPressed: () => _shareCurrentGame(game),
+                              icon: const Icon(Icons.share_rounded, size: 15, color: Color(0xFF10B981)),
+                              label: const Text(
+                                'Share',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF10B981),
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Color(0xFF10B981), width: 1.2),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                             ElevatedButton(
                               onPressed: () => Navigator.pop(context),
                               style: ElevatedButton.styleFrom(
@@ -548,131 +639,182 @@ class _ZipGameplayScreenState extends State<ZipGameplayScreen> {
                       ),
                       const SizedBox(height: 8),
                     ] else ...[
-                      // Undo and Hint Pill Buttons Row (Matches Screenshot 1 & 2)
-                      Row(
-                        children: [
-                          // Undo Pill Button
-                          Expanded(
-                            child: InkWell(
-                              onTap: isUndoEnabled ? () => game.undo() : null,
-                              borderRadius: BorderRadius.circular(24),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: isUndoEnabled
-                                      ? (isDark
-                                          ? const Color(0xFF1E2024)
-                                          : Colors.white)
-                                      : (isDark
-                                          ? const Color(0xFF181A1D)
-                                          : const Color(0xFFECEEF1)),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: isUndoEnabled
-                                      ? Border.all(
-                                          color: isDark
-                                              ? const Color(0xFF33363D)
-                                              : const Color(0xFFD1D5DB),
-                                          width: 1.5,
-                                        )
-                                      : null,
+                      // Controls: Done Button (when completed/view-only) OR Undo & Hint (when playing)
+                      if (game.isCompleted || widget.isViewOnly)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: const Color(0xFF10B981),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  elevation: 2,
                                 ),
-                                child: Center(
-                                  child: Text(
-                                    'Undo',
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w600,
-                                      color: isUndoEnabled
-                                          ? (isDark
-                                              ? Colors.white
-                                              : const Color(0xFF111827))
-                                          : const Color(0xFF9CA3AF),
+                                icon: const Icon(Icons.check_circle_rounded, size: 22),
+                                label: const Text(
+                                  'Done',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                onPressed: () => _showCompletionDialog(game),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: isDark ? const Color(0xFF1E2024) : Colors.white,
+                                foregroundColor: const Color(0xFF10B981),
+                                side: const BorderSide(color: Color(0xFF10B981), width: 1.5),
+                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(24),
+                                ),
+                                elevation: 2,
+                              ),
+                              icon: const Icon(Icons.share_rounded, size: 20, color: Color(0xFF10B981)),
+                              label: const Text(
+                                'Share',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF10B981),
+                                ),
+                              ),
+                              onPressed: () => _shareCurrentGame(game),
+                            ),
+                          ],
+                        )
+                      else
+                        Row(
+                          children: [
+                            // Undo Pill Button
+                            Expanded(
+                              child: InkWell(
+                                onTap: isUndoEnabled ? () => game.undo() : null,
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: isUndoEnabled
+                                        ? (isDark
+                                            ? const Color(0xFF1E2024)
+                                            : Colors.white)
+                                        : (isDark
+                                            ? const Color(0xFF181A1D)
+                                            : const Color(0xFFECEEF1)),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: isUndoEnabled
+                                        ? Border.all(
+                                            color: isDark
+                                                ? const Color(0xFF33363D)
+                                                : const Color(0xFFD1D5DB),
+                                            width: 1.5,
+                                          )
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      'Undo',
+                                      style: TextStyle(
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                        color: isUndoEnabled
+                                            ? (isDark
+                                                ? Colors.white
+                                                : const Color(0xFF111827))
+                                            : const Color(0xFF9CA3AF),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
+                            const SizedBox(width: 12),
 
-                          // Hint Pill Button (3 daily hints limit)
-                          Expanded(
-                            child: InkWell(
-                              onTap: game.isCompleted
-                                  ? null
-                                  : () async {
-                                      if (game.remainingHints <= 0) {
-                                        ScaffoldMessenger.of(context)
-                                            .hideCurrentSnackBar();
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            content: Text(
-                                                'Daily hint limit reached (3/3). Come back tomorrow!'),
-                                            behavior: SnackBarBehavior.floating,
-                                            duration: Duration(seconds: 2),
+                            // Hint Pill Button (3 daily hints limit)
+                            Expanded(
+                              child: InkWell(
+                                onTap: game.isCompleted
+                                    ? null
+                                    : () async {
+                                        if (game.remainingHints <= 0) {
+                                          ScaffoldMessenger.of(context)
+                                              .hideCurrentSnackBar();
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                  'Daily hint limit reached (3/3). Come back tomorrow!'),
+                                              behavior: SnackBarBehavior.floating,
+                                              duration: Duration(seconds: 2),
+                                            ),
+                                          );
+                                          return;
+                                        }
+                                        game.hint();
+                                      },
+                                borderRadius: BorderRadius.circular(24),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  decoration: BoxDecoration(
+                                    color: game.canUseHint
+                                        ? (isDark
+                                            ? const Color(0xFF1E2024)
+                                            : Colors.white)
+                                        : (isDark
+                                            ? const Color(0xFF181A1D)
+                                            : const Color(0xFFECEEF1)),
+                                    borderRadius: BorderRadius.circular(24),
+                                    border: game.canUseHint
+                                        ? Border.all(
+                                            color: isDark
+                                                ? const Color(0xFF33363D)
+                                                : const Color(0xFFD1D5DB),
+                                            width: 1.5,
+                                          )
+                                        : null,
+                                  ),
+                                  child: Center(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          'Hint',
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w600,
+                                            color: game.canUseHint
+                                                ? (isDark
+                                                    ? Colors.white
+                                                    : const Color(0xFF111827))
+                                                : const Color(0xFF9CA3AF),
                                           ),
-                                        );
-                                        return;
-                                      }
-                                      game.hint();
-                                    },
-                              borderRadius: BorderRadius.circular(24),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                decoration: BoxDecoration(
-                                  color: game.canUseHint
-                                      ? (isDark
-                                          ? const Color(0xFF1E2024)
-                                          : Colors.white)
-                                      : (isDark
-                                          ? const Color(0xFF181A1D)
-                                          : const Color(0xFFECEEF1)),
-                                  borderRadius: BorderRadius.circular(24),
-                                  border: game.canUseHint
-                                      ? Border.all(
-                                          color: isDark
-                                              ? const Color(0xFF33363D)
-                                              : const Color(0xFFD1D5DB),
-                                          width: 1.5,
-                                        )
-                                      : null,
-                                ),
-                                child: Center(
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'Hint',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: game.canUseHint
-                                              ? (isDark
-                                                  ? Colors.white
-                                                  : const Color(0xFF111827))
-                                              : const Color(0xFF9CA3AF),
                                         ),
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '(${game.remainingHints})',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          fontWeight: FontWeight.bold,
-                                          color: game.canUseHint
-                                              ? game.pathColor
-                                              : const Color(0xFF9CA3AF),
+                                        const SizedBox(width: 4),
+                                        Text(
+                                          '(${game.remainingHints})',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                            color: game.canUseHint
+                                                ? game.pathColor
+                                                : const Color(0xFF9CA3AF),
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ],
-                      ),
+                          ],
+                        ),
 
                       const SizedBox(height: 16),
 

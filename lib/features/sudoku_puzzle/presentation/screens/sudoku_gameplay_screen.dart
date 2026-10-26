@@ -10,6 +10,7 @@ import '../widgets/sudoku_completion_dialog.dart';
 import '../widgets/sudoku_how_to_play_card.dart';
 import '../widgets/sudoku_number_pad.dart';
 import 'sudoku_leaderboard_screen.dart';
+import '../../../../services/game_share_helper.dart';
 
 class SudokuGameplayScreen extends StatefulWidget {
   final SudokuLevelDefinition level;
@@ -194,10 +195,57 @@ class _SudokuGameplayScreenState extends State<SudokuGameplayScreen> {
                             ),
                           ),
 
-                          // Right: Reset Button
-                          InkWell(
-                            onTap: !game.hasStarted ? null : () => game.reset(),
-                            borderRadius: BorderRadius.circular(20),
+                          // Right: Share & Reset Buttons
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              InkWell(
+                                onTap: () {
+                                  GameShareHelper.shareGame(
+                                    context: context,
+                                    gameSlug: 'sudoku',
+                                    gameTitle: 'Sudoku',
+                                    levelNumber: _currentLevel.levelNumber,
+                                    formattedTime: game.hasStarted ? game.formattedTime : null,
+                                  );
+                                },
+                                borderRadius: BorderRadius.circular(20),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 10, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(20),
+                                    border: Border.all(
+                                      color: const Color(0xFF10B981).withValues(alpha: 0.35),
+                                      width: 1.2,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.share_rounded,
+                                        size: 14,
+                                        color: Color(0xFF10B981),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        'Share',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark ? Colors.white : const Color(0xFF111827),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: !game.hasStarted ? null : () => game.reset(),
+                                borderRadius: BorderRadius.circular(20),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 14, vertical: 6),
@@ -231,7 +279,9 @@ class _SudokuGameplayScreenState extends State<SudokuGameplayScreen> {
                           ),
                         ],
                       ),
-                    ),
+                    ],
+                  ),
+                ),
 
                     const SizedBox(height: 4),
 

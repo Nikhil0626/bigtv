@@ -11,6 +11,7 @@ class SudokuLevel {
   final List<List<int>> initialGrid;
   final List<List<int>> solution;
   final SudokuPalette palette;
+  final String? logoUrl;
 
   SudokuLevel({
     required this.levelId,
@@ -23,6 +24,7 @@ class SudokuLevel {
     required this.initialGrid,
     required this.solution,
     required this.palette,
+    this.logoUrl,
   });
 
   factory SudokuLevel.fromJson(Map<String, dynamic> json) {
@@ -44,6 +46,14 @@ class SudokuLevel {
     final rawInitial = content['initialGrid'] as List? ?? [];
     final rawSolution = content['solution'] as List? ?? [];
 
+    final rawLogo = json['logoUrl'] ??
+        json['completionImageUrl'] ??
+        json['backgroundImageUrl'] ??
+        content['logoUrl'] ??
+        content['completionImageUrl'] ??
+        content['backgroundImageUrl'] ??
+        content['backgroundImage'];
+
     return SudokuLevel(
       levelId: json['levelId']?.toString() ?? 'sudoku_01',
       levelNumber: (json['levelNumber'] as num?)?.toInt() ?? 1,
@@ -61,6 +71,7 @@ class SudokuLevel {
       palette: SudokuPalette.fromJson(
         content['palette'] != null ? Map<String, dynamic>.from(content['palette']) : {},
       ),
+      logoUrl: rawLogo?.toString(),
     );
   }
 }
