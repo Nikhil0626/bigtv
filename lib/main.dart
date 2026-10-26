@@ -1,8 +1,14 @@
-import 'dart:async';
-
-import 'package:chotanews/services/analytics_service.dart';
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:chotanews/services/analytics_service.dart' as legacy_analytics;
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/analytics_navigator_observer.dart';
+import 'package:chotanews/analytics/analytics_connectivity_watcher.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:chotanews/utils/local_data.dart';
+import 'app_lifecycle_observer.dart';
 import 'package:chotanews/services/event_cron.dart';
-
 import 'package:chotanews/services/deviice_details.dart';
 import 'package:chotanews/services/permission_handler_services.dart';
 import 'package:chotanews/services/register_provider.dart';
@@ -52,8 +58,8 @@ Future<void> main() async {
     final appDocumentDir = await getApplicationDocumentsDirectory();
     Hive.init(appDocumentDir.path);
     await Hive.openBox('events');
+    await Hive.openBox('analytics_events');
     await Hive.openBox('pollBox');
-    EventCron().start();
   } catch (e) {
     debugPrint("Hive init error: $e");
   }
@@ -69,6 +75,83 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
   ]);
 
+  try {
+    final platform = kIsWeb
+        ? 'web'
+        : Platform.isAndroid
+            ? 'android'
+            : Platform.isIOS
+                ? 'ios'
+                : 'web';
+
+    final deviceId = await AnalyticsService.getStableDeviceId();
+    final userIdStr = await getUserid();
+    final userId = (userIdStr != null && userIdStr.isNotEmpty) ? int.tryParse(userIdStr) : null;
+
+    await AnalyticsService.instance.init(
+      deviceId: deviceId,
+      platform: platform,
+      userId: userId,
+    );
+
+    AnalyticsConnectivityWatcher.start();
+
+    await AnalyticsService.instance.track(
+      AnalyticsEventName.appOpen,
+      properties: {'launch_type': 'cold'},
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    final isFirstOpen = prefs.getBool('is_first_open_done') != true;
+    if (isFirstOpen) {
+      await AnalyticsService.instance.track(
+        AnalyticsEventName.appFirstOpen,
+        properties: {'install_source': 'organic'},
+      );
+      await AnalyticsService.instance.track(
+        AnalyticsEventName.userFirstOpen,
+        properties: {'install_source': 'organic'},
+      );
+      await prefs.setBool('is_first_open_done', true);
+    } else {
+      final lastOpenStr = prefs.getString('analytics_last_open_date');
+      if (lastOpenStr != null) {
+        final lastDate = DateTime.tryParse(lastOpenStr);
+        if (lastDate != null) {
+          final daysSince = DateTime.now().difference(lastDate).inDays;
+          if (daysSince > 0) {
+            await AnalyticsService.instance.track(
+              AnalyticsEventName.userReturn,
+              properties: {'days_since_last_open': daysSince},
+            );
+          }
+        }
+      }
+    }
+    await prefs.setString('analytics_last_open_date', DateTime.now().toIso8601String());
+
+    final todayStr = DateTime.now().toUtc().toIso8601String().substring(0, 10);
+    final lastDaily = prefs.getString('analytics_last_daily_activity');
+    if (lastDaily != todayStr) {
+      await AnalyticsService.instance.track(
+        AnalyticsEventName.appDailyActivity,
+        properties: {'date': todayStr},
+      );
+      await AnalyticsService.instance.track(
+        AnalyticsEventName.userActivitySummary,
+        properties: {'date': todayStr, 'type': 'daily_summary'},
+      );
+      await prefs.setString('analytics_last_daily_activity', todayStr);
+    }
+
+    await AnalyticsService.instance.startSession();
+
+    WidgetsBinding.instance.addObserver(AppLifecycleObserver());
+    EventCron().start();
+  } catch (e) {
+    debugPrint("[Analytics] Init error in main: $e");
+  }
+
   runApp(AppLifecycleManager(child: const MyApp()));
 
   // Run non-blocking background initialization tasks
@@ -81,10 +164,10 @@ void _initBackgroundServices() async {
     getReferrerFromPlayStore();
     checkForUpdate();
 
-    AnalyticsService.logAppOpen();
-    AnalyticsService().trackAppOpen();
-    AnalyticsService.startSession();
-    AnalyticsService.checkRetention();
+    legacy_analytics.AnalyticsService.logAppOpen();
+    legacy_analytics.AnalyticsService().trackAppOpen();
+    legacy_analytics.AnalyticsService.startSession();
+    legacy_analytics.AnalyticsService.checkRetention();
 
     // Configure foreground notification options for iOS
     FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
@@ -105,17 +188,44 @@ void _initBackgroundServices() async {
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       debugPrint("Foreground FCM message received: ${message.data}");
+      AnalyticsService.instance.track(AnalyticsEventName.notificationReceived, properties: {
+        'notification_id': message.messageId,
+        'campaign_id': message.data['campaign_id'],
+        'notification_type': message.data['type'] ?? 'general',
+      });
       _handleForegroundNotification(message);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       debugPrint("Notification opened app: ${message.data}");
+      AnalyticsService.instance.track(AnalyticsEventName.notificationOpen, properties: {
+        'notification_id': message.messageId,
+        'campaign_id': message.data['campaign_id'],
+        'destination': message.data['destination'] ?? 'home',
+      });
+      if (message.data['campaign_id'] != null) {
+        AnalyticsService.instance.track(AnalyticsEventName.campaignEntry, properties: {
+          'campaign_id': message.data['campaign_id'],
+          'source': 'push_notification',
+        });
+      }
       _handleBackgroundNotification(message.data);
     });
 
     FirebaseMessaging.instance.getInitialMessage().then((RemoteMessage? message) {
       if (message != null) {
         debugPrint("Initial FCM message on launch: ${message.data}");
+        AnalyticsService.instance.track(AnalyticsEventName.notificationOpen, properties: {
+          'notification_id': message.messageId,
+          'campaign_id': message.data['campaign_id'],
+          'destination': message.data['destination'] ?? 'home',
+        });
+        if (message.data['campaign_id'] != null) {
+          AnalyticsService.instance.track(AnalyticsEventName.campaignEntry, properties: {
+            'campaign_id': message.data['campaign_id'],
+            'source': 'push_notification',
+          });
+        }
         _handleBackgroundNotification(message.data);
       }
     });
@@ -203,6 +313,21 @@ void _handleBackgroundNotification(Map<String, dynamic>? payload, {String? deepL
 }
 
 void _handleBackgroundDeepLink(Uri uri) {
+  AnalyticsService.instance.track(AnalyticsEventName.deepLinkOpen, properties: {
+    'destination': uri.path,
+    'source': uri.queryParameters['source'] ?? 'deep_link',
+    'url': uri.toString(),
+  });
+  if (uri.queryParameters.containsKey('campaign_id') ||
+      uri.queryParameters.containsKey('utm_campaign') ||
+      uri.queryParameters.containsKey('campaign')) {
+    AnalyticsService.instance.track(AnalyticsEventName.campaignEntry, properties: {
+      'campaign_id': uri.queryParameters['campaign_id'] ??
+          uri.queryParameters['utm_campaign'] ??
+          uri.queryParameters['campaign'],
+      'source': uri.queryParameters['utm_source'] ?? 'deep_link',
+    });
+  }
   if (mainNavigatorKey.currentContext != null) {
     mainNavigatorKey.currentContext!.read<HomeProvider>().routeDeepLink(uri);
   } else {
@@ -238,6 +363,7 @@ class _MyAppState extends State<MyApp> {
           builder: (context, themeProvider, child) {
             return MaterialApp(
               navigatorKey: mainNavigatorKey,
+              navigatorObservers: [AnalyticsNavigatorObserver()],
 
               // supportedLocales: const [Locale('te', '')],
               // // Add your locales

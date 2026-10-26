@@ -7,7 +7,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
-import 'package:chotanews/utils/top_right_wave_painter.dart';
 import 'package:chotanews/features/home/presentation/screens/tag_video_player_screen.dart';
 import 'package:chotanews/features/home/presentation/screens/tag_folder_videos_screen.dart';
 
@@ -240,21 +239,6 @@ class _TagVideoGridViewWidgetState extends State<TagVideoGridViewWidget>
                         ],
                   stops: const [0.0, 0.5, 1.0],
                 ),
-              ),
-            ),
-          ),
-
-          // Self-moving wave ripple animation
-          Positioned(
-            top: 0,
-            right: 0,
-            width: MediaQuery.of(context).size.width,
-            height: 480.h,
-            child: CustomPaint(
-              painter: TopRightWavePainter(
-                isDark: isDark,
-                maxRadius: 460.0,
-                waveAnimation: _waveController,
               ),
             ),
           ),
@@ -754,21 +738,6 @@ class _TagVideoGridViewWidgetState extends State<TagVideoGridViewWidget>
                         ],
                   stops: const [0.0, 0.5, 1.0],
                 ),
-              ),
-            ),
-          ),
-
-          // Self-moving wave ripple animation
-          Positioned(
-            top: 0,
-            right: 0,
-            width: MediaQuery.of(context).size.width,
-            height: 480.h,
-            child: CustomPaint(
-              painter: TopRightWavePainter(
-                isDark: isDark,
-                maxRadius: 460.0,
-                waveAnimation: _waveController,
               ),
             ),
           ),

@@ -2,12 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/foundation.dart';
-import 'package:google_mlkit_translation/google_mlkit_translation.dart';
 import 'package:http/http.dart' as http;
 import 'package:translator/translator.dart';
 
 /// A singleton service that handles Telugu <-> English translation
-/// using GoogleTranslator package with Groq, OpenAI, MyMemory, and ML Kit fallbacks.
+/// using GoogleTranslator package with Groq, OpenAI, MyMemory fallbacks and cache.
 class TranslationService extends ChangeNotifier {
   static final TranslationService _instance = TranslationService._internal();
   factory TranslationService() => _instance;
@@ -15,11 +14,7 @@ class TranslationService extends ChangeNotifier {
 
   final GoogleTranslator _googleTranslator = GoogleTranslator();
 
-  OnDeviceTranslator? _translator;
-  bool _modelDownloaded = false;
-  bool _isDownloading = false;
-  bool _initFailed = false;
-  Completer<void>? _initCompleter;
+  final bool _isDownloading = false;
 
   final Map<String, String> _cache = {};
 
@@ -33,64 +28,9 @@ class TranslationService extends ChangeNotifier {
     return _cache[key];
   }
 
-  /// Ensures the model is downloaded and the translator is ready.
+  /// Ensures the translator service is initialized and ready.
   Future<void> init() async {
-    if (_modelDownloaded) return;
-    if (_isDownloading && _initCompleter != null) {
-      log('[TranslationService] Download already in progress, awaiting completer...');
-      await _initCompleter!.future;
-      return;
-    }
-
-    _isDownloading = true;
-    _initCompleter = Completer<void>();
-    if (_initFailed) {
-      log('[TranslationService] Retrying after previous failure...');
-      _initFailed = false;
-    }
-
-    log('[TranslationService] Starting model download...');
-
-    try {
-      final modelManager = OnDeviceTranslatorModelManager();
-
-      // Telugu model
-      bool teDownloaded = await modelManager.isModelDownloaded(TranslateLanguage.telugu.bcpCode);
-      log('[TranslationService] Telugu model already downloaded: $teDownloaded');
-      if (!teDownloaded) {
-        log('[TranslationService] Downloading Telugu model...');
-        await modelManager.downloadModel(TranslateLanguage.telugu.bcpCode);
-        log('[TranslationService] Telugu model downloaded successfully.');
-      }
-
-      // English model
-      bool enDownloaded = await modelManager.isModelDownloaded(TranslateLanguage.english.bcpCode);
-      log('[TranslationService] English model already downloaded: $enDownloaded');
-      if (!enDownloaded) {
-        log('[TranslationService] Downloading English model...');
-        await modelManager.downloadModel(TranslateLanguage.english.bcpCode);
-        log('[TranslationService] English model downloaded successfully.');
-      }
-
-      _translator = OnDeviceTranslator(
-        sourceLanguage: TranslateLanguage.telugu,
-        targetLanguage: TranslateLanguage.english,
-      );
-
-      _modelDownloaded = true;
-      _initFailed = false;
-      log('[TranslationService] Translator ready.');
-      notifyListeners();
-    } catch (e, st) {
-      _initFailed = true;
-      log('[TranslationService] ERROR during init: $e', stackTrace: st);
-    } finally {
-      _isDownloading = false;
-      if (_initCompleter != null && !_initCompleter!.isCompleted) {
-        _initCompleter!.complete();
-      }
-      _initCompleter = null;
-    }
+    // Online and HTTP translation engines are immediately ready
   }
 
   static const String _groqApiKey = String.fromEnvironment('GROQ_API_KEY', defaultValue: '');
@@ -258,26 +198,8 @@ class TranslationService extends ChangeNotifier {
       return onlineResult;
     }
 
-    // Tier 5: Fallback to Google ML Kit On-Device Translation
-    if (!_modelDownloaded) {
-      log('[TranslationService] translate() calling ML Kit fallback: initializing model...');
-      await init();
-    }
-
-    if (!_modelDownloaded || _translator == null) {
-      log('[TranslationService] translateText skipped: model not downloaded or translator null.');
-      return text;
-    }
-
-    try {
-      final result = await _translator!.translateText(text);
-      _cache[cacheKey] = result;
-      notifyListeners();
-      return result;
-    } catch (e) {
-      log('[TranslationService] translateText error: $e');
-      return text;
-    }
+    // If all online tiers fail, return original text
+    return text;
   }
 
   /// Pre-translates title, content, and bullet points of [article] asynchronously.
@@ -340,9 +262,9 @@ class TranslationService extends ChangeNotifier {
         List<String> origWords = origContent.split(RegExp(r'\s+'));
         List<String> enWords = enContent.split(RegExp(r'\s+'));
         if (origWords.length > 55) {
-          String displayOrigContent = origWords.take(55).join(' ') + "...";
+          String displayOrigContent = "${origWords.take(55).join(' ')}...";
           String displayEnContent = enWords.length > 55
-              ? enWords.take(55).join(' ') + "..."
+              ? "${enWords.take(55).join(' ')}..."
               : enContent;
           _cache['en_$displayOrigContent'] = displayEnContent;
         }
@@ -383,7 +305,7 @@ class TranslationService extends ChangeNotifier {
       }
       List<String> words = content.split(RegExp(r'\s+'));
       if (words.length > 55) {
-        String displayContent = words.take(55).join(' ') + "...";
+        String displayContent = "${words.take(55).join(' ')}...";
         if (!_cache.containsKey('en_$displayContent')) {
           translate(displayContent);
         }
@@ -420,10 +342,7 @@ class TranslationService extends ChangeNotifier {
 
   @override
   void dispose() {
-    _translator?.close();
-    _translator = null;
-    _modelDownloaded = false;
-    _initFailed = false;
+    _cache.clear();
     super.dispose();
   }
 }

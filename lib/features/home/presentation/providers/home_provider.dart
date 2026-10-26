@@ -40,6 +40,17 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:chotanews/features/patches_puzzle/presentation/screens/patch_game_screen.dart';
+import 'package:chotanews/features/patches_puzzle/presentation/screens/patch_dashboard_screen.dart';
+import 'package:chotanews/features/sudoku_puzzle/presentation/screens/sudoku_game_screen.dart';
+import 'package:chotanews/features/zip_puzzle/presentation/screens/zip_level_selection_screen.dart';
+import 'package:chotanews/features/zip_puzzle/presentation/screens/zip_gameplay_screen.dart';
+import 'package:chotanews/features/zip_puzzle/presentation/providers/daily_puzzle_provider.dart';
+import 'package:chotanews/features/home/presentation/widgets/games_bottom_sheet.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
+import 'package:chotanews/features/home/presentation/screens/live_tv_screen.dart';
+import 'package:chotanews/services/live_tv_share_helper.dart';
+import 'package:chotanews/utils/local_data.dart';
 
 
 
@@ -60,7 +71,7 @@ class HomeProvider extends ChangeNotifier {
 
   var getSinglePostList = {};
   int aiCurrentPostId = 0;
-  int selectedIndex = 0;
+  int selectedIndex = 1; // 0: Search, 1: Home, 2: Bigtv daily, 3: Marrini
   bool isSwitched = false;
   bool isWebView = false;
   String webUrl = '';
@@ -643,9 +654,11 @@ class HomeProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     getAllAiTagsList = [];
+    isAiTagsLoading = true;
 
     if (!showTopNavTags) {
       log("Top nav tags disabled by app config (livetvvideos: $liveTvVideosEnable, aitag: $aiTagEnable)");
+      isAiTagsLoading = false;
       notifyListeners();
       return;
     }
@@ -657,6 +670,7 @@ class HomeProvider extends ChangeNotifier {
       } else if (aiTagEnable) {
         response = await HomeRepo().getAiTags();
       } else {
+        isAiTagsLoading = false;
         notifyListeners();
         return;
       }
@@ -672,9 +686,20 @@ class HomeProvider extends ChangeNotifier {
         item['aitagid'] = item['id'] ?? item['aitagid'];
         item['slug'] = item['slug'] ?? item['name'] ?? item['aitagname'] ?? item['id'];
         item['aitagname'] = item['name'] ?? item['aitagname'] ?? item['slug'];
-        item['thumbnailUrl'] = item['thumbnailUrl'] ?? item['thumbnail_url'] ?? item['thumbnail'];
+        item['thumbnailUrl'] = item['thumbnailUrl'] ??
+            item['thumbnail_url'] ??
+            item['thumbnail'] ??
+            item['imageUrl'] ??
+            item['image_url'];
+        item['description'] = item['description'] ??
+            item['desc'] ??
+            item['title'] ??
+            item['aitagname'];
         if (item['aitagnameTranslations'] != null && item['aitagnameTranslations'][langCode] != null) {
           item['aitagname'] = item['aitagnameTranslations'][langCode];
+        }
+        if (item['descriptionTranslations'] != null && item['descriptionTranslations'][langCode] != null) {
+          item['description'] = item['descriptionTranslations'][langCode];
         }
         return item;
       }).toList();
@@ -685,6 +710,7 @@ class HomeProvider extends ChangeNotifier {
     } catch (e, st) {
       log("Get Tags Api catch error $e", stackTrace: st);
     } finally {
+      isAiTagsLoading = false;
       notifyListeners();
     }
   }
@@ -903,7 +929,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   bool get isCurrentArticleGrid {
-    if (selectedIndex != 0) return false;
+    if (selectedIndex != 1) return false;
     if (isAiTagDataLoaded) return false;
     if (getAllPostList.isEmpty) return false;
     if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
@@ -925,7 +951,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   bool get isCurrentArticleBulletin {
-    if (selectedIndex != 0) return false;
+    if (selectedIndex != 1) return false;
     if (isAiTagDataLoaded) return false;
     if (getAllPostList.isEmpty) return false;
     if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
@@ -935,7 +961,7 @@ class HomeProvider extends ChangeNotifier {
   }
 
   bool get isCurrentArticleShowAlert {
-    if (selectedIndex != 0) return false;
+    if (selectedIndex != 1) return false;
     if (isAiTagDataLoaded) return false;
     if (getAllPostList.isEmpty) return false;
     if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
@@ -1169,6 +1195,177 @@ class HomeProvider extends ChangeNotifier {
           }
         }
         onItemTapped(index);
+      }
+
+      // 0. LIVE TV DEEP LINK
+      // Handles:
+      // https://app.bigtv24x7.com/live
+      // https://app.bigtv24x7.com/livetv
+      // https://app.bigtv24x7.com/live-tv
+      // https://app.bigtv24x7.com/live_tv
+      // https://app.bigtv24x7.com/live-stream
+      final String cleanPath = path.replaceAll('/', '').trim();
+      final bool isLiveTvLink = (cleanPath == 'live' ||
+              cleanPath == 'livetv' ||
+              cleanPath == 'live-tv' ||
+              cleanPath == 'live_tv' ||
+              cleanPath == 'livestream' ||
+              cleanPath == 'live-stream' ||
+              queryParams['screen'] == 'live' ||
+              queryParams['type'] == 'live') &&
+          !path.contains('livebigtv') &&
+          !queryParams.containsKey('showname');
+
+      if (isLiveTvLink) {
+        log("Routing to Live TV deep link: $uri");
+        popToRoot();
+
+        try {
+          if (mainNavigatorKey.currentContext != null) {
+            mainNavigatorKey.currentContext!.read<VideoProvider>().pauseVideo();
+          }
+        } catch (_) {}
+
+        final liveData = await fetchLiveTvStream();
+        final String streamUrl = (liveData?['stream_url'] ?? "https://stream.bigtvlive.com/live/bigtv/index.m3u8").toString();
+        final String channelName = (liveData?['channel_name'] ?? "BIG TV").toString();
+        final String playbackType = (liveData?['playback_type'] ?? "hls").toString();
+
+        if (mainNavigatorKey.currentState != null) {
+          mainNavigatorKey.currentState!.push(
+            MaterialPageRoute(
+              builder: (context) => LiveTvScreen(
+                streamUrl: streamUrl,
+                channelName: channelName,
+                playbackType: playbackType,
+              ),
+            ),
+          );
+        }
+        return;
+      }
+
+      // 0. GAMES DEEP LINK
+      // Handles:
+      // https://app.bigtv24x7.com/games?game=zip
+      // https://app.bigtv24x7.com/games?game=patch
+      // https://app.bigtv24x7.com/games?game=sudoku
+      // https://app.bigtv24x7.com/games/zip
+      // https://app.bigtv24x7.com/games/patch
+      // https://app.bigtv24x7.com/games/sudoku
+      // https://app.bigtv24x7.com/game?slug=...
+      // https://app.bigtv24x7.com/zip
+      // https://app.bigtv24x7.com/patch
+      // https://app.bigtv24x7.com/sudoku
+      final bool isGamesLink = path.contains('game') ||
+          path.contains('zip') ||
+          path.contains('patch') ||
+          path.contains('sudoku') ||
+          path.contains('puzzle') ||
+          queryParams.containsKey('game') ||
+          queryParams.containsKey('gameId') ||
+          queryParams.containsKey('gameSlug') ||
+          queryParams.containsKey('puzzle');
+
+      if (isGamesLink) {
+        log("Routing to Games deep link: $uri");
+        popToRoot();
+
+        String rawGame = queryParams['game'] ??
+            queryParams['gameId'] ??
+            queryParams['gameSlug'] ??
+            queryParams['slug'] ??
+            queryParams['name'] ??
+            queryParams['puzzle'] ??
+            '';
+
+        if (rawGame.isEmpty) {
+          for (final segment in uri.pathSegments) {
+            final s = segment.toLowerCase();
+            if (s == 'zip' || s == 'patch' || s == 'patches' || s == 'sudoku') {
+              rawGame = s;
+              break;
+            }
+          }
+        }
+
+        final g = rawGame.toLowerCase();
+        final navContext = mainNavigatorKey.currentContext;
+        final navState = mainNavigatorKey.currentState;
+
+        if (navState != null) {
+          final userId = (await getUserid()) ?? 'guest';
+
+          if (g.contains('sudoku')) {
+            if (navContext != null) {
+              try {
+                final dailyProvider = navContext.read<DailyPuzzleProvider>();
+                dailyProvider.init(gameId: 'sudoku');
+                if (dailyProvider.isTodayCompleted) {
+                  navState.push(
+                    MaterialPageRoute(
+                      builder: (_) => SudokuGameScreen(
+                        playerId: userId,
+                        isViewOnly: true,
+                      ),
+                    ),
+                  );
+                  return;
+                }
+              } catch (_) {}
+            }
+            navState.push(
+              MaterialPageRoute(builder: (_) => SudokuGameScreen(playerId: userId)),
+            );
+          } else if (g.contains('patch')) {
+            if (navContext != null) {
+              try {
+                final dailyProvider = navContext.read<DailyPuzzleProvider>();
+                dailyProvider.init(gameId: 'patch');
+                if (dailyProvider.isTodayCompleted) {
+                  navState.push(
+                    MaterialPageRoute(builder: (_) => PatchDashboardScreen(playerId: userId)),
+                  );
+                  return;
+                }
+              } catch (_) {}
+            }
+            navState.push(
+              MaterialPageRoute(builder: (_) => PatchGameScreen(playerId: userId)),
+            );
+          } else if (g.contains('zip')) {
+            if (navContext != null) {
+              try {
+                final dailyProvider = navContext.read<DailyPuzzleProvider>();
+                dailyProvider.init(gameId: 'zip');
+                if (!dailyProvider.isTodayCompleted && dailyProvider.todayLevelDefinition != null) {
+                  navState.push(
+                    MaterialPageRoute(
+                      builder: (_) => ZipGameplayScreen(
+                        level: dailyProvider.todayLevelDefinition!,
+                        isDailyPuzzle: true,
+                      ),
+                    ),
+                  );
+                  return;
+                }
+              } catch (_) {}
+            }
+            navState.push(
+              MaterialPageRoute(builder: (_) => const ZipLevelSelectionScreen()),
+            );
+          } else {
+            // General games page -> open GamesBottomSheet or ZipLevelSelectionScreen
+            if (navContext != null) {
+              GamesBottomSheet.show(navContext, false);
+            } else {
+              navState.push(
+                MaterialPageRoute(builder: (_) => const ZipLevelSelectionScreen()),
+              );
+            }
+          }
+        }
+        return;
       }
 
       // 1. EPAPER DEEP LINK

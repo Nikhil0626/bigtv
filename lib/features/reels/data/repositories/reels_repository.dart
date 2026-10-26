@@ -30,9 +30,13 @@ class ReelsRepo  extends BaseService{
     return response;
   }
 
-  Future postLikes(Map body) async{
-    Response response = await makeRequest(baseUrl: BaseUrls.likePost,
-      url: BaseUrls.likePost, method: RequestType.post,body: body);
+  Future postLikes(Map body) async {
+    Response response = await makeRequest(
+      baseUrl: BaseUrls.baseUrlAwsDev,
+      url: BaseUrls.likePost,
+      method: RequestType.post,
+      body: body,
+    );
     return response;
   }
 }

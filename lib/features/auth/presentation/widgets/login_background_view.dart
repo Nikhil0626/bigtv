@@ -28,13 +28,19 @@ class LoginBackgroundView extends StatelessWidget {
         bool isDark = context.theme.brightness == Brightness.dark;
 
         if (!isAuthScreen) {
-          return AnimatedSwitcher(
-            duration: const Duration(milliseconds: 300),
-            switchInCurve: Curves.easeInOut,
-            switchOutCurve: Curves.easeInOut,
-            child: Container(
-              key: ValueKey(authenticationProvider.newAppLoginStatus),
-              child: _getLoginContent(authenticationProvider.newAppLoginStatus),
+          return Scaffold(
+            resizeToAvoidBottomInset: true,
+            backgroundColor: context.theme.scaffoldBackgroundColor,
+            body: SafeArea(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                switchInCurve: Curves.easeInOut,
+                switchOutCurve: Curves.easeInOut,
+                child: Container(
+                  key: ValueKey(authenticationProvider.newAppLoginStatus),
+                  child: _getLoginContent(authenticationProvider.newAppLoginStatus),
+                ),
+              ),
             ),
           );
         }

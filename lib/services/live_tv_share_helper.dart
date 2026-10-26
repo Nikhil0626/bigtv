@@ -1,0 +1,61 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
+
+class LiveTvShareHelper {
+  static const String baseUrl = 'https://app.bigtv24x7.com';
+  static const String liveShareUrl = '$baseUrl/live';
+
+  /// Generates the canonical deep link URL for Live TV using app.bigtv24x7.com
+  static String getLiveTvShareUrl() => liveShareUrl;
+
+  /// Generates the localized share text with app.bigtv24x7.com deep link
+  static String getShareText({
+    String channelName = "BIG TV",
+    bool isTelugu = false,
+  }) {
+    if (isTelugu) {
+      return "🔴 బిగ్ టీవీ ప్రత్యక్ష ప్రసారం చూడండి (24x7 Live News)!\n\n"
+          "లైవ్ చూడటానికి ఇక్కడ క్లిక్ చేయండి:\n"
+          "$liveShareUrl\n\n"
+          "తాజా బ్రేకింగ్ వార్తలు మరియు లైవ్ అప్‌డేట్స్ కోసం BIG TV యాప్‌ను డౌన్‌లోడ్ చేసుకోండి:\n"
+          "https://play.google.com/store/apps/details?id=com.chotanews";
+    }
+
+    return "🔴 Watch $channelName Live 24x7 News Streaming!\n\n"
+        "Click here to watch Live in the app:\n"
+        "$liveShareUrl\n\n"
+        "Download the BIG TV App for latest breaking news and live updates:\n"
+        "https://play.google.com/store/apps/details?id=com.chotanews";
+  }
+
+  /// Triggers the system share dialog for Live TV
+  static Future<void> shareLiveTv({
+    required BuildContext context,
+    String channelName = "BIG TV",
+    bool isTelugu = false,
+    String source = "player",
+  }) async {
+    final shareText = getShareText(channelName: channelName, isTelugu: isTelugu);
+
+    AnalyticsService.instance.track(AnalyticsEventName.liveTvShare, properties: {
+      'channel_id': channelName,
+      'share_target': 'system_share',
+      'share_url': liveShareUrl,
+      'source': source,
+    });
+
+    try {
+      final size = MediaQuery.of(context).size;
+      await Share.share(
+        shareText,
+        subject: 'Watch $channelName Live 24x7',
+        sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+      );
+    } catch (e) {
+      debugPrint('LiveTvShareHelper.shareLiveTv error: $e');
+    }
+  }
+}

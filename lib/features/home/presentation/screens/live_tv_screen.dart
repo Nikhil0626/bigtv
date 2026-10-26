@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:video_player/video_player.dart';
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/services/live_tv_share_helper.dart';
 
 class LiveTvScreen extends StatefulWidget {
   final String streamUrl;
@@ -30,10 +33,15 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
   bool _isMuted = false;
   bool _isLandscape = false;
   Timer? _hideControlsTimer;
+  DateTime? _playStartTime;
 
   @override
   void initState() {
     super.initState();
+    AnalyticsService.instance.track(AnalyticsEventName.liveTvOpen, properties: {
+      'channel_id': widget.channelName,
+      'source_screen': 'home',
+    });
     _initializePlayer();
   }
 
@@ -60,6 +68,11 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
       await controller.initialize();
       controller.setLooping(true);
       await controller.play();
+      _playStartTime = DateTime.now();
+      AnalyticsService.instance.track(AnalyticsEventName.liveTvPlay, properties: {
+        'channel_id': widget.channelName,
+        'stream_type': widget.playbackType ?? 'hls',
+      });
 
       if (mounted) {
         setState(() {
@@ -70,6 +83,10 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
       }
     } catch (e, stackTrace) {
       log("Error initializing Live TV video player: $e", stackTrace: stackTrace);
+      AnalyticsService.instance.track(AnalyticsEventName.liveTvError, properties: {
+        'channel_id': widget.channelName,
+        'error_code': e.toString(),
+      });
       if (mounted) {
         setState(() {
           _hasError = true;
@@ -128,8 +145,23 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
     }
   }
 
+  void _shareLiveTv() {
+    LiveTvShareHelper.shareLiveTv(
+      context: context,
+      channelName: widget.channelName,
+      source: 'player',
+    );
+  }
+
   @override
   void dispose() {
+    if (_playStartTime != null) {
+      final watchDuration = DateTime.now().difference(_playStartTime!).inSeconds;
+      AnalyticsService.instance.track(AnalyticsEventName.liveTvStop, properties: {
+        'channel_id': widget.channelName,
+        'watch_duration_seconds': watchDuration,
+      });
+    }
     _hideControlsTimer?.cancel();
     _controller?.dispose();
     SystemChrome.setPreferredOrientations([
@@ -294,14 +326,13 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
                                         letterSpacing: 1.0,
                                       ),
                                     ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                              SizedBox(width: 8.w),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
-                      ),
 
                       // Center Play/Pause button
                       if (_isInitialized && _controller != null)
@@ -318,8 +349,15 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
                               setState(() {
                                 if (_controller!.value.isPlaying) {
                                   _controller!.pause();
+                                  AnalyticsService.instance.track(AnalyticsEventName.liveTvPause, properties: {
+                                    'channel_id': widget.channelName,
+                                    'playback_position_seconds': _controller!.value.position.inSeconds,
+                                  });
                                 } else {
                                   _controller!.play();
+                                  AnalyticsService.instance.track(AnalyticsEventName.liveTvResume, properties: {
+                                    'channel_id': widget.channelName,
+                                  });
                                 }
                               });
                               _startHideControlsTimer();
@@ -366,26 +404,40 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
                                   ),
                                 ],
                               ),
-                              IconButton(
-                                padding: EdgeInsets.all(4.r),
-                                constraints: const BoxConstraints(),
-                                icon: Container(
-                                  padding: EdgeInsets.all(isLandscapeMode ? 10.r : 4.r),
-                                  decoration: BoxDecoration(
-                                    color: isLandscapeMode
-                                        ? Colors.red.withValues(alpha: 0.85)
-                                        : Colors.black45,
-                                    shape: BoxShape.circle,
+                              Row(
+                                children: [
+                                  IconButton(
+                                    iconSize: isLandscapeMode ? 32.r : 22.r,
+                                    tooltip: "Share Live TV",
+                                    icon: const Icon(
+                                      Icons.share_rounded,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: _shareLiveTv,
                                   ),
-                                  child: Icon(
-                                    isLandscapeMode
-                                        ? Icons.fullscreen_exit_rounded
-                                        : Icons.fullscreen_rounded,
-                                    color: Colors.white,
-                                    size: isLandscapeMode ? 44.r : 28.r,
+                                  SizedBox(width: 4.w),
+                                  IconButton(
+                                    padding: EdgeInsets.all(4.r),
+                                    constraints: const BoxConstraints(),
+                                    icon: Container(
+                                      padding: EdgeInsets.all(isLandscapeMode ? 10.r : 4.r),
+                                      decoration: BoxDecoration(
+                                        color: isLandscapeMode
+                                            ? Colors.red.withValues(alpha: 0.85)
+                                            : Colors.black45,
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: Icon(
+                                        isLandscapeMode
+                                            ? Icons.fullscreen_exit_rounded
+                                            : Icons.fullscreen_rounded,
+                                        color: Colors.white,
+                                        size: isLandscapeMode ? 44.r : 28.r,
+                                      ),
+                                    ),
+                                    onPressed: _toggleOrientation,
                                   ),
-                                ),
-                                onPressed: _toggleOrientation,
+                                ],
                               ),
                             ],
                           ),

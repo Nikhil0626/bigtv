@@ -3,14 +3,11 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 
-import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_screen.dart';
 import 'package:chotanews/aggricator_screens/rating_screen/rating_view/movie_reviews.dart';
-import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/gallery_screen.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_preview.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
-import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/home/presentation/widgets/bulletin_view.dart';
 import 'package:chotanews/features/home/presentation/widgets/full_standed_video_view.dart';
@@ -20,14 +17,10 @@ import 'package:chotanews/features/home/presentation/widgets/more_follow_widget.
 import 'package:chotanews/features/home/presentation/widgets/show_alerts_widget.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_player.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
-import 'package:chotanews/services/webengage_event_tracks.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
-import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/utils/botton_actions.dart';
-import 'package:chotanews/utils/commant_screen.dart';
 import 'package:chotanews/utils/date_format.dart';
 
 import 'package:chotanews/utils/in_app_web_view.dart';
@@ -36,7 +29,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:lottie/lottie.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
@@ -47,6 +39,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import 'package:chotanews/utils/image_post_slider.dart';
 import 'package:chotanews/utils/translated_text.dart';
+import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
 class MainScreenBytView extends StatefulWidget {
   final article;
   final pageController;
@@ -396,119 +389,115 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                       MainAxisAlignment
                                                                           .spaceBetween,
                                                                   children: [
-                                                                    Consumer<
-                                                                            SettingsProvider>(
-                                                                        builder: (_,
-                                                                            settingsProvider,
-                                                                            __) {
-                                                                      return BottomActions(
-                                                                        postType:
-                                                                            widget.article['subType'] ??
-                                                                                "",
-                                                                        icon: settingsProvider.isLikeList.contains(widget.article['id'].toString())
-                                                                            ? "assets/svg/like_full.svg"
-                                                                            : "assets/svg/like.svg",
-                                                                        label:
-                                                                            'லைக்',
-                                                                        isLike: settingsProvider
-                                                                            .isLikeList
-                                                                            .contains(widget.article['id'].toString()),
-                                                                        onTap:
-                                                                            () async {
-                                                                          log("Like");
-                                                                          settingsProvider
-                                                                              .isLikePost(widget.article);
-                                                                          EventRepo()
-                                                                              .addEvent({
-                                                                            "like":
-                                                                                !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                                            "postId":
-                                                                                widget.article['id'].toString() ?? '000',
-                                                                            "createAt":
-                                                                                DateTime.now().toString(),
-                                                                            "postTitle":
-                                                                                widget.article['title'].toString()
-                                                                          }, "liked_article");
-                                                                        },
-                                                                      );
-                                                                    }),
-                                                                    width(
-                                                                        width:
-                                                                            6),
-                                                                    BottomActions(
-                                                                      postType:
-                                                                          widget.article['subType'].toString() ??
-                                                                              "",
-                                                                      icon:
-                                                                          "assets/svg/new_comment.svg",
-                                                                      label:
-                                                                          'கமெண்ட்',
-                                                                      onTap:
-                                                                          () async {
-                                                                        if (context
-                                                                            .mounted) {
-                                                                          context
-                                                                              .read<AuthenticationProvider>()
-                                                                              .sendEvent("CommentPage");
-                                                                          showComments(
-                                                                              context,
-                                                                              widget.article['id'],
-                                                                              widget.article['title']);
-                                                                        }
+                                                                    Consumer<BookmarksProvider>(
+                                                                      builder: (context, bookmarksProvider, _) {
+                                                                        final isBookmarked = bookmarksProvider.isPostBookmarked(
+                                                                          widget.article['id'],
+                                                                          fallbackIsBookmarked: widget.article['isBookmarked'] == true ||
+                                                                              widget.article['isBookmarked'] == 1 ||
+                                                                              widget.article['isBookmarked'] == 'true',
+                                                                        );
+                                                                        return BottomActions(
+                                                                          postType: widget.article['subType']?.toString() ?? "",
+                                                                          icon: "",
+                                                                          iconWidget: Icon(
+                                                                            isBookmarked
+                                                                                ? Icons.bookmark_rounded
+                                                                                : Icons.bookmark_border_rounded,
+                                                                            color: isBookmarked
+                                                                                ? AppColorTokens.primaryRed
+                                                                                : (_isBigBlackStandard(widget.article)
+                                                                                    ? Colors.white
+                                                                                    : Colors.grey),
+                                                                            size: 22,
+                                                                          ),
+                                                                          label: 'Bookmark',
+                                                                          onTap: () async {
+                                                                            await bookmarksProvider.toggleBookmark(
+                                                                              postId: widget.article['id'],
+                                                                              article: widget.article,
+                                                                              context: context,
+                                                                            );
+                                                                          },
+                                                                        );
                                                                       },
                                                                     ),
                                                                     const Spacer(),
-
-                                                                    Consumer<
-                                                                            HomeProvider>(
-                                                                        builder: (_,
-                                                                            homeProvide,
-                                                                            __) {
-                                                                      return SizedBox(
-                                                                        height:
-                                                                            24,
-                                                                        width:
-                                                                            24,
-                                                                        child:
-                                                                            InkWell(
-                                                                          onTap:
-                                                                              () async {
-                                                                            log("Refresh");
-
-                                                                            homeProvide.isReloadData();
-                                                                            if (widget.isaiTags) {
-                                                                              EventRepo().addEvent({
-                                                                                "refresh": false,
-                                                                                "createAt": DateTime.now().toString()
-                                                                              }, "reload_article");
-                                                                              homeProvide.getAllPostsByAiId(widget.aiTagId.toString()).then(
-                                                                                (value) {
-                                                                                  homeProvide.isReloadFalse();
-                                                                                },
-                                                                              );
-                                                                            } else {
-                                                                              homeProvide.getAllPostList = [];
-                                                                              homeProvide.getAllPost();
-                                                                              EventRepo().addEvent({
-                                                                                "refresh": true,
-                                                                                "createAt": DateTime.now().toString()
-                                                                              }, "reload_article");
-                                                                            }
-                                                                          },
-                                                                          child: context.read<HomeProvider>().isReload
-                                                                              ? const SizedBox(height: 22, width: 22, child: AppLoadingScreen())
-                                                                              : SvgPicture.asset(
-                                                                                  "assets/svg/new_refresh.svg",
-                                                                                  height: 22,
-                                                                                  width: 22,
-                                                                                  color: _isBigBlackStandard(widget.article) ? Colors.white : Colors.grey,
-                                                                                ),
+                                                                    if (context.watch<HomeProvider>().englishLanguageEnable) ...[
+                                                                      PopupMenuButton<bool>(
+                                                                        padding: EdgeInsets.zero,
+                                                                        constraints: const BoxConstraints(),
+                                                                        tooltip: "Select Language",
+                                                                        offset: const Offset(0, -110),
+                                                                        shape: RoundedRectangleBorder(
+                                                                          borderRadius: BorderRadius.circular(12),
                                                                         ),
-                                                                      );
-                                                                    }),
-                                                                    width(
-                                                                        width:
-                                                                            12),
+                                                                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade900 : Colors.white,
+                                                                        elevation: 6,
+                                                                        onSelected: (bool isEnglish) {
+                                                                          context.read<HomeProvider>().setEnglishMode(isEnglish);
+                                                                        },
+                                                                        itemBuilder: (context) {
+                                                                          final homeProvider = context.read<HomeProvider>();
+                                                                          final isDark = Theme.of(context).brightness == Brightness.dark;
+                                                                          final textColor = isDark ? Colors.white : Colors.black87;
+
+                                                                          return [
+                                                                            PopupMenuItem<bool>(
+                                                                              value: false,
+                                                                              height: 40,
+                                                                              child: Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    "తెలుగు (Telugu)",
+                                                                                    style: TextStyle(
+                                                                                      fontSize: 14.sp,
+                                                                                      fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
+                                                                                      color: !homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
+                                                                                    ),
+                                                                                  ),
+                                                                                  if (!homeProvider.isEnglishMode)
+                                                                                    const Padding(
+                                                                                      padding: EdgeInsets.only(left: 8.0),
+                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
+                                                                                    ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                            const PopupMenuDivider(height: 1),
+                                                                            PopupMenuItem<bool>(
+                                                                              value: true,
+                                                                              height: 40,
+                                                                              child: Row(
+                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    "English",
+                                                                                    style: TextStyle(
+                                                                                      fontSize: 14.sp,
+                                                                                      fontWeight: homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
+                                                                                      color: homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
+                                                                                    ),
+                                                                                  ),
+                                                                                  if (homeProvider.isEnglishMode)
+                                                                                    const Padding(
+                                                                                      padding: EdgeInsets.only(left: 8.0),
+                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
+                                                                                    ),
+                                                                                ],
+                                                                              ),
+                                                                            ),
+                                                                          ];
+                                                                        },
+                                                                        child: Icon(
+                                                                          Icons.g_translate_rounded,
+                                                                          size: 24,
+                                                                          color: _isBigBlackStandard(widget.article) ? Colors.white : Colors.grey,
+                                                                        ),
+                                                                      ),
+                                                                      width(width: 14),
+                                                                    ],
                                                                     InkWell(
                                                                       onTap: () async {
                                                                         try {
@@ -521,31 +510,20 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                             final directory = await getTemporaryDirectory();
                                                                             final imagePath = await File(directory.path + "/screenshot_" + DateTime.now().millisecondsSinceEpoch.toString() + ".png").create();
                                                                             await imagePath.writeAsBytes(imageBytes);
-                                                                            try {
-                                                                              if (Platform.isIOS) {
-                                                                                final Size size = MediaQuery.of(context).size;
-                                                                                await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                              } else {
-                                                                                const platform = MethodChannel('com.chotanews/whatsapp');
-                                                                                await platform.invokeMethod('shareToWhatsApp', {'imagePath': imagePath.path, 'text': shareText});
-                                                                              }
-                                                                            } catch (e) {
-                                                                              final Size size = MediaQuery.of(context).size;
-                                                                              await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                            }
+                                                                            final Size size = MediaQuery.of(context).size;
+                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
                                                                           } else {
-                                                                            final url = "whatsapp://send?text=" + Uri.encodeComponent(shareText);
-                                                                            if (await canLaunchUrl(Uri.parse(url))) {
-                                                                              await launchUrl(Uri.parse(url));
-                                                                            } else {
-                                                                              await Share.share(shareText);
-                                                                            }
+                                                                            await Share.share(shareText);
                                                                           }
                                                                         } catch (e) {
-                                                                          debugPrint("WhatsApp share error: $e");
+                                                                          debugPrint("Share error: $e");
                                                                         }
                                                                       },
-                                                                      child: Image.asset("assets/images/WhatsApp_icon.png", height: 28, width: 28),
+                                                                      child: Icon(
+                                                                        Icons.share_rounded,
+                                                                        size: 24,
+                                                                        color: _isBigBlackStandard(widget.article) ? Colors.white : Colors.grey,
+                                                                      ),
                                                                     ),
                                                                   ],
                                                                 ),
@@ -968,21 +946,27 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                  ),
                                                                                  Row(
                                                                                    mainAxisSize: MainAxisSize.min,
-                                                                                   children: [                  Row(
-                                                                                      mainAxisSize: MainAxisSize.min,
-                                                                                      children: [
-                                                                                      /// Like Icon
-                                                                                      Consumer<SettingsProvider>(builder: (_, settingsProvider, __) {
-                                                                                        return InkWell(
-                                                                                          onTap: () async {
-                                                                                            log("Like");
-                                                                                            settingsProvider.isLikePost(widget.article);
-                                                                                            EventRepo().addEvent({
-                                                                                              "isLike": !settingsProvider.isLikeList.contains(widget.article['id'].toString()),
-                                                                                              "postId": widget.article['id'].toString() ?? "000",
-                                                                                              "createAt": DateTime.now().toString(),
-                                                                                              "postTitle": widget.article['title'].toString()
-                                                                                            }, "liked_article");
+                                                                                   children: [
+                                                                                      /// Bookmark Icon
+                                                                                      Consumer<BookmarksProvider>(
+                                                                                        builder: (context, bookmarksProvider, _) {
+                                                                                          final isBookmarked = bookmarksProvider.isPostBookmarked(
+                                                                                            widget.article['id'],
+                                                                                            fallbackIsBookmarked: widget.article['isBookmarked'] == true ||
+                                                                                                widget.article['isBookmarked'] == 1 ||
+                                                                                                widget.article['isBookmarked'] == 'true',
+                                                                                          );
+                                                                                          final Color normalColor = (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context))
+                                                                                              ? Colors.white
+                                                                                              : AppColorTokens.primaryRed;
+
+                                                                                          return InkWell(
+                                                                                            onTap: () async {
+                                                                                              await bookmarksProvider.toggleBookmark(
+                                                                                                postId: widget.article['id'],
+                                                                                                article: widget.article,
+                                                                                                context: context,
+                                                                                            );
                                                                                           },
                                                                                           child: Column(
                                                                                             mainAxisSize: MainAxisSize.min,
@@ -990,229 +974,134 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                               Row(
                                                                                                 mainAxisSize: MainAxisSize.min,
                                                                                                 children: [
-                                                                                                  SvgPicture.asset(
-                                                                                                    settingsProvider.isLikeList.contains(widget.article['id'].toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                                                                                                    height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
-                                                                                                    width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
-                                                                                                    colorFilter: ColorFilter.mode(
-                                                                                                      (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : AppColorTokens.primaryRed,
-                                                                                                      BlendMode.srcIn,
-                                                                                                    ),
+                                                                                                  Icon(
+                                                                                                    isBookmarked
+                                                                                                        ? Icons.bookmark_rounded
+                                                                                                        : Icons.bookmark_border_rounded,
+                                                                                                    size: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
+                                                                                                    color: isBookmarked ? AppColorTokens.primaryRed : normalColor,
                                                                                                   ),
                                                                                                 ],
                                                                                               ),
                                                                                             ],
                                                                                           ),
                                                                                         );
-                                                                                      }),
-                                                                                        const SizedBox(width: 16),
-                                                                                      /// Comment Icon
-                                                                                      InkWell(
-                                                                                        onTap: () {
-                                                                                          log("Comment...");
-                                                                                          if (context.mounted) {
-                                                                                            context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                                                                                            showComments(context, widget.article['id'], widget.article['title']);
-                                                                                          }
+                                                                                      },
+                                                                                    ),
+                                                                                    const SizedBox(width: 16),
+                                                                                    if (context.watch<HomeProvider>().englishLanguageEnable) ...[
+                                                                                      /// Language Translation Icon Dropdown Card
+                                                                                      PopupMenuButton<bool>(
+                                                                                        padding: EdgeInsets.zero,
+                                                                                        constraints: const BoxConstraints(),
+                                                                                        tooltip: "Select Language",
+                                                                                        offset: const Offset(0, -110),
+                                                                                        shape: RoundedRectangleBorder(
+                                                                                          borderRadius: BorderRadius.circular(12),
+                                                                                        ),
+                                                                                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade900 : Colors.white,
+                                                                                        elevation: 6,
+                                                                                        onSelected: (bool isEnglish) {
+                                                                                          context.read<HomeProvider>().setEnglishMode(isEnglish);
+                                                                                        },
+                                                                                        itemBuilder: (context) {
+                                                                                          final homeProvider = context.read<HomeProvider>();
+                                                                                          final isDark = Theme.of(context).brightness == Brightness.dark;
+                                                                                          final textColor = isDark ? Colors.white : Colors.black87;
+
+                                                                                          return [
+                                                                                            PopupMenuItem<bool>(
+                                                                                              value: false,
+                                                                                              height: 40,
+                                                                                              child: Row(
+                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                children: [
+                                                                                                  Text(
+                                                                                                    "తెలుగు (Telugu)",
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 14.sp,
+                                                                                                      fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
+                                                                                                      color: !homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  if (!homeProvider.isEnglishMode)
+                                                                                                    const Padding(
+                                                                                                      padding: EdgeInsets.only(left: 8.0),
+                                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
+                                                                                                    ),
+                                                                                                ],
+                                                                                              ),
+                                                                                            ),
+                                                                                            const PopupMenuDivider(height: 1),
+                                                                                            PopupMenuItem<bool>(
+                                                                                              value: true,
+                                                                                              height: 40,
+                                                                                              child: Row(
+                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                                                                children: [
+                                                                                                  Text(
+                                                                                                    "English",
+                                                                                                    style: TextStyle(
+                                                                                                      fontSize: 14.sp,
+                                                                                                      fontWeight: homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
+                                                                                                      color: homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
+                                                                                                    ),
+                                                                                                  ),
+                                                                                                  if (homeProvider.isEnglishMode)
+                                                                                                    const Padding(
+                                                                                                      padding: EdgeInsets.only(left: 8.0),
+                                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
+                                                                                                    ),
+                                                                                                ],
+                                                                                              ),
+                                                                                            ),
+                                                                                          ];
                                                                                         },
                                                                                         child: Column(
                                                                                           mainAxisSize: MainAxisSize.min,
                                                                                           children: [
-                                                                                            Row(
-                                                                                              mainAxisSize: MainAxisSize.min,
-                                                                                              children: [
-                                                                                                SvgPicture.asset(
-                                                                                                  "assets/svg/new_comment.svg",
-                                                                                                  height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
-                                                                                                  width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
-                                                                                                  colorFilter: ColorFilter.mode(
-                                                                                                    (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : AppColorTokens.primaryRed,
-                                                                                                    BlendMode.srcIn,
-                                                                                                  ),
-                                                                                                ),
-                                                                                              ],
+                                                                                            Icon(
+                                                                                              Icons.g_translate_rounded,
+                                                                                              size: 28,
+                                                                                              color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : const Color(0xFFED1C24),
                                                                                             ),
                                                                                           ],
                                                                                         ),
                                                                                       ),
-                                                                                        const SizedBox(width: 16),
-                                                                                      /// Reload Icon
-                                                                                      Consumer<HomeProvider>(builder: (_, homeProvide, __) {
-                                                                                        return InkWell(
-                                                                                          onTap: () async {
-                                                                                            log("Refresh");
-                                                                                            EventRepo().addEvent({
-                                                                                              "refresh": true,
-                                                                                              "createAt": DateTime.now().toString()
-                                                                                            }, "reload_article");
-                                                                                            homeProvide.isReloadData();
-                                                                                            if (homeProvide.isAiTagDataLoaded) {
-                                                                                              homeProvide.getAllPostsByAiId(homeProvide.selectedTagId.toString());
-                                                                                              homeProvide.isReloadFalse();
-                                                                                            } else {
-                                                                                              homeProvide.getAllPostList = [];
-                                                                                              homeProvide.getAllPost();
-                                                                                            }
-                                                                                          },
-                                                                                          child: Column(
-                                                                                            mainAxisSize: MainAxisSize.min,
-                                                                                            children: [
-                                                                                              Row(
-                                                                                                mainAxisSize: MainAxisSize.min,
-                                                                                                children: [
-                                                                                                  homeProvide.isReload
-                                                                                                      ? SizedBox(
-                                                                                                          height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
-                                                                                                          width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
-                                                                                                          child: const AppLoadingScreen(),
-                                                                                                        )
-                                                                                                      : SvgPicture.asset(
-                                                                                                          "assets/svg/new_refresh.svg",
-                                                                                                          height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
-                                                                                                          width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
-                                                                                                          colorFilter: ColorFilter.mode(
-                                                                                                            (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : AppColorTokens.primaryRed,
-                                                                                                            BlendMode.srcIn,
-                                                                                                          ),
-                                                                                                        ),
-                                                                                                ],
-                                                                                              ),
-                                                                                            ],
-                                                                                          ),
-                                                                                        );
-                                                                                      }),
-                                                                                        const SizedBox(width: 16),
-                                                                                        if (context.watch<HomeProvider>().englishLanguageEnable) ...[
-                                                                                         /// Language Translation Icon Dropdown Card
-                                                                                         PopupMenuButton<bool>(
-                                                                                           padding: EdgeInsets.zero,
-                                                                                           constraints: const BoxConstraints(),
-                                                                                           tooltip: "Select Language",
-                                                                                           offset: const Offset(0, -110),
-                                                                                           shape: RoundedRectangleBorder(
-                                                                                             borderRadius: BorderRadius.circular(12),
-                                                                                           ),
-                                                                                           color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade900 : Colors.white,
-                                                                                           elevation: 6,
-                                                                                           onSelected: (bool isEnglish) {
-                                                                                             context.read<HomeProvider>().setEnglishMode(isEnglish);
-                                                                                           },
-                                                                                           itemBuilder: (context) {
-                                                                                             final homeProvider = context.read<HomeProvider>();
-                                                                                             final isDark = Theme.of(context).brightness == Brightness.dark;
-                                                                                             final textColor = isDark ? Colors.white : Colors.black87;
-
-                                                                                             return [
-                                                                                               PopupMenuItem<bool>(
-                                                                                                 value: false,
-                                                                                                 height: 40,
-                                                                                                 child: Row(
-                                                                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                                   children: [
-                                                                                                     Text(
-                                                                                                       "తెలుగు (Telugu)",
-                                                                                                       style: TextStyle(
-                                                                                                         fontSize: 14.sp,
-                                                                                                         fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
-                                                                                                         color: !homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
-                                                                                                       ),
-                                                                                                     ),
-                                                                                                     if (!homeProvider.isEnglishMode)
-                                                                                                       const Padding(
-                                                                                                         padding: EdgeInsets.only(left: 8.0),
-                                                                                                         child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
-                                                                                                       ),
-                                                                                                   ],
-                                                                                                 ),
-                                                                                               ),
-                                                                                               const PopupMenuDivider(height: 1),
-                                                                                               PopupMenuItem<bool>(
-                                                                                                 value: true,
-                                                                                                 height: 40,
-                                                                                                 child: Row(
-                                                                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                                   children: [
-                                                                                                     Text(
-                                                                                                       "English",
-                                                                                                       style: TextStyle(
-                                                                                                         fontSize: 14.sp,
-                                                                                                         fontWeight: homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
-                                                                                                         color: homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
-                                                                                                       ),
-                                                                                                     ),
-                                                                                                     if (homeProvider.isEnglishMode)
-                                                                                                       const Padding(
-                                                                                                         padding: EdgeInsets.only(left: 8.0),
-                                                                                                         child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
-                                                                                                       ),
-                                                                                                   ],
-                                                                                                 ),
-                                                                                               ),
-                                                                                             ];
-                                                                                           },
-                                                                                           child: Column(
-                                                                                             mainAxisSize: MainAxisSize.min,
-                                                                                             children: [
-                                                                                               Icon(
-                                                                                                 Icons.g_translate_rounded,
-                                                                                                 size: 28,
-                                                                                                 color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : const Color(0xFFED1C24),
-                                                                                               ),
-                                                                                             ],
-                                                                                           ),
-                                                                                         ),
-                                                                                         const SizedBox(width: 16),
-                                                                                       ],
-                                                                                      /// WhatsApp Icon
-                                                                                      InkWell(
-                                                                                        onTap: () async {
-                                                                                          try {
-                                                                                            final String title = widget.article['title']?.toString() ?? "";
-                                                                                            final String link = Platform.isIOS ? (widget.article['linkURLIos']?.toString() ?? "") : (widget.article['linkURLAndroid']?.toString() ?? "");
-                                                                                            final String postUrl = widget.article['postUrl']?.toString() ?? "";
-                                                                                            final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
-                                                                                            final imageBytes = await adsScreenshotController.capture(delay: const Duration(milliseconds: 10));
-                                                                                            if (imageBytes != null) {
-                                                                                              final directory = await getTemporaryDirectory();
-                                                                                              final imagePath = await File(directory.path + "/screenshot_" + DateTime.now().millisecondsSinceEpoch.toString() + ".png").create();
-                                                                                              await imagePath.writeAsBytes(imageBytes);
-                                                                                              try {
-                                                                                                if (Platform.isIOS) {
-                                                                                                  final Size size = MediaQuery.of(context).size;
-                                                                                                  await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                                                } else {
-                                                                                                  const platform = MethodChannel('com.chotanews/whatsapp');
-                                                                                                  await platform.invokeMethod('shareToWhatsApp', {'imagePath': imagePath.path, 'text': shareText});
-                                                                                                }
-                                                                                              } catch (e) {
-                                                                                                if (e is PlatformException && e.code == "APP_NOT_INSTALLED") {
-                                                                                                  final Size size = MediaQuery.of(context).size;
-                                                                                                  await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                                                } else {
-                                                                                                  final Size size = MediaQuery.of(context).size;
-                                                                                                  await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                                                }
-                                                                                              }
-                                                                                            } else {
-                                                                                              final url = "whatsapp://send?text=" + Uri.encodeComponent(shareText);
-                                                                                              if (await canLaunchUrl(Uri.parse(url))) {
-                                                                                                await launchUrl(Uri.parse(url));
-                                                                                              } else {
-                                                                                                await Share.share(shareText);
-                                                                                              }
-                                                                                            }
-                                                                                          } catch (e) {
-                                                                                            debugPrint("WhatsApp share error: " + e.toString());
+                                                                                      const SizedBox(width: 16),
+                                                                                    ],
+                                                                                    /// Share Icon
+                                                                                    InkWell(
+                                                                                      onTap: () async {
+                                                                                        try {
+                                                                                          final String title = widget.article['title']?.toString() ?? "";
+                                                                                          final String link = Platform.isIOS ? (widget.article['linkURLIos']?.toString() ?? "") : (widget.article['linkURLAndroid']?.toString() ?? "");
+                                                                                          final String postUrl = widget.article['postUrl']?.toString() ?? "";
+                                                                                          final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
+                                                                                          final imageBytes = await adsScreenshotController.capture(delay: const Duration(milliseconds: 10));
+                                                                                          if (imageBytes != null) {
+                                                                                            final directory = await getTemporaryDirectory();
+                                                                                            final imagePath = await File(directory.path + "/screenshot_" + DateTime.now().millisecondsSinceEpoch.toString() + ".png").create();
+                                                                                            await imagePath.writeAsBytes(imageBytes);
+                                                                                            final Size size = MediaQuery.of(context).size;
+                                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
+                                                                                          } else {
+                                                                                            await Share.share(shareText);
                                                                                           }
-                                                                                        },
-                                                                                        child: Column(
-                                                                                          mainAxisSize: MainAxisSize.min,
-                                                                                          children: [
-                                                                                            Image.asset("assets/images/WhatsApp_icon.png", height: 35, width: 35),
-                                                                                          ],
-                                                                                        ),
+                                                                                        } catch (e) {
+                                                                                          debugPrint("Share error: $e");
+                                                                                        }
+                                                                                      },
+                                                                                      child: Column(
+                                                                                        mainAxisSize: MainAxisSize.min,
+                                                                                        children: [
+                                                                                          Icon(
+                                                                                            Icons.share_rounded,
+                                                                                            size: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 30 : 24,
+                                                                                            color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : const Color(0xFFED1C24),
+                                                                                          ),
+                                                                                        ],
                                                                                       ),
-                                                                                      ],
                                                                                     ),
                                                                                   ],
                                                                                 ),
@@ -1230,133 +1119,6 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                             ),
                           ),
           );
-  }
-
-  void _showBottomSheet(BuildContext context, dynamic article) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) {
-        return Container(
-          height: MediaQuery.of(context).size.height * 0.85,
-          decoration: BoxDecoration(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Image.asset(
-                          "assets/images/BigTvPostLogo.png",
-                          height: 30.h,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) => Text(
-                            "News Details",
-                            style: homeScreenFontStyle(
-                              fontSize: 18.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textColor,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () => Navigator.pop(context),
-                      child: Icon(Icons.close, color: AppColors.textColor),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (article['image_url'] != null && article['image_url'].toString().isNotEmpty)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12.r),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => ImagePreview(
-                                      imageUrl: _getImageUrl(article['image_url']),
-                                      title: article['title'] ?? "",
-                                    ),
-                                  ),
-                                );
-                              },
-                              child: CachedNetworkImage(
-                                imageUrl: _getImageUrl(article['image_url']),
-                              width: double.infinity,
-                              height: 250.h,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: AppColors.borderColor.withValues(alpha: .2),
-                              ),
-                              errorWidget: (context, url, error) => Image.asset(
-                                "assets/images/bigtv_default_post.png",
-                                width: double.infinity,
-                                height: 250.h,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 16.h),
-                        TranslatedText(
-                          article['title'] ?? "",
-                          translate: context.watch<HomeProvider>().isEnglishMode,
-                          style: homeScreenFontStyle(
-                            color: AppColorTokens.primaryRed,
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
-                        (article['links'] != null && (article['links'] as List).isNotEmpty)
-                            ? RichText(
-                                text: TextSpan(
-                                  children: _parseText(
-                                    context, 
-                                    article['content'] ?? "", 
-                                    article['links'], 
-                                    {'subType': 'Standard'}
-                                  ),
-                                ),
-                              )
-                            : TranslatedText(
-                                article['content'] ?? "",
-                                translate: context.watch<HomeProvider>().isEnglishMode,
-                                style: homeScreenFontStyle(
-                                  color: AppColors.textColor,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16.sp,
-                                ),
-                              ),
-                        SizedBox(height: 30.h),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   List<TextSpan> _parseText(BuildContext context, String text, links, article) {
