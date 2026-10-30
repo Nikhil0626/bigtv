@@ -33,6 +33,7 @@ import 'aggricator_screens/settings_screen/settings_view/settings_view.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'aggricator_screens/splash_screen/splash_screen_view.dart';
 import 'globel_keys/globel_keys.dart';
+import 'globel_keys/global_variables_data.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'features/home/presentation/widgets/html_notification_dialog.dart';
@@ -87,6 +88,9 @@ Future<void> main() async {
     final deviceId = await AnalyticsService.getStableDeviceId();
     final userIdStr = await getUserid();
     final userId = (userIdStr != null && userIdStr.isNotEmpty) ? int.tryParse(userIdStr) : null;
+    if (userId != null && userId > 0) {
+      GlobalVariables().userId = userId.toString();
+    }
 
     await AnalyticsService.instance.init(
       deviceId: deviceId,
@@ -237,14 +241,50 @@ void _initBackgroundServices() async {
 
     try {
       final appLinks = AppLinks();
-      appLinks.getInitialLink().then((uri) {
+      appLinks.getInitialLink().then((uri) async {
         if (uri != null) {
-          debugPrint("AppLinks initial link: $uri");
+          final uriStr = uri.toString();
+
+          // Verify with native Android activity whether this was a real deep link launch
+          try {
+            const channel = MethodChannel("com.chotanews/whatsapp");
+            final details = await channel.invokeMethod<Map<dynamic, dynamic>>("getLaunchIntentDetails");
+            if (details != null) {
+              final String? action = details["action"]?.toString();
+              final String? data = details["data"]?.toString();
+              final bool isLauncher = details["isLauncher"] == true;
+              final bool isFromHistory = details["isFromHistory"] == true;
+
+              if (isLauncher || isFromHistory || data == null || action != "android.intent.action.VIEW") {
+                debugPrint("AppLinks initial link ignored: launch was from launcher/history (action=$action, data=$data)");
+                try {
+                  await channel.invokeMethod("clearInitialIntent");
+                } catch (_) {}
+                return;
+              }
+            }
+          } catch (e) {
+            debugPrint("Could not query native launch intent details: $e");
+          }
+
+          final prefs = await SharedPreferences.getInstance();
+          final consumedLink = prefs.getString('last_consumed_initial_deep_link');
+          if (consumedLink == uriStr) {
+            debugPrint("AppLinks initial link already consumed in previous session, ignoring: $uri");
+            try {
+              const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
+            } catch (_) {}
+            return;
+          }
+          debugPrint("AppLinks initial link accepted: $uri");
+          await prefs.setString('last_consumed_initial_deep_link', uriStr);
           _handleBackgroundDeepLink(uri);
         }
       });
-      appLinks.uriLinkStream.listen((uri) {
+      appLinks.uriLinkStream.listen((uri) async {
         debugPrint("AppLinks stream link: $uri");
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('last_consumed_initial_deep_link', uri.toString());
         _handleBackgroundDeepLink(uri);
       });
     } catch (e) {
@@ -313,26 +353,15 @@ void _handleBackgroundNotification(Map<String, dynamic>? payload, {String? deepL
 }
 
 void _handleBackgroundDeepLink(Uri uri) {
-  AnalyticsService.instance.track(AnalyticsEventName.deepLinkOpen, properties: {
-    'destination': uri.path,
-    'source': uri.queryParameters['source'] ?? 'deep_link',
-    'url': uri.toString(),
-  });
-  if (uri.queryParameters.containsKey('campaign_id') ||
-      uri.queryParameters.containsKey('utm_campaign') ||
-      uri.queryParameters.containsKey('campaign')) {
-    AnalyticsService.instance.track(AnalyticsEventName.campaignEntry, properties: {
-      'campaign_id': uri.queryParameters['campaign_id'] ??
-          uri.queryParameters['utm_campaign'] ??
-          uri.queryParameters['campaign'],
-      'source': uri.queryParameters['utm_source'] ?? 'deep_link',
-    });
-  }
   if (mainNavigatorKey.currentContext != null) {
-    mainNavigatorKey.currentContext!.read<HomeProvider>().routeDeepLink(uri);
-  } else {
-    pendingDeepLink = uri.toString();
+    try {
+      mainNavigatorKey.currentContext!.read<HomeProvider>().handleIncomingDeepLink(uri);
+      return;
+    } catch (e) {
+      debugPrint("Error handling incoming deep link in HomeProvider: $e");
+    }
   }
+  pendingDeepLink = uri.toString();
 }
 
 class MyApp extends StatefulWidget {

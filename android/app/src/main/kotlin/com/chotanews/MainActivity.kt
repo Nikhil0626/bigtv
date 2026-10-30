@@ -20,9 +20,41 @@ class MainActivity: FlutterActivity() {
                 val imagePath = call.argument<String>("imagePath")
                 val text = call.argument<String>("text")
                 shareToWhatsApp(imagePath, text, result)
+            } else if (call.method == "getLaunchIntentDetails") {
+                val act = intent?.action
+                val dat = intent?.dataString
+                val flags = intent?.flags ?: 0
+                val isHistory = (flags and Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY) != 0
+                val isLauncher = (act == Intent.ACTION_MAIN)
+                result.success(mapOf(
+                    "action" to act,
+                    "data" to dat,
+                    "isFromHistory" to isHistory,
+                    "isLauncher" to isLauncher
+                ))
+            } else if (call.method == "clearInitialIntent") {
+                try {
+                    intent?.data = null
+                    intent?.action = Intent.ACTION_MAIN
+                } catch (e: Exception) {
+                    // Ignore
+                }
+                result.success(true)
             } else {
                 result.notImplemented()
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (intent?.action == Intent.ACTION_MAIN) {
+            intent?.data = null
         }
     }
 

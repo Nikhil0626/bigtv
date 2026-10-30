@@ -13,11 +13,14 @@ import 'package:chotanews/aggricator_screens/rating_screen/rating_provider/ratin
 import 'package:chotanews/features/home/data/repositories/home_repo.dart';
 import 'package:chotanews/features/home/presentation/providers/epaper_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/epaper_detail_screen.dart';
+import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart';
 import 'package:chotanews/features/home/presentation/screens/tag_video_player_screen.dart';
 import 'package:chotanews/features/events/presentation/screens/folk_night_event_screen.dart';
 import 'package:chotanews/features/home/presentation/widgets/html_notification_dialog.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
-import 'package:chotanews/services/analytics_service.dart';
+import 'package:chotanews/services/analytics_service.dart' as legacy_analytics;
+import 'package:chotanews/analytics/analytics_service.dart';
+import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/services/base_service.dart';
 import 'package:chotanews/services/base_urls.dart';
 import 'package:chotanews/services/deviice_details.dart';
@@ -49,7 +52,8 @@ import 'package:chotanews/features/zip_puzzle/presentation/providers/daily_puzzl
 import 'package:chotanews/features/home/presentation/widgets/games_bottom_sheet.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/features/home/presentation/screens/live_tv_screen.dart';
-import 'package:chotanews/services/live_tv_share_helper.dart';
+import 'package:chotanews/features/home/presentation/screens/editorial_screen.dart';
+import 'package:chotanews/aggricator_screens/individual_post_details/individual_post_view.dart';
 import 'package:chotanews/utils/local_data.dart';
 
 
@@ -76,6 +80,7 @@ class HomeProvider extends ChangeNotifier {
   bool isWebView = false;
   String webUrl = '';
   bool isHomeLoading = false;
+  bool isInitialHomeLoaded = false;
   bool isPlaying = false;
   bool isPostLoading = false;
   bool isMuted = false;
@@ -90,12 +95,57 @@ class HomeProvider extends ChangeNotifier {
   dynamic get selectedTagId => _selectedTagId;
 
   String langCode = 'te';
+  String? videoTagsLanguage;
+  String? postsLanguage;
 
   Future<void> loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
-    langCode = prefs.getString("selectedLanguageCode") ?? "te";
+    final newCode = prefs.getString("selectedLanguageCode") ?? "te";
+    final langChanged = langCode != newCode || (postsLanguage != null && postsLanguage != newCode);
+    if (langChanged) {
+      if (editorialPosts.isNotEmpty) {
+        editorialPosts = [];
+        editorialCurrentPage = 1;
+        hasMoreEditorial = true;
+        editorialLanguage = null;
+      }
+      getAllAiTagsList = [];
+      videoTagsLanguage = null;
+      getAllPostList = [];
+      _currentPageIndex = 0;
+      postsLanguage = newCode;
+    }
+    langCode = newCode;
     isEnglishMode = langCode == 'en';
     notifyListeners();
+    if (langChanged) {
+      getAllAiTags();
+      getAllPost(postIds: "0", isGetAllPost: true);
+    }
+  }
+
+  void setLangCode(String code) {
+    final langChanged = langCode != code || (postsLanguage != null && postsLanguage != code);
+    if (langChanged) {
+      if (editorialPosts.isNotEmpty) {
+        editorialPosts = [];
+        editorialCurrentPage = 1;
+        hasMoreEditorial = true;
+        editorialLanguage = null;
+      }
+      getAllAiTagsList = [];
+      videoTagsLanguage = null;
+      getAllPostList = [];
+      _currentPageIndex = 0;
+      postsLanguage = code;
+    }
+    langCode = code;
+    isEnglishMode = code == 'en';
+    notifyListeners();
+    if (langChanged) {
+      getAllAiTags();
+      getAllPost(postIds: "0", isGetAllPost: true);
+    }
   }
 
   void onItemTapped(int index) {
@@ -121,10 +171,36 @@ class HomeProvider extends ChangeNotifier {
   bool liveTvCountEnable = true;
   bool isLiveTvLoading = false;
 
-  Future<Map<String, dynamic>?> fetchLiveTvStream() async {
+  static const String teluguLiveStreamUrl = "https://api.pravasamedia.com/live/bigtv/index.m3u8";
+  static const String malayalamLiveStreamUrl = "https://api.pravasamedia.com/live/bigtv_malayalam/index.m3u8";
+
+  Future<Map<String, dynamic>?> fetchLiveTvStream({String? targetLangCode}) async {
     isLiveTvLoading = true;
     notifyListeners();
 
+    // Determine active language
+    String activeLang = (targetLangCode ?? langCode).trim().toLowerCase();
+    if (activeLang.isEmpty) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        activeLang = (prefs.getString("selectedLanguageCode") ?? "te").trim().toLowerCase();
+      } catch (_) {
+        activeLang = "te";
+      }
+    }
+
+    // 1. If Malayalam is selected, return Malayalam Live TV stream
+    if (activeLang == 'ml') {
+      isLiveTvLoading = false;
+      notifyListeners();
+      return {
+        'channel_name': 'BIG TV Malayalam',
+        'playback_type': 'hls',
+        'stream_url': malayalamLiveStreamUrl,
+      };
+    }
+
+    // 2. Otherwise fetch from Live TV API (Telugu/default)
     try {
       log("Calling Live TV API: https://api.pravasamedia.com/api/v1/live");
       final response = await http.get(
@@ -154,7 +230,12 @@ class HomeProvider extends ChangeNotifier {
       isLiveTvLoading = false;
       notifyListeners();
     }
-    return null;
+
+    return {
+      'channel_name': 'BIG TV',
+      'playback_type': 'hls',
+      'stream_url': teluguLiveStreamUrl,
+    };
   }
 
   bool get showTopNavTags => liveTvVideosEnable || aiTagEnable;
@@ -309,7 +390,9 @@ class HomeProvider extends ChangeNotifier {
     if (isAds == true) {
       clearSinglePost();
     } else {
-      getAllPostList = [];
+      if (getAllPostList.isEmpty) {
+        getAllPostList = [];
+      }
     }
     isPostLoading = true;
     String userId = preferences.getString("userId") ?? "0";
@@ -418,7 +501,7 @@ class HomeProvider extends ChangeNotifier {
     }
 
     isHomeLoading = true;
-    if (isGetAllPost == false && postIds == "0") {
+    if (postIds == "0") {
       getAllPostList = [];
       _currentPageIndex = 0;
     }
@@ -429,6 +512,7 @@ class HomeProvider extends ChangeNotifier {
     allPostLastId = "0";
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String langCode = preferences.getString("selectedLanguageCode") ?? "te";
+    postsLanguage = langCode;
 
     String? deviceId = preferences.getString("deviceId");
     String? userIdStr = preferences.getString("userId");
@@ -584,7 +668,7 @@ class HomeProvider extends ChangeNotifier {
       }
 
       // Prepend homePosts grid at position 0 (shown first in the feed)
-      if (homePosts.isNotEmpty && isGetAllPost == false && postIds == "0") {
+      if (homePosts.isNotEmpty && postIds == "0") {
         getAllPostList.removeWhere((e) =>
             e is Map &&
             (e['id'] == -999 ||
@@ -609,6 +693,7 @@ class HomeProvider extends ChangeNotifier {
     } finally {
       isReload = false;
       isHomeLoading = false;
+      isInitialHomeLoaded = true;
       notifyListeners();
     }
   }
@@ -646,13 +731,16 @@ class HomeProvider extends ChangeNotifier {
       log("Get News Api catch error $e", stackTrace: st);
     } finally {
       isHomeLoading = false;
+      isInitialHomeLoaded = true;
       notifyListeners();
     }
   }
 
   Future<void> getAllAiTags() async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
-    String langCode = preferences.getString("selectedLanguageCode") ?? "te";
+    String currentCode = preferences.getString("selectedLanguageCode") ?? langCode;
+    final currentLang = (currentCode == 'ml') ? 'ml' : 'te';
+    videoTagsLanguage = currentLang;
     getAllAiTagsList = [];
     isAiTagsLoading = true;
 
@@ -666,7 +754,13 @@ class HomeProvider extends ChangeNotifier {
     try {
       Response response;
       if (liveTvVideosEnable) {
-        response = await HomeRepo().getAllAiTags({});
+        final Map<String, dynamic> queryParams = {
+          'language': currentLang,
+          'lan': currentLang,
+          'lang': currentLang,
+          'segregated': 'false',
+        };
+        response = await HomeRepo().getAllAiTags(queryParams);
       } else if (aiTagEnable) {
         response = await HomeRepo().getAiTags();
       } else {
@@ -679,7 +773,20 @@ class HomeProvider extends ChangeNotifier {
       if (responseData is String) {
         try { responseData = jsonDecode(responseData); } catch (_) {}
       }
-      List data = responseData is List ? responseData : (responseData['data'] ?? []);
+      List data = [];
+      if (responseData is List) {
+        data = responseData;
+      } else if (responseData is Map) {
+        final dynamic rawData = responseData['data'];
+        if (rawData is List) {
+          data = rawData;
+        } else if (rawData is Map) {
+          final langList = rawData[currentLang] ?? rawData[currentCode];
+          if (langList is List) {
+            data = List.from(langList);
+          }
+        }
+      }
       
       getAllAiTagsList = data.map((e) {
         Map<String, dynamic> item = Map<String, dynamic>.from(e is Map ? e : {});
@@ -695,16 +802,16 @@ class HomeProvider extends ChangeNotifier {
             item['desc'] ??
             item['title'] ??
             item['aitagname'];
-        if (item['aitagnameTranslations'] != null && item['aitagnameTranslations'][langCode] != null) {
-          item['aitagname'] = item['aitagnameTranslations'][langCode];
+        if (item['aitagnameTranslations'] != null && item['aitagnameTranslations'][currentCode] != null) {
+          item['aitagname'] = item['aitagnameTranslations'][currentCode];
         }
-        if (item['descriptionTranslations'] != null && item['descriptionTranslations'][langCode] != null) {
-          item['description'] = item['descriptionTranslations'][langCode];
+        if (item['descriptionTranslations'] != null && item['descriptionTranslations'][currentCode] != null) {
+          item['description'] = item['descriptionTranslations'][currentCode];
         }
         return item;
       }).toList();
       
-      log("Tags loaded (liveTvVideos: $liveTvVideosEnable, aiTag: $aiTagEnable): ${getAllAiTagsList.length} items");
+      log("Tags loaded (liveTvVideos: $liveTvVideosEnable, aiTag: $aiTagEnable): ${getAllAiTagsList.length} items for lang: $currentLang");
     } on DioException catch (e, st) {
       log("Get Tags Api catch error $e", stackTrace: st);
     } catch (e, st) {
@@ -796,31 +903,62 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final currentLang = (langCode == 'ml') ? 'ml' : 'te';
+      final Map<String, dynamic> queryParams = {
+        'language': currentLang,
+        'lan': currentLang,
+        'lang': currentLang,
+        'segregated': 'false',
+      };
       final encodedSlug = Uri.encodeComponent(effectiveSlug);
-      Response response = await HomeRepo().getTagVideos(encodedSlug);
+      Response response = await HomeRepo().getTagVideos(encodedSlug, queryParameters: queryParams);
       var responseData = response.data;
       if (responseData is String) {
         try { responseData = jsonDecode(responseData); } catch (_) {}
       }
-      List data = responseData is List ? responseData : (responseData['data'] ?? []);
+      List data = [];
+      if (responseData is List) {
+        data = responseData;
+      } else if (responseData is Map) {
+        final dynamic rawData = responseData['data'];
+        if (rawData is List) {
+          data = rawData;
+        } else if (rawData is Map) {
+          final langList = rawData[currentLang] ?? rawData[langCode];
+          if (langList is List) {
+            data = List.from(langList);
+          }
+        }
+      }
 
       // If empty and effectiveSlug differed from original slug, try fallback to original slug
       if (data.isEmpty && effectiveSlug != slug) {
         try {
-          Response fallbackRes = await HomeRepo().getTagVideos(Uri.encodeComponent(slug));
+          Response fallbackRes = await HomeRepo().getTagVideos(Uri.encodeComponent(slug), queryParameters: queryParams);
           var fallbackData = fallbackRes.data;
           if (fallbackData is String) {
             try { fallbackData = jsonDecode(fallbackData); } catch (_) {}
           }
-          final fallbackList = fallbackData is List ? fallbackData : (fallbackData['data'] ?? []);
-          if (fallbackList is List && fallbackList.isNotEmpty) {
+          List fallbackList = [];
+          if (fallbackData is List) {
+            fallbackList = fallbackData;
+          } else if (fallbackData is Map) {
+            final dynamic raw = fallbackData['data'];
+            if (raw is List) {
+              fallbackList = raw;
+            } else if (raw is Map) {
+              final ll = raw[currentLang] ?? raw[langCode];
+              if (ll is List) fallbackList = List.from(ll);
+            }
+          }
+          if (fallbackList.isNotEmpty) {
             data = fallbackList;
           }
         } catch (_) {}
       }
 
       tagVideosList = data;
-      log("Fetched ${tagVideosList.length} videos for tag slug: $effectiveSlug (original: $slug)");
+      log("Fetched ${tagVideosList.length} videos for tag slug: $effectiveSlug (original: $slug, lang: $currentLang)");
     } on DioException catch (e, st) {
       log("Get Tag Videos Api catch error $e", stackTrace: st);
     } catch (e, st) {
@@ -876,7 +1014,7 @@ class HomeProvider extends ChangeNotifier {
   List isBookMark = [];
 
   void flipEvent(String pageName, dynamic id, dynamic val) async {
-    AnalyticsService().trackArticlesRead();
+    legacy_analytics.AnalyticsService().trackArticlesRead();
     notifyListeners();
   }
 
@@ -900,6 +1038,18 @@ class HomeProvider extends ChangeNotifier {
   int _currentPageIndex = 0;
   int get currentPageIndex => _currentPageIndex;
 
+  int get activePostIndex {
+    if (pageController != null && pageController!.hasClients && pageController!.positions.isNotEmpty) {
+      try {
+        final page = pageController!.page;
+        if (page != null) {
+          return page.round();
+        }
+      } catch (_) {}
+    }
+    return _currentPageIndex;
+  }
+
   void setCurrentPageIndex(int index) {
     if (_currentPageIndex != index) {
       _currentPageIndex = index;
@@ -909,10 +1059,18 @@ class HomeProvider extends ChangeNotifier {
 
   bool isHomePostGrid(dynamic article) {
     if (article is! Map) return false;
-    return article['type'] == 'HomePostGrid' ||
-        article['subType'] == 'HomePostGrid' ||
-        article['post_type'] == 'HomePostGrid' ||
-        article['homepost'] != null;
+    final type = article['type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    final subType = article['subType']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().replaceAll(RegExp(r'[^a-zA-Z0-9]'), '') ?? '';
+    return type == 'homepostgrid' ||
+        subType == 'homepostgrid' ||
+        postType == 'homepostgrid' ||
+        type.contains('grid') ||
+        subType.contains('grid') ||
+        postType.contains('grid') ||
+        article['homepost'] != null ||
+        article['home_post'] != null ||
+        article['homePosts'] != null;
   }
 
   bool isShowAlertPost(dynamic article) {
@@ -932,8 +1090,9 @@ class HomeProvider extends ChangeNotifier {
     if (selectedIndex != 1) return false;
     if (isAiTagDataLoaded) return false;
     if (getAllPostList.isEmpty) return false;
-    if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
-      return isHomePostGrid(getAllPostList[_currentPageIndex]);
+    final idx = activePostIndex;
+    if (idx >= 0 && idx < getAllPostList.length) {
+      return isHomePostGrid(getAllPostList[idx]);
     }
     return false;
   }
@@ -997,7 +1156,13 @@ class HomeProvider extends ChangeNotifier {
     void search(Map m) {
       m.forEach((k, v) {
         if (foundId != null) return;
-        if (k == 'postId' || k == 'post_id') {
+        final keyLower = k.toString().toLowerCase();
+        if (keyLower == 'postid' ||
+            keyLower == 'post_id' ||
+            keyLower == 'articleid' ||
+            keyLower == 'article_id') {
+          foundId = v.toString();
+        } else if (keyLower == 'id' && int.tryParse(v.toString()) != null && v.toString() != "0") {
           foundId = v.toString();
         } else if (v is Map) {
           search(v);
@@ -1030,12 +1195,19 @@ class HomeProvider extends ChangeNotifier {
       
       if (customDataList != null) {
         for (var item in customDataList) {
-          if (item is Map && (item['key'] == 'postId' || item['key'] == 'post_id')) {
-            return item['value'].toString();
-          }
-          // iOS WebEngage might just put the value in the first item without a key
-          if (item is Map && item.containsKey('value') && !item.containsKey('key')) {
-             return item['value'].toString();
+          if (item is Map) {
+            final keyLower = item['key']?.toString().toLowerCase();
+            if (keyLower == 'postid' ||
+                keyLower == 'post_id' ||
+                keyLower == 'articleid' ||
+                keyLower == 'article_id' ||
+                (keyLower == 'id' && int.tryParse(item['value']?.toString() ?? '') != null)) {
+              return item['value'].toString();
+            }
+            // iOS WebEngage might just put the value in the first item without a key
+            if (item.containsKey('value') && !item.containsKey('key')) {
+              return item['value'].toString();
+            }
           }
         }
       }
@@ -1087,46 +1259,105 @@ class HomeProvider extends ChangeNotifier {
             messagePayload['deeplink'] ??
             messagePayload['url'] ??
             messagePayload['link'] ??
-            messagePayload['click_action'];
+            messagePayload['click_action'] ??
+            messagePayload['linkURLAndroid'] ??
+            messagePayload['linkURLIos'];
       }
     }
 
-    if (linkStr != null && linkStr.isNotEmpty && (linkStr.startsWith('http://') || linkStr.startsWith('https://') || linkStr.contains('://'))) {
-      try {
-        final uri = Uri.parse(linkStr);
-        await routeDeepLink(uri, isFromNotification: true);
-        return;
-      } catch (e) {
-        log("Error parsing deepLink string from notification: $e");
+    if (linkStr != null && linkStr.isNotEmpty) {
+      final cleanLink = linkStr.trim();
+      if (cleanLink.startsWith('http://') ||
+          cleanLink.startsWith('https://') ||
+          cleanLink.contains('://')) {
+        try {
+          final uri = Uri.parse(cleanLink);
+          await routeDeepLink(uri, isFromNotification: true);
+          return;
+        } catch (e) {
+          log("Error parsing deepLink string from notification: $e");
+        }
+      } else if (cleanLink.startsWith('/')) {
+        try {
+          final uri = Uri.parse("https://app.bigtv24x7.com$cleanLink");
+          await routeDeepLink(uri, isFromNotification: true);
+          return;
+        } catch (e) {
+          log("Error parsing relative deepLink string from notification: $e");
+        }
       }
     }
 
     // Fallback: extract postId from payload
     final String? extractedPostId = _extractPostIdSafely(messagePayload);
-    if (extractedPostId != null && extractedPostId != "0") {
-      await routeDeepLink(Uri.parse("https://app.bigtv24x7.com/individualPage?postId=$extractedPostId"), isFromNotification: true);
+    if (extractedPostId != null && extractedPostId != "0" && extractedPostId.isNotEmpty) {
+      await routeDeepLink(
+        Uri.parse("https://app.bigtv24x7.com/individualPage?postId=$extractedPostId"),
+        isFromNotification: true,
+      );
     }
   }
 
   StreamSubscription<Uri>? linkSubscription;
-  PageController homePageController = PageController(initialPage: 0);
+  PageController homePageController = PageController(initialPage: 1);
   bool isHomeScreen = false;
+  Uri? pendingDeepLinkUri;
+
+  bool get hasPendingDeepLink =>
+      pendingDeepLinkUri != null || (pendingDeepLink != null && pendingDeepLink!.isNotEmpty);
+  bool get isRoutingDeepLink => _isRoutingDeepLink;
+
+  void handleIncomingDeepLink(Uri uri) {
+    debugPrint("handleIncomingDeepLink: $uri (isHomeScreen: $isHomeScreen)");
+    AnalyticsService.instance.track(AnalyticsEventName.deepLinkOpen, properties: {
+      'destination': uri.path,
+      'source': uri.queryParameters['source'] ?? 'deep_link',
+      'url': uri.toString(),
+    });
+    if (uri.queryParameters.containsKey('campaign_id') ||
+        uri.queryParameters.containsKey('utm_campaign') ||
+        uri.queryParameters.containsKey('campaign')) {
+      AnalyticsService.instance.track(AnalyticsEventName.campaignEntry, properties: {
+        'campaign_id': uri.queryParameters['campaign_id'] ??
+            uri.queryParameters['utm_campaign'] ??
+            uri.queryParameters['campaign'],
+        'source': uri.queryParameters['utm_source'] ?? 'deep_link',
+      });
+    }
+
+    if (!isHomeScreen) {
+      log("HomeView not mounted yet, storing pending deep link: $uri");
+      pendingDeepLinkUri = uri;
+      pendingDeepLink = uri.toString();
+      isComeFromLinkOrNotification = true;
+      isHomeLoading = true;
+      notifyListeners();
+      return;
+    }
+
+    routeDeepLink(uri, isFromNotification: false);
+  }
+
+  Future<void> processPendingDeepLink() async {
+    final uriToProcess = pendingDeepLinkUri ??
+        (pendingDeepLink != null && pendingDeepLink!.isNotEmpty ? Uri.tryParse(pendingDeepLink!) : null);
+    pendingDeepLinkUri = null;
+    pendingDeepLink = null;
+    if (uriToProcess != null) {
+      _lastDeepLinkUrl = null;
+      _lastDeepLinkTime = null;
+      log("Processing pending deep link on HomeView mount: $uriToProcess");
+      await routeDeepLink(uriToProcess, isFromNotification: false);
+    }
+  }
 
   Future<void> initDeepLinks() async {
-    try {
-      final initialUri = await AppLinks().getInitialLink();
-      if (initialUri != null) {
-        debugPrint('getInitialLink: $initialUri');
-        _handleDeepLink(initialUri);
-      }
-    } catch (e) {
-      log("Error getting initial link: $e");
-    }
+    await processPendingDeepLink();
 
     linkSubscription?.cancel();
     linkSubscription = AppLinks().uriLinkStream.listen((uri) {
-      debugPrint('onAppLink: $uri');
-      _handleDeepLink(uri);
+      debugPrint('onAppLink stream in HomeProvider: $uri');
+      handleIncomingDeepLink(uri);
     }, onError: (err) {
       log("Error in deep link handling: $err");
     });
@@ -1136,12 +1367,16 @@ class HomeProvider extends ChangeNotifier {
   DateTime? _lastDeepLinkTime;
   bool _isRoutingDeepLink = false;
 
-  void _handleDeepLink(Uri uri) async {
-    log("Deep link path: $uri");
-    await routeDeepLink(uri, isFromNotification: false);
-  }
 
   Future<void> routeDeepLink(Uri uri, {bool isFromNotification = false}) async {
+    // If HomeView is not mounted yet, queue for when HomeView is ready
+    if (!isHomeScreen) {
+      log("HomeView not mounted yet, queuing deep link: $uri");
+      pendingDeepLinkUri = uri;
+      pendingDeepLink = uri.toString();
+      return;
+    }
+
     final String uriString = uri.toString();
     final DateTime now = DateTime.now();
 
@@ -1227,8 +1462,10 @@ class HomeProvider extends ChangeNotifier {
         } catch (_) {}
 
         final liveData = await fetchLiveTvStream();
-        final String streamUrl = (liveData?['stream_url'] ?? "https://stream.bigtvlive.com/live/bigtv/index.m3u8").toString();
-        final String channelName = (liveData?['channel_name'] ?? "BIG TV").toString();
+        final bool isMl = langCode.trim().toLowerCase() == 'ml';
+        final String fallbackStreamUrl = isMl ? malayalamLiveStreamUrl : teluguLiveStreamUrl;
+        final String streamUrl = (liveData?['stream_url'] ?? fallbackStreamUrl).toString();
+        final String channelName = (liveData?['channel_name'] ?? (isMl ? "BIG TV Malayalam" : "BIG TV")).toString();
         final String playbackType = (liveData?['playback_type'] ?? "hls").toString();
 
         if (mainNavigatorKey.currentState != null) {
@@ -1300,7 +1537,7 @@ class HomeProvider extends ChangeNotifier {
             if (navContext != null) {
               try {
                 final dailyProvider = navContext.read<DailyPuzzleProvider>();
-                dailyProvider.init(gameId: 'sudoku');
+                await dailyProvider.init(gameId: 'sudoku');
                 if (dailyProvider.isTodayCompleted) {
                   navState.push(
                     MaterialPageRoute(
@@ -1312,7 +1549,9 @@ class HomeProvider extends ChangeNotifier {
                   );
                   return;
                 }
-              } catch (_) {}
+              } catch (e) {
+                log("Error initializing sudoku provider: $e");
+              }
             }
             navState.push(
               MaterialPageRoute(builder: (_) => SudokuGameScreen(playerId: userId)),
@@ -1329,14 +1568,16 @@ class HomeProvider extends ChangeNotifier {
             if (navContext != null && !isPlayRequested) {
               try {
                 final dailyProvider = navContext.read<DailyPuzzleProvider>();
-                dailyProvider.init(gameId: 'patch');
+                await dailyProvider.init(gameId: 'patch');
                 if (dailyProvider.isTodayCompleted) {
                   navState.push(
                     MaterialPageRoute(builder: (_) => PatchDashboardScreen(playerId: userId)),
                   );
                   return;
                 }
-              } catch (_) {}
+              } catch (e) {
+                log("Error initializing patch provider: $e");
+              }
             }
             navState.push(
               MaterialPageRoute(builder: (_) => PatchGameScreen(playerId: userId)),
@@ -1345,7 +1586,7 @@ class HomeProvider extends ChangeNotifier {
             if (navContext != null) {
               try {
                 final dailyProvider = navContext.read<DailyPuzzleProvider>();
-                dailyProvider.init(gameId: 'zip');
+                await dailyProvider.init(gameId: 'zip');
                 if (!dailyProvider.isTodayCompleted && dailyProvider.todayLevelDefinition != null) {
                   navState.push(
                     MaterialPageRoute(
@@ -1357,7 +1598,9 @@ class HomeProvider extends ChangeNotifier {
                   );
                   return;
                 }
-              } catch (_) {}
+              } catch (e) {
+                log("Error initializing zip provider: $e");
+              }
             }
             navState.push(
               MaterialPageRoute(builder: (_) => const ZipLevelSelectionScreen()),
@@ -1376,56 +1619,78 @@ class HomeProvider extends ChangeNotifier {
         return;
       }
 
-      // 1. EPAPER DEEP LINK
+      // 1. EPAPER / NEWSPAPER DEEP LINK
       // Handles:
       // https://www.bigtv24x7.com/epaper?id=epaper_f5276469
       // https://app.bigtv24x7.com/epaper?id=epaper_f5276469
       // https://app.bigtv24x7.com/epaper?epaperId=...
+      // https://app.bigtv24x7.com/newspaper
       // https://www.bigtv24x7.com/epaper/epaper_f5276469
       final bool isEpaperLink = path.contains('epaper') ||
+          path.contains('newspaper') ||
           queryParams.containsKey('epaperId') ||
-          (queryParams['id'] != null && queryParams['id']!.toLowerCase().startsWith('epaper'));
+          queryParams.containsKey('newspaperId') ||
+          (queryParams['id'] != null &&
+              (queryParams['id']!.toLowerCase().startsWith('epaper') ||
+                  queryParams['id']!.toLowerCase().startsWith('newspaper')));
 
       if (isEpaperLink) {
         log("Routing to Epaper deep link: $uri");
         popToRoot();
-        switchTab(3);
+        switchTab(1); // Underlying tab is News (tab 1), NEVER Tab 3 (Settings)
 
-        String? epaperId = queryParams['epaperId'] ?? queryParams['id'];
-        if ((epaperId == null || epaperId.isEmpty) && uri.pathSegments.contains('epaper')) {
-          final idx = uri.pathSegments.indexOf('epaper');
+        String? epaperId = queryParams['epaperId'] ?? queryParams['newspaperId'] ?? queryParams['id'];
+        if ((epaperId == null || epaperId.isEmpty) &&
+            (uri.pathSegments.contains('epaper') || uri.pathSegments.contains('newspaper'))) {
+          final idx = uri.pathSegments.contains('epaper')
+              ? uri.pathSegments.indexOf('epaper')
+              : uri.pathSegments.indexOf('newspaper');
           if (idx + 1 < uri.pathSegments.length) {
             epaperId = uri.pathSegments[idx + 1];
           }
         }
 
         final navContext = mainNavigatorKey.currentContext;
-        if (navContext != null) {
-          final epaperProvider = navContext.read<EpaperProvider>();
-          if (epaperProvider.allEpapers.isEmpty) {
-            await epaperProvider.fetchEpapers();
-          }
+        final navState = mainNavigatorKey.currentState;
 
-          if (epaperId != null && epaperId.isNotEmpty) {
-            final matched = epaperProvider.allEpapers.firstWhere(
-              (e) =>
-                  e is Map &&
-                  (e['_id']?.toString() == epaperId ||
-                      e['id']?.toString() == epaperId ||
-                      e['epaperId']?.toString() == epaperId),
-              orElse: () => null,
-            );
+        if (navState != null) {
+          if (epaperId != null && epaperId.isNotEmpty && navContext != null) {
+            try {
+              final epaperProvider = navContext.read<EpaperProvider>();
+              if (epaperProvider.allEpapers.isEmpty) {
+                await epaperProvider.fetchEpapers();
+              }
 
-            if (matched != null && mainNavigatorKey.currentState != null) {
-              mainNavigatorKey.currentState!.push(
-                MaterialPageRoute(
-                  builder: (context) => EpaperDetailScreen(
-                    epaper: Map<String, dynamic>.from(matched),
-                  ),
-                ),
+              final matched = epaperProvider.allEpapers.firstWhere(
+                (e) {
+                  if (e is! Map) return false;
+                  final id = e['_id']?.toString() ?? e['id']?.toString() ?? e['epaperId']?.toString() ?? '';
+                  return id == epaperId || id.toLowerCase() == epaperId!.toLowerCase();
+                },
+                orElse: () => null,
               );
+
+              if (matched != null) {
+                navState.push(
+                  MaterialPageRoute(
+                    builder: (context) => EpaperDetailScreen(
+                      epaper: Map<String, dynamic>.from(matched),
+                    ),
+                  ),
+                );
+                return;
+              }
+            } catch (e) {
+              log("Error fetching/matching epaper: $e");
             }
           }
+
+          // If no specific epaper matched or no epaperId provided, open the main Epaper list screen
+          navState.push(
+            MaterialPageRoute(
+              builder: (context) => const EpaperScreen(),
+            ),
+          );
         }
         return;
       }
@@ -1443,7 +1708,7 @@ class HomeProvider extends ChangeNotifier {
       if (isEventsLink) {
         log("Routing to Folk Night / Events deep link: $uri");
         popToRoot();
-        switchTab(0);
+        switchTab(1);
 
         final String? targetEventId = queryParams['eventId'] ?? queryParams['id'];
 
@@ -1471,7 +1736,7 @@ class HomeProvider extends ChangeNotifier {
       if (isVideoTagLink) {
         log("Routing to Video Tag / Live Big TV deep link: $uri");
         popToRoot();
-        switchTab(0);
+        switchTab(1);
 
         final String rawShowOrSlug = queryParams['showname'] ??
             queryParams['tagSlug'] ??
@@ -1585,7 +1850,12 @@ class HomeProvider extends ChangeNotifier {
       if (path.contains('editorial')) {
         log("Routing to Editorial deep link");
         popToRoot();
-        switchTab(2);
+        switchTab(1);
+        if (mainNavigatorKey.currentState != null) {
+          mainNavigatorKey.currentState!.push(
+            MaterialPageRoute(builder: (context) => const EditorialScreen()),
+          );
+        }
         return;
       }
 
@@ -1593,7 +1863,7 @@ class HomeProvider extends ChangeNotifier {
       if (path.contains('reels') || path.contains('reel') || path.contains('shorts')) {
         log("Routing to Reels deep link");
         popToRoot();
-        switchTab(1);
+        switchTab(2);
         return;
       }
 
@@ -1601,15 +1871,49 @@ class HomeProvider extends ChangeNotifier {
       // Handles:
       // https://app.bigtv24x7.com/individualPage?postId=214
       // https://www.bigtv24x7.com/posts?postId=214
+      // https://www.bigtvlive.com/posts/214
+      // https://www.bigtvlive.com/posts/214/some-slug
       // https://app.bigtv24x7.com/posts?postId=214
-      final String? pId = queryParams['postId'] ??
+      String? pId = queryParams['postId'] ??
           queryParams['post_id'] ??
-          queryParams['id'] ??
-          (uri.pathSegments.isNotEmpty && int.tryParse(uri.pathSegments.last) != null ? uri.pathSegments.last : null);
+          queryParams['articleId'] ??
+          queryParams['article_id'];
+
+      if ((pId == null || pId.isEmpty) && queryParams.containsKey('id')) {
+        final idVal = queryParams['id'];
+        if (idVal != null && idVal.isNotEmpty && !idVal.toLowerCase().startsWith('epaper')) {
+          pId = idVal;
+        }
+      }
+
+      // Check path segments (e.g., /posts/1234, /posts/1234/title-slug, /1234)
+      if (pId == null || pId.isEmpty) {
+        for (final segment in uri.pathSegments) {
+          if (int.tryParse(segment) != null && segment != "0") {
+            pId = segment;
+            break;
+          }
+        }
+      }
+
+      if (pId == null || pId.isEmpty) {
+        for (int i = 0; i < uri.pathSegments.length; i++) {
+          final seg = uri.pathSegments[i].toLowerCase();
+          if ((seg == 'post' || seg == 'posts' || seg == 'article' || seg == 'individualpage') &&
+              i + 1 < uri.pathSegments.length) {
+            final candidate = uri.pathSegments[i + 1];
+            if (candidate.isNotEmpty) {
+              pId = candidate;
+              break;
+            }
+          }
+        }
+      }
 
       if (pId != null && pId.isNotEmpty && pId != "0") {
-        log("Routing to Post ID: $pId");
-        postId = pId;
+        log("Routing to Post ID: $pId (isNotification: $isFromNotification)");
+        final targetPostId = pId!;
+        postId = "0";
         isComeFromLinkOrNotification = true;
         isAiTagDataLoaded = false;
         _selectedTagId = null;
@@ -1617,13 +1921,36 @@ class HomeProvider extends ChangeNotifier {
         isHomeLoading = true;
 
         popToRoot();
-        switchTab(0);
-        getAllPostList = [];
-        notifyListeners();
+        switchTab(1); // Set bottom nav to Home (Index 1) - NEVER Search (Index 0)
 
-        await getIndividualPost(postId, isLink: isFromNotification);
-        isHomeLoading = false;
-        notifyListeners();
+        // Push IndividualPostView1 so the user directly navigates to the particular post
+        if (mainNavigatorKey.currentState != null) {
+          mainNavigatorKey.currentState!.push(
+            MaterialPageRoute(
+              builder: (context) => IndividualPostView1(
+                postId: targetPostId,
+                isComeFrom: true,
+              ),
+            ),
+          );
+        }
+
+        // Fetch post in background to populate getSinglePostList and log analytics event
+        getIndividualPost(targetPostId, isAds: true, isLink: isFromNotification).then((_) {
+          isHomeLoading = false;
+          notifyListeners();
+        });
+
+        // Ensure home news feed is populated in background so tapping back has news cards ready
+        if (getAllPostList.isEmpty) {
+          getAllPost(isGetAllPost: true);
+        }
+
+        // Tell native Android to clear its launch intent data so it doesn't replay on next open
+        try {
+          const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
+        } catch (_) {}
+
         return;
       }
 
@@ -1955,6 +2282,15 @@ class HomeProvider extends ChangeNotifier {
   int editorialCurrentPage = 1;
   bool hasMoreEditorial = true;
 
+  String? editorialLanguage;
+
+  String get editorialWpBaseUrl {
+    if (langCode == 'ml') {
+      return "https://bigtv24x7.com/wp-json";
+    }
+    return "https://www.bigtvlive.com/wp-json";
+  }
+
   String _cleanWpTitle(String rawTitle) {
     return rawTitle
         .replaceAll('&#8217;', "'")
@@ -2017,15 +2353,23 @@ class HomeProvider extends ChangeNotifier {
   Future<void> fetchEditorialPosts({bool refresh = false}) async {
     if (isEditorialLoading) return;
 
-    if (refresh || editorialPosts.isEmpty) {
+    final String targetLang = langCode;
+    final bool langChanged = editorialLanguage != targetLang;
+
+    if (refresh || editorialPosts.isEmpty || langChanged) {
       isEditorialLoading = true;
       editorialCurrentPage = 1;
       hasMoreEditorial = true;
+      if (langChanged) {
+        editorialPosts = [];
+      }
+      editorialLanguage = targetLang;
       notifyListeners();
     }
 
     try {
-      final url = "https://www.bigtvlive.com/wp-json/wp/v2/posts?per_page=50&page=1&_embed";
+      final baseUrl = editorialWpBaseUrl;
+      final url = "$baseUrl/wp/v2/posts?per_page=50&page=1&_embed";
       final response = await Dio().get(url);
       if (response.statusCode == 200 && response.data is List) {
         final List list = response.data;
@@ -2045,6 +2389,7 @@ class HomeProvider extends ChangeNotifier {
           }
         }
         editorialPosts = parsed;
+        editorialLanguage = targetLang;
         if (list.length < 50) {
           hasMoreEditorial = false;
         }
@@ -2066,7 +2411,8 @@ class HomeProvider extends ChangeNotifier {
     final nextPage = editorialCurrentPage + 1;
 
     try {
-      final url = "https://www.bigtvlive.com/wp-json/wp/v2/posts?per_page=50&page=$nextPage&_embed";
+      final baseUrl = editorialWpBaseUrl;
+      final url = "$baseUrl/wp/v2/posts?per_page=50&page=$nextPage&_embed";
       final response = await Dio().get(url);
       if (response.statusCode == 200 && response.data is List) {
         final List list = response.data;

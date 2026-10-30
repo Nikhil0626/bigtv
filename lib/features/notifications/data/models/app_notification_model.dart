@@ -75,7 +75,7 @@ class AppNotificationModel {
       imageUrl: json['imageUrl']?.toString(),
       brandName: json['brandName']?.toString() ?? 'BigTV',
       brandLogo: json['brandLogo']?.toString(),
-      lan: json['lan']?.toString(),
+      lan: (json['lan'] ?? json['language'] ?? json['lang'])?.toString(),
       status: json['status']?.toString(),
       totalTargeted: json['totalTargeted'] is int
           ? json['totalTargeted']
@@ -93,6 +93,16 @@ class AppNotificationModel {
     );
   }
 
+  bool matchesLanguage(String languageCode) {
+    final code = languageCode.trim().toLowerCase();
+    final itemLan = (lan ?? '').trim().toLowerCase();
+    if (code == 'ml') {
+      return itemLan == 'ml';
+    } else {
+      return itemLan != 'ml';
+    }
+  }
+
   String get displayImageUrl {
     if (imageUrl == null || imageUrl!.trim().isEmpty) return '';
     final url = imageUrl!.trim();
@@ -103,21 +113,21 @@ class AppNotificationModel {
 
   String getTimeAgo({bool isTelugu = true}) {
     final target = sentAt ?? createdAt;
-    if (target == null) return isTelugu ? "ఇప్పుడే" : "Just now";
+    if (target == null) return isTelugu ? "ఇప్పుడే" : "ഇപ്പോൾ";
     final now = DateTime.now();
     final difference = now.difference(target.toLocal());
 
     if (difference.inSeconds < 0 || difference.inSeconds < 60) {
-      return isTelugu ? "ఇప్పుడే" : "Just now";
+      return isTelugu ? "ఇప్పుడే" : "ഇപ്പോൾ";
     } else if (difference.inMinutes < 60) {
       final mins = difference.inMinutes;
-      return isTelugu ? "$mins నిమిషాల క్రితం" : "${mins}m ago";
+      return isTelugu ? "$mins నిమిషాల క్రితం" : "$mins മിനിറ്റ് മുൻപ്";
     } else if (difference.inHours < 24) {
       final hours = difference.inHours;
-      return isTelugu ? "$hours గంటల క్రితం" : "${hours}h ago";
+      return isTelugu ? "$hours గంటల క్రితం" : "$hours മണിക്കൂർ മുൻപ്";
     } else if (difference.inDays < 7) {
       final days = difference.inDays;
-      return isTelugu ? "$days రోజుల క్రితం" : "${days}d ago";
+      return isTelugu ? "$days రోజుల క్రితం" : "$days ദിവസം മുൻപ്";
     } else {
       return DateFormat('dd MMM, hh:mm a').format(target.toLocal());
     }

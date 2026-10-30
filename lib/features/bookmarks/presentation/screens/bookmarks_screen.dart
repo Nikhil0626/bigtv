@@ -11,6 +11,9 @@ import '../../../../aggricator_screens/individual_post_details/individual_post_v
 import '../../../../core/theme/color_tokens.dart';
 import '../../../../features/home/presentation/providers/home_provider.dart';
 import '../../../../utils/app_loading_screen.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
+import '../../../../utils/app_enums.dart';
 import '../../data/models/bookmark_post_model.dart';
 import '../providers/bookmarks_provider.dart';
 
@@ -83,7 +86,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             ),
             const SizedBox(width: 10),
             Text(
-              isTelugu ? "బుక్‌మార్క్‌లు" : "Bookmarks",
+              isTelugu ? "బుక్‌మార్క్‌లు" : "ബുക്ക്‌മാർക്കുകൾ",
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w700,
@@ -93,7 +96,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             const SizedBox(width: 8),
             Consumer<BookmarksProvider>(
               builder: (context, provider, _) {
-                if (provider.totalBookmarks <= 0) return const SizedBox.shrink();
+                if (!provider.isLoggedIn || provider.totalBookmarks <= 0) return const SizedBox.shrink();
                 return Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
@@ -139,6 +142,10 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             return const Center(child: AppLoadingScreen());
           }
 
+          if (!provider.isLoggedIn) {
+            return _buildLoginRequiredState(context, isDark, isTelugu);
+          }
+
           if (provider.bookmarks.isEmpty) {
             return _buildEmptyState(context, isDark, isTelugu);
           }
@@ -179,7 +186,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
   ) {
     final String category = post.categoryName.isNotEmpty
         ? post.categoryName.first
-        : (isTelugu ? "తాజా వార్తలు" : "Latest News");
+        : (isTelugu ? "తాజా వార్తలు" : "ഏറ്റവും പുതിയ വാർത്തകൾ");
 
     final String timeDisplay = _formatCreatedDate(post.created);
 
@@ -362,7 +369,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  isTelugu ? "తీసివేయి" : "Remove",
+                                  isTelugu ? "తీసివేయి" : "നീക്കം ചെയ്യുക",
                                   style: TextStyle(
                                     fontSize: 11.sp,
                                     fontWeight: FontWeight.w600,
@@ -409,7 +416,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             ),
             SizedBox(height: 18.h),
             Text(
-              isTelugu ? "బుక్‌మార్క్‌లు ఏవీ లేవు" : "No Bookmarks Yet",
+              isTelugu ? "బుక్‌మార్క్‌లు ఏవీ లేవు" : "ബുക്ക്‌മാർക്കുകളൊന്നും ലഭ്യമല്ല",
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.w800,
@@ -420,7 +427,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             Text(
               isTelugu
                   ? "మీకు నచ్చిన వార్తలను తరువాత చదవడానికి బుక్‌మార్క్ చిహ్నాన్ని నొక్కండి."
-                  : "Tap the bookmark icon on any news post to save and read it later here.",
+                  : "നിങ്ങൾക്ക് ഇഷ്ടമുള്ള വാർത്തകൾ പിന്നീട് വായിക്കാൻ ബുക്ക്‌മാർക്ക് ഐക്കൺ ടാപ്പ് ചെയ്യുക.",
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13.sp,
@@ -433,12 +440,85 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
               onPressed: () => Navigator.pop(context),
               icon: const Icon(Icons.explore_rounded, size: 18, color: Colors.white),
               label: Text(
-                isTelugu ? "వార్తలు అన్వేషించండి" : "Explore News",
+                isTelugu ? "వార్తలు అన్వేషించండి" : "വാർത്തകൾ പര്യവേക്ഷണം ചെയ്യുക",
                 style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColorTokens.primaryRed,
                 padding: EdgeInsets.symmetric(horizontal: 22.w, vertical: 12.h),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+                elevation: 0,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoginRequiredState(BuildContext context, bool isDark, bool isTelugu) {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 32.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80.w,
+              height: 80.w,
+              decoration: BoxDecoration(
+                color: const Color(0xFFED1C24).withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Center(
+                child: Icon(
+                  Icons.bookmark_add_outlined,
+                  size: 42,
+                  color: Color(0xFFED1C24),
+                ),
+              ),
+            ),
+            SizedBox(height: 18.h),
+            Text(
+              isTelugu ? "లాగిన్ అవ్వండి" : "ലോഗിൻ ചെയ്യുക",
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.w800,
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Text(
+              isTelugu
+                  ? "మీరు సేవ్ చేసిన బుక్‌మార్క్‌లను చూడటానికి మరియు నిర్వహించడానికి దయచేసి లాగిన్ అవ్వండి."
+                  : "നിങ്ങൾ സംരക്ഷിച്ച ബുക്ക്‌മാർക്കുകൾ കാണാനും കൈകാര്യം ചെയ്യാനും ദയവായി ലോഗിൻ ചെയ്യുക.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13.sp,
+                height: 1.4,
+                color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
+              ),
+            ),
+            SizedBox(height: 24.h),
+            ElevatedButton.icon(
+              onPressed: () async {
+                context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LoginBackgroundView()),
+                );
+                if (mounted && context.mounted) {
+                  context.read<BookmarksProvider>().fetchBookmarks(refresh: true);
+                }
+              },
+              icon: const Icon(Icons.login_rounded, size: 18, color: Colors.white),
+              label: Text(
+                isTelugu ? "ఇప్పుడే లాగిన్ అవ్వండి" : "ഇപ്പോൾ ലോഗിൻ ചെയ്യുക",
+                style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColorTokens.primaryRed,
+                padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
                 elevation: 0,
               ),

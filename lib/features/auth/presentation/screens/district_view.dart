@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 
 class DistrictView extends StatefulWidget {
   const DistrictView({super.key});
@@ -37,6 +38,28 @@ class _DistrictViewState extends State<DistrictView> {
       'nativeName': 'కేరళ',
       'englishName': 'Kerala',
       'asset': null,
+    },
+  ];
+
+  // Default fallback locations for Malayalam
+  final List<Map<String, dynamic>> _fallbackLocationsMl = [
+    {
+      'id': 3,
+      'nativeName': 'കേരളം',
+      'englishName': 'Kerala',
+      'asset': null,
+    },
+    {
+      'id': 1,
+      'nativeName': 'തെലങ്കാന',
+      'englishName': 'Telangana',
+      'asset': 'assets/images/Telangana logo.png',
+    },
+    {
+      'id': 2,
+      'nativeName': 'ആന്ധ്രാപ്രദേശ്',
+      'englishName': 'Andhra Pradesh',
+      'asset': 'assets/images/AP logo.png',
     },
   ];
 
@@ -146,14 +169,14 @@ class _DistrictViewState extends State<DistrictView> {
     }
 
     final lower = stateName.toLowerCase();
-    if (lower.contains('telangana') || lower.contains('తెలంగాణ')) {
+    if (lower.contains('telangana') || lower.contains('తెలంగాణ') || lower.contains('തെലങ്കാന')) {
       return Image.asset(
         'assets/images/Telangana logo.png',
         fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => _buildStateIcon(stateName),
       );
     }
-    if (lower.contains('andhra') || lower.contains('ఆంధ్రప్రదేశ్')) {
+    if (lower.contains('andhra') || lower.contains('ఆంధ్రప్రదేశ్') || lower.contains('ആന്ധ്രാപ്രദേശ്')) {
       return Image.asset(
         'assets/images/AP logo.png',
         fit: BoxFit.contain,
@@ -185,10 +208,12 @@ class _DistrictViewState extends State<DistrictView> {
           );
         }
 
+        final bool isMalayalam = context.watch<HomeProvider>().langCode == 'ml';
+        final List<Map<String, dynamic>> fallbacks = isMalayalam ? _fallbackLocationsMl : _fallbackLocations;
         final List<LocationModel> locations = authProvider.getAllLocationList;
         final bool useFallbacks = locations.isEmpty;
         final int selectedCount = authProvider.selectedLocations.length;
-        final int totalItems = useFallbacks ? _fallbackLocations.length : locations.length;
+        final int totalItems = useFallbacks ? fallbacks.length : locations.length;
 
         return Scaffold(
           backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
@@ -220,11 +245,7 @@ class _DistrictViewState extends State<DistrictView> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    authProvider.updateLoginStatus(NewAppLoginStatus.category);
-                                  }
+                                  authProvider.updateLoginStatus(NewAppLoginStatus.category);
                                 },
                                 borderRadius: BorderRadius.circular(20.r),
                                 child: Container(
@@ -265,7 +286,7 @@ class _DistrictViewState extends State<DistrictView> {
                                     ),
                                     SizedBox(width: 4.w),
                                     Text(
-                                      "LOCATION",
+                                      isMalayalam ? "സ്ഥലം" : "LOCATION",
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 10.5.sp,
@@ -282,103 +303,105 @@ class _DistrictViewState extends State<DistrictView> {
 
                           SizedBox(height: 12.h),
 
-                          // HERO SECTION: "News closer to you." + Map Graphic
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    RichText(
-                                      text: TextSpan(
-                                        text: "News closer\n",
-                                        style: TextStyle(
-                                          fontFamily: 'Poppins',
-                                          fontSize: 27.sp,
-                                          fontWeight: FontWeight.w900,
-                                          color: isDark ? Colors.white : const Color(0xFF181A20),
-                                          height: 1.1,
-                                        ),
-                                        children: const [
-                                          TextSpan(
-                                            text: "to you.",
-                                            style: TextStyle(
-                                              color: Color(0xFFED1C24),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    SizedBox(height: 6.h),
-                                    Text(
-                                      "Get local news from the places\nyou choose.",
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 12.5.sp,
-                                        fontWeight: FontWeight.w500,
-                                        color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
-                                        height: 1.3,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(width: 10.w),
-                              _buildLocationHeroGraphic(isDark),
-                            ],
-                          ),
+                           // HERO SECTION: "News closer to you." + Map Graphic
+                           Row(
+                             crossAxisAlignment: CrossAxisAlignment.center,
+                             children: [
+                               Expanded(
+                                 child: Column(
+                                   crossAxisAlignment: CrossAxisAlignment.start,
+                                   children: [
+                                     RichText(
+                                       text: TextSpan(
+                                         text: isMalayalam ? "നിങ്ങളുടെ അടുത്തുള്ള\n" : "News closer\n",
+                                         style: TextStyle(
+                                           fontFamily: 'Poppins',
+                                           fontSize: isMalayalam ? 25.sp : 27.sp,
+                                           fontWeight: FontWeight.w900,
+                                           color: isDark ? Colors.white : const Color(0xFF181A20),
+                                           height: 1.1,
+                                         ),
+                                         children: [
+                                           TextSpan(
+                                             text: isMalayalam ? "വാർത്തകൾ." : "to you.",
+                                             style: const TextStyle(
+                                               color: Color(0xFFED1C24),
+                                             ),
+                                           ),
+                                         ],
+                                       ),
+                                     ),
+                                     SizedBox(height: 6.h),
+                                     Text(
+                                       isMalayalam
+                                           ? "നിങ്ങൾ തിരഞ്ഞെടുക്കുന്ന സ്ഥലങ്ങളിൽ\nനിന്നുള്ള വാർത്തകൾ നേടൂ."
+                                           : "Get local news from the places\nyou choose.",
+                                       style: TextStyle(
+                                         fontFamily: 'Poppins',
+                                         fontSize: 12.5.sp,
+                                         fontWeight: FontWeight.w500,
+                                         color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
+                                         height: 1.3,
+                                       ),
+                                     ),
+                                   ],
+                                 ),
+                               ),
+                               SizedBox(width: 10.w),
+                               _buildLocationHeroGraphic(isDark),
+                             ],
+                           ),
 
-                          SizedBox(height: 18.h),
+                           SizedBox(height: 18.h),
 
-                          // SECTION BAR: "Choose locations" & "[ N selected ]"
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Choose locations",
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 16.sp,
-                                      fontWeight: FontWeight.w800,
-                                      color: isDark ? Colors.white : const Color(0xFF181A20),
-                                    ),
-                                  ),
-                                  SizedBox(height: 1.h),
-                                  Text(
-                                    "Select all that apply",
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 12.sp,
-                                      fontWeight: FontWeight.w500,
-                                      color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              if (selectedCount > 0)
-                                Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.5.h),
-                                  decoration: BoxDecoration(
-                                    color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFECEC),
-                                    borderRadius: BorderRadius.circular(14.r),
-                                  ),
-                                  child: Text(
-                                    "$selectedCount selected",
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      fontSize: 11.5.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: const Color(0xFFED1C24),
-                                    ),
-                                  ),
-                                ),
-                            ],
-                          ),
+                           // SECTION BAR: "Choose locations" & "[ N selected ]"
+                           Row(
+                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                             crossAxisAlignment: CrossAxisAlignment.center,
+                             children: [
+                               Column(
+                                 crossAxisAlignment: CrossAxisAlignment.start,
+                                 children: [
+                                   Text(
+                                     isMalayalam ? "സ്ഥലങ്ങൾ തിരഞ്ഞെടുക്കുക" : "Choose locations",
+                                     style: TextStyle(
+                                       fontFamily: 'Poppins',
+                                       fontSize: 16.sp,
+                                       fontWeight: FontWeight.w800,
+                                       color: isDark ? Colors.white : const Color(0xFF181A20),
+                                     ),
+                                   ),
+                                   SizedBox(height: 1.h),
+                                   Text(
+                                     isMalayalam ? "ബാധകമായവ എല്ലാം തിരഞ്ഞെടുക്കുക" : "Select all that apply",
+                                     style: TextStyle(
+                                       fontFamily: 'Poppins',
+                                       fontSize: 12.sp,
+                                       fontWeight: FontWeight.w500,
+                                       color: isDark ? const Color(0xFFBDBDBD) : const Color(0xFF6C7278),
+                                     ),
+                                   ),
+                                 ],
+                               ),
+                               if (selectedCount > 0)
+                                 Container(
+                                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.5.h),
+                                   decoration: BoxDecoration(
+                                     color: isDark ? const Color(0xFF2E1214) : const Color(0xFFFFECEC),
+                                     borderRadius: BorderRadius.circular(14.r),
+                                   ),
+                                   child: Text(
+                                     isMalayalam ? "$selectedCount തെരഞ്ഞെടുത്തു" : "$selectedCount selected",
+                                     style: TextStyle(
+                                       fontFamily: 'Poppins',
+                                       fontSize: 11.5.sp,
+                                       fontWeight: FontWeight.w700,
+                                       color: const Color(0xFFED1C24),
+                                     ),
+                                   ),
+                                 ),
+                             ],
+                           ),
 
                           SizedBox(height: 12.h),
                         ],
@@ -399,7 +422,7 @@ class _DistrictViewState extends State<DistrictView> {
                           final String? fallbackAsset;
 
                           if (useFallbacks) {
-                            final item = _fallbackLocations[index];
+                            final item = fallbacks[index];
                             nativeName = item['nativeName'] as String;
                             englishName = item['englishName'] as String;
                             stateKey = nativeName;
@@ -550,6 +573,16 @@ class _DistrictViewState extends State<DistrictView> {
                             ? () {
                                 authProvider.sendLocationsToServer(context).then((_) {
                                   if (context.mounted && authProvider.newAppLoginStatus == NewAppLoginStatus.home) {
+                                    try {
+                                      final hp = context.read<HomeProvider>();
+                                      hp.selectedIndex = 1;
+                                      hp.onItemTapped(1);
+                                      if (hp.homePageController.hasClients) {
+                                        hp.homePageController.jumpToPage(1);
+                                      }
+                                      hp.getAllPostList = [];
+                                      hp.getAllPost(postIds: "0", isGetAllPost: true);
+                                    } catch (_) {}
                                     Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(
@@ -593,7 +626,7 @@ class _DistrictViewState extends State<DistrictView> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        "Continue",
+                                        isMalayalam ? "തുടരുക" : "Continue",
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 14.5.sp,

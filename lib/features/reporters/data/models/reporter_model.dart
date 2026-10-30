@@ -14,6 +14,9 @@ class ReporterModel {
   final String employeeId;
   final String mediaChannelName;
   final Map<String, dynamic>? socialMediaProfiles;
+  final String language;
+  final String lan;
+  final List<String> languages;
 
   const ReporterModel({
     required this.id,
@@ -31,9 +34,20 @@ class ReporterModel {
     this.employeeId = '',
     this.mediaChannelName = '',
     this.socialMediaProfiles,
+    this.language = '',
+    this.lan = '',
+    this.languages = const [],
   });
 
   String get fullLocation => state.isNotEmpty ? "$location, $state" : location;
+
+  bool matchesLanguage(String lang) {
+    final target = lang.toLowerCase().trim();
+    if (language.isNotEmpty && language == target) return true;
+    if (lan.isNotEmpty && lan == target) return true;
+    if (languages.contains(target)) return true;
+    return false;
+  }
 
   factory ReporterModel.fromJson(Map<String, dynamic> json) {
     final mediaChannel = json['mediaChannel'] is Map<String, dynamic>
@@ -125,6 +139,17 @@ class ReporterModel {
         ? json['socialMediaProfiles'] as Map<String, dynamic>
         : null;
 
+    final langStr = json['language']?.toString().toLowerCase().trim() ?? '';
+    final lanStr = json['lan']?.toString().toLowerCase().trim() ?? '';
+    final List<String> langsList = [];
+    if (json['languages'] is List) {
+      for (final l in json['languages']) {
+        if (l != null && l.toString().trim().isNotEmpty) {
+          langsList.add(l.toString().toLowerCase().trim());
+        }
+      }
+    }
+
     return ReporterModel(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
@@ -141,6 +166,9 @@ class ReporterModel {
       employeeId: employment?['employeeId']?.toString() ?? '',
       mediaChannelName: mediaChannel?['name']?.toString() ?? '',
       socialMediaProfiles: socialMap,
+      language: langStr,
+      lan: lanStr,
+      languages: langsList,
     );
   }
 
@@ -161,6 +189,9 @@ class ReporterModel {
       'employeeId': employeeId,
       'mediaChannelName': mediaChannelName,
       'socialMediaProfiles': socialMediaProfiles,
+      'language': language,
+      'lan': lan,
+      'languages': languages,
     };
   }
 }

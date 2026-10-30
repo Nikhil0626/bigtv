@@ -4,8 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../utils/top_right_wave_painter.dart';
 import '../providers/daily_puzzle_provider.dart';
 import '../widgets/zip_daily_challenge_view.dart';
-import 'zip_leaderboard_screen.dart';
-import '../../../../services/game_share_helper.dart';
+import '../../../patches_puzzle/presentation/widgets/competition_atmosphere_painter.dart';
 
 class ZipLevelSelectionScreen extends StatefulWidget {
   const ZipLevelSelectionScreen({super.key});
@@ -15,8 +14,9 @@ class ZipLevelSelectionScreen extends StatefulWidget {
 }
 
 class _ZipLevelSelectionScreenState extends State<ZipLevelSelectionScreen>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _waveController;
+  late final AnimationController _competitionController;
 
   @override
   void initState() {
@@ -26,12 +26,17 @@ class _ZipLevelSelectionScreenState extends State<ZipLevelSelectionScreen>
       duration: const Duration(milliseconds: 3800),
     )..repeat();
 
+    _competitionController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 5500),
+    )..repeat();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         final provider = context.read<DailyPuzzleProvider>();
-        if (provider.gameId != 'zip' || provider.todayPuzzle == null) {
-          provider.init(gameId: 'zip');
-        }
+        provider.init(gameId: 'zip');
+        provider.loadStreakCalendar();
+        provider.loadTodayLeaderboard(limit: 100);
       }
     });
   }
@@ -39,6 +44,7 @@ class _ZipLevelSelectionScreenState extends State<ZipLevelSelectionScreen>
   @override
   void dispose() {
     _waveController.dispose();
+    _competitionController.dispose();
     super.dispose();
   }
 
@@ -66,6 +72,7 @@ class _ZipLevelSelectionScreenState extends State<ZipLevelSelectionScreen>
                 borderRadius: BorderRadius.circular(14.r),
                 border: Border.all(
                   color: isDark ? const Color(0xFF2C3242) : const Color(0xFFE2E8F0),
+                  width: 1,
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -85,144 +92,28 @@ class _ZipLevelSelectionScreenState extends State<ZipLevelSelectionScreen>
         ),
         title: FittedBox(
           fit: BoxFit.scaleDown,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-            decoration: BoxDecoration(
-              color: isDark
-                  ? const Color(0xFF161922).withValues(alpha: 0.85)
-                  : Colors.white.withValues(alpha: 0.9),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                color: isDark ? const Color(0xFF282E3E) : const Color(0xFFE2E8F0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Image.asset(
+                'assets/images/zip_puzzle_3d_icon.png',
+                width: 22.w,
+                height: 22.w,
+                errorBuilder: (_, __, ___) => const Icon(Icons.flash_on_rounded, color: Colors.amber, size: 20),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.04),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+              SizedBox(width: 6.w),
+              Text(
+                'Zip Puzzle',
+                style: TextStyle(
+                  fontWeight: FontWeight.w900,
+                  fontSize: 17.sp,
+                  letterSpacing: 0.3,
+                  color: isDark ? Colors.white : const Color(0xFF0F172A),
                 ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.asset(
-                  'assets/images/zip_puzzle_3d_icon.png',
-                  width: 24.w,
-                  height: 24.w,
-                  errorBuilder: (_, __, ___) => const Icon(Icons.flash_on_rounded, color: Colors.amber, size: 22),
-                ),
-                SizedBox(width: 8.w),
-                Text(
-                  'Zip Puzzle',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 16.5.sp,
-                    letterSpacing: 0.4,
-                    color: isDark ? Colors.white : const Color(0xFF0F172A),
-                  ),
-                ),
-                SizedBox(width: 6.w),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE50914).withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(6.r),
-                  ),
-                  child: Text(
-                    'ARENA',
-                    style: TextStyle(
-                      fontSize: 8.5.sp,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.8,
-                      color: const Color(0xFFE50914),
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
-        actions: [
-          Consumer<DailyPuzzleProvider>(
-            builder: (context, provider, _) {
-              final last = provider.isTodayCompleted ? provider.lastSubmissionResult : null;
-              return Padding(
-                padding: EdgeInsets.only(right: 6.w),
-                child: InkWell(
-                  onTap: () {
-                    GameShareHelper.shareGame(
-                      context: context,
-                      gameSlug: 'zip',
-                      gameTitle: 'Zip Puzzle',
-                      formattedTime: last != null ? '${(last.durationMs / 1000).toStringAsFixed(1)}s' : null,
-                      rank: last?.rank,
-                      streak: last?.streak.currentStreak,
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(14.r),
-                  child: Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14.r),
-                      border: Border.all(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.4),
-                        width: 1,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.share_rounded,
-                      size: 18.sp,
-                      color: const Color(0xFF10B981),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 12.w),
-            child: InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ZipLeaderboardScreen(
-                      initialLevel: 1,
-                      isDailyLeaderboard: true,
-                    ),
-                  ),
-                );
-              },
-              borderRadius: BorderRadius.circular(14.r),
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF1E222D).withValues(alpha: 0.9)
-                      : Colors.white.withValues(alpha: 0.95),
-                  borderRadius: BorderRadius.circular(14.r),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF2C3242) : const Color(0xFFE2E8F0),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.leaderboard_rounded,
-                  size: 20.sp,
-                  color: Colors.amber.shade600,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
       body: Stack(
         children: [
@@ -249,7 +140,24 @@ class _ZipLevelSelectionScreenState extends State<ZipLevelSelectionScreen>
             ),
           ),
 
-          // 2. Gaming Content
+          // 2. Animated Competition Atmosphere Sparks & Championship Aura
+          Positioned.fill(
+            child: IgnorePointer(
+              child: AnimatedBuilder(
+                animation: _competitionController,
+                builder: (context, _) {
+                  return CustomPaint(
+                    painter: CompetitionAtmospherePainter(
+                      animation: _competitionController,
+                      isDark: isDark,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // 3. Gaming Content
           const SafeArea(
             child: ZipDailyChallengeView(),
           ),

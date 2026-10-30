@@ -165,6 +165,10 @@ class ProfileViewState extends State<ProfileView> {
                                 TextField(
                                   controller: profileProvider.nameController,
                                   style: TextStyle(color: textPrimaryColor),
+                                  textInputAction: TextInputAction.next,
+                                  onSubmitted: (_) {
+                                    FocusScope.of(context).requestFocus(dayFocusNode);
+                                  },
                                   decoration: InputDecoration(
                                     filled: true,
                                     fillColor: cardBgColor,
@@ -175,13 +179,65 @@ class ProfileViewState extends State<ProfileView> {
                                   ),
                                 ),
                                 height(height: 20.h),
-                                Text(
-                                  "Date of Birth",
-                                  style: newAppFont(
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: textSecondaryColor,
-                                  ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      "Date of Birth",
+                                      style: newAppFont(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: textSecondaryColor,
+                                      ),
+                                    ),
+                                    InkWell(
+                                      onTap: () async {
+                                        DateTime initialDate = DateTime.now().subtract(const Duration(days: 365 * 18));
+                                        final y = int.tryParse(profileProvider.yearController.text.trim());
+                                        final m = int.tryParse(profileProvider.monthController.text.trim());
+                                        final d = int.tryParse(profileProvider.dayController.text.trim());
+                                        if (y != null && m != null && d != null) {
+                                          try {
+                                            final parsed = DateTime(y, m, d);
+                                            if (parsed.isBefore(DateTime.now())) {
+                                              initialDate = parsed;
+                                            }
+                                          } catch (_) {}
+                                        }
+                                        final picked = await showDatePicker(
+                                          context: context,
+                                          initialDate: initialDate,
+                                          firstDate: DateTime(1900),
+                                          lastDate: DateTime.now(),
+                                        );
+                                        if (picked != null) {
+                                          profileProvider.setDob(picked);
+                                        }
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 2.h),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.calendar_month_outlined,
+                                              size: 16.sp,
+                                              color: const Color(0xFFED1C24),
+                                            ),
+                                            width(width: 4.w),
+                                            Text(
+                                              "Pick Date",
+                                              style: newAppFont(
+                                                fontSize: 12.sp,
+                                                fontWeight: FontWeight.w500,
+                                                color: const Color(0xFFED1C24),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 height(height: 5.h),
                                 Row(
@@ -192,6 +248,8 @@ class ProfileViewState extends State<ProfileView> {
                                         controller: profileProvider.dayController,
                                         focusNode: dayFocusNode,
                                         keyboardType: TextInputType.number,
+                                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                        textInputAction: TextInputAction.next,
                                         maxLength: 2,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(color: textPrimaryColor),
@@ -219,6 +277,8 @@ class ProfileViewState extends State<ProfileView> {
                                         controller: profileProvider.monthController,
                                         focusNode: monthFocusNode,
                                         keyboardType: TextInputType.number,
+                                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                        textInputAction: TextInputAction.next,
                                         maxLength: 2,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(color: textPrimaryColor),
@@ -246,6 +306,11 @@ class ProfileViewState extends State<ProfileView> {
                                         controller: profileProvider.yearController,
                                         focusNode: yearFocusNode,
                                         keyboardType: TextInputType.number,
+                                        inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                        textInputAction: TextInputAction.done,
+                                        onSubmitted: (_) {
+                                          FocusScope.of(context).unfocus();
+                                        },
                                         maxLength: 4,
                                         textAlign: TextAlign.center,
                                         style: TextStyle(color: textPrimaryColor),
@@ -340,7 +405,7 @@ class ProfileViewState extends State<ProfileView> {
                           padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 6),
                           child: InkWell(
                             onTap: () {
-                              if (!profileProvider.isProfileLoading) {
+                              if (!profileProvider.isProfileLoading && !profileProvider.isProfileUpdate) {
                                 profileProvider.postProfile();
                               }
                             },
@@ -352,7 +417,7 @@ class ProfileViewState extends State<ProfileView> {
                                 borderRadius: BorderRadius.circular(8.r),
                               ),
                               child: Center(
-                                child: profileProvider.isProfileLoading
+                                child: (profileProvider.isProfileLoading || profileProvider.isProfileUpdate)
                                     ? AppLoadingScreen()
                                     : Text(
                                         'Update',
@@ -481,7 +546,7 @@ class ProfileViewState extends State<ProfileView> {
                                 border: Border.all(color: const Color(0xFFEF4444).withValues(alpha: 0.5), width: 1),
                               ),
                               child: Center(
-                                child: profileProvider.isProfileLoading
+                                child: (profileProvider.isProfileLoading || profileProvider.isProfileUpdate)
                                     ? AppLoadingScreen()
                                     : Text(
                                         'Delete account',

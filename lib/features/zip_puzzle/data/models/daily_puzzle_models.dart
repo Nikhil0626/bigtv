@@ -328,7 +328,12 @@ class DailyLeaderboardUser {
       rank: json['rank'] is int ? json['rank'] as int : int.tryParse(json['rank']?.toString() ?? '0') ?? 0,
       playerId: json['playerId']?.toString() ?? '',
       displayName: json['displayName']?.toString() ?? 'Player',
-      avatarUrl: json['avatarUrl']?.toString(),
+      avatarUrl: json['avatarUrl']?.toString() ??
+          json['photo']?.toString() ??
+          json['photoUrl']?.toString() ??
+          json['photo_url']?.toString() ??
+          json['image']?.toString() ??
+          json['userImage']?.toString(),
       bestDurationMs: json['bestDurationMs'] is int
           ? json['bestDurationMs'] as int
           : int.tryParse(json['bestDurationMs']?.toString() ?? '0') ?? 0,

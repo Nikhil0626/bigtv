@@ -7,6 +7,7 @@ import 'package:video_player/video_player.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/services/live_tv_share_helper.dart';
+import 'package:chotanews/utils/top_right_wave_painter.dart';
 
 class LiveTvScreen extends StatefulWidget {
   final String streamUrl;
@@ -24,7 +25,8 @@ class LiveTvScreen extends StatefulWidget {
   State<LiveTvScreen> createState() => _LiveTvScreenState();
 }
 
-class _LiveTvScreenState extends State<LiveTvScreen> {
+class _LiveTvScreenState extends State<LiveTvScreen>
+    with SingleTickerProviderStateMixin {
   VideoPlayerController? _controller;
   bool _isInitialized = false;
   bool _hasError = false;
@@ -34,10 +36,22 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
   bool _isLandscape = false;
   Timer? _hideControlsTimer;
   DateTime? _playStartTime;
+  late AnimationController _waveController;
+  late Animation<double> _waveAnimation;
+
+  bool get _isMalayalam =>
+      widget.streamUrl.contains('malayalam') ||
+      widget.channelName.toLowerCase().contains('malayalam');
 
   @override
   void initState() {
     super.initState();
+    _waveController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat();
+    _waveAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_waveController);
+
     AnalyticsService.instance.track(AnalyticsEventName.liveTvOpen, properties: {
       'channel_id': widget.channelName,
       'source_screen': 'home',
@@ -146,9 +160,12 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
   }
 
   void _shareLiveTv() {
+    final bool isMl = _isMalayalam;
     LiveTvShareHelper.shareLiveTv(
       context: context,
       channelName: widget.channelName,
+      isTelugu: !isMl,
+      langCode: isMl ? 'ml' : 'te',
       source: 'player',
     );
   }
@@ -162,6 +179,7 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
         'watch_duration_seconds': watchDuration,
       });
     }
+    _waveController.dispose();
     _hideControlsTimer?.cancel();
     _controller?.dispose();
     SystemChrome.setPreferredOrientations([
@@ -185,7 +203,7 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: isLandscapeMode ? Colors.black : const Color(0xFF0F0F12),
         body: SafeArea(
           top: !isLandscapeMode,
           bottom: !isLandscapeMode,
@@ -193,6 +211,66 @@ class _LiveTvScreenState extends State<LiveTvScreen> {
           right: false,
           child: Stack(
             children: [
+              // 1. Subtle Luxury Ambient Gradient Backdrop (from feedback_view.dart)
+              if (!isLandscapeMode)
+                Positioned.fill(
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          Color(0xFF180A0D),
+                          Color(0xFF0F0F12),
+                          Color(0xFF13090B),
+                        ],
+                        stops: [0.0, 0.5, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+
+              // 2. Top Right Wave Ripple Art (from feedback_view.dart)
+              if (!isLandscapeMode)
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  width: MediaQuery.of(context).size.width,
+                  height: 380.h,
+                  child: IgnorePointer(
+                    child: CustomPaint(
+                      painter: TopRightWavePainter(
+                        isDark: true,
+                        waveAnimation: _waveAnimation,
+                      ),
+                    ),
+                  ),
+                ),
+
+              // 3. Bottom-Left Radiant Glow Orb (from feedback_view.dart)
+              if (!isLandscapeMode)
+                Positioned(
+                  bottom: -60.h,
+                  left: -60.w,
+                  width: 280.w,
+                  height: 280.w,
+                  child: IgnorePointer(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [
+                            const Color(0xFFED1C24).withValues(alpha: 0.16),
+                            const Color(0xFFED1C24).withValues(alpha: 0.06),
+                            Colors.transparent,
+                          ],
+                          stops: const [0.0, 0.5, 1.0],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
               // Video Surface
               Center(
                 child: _hasError

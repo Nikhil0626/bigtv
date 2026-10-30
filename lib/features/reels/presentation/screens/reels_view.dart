@@ -1,10 +1,10 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/loading_screen/home_shimmer.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/features/reels/data/models/reels_model.dart';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:chotanews/features/reels/presentation/widgets/reels_screen_preview.dart';
@@ -13,19 +13,16 @@ import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/app_spaces.dart';
-import 'package:chotanews/utils/app_toasts.dart';
 import 'package:chotanews/utils/botton_actions.dart';
 import 'package:chotanews/utils/commant_screen.dart';
 import 'package:chotanews/utils/date_format.dart';
 import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:http/http.dart' as http;
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 
@@ -235,85 +232,101 @@ class _EachReelCardState extends State<EachReelCard> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          BottomActions(
-                            iconColor: AppColors.iconColors,
-                            postType: widget.reel.postName,
-                            icon: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()) ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
-                            label: 'లైక్',
-                            isLike: widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
-                            onTap: () async {
-                              widget.reelsProvider.isLikePost(widget.reel);
-                              log("Like");
-                              EventRepo().addEvent(
-                                  {
-                                    "like": !widget.reelsProvider.isLikeList.contains(widget.reel.id.toString()),
-                                    "postId": widget.reel.id.toString(),
-                                    "createAt": DateTime.now().toString(),
-                                    "postTitle": widget.reel.title.toString(),
-                                  },
-                              "liked_article");
+                          Consumer<ReelsProviders>(
+                            builder: (context, reelsProvider, _) {
+                              final bool isLiked = reelsProvider.isReelLiked(widget.reel.id.toString());
+                              final isMl = context.watch<HomeProvider>().langCode == 'ml';
+                              return BottomActions(
+                                iconColor: AppColors.iconColors,
+                                postType: widget.reel.postName,
+                                icon: isLiked ? "assets/svg/like_full.svg" : "assets/svg/like.svg",
+                                label: isMl ? 'ലൈക്ക്' : 'లైక్',
+                                isLike: isLiked,
+                                onTap: () async {
+                                  final bool newLikeState = !isLiked;
+                                  reelsProvider.isLikePost(widget.reel);
+                                  log("Like");
+                                  EventRepo().addEvent(
+                                      {
+                                        "like": newLikeState,
+                                        "postId": widget.reel.id.toString(),
+                                        "createAt": DateTime.now().toString(),
+                                        "postTitle": widget.reel.title.toString(),
+                                      },
+                                  "liked_article");
+                                },
+                              );
                             },
                           ),
-                          BottomActions(
-                            postType: "",
-                            icon: "assets/svg/new_comment.svg",
-                            label: 'కామెంట్',
-                            iconColor: AppColors.iconColors,
-                            onTap: () async {
-                              context.read<AuthenticationProvider>().sendEvent("CommentPage");
-
-                              showComments(context, widget.reel.id.toString(), widget.reel.title.toString());
+                          Builder(
+                            builder: (context) {
+                              final isMl = context.watch<HomeProvider>().langCode == 'ml';
+                              return BottomActions(
+                                postType: "",
+                                icon: "assets/svg/new_comment.svg",
+                                label: isMl ? 'കമന്റ്' : 'కామెంట్',
+                                iconColor: AppColors.iconColors,
+                                onTap: () async {
+                                  context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                                  showComments(context, widget.reel.id.toString(), widget.reel.title.toString());
+                                },
+                              );
                             },
                           ),
                           Spacer(),
-                          BottomActions(
-                            postType: "",
-                            icon: "assets/svg/share.svg",
-                            label: 'షేర్',
-                            iconColor: AppColors.iconColors,
-                            onTap: () async {
-                              print("🔥🔥🔥 EACH REEL CARD SHARE BUTTON TAPPED 🔥🔥🔥");
-                              log("Share Reel: ${widget.reel.id}");
+                          Builder(
+                            builder: (context) {
+                              final isMl = context.watch<HomeProvider>().langCode == 'ml';
+                              return BottomActions(
+                                postType: "",
+                                icon: "assets/svg/share.svg",
+                                label: isMl ? 'പങ്കിടുക' : 'షేర్',
+                                iconColor: AppColors.iconColors,
+                                onTap: () async {
+                                  print("🔥🔥🔥 EACH REEL CARD SHARE BUTTON TAPPED 🔥🔥🔥");
+                                  log("Share Reel: ${widget.reel.id}");
 
-                              final Size size = MediaQuery.of(context).size;
-                              final Rect shareOrigin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
+                                  final Size size = MediaQuery.of(context).size;
+                                  final Rect shareOrigin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
 
-                              final String title = widget.reel.title.trim();
-                              final String videoUrl = widget.reel.videoUrl.trim();
-                              final String fallbackUrl = "https://www.bigtv24x7.com/posts?postId=${widget.reel.id}";
-                              final String shareLink = videoUrl.isNotEmpty ? videoUrl : fallbackUrl;
-                              final String shareText = title.isNotEmpty ? "$title\n\n$shareLink" : shareLink;
+                                  final String title = widget.reel.title.trim();
+                                  final String videoUrl = widget.reel.videoUrl.trim();
+                                  final String fallbackUrl = "https://www.bigtv24x7.com/posts?postId=${widget.reel.id}";
+                                  final String shareLink = videoUrl.isNotEmpty ? videoUrl : fallbackUrl;
+                                  final String shareText = title.isNotEmpty ? "$title\n\n$shareLink" : shareLink;
 
-                              // Share immediately so there is zero UI delay
-                              try {
-                                await Share.share(
-                                  shareText,
-                                  sharePositionOrigin: shareOrigin,
-                                );
-                              } catch (e) {
-                                log("Error in Share.share: $e");
-                                try {
-                                  await Share.share(shareText);
-                                } catch (err) {
-                                  log("Fallback Share.share failed: $err");
-                                }
-                              }
+                                  // Share immediately so there is zero UI delay
+                                  try {
+                                    await Share.share(
+                                      shareText,
+                                      sharePositionOrigin: shareOrigin,
+                                    );
+                                  } catch (e) {
+                                    log("Error in Share.share: $e");
+                                    try {
+                                      await Share.share(shareText);
+                                    } catch (err) {
+                                      log("Fallback Share.share failed: $err");
+                                    }
+                                  }
 
-                              // Background event tracking
-                              EventRepo().addEvent({
-                                "share": "reels",
-                                "postId": widget.reel.id.toString(),
-                                "createAt": DateTime.now().toString(),
-                                "postTitle": widget.reel.title.toString(),
-                              }, "shared_article");
+                                  // Background event tracking
+                                  EventRepo().addEvent({
+                                    "share": "reels",
+                                    "postId": widget.reel.id.toString(),
+                                    "createAt": DateTime.now().toString(),
+                                    "postTitle": widget.reel.title.toString(),
+                                  }, "shared_article");
 
-                              try {
-                                SharedPreferences sp = await SharedPreferences.getInstance();
-                                String? userId = sp.getString("userId");
-                                sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
-                              } catch (e) {
-                                log("Error sending share details: $e");
-                              }
+                                  try {
+                                    SharedPreferences sp = await SharedPreferences.getInstance();
+                                    String? userId = sp.getString("userId");
+                                    sendShareDetails(userId, widget.reel.id, widget.reel.content.toString());
+                                  } catch (e) {
+                                    log("Error sending share details: $e");
+                                  }
+                                },
+                              );
                             },
                           ),
                         ],

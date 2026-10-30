@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/auth/domain/models/categories_model.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 
 class UpdateCategoriesView extends StatefulWidget {
@@ -28,6 +29,19 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
     {'name': 'జనరల్', 'icon': Icons.newspaper_rounded},
   ];
 
+  // Default fallback categories for Malayalam
+  final List<Map<String, dynamic>> _fallbackCategoriesMl = [
+    {'name': 'ബിസിനസ്', 'icon': Icons.trending_up_rounded},
+    {'name': 'സ്പോർട്സ്', 'icon': Icons.directions_run_rounded},
+    {'name': 'ടെക്നോളജി', 'icon': Icons.devices_rounded},
+    {'name': 'സിനിമ', 'icon': Icons.movie_creation_outlined},
+    {'name': 'ജീവിതശൈലി', 'icon': Icons.self_improvement_rounded},
+    {'name': 'വിദ്യാഭ്യാസം', 'icon': Icons.school_outlined},
+    {'name': 'രാഷ്ട്രീയം', 'icon': Icons.account_balance_outlined},
+    {'name': 'ആരോഗ്യം', 'icon': Icons.favorite_outline_rounded},
+    {'name': 'ജനറൽ', 'icon': Icons.newspaper_rounded},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -38,15 +52,15 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
 
   IconData _getCategoryFallbackIcon(String name) {
     final lower = name.toLowerCase();
-    if (lower.contains('బిజినెస్') || lower.contains('business')) return Icons.trending_up_rounded;
-    if (lower.contains('స్పోర్ట్స్') || lower.contains('sport')) return Icons.directions_run_rounded;
-    if (lower.contains('టెక్నాలజీ') || lower.contains('tech')) return Icons.devices_rounded;
-    if (lower.contains('సినిమా') || lower.contains('cinema') || lower.contains('movie')) return Icons.movie_creation_outlined;
-    if (lower.contains('లైఫ్') || lower.contains('life')) return Icons.self_improvement_rounded;
-    if (lower.contains('ఎడ్యుకేషన్') || lower.contains('education')) return Icons.school_outlined;
-    if (lower.contains('రాజకీయాలు') || lower.contains('politics')) return Icons.account_balance_outlined;
-    if (lower.contains('హెల్త్') || lower.contains('health')) return Icons.favorite_outline_rounded;
-    if (lower.contains('జనరల్') || lower.contains('general')) return Icons.newspaper_rounded;
+    if (lower.contains('బిజినెస్') || lower.contains('ബിസിനസ്') || lower.contains('business')) return Icons.trending_up_rounded;
+    if (lower.contains('స్పోర్ట్స్') || lower.contains('സ്പോർട്സ്') || lower.contains('sport')) return Icons.directions_run_rounded;
+    if (lower.contains('టెక్నాలజీ') || lower.contains('ടെക്നോളജി') || lower.contains('tech')) return Icons.devices_rounded;
+    if (lower.contains('సినిమా') || lower.contains('സിനിമ') || lower.contains('cinema') || lower.contains('movie')) return Icons.movie_creation_outlined;
+    if (lower.contains('లైఫ్') || lower.contains('ജീവിതശൈലി') || lower.contains('ലൈഫ്') || lower.contains('life')) return Icons.self_improvement_rounded;
+    if (lower.contains('ఎడ్యుకేషన్') || lower.contains('വിദ്യാഭ്യാസം') || lower.contains('education')) return Icons.school_outlined;
+    if (lower.contains('రాజకీయాలు') || lower.contains('രാഷ്ട്രീയം') || lower.contains('politics')) return Icons.account_balance_outlined;
+    if (lower.contains('హెల్త్') || lower.contains('ആരോഗ്യം') || lower.contains('health')) return Icons.favorite_outline_rounded;
+    if (lower.contains('జనరల్') || lower.contains('ജനറൽ') || lower.contains('general')) return Icons.newspaper_rounded;
     return Icons.grid_view_rounded;
   }
 
@@ -104,8 +118,10 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
           return const Center(child: AppLoadingScreen());
         }
 
+        final bool isMalayalam = context.watch<HomeProvider>().langCode == 'ml';
         final List<CategoryModel> categories = authProvider.getAllCategoryList;
         final bool useFallbacks = categories.isEmpty;
+        final List<Map<String, dynamic>> fallbacks = isMalayalam ? _fallbackCategoriesMl : _fallbackCategories;
         final int selectedCount = authProvider.selectedCategories.length;
 
         return Padding(
@@ -122,7 +138,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "మీ కోసం వార్తలు",
+                        isMalayalam ? "നിങ്ങൾക്കായുള്ള വാർത്തകൾ" : "మీ కోసం వార్తలు",
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 15.sp,
@@ -132,7 +148,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                       ),
                       SizedBox(height: 1.h),
                       Text(
-                        "మీకు నచ్చిన అంశాలను ఎంచుకోండి",
+                        isMalayalam ? "നിങ്ങൾക്ക് ഇഷ്ടമുള്ള വിഷയങ്ങൾ തിരഞ്ഞെടുക്കുക" : "మీకు నచ్చిన అంశాలను ఎంచుకోండి",
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 11.5.sp,
@@ -150,7 +166,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                         borderRadius: BorderRadius.circular(14.r),
                       ),
                       child: Text(
-                        "$selectedCount selected",
+                        isMalayalam ? "$selectedCount തെരഞ്ഞെടുത്തു" : "$selectedCount selected",
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 11.sp,
@@ -169,7 +185,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                 child: GridView.builder(
                   padding: EdgeInsets.only(bottom: 8.h),
                   physics: const BouncingScrollPhysics(),
-                  itemCount: useFallbacks ? _fallbackCategories.length : categories.length,
+                  itemCount: useFallbacks ? fallbacks.length : categories.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     crossAxisSpacing: 10.w,
@@ -178,7 +194,7 @@ class _UpdateCategoriesViewState extends State<UpdateCategoriesView> {
                   ),
                   itemBuilder: (context, index) {
                     final String categoryName = useFallbacks
-                        ? _fallbackCategories[index]['name'] as String
+                        ? fallbacks[index]['name'] as String
                         : (categories[index].categoryName ?? '');
                     final String? imageUrl = useFallbacks
                         ? null

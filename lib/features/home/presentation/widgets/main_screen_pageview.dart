@@ -7,6 +7,7 @@ import 'package:chotanews/services/analytics_service.dart' as legacy_analytics;
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/utils/app_no_data.dart';
+import 'package:chotanews/aggricator_screens/loading_screen/home_shimmer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
@@ -81,7 +82,17 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
     autoIndex = 0;
     super.initState();
+    homeProvider?.setCurrentPageIndex(widget.startIndex);
     homeProvider?.pageController?.addListener(homeProvider!.scrollListener);
+    homeProvider?.pageController?.addListener(() {
+      final page = homeProvider?.pageController?.page;
+      if (page != null) {
+        final roundPage = page.round();
+        if (roundPage != homeProvider?.currentPageIndex) {
+          homeProvider?.setCurrentPageIndex(roundPage);
+        }
+      }
+    });
     _pageStartTime = DateTime.now();
     _lastTrackedIndex = widget.startIndex;
     if (homeProvider?.isEnglishMode == true) {
@@ -149,14 +160,20 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                       PointerDeviceKind.mouse,
                     },
                   ),
-                  child: context.read<HomeProvider>().getAllPostList.isEmpty
+                  child: homeProvider.getAllPostList.isEmpty
                       ? Center(
-                          child: widget.isAiTags
-                              ? const AppNoData()
-                              : Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    const AppNoData(),
+                          child: (homeProvider.isHomeLoading ||
+                                  homeProvider.hasPendingDeepLink ||
+                                  homeProvider.isRoutingDeepLink ||
+                                  homeProvider.isComeFromLinkOrNotification ||
+                                  !homeProvider.isInitialHomeLoaded)
+                              ? const HomeShimmer()
+                              : widget.isAiTags
+                                  ? const AppNoData()
+                                  : Column(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        const AppNoData(),
                                     const SizedBox(height: 16),
                                     ElevatedButton.icon(
                                       style: ElevatedButton.styleFrom(

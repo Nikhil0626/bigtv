@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/auth/domain/models/categories_model.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/utils/app_enums.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/top_right_wave_painter.dart';
@@ -30,6 +31,19 @@ class _CategoriesViewState extends State<CategoriesView> {
     {'name': 'జనరల్', 'icon': Icons.newspaper_rounded},
   ];
 
+  // Default fallback categories with Malayalam names & icons
+  final List<Map<String, dynamic>> _fallbackCategoriesMl = [
+    {'name': 'ബിസിനസ്സ്', 'icon': Icons.trending_up_rounded},
+    {'name': 'കായികം', 'icon': Icons.directions_run_rounded},
+    {'name': 'സാങ്കേതികവിദ്യ', 'icon': Icons.devices_rounded},
+    {'name': 'സിനിമ', 'icon': Icons.movie_creation_outlined},
+    {'name': 'ലൈഫ് സ്റ്റൈൽ', 'icon': Icons.self_improvement_rounded},
+    {'name': 'വിദ്യാഭ്യാസം', 'icon': Icons.school_outlined},
+    {'name': 'രാഷ്ട്രീയം', 'icon': Icons.account_balance_outlined},
+    {'name': 'ആരോഗ്യം', 'icon': Icons.favorite_outline_rounded},
+    {'name': 'ജനറൽ', 'icon': Icons.newspaper_rounded},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -40,15 +54,15 @@ class _CategoriesViewState extends State<CategoriesView> {
 
   IconData _getCategoryFallbackIcon(String name) {
     final lower = name.toLowerCase();
-    if (lower.contains('బిజినెస్') || lower.contains('business')) return Icons.trending_up_rounded;
-    if (lower.contains('స్పోర్ట్స్') || lower.contains('sport')) return Icons.directions_run_rounded;
-    if (lower.contains('టెక్నాలజీ') || lower.contains('tech')) return Icons.devices_rounded;
-    if (lower.contains('సినిమా') || lower.contains('cinema') || lower.contains('movie')) return Icons.movie_creation_outlined;
-    if (lower.contains('లైఫ్') || lower.contains('life')) return Icons.self_improvement_rounded;
-    if (lower.contains('ఎడ్యుకేషన్') || lower.contains('education')) return Icons.school_outlined;
-    if (lower.contains('రాజకీయాలు') || lower.contains('politics')) return Icons.account_balance_outlined;
-    if (lower.contains('హెల్త్') || lower.contains('health')) return Icons.favorite_outline_rounded;
-    if (lower.contains('జనరల్') || lower.contains('general')) return Icons.newspaper_rounded;
+    if (lower.contains('బిజినెస్') || lower.contains('ബിസിനസ്സ്') || lower.contains('business')) return Icons.trending_up_rounded;
+    if (lower.contains('స్పోర్ట్స్') || lower.contains('കായികം') || lower.contains('sport')) return Icons.directions_run_rounded;
+    if (lower.contains('టెక్నాలజీ') || lower.contains('സാങ്കേതികവിദ്യ') || lower.contains('tech')) return Icons.devices_rounded;
+    if (lower.contains('సినిమా') || lower.contains('സിനിമ') || lower.contains('cinema') || lower.contains('movie')) return Icons.movie_creation_outlined;
+    if (lower.contains('లైఫ్') || lower.contains('ലൈഫ്') || lower.contains('life')) return Icons.self_improvement_rounded;
+    if (lower.contains('ఎడ్యుకేషన్') || lower.contains('വിദ്യാഭ്യാസം') || lower.contains('education')) return Icons.school_outlined;
+    if (lower.contains('రాజకీయాలు') || lower.contains('രാഷ്ട്രീയം') || lower.contains('politics')) return Icons.account_balance_outlined;
+    if (lower.contains('హెల్త్') || lower.contains('ആരോഗ്യം') || lower.contains('health')) return Icons.favorite_outline_rounded;
+    if (lower.contains('జనరల్') || lower.contains('ജനറൽ') || lower.contains('general')) return Icons.newspaper_rounded;
     return Icons.grid_view_rounded;
   }
 
@@ -109,8 +123,10 @@ class _CategoriesViewState extends State<CategoriesView> {
           );
         }
 
+        final bool isMalayalam = context.watch<HomeProvider>().langCode == 'ml';
         final List<CategoryModel> categories = authProvider.getAllCategoryList;
         final bool useFallbacks = categories.isEmpty;
+        final List<Map<String, dynamic>> fallbacks = isMalayalam ? _fallbackCategoriesMl : _fallbackCategories;
         final int selectedCount = authProvider.selectedCategories.length;
 
         return Scaffold(
@@ -143,11 +159,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    authProvider.updateLoginStatus(NewAppLoginStatus.language);
-                                  }
+                                  authProvider.updateLoginStatus(NewAppLoginStatus.language);
                                 },
                                 borderRadius: BorderRadius.circular(20.r),
                                 child: Container(
@@ -188,7 +200,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                                     ),
                                     SizedBox(width: 5.w),
                                     Text(
-                                      "CATEGORIES",
+                                      isMalayalam ? "വിഭാഗങ്ങൾ" : "CATEGORIES",
                                       style: TextStyle(
                                         fontFamily: 'Poppins',
                                         fontSize: 10.5.sp,
@@ -205,10 +217,10 @@ class _CategoriesViewState extends State<CategoriesView> {
 
                           SizedBox(height: 10.h),
 
-                          // HERO SECTION: Telugu Title & Subtitle
+                          // HERO SECTION: Telugu / Malayalam Title & Subtitle
                           RichText(
                             text: TextSpan(
-                              text: "మీ ఆసక్తులను\n",
+                              text: isMalayalam ? "നിങ്ങളുടെ താൽപ്പര്യങ്ങൾ\n" : "మీ ఆసక్తులను\n",
                               style: TextStyle(
                                 fontFamily: 'Poppins',
                                 fontSize: 25.sp,
@@ -216,10 +228,10 @@ class _CategoriesViewState extends State<CategoriesView> {
                                 color: isDark ? Colors.white : const Color(0xFF181A20),
                                 height: 1.15,
                               ),
-                              children: const [
+                              children: [
                                 TextSpan(
-                                  text: "ఎంచుకోండి",
-                                  style: TextStyle(
+                                  text: isMalayalam ? "തിരഞ്ഞെടുക്കുക" : "ఎంచుకోండి",
+                                  style: const TextStyle(
                                     color: Color(0xFFED1C24),
                                   ),
                                 ),
@@ -228,7 +240,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                           ),
                           SizedBox(height: 3.h),
                           Text(
-                            "మీకు నచ్చిన అంశాలను ఎంచుకోండి",
+                            isMalayalam ? "നിങ്ങൾക്ക് ഇഷ്ടമുള്ള വിഷയങ്ങൾ തിരഞ്ഞെടുക്കുക" : "మీకు నచ్చిన అంశాలను ఎంచుకోండి",
                             style: TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 12.5.sp,
@@ -239,13 +251,13 @@ class _CategoriesViewState extends State<CategoriesView> {
 
                           SizedBox(height: 16.h),
 
-                          // SUBHEADER: "మీ కోసం వార్తలు" & "[ 3 selected ]"
+                          // SUBHEADER: Telugu / Malayalam Header & Selected Count
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Text(
-                                "మీ కోసం వార్తలు",
+                                isMalayalam ? "നിങ്ങൾക്കായുള്ള വാർത്തകൾ" : "మీ కోసం వార్తలు",
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
                                   fontSize: 15.5.sp,
@@ -261,7 +273,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                                     borderRadius: BorderRadius.circular(14.r),
                                   ),
                                   child: Text(
-                                    "$selectedCount selected",
+                                    isMalayalam ? "$selectedCount തെരഞ്ഞെടുത്തു" : "$selectedCount selected",
                                     style: TextStyle(
                                       fontFamily: 'Poppins',
                                       fontSize: 11.sp,
@@ -283,7 +295,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                       child: GridView.builder(
                         padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 4.h),
                         physics: const BouncingScrollPhysics(),
-                        itemCount: useFallbacks ? _fallbackCategories.length : categories.length,
+                        itemCount: useFallbacks ? fallbacks.length : categories.length,
                         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 3,
                           crossAxisSpacing: 10.w,
@@ -292,7 +304,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                         ),
                         itemBuilder: (context, index) {
                           final String categoryName = useFallbacks
-                              ? _fallbackCategories[index]['name'] as String
+                              ? fallbacks[index]['name'] as String
                               : (categories[index].categoryName ?? '');
                           final String? imageUrl = useFallbacks
                               ? null
@@ -445,7 +457,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Text(
-                                        "Continue",
+                                        isMalayalam ? "തുടരുക" : "Continue",
                                         style: TextStyle(
                                           fontFamily: 'Poppins',
                                           fontSize: 14.5.sp,

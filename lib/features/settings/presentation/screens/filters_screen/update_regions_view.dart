@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/auth/domain/models/location_model.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/utils/app_loading_screen.dart';
 
 class UpdateRegionsView extends StatefulWidget {
@@ -34,6 +35,28 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
       'nativeName': 'కేరళ',
       'englishName': 'Kerala',
       'asset': null,
+    },
+  ];
+
+  // Default fallback locations for Malayalam
+  final List<Map<String, dynamic>> _fallbackLocationsMl = [
+    {
+      'id': 3,
+      'nativeName': 'കേരളം',
+      'englishName': 'Kerala',
+      'asset': null,
+    },
+    {
+      'id': 1,
+      'nativeName': 'തെലങ്കാന',
+      'englishName': 'Telangana',
+      'asset': 'assets/images/Telangana logo.png',
+    },
+    {
+      'id': 2,
+      'nativeName': 'ആന്ധ്രാപ്രദേശ്',
+      'englishName': 'Andhra Pradesh',
+      'asset': 'assets/images/AP logo.png',
     },
   ];
 
@@ -92,14 +115,14 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
     }
 
     final lower = stateName.toLowerCase();
-    if (lower.contains('telangana') || lower.contains('తెలంగాణ')) {
+    if (lower.contains('telangana') || lower.contains('తెలంగాణ') || lower.contains('തെലങ്കാന')) {
       return Image.asset(
         'assets/images/Telangana logo.png',
         fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => _buildStateIcon(stateName),
       );
     }
-    if (lower.contains('andhra') || lower.contains('ఆంధ్రప్రదేశ్')) {
+    if (lower.contains('andhra') || lower.contains('ఆంధ్రప్రదేశ్') || lower.contains('ആന്ധ്രാപ്രദേശ്')) {
       return Image.asset(
         'assets/images/AP logo.png',
         fit: BoxFit.contain,
@@ -128,10 +151,12 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
           return const Center(child: AppLoadingScreen());
         }
 
+        final bool isMalayalam = context.watch<HomeProvider>().langCode == 'ml';
+        final List<Map<String, dynamic>> fallbacks = isMalayalam ? _fallbackLocationsMl : _fallbackLocations;
         final List<LocationModel> locations = authProvider.getAllLocationList;
         final bool useFallbacks = locations.isEmpty &&
             (authProvider.states == null || authProvider.states!.isEmpty);
-        final int totalItems = useFallbacks ? _fallbackLocations.length : locations.length;
+        final int totalItems = useFallbacks ? fallbacks.length : locations.length;
         final int selectedCount = authProvider.selectedLocations.length;
 
         return Padding(
@@ -148,7 +173,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Districts to be selected",
+                        isMalayalam ? "തിരഞ്ഞെടുക്കേണ്ട ജില്ലകൾ" : "Districts to be selected",
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 15.sp,
@@ -158,7 +183,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                       ),
                       SizedBox(height: 1.h),
                       Text(
-                        "Select up to 5 districts",
+                        isMalayalam ? "5 ജില്ലകൾ വരെ തിരഞ്ഞെടുക്കുക" : "Select up to 5 districts",
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 11.5.sp,
@@ -176,7 +201,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                         borderRadius: BorderRadius.circular(14.r),
                       ),
                       child: Text(
-                        "$selectedCount selected",
+                        isMalayalam ? "$selectedCount തെരഞ്ഞെടുത്തു" : "$selectedCount selected",
                         style: TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 11.5.sp,
@@ -204,7 +229,7 @@ class _UpdateRegionsViewState extends State<UpdateRegionsView> {
                     final String? fallbackAsset;
 
                     if (useFallbacks) {
-                      final item = _fallbackLocations[index];
+                      final item = fallbacks[index];
                       nativeName = item['nativeName'] as String;
                       englishName = item['englishName'] as String;
                       stateKey = nativeName;

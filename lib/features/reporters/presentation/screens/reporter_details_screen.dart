@@ -6,6 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/theme_extensions.dart';
 import '../../data/models/reporter_model.dart';
+import 'package:provider/provider.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
@@ -75,6 +77,9 @@ class _ReporterDetailsScreenState extends State<ReporterDetailsScreen> {
   Widget build(BuildContext context) {
     final primaryColor = context.primaryColor;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final homeProvider = context.watch<HomeProvider>();
+    final isMalayalam = homeProvider.langCode == 'ml';
+    final isTelugu = homeProvider.langCode == 'te' || (!isMalayalam && !homeProvider.isEnglishMode);
 
     return Scaffold(
       appBar: AppBar(
@@ -96,9 +101,9 @@ class _ReporterDetailsScreenState extends State<ReporterDetailsScreen> {
             },
           ),
         ],
-        title: const Text(
-          'Reporter details',
-          style: TextStyle(
+        title: Text(
+          isMalayalam ? 'റിപ്പോർട്ടർ വിവരങ്ങൾ' : (isTelugu ? 'రిపోర్టర్ వివరాలు' : 'Reporter details'),
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 18,
@@ -247,7 +252,9 @@ class _ReporterDetailsScreenState extends State<ReporterDetailsScreen> {
                                   borderRadius: BorderRadius.circular(14.r),
                                 ),
                                 child: Text(
-                                  _isFollowing ? 'Following' : 'Follow',
+                                  _isFollowing
+                                      ? (isMalayalam ? 'ഫോളോ ചെയ്യുന്നു' : (isTelugu ? 'ఫాలోయింగ్' : 'Following'))
+                                      : (isMalayalam ? 'ഫോളോ ചെയ്യുക' : (isTelugu ? 'ఫాలో' : 'Follow')),
                                   style: TextStyle(
                                     color: _isFollowing ? (isDark ? Colors.white70 : Colors.black87) : Colors.white,
                                     fontSize: 11.sp,
@@ -291,7 +298,7 @@ class _ReporterDetailsScreenState extends State<ReporterDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'About',
+                    isMalayalam ? 'വിവരം' : (isTelugu ? 'గురించి' : 'About'),
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
@@ -337,7 +344,7 @@ class _ReporterDetailsScreenState extends State<ReporterDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Contact details',
+                    isMalayalam ? 'ബന്ധപ്പെടാനുള്ള വിവരങ്ങൾ' : (isTelugu ? 'సంప్రదింపు వివరాలు' : 'Contact details'),
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
@@ -350,7 +357,7 @@ class _ReporterDetailsScreenState extends State<ReporterDetailsScreen> {
                   _buildContactRow(
                     context,
                     icon: Icons.phone_outlined,
-                    label: 'Phone',
+                    label: isMalayalam ? 'ഫോൺ' : (isTelugu ? 'ఫోన్' : 'Phone'),
                     value: reporter.phone,
                   ),
                   SizedBox(height: 14.h),
@@ -383,7 +390,7 @@ class _ReporterDetailsScreenState extends State<ReporterDetailsScreen> {
                           onPressed: () => _makePhoneCall(reporter.phone),
                           icon: Icon(Icons.phone, size: 18.w, color: Colors.white),
                           label: Text(
-                            'Call reporter',
+                            isMalayalam ? 'വിളിക്കുക' : (isTelugu ? 'కాల్ చేయండి' : 'Call reporter'),
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontWeight: FontWeight.bold,
@@ -436,7 +443,9 @@ class _ReporterDetailsScreenState extends State<ReporterDetailsScreen> {
                   // Subtext Note
                   Center(
                     child: Text(
-                      'For news tips and story enquiries.',
+                      isMalayalam
+                          ? 'വാർത്താ വിവരങ്ങൾക്കും അന്വേഷണങ്ങൾക്കും.'
+                          : (isTelugu ? 'వార్తల సమాచారం మరియు విచారణల కోసం.' : 'For news tips and story enquiries.'),
                       style: TextStyle(
                         fontSize: 12.sp,
                         color: Colors.grey.shade500,

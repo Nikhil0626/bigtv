@@ -31,8 +31,14 @@ class HomeRepo extends BaseService{
 
     return response;
   }
-  Future getAllAiTags(Map<String, dynamic> body) async{
-    Response response = await makeRequest(baseUrl: BaseUrls.newServerBaseUrl, url: BaseUrls.videoTags, method: RequestType.get);
+  Future getAllAiTags(Map<String, dynamic> body) async {
+    Response response = await makeRequest(
+      baseUrl: BaseUrls.newServerBaseUrl,
+      url: BaseUrls.videoTags,
+      method: RequestType.get,
+      queryParameters: body,
+      headers: {'accept': '*/*'},
+    );
     return response;
   }
 
@@ -41,11 +47,13 @@ class HomeRepo extends BaseService{
     return response;
   }
 
-  Future getTagVideos(String slug) async {
+  Future getTagVideos(String slug, {Map<String, dynamic>? queryParameters}) async {
     Response response = await makeRequest(
       baseUrl: BaseUrls.newServerBaseUrl,
       url: "/api/v1/video-tags/$slug/videos",
       method: RequestType.get,
+      queryParameters: queryParameters,
+      headers: {'accept': '*/*'},
     );
     return response;
   }
@@ -74,8 +82,31 @@ class HomeRepo extends BaseService{
     return response;
   }
 
-  Future getEpapers(Map<String, dynamic> queryParams) async{
-    Response response = await makeRequest(baseUrl:BaseUrls.baseUrlAwsDev,url: "/epapers",method: RequestType.get,queryParameters: queryParams);
+  Future getEpapers(Map<String, dynamic> queryParams) async {
+    Response response = await makeRequest(
+      baseUrl: BaseUrls.baseUrlAwsDev,
+      url: "/epapers",
+      method: RequestType.get,
+      queryParameters: queryParams,
+    );
+    if (response.statusCode == 200 &&
+        response.data is List &&
+        (response.data as List).isNotEmpty) {
+      return response;
+    }
+    try {
+      Response prodResponse = await makeRequest(
+        baseUrl: "https://api.chotanews.com",
+        url: "/epapers",
+        method: RequestType.get,
+        queryParameters: queryParams,
+      );
+      if (prodResponse.statusCode == 200 &&
+          prodResponse.data is List &&
+          (prodResponse.data as List).isNotEmpty) {
+        return prodResponse;
+      }
+    } catch (_) {}
     return response;
   }
 

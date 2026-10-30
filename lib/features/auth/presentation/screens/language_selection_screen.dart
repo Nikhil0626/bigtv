@@ -17,14 +17,15 @@ class LanguageSelectionScreen extends StatefulWidget {
 class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
   // Default fallback languages if API is loading or returns empty
   final List<Map<String, dynamic>> _fallbackLanguages = [
-    {'id': 1, 'code': 'te', 'native': 'తెలుగు', 'english': 'Telugu'},
-    {'id': 2, 'code': 'en', 'native': 'English', 'english': 'English'},
+    {'id': 7, 'code': 'te', 'native': 'తెలుగు', 'english': 'Telugu'},
+    {'id': 8, 'code': 'en', 'native': 'English', 'english': 'English'},
+    {'id': 9, 'code': 'ml', 'native': 'മലയാളം', 'english': 'Malayalam'},
     {'id': 3, 'code': 'hi', 'native': 'हिन्दी', 'english': 'Hindi'},
     {'id': 4, 'code': 'ta', 'native': 'தமிழ்', 'english': 'Tamil'},
     {'id': 5, 'code': 'kn', 'native': 'ಕನ್ನಡ', 'english': 'Kannada'},
     {'id': 6, 'code': 'ml', 'native': 'മലയാളം', 'english': 'Malayalam'},
-    {'id': 7, 'code': 'mr', 'native': 'मराठी', 'english': 'Marathi'},
-    {'id': 8, 'code': 'bn', 'native': 'বাংলা', 'english': 'Bengali'},
+    {'id': 10, 'code': 'mr', 'native': 'मराठी', 'english': 'Marathi'},
+    {'id': 11, 'code': 'bn', 'native': 'বাংলা', 'english': 'Bengali'},
   ];
 
   @override
@@ -41,7 +42,7 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
           );
           authProvider.setSelectedLanguageId(teLang.id);
         } else if (authProvider.selectedLanguageId == null) {
-          authProvider.setSelectedLanguageId(1);
+          authProvider.setSelectedLanguageId(7);
         }
       });
     });
@@ -399,9 +400,24 @@ class _LanguageSelectionScreenState extends State<LanguageSelectionScreen> {
                         onTap: provider.selectedLanguageId == null
                             ? null
                             : () {
+                                String? selectedCode;
+                                if (useFallbacks) {
+                                  final match = _fallbackLanguages.firstWhere(
+                                    (l) => l['id'] == provider.selectedLanguageId,
+                                    orElse: () => {'code': 'te'},
+                                  );
+                                  selectedCode = match['code'] as String?;
+                                } else {
+                                  final match = languages.firstWhere(
+                                    (l) => l.id == provider.selectedLanguageId,
+                                    orElse: () => languages.first,
+                                  );
+                                  selectedCode = match.code;
+                                }
                                 provider.saveLanguageAndProceed(
                                   context,
                                   provider.selectedLanguageId!,
+                                  targetCode: selectedCode,
                                 );
                               },
                         child: Container(

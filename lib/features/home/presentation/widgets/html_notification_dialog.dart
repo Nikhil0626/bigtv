@@ -98,7 +98,17 @@ class _HtmlNotificationDialogState extends State<HtmlNotificationDialog> {
       final uri = Uri.parse(url);
       
       // If it's an in-app deep link or internal article/page
-      if (mounted && (url.contains('app.bigtv24x7.com') || url.contains('bigtv24x7.com/individualPage'))) {
+      final lowerUrl = url.toLowerCase();
+      final bool isInternalLink = lowerUrl.contains('bigtv24x7.com') ||
+          lowerUrl.contains('bigtvlive.com') ||
+          lowerUrl.contains('chotanews') ||
+          lowerUrl.startsWith('/') ||
+          lowerUrl.contains('postid=') ||
+          lowerUrl.contains('post_id=') ||
+          lowerUrl.contains('/posts/') ||
+          lowerUrl.contains('/post/');
+
+      if (mounted && isInternalLink) {
         Navigator.of(context, rootNavigator: true).pop();
         context.read<HomeProvider>().routeDeepLink(uri, isFromNotification: true);
         return;

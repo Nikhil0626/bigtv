@@ -36,6 +36,7 @@ class ReelPreviewScreen extends StatefulWidget {
 class ReelPreviewScreenState extends State<ReelPreviewScreen> {
   late PageController _pageController;
   int currentIndex = 0;
+  bool _isAutoScrolling = false;
 
   final Map<int, VideoPlayerController> _networkControllers = {};
   final Map<int, YoutubePlayerController> _youtubeControllers = {};
@@ -145,15 +146,17 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
           final uri = Uri.parse(videoUrl);
           final controller = VideoPlayerController.networkUrl(uri);
           await controller.initialize();
-          controller.setLooping(true);
+          controller.setLooping(false);
           _networkControllers[idx] = controller;
           _initializingIndices.remove(idx);
 
           if (idx == currentIndex && mounted) {
+            controller.seekTo(Duration.zero);
             controller.play();
             setState(() {});
           } else {
             controller.pause();
+            controller.seekTo(Duration.zero);
           }
         } catch (e) {
           log("Error pre-initializing network video controller $idx ($videoUrl): $e");
@@ -166,20 +169,46 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
   }
 
   void _onPageSwiped(int newIndex, List<ReelsModel> reelsList) {
-    // Pause previous active controllers
-    _networkControllers[currentIndex]?.pause();
-    _youtubeControllers[currentIndex]?.pause();
+    _isAutoScrolling = false;
+
+    // Pause previous active controllers and rewind if finished
+    final prevNet = _networkControllers[currentIndex];
+    if (prevNet != null && prevNet.value.isInitialized) {
+      prevNet.pause();
+      final pos = prevNet.value.position;
+      final dur = prevNet.value.duration;
+      if (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 500)) {
+        prevNet.seekTo(Duration.zero);
+      }
+    }
+    final prevYt = _youtubeControllers[currentIndex];
+    if (prevYt != null) {
+      prevYt.pause();
+      if (prevYt.value.playerState == PlayerState.ended) {
+        prevYt.seekTo(Duration.zero);
+      }
+    }
 
     setState(() {
       currentIndex = newIndex;
     });
 
     // Play new active controller instantly (0 latency!)
-    if (_networkControllers.containsKey(newIndex)) {
-      _networkControllers[newIndex]?.play();
+    final nextNet = _networkControllers[newIndex];
+    if (nextNet != null && nextNet.value.isInitialized) {
+      final pos = nextNet.value.position;
+      final dur = nextNet.value.duration;
+      if (dur > Duration.zero && pos >= dur - const Duration(milliseconds: 500)) {
+        nextNet.seekTo(Duration.zero);
+      }
+      nextNet.play();
     }
-    if (_youtubeControllers.containsKey(newIndex)) {
-      _youtubeControllers[newIndex]?.play();
+    final nextYt = _youtubeControllers[newIndex];
+    if (nextYt != null) {
+      if (nextYt.value.playerState == PlayerState.ended) {
+        nextYt.seekTo(Duration.zero);
+      }
+      nextYt.play();
     }
 
     // Trigger preloader for next upcoming reels
@@ -251,6 +280,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
             scrollDirection: Axis.vertical,
             itemCount: reelsList.length,
             onPageChanged: (value) {
+              _isAutoScrolling = false;
               context.read<HomeProvider>().flipEvent(
                     'reel',
                     reelsList[value].id,
@@ -269,11 +299,34 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
                 youtubeController: ytController,
                 isCurrentPage: index == currentIndex,
                 onVideoEnded: () {
+                  // Only permit auto-scrolling if triggered by the active visible reel!
+                  if (index != currentIndex) return;
+                  if (_isAutoScrolling) return;
+
                   if (index < reelsList.length - 1) {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeIn,
-                    );
+                    if (_pageController.hasClients) {
+                      _isAutoScrolling = true;
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 350),
+                        curve: Curves.easeInOut,
+                      ).then((_) {
+                        _isAutoScrolling = false;
+                      }).catchError((_) {
+                        _isAutoScrolling = false;
+                      });
+                    }
+                  } else {
+                    // Replay last reel from beginning
+                    final lastNet = _networkControllers[index];
+                    if (lastNet != null && lastNet.value.isInitialized) {
+                      lastNet.seekTo(Duration.zero);
+                      lastNet.play();
+                    }
+                    final lastYt = _youtubeControllers[index];
+                    if (lastYt != null) {
+                      lastYt.seekTo(Duration.zero);
+                      lastYt.play();
+                    }
                   }
                 },
               );
@@ -314,6 +367,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
   void initState() {
     super.initState();
     widget.videoController?.addListener(_controllerListener);
+    widget.youtubeController?.addListener(_ytListener);
   }
 
   @override
@@ -325,21 +379,47 @@ class _ReelsCardViewState extends State<ReelsCardView> {
       _hasCompleted = false;
       _playCount = 0;
     }
+    if (oldWidget.youtubeController != widget.youtubeController) {
+      oldWidget.youtubeController?.removeListener(_ytListener);
+      widget.youtubeController?.addListener(_ytListener);
+      _hasCompleted = false;
+      _playCount = 0;
+    }
+    // When this card transitions from off-screen to the active visible page, reset completion state
+    if (!oldWidget.isCurrentPage && widget.isCurrentPage) {
+      _hasCompleted = false;
+    }
   }
 
   @override
   void dispose() {
     widget.videoController?.removeListener(_controllerListener);
+    widget.youtubeController?.removeListener(_ytListener);
     super.dispose();
   }
 
   void _controllerListener() {
+    // CRITICAL: Only the actively visible page should evaluate video completion!
+    if (!widget.isCurrentPage) return;
+
     final controller = widget.videoController;
     if (controller != null && controller.value.isInitialized) {
       final pos = controller.value.position;
       final dur = controller.value.duration;
-      if (dur > Duration.zero) {
-        if (pos >= dur && !_hasCompleted) {
+
+      // Verify duration is valid (>1.5s) and video is not in an initial buffering/unloaded state
+      if (dur > const Duration(milliseconds: 1500) && !controller.value.isBuffering) {
+        // Completion condition:
+        // 1. Position is within 300ms of duration OR controller reported isCompleted
+        // 2. Position has played at least 85% of total duration
+        // 3. Position is at least 1.5 seconds into the video (prevents false early triggers)
+        final bool isNearEnd = pos >= dur - const Duration(milliseconds: 300) ||
+            controller.value.isCompleted;
+        final bool hasPlayedSufficiently =
+            pos.inMilliseconds >= (dur.inMilliseconds * 0.85) &&
+            pos >= const Duration(milliseconds: 1500);
+
+        if (isNearEnd && hasPlayedSufficiently && !_hasCompleted) {
           _hasCompleted = true;
           _playCount++;
           AnalyticsService.instance.track(AnalyticsEventName.reelComplete, properties: {
@@ -353,6 +433,28 @@ class _ReelsCardViewState extends State<ReelsCardView> {
             'reel_id': widget.reelCard.id,
           });
         }
+      }
+    }
+  }
+
+  void _ytListener() {
+    // CRITICAL: Only the actively visible page should evaluate completion!
+    if (!widget.isCurrentPage) return;
+
+    final ytController = widget.youtubeController;
+    if (ytController != null) {
+      if (ytController.value.playerState == PlayerState.ended && !_hasCompleted) {
+        _hasCompleted = true;
+        _playCount++;
+        AnalyticsService.instance.track(AnalyticsEventName.reelComplete, properties: {
+          'reel_id': widget.reelCard.id,
+          'watch_duration_seconds': ytController.metadata.duration.inSeconds,
+        });
+        widget.onVideoEnded?.call();
+      } else if (ytController.value.playerState == PlayerState.playing &&
+          _hasCompleted &&
+          ytController.value.position < const Duration(milliseconds: 500)) {
+        _hasCompleted = false;
       }
     }
   }
@@ -585,56 +687,62 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              BottomActions(
-                iconColor: Colors.white,
-                postType: widget.reelCard.postName,
-                icon: context
-                        .read<ReelsProviders>()
-                        .isLikeList
-                        .contains(widget.reelCard.id.toString())
-                    ? "assets/svg/like_full.svg"
-                    : "assets/svg/like.svg",
-                label: 'లైక్',
-                isLike: context
-                    .read<ReelsProviders>()
-                    .isLikeList
-                    .contains(widget.reelCard.id.toString()),
-                onTap: () async {
-                  log("Like");
-                  AnalyticsService.instance.track(AnalyticsEventName.reelLike, properties: {
-                    'reel_id': widget.reelCard.id,
-                  });
-                  context.read<ReelsProviders>().isLikePost(widget.reelCard);
-                  EventRepo().addEvent({
-                    "like": !context
-                        .read<ReelsProviders>()
-                        .isLikeList
-                        .contains(widget.reelCard.id.toString()),
-                    "postId": widget.reelCard.id.toString(),
-                    "createAt": DateTime.now().toString(),
-                    "postTitle": widget.reelCard.title.toString()
-                  }, "liked_article");
+              Consumer<ReelsProviders>(
+                builder: (context, reelsProvider, child) {
+                  final bool isLiked = reelsProvider.isReelLiked(widget.reelCard.id.toString());
+                  final isMl = context.watch<HomeProvider>().langCode == 'ml';
+                  return BottomActions(
+                    iconColor: Colors.white,
+                    postType: widget.reelCard.postName,
+                    icon: isLiked
+                        ? "assets/svg/like_full.svg"
+                        : "assets/svg/like.svg",
+                    label: isMl ? 'ലൈക്ക്' : 'లైక్',
+                    isLike: isLiked,
+                    onTap: () async {
+                      log("Like");
+                      AnalyticsService.instance.track(AnalyticsEventName.reelLike, properties: {
+                        'reel_id': widget.reelCard.id,
+                      });
+                      final bool newLikeState = !isLiked;
+                      reelsProvider.isLikePost(widget.reelCard);
+                      EventRepo().addEvent({
+                        "like": newLikeState,
+                        "postId": widget.reelCard.id.toString(),
+                        "createAt": DateTime.now().toString(),
+                        "postTitle": widget.reelCard.title.toString()
+                      }, "liked_article");
+                    },
+                  );
                 },
               ),
               height(height: 20),
-              BottomActions(
-                postType: "",
-                icon: "assets/svg/new_comment.svg",
-                label: 'కామెంట్',
-                iconColor: Colors.white,
-                onTap: () async {
-                  context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                  showComments(
-                      context, widget.reelCard.id.toString(), widget.reelCard.title.toString());
+              Builder(
+                builder: (context) {
+                  final isMl = context.watch<HomeProvider>().langCode == 'ml';
+                  return BottomActions(
+                    postType: "",
+                    icon: "assets/svg/new_comment.svg",
+                    label: isMl ? 'കമന്റ്' : 'కామెంట్',
+                    iconColor: Colors.white,
+                    onTap: () async {
+                      context.read<AuthenticationProvider>().sendEvent("CommentPage");
+                      showComments(
+                          context, widget.reelCard.id.toString(), widget.reelCard.title.toString());
+                    },
+                  );
                 },
               ),
               height(height: 20),
-              BottomActions(
-                postType: "",
-                icon: "assets/svg/share.svg",
-                label: 'షేర్',
-                iconColor: Colors.white,
-                onTap: () async {
+              Builder(
+                builder: (context) {
+                  final isMl = context.watch<HomeProvider>().langCode == 'ml';
+                  return BottomActions(
+                    postType: "",
+                    icon: "assets/svg/share.svg",
+                    label: isMl ? 'പങ്കിടുക' : 'షేర్',
+                    iconColor: Colors.white,
+                    onTap: () async {
                   log("Share Reel button tapped: ${widget.reelCard.id}");
                   AnalyticsService.instance.track(AnalyticsEventName.reelShare, properties: {
                     'reel_id': widget.reelCard.id,
@@ -684,10 +792,12 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                     log("Error sending share details: $e");
                   }
                 },
-              ),
-            ],
+              );
+            },
           ),
-        ),
+        ],
+      ),
+    ),
       ],
     );
   }

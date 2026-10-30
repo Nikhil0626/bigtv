@@ -10,6 +10,7 @@ import '../../../auth/presentation/widgets/login_background_view.dart';
 import '../../../patches_puzzle/presentation/screens/patch_game_screen.dart';
 import '../../../patches_puzzle/presentation/screens/patch_dashboard_screen.dart';
 import '../../../sudoku_puzzle/presentation/screens/sudoku_game_screen.dart';
+import '../../../sudoku_puzzle/presentation/screens/sudoku_dashboard_screen.dart';
 import '../../../zip_puzzle/data/models/daily_puzzle_models.dart';
 import '../../../zip_puzzle/data/repositories/puzzle_games_api_client.dart';
 import '../../../zip_puzzle/presentation/providers/daily_puzzle_provider.dart';
@@ -18,7 +19,6 @@ import '../../../zip_puzzle/presentation/screens/zip_level_selection_screen.dart
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/features/home/presentation/widgets/lottie_3d_icon.dart';
-import 'package:chotanews/services/game_share_helper.dart';
 
 class GamesBottomSheet extends StatefulWidget {
   final bool isTelugu;
@@ -76,6 +76,10 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
     if (_isNavigating) return;
     _isNavigating = true;
 
+    final currentContext = context;
+    final navigator = Navigator.of(context);
+    final dailyProvider = context.read<DailyPuzzleProvider>();
+
     try {
       // 2. Verify user is logged in
       final isLoggedIn = await isUserLoggedIn();
@@ -86,7 +90,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
 
       if (!isLoggedIn) {
         _isNavigating = false;
-        _showLoginRequiredDialog(context);
+        _showLoginRequiredDialog(currentContext);
         return;
       }
 
@@ -104,10 +108,6 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
         'game_name': game.name,
       });
 
-      // Capture navigator and provider before popping modal
-      final navigator = Navigator.of(context);
-      final dailyProvider = context.read<DailyPuzzleProvider>();
-
       // Dismiss bottom sheet immediately on the first tap
       navigator.pop();
 
@@ -115,7 +115,17 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
       Widget targetScreen;
 
       if (slug.contains('sudoku') || gameType == 'sudoku') {
-        targetScreen = SudokuGameScreen(playerId: userId);
+        // Trigger background sync for sudoku state
+        dailyProvider.init(gameId: 'sudoku');
+
+        final isCompleted = (dailyProvider.gameId == 'sudoku' && dailyProvider.isTodayCompleted) ||
+            (await _isGameCompletedToday('sudoku'));
+
+        if (isCompleted) {
+          targetScreen = SudokuDashboardScreen(playerId: userId);
+        } else {
+          targetScreen = SudokuGameScreen(playerId: userId);
+        }
       } else if (slug.contains('patch') || gameType == 'patch' || gameType == 'patches') {
         // Trigger background sync for patch state
         dailyProvider.init(gameId: 'patch');
@@ -186,7 +196,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
               SizedBox(width: 12.w),
               Expanded(
                 child: Text(
-                  widget.isTelugu ? 'లాగిన్ అవసరం' : 'Login Required',
+                  widget.isTelugu ? 'లాగిన్ అవసరం' : 'ലോഗിൻ ആവശ്യമാണ്',
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -199,7 +209,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
           content: Text(
             widget.isTelugu
                 ? 'గేమ్స్ ఆడటానికి మరియు మీ ర్యాంక్, స్ట్రీక్స్ నమోదు చేయడానికి దయచేసి లాగిన్ అవ్వండి.'
-                : 'Please login with your mobile number to play games, track your daily streaks, and compete on the leaderboard.',
+                : 'ഗെയിമുകൾ കളിക്കാനും നിങ്ങളുടെ റാങ്ക്, സ്‌ട്രീക്കുകൾ രേഖപ്പെടുത്താനും ദയവായി ലോഗിൻ ചെയ്യുക.',
             style: TextStyle(
               fontSize: 13.sp,
               color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF64748B),
@@ -211,7 +221,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
               child: Text(
-                widget.isTelugu ? 'రద్దు' : 'Cancel',
+                widget.isTelugu ? 'రద్దు' : 'റദ്ദാക്കുക',
                 style: TextStyle(color: const Color(0xFF64748B), fontSize: 13.sp),
               ),
             ),
@@ -232,7 +242,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                 );
               },
               child: Text(
-                widget.isTelugu ? 'లాగిన్ అవ్వండి' : 'Login Now',
+                widget.isTelugu ? 'లాగిన్ అవ్వండి' : 'ഇപ്പോൾ ലോഗിൻ ചെയ്യുക',
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -364,7 +374,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        isTelugu ? "బిగ్ టీవీ గేమ్స్ & పజిల్స్" : "Big TV Games & Puzzles",
+                        isTelugu ? "బిగ్ టీవీ గేమ్స్ & పజిల్స్" : "ബിഗ് ടിവി ഗെയിംസ് & പസിലുകൾ",
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w800,
@@ -373,7 +383,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                       ),
                       SizedBox(height: 2.h),
                       Text(
-                        isTelugu ? "మీ మెదడుకు పదును పెట్టే సరికొత్త పజిల్స్" : "Challenge your mind with puzzles",
+                        isTelugu ? "మీ మెదడుకు పదును పెట్టే సరికొత్త పజిల్స్" : "നിങ്ങളുടെ മനസ്സിന് മൂർച്ച കൂട്ടുന്ന ഏറ്റവും പുതിയ പസിലുകൾ",
                         style: TextStyle(
                           fontSize: 11.5.sp,
                           color: const Color(0xFF64748B),
@@ -412,7 +422,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                           Icon(Icons.cloud_off_rounded, size: 40.sp, color: Colors.grey),
                           SizedBox(height: 10.h),
                           Text(
-                            isTelugu ? "గేమ్స్ లోడ్ చేయడం విఫలమైంది" : "Unable to load games from server",
+                            isTelugu ? "గేమ్స్ లోడ్ చేయడం విఫలమైంది" : "ഗെയിമുകൾ ലോഡ് ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു",
                             style: TextStyle(fontSize: 13.sp, color: const Color(0xFF64748B)),
                           ),
                           SizedBox(height: 12.h),
@@ -423,7 +433,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                               });
                             },
                             icon: const Icon(Icons.refresh_rounded, size: 18),
-                            label: Text(isTelugu ? "మళ్లీ ప్రయత్నించండి" : "Retry"),
+                            label: Text(isTelugu ? "మళ్లీ ప్రయత్నించండి" : "വീണ്ടും ശ്രമിക്കുക"),
                           ),
                         ],
                       ),
@@ -438,7 +448,7 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                     padding: EdgeInsets.symmetric(vertical: 30.h),
                     child: Center(
                       child: Text(
-                        isTelugu ? "ప్రస్తుతం గేమ్స్ అందుబాటులో లేవు" : "No games available currently",
+                        isTelugu ? "ప్రస్తుతం గేమ్స్ అందుబాటులో లేవు" : "നിലവിൽ ഗെയിമുകൾ ലഭ്യമല്ല",
                         style: TextStyle(fontSize: 14.sp, color: const Color(0xFF64748B)),
                       ),
                     ),
@@ -591,33 +601,6 @@ class _GamesBottomSheetState extends State<GamesBottomSheet> {
                   ],
                 ),
               ),
-              IconButton(
-                icon: const Icon(Icons.share_rounded, size: 20, color: Color(0xFF10B981)),
-                tooltip: 'Share Game',
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-                onPressed: () {
-                  final slugLower = (gameSlug ?? '').toLowerCase();
-                  String canonicalSlug = 'zip';
-                  String canonicalTitle = title;
-                  if (slugLower.contains('patch')) {
-                    canonicalSlug = 'patch';
-                    canonicalTitle = 'Patch Puzzle';
-                  } else if (slugLower.contains('sudoku')) {
-                    canonicalSlug = 'sudoku';
-                    canonicalTitle = 'Sudoku';
-                  } else {
-                    canonicalSlug = 'zip';
-                    canonicalTitle = 'Zip Puzzle';
-                  }
-                  GameShareHelper.shareGame(
-                    context: context,
-                    gameSlug: canonicalSlug,
-                    gameTitle: canonicalTitle,
-                  );
-                },
-              ),
-              SizedBox(width: 4.w),
               Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: const Color(0xFF94A3B8)),
             ],
           ),
