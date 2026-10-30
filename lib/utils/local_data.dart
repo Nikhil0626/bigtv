@@ -1,5 +1,6 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../globel_keys/global_variables_data.dart';
 import 'app_enums.dart';
 
 
@@ -21,11 +22,13 @@ Future<LoginStatus> getLoginStatus() async {
 }
 
 
+
 Future<void> saveUserid(String userId) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('loginId', userId.toString());
   if (userId.isNotEmpty && userId != "0") {
     prefs.setString('userId', userId.toString());
+    GlobalVariables().userId = userId.toString();
   }
 }
 
@@ -45,6 +48,9 @@ Future<String?> getUserid() async {
 Future<bool> isUserLoggedIn() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   final loginType = prefs.getString('loginType');
+  if (loginType == 'logout') {
+    return false;
+  }
   final userId = prefs.getString('userId');
   final loginId = prefs.getString('loginId');
 

@@ -7,13 +7,14 @@ import 'package:chotanews/utils/app_loading_screen.dart';
 import 'package:chotanews/utils/app_spaces.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 
 import '../aggricator_screens/events_data/event_repo.dart';
 import 'date_format.dart';
-void showComments(BuildContext context, postId,postTitle) {
+import 'local_data.dart';
+
+void showComments(BuildContext context, dynamic postId, dynamic postTitle) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -31,11 +32,12 @@ void showComments(BuildContext context, postId,postTitle) {
     },
   );
 }
-class CommentSection extends StatefulWidget {
-  final postId;
-  final postTitle;
 
-  const CommentSection({super.key, required this.postId,required this.postTitle});
+class CommentSection extends StatefulWidget {
+  final dynamic postId;
+  final dynamic postTitle;
+
+  const CommentSection({super.key, required this.postId, required this.postTitle});
 
   @override
   State<CommentSection> createState() => _CommentSectionState();
@@ -126,7 +128,11 @@ class _CommentSectionState extends State<CommentSection> {
                               shrinkWrap: true,
                               itemCount: newsPostsProvider.getAllCommentsList.length,
                               itemBuilder: (context, index) {
-                                var filteredComments = newsPostsProvider.getAllCommentsList.toList();
+                                final comment = newsPostsProvider.getAllCommentsList[index];
+                                final userName = (comment.user.name.trim().isNotEmpty)
+                                    ? comment.user.name.trim()
+                                    : "User";
+                                final initial = userName.isNotEmpty ? userName[0].toUpperCase() : "U";
 
                                 return Padding(
                                   padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
@@ -135,7 +141,7 @@ class _CommentSectionState extends State<CommentSection> {
                                     children: [
                                       CircleAvatar(
                                         child: Text(
-                                          filteredComments[index].user.name == "" ? "U" : filteredComments[index].user.name.toString().split("").first.toString() ?? "U",
+                                          initial,
                                           style: fontStyle(fontSize: 16, fontWeight: FontWeight.normal),
                                         ),
                                       ),
@@ -148,7 +154,7 @@ class _CommentSectionState extends State<CommentSection> {
                                               crossAxisAlignment: CrossAxisAlignment.center,
                                               children: [
                                                 Text(
-                                                  filteredComments[index].user.name == "" ? "User" : filteredComments[index].user.name,
+                                                  userName,
                                                   overflow: TextOverflow.ellipsis,
                                                   maxLines: 1,
                                                   style: const TextStyle(
@@ -172,7 +178,7 @@ class _CommentSectionState extends State<CommentSection> {
                                                 Center(
                                                   child: Text(
                                                     formatTimeDifference(
-                                                      filteredComments[index].createdAt.toIso8601String(),
+                                                      comment.createdAt.toIso8601String(),
                                                       isComment: true,
                                                     ),
                                                     textAlign: TextAlign.center,
@@ -187,7 +193,7 @@ class _CommentSectionState extends State<CommentSection> {
                                             ),
                                             height(height: 8),
                                             ExpandableTextWidget(
-                                              text: filteredComments[index].text,
+                                              text: comment.text,
                                             ),
                                             height(height: 8),
                                           ],
@@ -222,45 +228,53 @@ class _CommentSectionState extends State<CommentSection> {
                               suffixIcon: Padding(
                                 padding: const EdgeInsets.only(right: 8.0),
                                 child: IconButton(
-                                  icon: const Icon(Icons.send, color: Colors.red),
-                                  onPressed: () async {
-                                    SharedPreferences sp = await SharedPreferences.getInstance();
-                                    bool isLogin = sp.getString("loginType").toString() == "login" ? true : false ?? false;
-                                    if (isLogin) {
-                                      if (controller.text.isEmpty) {
-                                      } else {
-                                         EventRepo().addEvent({
-                                          "commented": controller.text,
-                                          "postId": widget.postId.toString()??"000",
-                                          "createAt": DateTime.now().toString(),
-                                           "postTitle": widget.postTitle.toString()??""
-
-                                         }, "commented_article");
-                                        newsPostsProvider.sendCommentsOnPost(widget.postId, controller.text).then(
-                                              (value) => controller.text = '',
+                                  icon: newsPostsProvider.sendCommentLoading
+                                      ? const SizedBox(
+                                          width: 18,
+                                          height: 18,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            color: Colors.red,
+                                          ),
+                                        )
+                                      : const Icon(Icons.send, color: Colors.red),
+                                  onPressed: newsPostsProvider.sendCommentLoading
+                                      ? null
+                                      : () async {
+                                          bool isLogin = await isUserLoggedIn();
+                                          if (isLogin) {
+                                            final text = controller.text.trim();
+                                            if (text.isEmpty) return;
+                                            controller.clear();
+                                            EventRepo().addEvent({
+                                              "commented": text,
+                                              "postId": widget.postId.toString(),
+                                              "createAt": DateTime.now().toString(),
+                                              "postTitle": widget.postTitle.toString()
+                                            }, "commented_article");
+                                            await newsPostsProvider.sendCommentsOnPost(
+                                              widget.postId,
+                                              text,
                                             );
-
-
-                                      }
-                                    } else {
-                                       if (context.mounted) {
-                                         try {
-                                           context.read<HomeProvider>().isPlayingYoutube(false);
-                                         } catch (_) {}
-                                         try {
-                                           context.read<VideoProvider>().pauseVideo();
-                                         } catch (_) {}
-                                         Navigator.pop(context);
-                                         context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
-                                         Navigator.push(
-                                           context,
-                                           MaterialPageRoute(
-                                             builder: (context) => const LoginBackgroundView(),
-                                           ),
-                                         );
-                                       }
-                                    }
-                                  },
+                                          } else {
+                                            if (context.mounted) {
+                                              try {
+                                                context.read<HomeProvider>().isPlayingYoutube(false);
+                                              } catch (_) {}
+                                              try {
+                                                context.read<VideoProvider>().pauseVideo();
+                                              } catch (_) {}
+                                              Navigator.pop(context);
+                                              context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => const LoginBackgroundView(),
+                                                ),
+                                              );
+                                            }
+                                          }
+                                        },
                                 ),
                               ),
                             ),

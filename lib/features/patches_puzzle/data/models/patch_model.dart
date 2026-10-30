@@ -250,4 +250,32 @@ class PlacedPatch {
   bool contains(int row, int col) {
     return row >= minRow && row <= maxRow && col >= minCol && col <= maxCol;
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'minRow': minRow,
+      'maxRow': maxRow,
+      'minCol': minCol,
+      'maxCol': maxCol,
+      'color': color.toARGB32(),
+      'clueValue': clueValue,
+      'clueRow': clueRow,
+      'clueCol': clueCol,
+    };
+  }
+
+  factory PlacedPatch.fromJson(Map<String, dynamic> json) {
+    return PlacedPatch(
+      id: json['id']?.toString() ?? '',
+      minRow: (json['minRow'] as num?)?.toInt() ?? 0,
+      maxRow: (json['maxRow'] as num?)?.toInt() ?? 0,
+      minCol: (json['minCol'] as num?)?.toInt() ?? 0,
+      maxCol: (json['maxCol'] as num?)?.toInt() ?? 0,
+      color: Color((json['color'] as num?)?.toInt() ?? 0xFF2563EB),
+      clueValue: (json['clueValue'] as num?)?.toInt() ?? 0,
+      clueRow: (json['clueRow'] as num?)?.toInt() ?? 0,
+      clueCol: (json['clueCol'] as num?)?.toInt() ?? 0,
+    );
+  }
 }

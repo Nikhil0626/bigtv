@@ -117,9 +117,24 @@ class DailyPuzzleProvider extends ChangeNotifier {
         _playerId = guestId;
       }
 
-      _displayName = await _repository.getPlayerName();
-      if (_displayName.isEmpty) {
-        _displayName = 'You';
+      final prefs = await SharedPreferences.getInstance();
+      final unifiedName = prefs.getString('game_profile_name') ??
+          prefs.getString('userName') ??
+          prefs.getString('zip_puzzle_v1_player_name') ??
+          prefs.getString('patches_puzzle_v1_player_name') ??
+          prefs.getString('sudoku_player_display_name');
+
+      if (unifiedName != null &&
+          unifiedName.trim().isNotEmpty &&
+          unifiedName.trim().toLowerCase() != 'player' &&
+          unifiedName.trim().toLowerCase() != 'you' &&
+          !unifiedName.trim().toLowerCase().startsWith('guest')) {
+        _displayName = unifiedName.trim();
+      } else {
+        _displayName = await _repository.getPlayerName();
+        if (_displayName.isEmpty) {
+          _displayName = 'You';
+        }
       }
     } catch (e) {
       debugPrint('DailyPuzzleProvider._resolvePlayerIdentity error: $e');
@@ -173,13 +188,11 @@ class DailyPuzzleProvider extends ChangeNotifier {
         playerId: _playerId,
       );
       _streakCalendar = streak;
-      if (streak != null) {
-        for (final day in streak.last7Days) {
-          if (day.isToday && day.completed) {
-            final today = DateTime.now().toIso8601String().substring(0, 10);
-            SharedPreferences.getInstance().then((p) => p.setBool('puzzle_completed_${_gameId}_$today', true));
-            break;
-          }
+      for (final day in streak.last7Days) {
+        if (day.isToday && day.completed) {
+          final today = DateTime.now().toIso8601String().substring(0, 10);
+          SharedPreferences.getInstance().then((p) => p.setBool('puzzle_completed_${_gameId}_$today', true));
+          break;
         }
       }
     } catch (e) {

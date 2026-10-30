@@ -6,12 +6,14 @@ class GameWatermarkWidget extends StatelessWidget {
   final String? logoUrl;
   final double? size;
   final double opacity;
+  final BoxFit fit;
 
   const GameWatermarkWidget({
     super.key,
     this.logoUrl,
     this.size,
     this.opacity = 0.55,
+    this.fit = BoxFit.contain,
   });
 
   @override
@@ -24,7 +26,7 @@ class GameWatermarkWidget extends StatelessWidget {
       'assets/images/BigTvPostLogo.png',
       width: size,
       height: size,
-      fit: BoxFit.contain,
+      fit: fit,
     );
 
     return IgnorePointer(
@@ -38,7 +40,7 @@ class GameWatermarkWidget extends StatelessWidget {
                   cleanUrl,
                   width: size,
                   height: size,
-                  fit: BoxFit.contain,
+                  fit: fit,
                   errorBuilder: (_, __, ___) => fallbackAsset,
                 )
               : fallbackAsset,

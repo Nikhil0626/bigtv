@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/widgets/game_watermark_widget.dart';
@@ -96,9 +97,22 @@ class ZipBoardWidget extends StatelessWidget {
                         ),
                         if (game.isCompleted || game.isViewOnly)
                           Positioned.fill(
-                            child: GameWatermarkWidget(
-                              logoUrl: level.logoUrl,
-                              size: boardWidth * 0.55,
+                            child: IgnorePointer(
+                              child: Center(
+                                child: Transform.rotate(
+                                  angle: 45 * pi / 180,
+                                  child: SizedBox(
+                                    width: max(boardWidth, boardHeight) * 1.5,
+                                    height: max(boardWidth, boardHeight) * 1.5,
+                                    child: GameWatermarkWidget(
+                                      logoUrl: level.logoUrl,
+                                      size: max(boardWidth, boardHeight) * 1.5,
+                                      fit: BoxFit.cover,
+                                      opacity: 0.52,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                       ],

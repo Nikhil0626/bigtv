@@ -67,12 +67,6 @@ class LocationModel {
   }
 
   String getNativeName() {
-    final lower = stateName.toLowerCase();
-    if (lower.contains('telangana') || lower.contains('తెలంగాణ')) return 'తెలంగాణ';
-    if (lower.contains('andhra') || lower.contains('ఆంధ్రప్రదేశ్')) return 'ఆంధ్రప్రదేశ్';
-    if (lower.contains('kerala') || lower.contains('కేరళ')) return 'కేరళ';
-    if (lower.contains('tamil') || lower.contains('తమిళనాడు')) return 'తమిళనాడు';
-    if (lower.contains('karnataka') || lower.contains('కర్ణాటక')) return 'కర్ణాటక';
     return stateName;
   }
 
@@ -81,11 +75,15 @@ class LocationModel {
       return englishName!.trim();
     }
     final lower = stateName.toLowerCase();
-    if (lower.contains('తెలంగాణ') || lower.contains('telangana')) return 'Telangana';
-    if (lower.contains('ఆంధ్రప్రదేశ్') || lower.contains('andhra')) return 'Andhra Pradesh';
-    if (lower.contains('కేరళ') || lower.contains('kerala')) return 'Kerala';
-    if (lower.contains('తమిళనాడు') || lower.contains('tamil')) return 'Tamil Nadu';
-    if (lower.contains('కర్ణాటక') || lower.contains('karnataka')) return 'Karnataka';
+    final val = (value ?? '').toLowerCase();
+    if (lower.contains('తెలంగాణ') || lower.contains('telangana') || lower.contains('തെലങ്കാന') || val.contains('telangana')) return 'Telangana';
+    if (lower.contains('ఆంధ్రప్రదేశ్') || lower.contains('andhra') || lower.contains('ആന്ധ്രാപ്രദേശ്') || lower.contains('ആന്ധ്ര') || val.contains('andhra') || val.contains('sivakumar')) return 'Andhra Pradesh';
+    if (lower.contains('కేరళ') || lower.contains('kerala') || lower.contains('കേരളം') || val.contains('kerala') || val.contains('karnataka')) {
+      if (lower.contains('കർണാടക') || lower.contains('కర్ణాటక') || lower.contains('karnataka')) return 'Karnataka';
+      return 'Kerala';
+    }
+    if (lower.contains('తమిళనాడు') || lower.contains('tamil') || lower.contains('തമിഴ്നാട്')) return 'Tamil Nadu';
+    if (lower.contains('కర్ణాటక') || lower.contains('karnataka') || lower.contains('കർണാടക')) return 'Karnataka';
     return stateName;
   }
 

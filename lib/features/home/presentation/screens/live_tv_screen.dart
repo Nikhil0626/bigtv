@@ -7,8 +7,6 @@ import 'package:video_player/video_player.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 import 'package:chotanews/services/live_tv_share_helper.dart';
-import 'package:provider/provider.dart';
-import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 import 'package:chotanews/utils/top_right_wave_painter.dart';
 
 class LiveTvScreen extends StatefulWidget {
@@ -40,6 +38,10 @@ class _LiveTvScreenState extends State<LiveTvScreen>
   DateTime? _playStartTime;
   late AnimationController _waveController;
   late Animation<double> _waveAnimation;
+
+  bool get _isMalayalam =>
+      widget.streamUrl.contains('malayalam') ||
+      widget.channelName.toLowerCase().contains('malayalam');
 
   @override
   void initState() {
@@ -158,17 +160,12 @@ class _LiveTvScreenState extends State<LiveTvScreen>
   }
 
   void _shareLiveTv() {
-    String? langCode;
-    try {
-      final homeProvider = Provider.of<HomeProvider>(context, listen: false);
-      langCode = homeProvider.langCode;
-    } catch (_) {}
-
+    final bool isMl = _isMalayalam;
     LiveTvShareHelper.shareLiveTv(
       context: context,
       channelName: widget.channelName,
-      isTelugu: langCode != 'ml',
-      langCode: langCode,
+      isTelugu: !isMl,
+      langCode: isMl ? 'ml' : 'te',
       source: 'player',
     );
   }

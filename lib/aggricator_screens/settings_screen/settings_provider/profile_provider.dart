@@ -267,6 +267,15 @@ class ProfileProvider extends ChangeNotifier {
           profileData['profile']['photo'] = uploadImageUrl.toString();
         }
         preferences.setString("userName", name);
+        preferences.setString("game_profile_name", name);
+        preferences.setString("zip_puzzle_v1_player_name", name);
+        preferences.setString("patches_puzzle_v1_player_name", name);
+        preferences.setString("sudoku_player_display_name", name);
+        if (uploadImageUrl.toString().isNotEmpty) {
+          preferences.setString("userPhoto", uploadImageUrl.toString());
+          preferences.setString("userImage", uploadImageUrl.toString());
+          preferences.setString("game_profile_photo", uploadImageUrl.toString());
+        }
         CustomToast.showSuccessToast(msg: "Profile data updated");
         log("Profile updated successfully: ${response.data}");
       } else {

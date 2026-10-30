@@ -10,11 +10,43 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 
 class ReelsProviders extends ChangeNotifier {
+  static const String _likedReelsKey = "cached_liked_reels_ids";
+
   bool reelsLoading = true;
   List<ReelsModel> getAllReelsList = [];
   List<String> isLikeList = [];
   bool isMuted = false;
   String? reelsLanguage;
+
+  ReelsProviders() {
+    loadCachedLikedReels();
+  }
+
+  Future<void> loadCachedLikedReels() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? userId = prefs.getString("userId");
+      List<String>? globalLikes = prefs.getStringList(_likedReelsKey);
+      List<String>? userLikes;
+      if (userId != null && userId.isNotEmpty) {
+        userLikes = prefs.getStringList("${_likedReelsKey}_$userId");
+      }
+
+      final Set<String> combined = {};
+      if (globalLikes != null) combined.addAll(globalLikes);
+      if (userLikes != null) combined.addAll(userLikes);
+
+      isLikeList = combined.toList();
+      log("Loaded ${isLikeList.length} cached liked reels: $isLikeList");
+      notifyListeners();
+    } catch (e) {
+      log("Error loading cached liked reels: $e");
+    }
+  }
+
+  bool isReelLiked(String reelId) {
+    return isLikeList.contains(reelId);
+  }
 
   void toggleMute() {
     isMuted = !isMuted;
@@ -31,11 +63,13 @@ class ReelsProviders extends ChangeNotifier {
       reelsLanguage = currentLang;
 
       final Map<String, dynamic> queryParams = {
-        'language': currentLang,
-        'lan': currentLang,
         'lang': currentLang,
         'segregated': 'false',
       };
+      if (currentLang != 'ml') {
+        queryParams['language'] = currentLang;
+        queryParams['lan'] = currentLang;
+      }
 
       Response response = await ReelsRepo().getAllReels(queryParams);
 
@@ -71,24 +105,44 @@ class ReelsProviders extends ChangeNotifier {
   }
 
   void isLikePost(val) async {
-    SharedPreferences sp = await SharedPreferences.getInstance();
-    String? userId = sp.getString("userId");
-    log(val.id.toString());
-    if (!isLikeList.contains(val.id.toString())) {
+    final String reelId = val is ReelsModel
+        ? val.id.toString()
+        : (val is Map ? (val['id']?.toString() ?? '') : val.toString());
+    if (reelId.isEmpty) return;
 
-      isLikeList.add(val.id.toString());
-      postLike(val.id.toString(), true);
-      sendLikeDetails(userId, val, true, val.contant.toString());
-      log(isLikeList.toString());
+    final String content = val is ReelsModel
+        ? val.content
+        : (val is Map ? (val['description'] ?? val['title'] ?? val['content'] ?? '').toString() : '');
+
+    final bool isCurrentlyLiked = isLikeList.contains(reelId);
+    final bool newLikeState = !isCurrentlyLiked;
+
+    if (newLikeState) {
+      if (!isLikeList.contains(reelId)) {
+        isLikeList.add(reelId);
+      }
     } else {
-      postLike(val.id.toString(), false);
-      isLikeList.remove(val.id.toString());
-
-      sendLikeDetails(userId, val.id.toString(), false, val.contant.toString());
-      log(isLikeList.toString());
+      isLikeList.remove(reelId);
     }
 
     notifyListeners();
+
+    try {
+      SharedPreferences sp = await SharedPreferences.getInstance();
+      String? userId = sp.getString("userId");
+
+      await sp.setStringList(_likedReelsKey, isLikeList);
+      if (userId != null && userId.isNotEmpty) {
+        await sp.setStringList("${_likedReelsKey}_$userId", isLikeList);
+      }
+      log("Persisted ${isLikeList.length} liked reels to preferences");
+
+      postLike(reelId, newLikeState);
+      sendLikeDetails(userId, reelId, newLikeState, content);
+      log("Synced like state $newLikeState for reel $reelId");
+    } catch (e) {
+      log("Error syncing like details: $e");
+    }
   }
 
   Future<void> postLike(String postId, isLike) async {
@@ -96,20 +150,23 @@ class ReelsProviders extends ChangeNotifier {
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
     Map<String, dynamic> body = {
-      "deviceId": deviceId,
+      "deviceId": deviceId ?? "",
       "postId": postId,
-      "userId": userId,
-      "isLiked": isLike};
+      "userId": userId ?? "",
+      "isLiked": isLike
+    };
     try {
       log("body $body");
       Response response = await SettingsRepo().liked(body);
-      notifyListeners();
       if (response.statusCode == 200) {}
     } catch (e) {
       log("Error: $e");
-    } finally {
-      notifyListeners();
     }
+  }
+
+  void clearLikesOnLogout() {
+    isLikeList = [];
+    notifyListeners();
   }
 
   late ReelsModel reelData;
@@ -131,9 +188,9 @@ class ReelsProviders extends ChangeNotifier {
     } catch (e, st) {
       log("Catch Exception -- ${e.toString()}/// ${st.toString()}");
     } finally {
-    isReelDataLoading = false;
+      isReelDataLoading = false;
       notifyListeners();
-      return reelData;
     }
+    return reelData;
   }
 }

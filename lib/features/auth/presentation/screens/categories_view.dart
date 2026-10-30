@@ -159,11 +159,7 @@ class _CategoriesViewState extends State<CategoriesView> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    authProvider.updateLoginStatus(NewAppLoginStatus.language);
-                                  }
+                                  authProvider.updateLoginStatus(NewAppLoginStatus.language);
                                 },
                                 borderRadius: BorderRadius.circular(20.r),
                                 child: Container(

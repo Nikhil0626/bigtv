@@ -28,7 +28,7 @@ class _MainScreenCardState extends State<MainScreenCard>
   void initState() {
     super.initState();
     context.read<HomeProvider>().getAllAiTags();
-    if (context.read<HomeProvider>().postId.toString() == "0") {
+    if (context.read<HomeProvider>().getAllPostList.isEmpty) {
       context.read<HomeProvider>().getAllPost();
     }
     // Pre-download translation models in background
@@ -74,8 +74,12 @@ class _MainScreenCardState extends State<MainScreenCard>
                 child: Container(
                   color: topBarColor,
                   child: Center(
-                    child: homeProvider.isHomeLoading
-                        ? HomeShimmer()
+                    child: (homeProvider.isHomeLoading ||
+                            homeProvider.hasPendingDeepLink ||
+                            homeProvider.isRoutingDeepLink ||
+                            homeProvider.isComeFromLinkOrNotification ||
+                            !homeProvider.isInitialHomeLoaded)
+                        ? const HomeShimmer()
                         : Column(
                             children: [
                               if (showInFocusBar)

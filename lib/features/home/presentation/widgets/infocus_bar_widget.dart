@@ -33,7 +33,6 @@ class InFocusBarWidget extends StatelessWidget {
 
         return Container(
           height: 68.h,
-          padding: EdgeInsets.symmetric(vertical: 4.h),
           color: barBackgroundColor,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -43,14 +42,16 @@ class InFocusBarWidget extends StatelessWidget {
 
               // Horizontal Scrollable Cards
               Expanded(
-                child: ListView.separated(
-                  controller: homeProvider.aiTagScrollController,
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.only(right: 8.w),
-                  itemCount: homeProvider.getAllAiTagsList.length,
-                  separatorBuilder: (context, index) => SizedBox(width: 8.w),
-                  itemBuilder: (context, index) {
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 4.h),
+                  child: ListView.separated(
+                    controller: homeProvider.aiTagScrollController,
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.only(right: 8.w),
+                    itemCount: homeProvider.getAllAiTagsList.length,
+                    separatorBuilder: (context, index) => SizedBox(width: 8.w),
+                    itemBuilder: (context, index) {
                     if (!homeProvider.aiTagKeys.containsKey(index)) {
                       homeProvider.aiTagKeys[index] = GlobalKey();
                     }
@@ -100,7 +101,8 @@ class InFocusBarWidget extends StatelessWidget {
                   },
                 ),
               ),
-            ],
+            ),
+          ],
           ),
         );
       },
@@ -120,7 +122,8 @@ class InFocusBarWidget extends StatelessWidget {
         }
       },
       child: Container(
-        width: 33.w,
+        width: 40.w,
+        clipBehavior: Clip.antiAlias,
         margin: EdgeInsets.only(left: 0, right: 6.w),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -136,6 +139,9 @@ class InFocusBarWidget extends StatelessWidget {
             right: 1.2,
             left: 0,
           ),
+          padding: EdgeInsets.only(left: 0, right: 2.w),
+          clipBehavior: Clip.antiAlias,
+          alignment: Alignment.centerLeft,
           decoration: BoxDecoration(
             color: const Color(0xFF0F172A),
             borderRadius: BorderRadius.only(
@@ -143,19 +149,47 @@ class InFocusBarWidget extends StatelessWidget {
               bottomRight: Radius.circular(6.8.r),
             ),
           ),
-          child: Center(
-            child: RotatedBox(
-              quarterTurns: 3,
-              child: Text(
-                "INFOCUS",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 1.5,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              SizedBox(
+                width: 18.w,
+                child: RotatedBox(
+                  quarterTurns: 3,
+                  child: Image.asset(
+                    "assets/images/BigTvPostLogo.png",
+                    fit: BoxFit.fill,
+                    alignment: Alignment.center,
+                    errorBuilder: (_, __, ___) => Image.asset(
+                      "assets/BIGTV-APP ICON.png",
+                      fit: BoxFit.contain,
+                    ),
+                  ),
                 ),
               ),
-            ),
+              Padding(
+                padding: const EdgeInsets.all(2),
+                child: Center(
+                  child: RotatedBox(
+                    quarterTurns: 3,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        "INFOCUS",
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -249,13 +283,20 @@ class InFocusBarWidget extends StatelessWidget {
               ),
             ),
             SizedBox(width: 8.w),
-            // Right-aligned Thumbnail Image
-            ClipRRect(
-              borderRadius: BorderRadius.circular(6.r),
-              child: SizedBox(
-                width: 48.w,
-                height: 48.w,
-                child: _buildThumbnail(imageUrl),
+            // Right-aligned Thumbnail Image (properly fitted inside container)
+            Container(
+              width: 50.w,
+              height: 46.h,
+              padding: EdgeInsets.all(2.5.w),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F5F9),
+                borderRadius: BorderRadius.circular(6.r),
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(4.r),
+                child: Center(
+                  child: _buildThumbnail(imageUrl),
+                ),
               ),
             ),
           ],
@@ -268,7 +309,8 @@ class InFocusBarWidget extends StatelessWidget {
     if (imageUrl.isNotEmpty && (imageUrl.startsWith('http://') || imageUrl.startsWith('https://'))) {
       return Image.network(
         imageUrl,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
+        alignment: Alignment.center,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return Container(
@@ -294,10 +336,10 @@ class InFocusBarWidget extends StatelessWidget {
   Widget _buildFallbackThumbnail() {
     return Container(
       color: const Color(0xFFF5F5F5),
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(2),
       child: Image.asset(
         "assets/images/bigtv_default_post.png",
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         errorBuilder: (_, __, ___) => Image.asset(
           "assets/BIGTV-APP ICON.png",
           fit: BoxFit.contain,
@@ -320,12 +362,12 @@ class InFocusBarWidget extends StatelessWidget {
       highlightColor: highlightColor,
       child: Container(
         height: 68.h,
-        padding: EdgeInsets.symmetric(vertical: 4.h),
         color: barBackgroundColor,
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              width: 32.w,
+              width: 40.w,
               margin: EdgeInsets.only(left: 0, right: 6.w),
               decoration: BoxDecoration(
                 color: baseColor,
@@ -336,16 +378,19 @@ class InFocusBarWidget extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 2,
-                separatorBuilder: (_, __) => SizedBox(width: 8.w),
-                itemBuilder: (_, __) => Container(
-                  width: 260.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(8.r),
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 4.h),
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: 2,
+                  separatorBuilder: (_, __) => SizedBox(width: 8.w),
+                  itemBuilder: (_, __) => Container(
+                    width: 260.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
                   ),
                 ),
               ),

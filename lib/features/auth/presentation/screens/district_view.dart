@@ -245,11 +245,7 @@ class _DistrictViewState extends State<DistrictView> {
                             children: [
                               InkWell(
                                 onTap: () {
-                                  if (Navigator.canPop(context)) {
-                                    Navigator.pop(context);
-                                  } else {
-                                    authProvider.updateLoginStatus(NewAppLoginStatus.category);
-                                  }
+                                  authProvider.updateLoginStatus(NewAppLoginStatus.category);
                                 },
                                 borderRadius: BorderRadius.circular(20.r),
                                 child: Container(
@@ -577,6 +573,16 @@ class _DistrictViewState extends State<DistrictView> {
                             ? () {
                                 authProvider.sendLocationsToServer(context).then((_) {
                                   if (context.mounted && authProvider.newAppLoginStatus == NewAppLoginStatus.home) {
+                                    try {
+                                      final hp = context.read<HomeProvider>();
+                                      hp.selectedIndex = 1;
+                                      hp.onItemTapped(1);
+                                      if (hp.homePageController.hasClients) {
+                                        hp.homePageController.jumpToPage(1);
+                                      }
+                                      hp.getAllPostList = [];
+                                      hp.getAllPost(postIds: "0", isGetAllPost: true);
+                                    } catch (_) {}
                                     Navigator.pushAndRemoveUntil(
                                       context,
                                       MaterialPageRoute(

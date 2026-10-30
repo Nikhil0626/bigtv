@@ -1,6 +1,6 @@
 class CommentsModel {
   final dynamic id;
-  final int postId;
+  final dynamic postId;
   final String text;
   final DateTime createdAt;
   final ChatUser user;
@@ -28,11 +28,15 @@ class CommentsModel {
     }
 
     return CommentsModel(
-      id: json['id'],
-      postId: json['postId'],
-      text: json['text'],
+      id: json['id'] ?? 0,
+      postId: json['postId']?.toString() ?? '',
+      text: json['text']?.toString() ?? '',
       createdAt: parsedDate,
-      user: ChatUser.fromJson(json['user']),
+      user: json['user'] is Map<String, dynamic>
+          ? ChatUser.fromJson(json['user'] as Map<String, dynamic>)
+          : (json['user'] is Map
+              ? ChatUser.fromJson(Map<String, dynamic>.from(json['user'] as Map))
+              : ChatUser(id: 0, name: 'Anonymous', avatar: '')),
     );
   }
 
@@ -48,7 +52,7 @@ class CommentsModel {
 }
 
 class ChatUser {
-  final int id;
+  final dynamic id;
   final String name;
   final dynamic avatar;
 
@@ -60,9 +64,9 @@ class ChatUser {
 
   factory ChatUser.fromJson(Map<String, dynamic> json) {
     return ChatUser(
-      id: json['id'],
-      name: json['name'],
-      avatar: json['avatar'],
+      id: json['id'] ?? 0,
+      name: json['name']?.toString() ?? 'Anonymous',
+      avatar: json['avatar']?.toString() ?? '',
     );
   }
 
@@ -74,3 +78,4 @@ class ChatUser {
     };
   }
 }
+

@@ -5,7 +5,6 @@ import '../../../../utils/top_right_wave_painter.dart';
 import '../../../zip_puzzle/presentation/providers/daily_puzzle_provider.dart';
 import '../widgets/competition_atmosphere_painter.dart';
 import '../widgets/patch_daily_challenge_view.dart';
-import '../../../../services/game_share_helper.dart';
 
 class PatchDashboardScreen extends StatefulWidget {
   final String playerId;
@@ -54,16 +53,6 @@ class _PatchDashboardScreenState extends State<PatchDashboardScreen>
     _competitionController.dispose();
     _pageScrollController.dispose();
     super.dispose();
-  }
-
-  void _scrollToSpeedLeaders() {
-    if (_pageScrollController.hasClients) {
-      _pageScrollController.animateTo(
-        _pageScrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeOutCubic,
-      );
-    }
   }
 
   @override
@@ -132,77 +121,6 @@ class _PatchDashboardScreenState extends State<PatchDashboardScreen>
             ],
           ),
         ),
-        actions: [
-          Consumer<DailyPuzzleProvider>(
-            builder: (context, provider, _) {
-              final last = provider.isTodayCompleted ? provider.lastSubmissionResult : null;
-              return Padding(
-                padding: EdgeInsets.only(right: 6.w),
-                child: InkWell(
-                  onTap: () {
-                    GameShareHelper.shareGame(
-                      context: context,
-                      gameSlug: 'patch',
-                      gameTitle: 'Patch Puzzle',
-                      formattedTime: last != null ? '${(last.durationMs / 1000).toStringAsFixed(1)}s' : null,
-                      rank: last?.rank,
-                      streak: last?.streak.currentStreak,
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(14.r),
-                  child: Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14.r),
-                      border: Border.all(
-                        color: const Color(0xFF10B981).withValues(alpha: 0.4),
-                        width: 1,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.share_rounded,
-                      size: 18.sp,
-                      color: const Color(0xFF10B981),
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          Padding(
-            padding: EdgeInsets.only(right: 12.w),
-            child: InkWell(
-              onTap: _scrollToSpeedLeaders,
-              borderRadius: BorderRadius.circular(14.r),
-              child: Container(
-                padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? const Color(0xFF1E222D).withValues(alpha: 0.9)
-                      : Colors.white.withValues(alpha: 0.95),
-                  borderRadius: BorderRadius.circular(14.r),
-                  border: Border.all(
-                    color: isDark ? const Color(0xFF2C3242) : const Color(0xFFE2E8F0),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: isDark ? 0.35 : 0.06),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  Icons.leaderboard_rounded,
-                  size: 20.sp,
-                  color: Colors.amber.shade600,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
       body: Stack(
         children: [

@@ -1,12 +1,7 @@
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
-import 'package:chotanews/features/home/presentation/widgets/bulletin_view.dart';
-import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
-import 'package:chotanews/utils/app_no_data.dart';
 import 'package:chotanews/utils/image_post_slider.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -14,30 +9,20 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/utils/translated_text.dart';
-import 'package:flutter_svg/svg.dart';
-
-import 'package:path_provider/path_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'package:provider/provider.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../../utils/in_app_web_view.dart';
-import '../settings_screen/settings_provider/settings_provider.dart';
-import '../video_image_screen/gallery_screen.dart';
-import '../video_image_screen/video_preview.dart';
 import '../video_image_screen/video_provider.dart';
-import '../../services/webengage_event_tracks.dart';
 import '../../utils/app_colors.dart';
 import '../../utils/app_fonts.dart';
 import '../../utils/app_loading_screen.dart';
-import '../../utils/app_spaces.dart';
 import '../../utils/app_toasts.dart';
-import '../../utils/commant_screen.dart';
-import '../../utils/date_format.dart';
-import '../events_data/event_repo.dart';
 import 'package:chotanews/features/home/presentation/widgets/main_screen_byts_view.dart';
+import 'package:chotanews/features/home/presentation/screens/home_view.dart';
 
 class IndividualPostView1 extends StatefulWidget {
   final String postId;
@@ -163,9 +148,75 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
     } catch (_) {}
   }
 
+  bool _isNavigatingBack = false;
+
+  void _handleBackNavigation() {
+    if (_isNavigatingBack) return;
+    _isNavigatingBack = true;
+
+    _stopVideoPlayback();
+
+    try {
+      final homeProvider = context.read<HomeProvider>();
+
+      // Ensure bottom navigation tab is switched to Home (Index 1: News / వార్తలు)
+      homeProvider.onItemTapped(1);
+      if (homeProvider.homePageController.hasClients) {
+        try {
+          homeProvider.homePageController.jumpToPage(1);
+        } catch (e) {
+          log("Error jumping to home tab: $e");
+        }
+      }
+
+      // Ensure Home screen bottom bar is enabled
+      homeProvider.isBottomEnable = true;
+      homeProvider.isComeFromLinkOrNotification = false;
+
+      // If feed was empty or single-item from link, reload full home news feed
+      if (homeProvider.getAllPostList.length <= 1) {
+        homeProvider.getAllPost(isGetAllPost: true);
+      }
+
+      try {
+        const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
+      } catch (_) {}
+    } catch (e) {
+      log("Error configuring homeProvider on back navigation: $e");
+    }
+
+    if (Navigator.canPop(context)) {
+      Navigator.pop(context);
+    } else {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const HomeView()),
+        (route) => false,
+      );
+    }
+  }
+
   @override
   void dispose() {
     _stopVideoPlayback();
+    try {
+      final homeProvider = context.read<HomeProvider>();
+      if (widget.isComeFrom || homeProvider.isComeFromLinkOrNotification) {
+        homeProvider.isComeFromLinkOrNotification = false;
+        homeProvider.onItemTapped(1);
+        if (homeProvider.homePageController.hasClients) {
+          try {
+            homeProvider.homePageController.jumpToPage(1);
+          } catch (_) {}
+        }
+        if (homeProvider.getAllPostList.length <= 1) {
+          homeProvider.getAllPost(isGetAllPost: true);
+        }
+        try {
+          const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
+        } catch (_) {}
+      }
+    } catch (_) {}
     super.dispose();
   }
 
@@ -173,7 +224,11 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
   void initState() {
     log("is come from lin----k ${widget.postId}");
     getWebData();
-    context.read<HomeProvider>().getIndividualPost(widget.postId, isAds: true);
+    final home = context.read<HomeProvider>();
+    if (home.getSinglePostList.isEmpty ||
+        home.getSinglePostList['id']?.toString() != widget.postId.toString()) {
+      home.getIndividualPost(widget.postId, isAds: true);
+    }
     super.initState();
   }
 
@@ -190,11 +245,10 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
           statusBarBrightness: Brightness.dark,
         ),
         child: PopScope(
-          canPop: true,
+          canPop: false,
           onPopInvokedWithResult: (didPop, result) {
-            if (didPop) {
-              _stopVideoPlayback();
-            }
+            if (didPop) return;
+            _handleBackNavigation();
           },
           child: Scaffold(
             backgroundColor: _getPostBackgroundColor(article, context),
@@ -205,11 +259,9 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                   height: MediaQuery.of(context).padding.top,
                 ),
                 Expanded(
-                  child: homeProvider.isPostLoading && article.isEmpty
+                  child: article.isEmpty
                       ? const AppLoadingScreen()
-                      : article.isEmpty
-                          ? const AppNoData()
-                          : SizedBox(
+                      : SizedBox(
                               height: double.infinity,
                               width: double.infinity,
                               child: Screenshot(
@@ -273,10 +325,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                         top: 12,
                                         left: 14,
                                         child: InkWell(
-                                          onTap: () {
-                                            _stopVideoPlayback();
-                                            Navigator.pop(context);
-                                          },
+                                          onTap: _handleBackNavigation,
                                           child: Container(
                                             padding: const EdgeInsets.all(7),
                                             decoration: const BoxDecoration(
@@ -306,10 +355,7 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                                       top: 12,
                                       left: 14,
                                       child: InkWell(
-                                        onTap: () {
-                                          _stopVideoPlayback();
-                                          Navigator.pop(context);
-                                        },
+                                        onTap: _handleBackNavigation,
                                         child: Container(
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(

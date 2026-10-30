@@ -40,7 +40,7 @@ class _HomeViewState extends State<HomeView> {
   void initState() {
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
 
-    homeProvider?.isHomeScreen = false;
+    homeProvider?.isHomeScreen = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       AppUpdateService.checkForUpdate(context);
       requestNotificationPermission();
@@ -48,16 +48,24 @@ class _HomeViewState extends State<HomeView> {
       homeProvider?.loadLanguage();
       _sendDeviceDetails();
       _checkAndShowFirstOpenEpaperPopup();
+      homeProvider?.processPendingDeepLink();
     });
     homeProvider?.initDeepLinks();
     homeProvider?.subscribeToPushCallbacks();
-    final initialTab = homeProvider?.selectedIndex ?? 1;
-    homeProvider?.homePageController = PageController(initialPage: initialTab);
+    homeProvider?.selectedIndex = 1;
+    homeProvider?.homePageController = PageController(initialPage: 1);
+    if (homeProvider?.getAllPostList.isEmpty == true ||
+        (homeProvider?.postsLanguage != null && homeProvider?.postsLanguage != homeProvider?.langCode)) {
+      homeProvider?.getAllPost(isGetAllPost: true);
+    }
     super.initState();
   }
 
   Future<void> _checkAndShowFirstOpenEpaperPopup() async {
     try {
+      if (homeProvider?.hasPendingDeepLink == true || homeProvider?.isRoutingDeepLink == true) {
+        return;
+      }
       final bool shouldShow = await shouldShowEpaperFirstOpenDialog();
       if (!shouldShow) return;
 
@@ -101,6 +109,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void dispose() {
+    homeProvider?.isHomeScreen = false;
     super.dispose();
   }
 

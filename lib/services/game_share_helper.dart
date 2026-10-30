@@ -17,7 +17,7 @@ class GameShareHelper {
     }
   }
 
-  /// Shares game completion stats with a direct deep link to the game
+  /// Shares game completion stats with a direct deep link to the game and optional screenshot
   static Future<void> shareGame({
     required BuildContext context,
     required String gameSlug,
@@ -26,6 +26,7 @@ class GameShareHelper {
     String? formattedTime,
     int? rank,
     int? streak,
+    XFile? screenshotFile,
   }) async {
     final url = getGameShareUrl(gameSlug);
 
@@ -55,18 +56,29 @@ class GameShareHelper {
     final text = buffer.toString();
 
     try {
-      if (Platform.isIOS) {
-        final size = MediaQuery.of(context).size;
-        await Share.share(
-          text,
+      final size = MediaQuery.of(context).size;
+      final origin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
+
+      if (screenshotFile != null) {
+        await Share.shareXFiles(
+          [screenshotFile],
+          text: text,
           subject: 'Play $gameTitle on Big TV',
-          sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2),
+          sharePositionOrigin: origin,
         );
       } else {
-        await Share.share(
-          text,
-          subject: 'Play $gameTitle on Big TV',
-        );
+        if (Platform.isIOS) {
+          await Share.share(
+            text,
+            subject: 'Play $gameTitle on Big TV',
+            sharePositionOrigin: origin,
+          );
+        } else {
+          await Share.share(
+            text,
+            subject: 'Play $gameTitle on Big TV',
+          );
+        }
       }
     } catch (e) {
       debugPrint('GameShareHelper.shareGame error: $e');

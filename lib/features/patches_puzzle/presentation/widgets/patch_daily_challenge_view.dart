@@ -6,6 +6,7 @@ import '../../../zip_puzzle/presentation/providers/daily_puzzle_provider.dart';
 import '../../../zip_puzzle/presentation/widgets/zip_daily_streak_card.dart';
 import '../screens/patch_game_screen.dart';
 import '../../../../services/game_share_helper.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 
 class PatchDailyChallengeView extends StatelessWidget {
   final String playerId;
@@ -93,7 +94,6 @@ class PatchDailyChallengeView extends StatelessWidget {
     final todayData = dailyProvider.todayPuzzle;
     final isCompleted = dailyProvider.isTodayCompleted;
     final lastResult = dailyProvider.lastSubmissionResult;
-    final levelNum = todayData?.levelNumber ?? 3;
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
@@ -188,11 +188,11 @@ class PatchDailyChallengeView extends StatelessWidget {
           ),
           SizedBox(height: 12.h),
 
-          // Title: Level X + Arcade Badge
+          // Title: Patch Puzzle + Arcade Badge
           Row(
             children: [
               Text(
-                'Level $levelNum',
+                'Patch Puzzle',
                 style: TextStyle(
                   fontSize: 21.sp,
                   fontWeight: FontWeight.w900,
@@ -738,7 +738,9 @@ class _LeaderboardScrollListState extends State<_LeaderboardScrollList>
           ),
           child: rankIcon,
         ),
-        SizedBox(width: 10.w),
+        SizedBox(width: 8.w),
+        _buildUserAvatar(user, isCurrentPlayer, isDark),
+        SizedBox(width: 8.w),
         Expanded(
           child: Row(
             children: [
@@ -864,6 +866,64 @@ class _LeaderboardScrollListState extends State<_LeaderboardScrollList>
         ),
       ),
       child: rowContent,
+    );
+  }
+
+  Widget _buildUserAvatar(DailyLeaderboardUser user, bool isCurrentPlayer, bool isDark) {
+    String? effectiveUrl = user.avatarUrl;
+    if (isCurrentPlayer && (effectiveUrl == null || effectiveUrl.isEmpty)) {
+      try {
+        final profileProvider = context.read<ProfileProvider>();
+        if (profileProvider.uploadImageUrl.isNotEmpty) {
+          effectiveUrl = profileProvider.uploadImageUrl;
+        }
+      } catch (_) {}
+    }
+
+    if (effectiveUrl != null && effectiveUrl.isNotEmpty) {
+      return Container(
+        width: 22.w,
+        height: 22.w,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isCurrentPlayer
+                ? const Color(0xFFE50914)
+                : (isDark ? const Color(0xFF33363D) : const Color(0xFFCBD5E1)),
+            width: 1.2,
+          ),
+        ),
+        child: ClipOval(
+          child: Image.network(
+            effectiveUrl,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => _buildAvatarFallback(user.displayName, isCurrentPlayer),
+          ),
+        ),
+      );
+    }
+
+    return _buildAvatarFallback(user.displayName, isCurrentPlayer);
+  }
+
+  Widget _buildAvatarFallback(String displayName, bool isCurrentPlayer) {
+    final initial = displayName.trim().isNotEmpty ? displayName.trim()[0].toUpperCase() : 'P';
+    return Container(
+      width: 22.w,
+      height: 22.w,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: isCurrentPlayer ? const Color(0xFFE50914) : const Color(0xFF64748B),
+        shape: BoxShape.circle,
+      ),
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 10.sp,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
     );
   }
 }

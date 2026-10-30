@@ -49,23 +49,28 @@ class PuzzleApiService {
     required int durationMs,
     required int score,
     String? displayName,
+    String? avatarUrl,
     int? moves,
   }) async {
     final url = '$baseUrl/games/$gameSlug/submit';
 
     try {
+      final bodyMap = <String, dynamic>{
+        'playerId': playerId,
+        'durationMs': durationMs,
+        'score': score,
+        'displayName': displayName ?? 'Player',
+        'completed': true,
+        if (moves != null) 'moves': moves,
+        if (avatarUrl != null && avatarUrl.isNotEmpty) 'avatarUrl': avatarUrl,
+        if (avatarUrl != null && avatarUrl.isNotEmpty) 'photo': avatarUrl,
+      };
+
       final response = await http
           .post(
             Uri.parse(url),
             headers: {'Content-Type': 'application/json', 'Accept': '*/*'},
-            body: jsonEncode({
-              'playerId': playerId,
-              'durationMs': durationMs,
-              'score': score,
-              'displayName': displayName ?? 'Player',
-              'completed': true,
-              'moves': moves,
-            }),
+            body: jsonEncode(bodyMap),
           )
           .timeout(const Duration(seconds: 5));
 

@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
 
@@ -25,6 +23,8 @@ import 'package:chotanews/features/auth/domain/models/categories_model.dart';
 import 'package:chotanews/features/auth/domain/models/location_model.dart';
 import 'package:chotanews/features/auth/domain/models/language_model.dart';
 import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
+import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
+import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
 
@@ -218,6 +218,9 @@ class AuthenticationProvider extends ChangeNotifier {
         preferences.setString("referralCode", "");
         EventRepo().addEvent({"otpStatus": "complete", "otp": otpController.text, "mobileNumber": phoneController.text, "createAt": DateTime.now().toString()}, "otp_verify");
         phoneController.text = "";
+        try {
+          Provider.of<ReelsProviders>(context, listen: false).loadCachedLikedReels();
+        } catch (_) {}
         notifyListeners();
       }
       if (response.statusCode == 400) {
@@ -282,27 +285,46 @@ class AuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  void saveLanguageAndProceed(BuildContext context, int languageId) async {
+  void saveLanguageAndProceed(BuildContext context, int languageId, {String? targetCode}) async {
+    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
     SharedPreferences preferences = await SharedPreferences.getInstance();
     await preferences.setInt("selectedLanguageId", languageId);
-    String langCode = 'te';
-    try {
-      final lang = getAllLanguageList.firstWhere((l) => l.id == languageId);
-      langCode = lang.code ?? 'te';
-      await preferences.setString("selectedLanguageCode", langCode);
-    } catch (_) {}
+    String langCode = targetCode ?? 'te';
+    if (targetCode == null || targetCode.isEmpty) {
+      try {
+        final lang = getAllLanguageList.firstWhere((l) => l.id == languageId);
+        langCode = lang.code ?? 'te';
+      } catch (_) {
+        if (languageId == 9 || languageId == 6) {
+          langCode = 'ml';
+        } else if (languageId == 8 || languageId == 2) {
+          langCode = 'en';
+        } else if (languageId == 7 || languageId == 1) {
+          langCode = 'te';
+        }
+      }
+    }
+    await preferences.setString("selectedLanguageCode", langCode);
 
     String token = await getAppFcmToken() ?? "";
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
 
-    final homeProvider = Provider.of<HomeProvider>(context, listen: false);
+    homeProvider.postsLanguage = langCode;
     homeProvider.setLangCode(langCode);
+    homeProvider.selectedIndex = 1;
+    homeProvider.onItemTapped(1);
+    if (homeProvider.homePageController.hasClients) {
+      homeProvider.homePageController.jumpToPage(1);
+    }
+    homeProvider.getAllPostList = [];
+    homeProvider.getAllPost(postIds: "0", isGetAllPost: true);
+
     homeProvider.sendDeviceDetailsApi(
-        userId: userId ?? "0",
-        deviceId: deviceId ?? "",
-        fcmToken: token,
-        lan: langCode,
+      userId: userId ?? "0",
+      deviceId: deviceId ?? "",
+      fcmToken: token,
+      lan: langCode,
     );
 
     final prevLang = preferences.getString("selectedLanguageCode");
@@ -362,7 +384,12 @@ class AuthenticationProvider extends ChangeNotifier {
             .toList();
 
         selectedCategories = getAllCategoryList.where((item) => item.isFollowed == true).map((item) => item.categoryName.toString()).toList();
-        log(getAllCategoryList.first.categoryName.toString());
+        if (selectedCategories.isEmpty && getAllCategoryList.isNotEmpty) {
+          selectedCategories = getAllCategoryList.map((item) => item.categoryName.toString()).take(3).toList();
+        }
+        if (getAllCategoryList.isNotEmpty) {
+          log(getAllCategoryList.first.categoryName.toString());
+        }
         String result = selectedCategories.toSet().join(',');
         preferences.setString("categoriesId", result);
       }
@@ -465,8 +492,10 @@ class AuthenticationProvider extends ChangeNotifier {
               (e) {
                 if (e['locationNameTranslations'] != null && e['locationNameTranslations'][langCode] != null) {
                   e['locationName'] = e['locationNameTranslations'][langCode];
+                  e['stateName'] = e['locationNameTranslations'][langCode];
                 } else if (e['stateNameTranslations'] != null && e['stateNameTranslations'][langCode] != null) {
                   e['stateName'] = e['stateNameTranslations'][langCode];
+                  e['locationName'] = e['stateNameTranslations'][langCode];
                 }
                 return LocationModel.fromJson(e);
               }
@@ -476,7 +505,16 @@ class AuthenticationProvider extends ChangeNotifier {
         states = {for (var d in data) (d['locationId'] ?? d['stateId']): (d['locationName'] ?? d['stateName'])};
 
         selectedLocations = getAllLocationList.where((item) => item.isFollowed == true).map((item) => item.stateName.toString()).toSet().toList();
-        log(getAllLocationList.first.stateName.toString());
+        if (selectedLocations.isEmpty) {
+          if (getAllLocationList.isNotEmpty) {
+            selectedLocations = [getAllLocationList.first.stateName.toString()];
+          } else {
+            selectedLocations = [langCode == 'ml' ? 'കേരളം' : 'తెలంగాణ'];
+          }
+        }
+        if (getAllLocationList.isNotEmpty) {
+          log(getAllLocationList.first.stateName.toString());
+        }
         log("response.data.toString123 $selectedLocations");
         String result = selectedLocations.toSet().join(',');
         preferences.setString("locationId", result);
@@ -512,8 +550,20 @@ class AuthenticationProvider extends ChangeNotifier {
       var statesMatched = getAllLocationList.where((item) => item.stateName == stateName).toList();
       selectedCategoryIds.addAll(statesMatched.map((e) => e.stateId));
     }
+    if (selectedCategoryIds.isEmpty && selectedLocations.isNotEmpty) {
+      for (String stateName in selectedLocations) {
+        final lower = stateName.toLowerCase();
+        if (lower.contains('കേരള') || lower.contains('kerala') || lower.contains('కేరళ')) {
+          selectedCategoryIds.add(82);
+        } else if (lower.contains('തെലങ്കാന') || lower.contains('telangana') || lower.contains('తెలంగాణ')) {
+          selectedCategoryIds.add(83);
+        } else if (lower.contains('ആന്ധ്ര') || lower.contains('andhra') || lower.contains('ఆంధ్ర')) {
+          selectedCategoryIds.add(90);
+        }
+      }
+    }
     selectedCategoryIds = selectedCategoryIds.toSet().toList();
-    log("Mapped state names to state IDs: ${selectedCategoryIds}");
+    log("Mapped state names to state IDs: $selectedCategoryIds");
     log("Selected State Names: $selectedLocations");
     String nameOfDistrict = selectedLocations.toSet().join(',');
     sendUserAttribute(nameOfDistrict);
@@ -562,31 +612,49 @@ class AuthenticationProvider extends ChangeNotifier {
 
   void isPageNavigation(BuildContext context) async {
     NewAppLoginStatus status = await getLoginStatus();
+    if (!context.mounted) return;
     log("Page Name $status");
     switch (status) {
       case NewAppLoginStatus.skip:
+        try {
+          final hp = context.read<HomeProvider>();
+          hp.selectedIndex = 1;
+          hp.onItemTapped(1);
+          if (hp.getAllPostList.isEmpty) {
+            hp.getAllPost(isGetAllPost: true);
+          }
+        } catch (_) {}
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeView(),
+            builder: (context) => const HomeView(),
           ),
           (route) => false,
         );
         break;
       case NewAppLoginStatus.home:
+        try {
+          final hp = context.read<HomeProvider>();
+          hp.selectedIndex = 1;
+          hp.onItemTapped(1);
+          if (hp.getAllPostList.isEmpty) {
+            hp.getAllPost(isGetAllPost: true);
+          }
+        } catch (_) {}
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => HomeView(),
+            builder: (context) => const HomeView(),
           ),
           (route) => false,
         );
         break;
       default:
+        newAppLoginStatus = status;
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
-            builder: (context) => LoginBackgroundView(),
+            builder: (context) => const LoginBackgroundView(),
           ),
           (route) => false,
         );
@@ -617,6 +685,18 @@ class AuthenticationProvider extends ChangeNotifier {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.setString("loginType", "skip");
 
+    try {
+      final hp = context.read<HomeProvider>();
+      hp.selectedIndex = 1;
+      hp.onItemTapped(1);
+      if (hp.homePageController.hasClients) {
+        hp.homePageController.jumpToPage(1);
+      }
+      if (hp.getAllPostList.isEmpty) {
+        hp.getAllPost(isGetAllPost: true);
+      }
+    } catch (_) {}
+
     if (canPop) {
       if (context.mounted) {
         Navigator.pop(context);
@@ -632,9 +712,18 @@ class AuthenticationProvider extends ChangeNotifier {
     newAppLoginStatus = isLogout ? NewAppLoginStatus.skip : NewAppLoginStatus.login;
     AnalyticsService.instance.track(AnalyticsEventName.logout);
     AnalyticsService.instance.setUser(null);
+    GlobalVariables().userId = null;
     SharedPreferences preferences = await SharedPreferences.getInstance();
     preferences.clear();
     preferences.setString("loginState", newAppLoginStatus.toString());
+
+    try {
+      Provider.of<BookmarksProvider>(context, listen: false).clearBookmarksOnLogout();
+    } catch (_) {}
+
+    try {
+      Provider.of<ReelsProviders>(context, listen: false).clearLikesOnLogout();
+    } catch (_) {}
 
     isPageNavigation(context);
   }

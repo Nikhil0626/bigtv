@@ -66,7 +66,7 @@ class SudokuCompletionDialog extends StatelessWidget {
 
                 // Title
                 Text(
-                  'Level $levelNumber Solved!',
+                  'Puzzle Solved!',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -152,7 +152,7 @@ class SudokuCompletionDialog extends StatelessWidget {
                       GameShareHelper.shareGame(
                         context: context,
                         gameSlug: 'sudoku',
-                        gameTitle: 'Sudoku Level $levelNumber',
+                        gameTitle: 'Sudoku Puzzle',
                         formattedTime: formattedTime,
                       );
                     },

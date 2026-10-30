@@ -240,7 +240,7 @@ class _TestReportersProvider extends ReportersProvider {
   }
 
   @override
-  Future<void> loadReporters() async {}
+  Future<void> loadReporters({bool force = false, String? languageCode}) async {}
 
   @override
   bool get isLoading => false;

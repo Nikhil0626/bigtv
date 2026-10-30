@@ -218,6 +218,126 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
         subType == 'bulletpost';
   }
 
+  Future<void> _shareArticle({bool isWhatsAppOnly = true}) async {
+    try {
+      final String title = widget.article['title']?.toString() ?? "";
+      final String link = Platform.isIOS
+          ? (widget.article['linkURLIos']?.toString() ?? "")
+          : (widget.article['linkURLAndroid']?.toString() ?? "");
+      final String postUrl = widget.article['postUrl']?.toString() ?? "";
+      final String shareText =
+          "$title\n${postUrl.isNotEmpty ? '$postUrl\n' : ''}$link";
+
+      final imageBytes = await adsScreenshotController.capture(
+          delay: const Duration(milliseconds: 10));
+
+      final Size size = MediaQuery.of(context).size;
+      final Rect shareOrigin = Rect.fromLTWH(0, 0, size.width, size.height / 2);
+
+      if (isWhatsAppOnly) {
+        if (imageBytes != null) {
+          final directory = await getTemporaryDirectory();
+          final imagePath = await File(
+                  "${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png")
+              .create();
+          await imagePath.writeAsBytes(imageBytes);
+
+          if (Platform.isIOS) {
+            await Share.shareXFiles(
+              [XFile(imagePath.path)],
+              text: shareText,
+              sharePositionOrigin: shareOrigin,
+            );
+          } else {
+            try {
+              const platform = MethodChannel('com.chotanews/whatsapp');
+              await platform.invokeMethod('shareToWhatsApp',
+                  {'imagePath': imagePath.path, 'text': shareText});
+            } catch (e) {
+              await Share.shareXFiles(
+                [XFile(imagePath.path)],
+                text: shareText,
+                sharePositionOrigin: shareOrigin,
+              );
+            }
+          }
+        } else {
+          final url = "whatsapp://send?text=${Uri.encodeComponent(shareText)}";
+          if (await canLaunchUrl(Uri.parse(url))) {
+            await launchUrl(Uri.parse(url));
+          } else {
+            await Share.share(shareText);
+          }
+        }
+      } else {
+        if (imageBytes != null) {
+          final directory = await getTemporaryDirectory();
+          final imagePath = await File(
+                  "${directory.path}/screenshot_${DateTime.now().millisecondsSinceEpoch}.png")
+              .create();
+          await imagePath.writeAsBytes(imageBytes);
+          await Share.shareXFiles(
+            [XFile(imagePath.path)],
+            text: shareText,
+            sharePositionOrigin: shareOrigin,
+          );
+        } else {
+          await Share.share(shareText);
+        }
+      }
+    } catch (e) {
+      debugPrint("Share error: $e");
+    }
+  }
+
+
+  Widget _buildImageBookmarkButton(BuildContext context) {
+    return Consumer<BookmarksProvider>(
+      builder: (context, bookmarksProvider, _) {
+        final isBookmarked = bookmarksProvider.isPostBookmarked(
+          widget.article['id'],
+          fallbackIsBookmarked: widget.article['isBookmarked'] == true ||
+              widget.article['isBookmarked'] == 1 ||
+              widget.article['isBookmarked'] == 'true',
+        );
+
+        return GestureDetector(
+          onTap: () async {
+            await bookmarksProvider.toggleBookmark(
+              postId: widget.article['id'],
+              article: widget.article,
+              context: context,
+            );
+          },
+          child: Container(
+            padding: EdgeInsets.all(7.w),
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.52),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.22),
+                width: 0.8,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1.5),
+                ),
+              ],
+            ),
+            child: Icon(
+              isBookmarked
+                  ? Icons.bookmark_rounded
+                  : Icons.bookmark_border_rounded,
+              color: isBookmarked ? AppColorTokens.primaryRed : Colors.white,
+              size: 20.sp,
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -267,8 +387,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
             color: _getPostBackgroundColor(widget.article, context),
             height: double.infinity,
             width: double.infinity,
-            child: (widget.article['type'] == 'HomePostGrid' || widget.article['subType'] == 'HomePostGrid' || widget.article['homepost'] != null)
-                ? HomePostGridWidget(posts: widget.article['homepost'] as List? ?? [])
+            child: (context.read<HomeProvider>().isHomePostGrid(widget.article))
+                ? HomePostGridWidget(posts: (widget.article['homepost'] ?? widget.article['home_post'] ?? widget.article['homePosts']) as List? ?? [])
                 : (widget.article['type'] == 'MoreFollow' ||
                         widget.article['subType'] == 'MoreFollow' ||
                         widget.article['type']?.toString().toLowerCase() == 'morefollow' ||
@@ -352,6 +472,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                       fit: BoxFit.fill,
                                                     ),
                                                     Positioned(
+                                                      top: MediaQuery.of(context).padding.top + 10,
+                                                      right: 14,
+                                                      child: _buildImageBookmarkButton(context),
+                                                    ),
+                                                    Positioned(
                                                       bottom: 0,
                                                       child: Padding(
                                                         padding: EdgeInsets.only(
@@ -389,140 +514,50 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                       MainAxisAlignment
                                                                           .spaceBetween,
                                                                   children: [
-                                                                    Consumer<BookmarksProvider>(
-                                                                      builder: (context, bookmarksProvider, _) {
-                                                                        final isBookmarked = bookmarksProvider.isPostBookmarked(
-                                                                          widget.article['id'],
-                                                                          fallbackIsBookmarked: widget.article['isBookmarked'] == true ||
-                                                                              widget.article['isBookmarked'] == 1 ||
-                                                                              widget.article['isBookmarked'] == 'true',
-                                                                        );
+                                                                    Consumer<HomeProvider>(
+                                                                      builder: (context, homeProvider, _) {
                                                                         return BottomActions(
                                                                           postType: widget.article['subType']?.toString() ?? "",
                                                                           icon: "",
-                                                                          iconWidget: Icon(
-                                                                            isBookmarked
-                                                                                ? Icons.bookmark_rounded
-                                                                                : Icons.bookmark_border_rounded,
-                                                                            color: isBookmarked
-                                                                                ? AppColorTokens.primaryRed
-                                                                                : (_isBigBlackStandard(widget.article)
-                                                                                    ? Colors.white
-                                                                                    : Colors.grey),
-                                                                            size: 22,
-                                                                          ),
-                                                                          label: 'Bookmark',
+                                                                          iconWidget: homeProvider.isReload
+                                                                              ? SizedBox(
+                                                                                  width: 18,
+                                                                                  height: 18,
+                                                                                  child: CircularProgressIndicator(
+                                                                                    strokeWidth: 2,
+                                                                                    color: _isBigBlackStandard(widget.article)
+                                                                                        ? Colors.white
+                                                                                        : AppColorTokens.primaryRed,
+                                                                                  ),
+                                                                                )
+                                                                              : Icon(
+                                                                                  Icons.refresh_rounded,
+                                                                                  color: _isBigBlackStandard(widget.article)
+                                                                                      ? Colors.white
+                                                                                      : Colors.grey,
+                                                                                  size: 22,
+                                                                                ),
+                                                                          label: 'Reload',
                                                                           onTap: () async {
-                                                                            await bookmarksProvider.toggleBookmark(
-                                                                              postId: widget.article['id'],
-                                                                              article: widget.article,
-                                                                              context: context,
-                                                                            );
+                                                                            homeProvider.isReloadData();
+                                                                            if (homeProvider.isAiTagDataLoaded && homeProvider.selectedTagId != 0) {
+                                                                              await homeProvider.getAllPostsByAiId(homeProvider.selectedTagId);
+                                                                            } else {
+                                                                              await homeProvider.getAllPost(postIds: "0");
+                                                                            }
                                                                           },
                                                                         );
                                                                       },
                                                                     ),
                                                                     const Spacer(),
-                                                                    if (context.watch<HomeProvider>().englishLanguageEnable) ...[
-                                                                      PopupMenuButton<bool>(
-                                                                        padding: EdgeInsets.zero,
-                                                                        constraints: const BoxConstraints(),
-                                                                        tooltip: "Select Language",
-                                                                        offset: const Offset(0, -110),
-                                                                        shape: RoundedRectangleBorder(
-                                                                          borderRadius: BorderRadius.circular(12),
-                                                                        ),
-                                                                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade900 : Colors.white,
-                                                                        elevation: 6,
-                                                                        onSelected: (bool isEnglish) {
-                                                                          context.read<HomeProvider>().setEnglishMode(isEnglish);
-                                                                        },
-                                                                        itemBuilder: (context) {
-                                                                          final homeProvider = context.read<HomeProvider>();
-                                                                          final isDark = Theme.of(context).brightness == Brightness.dark;
-                                                                          final textColor = isDark ? Colors.white : Colors.black87;
-
-                                                                          return [
-                                                                            PopupMenuItem<bool>(
-                                                                              value: false,
-                                                                              height: 40,
-                                                                              child: Row(
-                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                children: [
-                                                                                  Text(
-                                                                                    homeProvider.langCode == 'ml' ? "മലയാളം (Malayalam)" : homeProvider.langCode == 'ml' ? "മലയാളം (Malayalam)" : "తెలుగు (Telugu)",
-                                                                                    style: TextStyle(
-                                                                                      fontSize: 14.sp,
-                                                                                      fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
-                                                                                      color: !homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
-                                                                                    ),
-                                                                                  ),
-                                                                                  if (!homeProvider.isEnglishMode)
-                                                                                    const Padding(
-                                                                                      padding: EdgeInsets.only(left: 8.0),
-                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
-                                                                                    ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                            const PopupMenuDivider(height: 1),
-                                                                            PopupMenuItem<bool>(
-                                                                              value: true,
-                                                                              height: 40,
-                                                                              child: Row(
-                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                children: [
-                                                                                  Text(
-                                                                                    "English",
-                                                                                    style: TextStyle(
-                                                                                      fontSize: 14.sp,
-                                                                                      fontWeight: homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
-                                                                                      color: homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
-                                                                                    ),
-                                                                                  ),
-                                                                                  if (homeProvider.isEnglishMode)
-                                                                                    const Padding(
-                                                                                      padding: EdgeInsets.only(left: 8.0),
-                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
-                                                                                    ),
-                                                                                ],
-                                                                              ),
-                                                                            ),
-                                                                          ];
-                                                                        },
-                                                                        child: Icon(
-                                                                          Icons.g_translate_rounded,
-                                                                          size: 24,
-                                                                          color: _isBigBlackStandard(widget.article) ? Colors.white : Colors.grey,
-                                                                        ),
-                                                                      ),
-                                                                      width(width: 14),
-                                                                    ],
+                                                                    // WhatsApp Share
                                                                     InkWell(
-                                                                      onTap: () async {
-                                                                        try {
-                                                                          final String title = widget.article['title']?.toString() ?? "";
-                                                                          final String link = Platform.isIOS ? (widget.article['linkURLIos']?.toString() ?? "") : (widget.article['linkURLAndroid']?.toString() ?? "");
-                                                                          final String postUrl = widget.article['postUrl']?.toString() ?? "";
-                                                                          final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
-                                                                          final imageBytes = await adsScreenshotController.capture(delay: const Duration(milliseconds: 10));
-                                                                          if (imageBytes != null) {
-                                                                            final directory = await getTemporaryDirectory();
-                                                                            final imagePath = await File(directory.path + "/screenshot_" + DateTime.now().millisecondsSinceEpoch.toString() + ".png").create();
-                                                                            await imagePath.writeAsBytes(imageBytes);
-                                                                            final Size size = MediaQuery.of(context).size;
-                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                          } else {
-                                                                            await Share.share(shareText);
-                                                                          }
-                                                                        } catch (e) {
-                                                                          debugPrint("Share error: $e");
-                                                                        }
-                                                                      },
-                                                                      child: Icon(
-                                                                        Icons.share_rounded,
-                                                                        size: 24,
-                                                                        color: _isBigBlackStandard(widget.article) ? Colors.white : Colors.grey,
+                                                                      onTap: () => _shareArticle(isWhatsAppOnly: true),
+                                                                      child: Image.asset(
+                                                                        "assets/images/WhatsApp_icon.png",
+                                                                        height: 28,
+                                                                        width: 28,
+                                                                        fit: BoxFit.contain,
                                                                       ),
                                                                     ),
                                                                   ],
@@ -610,6 +645,11 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                     widget
                                                                         .article,
                                                               ),
+                                                              Positioned(
+                                                                top: 10,
+                                                                right: 14,
+                                                                child: _buildImageBookmarkButton(context),
+                                                              ),
                                                             ],
                                                           ),
                                                         )
@@ -695,15 +735,19 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                     ),
                                                                   ),
 
+                                                                /// Bookmark on stack of the image top right
+                                                                Positioned(
+                                                                  top: 10,
+                                                                  right: widget.isaiTags ? 56 : 14,
+                                                                  child: _buildImageBookmarkButton(context),
+                                                                ),
+
                                                                 /// SHOW BACK BUTTON ONLY FOR AI TAG POSTS
                                                                 if (widget
                                                                     .isaiTags)
                                                                   Positioned(
-                                                                    top: MediaQuery.of(context)
-                                                                            .padding
-                                                                            .top +
-                                                                        10,
-                                                                    right: 16,
+                                                                    top: 10,
+                                                                    right: 14,
                                                                     child:
                                                                         GestureDetector(
                                                                       onTap:
@@ -947,158 +991,61 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                  Row(
                                                                                    mainAxisSize: MainAxisSize.min,
                                                                                    children: [
-                                                                                      /// Bookmark Icon
-                                                                                      Consumer<BookmarksProvider>(
-                                                                                        builder: (context, bookmarksProvider, _) {
-                                                                                          final isBookmarked = bookmarksProvider.isPostBookmarked(
-                                                                                            widget.article['id'],
-                                                                                            fallbackIsBookmarked: widget.article['isBookmarked'] == true ||
-                                                                                                widget.article['isBookmarked'] == 1 ||
-                                                                                                widget.article['isBookmarked'] == 'true',
-                                                                                          );
-                                                                                          final Color normalColor = (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context))
-                                                                                              ? Colors.white
-                                                                                              : AppColorTokens.primaryRed;
+                                                                                      /// Reload Icon
+                                                        Consumer<HomeProvider>(
+                                                          builder: (context, homeProvider, _) {
+                                                            final Color normalColor = (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context))
+                                                                ? Colors.white
+                                                                : AppColorTokens.primaryRed;
 
-                                                                                          return InkWell(
-                                                                                            onTap: () async {
-                                                                                              await bookmarksProvider.toggleBookmark(
-                                                                                                postId: widget.article['id'],
-                                                                                                article: widget.article,
-                                                                                                context: context,
-                                                                                            );
-                                                                                          },
-                                                                                          child: Column(
-                                                                                            mainAxisSize: MainAxisSize.min,
-                                                                                            children: [
-                                                                                              Row(
-                                                                                                mainAxisSize: MainAxisSize.min,
-                                                                                                children: [
-                                                                                                  Icon(
-                                                                                                    isBookmarked
-                                                                                                        ? Icons.bookmark_rounded
-                                                                                                        : Icons.bookmark_border_rounded,
-                                                                                                    size: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 32 : 24,
-                                                                                                    color: isBookmarked ? AppColorTokens.primaryRed : normalColor,
-                                                                                                  ),
-                                                                                                ],
-                                                                                              ),
-                                                                                            ],
-                                                                                          ),
-                                                                                        );
-                                                                                      },
-                                                                                    ),
+                                                            return InkWell(
+                                                              onTap: () async {
+                                                                homeProvider.isReloadData();
+                                                                if (homeProvider.isAiTagDataLoaded && homeProvider.selectedTagId != 0) {
+                                                                  await homeProvider.getAllPostsByAiId(homeProvider.selectedTagId);
+                                                                } else {
+                                                                  await homeProvider.getAllPost(postIds: "0");
+                                                                }
+                                                              },
+                                                              child: Column(
+                                                                mainAxisSize: MainAxisSize.min,
+                                                                children: [
+                                                                  Row(
+                                                                    mainAxisSize: MainAxisSize.min,
+                                                                    children: [
+                                                                      homeProvider.isReload
+                                                                          ? SizedBox(
+                                                                              height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 22 : 18,
+                                                                              width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 22 : 18,
+                                                                              child: CircularProgressIndicator(
+                                                                                strokeWidth: 2,
+                                                                                color: normalColor,
+                                                                              ),
+                                                                            )
+                                                                          : Icon(
+                                                                              Icons.refresh_rounded,
+                                                                              size: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 30 : 24,
+                                                                              color: normalColor,
+                                                                            ),
+                                                                    ],
+                                                                  ),
+                                                                ],
+                                                              ),
+                                                            );
+                                                          },
+                                                        ),
                                                                                     const SizedBox(width: 16),
-                                                                                    if (context.watch<HomeProvider>().englishLanguageEnable) ...[
-                                                                                      /// Language Translation Icon Dropdown Card
-                                                                                      PopupMenuButton<bool>(
-                                                                                        padding: EdgeInsets.zero,
-                                                                                        constraints: const BoxConstraints(),
-                                                                                        tooltip: "Select Language",
-                                                                                        offset: const Offset(0, -110),
-                                                                                        shape: RoundedRectangleBorder(
-                                                                                          borderRadius: BorderRadius.circular(12),
-                                                                                        ),
-                                                                                        color: Theme.of(context).brightness == Brightness.dark ? Colors.grey.shade900 : Colors.white,
-                                                                                        elevation: 6,
-                                                                                        onSelected: (bool isEnglish) {
-                                                                                          context.read<HomeProvider>().setEnglishMode(isEnglish);
-                                                                                        },
-                                                                                        itemBuilder: (context) {
-                                                                                          final homeProvider = context.read<HomeProvider>();
-                                                                                          final isDark = Theme.of(context).brightness == Brightness.dark;
-                                                                                          final textColor = isDark ? Colors.white : Colors.black87;
-
-                                                                                          return [
-                                                                                            PopupMenuItem<bool>(
-                                                                                              value: false,
-                                                                                              height: 40,
-                                                                                              child: Row(
-                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                                children: [
-                                                                                                  Text(
-                                                                                                    homeProvider.langCode == 'ml' ? "മലയാളം (Malayalam)" : "తెలుగు (Telugu)",
-                                                                                                    style: TextStyle(
-                                                                                                      fontSize: 14.sp,
-                                                                                                      fontWeight: !homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
-                                                                                                      color: !homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  if (!homeProvider.isEnglishMode)
-                                                                                                    const Padding(
-                                                                                                      padding: EdgeInsets.only(left: 8.0),
-                                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
-                                                                                                    ),
-                                                                                                ],
-                                                                                              ),
-                                                                                            ),
-                                                                                            const PopupMenuDivider(height: 1),
-                                                                                            PopupMenuItem<bool>(
-                                                                                              value: true,
-                                                                                              height: 40,
-                                                                                              child: Row(
-                                                                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                                                                children: [
-                                                                                                  Text(
-                                                                                                    "English",
-                                                                                                    style: TextStyle(
-                                                                                                      fontSize: 14.sp,
-                                                                                                      fontWeight: homeProvider.isEnglishMode ? FontWeight.bold : FontWeight.normal,
-                                                                                                      color: homeProvider.isEnglishMode ? const Color(0xFFED1C24) : textColor,
-                                                                                                    ),
-                                                                                                  ),
-                                                                                                  if (homeProvider.isEnglishMode)
-                                                                                                    const Padding(
-                                                                                                      padding: EdgeInsets.only(left: 8.0),
-                                                                                                      child: Icon(Icons.check_circle, size: 16, color: Color(0xFFED1C24)),
-                                                                                                    ),
-                                                                                                ],
-                                                                                              ),
-                                                                                            ),
-                                                                                          ];
-                                                                                        },
-                                                                                        child: Column(
-                                                                                          mainAxisSize: MainAxisSize.min,
-                                                                                          children: [
-                                                                                            Icon(
-                                                                                              Icons.g_translate_rounded,
-                                                                                              size: 28,
-                                                                                              color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : const Color(0xFFED1C24),
-                                                                                            ),
-                                                                                          ],
-                                                                                        ),
-                                                                                      ),
-                                                                                      const SizedBox(width: 16),
-                                                                                    ],
-                                                                                    /// Share Icon
+                                                                                    /// WhatsApp Share Icon
                                                                                     InkWell(
-                                                                                      onTap: () async {
-                                                                                        try {
-                                                                                          final String title = widget.article['title']?.toString() ?? "";
-                                                                                          final String link = Platform.isIOS ? (widget.article['linkURLIos']?.toString() ?? "") : (widget.article['linkURLAndroid']?.toString() ?? "");
-                                                                                          final String postUrl = widget.article['postUrl']?.toString() ?? "";
-                                                                                          final String shareText = "$title\n${postUrl.isNotEmpty ? postUrl + '\n' : ''}$link";
-                                                                                          final imageBytes = await adsScreenshotController.capture(delay: const Duration(milliseconds: 10));
-                                                                                          if (imageBytes != null) {
-                                                                                            final directory = await getTemporaryDirectory();
-                                                                                            final imagePath = await File(directory.path + "/screenshot_" + DateTime.now().millisecondsSinceEpoch.toString() + ".png").create();
-                                                                                            await imagePath.writeAsBytes(imageBytes);
-                                                                                            final Size size = MediaQuery.of(context).size;
-                                                                                            await Share.shareXFiles([XFile(imagePath.path)], text: shareText, sharePositionOrigin: Rect.fromLTWH(0, 0, size.width, size.height / 2));
-                                                                                          } else {
-                                                                                            await Share.share(shareText);
-                                                                                          }
-                                                                                        } catch (e) {
-                                                                                          debugPrint("Share error: $e");
-                                                                                        }
-                                                                                      },
+                                                                                      onTap: () => _shareArticle(isWhatsAppOnly: true),
                                                                                       child: Column(
                                                                                         mainAxisSize: MainAxisSize.min,
                                                                                         children: [
-                                                                                          Icon(
-                                                                                            Icons.share_rounded,
-                                                                                            size: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 30 : 24,
-                                                                                            color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : const Color(0xFFED1C24),
+                                                                                          Image.asset(
+                                                                                            "assets/images/WhatsApp_icon.png",
+                                                                                            height: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 35 : 30,
+                                                                                            width: (widget.article['type'] == "Gallery" || widget.article['type'] == "Image") ? 35 : 30,
+                                                                                            fit: BoxFit.contain,
                                                                                           ),
                                                                                         ],
                                                                                       ),

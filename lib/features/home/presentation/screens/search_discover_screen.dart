@@ -392,7 +392,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                       SizedBox(width: 6.w),
                       Flexible(
                         child: Text(
-                          "${isTelugu ? "నోటిఫికేషన్‌లు" : "അറിയിപ്പുകൾ"}${notifProvider.total > 0 ? " (${notifProvider.total})" : ""}",
+                          isTelugu ? "నోటిఫికేషన్‌లు" : "അറിയിപ്പുകൾ",
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -649,26 +649,6 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             label: isTelugu ? "న్యూస్" : "വാർത്തകൾ",
             onTap: () => _navigateToHome(context, homeProvider),
           ),
-          SizedBox(width: 8.w),
-
-          // 7. TRENDING
-          _buildCompactChip(
-            index: 6,
-            icon: Icons.local_fire_department_rounded,
-            iconColor: const Color(0xFFFF4B2B),
-            imagePath: 'assets/images/trending_3d_icon.png',
-            label: isTelugu ? "ట్రెండింగ్" : "ട്രെൻഡിംഗ്",
-            onTap: () {
-              if (homeProvider.getAllAiTagsList.isNotEmpty) {
-                final firstTag = homeProvider.getAllAiTagsList.first;
-                final tagId = firstTag['aitagid'] ?? firstTag['id'] ?? firstTag['slug'] ?? '0';
-                homeProvider.setSelectedTagId(tagId);
-                homeProvider.getAllPostsByAiId(tagId);
-                homeProvider.aiTagDataLoaded(true);
-              }
-              _navigateToHome(context, homeProvider);
-            },
-          ),
         ],
       ),
     );
@@ -863,7 +843,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.only(top: 14.h, bottom: 90.h),
         children: [
-          // 1. Quick Services Shortcuts (Editorial, E-Paper, My Feed, Trending)
+          // 1. Quick Services Shortcuts (Editorial, E-Paper, My Feed)
           _buildQuickServicesSection(context, homeProvider, isTelugu),
 
           SizedBox(height: 22.h),
@@ -999,7 +979,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                     SizedBox(width: 4.w),
                     Consumer<BookmarksProvider>(
                       builder: (context, provider, _) {
-                        final countText = provider.totalBookmarks > 0
+                        final countText = (provider.isLoggedIn && provider.totalBookmarks > 0)
                             ? " (${provider.totalBookmarks})"
                             : "";
                         return Text(
@@ -1191,7 +1171,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     );
   }
 
-  /// Quick Services Section (Editorial, E-Paper, Reporters, My Feed, Trending)
+  /// Quick Services Section (Editorial, E-Paper, Reporters, My Feed)
   Widget _buildQuickServicesSection(
     BuildContext context,
     HomeProvider homeProvider,
@@ -1321,28 +1301,6 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                 shadowColor: const Color(0xFF2563EB).withValues(alpha: 0.25),
                 imagePath: 'assets/images/myfeed_3d_icon.png',
                 onTap: () => _navigateToHome(context, homeProvider),
-              ),
-              SizedBox(width: 10.w),
-
-              // 7. TRENDING
-              _buildModernShortcutTile(
-                index: 6,
-                title: isTelugu ? "ట్రెండింగ్" : "ട്രെൻഡിംഗ്",
-                subtitle: isTelugu ? "ట్రెండింగ్" : "ട്രെൻഡിംഗ്",
-                icon: Icons.local_fire_department_rounded,
-                iconGradient: const [Color(0xFFFF416C), Color(0xFFFF4B2B)],
-                shadowColor: const Color(0xFFFF416C).withValues(alpha: 0.25),
-                imagePath: 'assets/images/trending_3d_icon.png',
-                onTap: () {
-                  if (homeProvider.getAllAiTagsList.isNotEmpty) {
-                    final firstTag = homeProvider.getAllAiTagsList.first;
-                    final tagId = firstTag['aitagid'] ?? firstTag['id'] ?? firstTag['slug'] ?? '0';
-                    homeProvider.setSelectedTagId(tagId);
-                    homeProvider.getAllPostsByAiId(tagId);
-                    homeProvider.aiTagDataLoaded(true);
-                  }
-                  _navigateToHome(context, homeProvider);
-                },
               ),
             ],
           ),
@@ -1637,7 +1595,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                           SizedBox(width: 8.w),
                           Flexible(
                             child: Text(
-                              "BIG TV 24x7",
+                              isTelugu ? "BIG TV 24x7" : "BIG TV Malayalam 24x7",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(

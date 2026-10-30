@@ -4,6 +4,7 @@ import '../../../../core/theme/color_tokens.dart';
 import '../../data/models/leaderboard_entry.dart';
 import '../../data/repositories/zip_puzzle_repository.dart';
 import '../providers/daily_puzzle_provider.dart';
+import 'package:chotanews/aggricator_screens/settings_screen/settings_provider/profile_provider.dart';
 
 class ZipLeaderboardScreen extends StatefulWidget {
   final int initialLevel;
@@ -211,19 +212,30 @@ class _ZipLeaderboardScreenState extends State<ZipLeaderboardScreen>
                     child: Row(
                       children: [
                         _buildRankMedal(currentUser.rank),
-                        const SizedBox(width: 12),
+                        const SizedBox(width: 8),
+                        _buildAvatar(
+                          currentUser.avatarUrl,
+                          currentUser.displayName,
+                          isCurrentUser: true,
+                          radius: 18,
+                        ),
+                        const SizedBox(width: 10),
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Row(
                                 children: [
-                                  Text(
-                                    currentUser.displayName,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: isDark ? Colors.white : const Color(0xFF1F2937),
+                                  Flexible(
+                                    child: Text(
+                                      currentUser.displayName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 16,
+                                        color: isDark ? Colors.white : const Color(0xFF1F2937),
+                                      ),
                                     ),
                                   ),
                                   const SizedBox(width: 6),
@@ -364,23 +376,34 @@ class _ZipLeaderboardScreenState extends State<ZipLeaderboardScreen>
                           child: Row(
                             children: [
                               _buildRankMedal(entry.rank),
-                              const SizedBox(width: 14),
+                              const SizedBox(width: 8),
+                              _buildAvatar(
+                                entry.avatarUrl,
+                                entry.displayName,
+                                isCurrentUser: isYou,
+                                radius: 16,
+                              ),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       children: [
-                                        Text(
-                                          entry.displayName,
-                                          style: TextStyle(
-                                            fontWeight: isYou
-                                                ? FontWeight.bold
-                                                : FontWeight.w600,
-                                            fontSize: 15,
-                                            color: isDark
-                                                ? Colors.white
-                                                : const Color(0xFF1F2937),
+                                        Flexible(
+                                          child: Text(
+                                            entry.displayName,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: isYou
+                                                  ? FontWeight.bold
+                                                  : FontWeight.w600,
+                                              fontSize: 15,
+                                              color: isDark
+                                                  ? Colors.white
+                                                  : const Color(0xFF1F2937),
+                                            ),
                                           ),
                                         ),
                                         if (isYou) ...[
@@ -582,21 +605,32 @@ class _ZipLeaderboardScreenState extends State<ZipLeaderboardScreen>
                           child: Row(
                             children: [
                               _buildRankMedal(rank),
-                              const SizedBox(width: 14),
+                              const SizedBox(width: 8),
+                              _buildAvatar(
+                                null,
+                                entry.playerName,
+                                isCurrentUser: isCurrentPlayer,
+                                radius: 16,
+                              ),
+                              const SizedBox(width: 10),
                               Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Row(
                                       children: [
-                                        Text(
-                                          entry.playerName,
-                                          style: TextStyle(
-                                            fontWeight: isCurrentPlayer
-                                                ? FontWeight.bold
-                                                : FontWeight.w600,
-                                            fontSize: 15,
-                                            color: isDark ? Colors.white : const Color(0xFF1F2937),
+                                        Flexible(
+                                          child: Text(
+                                            entry.playerName,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                              fontWeight: isCurrentPlayer
+                                                  ? FontWeight.bold
+                                                  : FontWeight.w600,
+                                              fontSize: 15,
+                                              color: isDark ? Colors.white : const Color(0xFF1F2937),
+                                            ),
                                           ),
                                         ),
                                         if (isCurrentPlayer) ...[
@@ -679,6 +713,49 @@ class _ZipLeaderboardScreenState extends State<ZipLeaderboardScreen>
           fontSize: 12,
           fontWeight: FontWeight.bold,
           color: Colors.grey,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(
+    String? avatarUrl,
+    String displayName, {
+    bool isCurrentUser = false,
+    double radius = 18,
+  }) {
+    String? effectiveUrl = avatarUrl;
+    if (isCurrentUser && (effectiveUrl == null || effectiveUrl.isEmpty)) {
+      try {
+        final profileProvider = context.read<ProfileProvider>();
+        if (profileProvider.uploadImageUrl.isNotEmpty) {
+          effectiveUrl = profileProvider.uploadImageUrl;
+        }
+      } catch (_) {}
+    }
+
+    if (effectiveUrl != null && effectiveUrl.isNotEmpty) {
+      return CircleAvatar(
+        radius: radius,
+        backgroundColor: Colors.grey.shade300,
+        backgroundImage: NetworkImage(effectiveUrl),
+        onBackgroundImageError: (_, __) {},
+      );
+    }
+
+    final initial = displayName.trim().isNotEmpty
+        ? displayName.trim()[0].toUpperCase()
+        : 'P';
+
+    return CircleAvatar(
+      radius: radius,
+      backgroundColor: isCurrentUser ? Colors.deepOrange : const Color(0xFF64748B),
+      child: Text(
+        initial,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: radius * 0.85,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

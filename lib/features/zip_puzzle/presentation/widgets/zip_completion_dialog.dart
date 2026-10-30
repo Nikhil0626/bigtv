@@ -79,7 +79,7 @@ class ZipCompletionDialog extends StatelessWidget {
 
                 // Title
                 Text(
-                  isDailyPuzzle ? "Today's Puzzle Solved!" : 'Level $levelNumber Solved!',
+                  "Today's Puzzle Solved!",
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -240,7 +240,7 @@ class ZipCompletionDialog extends StatelessWidget {
                       GameShareHelper.shareGame(
                         context: context,
                         gameSlug: 'zip',
-                        gameTitle: isDailyPuzzle ? 'Zip Puzzle' : 'Zip Level $levelNumber',
+                        gameTitle: 'Zip Puzzle',
                         formattedTime: formattedTime,
                         rank: dailyResult?.rank,
                         streak: dailyResult?.streak.currentStreak,

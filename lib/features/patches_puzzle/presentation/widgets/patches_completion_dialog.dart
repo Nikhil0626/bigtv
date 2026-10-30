@@ -66,7 +66,7 @@ class PatchesCompletionDialog extends StatelessWidget {
 
                 // Title
                 Text(
-                  'Level $levelNumber Solved!',
+                  'Puzzle Solved!',
                   style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -147,7 +147,7 @@ class PatchesCompletionDialog extends StatelessWidget {
                       GameShareHelper.shareGame(
                         context: context,
                         gameSlug: 'patch',
-                        gameTitle: 'Patch Puzzle Level $levelNumber',
+                        gameTitle: 'Patch Puzzle',
                         formattedTime: formattedTime,
                       );
                     },

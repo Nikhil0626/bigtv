@@ -1,10 +1,20 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/models/bookmark_post_model.dart';
 import '../../data/repositories/bookmarks_repository.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
+import 'package:chotanews/globel_keys/global_variables_data.dart';
+import 'package:chotanews/utils/app_enums.dart';
+import 'package:chotanews/utils/local_data.dart';
 
 class BookmarksProvider extends ChangeNotifier {
   final BookmarksRepository _repository = BookmarksRepository();
@@ -18,6 +28,9 @@ class BookmarksProvider extends ChangeNotifier {
   bool _hasMore = true;
   static const int _pageSize = 20;
 
+  bool _isLoggedIn = false;
+  int? _currentUserId;
+
   List<BookmarkPostModel> get bookmarks => List.unmodifiable(_bookmarks);
   Set<int> get bookmarkedPostIds => Set.unmodifiable(_bookmarkedPostIds);
   bool get isLoading => _isLoading;
@@ -25,15 +38,30 @@ class BookmarksProvider extends ChangeNotifier {
   int get totalBookmarks => _totalBookmarks;
   int get currentPage => _currentPage;
   bool get hasMore => _hasMore;
+  bool get isLoggedIn => _isLoggedIn;
+  int? get currentUserId => _currentUserId;
 
   BookmarksProvider() {
-    _loadCachedBookmarkIds();
+    _initAuthAndCache();
+  }
+
+  Future<void> _initAuthAndCache() async {
+    final direct = GlobalVariables().userId;
+    if (direct != null && direct.isNotEmpty) {
+      final parsed = int.tryParse(direct);
+      if (parsed != null && parsed > 0) {
+        _isLoggedIn = true;
+        _currentUserId = parsed;
+      }
+    }
+    await _loadCachedBookmarkIds();
   }
 
   final Set<int> _unbookmarkedSessionIds = {};
 
   /// Check if a given post is bookmarked (checks cache, active set, or post's default)
   bool isPostBookmarked(dynamic postId, {bool? fallbackIsBookmarked}) {
+    if (!_isLoggedIn) return false;
     final int id = int.tryParse(postId?.toString() ?? '0') ?? 0;
     if (id <= 0) return false;
     if (_bookmarkedPostIds.contains(id)) return true;
@@ -42,15 +70,37 @@ class BookmarksProvider extends ChangeNotifier {
     return false;
   }
 
-  /// Resolve numeric userId from preferences (fallback to 12 if not logged in or guest)
-  Future<int> resolveUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final rawUserId = prefs.getString('userId') ?? prefs.getString('loginId') ?? '';
-    final parsed = int.tryParse(rawUserId);
-    if (parsed != null && parsed > 0) {
-      return parsed;
+  /// Resolve numeric userId from preferences (strictly for logged-in user, returns null for guests)
+  Future<int?> resolveUserId() async {
+    final loggedIn = await isUserLoggedIn();
+    if (!loggedIn) {
+      _isLoggedIn = false;
+      _currentUserId = null;
+      return null;
     }
-    return 12; // Default dev test user ID matching backend sample
+
+    final rawUserId = await getUserid();
+    if (rawUserId != null && rawUserId.isNotEmpty) {
+      final parsed = int.tryParse(rawUserId);
+      if (parsed != null && parsed > 0) {
+        _isLoggedIn = true;
+        _currentUserId = parsed;
+        return parsed;
+      }
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final directUserId = prefs.getString('userId') ?? prefs.getString('loginId') ?? GlobalVariables().userId;
+    final parsedDirect = int.tryParse(directUserId ?? '');
+    if (parsedDirect != null && parsedDirect > 0) {
+      _isLoggedIn = true;
+      _currentUserId = parsedDirect;
+      return parsedDirect;
+    }
+
+    _isLoggedIn = false;
+    _currentUserId = null;
+    return null;
   }
 
   /// Resolve deviceId from preferences
@@ -63,11 +113,30 @@ class BookmarksProvider extends ChangeNotifier {
     return 'device_${DateTime.now().millisecondsSinceEpoch}';
   }
 
-  /// Load cached bookmarked post IDs from SharedPreferences
+  /// Load cached bookmarked post IDs from SharedPreferences for the logged-in user
   Future<void> _loadCachedBookmarkIds() async {
     try {
+      final userId = await resolveUserId();
+      if (userId == null) {
+        _isLoggedIn = false;
+        _currentUserId = null;
+        _bookmarkedPostIds.clear();
+        _bookmarks.clear();
+        _totalBookmarks = 0;
+        try {
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.remove('dev_cached_bookmarks_ids');
+        } catch (_) {}
+        notifyListeners();
+        return;
+      }
+
+      _isLoggedIn = true;
+      _currentUserId = userId;
       final prefs = await SharedPreferences.getInstance();
-      final List<String>? rawList = prefs.getStringList('dev_cached_bookmarks_ids');
+      final List<String>? rawList =
+          prefs.getStringList('cached_bookmarks_ids_$userId') ??
+          prefs.getStringList('dev_cached_bookmarks_ids');
       if (rawList != null) {
         _bookmarkedPostIds.clear();
         for (final item in rawList) {
@@ -83,19 +152,52 @@ class BookmarksProvider extends ChangeNotifier {
     }
   }
 
-  /// Save cached bookmarked post IDs to SharedPreferences
+  /// Save cached bookmarked post IDs to SharedPreferences for the logged-in user
   Future<void> _saveCachedBookmarkIds() async {
     try {
+      final userId = _currentUserId ?? await resolveUserId();
+      if (userId == null) return;
       final prefs = await SharedPreferences.getInstance();
       final list = _bookmarkedPostIds.map((e) => e.toString()).toList();
-      await prefs.setStringList('dev_cached_bookmarks_ids', list);
+      await prefs.setStringList('cached_bookmarks_ids_$userId', list);
     } catch (e) {
       log("Error saving cached bookmark ids: $e");
     }
   }
 
-  /// Fetch bookmarked posts from GET /bookmarks
+  /// Clear all bookmark state when user logs out
+  void clearBookmarksOnLogout() {
+    _bookmarks = [];
+    _bookmarkedPostIds.clear();
+    _unbookmarkedSessionIds.clear();
+    _totalBookmarks = 0;
+    _currentPage = 1;
+    _hasMore = true;
+    _isLoggedIn = false;
+    _currentUserId = null;
+    notifyListeners();
+  }
+
+  /// Fetch bookmarked posts from GET /bookmarks strictly for the logged-in user
   Future<void> fetchBookmarks({bool refresh = false}) async {
+    final userId = await resolveUserId();
+    if (userId == null) {
+      _isLoggedIn = false;
+      _currentUserId = null;
+      _bookmarks = [];
+      _bookmarkedPostIds.clear();
+      _totalBookmarks = 0;
+      _currentPage = 1;
+      _hasMore = false;
+      _isLoading = false;
+      _isMoreLoading = false;
+      notifyListeners();
+      return;
+    }
+
+    _isLoggedIn = true;
+    _currentUserId = userId;
+
     if (refresh) {
       _currentPage = 1;
       _hasMore = true;
@@ -113,7 +215,6 @@ class BookmarksProvider extends ChangeNotifier {
     }
 
     try {
-      final userId = await resolveUserId();
       final result = await _repository.getBookmarks(
         userId: userId,
         page: _currentPage,
@@ -153,6 +254,109 @@ class BookmarksProvider extends ChangeNotifier {
     }
   }
 
+  /// Show login required dialog when unauthenticated user tries to bookmark
+  static Future<bool> showLoginRequiredDialog(BuildContext context) async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    String langCode = 'te';
+    try {
+      langCode = context.read<HomeProvider>().langCode;
+    } catch (_) {}
+    final isTelugu = langCode == 'te';
+
+    final bool? shouldLogin = await showDialog<bool>(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          backgroundColor: isDark ? const Color(0xFF1E222A) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+          title: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColorTokens.primaryRed.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.bookmark_border_rounded,
+                  color: AppColorTokens.primaryRed,
+                  size: 22,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  isTelugu ? 'లాగిన్ అవ్వండి' : 'ലോഗിൻ ചെയ്യുക',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : const Color(0xFF0F172A),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            isTelugu
+                ? 'వార్తలను బుక్‌మార్క్ చేయడానికి మరియు ఎప్పుడైనా చదవడానికి దయచేసి లాగిన్ అవ్వండి.'
+                : 'വാർത്തകൾ ബുക്ക്‌മാർക്ക് ചെയ്യാനും പിന്നീട് വായിക്കാനും ദയവായി ലോഗിൻ ചെയ്യുക.',
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: isDark ? const Color(0xFF94A3B8) : const Color(0xFF475569),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx, false),
+              child: Text(
+                isTelugu ? 'రద్దు చేయి' : 'റദ്దాക്കുക',
+                style: TextStyle(color: const Color(0xFF64748B), fontSize: 13.sp),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColorTokens.primaryRed,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 10.h),
+                elevation: 0,
+              ),
+              onPressed: () {
+                Navigator.pop(dialogCtx, true);
+              },
+              child: Text(
+                isTelugu ? 'లాగిన్ అవ్వండి' : 'ഇപ്പോൾ ലോഗിൻ ചെയ്യുക',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 13.sp,
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldLogin == true && context.mounted) {
+      try {
+        context.read<HomeProvider>().isPlayingYoutube(false);
+      } catch (_) {}
+      try {
+        context.read<VideoProvider>().pauseVideo();
+      } catch (_) {}
+      context.read<AuthenticationProvider>().newAppLoginStatus = NewAppLoginStatus.login;
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginBackgroundView()),
+      );
+      if (context.mounted) {
+        await context.read<BookmarksProvider>().fetchBookmarks(refresh: true);
+        return await isUserLoggedIn();
+      }
+    }
+    return false;
+  }
+
   /// Toggle bookmark for a post
   /// Returns the new bookmarked state (true = bookmarked, false = removed)
   Future<bool> toggleBookmark({
@@ -163,6 +367,20 @@ class BookmarksProvider extends ChangeNotifier {
   }) async {
     final int id = int.tryParse(postId?.toString() ?? '0') ?? 0;
     if (id <= 0) return false;
+
+    // Check if user is logged in
+    int? userId = await resolveUserId();
+    if (userId == null) {
+      if (context != null && context.mounted) {
+        final didLogin = await showLoginRequiredDialog(context);
+        if (didLogin && context.mounted) {
+          userId = await resolveUserId();
+        }
+      }
+      if (userId == null) {
+        return false;
+      }
+    }
 
     final bool currentStatus = isPostBookmarked(
       id,
@@ -199,7 +417,6 @@ class BookmarksProvider extends ChangeNotifier {
 
     // 2. Call POST API
     try {
-      final userId = await resolveUserId();
       final deviceId = await resolveDeviceId();
 
       final res = await _repository.toggleBookmark(
