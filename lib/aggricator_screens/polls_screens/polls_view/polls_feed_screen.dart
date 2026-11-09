@@ -367,7 +367,6 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                 final item = polls[index];
                 final title = (item['title'] ?? 'Poll').toString();
                 final imageUrl = _getImageUrl(item['image_url'] ?? item['imageUrl']);
-                final category = (item['category'] ?? item['categoryName'] ?? 'రాజకీయాలు').toString();
                 final votes = (item['total_votes_display'] ?? '1.2 లక్షల మంది').toString();
 
                 return GestureDetector(
@@ -446,26 +445,6 @@ class _PollsFeedScreenState extends State<PollsFeedScreen> {
                                 ),
                               ),
 
-                              // Category Pill
-                              Positioned(
-                                top: 8.h,
-                                left: 8.w,
-                                child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFE50914),
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                  child: Text(
-                                    category,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 9.5.sp,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
                         ),

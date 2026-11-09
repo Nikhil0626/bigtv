@@ -332,11 +332,6 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                 "")
             .toString();
 
-        final String category = (article['category'] ??
-                article['categoryName'] ??
-                "")
-            .toString();
-
         final String dateStr =
             (article['created_at'] ?? article['date'] ?? "").toString();
 
@@ -501,27 +496,6 @@ class _PollScreenDesignState extends State<PollScreenDesign> {
                           ],
                         ),
                         SizedBox(height: 12.h),
-                      ],
-
-                      // Category Pill (e.g. "రాజకీయాలు")
-                      if (category.isNotEmpty) ...[
-                        Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: 14.w, vertical: 3.h),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE50914),
-                            borderRadius: BorderRadius.circular(16.r),
-                          ),
-                          child: Text(
-                            category,
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 11.5.sp,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 8.h),
                       ],
 
                       // Poll Question Title
