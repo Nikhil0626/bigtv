@@ -60,6 +60,7 @@ import 'package:chotanews/utils/local_data.dart';
 
 class HomeProvider extends ChangeNotifier {
   List getAllPostList = [];
+  List homePostsList = [];
 
   List getAllAiTagsList = [];
   List getAllAiTagsPostList = [];
@@ -338,8 +339,12 @@ class HomeProvider extends ChangeNotifier {
 
             if (!cricketEnable) {
               _removeCricketWebView();
-            } else if (getAllPostList.isNotEmpty && getAllPostList.indexWhere((e) => e is Map && (e['id'] == 777701 || e['type']?.toString().toLowerCase() == 'cricketwebview')) == -1) {
-              _placeCricketWebViewAtThirdPosition();
+              if (homePostsList.isNotEmpty && getAllPostList.indexWhere((e) => isHomePostGrid(e)) == -1) {
+                _placeHomePostGridAtFirstPosition();
+              }
+            } else if (getAllPostList.isNotEmpty) {
+              _removeHomePostGrid();
+              _placeCricketWebViewAtFirstPosition();
             }
 
             notifyListeners();
@@ -575,6 +580,7 @@ class HomeProvider extends ChangeNotifier {
 
       isHomeLoading = true;
       getAllPostList = [];
+      homePostsList = [];
       dynamicMovieReviews = [];
       dynamicPolls = [];
       _currentPageIndex = 0;
@@ -661,6 +667,7 @@ class HomeProvider extends ChangeNotifier {
             data = data.sublist(1);
           }
         }
+        homePostsList = homePosts;
         log("Extracted homePosts count: ${homePosts.length}");
       }
 
@@ -696,8 +703,8 @@ class HomeProvider extends ChangeNotifier {
         }
       }
 
-      // Filter out posts that are already present inside homePosts 3-grid card
-      if (homePosts.isNotEmpty) {
+      // Filter out posts that are already present inside homePosts 3-grid card (only if cricket is disabled and grid is shown)
+      if (!cricketEnable && homePosts.isNotEmpty) {
         final homePostIds = homePosts
             .where((e) => e is Map && e['id'] != null)
             .map((e) => e['id'].toString())
@@ -783,31 +790,19 @@ class HomeProvider extends ChangeNotifier {
         });
       }
 
-      // Prepend homePosts grid at position 0 (shown first in the feed)
-      if (homePosts.isNotEmpty && postIds == "0") {
-        getAllPostList.removeWhere((e) =>
-            e is Map &&
-            (e['id'] == -999 ||
-                e['type'] == 'HomePostGrid' ||
-                e['subType'] == 'HomePostGrid' ||
-                e['post_type'] == 'HomePostGrid'));
-        getAllPostList.insert(0, {
-          'id': -999,
-          'type': 'HomePostGrid',
-          'post_type': 'HomePostGrid',
-          'subType': 'HomePostGrid',
-          'homepost': homePosts,
-        });
-      }
-
-      // Place Cricket WebView at the 3rd position (index 2) in initial feed
+      // Handle Cricket WebView or HomePostGrid at position 0 (first in feed)
       if (postIds == "0") {
-        _extractDynamicReviewsAndPolls(data);
         if (cricketEnable) {
-          _placeCricketWebViewAtThirdPosition();
+          _removeHomePostGrid();
+          _placeCricketWebViewAtFirstPosition();
         } else {
           _removeCricketWebView();
+          if (homePosts.isNotEmpty) {
+            _placeHomePostGridAtFirstPosition();
+          }
         }
+
+        _extractDynamicReviewsAndPolls(data);
         _placeMovieReviewAtThirdPosition();
         _placePollAtFifthPosition();
       }
@@ -1002,12 +997,31 @@ class HomeProvider extends ChangeNotifier {
             e['url'] == cricketWebUrl));
   }
 
-  void _placeCricketWebViewAtThirdPosition() {
+  void _removeHomePostGrid() {
+    getAllPostList.removeWhere((e) => isHomePostGrid(e));
+  }
+
+  void _placeHomePostGridAtFirstPosition() {
+    if (homePostsList.isEmpty || cricketEnable) return;
+    _removeHomePostGrid();
+    getAllPostList.insert(0, {
+      'id': -999,
+      'type': 'HomePostGrid',
+      'post_type': 'HomePostGrid',
+      'subType': 'HomePostGrid',
+      'homepost': homePostsList,
+    });
+  }
+
+  void _placeCricketWebViewAtFirstPosition() {
     if (!cricketEnable) {
       _removeCricketWebView();
       return;
     }
     if (getAllPostList.isEmpty) return;
+
+    // Do not show home post 3 grid if cricket is enabled
+    _removeHomePostGrid();
 
     // Check and remove any existing cricket webview post to prevent duplicates
     final existingIdx = getAllPostList.indexWhere((e) =>
@@ -1035,8 +1049,7 @@ class HomeProvider extends ChangeNotifier {
       };
     }
 
-    final targetIdx = getAllPostList.length >= 2 ? 2 : getAllPostList.length;
-    getAllPostList.insert(targetIdx, cricketItem);
+    getAllPostList.insert(0, cricketItem);
   }
 
   void _placeMovieReviewAtThirdPosition() {
