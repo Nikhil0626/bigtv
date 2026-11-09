@@ -166,6 +166,13 @@ class AnalyticsService {
   }
 
   Future<void> track(String eventName, {Map<String, dynamic>? properties}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool isEnabled = prefs.getBool("eventsEnable") ?? true;
+    if (!isEnabled) {
+      debugPrint('[Analytics] Event tracking skipped because eventsEnable is false: $eventName');
+      return;
+    }
+
     final event = AnalyticsEvent(
       eventName:  eventName,
       appVersion: _initialized ? _appVersion : 'unknown',

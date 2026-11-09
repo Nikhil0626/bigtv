@@ -2,24 +2,33 @@ import 'dart:math' as math;
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
-import 'package:chotanews/features/home/presentation/providers/epaper_provider.dart';
-import 'package:chotanews/features/home/presentation/screens/epaper_detail_screen.dart';
 import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart';
 import 'package:chotanews/globel_keys/globel_keys.dart';
 
+const String kLastEpaperPopupShownDateKey = 'last_epaper_popup_shown_date';
 const String kFirstOpenEpaperPopupShownKey = 'first_open_epaper_popup_shown';
 
-/// Checks if the e-paper popup should be shown on app first open.
-/// Only displays for Telugu users and only once per device/install.
+/// Formats the current local date as 'yyyy-MM-dd' for daily tracking.
+String getTodayDateString() {
+  final now = DateTime.now();
+  return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+}
+
+/// Checks if the e-paper popup should be shown today.
+/// Displays once per day on the first app open of each day (not for Malayalam).
 Future<bool> shouldShowEpaperFirstOpenDialog() async {
   try {
     final prefs = await SharedPreferences.getInstance();
-    final bool alreadyShown = prefs.getBool(kFirstOpenEpaperPopupShownKey) ?? false;
-    if (alreadyShown) return false;
+    final todayStr = getTodayDateString();
+    final String? lastShownDate = prefs.getString(kLastEpaperPopupShownDateKey);
+
+    // If already shown today, do not show again today
+    if (lastShownDate == todayStr) {
+      return false;
+    }
 
     final String langCode = prefs.getString("selectedLanguageCode") ??
         prefs.getString("selectedLanguage") ??
@@ -34,8 +43,19 @@ Future<bool> shouldShowEpaperFirstOpenDialog() async {
   }
 }
 
-/// Helper function to display the dialog.
+/// Marks the e-paper popup as shown for today.
+Future<void> markEpaperPopupShownToday() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    final todayStr = getTodayDateString();
+    await prefs.setString(kLastEpaperPopupShownDateKey, todayStr);
+    await prefs.setBool(kFirstOpenEpaperPopupShownKey, true);
+  } catch (_) {}
+}
+
+/// Helper function to display the dialog and record today's date.
 Future<void> showEpaperFirstOpenDialog(BuildContext context) async {
+  markEpaperPopupShownToday();
   return showDialog<void>(
     context: context,
     barrierDismissible: true,
@@ -58,7 +78,6 @@ class _EpaperFirstOpenDialogState extends State<EpaperFirstOpenDialog>
   late AnimationController _animController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _floatingAnimation;
-  String _selectedLanguage = 'te';
   bool _isOpeningEpaper = false;
 
   @override
@@ -98,83 +117,19 @@ class _EpaperFirstOpenDialogState extends State<EpaperFirstOpenDialog>
     super.dispose();
   }
 
-  Future<void> _openTodayEpaper() async {
+  void _openTodayEpaper() {
     if (_isOpeningEpaper) return;
-    setState(() {
-      _isOpeningEpaper = true;
-    });
+    _isOpeningEpaper = true;
 
-    final epaperProvider = context.read<EpaperProvider>();
-
-    // Close the dialog first
+    // Immediately close the dialog
     Navigator.of(context).pop();
 
-    try {
-      if (epaperProvider.allEpapers.isEmpty) {
-        await epaperProvider.fetchEpapers();
-      }
-
-      final todayStr = DateTime.now().toIso8601String().split('T')[0];
-
-      // Find the most appropriate e-paper for the selected language & date
-      Map<String, dynamic>? targetEpaper;
-
-      if (epaperProvider.allEpapers.isNotEmpty) {
-        // 1. Try matching language and today's date
-        try {
-          targetEpaper = epaperProvider.allEpapers.firstWhere(
-            (e) {
-              final lang = (e['language'] ?? 'te').toString().toLowerCase();
-              final pDate = (e['publishDate'] ?? '').toString();
-              return lang == _selectedLanguage && pDate.startsWith(todayStr);
-            },
-          ) as Map<String, dynamic>?;
-        } catch (_) {}
-
-        // 2. Try matching today's date regardless of language
-        if (targetEpaper == null) {
-          try {
-            targetEpaper = epaperProvider.allEpapers.firstWhere(
-              (e) => (e['publishDate'] ?? '').toString().startsWith(todayStr),
-            ) as Map<String, dynamic>?;
-          } catch (_) {}
-        }
-
-        // 3. Try matching language regardless of date
-        if (targetEpaper == null) {
-          try {
-            targetEpaper = epaperProvider.allEpapers.firstWhere(
-              (e) => (e['language'] ?? 'te').toString().toLowerCase() == _selectedLanguage,
-            ) as Map<String, dynamic>?;
-          } catch (_) {}
-        }
-
-        // 4. Fallback to first available e-paper
-        targetEpaper ??= epaperProvider.allEpapers.first as Map<String, dynamic>?;
-      }
-
-      if (targetEpaper != null) {
-        mainNavigatorKey.currentState?.push(
-          MaterialPageRoute(
-            builder: (context) => EpaperDetailScreen(epaper: targetEpaper!),
-          ),
-        );
-      } else {
-        // Fallback to epaper listing screen if no items found
-        mainNavigatorKey.currentState?.push(
-          MaterialPageRoute(
-            builder: (context) => const EpaperScreen(),
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint("Error opening today e-paper: $e");
-      mainNavigatorKey.currentState?.push(
-        MaterialPageRoute(
-          builder: (context) => const EpaperScreen(),
-        ),
-      );
-    }
+    // Immediately navigate to the e-paper section
+    mainNavigatorKey.currentState?.push(
+      MaterialPageRoute(
+        builder: (context) => const EpaperScreen(),
+      ),
+    );
   }
 
   @override
@@ -348,89 +303,6 @@ class _EpaperFirstOpenDialogState extends State<EpaperFirstOpenDialog>
                       color: const Color(0xFFD1D5DB),
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
-                    ),
-                  ),
-
-                  SizedBox(height: 16.h),
-
-                  // Language Toggle Switcher [ తెలుగు | English ]
-                  Container(
-                    padding: EdgeInsets.all(4.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF16161D),
-                      borderRadius: BorderRadius.circular(24.r),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.14),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Telugu Pill
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            setState(() {
-                              _selectedLanguage = 'te';
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 7.h),
-                            decoration: BoxDecoration(
-                              color: _selectedLanguage == 'te'
-                                  ? const Color(0xFFE50914)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(20.r),
-                            ),
-                            child: Text(
-                              "తెలుగు",
-                              style: TextStyle(
-                                color: _selectedLanguage == 'te'
-                                    ? Colors.white
-                                    : const Color(0xFF94A3B8),
-                                fontSize: 13.sp,
-                                fontWeight: _selectedLanguage == 'te'
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-
-                        // English Pill
-                        GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {
-                            setState(() {
-                              _selectedLanguage = 'en';
-                            });
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 7.h),
-                            decoration: BoxDecoration(
-                              color: _selectedLanguage == 'en'
-                                  ? const Color(0xFFE50914)
-                                  : Colors.transparent,
-                              borderRadius: BorderRadius.circular(20.r),
-                            ),
-                            child: Text(
-                              "English",
-                              style: TextStyle(
-                                color: _selectedLanguage == 'en'
-                                    ? Colors.white
-                                    : const Color(0xFF94A3B8),
-                                fontSize: 13.sp,
-                                fontWeight: _selectedLanguage == 'en'
-                                    ? FontWeight.w700
-                                    : FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
                   ),
 

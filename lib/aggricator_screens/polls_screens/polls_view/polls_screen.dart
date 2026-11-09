@@ -1,928 +1,857 @@
 import 'dart:developer';
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chotanews/aggricator_screens/polls_screens/poll_provider.dart';
-import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_comments.dart';
-import 'package:chotanews/utils/app_loading_screen.dart';
+import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
+import 'package:chotanews/features/auth/presentation/widgets/login_background_view.dart';
+import 'package:chotanews/utils/app_enums.dart';
+import 'package:chotanews/utils/app_toasts.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
-import 'package:screenshot/screenshot.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../services/webengage_event_tracks.dart';
-import '../../../utils/app_colors.dart';
-import '../../../utils/app_fonts.dart';
-import '../../../utils/app_spaces.dart';
-import '../../../utils/app_toasts.dart';
-import '../../../utils/date_format.dart';
-import '../../events_data/event_repo.dart';
 
 class PollScreenDesign extends StatefulWidget {
   final dynamic artical;
-  final int? index; // Changed to dynamic since the type isn't specified
-  const PollScreenDesign({super.key, required this.artical, required this.index});
+  final int? index;
+  final bool showTopBar;
+
+  const PollScreenDesign({
+    super.key,
+    required this.artical,
+    required this.index,
+    this.showTopBar = false,
+  });
 
   @override
   State<PollScreenDesign> createState() => _PollScreenDesignState();
 }
 
 class _PollScreenDesignState extends State<PollScreenDesign> {
-  ScreenshotController adsScreenshotController = ScreenshotController();
+  bool _isSubmittingVote = false;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPendingVote();
+      final pollProvider = context.read<PollProvider>();
+      pollProvider.commentController.text = "";
+      pollProvider.addData(widget.artical);
 
-    context.read<PollProvider>().commentController.text = "";
-    context.read<PollProvider>().addData(widget.artical);
+      final rawId = widget.artical is Map
+          ? (widget.artical['id'] ?? widget.artical['post_id'])
+          : null;
+      final intPostId = int.tryParse(rawId?.toString() ?? '0') ?? 0;
+      if (intPostId > 0) {
+        pollProvider.fetchLivePollResults(intPostId);
+      }
+    });
+  }
+
+  Future<void> _checkPendingVote() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      if (sp.getString("loginType") == "login") {
+        final pendingPollId = sp.getInt('pending_poll_id');
+        final pendingOptId = sp.getInt('pending_poll_opt_id');
+        final pendingTitle = sp.getString('pending_poll_title') ?? '';
+        final currentId = int.tryParse(
+                (widget.artical is Map ? (widget.artical['id'] ?? widget.artical['post_id']) : 0)
+                    .toString()) ??
+            0;
+
+        if (pendingPollId != null && pendingPollId == currentId && pendingOptId != null) {
+          await sp.remove('pending_poll_id');
+          await sp.remove('pending_poll_opt_id');
+          await sp.remove('pending_poll_title');
+          if (mounted) {
+            final articleMap = (widget.artical is Map)
+                ? Map<String, dynamic>.from(widget.artical)
+                : <String, dynamic>{};
+            await _executeVote(pendingOptId, articleMap, pendingTitle);
+          }
+        }
+      }
+    } catch (e) {
+      log("Error checking pending vote: $e");
+    }
+  }
+
+  Future<void> _handleOptionTap({
+    required int optId,
+    required Map<String, dynamic> article,
+    required String title,
+    required bool hasVoted,
+  }) async {
+    if (hasVoted || _isSubmittingVote) {
+      if (hasVoted) {
+        CustomToast.showInfoToast(msg: "మీరు ఇప్పటికే ఓటు వేశారు!");
+      }
+      return;
+    }
+
+    final sp = await SharedPreferences.getInstance();
+    final bool isGuest = sp.getString("loginType") != "login";
+
+    if (isGuest) {
+      if (!mounted) return;
+      _showLoginDialog(
+        optId: optId,
+        article: article,
+        title: title,
+      );
+      return;
+    }
+
+    await _executeVote(optId, article, title);
+  }
+
+  Future<void> _executeVote(int optId, Map<String, dynamic> article, String title) async {
+    if (_isSubmittingVote) return;
+    setState(() {
+      _isSubmittingVote = true;
+    });
+
+    final pollProvider = context.read<PollProvider>();
+    final rawId = article['id'] ?? article['post_id'] ?? 888801;
+    final int pId = int.tryParse(rawId.toString()) ?? 0;
+
+    pollProvider.setTempSelectedOptionId(optId);
+
+    try {
+      await pollProvider.submitPolls(
+        rawId,
+        0,
+        optId,
+        title,
+        onSuccess: () {
+          if (pId > 0) {
+            pollProvider.fetchLivePollResults(pId);
+          }
+        },
+      );
+    } catch (e) {
+      log("Error executing poll vote: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmittingVote = false;
+        });
+      }
+    }
+  }
+
+  void _showLoginDialog({
+    required int optId,
+    required Map<String, dynamic> article,
+    required String title,
+  }) {
+    showDialog(
+      context: context,
+      builder: (dialogCtx) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1E2024),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18.r),
+          ),
+          contentPadding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 16.h),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 50.r,
+                height: 50.r,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE50914).withValues(alpha: 0.15),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.how_to_vote_rounded,
+                  color: const Color(0xFFE50914),
+                  size: 26.sp,
+                ),
+              ),
+              SizedBox(height: 14.h),
+              Text(
+                "లాగిన్ అవ్వండి",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              Text(
+                "ఓటు వేయడానికి మరియు ఫలితాలను చూడటానికి దయచేసి మీ మొబైల్ నంబర్‌తో లాగిన్ అవ్వండి.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: const Color(0xFF94A3B8),
+                  fontSize: 13.5.sp,
+                  height: 1.4,
+                ),
+              ),
+              SizedBox(height: 20.h),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.25),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 11.h),
+                      ),
+                      onPressed: () => Navigator.pop(dialogCtx),
+                      child: Text(
+                        "రద్దు",
+                        style: TextStyle(
+                          color: const Color(0xFF94A3B8),
+                          fontSize: 13.5.sp,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 10.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFE50914),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        padding: EdgeInsets.symmetric(vertical: 11.h),
+                        elevation: 0,
+                      ),
+                      onPressed: () async {
+                        Navigator.pop(dialogCtx);
+                        final pId = int.tryParse(
+                                (article['id'] ?? article['post_id'] ?? '')
+                                    .toString()) ??
+                            0;
+                        final sp = await SharedPreferences.getInstance();
+                        await sp.setInt('pending_poll_id', pId);
+                        await sp.setInt('pending_poll_opt_id', optId);
+                        await sp.setString('pending_poll_title', title);
+
+                        if (!mounted) return;
+                        context.read<AuthenticationProvider>().newAppLoginStatus =
+                            NewAppLoginStatus.login;
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const LoginBackgroundView(),
+                          ),
+                        );
+
+                        if (!mounted) return;
+                        final updatedSp = await SharedPreferences.getInstance();
+                        final bool isNowLoggedIn =
+                            updatedSp.getString("loginType") == "login";
+                        if (isNowLoggedIn) {
+                          await updatedSp.remove('pending_poll_id');
+                          await updatedSp.remove('pending_poll_opt_id');
+                          await updatedSp.remove('pending_poll_title');
+                          await _executeVote(optId, article, title);
+                        }
+                      },
+                      child: Text(
+                        "లాగిన్",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 13.5.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant PollScreenDesign oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final oldId = oldWidget.artical is Map ? (oldWidget.artical['id'] ?? oldWidget.artical['post_id']) : null;
+    final newId = widget.artical is Map ? (widget.artical['id'] ?? widget.artical['post_id']) : null;
+    if (newId != null && newId != oldId) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final pollProvider = context.read<PollProvider>();
+        pollProvider.commentController.text = "";
+        pollProvider.addData(widget.artical);
+        final intPostId = int.tryParse(newId.toString()) ?? 0;
+        if (intPostId > 0) {
+          pollProvider.fetchLivePollResults(intPostId);
+        }
+      });
+    }
+  }
+
+  String _getImageUrl(dynamic imageUrl) {
+    if (imageUrl == null || imageUrl.toString().trim().isEmpty) return "";
+    final url = imageUrl.toString();
+    if (url.startsWith('http')) return url;
+    if (url.startsWith('/')) return "https://migwp.chotanews.com$url";
+    return "https://migwp.chotanews.com/$url";
   }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PollProvider>(builder: (_, pollProvider, __) {
-      final article = pollProvider.localArticle;
+    return Consumer<PollProvider>(
+      builder: (context, pollProvider, _) {
+        final currentArticleMap = (widget.artical is Map)
+            ? Map<String, dynamic>.from(widget.artical)
+            : <String, dynamic>{};
+        final currentPostId = currentArticleMap['id'] ?? currentArticleMap['post_id'];
+        final bool isSameArticleAsLocal = pollProvider.localArticle.isNotEmpty &&
+            currentPostId != null &&
+            (pollProvider.localArticle['id'] == currentPostId ||
+             pollProvider.localArticle['post_id'] == currentPostId);
 
-      final pollData = article['pollData'];
+        final article = isSameArticleAsLocal
+            ? pollProvider.localArticle
+            : currentArticleMap;
 
-      if (article == null || pollData == null) {
-        return AppLoadingScreen();
-      }
+        final pollData = (article['pollData'] is Map)
+            ? Map<String, dynamic>.from(article['pollData'])
+            : (article['poll_data'] is Map)
+                ? Map<String, dynamic>.from(article['poll_data'])
+                : <String, dynamic>{};
 
-      final hasVoted = pollData['userHasVoted'] == true;
+        final String title = (article['title'] ??
+                pollData['title'] ??
+                "")
+            .toString();
 
-      return Screenshot(
-        controller: adsScreenshotController,
-        child: hasVoted ? _buildResultsView(pollProvider, adsScreenshotController) : _buildVotingView(pollProvider, adsScreenshotController),
-      );
-    });
-  }
+        final String category = (article['category'] ??
+                article['categoryName'] ??
+                "")
+            .toString();
 
-  Widget _buildVotingView(PollProvider pollProvider, ScreenshotController adsScreenshotController) {
-    final options = pollProvider.localArticle['pollData']['options'] as List;
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: CachedNetworkImage(
-            imageUrl: pollProvider.localArticle['image_url'] ?? "",
-            fit: BoxFit.fill,
-            placeholder: (context, url) => Container(color: AppColors.borderColor.withValues(alpha: .2)),
-            errorWidget: (context, url, error) => Center(child: Icon(Icons.image, size: 80, color: Colors.grey.shade300)),
-          ),
-        ),
-        Positioned(
-          top: 9,
-          right: 5,
-          child: Padding(
-            padding: EdgeInsets.only(top: 8, right: 12),
-            child: Container(
-              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.9), shape: BoxShape.circle),
-              child: IconButton(
-                icon: Icon(Icons.ios_share_outlined, color: Colors.white, size: 22),
-                onPressed: () async {
-                  SharedPreferences sp = await SharedPreferences.getInstance();
-                  String? userId = sp.getString("userId");
+        final String dateStr =
+            (article['created_at'] ?? article['date'] ?? "").toString();
 
-                  sendShareDetails(userId, pollProvider.localArticle['id'], pollProvider.localArticle['content'].toString());
+        final String remainingTime =
+            (article['remaining_time'] ?? "").toString();
 
-                  if (pollProvider.localArticle['type'] == "Standard" || pollProvider.localArticle['type'] == "Video" || pollProvider.localArticle['type'] == "Image") {
-                    try {
-                      final image = await adsScreenshotController.capture(
-                        pixelRatio: 2.0,
-                      );
-                      if (image != null) {
-                        final directory = await getTemporaryDirectory();
-                        final imagePath = '${directory.path}/${pollProvider.localArticle['id']}.png';
-                        final imageFile = File(imagePath);
-                        await imageFile.writeAsBytes(image);
+        final String description = (article['content'] ??
+                article['description'] ??
+                "")
+            .toString();
 
-                        Share.shareXFiles([XFile(imageFile.path)], text: pollProvider.localArticle['linkURLAndroid'].toString());
-                      } else {
-                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                      }
-                    } catch (e) {
-                      log("Error sharing: $e");
-                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                    }
-                  }
-                  EventRepo().addEvent(
-                      {"share": "news", "postId": pollProvider.localArticle['id'].toString(), "createAt": DateTime.now().toString(), "postTitle": pollProvider.localArticle['title'].toString()},
-                      "shared_article");
-                },
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Padding(
-            padding: const EdgeInsets.only(right: 15.0, left: 15.0, bottom: 15.0),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 12, horizontal: 6),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: LinearGradient(
-                  colors: [Colors.black.withValues(alpha: .4), Colors.black],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Text(
-                      pollProvider.localArticle['title'],
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
+        final String imageUrl = _getImageUrl(article['image_url'] ?? article['imageUrl']);
+
+        final List rawOpts = (pollData['options'] is List &&
+                (pollData['options'] as List).isNotEmpty)
+            ? (pollData['options'] as List)
+            : (article['poll_options'] is List &&
+                    (article['poll_options'] as List).isNotEmpty)
+                ? (article['poll_options'] as List)
+                : (article['options'] is List &&
+                        (article['options'] as List).isNotEmpty)
+                    ? (article['options'] as List)
+                    : [];
+
+        final List options = rawOpts;
+
+        final bool hasVoted = pollData['userHasVoted'] == true ||
+            pollData['user_has_voted'] == true ||
+            pollProvider.userVotedOptionId != null;
+
+        final int selectedOptionId = pollProvider.tempSelectedOptionId ??
+            pollProvider.userVotedOptionId ??
+            (pollData['userVotedOption'] is num
+                ? (pollData['userVotedOption'] as num).toInt()
+                : (pollData['user_voted_option'] is num
+                    ? (pollData['user_voted_option'] as num).toInt()
+                    : -1));
+
+        final totalVotesVal = article['total_votes_display'] ??
+            pollData['totalVotes'] ??
+            pollData['total_votes'] ??
+            article['total_votes'];
+        final String totalVotesDisplay = totalVotesVal != null && totalVotesVal.toString().isNotEmpty
+            ? (totalVotesVal.toString().contains('ఓటు')
+                ? totalVotesVal.toString()
+                : "$totalVotesVal మంది ఓటు వేశారు")
+            : "";
+
+        return Container(
+          width: double.infinity,
+          height: double.infinity,
+          color: const Color(0xFF0F0F12),
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Background Image
+              if (imageUrl.isNotEmpty)
+                CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder: (_, __) => Container(color: const Color(0xFF16161B)),
+                  errorWidget: (_, __, ___) => Container(
+                    color: const Color(0xFF16161B),
+                    child: const Center(
+                      child: Icon(Icons.poll_rounded, color: Colors.white24, size: 60),
                     ),
                   ),
-                  // SizedBox(
-                  //   height: 60,
-                  //   child: ListView.builder(
-                  //     // shrinkWrap: true,
-                  //     scrollDirection: Axis.horizontal,
-                  //     physics: const NeverScrollableScrollPhysics(),
-                  //     itemCount: options.length,
-                  //     itemBuilder: (context, index) {
-                  //       final option = options[index];
-                  //       final bool isSelected = pollProvider.tempSelectedOptionId == option['id'];
-                  //       return GestureDetector(
-                  //         onTap: () {
-                  //           setState(() {
-                  //             pollProvider.tempSelectedOptionId = option['id'];
-                  //             selectId = index;
-                  //           });
-                  //         },
-                  //         child: Container(
-                  //           margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  //           padding: const EdgeInsets.symmetric(horizontal: 16),
-                  //           decoration: BoxDecoration(
-                  //             color: isSelected ? Colors.blue.withOpacity(0.8) : Colors.grey.shade900,
-                  //             borderRadius: BorderRadius.circular(10),
-                  //             border: Border.all(color: isSelected ? Colors.blue : Colors.grey.shade700),
-                  //           ),
-                  //           // child: Row(
-                  //           //   children: [
-                  //           //     Expanded(
-                  //           //       child: Text(
-                  //           //         option['text'],
-                  //           //         style: TextStyle(
-                  //           //           color: isSelected ? Colors.black : Colors.white,
-                  //           //           fontWeight: FontWeight.w600,
-                  //           //         ),
-                  //           //       ),
-                  //           //     ),
-                  //           //     // if (isSelected) const Icon(Icons.check_circle, color: Colors.black),
-                  //           //   ],
-                  //           // ),
-                  //           child: Center(
-                  //             child: Text(
-                  //               option['text'],
-                  //               textAlign: TextAlign.center,
-                  //               style: TextStyle(
-                  //                 color: isSelected ? Colors.black : Colors.white,
-                  //                 fontWeight: FontWeight.w600,
-                  //               ),
-                  //             ),
-                  //           ),
-                  //         ),
-                  //       );
-                  //     },
-                  //   ),
-                  // ),
-              SizedBox(
-                height: 40,
-                child: Row(
-                  children: options.map((option,) {
-                    final bool isSelected = pollProvider.tempSelectedOptionId == option['id'];
-
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          pollProvider.setTempSelectedOptionId(option['id']);
-                        },
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 8),
-                          padding: const EdgeInsets.symmetric(vertical: 8),
-                          decoration: BoxDecoration(
-                            color: isSelected ? Colors.blue.withValues(alpha: 0.8) : Colors.white,
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isSelected ? Colors.blue : Colors.grey.shade700,
-                            ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.only(left: 8),
-                            child: Text(
-                              option['text'],
-                              style: TextStyle(
-                                color: isSelected ? Colors.white : Colors.black,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  }).toList(),
                 ),
-              ),
 
-
-              // const SizedBox(height: 12),
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  //   child: SizedBox(
-                  //     width: double.infinity,
-                  //     height: 46,
-                  //     child: ElevatedButton(
-                  //       onPressed: pollProvider.tempSelectedOptionId == null
-                  //           ? null
-                  //           : () async {
-                  //               pollProvider.submitPolls(widget.artical['id'], selectId!, pollProvider.tempSelectedOptionId);
-                  //             },
-                  //       style: ElevatedButton.styleFrom(
-                  //         backgroundColor: Colors.lightBlue,
-                  //         disabledBackgroundColor: Colors.grey.shade800,
-                  //         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  //       ),
-                  //       child: const Text("Submit", style: TextStyle(color: Colors.white)),
-                  //     ),
-                  //   ),
-                  // ),
-                  height(height: 12),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: SizedBox(
-                            height: 40,
-                            child: TextFormField(
-                              controller: pollProvider.commentController,
-                              style: fontStyle(fontSize: 14, color: Colors.black),
-                              decoration: InputDecoration(
-                                hintText: "Type your comment here (optional)",
-                                hintStyle: fontStyle(color: Colors.black),
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        InkWell(
-                          onTap: pollProvider.tempSelectedOptionId != null
-                              ? () async {
-                            SharedPreferences sp = await SharedPreferences.getInstance();
-                            bool isLogin = sp.getString("loginType") != "login" ? true : false;
-
-                            if (isLogin) {
-                              CustomToast.showErrorToast(msg: "Your a guest user, Please login to submit poll");
-                            } else {
-                              pollProvider.submitPolls(
-                                pollProvider.localArticle['id'] ?? 0, // Using 0 as default id if null
-                                0, // unused index
-                                pollProvider.tempSelectedOptionId,
-                                pollProvider.localArticle['title'] ?? " ",
-                              );
-                            }
-                          }
-                              : null,
-                          child: Icon(Icons.send, color: Colors.blue),
-                        )
+              // Gradient Overlay (Dark cinematic fade)
+              Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withValues(alpha: 0.6),
+                        Colors.transparent,
+                        Colors.black.withValues(alpha: 0.75),
+                        const Color(0xFF0F0F12).withValues(alpha: 0.95),
+                        const Color(0xFF0F0F12),
                       ],
+                      stops: const [0.0, 0.25, 0.50, 0.75, 1.0],
                     ),
                   ),
-                  // height(height: 12),
-                  // Padding(
-                  //   padding: const EdgeInsets.symmetric(horizontal: 10),
-                  //   child: SizedBox(
-                  //     width: double.infinity,
-                  //     height: 46,
-                  //     child: InkWell(
-                  //       onTap: pollProvider.tempSelectedOptionId != null
-                  //           ? () async {
-                  //               SharedPreferences sp = await SharedPreferences.getInstance();
-                  //               bool isLogin = sp.getString("loginType") != "login" ? true : false;
-                  //
-                  //               if (isLogin) {
-                  //                 CustomToast.showErrorToast(msg: "Your a guest user, Please login to submit poll");
-                  //               } else {
-                  //                 pollProvider.submitPolls(
-                  //                   pollProvider.localArticle['id'],
-                  //                   selectId!,
-                  //                   pollProvider.localArticle['pollData']['options'][selectId]['id'],
-                  //                   pollProvider.localArticle['title'],
-                  //                 );
-                  //               }
-                  //             }
-                  //           : null,
-                  //       child: Container(
-                  //         alignment: Alignment.center,
-                  //         decoration: BoxDecoration(
-                  //           color: pollProvider.tempSelectedOptionId != null ? Colors.lightBlue : Colors.grey.shade800,
-                  //           borderRadius: BorderRadius.circular(8),
-                  //         ),
-                  //         child: Text("Submit", style: fontStyle(color: Colors.white)),
-                  //       ),
-                  //     ),
-                  //   ),
-                  // ),
-                  if (pollProvider.localArticle['topComments'].isNotEmpty) ...[
-                    height(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        children: [
-                          Text("Top Comments", style: fontStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                          Spacer(),
-                          InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PollsComments(postId: pollProvider.localArticle['id'].toString()),
-                                  ),
-                                );
-                              },
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PollsComments(postId: pollProvider.localArticle['id'].toString()),
-                                    ),
-                                  );
-                                },
-                                child: Text(
-                                  "More >",
-                                  style: fontStyle(
-                                    color: Colors.lightBlue,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              )),
-                        ],
-                      ),
-                    ),
-                    height(height: 6),
-                    if (pollProvider.localArticle['topComments'].isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(left: 10),
-                          child: SizedBox(
-                            height: 70,
-                            child: ListView.builder(
-                              scrollDirection: Axis.horizontal,
-                              itemCount: pollProvider.localArticle['topComments'].length,
-                              itemBuilder: (context, index) {
-                                final comment = pollProvider.localArticle['topComments'][index];
-                                return Container(
-                                  width: MediaQuery.of(context).size.width - 80,
-                                  margin: const EdgeInsets.only(right: 8),
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: .5),
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey),
-                                  ),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(Icons.account_circle, size: 40),
-                                      const SizedBox(width: 8),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              comment["userName"] ?? "",
-                                              style: fontStyle(
-                                                fontWeight: FontWeight.w600,
-                                                fontSize: 12,
-                                              ),
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                            const SizedBox(height: 5),
-                                            Text(
-                                              comment["comment"] ?? "",
-                                              style: fontStyle(fontSize: 13, color: Colors.black),
-                                              maxLines: 2,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(width: 5),
-                                      Align(
-                                        alignment: Alignment.centerRight,
-                                        child: Text(
-                                          " ${formatTimeDifference(comment["createdAt"].toString())}",
-                                          style: fontStyle(color: Colors.black, fontSize: 11),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                      ),
-                  ],
-                  if (widget.index == 0) height(height: 60),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildResultsView(PollProvider pollProvider, ScreenshotController adsScreenshotController) {
-    final options = pollProvider.localArticle['pollData']['options'] as List;
-    return Stack(
-      children: [
-        Positioned.fill(
-          child: CachedNetworkImage(
-            imageUrl: pollProvider.localArticle['image_url'] ?? "",
-            fit: BoxFit.fill,
-            placeholder: (context, url) => Container(color: AppColors.borderColor.withValues(alpha: .2)),
-            errorWidget: (context, url, error) => Center(child: Icon(Icons.image, size: 80, color: Colors.grey.shade300)),
-          ),
-        ),
-        Positioned(
-          top: 9,
-          right: 5,
-          child: Padding(
-            padding: EdgeInsets.only(top: 8, right: 12),
-            child: Container(
-              decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.9), shape: BoxShape.circle),
-              child: IconButton(
-                icon: Icon(Icons.ios_share_outlined, color: Colors.white, size: 22),
-                onPressed: () async {
-                  SharedPreferences sp = await SharedPreferences.getInstance();
-                  String? userId = sp.getString("userId");
-
-                  sendShareDetails(userId, pollProvider.localArticle['id'], pollProvider.localArticle['content'].toString());
-
-                  if (pollProvider.localArticle['type'] == "Standard" || pollProvider.localArticle['type'] == "Video" || pollProvider.localArticle['type'] == "Image") {
-                    try {
-                      final image = await adsScreenshotController.capture(
-                        pixelRatio: 2.0,
-                      );
-                      if (image != null) {
-                        final directory = await getTemporaryDirectory();
-                        final imagePath = '${directory.path}/${pollProvider.localArticle['id']}.png';
-                        final imageFile = File(imagePath);
-                        await imageFile.writeAsBytes(image);
-
-                        Share.shareXFiles([XFile(imageFile.path)], text: pollProvider.localArticle['linkURLAndroid'].toString());
-                      } else {
-                        CustomToast.showErrorToast(msg: "Failed to capture screenshot.123");
-                      }
-                    } catch (e) {
-                      log("Error sharing: $e");
-                      CustomToast.showErrorToast(msg: "Failed to capture screenshot.");
-                    }
-                  }
-                  EventRepo().addEvent(
-                      {"share": "news", "postId": pollProvider.localArticle['id'].toString(), "createAt": DateTime.now().toString(), "postTitle": pollProvider.localArticle['title'].toString()},
-                      "shared_article");
-                },
-              ),
-            ),
-          ),
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          child: Padding(
-            padding: EdgeInsets.only(right: 15.0, left: 15.0, bottom: 15.0),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                gradient: LinearGradient(
-                  colors: [Colors.black.withValues(alpha: .4), Colors.black],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
                 ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    child: Text(
-                      pollProvider.localArticle['title'],
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  // ListView.builder(
-                  //   shrinkWrap: true,
-                  //   physics: const NeverScrollableScrollPhysics(),
-                  //   // scrollDirection: Axis.horizontal
-                  //   itemCount: options.length,
-                  //   scrollDirection: Axis.vertical,
-                  //   itemBuilder: (context, index) {
-                  //     final option = options[index];
-                  //     final double percentage = (option['percentage'] ?? 0.0).toDouble();
-                  //     final bool isVotedOption = option['id'] == pollProvider.userVotedOptionId;
-                  //
-                  //     return Container(
-                  //       height: 50,
-                  //       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                  //       decoration: BoxDecoration(
-                  //         borderRadius: BorderRadius.circular(10),
-                  //         color: isVotedOption ? Colors.blue : Colors.black
-                  //           ..withOpacity(.1),
-                  //         border: Border.all(
-                  //           color: isVotedOption ? Colors.blue : Colors.grey.shade700,
-                  //           width: isVotedOption ? 2.0 : 1.0,
-                  //         ),
-                  //       ),
-                  //       child: Stack(
-                  //         alignment: Alignment.centerLeft,
-                  //         children: [
-                  //           FractionallySizedBox(
-                  //             widthFactor: percentage / 100,
-                  //             child: Container(
-                  //               decoration: BoxDecoration(
-                  //                 color: Colors.blue,
-                  //                 borderRadius: BorderRadius.circular(8),
-                  //               ),
-                  //             ),
-                  //           ),
-                  //           Padding(
-                  //             padding: const EdgeInsets.symmetric(horizontal: 16),
-                  //             child: Row(
-                  //               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  //               children: [
-                  //                 Text(
-                  //                   option['text'],
-                  //                   style: TextStyle(
-                  //                     color: Colors.white,
-                  //                     fontWeight: isVotedOption ? FontWeight.bold : FontWeight.normal,
-                  //                   ),
-                  //                 ),
-                  //                 Row(
-                  //                   children: [
-                  //                     Text(
-                  //                       "${percentage.toStringAsFixed(1)}%",
-                  //                       style: TextStyle(
-                  //                         color: Colors.white,
-                  //                         fontWeight: isVotedOption ? FontWeight.bold : FontWeight.normal,
-                  //                       ),
-                  //                     ),
-                  //                     // if (isVotedOption) const SizedBox(width: 8),
-                  //                     // if (isVotedOption)
-                  //                     //   const Icon(Icons.check_circle_outline, color: Colors.white, size: 20),
-                  //                   ],
-                  //                 ),
-                  //               ],
-                  //             ),
-                  //           ),
-                  //         ],
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
-              SizedBox(
-                height: 50,
-                child: Row(
-                  children: options.map((option) {
-                    final bool isVotedOption = option['id'] == pollProvider.userVotedOptionId;
-                    final double percentage = ((option['percentage'] ?? 0.0).toDouble()).clamp(0.0, 100.0);
-                    return Expanded(
-                      child: GestureDetector(
-                        onTap: () {
-                          pollProvider.setTempSelectedOptionId(option['id']);
-                        },
-                        child: Container(
-                          height: 50,
-                          margin: const EdgeInsets.symmetric(horizontal: 6),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isVotedOption ? Colors.blue : Colors.grey.shade700,
-                              width: 1.0,
-                            ),
-                            color: Colors.white,
-                          ),
-                          child: Stack(
-                            alignment: Alignment.centerLeft,
-                            children: [
-                              FractionallySizedBox(
-                                widthFactor: percentage / 100,
-                                alignment: Alignment.centerLeft,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.withValues(alpha: 0.6),
-                                    borderRadius: BorderRadius.circular(8),
+
+              // Content Area
+              SafeArea(
+                bottom: true,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 10.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      // Top Bar (if standalone screen)
+                      if (widget.showTopBar) ...[
+                        Row(
+                          children: [
+                            InkWell(
+                              onTap: () => Navigator.maybePop(context),
+                              borderRadius: BorderRadius.circular(20),
+                              child: Container(
+                                padding: EdgeInsets.all(6.w),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withValues(alpha: 0.5),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.25),
+                                    width: 1,
                                   ),
                                 ),
+                                child: Icon(
+                                  Icons.arrow_back_ios_new_rounded,
+                                  color: Colors.white,
+                                  size: 16.sp,
+                                ),
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 8),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        option['text'],
-                                        style: TextStyle(
-                                          color: isVotedOption ? Colors.blue : Colors.black,
-                                          fontWeight: FontWeight.w600,
-                                          overflow: TextOverflow.ellipsis,
+                            ),
+                            SizedBox(width: 8.w),
+                            Container(
+                              padding:
+                                  EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE50914),
+                                borderRadius: BorderRadius.circular(4.r),
+                              ),
+                              child: Text(
+                                "BIG TV",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w900,
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              "|",
+                              style: TextStyle(
+                                color: Colors.white38,
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                            SizedBox(width: 8.w),
+                            Expanded(
+                              child: Text(
+                                "పోల్స్",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12.h),
+                      ],
+
+                      // Category Pill (e.g. "రాజకీయాలు")
+                      if (category.isNotEmpty) ...[
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 14.w, vertical: 3.h),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE50914),
+                            borderRadius: BorderRadius.circular(16.r),
+                          ),
+                          child: Text(
+                            category,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11.5.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 8.h),
+                      ],
+
+                      // Poll Question Title
+                      if (title.isNotEmpty) ...[
+                        Text(
+                          title,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 17.5.sp,
+                            fontWeight: FontWeight.w800,
+                            height: 1.32,
+                          ),
+                        ),
+                        SizedBox(height: 6.h),
+                      ],
+
+                      // Date & Remaining Time Row
+                      if (dateStr.isNotEmpty || remainingTime.isNotEmpty) ...[
+                        Row(
+                          children: [
+                            if (dateStr.isNotEmpty) ...[
+                              Icon(
+                                Icons.calendar_today_outlined,
+                                color: const Color(0xFFD1D5DB),
+                                size: 13.sp,
+                              ),
+                              SizedBox(width: 5.w),
+                              Text(
+                                dateStr,
+                                style: TextStyle(
+                                  color: const Color(0xFFD1D5DB),
+                                  fontSize: 11.5.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                            if (dateStr.isNotEmpty && remainingTime.isNotEmpty) ...[
+                              SizedBox(width: 8.w),
+                              Text(
+                                "|",
+                                style: TextStyle(
+                                  color: Colors.white38,
+                                  fontSize: 12.sp,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                            ],
+                            if (remainingTime.isNotEmpty) ...[
+                              Icon(
+                                Icons.timer_outlined,
+                                color: const Color(0xFFD1D5DB),
+                                size: 14.sp,
+                              ),
+                              SizedBox(width: 5.w),
+                              Text(
+                                remainingTime,
+                                style: TextStyle(
+                                  color: const Color(0xFFD1D5DB),
+                                  fontSize: 11.5.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        SizedBox(height: 8.h),
+                      ],
+
+                      // Description
+                      if (description.isNotEmpty) ...[
+                        Text(
+                          description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: const Color(0xFFE5E7EB),
+                            fontSize: 12.5.sp,
+                            height: 1.35,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                      ],
+
+                      // Options List (4 interactive cards)
+                      ...options.map((opt) {
+                        final optionMap = (opt is Map)
+                            ? Map<String, dynamic>.from(opt)
+                            : {'id': 0, 'text': opt.toString()};
+                        final int optId = optionMap['id'] is num
+                            ? (optionMap['id'] as num).toInt()
+                            : int.tryParse(optionMap['id']?.toString() ?? '') ??
+                                (optionMap['option'] is num
+                                    ? (optionMap['option'] as num).toInt()
+                                    : int.tryParse(optionMap['option']?.toString() ?? '') ?? 0);
+                        final String optText =
+                            (optionMap['text'] ?? optionMap['option_name'] ?? optionMap['name'] ?? optionMap['title'] ?? '').toString();
+                        final double percentage =
+                            ((optionMap['percentage'] ?? 0) as num).toDouble();
+                        final bool isSelected = (selectedOptionId == optId) ||
+                            (optionMap['selected'] == true) ||
+                            (pollData['userVotedOption'] == optId) ||
+                            (pollData['user_voted_option'] == optId);
+
+                        return GestureDetector(
+                          onTap: () => _handleOptionTap(
+                            optId: optId,
+                            article: article,
+                            title: title,
+                            hasVoted: hasVoted,
+                          ),
+                          child: Container(
+                            margin: EdgeInsets.only(bottom: 7.h),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 12.w, vertical: 7.5.h),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFFE50914).withValues(alpha: 0.15)
+                                  : const Color(0xFF1E1E24).withValues(alpha: 0.85),
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFFE50914)
+                                    : const Color(0xFF33333E),
+                                width: isSelected ? 1.4 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                // Radio Button Ring
+                                isSelected
+                                    ? Container(
+                                        width: 18.w,
+                                        height: 18.w,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: const Color(0xFFE50914),
+                                            width: 2.2,
+                                          ),
                                         ),
-                                        maxLines: 1,
+                                        child: Center(
+                                          child: Container(
+                                            width: 8.w,
+                                            height: 8.w,
+                                            decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Color(0xFFE50914),
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Container(
+                                        width: 18.w,
+                                        height: 18.w,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: const Color(0xFF9CA3AF),
+                                            width: 1.5,
+                                          ),
+                                        ),
+                                      ),
+                                SizedBox(width: 10.w),
+
+                                // Option Text
+                                Expanded(
+                                  child: Text(
+                                    optText,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12.5.sp,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w500,
+                                    ),
+                                  ),
+                                ),
+
+                                // Progress Bar & Percentage (Revealed only after vote is cast)
+                                if (hasVoted) ...[
+                                  SizedBox(width: 8.w),
+                                  Container(
+                                    width: 85.w,
+                                    height: 6.h,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF374151),
+                                      borderRadius: BorderRadius.circular(3.r),
+                                    ),
+                                    child: Align(
+                                      alignment: Alignment.centerLeft,
+                                      child: Container(
+                                        width: 85.w *
+                                            (percentage / 100.0).clamp(0.0, 1.0),
+                                        decoration: BoxDecoration(
+                                          color: isSelected
+                                              ? const Color(0xFFE50914)
+                                              : const Color(0xFF9CA3AF),
+                                          borderRadius: BorderRadius.circular(3.r),
+                                        ),
                                       ),
                                     ),
-                                    Text(
-                                      "${percentage.toStringAsFixed(1)}%",
+                                  ),
+                                  SizedBox(width: 8.w),
+                                  SizedBox(
+                                    width: 34.w,
+                                    child: Text(
+                                      "${percentage.toInt()}%",
+                                      textAlign: TextAlign.right,
                                       style: TextStyle(
-                                        color: isVotedOption ? Colors.blue : Colors.black,
+                                        color: isSelected
+                                            ? const Color(0xFFE50914)
+                                            : Colors.white,
+                                        fontSize: 12.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ],
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                      SizedBox(height: 6.h),
+
+                      // Footer Votes Row
+                      if (totalVotesDisplay.isNotEmpty) ...[
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.people_outline_rounded,
+                              color: const Color(0xFFE50914),
+                              size: 16.sp,
+                            ),
+                            SizedBox(width: 6.w),
+                            Text(
+                              totalVotesDisplay,
+                              style: TextStyle(
+                                color: const Color(0xFFE5E7EB),
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 10.h),
+                      ],
+
+                      // Post-vote confirmation or in-flight indicator (No separate vote button needed)
+                      if (_isSubmittingVote) ...[
+                        Container(
+                          height: 40.h,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF1E1E24).withValues(alpha: 0.85),
+                            borderRadius: BorderRadius.circular(22.r),
+                            border: Border.all(
+                              color: const Color(0xFFE50914).withValues(alpha: 0.4),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 16.r,
+                                height: 16.r,
+                                child: const CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Color(0xFFE50914),
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Text(
+                                "ఓటు నమోదు చేయబడుతోంది...",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    );
-                  }).toList(),
+                      ] else if (hasVoted) ...[
+                        Container(
+                          height: 40.h,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF10B981).withValues(alpha: 0.16),
+                            borderRadius: BorderRadius.circular(22.r),
+                            border: Border.all(
+                              color: const Color(0xFF10B981).withValues(alpha: 0.5),
+                              width: 1,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.check_circle_rounded,
+                                color: const Color(0xFF10B981),
+                                size: 18.sp,
+                              ),
+                              SizedBox(width: 6.w),
+                              Text(
+                                "ఓటు నమోదు చేయబడింది",
+                                style: TextStyle(
+                                  color: const Color(0xFF10B981),
+                                  fontSize: 13.5.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
-
-              // SizedBox(
-              //   height: 50,
-              //   child: Row(
-              //     children: options.map((option) {
-              //       // final bool isSelected = pollProvider.tempSelectedOptionId == option['id'];
-              //       final bool isVotedOption = option['id'] == pollProvider.userVotedOptionId;
-              //       final double percentage = (option['percentage'] ?? 0.0).toDouble();
-              //
-              //       return Expanded(
-              //         child: GestureDetector(
-              //           onTap: () {
-              //             setState(() {
-              //               pollProvider.tempSelectedOptionId = option['id'];
-              //             });
-              //           },
-              //           child: Container(
-              //             height: 50,
-              //             margin: const EdgeInsets.symmetric(horizontal: 6),
-              //             decoration: BoxDecoration(
-              //               borderRadius: BorderRadius.circular(8),
-              //               border: Border.all(
-              //                 color: isVotedOption ? Colors.blue : Colors.grey.shade700,
-              //                 width: 1.0,
-              //               ),
-              //               color: Colors.white,
-              //             ),
-              //             child: Stack(
-              //               alignment: Alignment.centerLeft,
-              //               children: [
-              //                 if (isVotedOption)
-              //                   FractionallySizedBox(
-              //                     widthFactor: percentage / 100,
-              //                     child: Container(
-              //                       decoration: BoxDecoration(
-              //                         color: Colors.blue.withOpacity(0.6),
-              //                         borderRadius: BorderRadius.circular(8),
-              //                       ),
-              //                     ),
-              //                   ),
-              //
-              //                 Padding(
-              //                   padding: const EdgeInsets.symmetric(horizontal: 8),
-              //                   child: Row(
-              //                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //                     children: [
-              //                       Text(
-              //                         option['text'],
-              //                         style: TextStyle(
-              //                           color: isVotedOption ? Colors.blue : Colors.black,
-              //                           fontWeight: FontWeight.w600,
-              //                         ),
-              //                       ),
-              //                       if (isVotedOption)
-              //                         Text(
-              //                           "${percentage.toStringAsFixed(1)}%",
-              //                           style: TextStyle(
-              //                             color: isVotedOption ? Colors.blue : Colors.black,
-              //                             fontWeight: FontWeight.bold,
-              //                           ),
-              //                         ),
-              //                     ],
-              //                   ),
-              //                 ),
-              //               ],
-              //             ),
-              //           ),
-              //         ),
-              //       );
-              //     }).toList(),
-              //   ),
-              // ),
-
-              if (pollProvider.localArticle['topComments'].isNotEmpty) ...[
-                    height(height: 20),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      child: Row(
-                        children: [
-                          Text("Top Comments", style: fontStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                          Spacer(),
-                          InkWell(
-                              onTap: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => PollsComments(postId: pollProvider.localArticle['id'].toString()),
-                                  ),
-                                );
-                              },
-                              child: InkWell(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => PollsComments(postId: pollProvider.localArticle['id'].toString()),
-                                    ),
-                                  );
-                                },
-                                child: Text(
-                                  "More >",
-                                  style: fontStyle(
-                                    color: Colors.lightBlue,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              )),
-                        ],
-                      ),
-                    ),
-                    height(height: 6),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: SizedBox(
-                        height: 70,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: pollProvider.localArticle['topComments'].length,
-                          itemBuilder: (context, index) {
-                            final comment = pollProvider.localArticle['topComments'][index];
-
-                            return Container(
-                              width: MediaQuery.of(context).size.width - 80,
-                              margin: const EdgeInsets.only(right: 8),
-                              padding: const EdgeInsets.all(10),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: .5),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: Colors.grey),
-                              ),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Icon(Icons.account_circle, size: 40),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          comment["userName"] ?? "",
-                                          style: fontStyle(
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 12,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        const SizedBox(height: 5),
-                                        Text(
-                                          comment["comment"] ?? "",
-                                          style: fontStyle(fontSize: 13, color: Colors.black),
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  Align(
-                                    alignment: Alignment.centerRight,
-                                    child: Text(
-                                      " ${formatTimeDifference(comment["createdAt"].toString())}",
-                                      style: fontStyle(color: Colors.black, fontSize: 11),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
-                      ),
-
-                      // child: SizedBox(
-                      //   height: 67,
-                      //   child: ListView.builder(
-                      //     scrollDirection: Axis.horizontal,
-                      //     itemCount: pollProvider.localArticle['topComments'].length,
-                      //     itemBuilder: (context, index) {
-                      //       final comment = pollProvider.localArticle['topComments'][index];
-                      //       return Container(
-                      //         margin: const EdgeInsets.only(right: 8),
-                      //         width: MediaQuery.of(context).size.width - 40,
-                      //         height: 40,
-                      //         // margin: EdgeInsets.only(right: 8),
-                      //         padding: EdgeInsets.all(10),
-                      //         decoration: BoxDecoration(
-                      //           color: Colors.white.withOpacity(.5),
-                      //           borderRadius: BorderRadius.circular(10),
-                      //           border: Border.all(color: Colors.grey),
-                      //         ),
-                      //         child: Row(
-                      //           crossAxisAlignment: CrossAxisAlignment.start,
-                      //           children: [
-                      //             Icon(Icons.account_circle, size: 40),
-                      //             width(width: 5),
-                      //             Column(
-                      //               children: [
-                      //                 // Icon(Icons.account_circle, size: 40),
-                      //                 // width(width: 5),
-                      //                 Text(comment["userName"] ?? "", style: fontStyle(fontWeight: FontWeight.w600, fontSize: 12)),
-                      //                 height(height: 5.0),
-                      //                 Text(
-                      //                   comment["comment"] ?? "",
-                      //                   style: fontStyle(fontSize: 13, color: Colors.black),
-                      //                   maxLines: 2,
-                      //                   overflow: TextOverflow.ellipsis,
-                      //                 ),
-                      //               ],
-                      //             ),
-                      //             // height(height: 4),
-                      //             // Text(
-                      //             //   comment["comment"] ?? "",
-                      //             //   style: fontStyle(fontSize: 13, color: Colors.black),
-                      //             //   maxLines: 2,
-                      //             //   overflow: TextOverflow.ellipsis,
-                      //             // ),
-                      //             width(width: 120),
-                      //             Center(
-                      //               child: Text(
-                      //                 " ${formatTimeDifference(comment["createdAt"].toString())}",
-                      //                 style: fontStyle(color: Colors.black, fontSize: 11),
-                      //               ),
-                      //             ),
-                      //           ],
-                      //         ),
-                      //       );
-                      //     },
-                      //   ),
-                      // ),
-                    ),
-                  ],
-                  if (widget.index == 0) height(height: 60),
-                ],
-              ),
-            ),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }

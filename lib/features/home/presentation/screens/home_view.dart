@@ -32,12 +32,15 @@ class HomeView extends StatefulWidget {
   State<HomeView> createState() => _HomeViewState();
 }
 
-class _HomeViewState extends State<HomeView> {
+class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
   HomeProvider? homeProvider;
   final ScreenshotController screenshotController = ScreenshotController();
 
+  bool _isCheckingEpaperPopup = false;
+
   @override
   void initState() {
+    WidgetsBinding.instance.addObserver(this);
     homeProvider = Provider.of<HomeProvider>(context, listen: false);
 
     homeProvider?.isHomeScreen = true;
@@ -61,7 +64,16 @@ class _HomeViewState extends State<HomeView> {
     super.initState();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      _checkAndShowFirstOpenEpaperPopup();
+    }
+  }
+
   Future<void> _checkAndShowFirstOpenEpaperPopup() async {
+    if (_isCheckingEpaperPopup) return;
+    _isCheckingEpaperPopup = true;
     try {
       if (homeProvider?.hasPendingDeepLink == true || homeProvider?.isRoutingDeepLink == true) {
         return;
@@ -76,14 +88,13 @@ class _HomeViewState extends State<HomeView> {
       final String langCode = homeProvider?.langCode ?? 'te';
       if (langCode == 'ml') return;
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setBool(kFirstOpenEpaperPopupShownKey, true);
-
       if (mounted) {
-        showEpaperFirstOpenDialog(context);
+        await showEpaperFirstOpenDialog(context);
       }
     } catch (e) {
       debugPrint("Error checking first open epaper popup: $e");
+    } finally {
+      _isCheckingEpaperPopup = false;
     }
   }
 
@@ -109,6 +120,7 @@ class _HomeViewState extends State<HomeView> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     homeProvider?.isHomeScreen = false;
     super.dispose();
   }
@@ -384,6 +396,13 @@ class _HomeViewState extends State<HomeView> {
                 streamUrl: liveData['stream_url'].toString(),
                 channelName: (liveData['channel_name'] ?? "BIGTV").toString(),
                 playbackType: (liveData['playback_type'] ?? "hls").toString(),
+                watchCount: liveData['watch_count'] is num
+                    ? (liveData['watch_count'] as num).toInt()
+                    : int.tryParse(liveData['watch_count']?.toString() ?? ''),
+                formattedWatchCount: liveData['formatted_watch_count']?.toString(),
+                watchCountEnabled: liveData['watch_count_enabled'] == true ||
+                    liveData['watch_count_enabled'] == 1 ||
+                    liveData['watch_count_enabled'] == 'true',
               ),
             ),
           );

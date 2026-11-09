@@ -100,6 +100,9 @@ class HomeProvider extends ChangeNotifier {
 
   Future<void> loadLanguage() async {
     final prefs = await SharedPreferences.getInstance();
+    eventsEnable = prefs.getBool("eventsEnable") ?? true;
+    cricketEnable = prefs.getBool("cricketEnable") ?? true;
+    EventRepo.eventsEnable = eventsEnable;
     final newCode = prefs.getString("selectedLanguageCode") ?? "te";
     final langChanged = langCode != newCode || (postsLanguage != null && postsLanguage != newCode);
     if (langChanged) {
@@ -164,12 +167,25 @@ class HomeProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool webEnable = true;
   bool folkNight = false;
-  bool liveTvVideosEnable = true;
+  bool cricketEnable = true;
+  bool eventsEnable = true;
+  bool bannersEnable = true;
+  bool languageEnable = true;
   bool aiTagEnable = true;
+  bool videosEnable = true;
+  bool epaperEnable = true;
+  bool liveTvVideosEnable = true;
   bool englishLanguageEnable = true;
   bool liveTvCountEnable = true;
+  bool reelsEnable = true;
   bool isLiveTvLoading = false;
+
+  Map<String, dynamic>? currentLiveTvData;
+  int? liveTvWatchCount;
+  String? liveTvFormattedWatchCount;
+  bool liveTvWatchCountEnabled = true;
 
   static const String teluguLiveStreamUrl = "https://api.pravasamedia.com/live/bigtv/index.m3u8";
   static const String malayalamLiveStreamUrl = "https://api.pravasamedia.com/live/bigtv_malayalam/index.m3u8";
@@ -214,6 +230,14 @@ class HomeProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data is Map<String, dynamic>) {
+          currentLiveTvData = data;
+          liveTvWatchCount = data['watch_count'] is num
+              ? (data['watch_count'] as num).toInt()
+              : int.tryParse(data['watch_count']?.toString() ?? '');
+          liveTvFormattedWatchCount = data['formatted_watch_count']?.toString();
+          liveTvWatchCountEnabled = data['watch_count_enabled'] == true ||
+              data['watch_count_enabled'] == 1 ||
+              data['watch_count_enabled'] == 'true';
           return data;
         }
       } else {
@@ -290,13 +314,34 @@ class HomeProvider extends ChangeNotifier {
               return defaultValue;
             }
 
-            folkNight = parseBool(configMap['folkNight'] ?? configMap['folknight'] ?? configMap['folk_night'], defaultValue: false);
-            liveTvVideosEnable = parseBool(configMap['livetvvideos'], defaultValue: true);
+            webEnable = parseBool(configMap['webEnable'], defaultValue: true);
+            folkNight = parseBool(configMap['folkNight'], defaultValue: false);
+            cricketEnable = parseBool(configMap['cricket'], defaultValue: true);
+            eventsEnable = parseBool(configMap['eventsEnable'], defaultValue: true);
+            bannersEnable = parseBool(configMap['bannersEnable'], defaultValue: true);
+            languageEnable = parseBool(configMap['language'], defaultValue: true);
             aiTagEnable = parseBool(configMap['aitag'], defaultValue: true);
+            videosEnable = parseBool(configMap['videos'], defaultValue: true);
+            epaperEnable = parseBool(configMap['epaper'], defaultValue: true);
+            liveTvVideosEnable = parseBool(configMap['livetvvideos'], defaultValue: true);
             englishLanguageEnable = parseBool(configMap['englishLanguage'], defaultValue: true);
             liveTvCountEnable = parseBool(configMap['livetvcount'], defaultValue: true);
+            reelsEnable = parseBool(configMap['reels'], defaultValue: true);
 
-            log("AppConfig updated: folkNight=$folkNight, liveTvVideosEnable=$liveTvVideosEnable, aiTagEnable=$aiTagEnable, englishLanguageEnable=$englishLanguageEnable, liveTvCountEnable=$liveTvCountEnable");
+            EventRepo.eventsEnable = eventsEnable;
+            SharedPreferences.getInstance().then((sp) {
+              sp.setBool('eventsEnable', eventsEnable);
+              sp.setBool('cricketEnable', cricketEnable);
+            }).catchError((_) {});
+
+            log("AppConfig updated: folkNight=$folkNight, cricketEnable=$cricketEnable, eventsEnable=$eventsEnable, liveTvVideosEnable=$liveTvVideosEnable, aiTagEnable=$aiTagEnable, englishLanguageEnable=$englishLanguageEnable, liveTvCountEnable=$liveTvCountEnable");
+
+            if (!cricketEnable) {
+              _removeCricketWebView();
+            } else if (getAllPostList.isNotEmpty && getAllPostList.indexWhere((e) => e is Map && (e['id'] == 777701 || e['type']?.toString().toLowerCase() == 'cricketwebview')) == -1) {
+              _placeCricketWebViewAtThirdPosition();
+            }
+
             notifyListeners();
 
             getAllAiTags();
@@ -478,38 +523,69 @@ class HomeProvider extends ChangeNotifier {
 
   PageController? pageController = PageController();
   String? allPostLastId = "0";
+  bool isLoadingMore = false;
+  bool hasMorePosts = true;
+  List<dynamic> moreFollowTagsList = [];
+  bool isMoreFollowLoading = false;
+
+  Future<void> loadMorePosts() async {
+    if (isLoadingMore || !hasMorePosts || isAiTagDataLoaded) return;
+
+    String? targetPostId = allPostLastId;
+    if (targetPostId == null || targetPostId == "0") {
+      for (int i = getAllPostList.length - 1; i >= 0; i--) {
+        final item = getAllPostList[i];
+        if (item is Map && item['id'] is int && (item['id'] as int) > 0) {
+          targetPostId = item['id'].toString();
+          break;
+        }
+      }
+    }
+
+    if (targetPostId == null || targetPostId == "0") {
+      log("loadMorePosts: No valid last post id found");
+      return;
+    }
+
+    log("loadMorePosts: fetching next batch for postId: $targetPostId");
+    await getAllPost(postIds: targetPostId);
+  }
 
   void scrollListener() {
-    if (pageController!.position.atEdge) {
-      bool isEnd = pageController!.position.pixels != 0;
-      if (isEnd) {
-        log("postId.toString() $postId");
-        if (!isAiTagDataLoaded && allPostLastId != "0") {
-          postId = "0";
-          getAllPost(postIds: allPostLastId ?? "0");
+    if (pageController != null && pageController!.hasClients) {
+      final pos = pageController!.position;
+      if (pos.atEdge && pos.pixels != 0) {
+        if (!isAiTagDataLoaded) {
+          loadMorePosts();
         }
       }
     }
   }
 
   Future<void> getAllPost({String postIds = "0", bool isGetAllPost = false}) async {
-    final context = mainNavigatorKey.currentContext;
-    if (context != null) {
-      context.read<RatingProvider>().ratingsList = [];
-      context.read<RatingProvider>().ratedArticleIds = {};
-      context.read<PollProvider>().clearData();
-    }
+    final bool isPagination = postIds != "0";
 
-    isHomeLoading = true;
-    if (postIds == "0") {
+    if (!isPagination) {
+      final context = mainNavigatorKey.currentContext;
+      if (context != null) {
+        context.read<RatingProvider>().ratingsList = [];
+        context.read<RatingProvider>().ratedArticleIds = {};
+        context.read<PollProvider>().clearData();
+      }
+
+      isHomeLoading = true;
       getAllPostList = [];
       _currentPageIndex = 0;
+      isBookMark = [];
+      isWebView = false;
+      webUrl = "";
+      allPostLastId = "0";
+      hasMorePosts = true;
+    } else {
+      isLoadingMore = true;
+      notifyListeners();
     }
-    isBookMark = [];
 
-    isWebView = false;
-    webUrl = "";
-    allPostLastId = "0";
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String langCode = preferences.getString("selectedLanguageCode") ?? "te";
     postsLanguage = langCode;
@@ -551,41 +627,70 @@ class HomeProvider extends ChangeNotifier {
       List data = [];
       if (responseData is Map) {
          data = responseData['posts'] ?? responseData['data'] ?? [];
-         isWebView = responseData['webView'] ?? false;
-         webUrl = responseData['webUrl'] ?? "";
-         allPostLastId = responseData['lastId']?.toString() ?? "0";
+         if (!isPagination) {
+           isWebView = responseData['webView'] ?? false;
+           webUrl = responseData['webUrl'] ?? "";
+         }
+         final apiLastId = responseData['lastId'];
+         if (apiLastId != null && apiLastId.toString() != "0") {
+           allPostLastId = apiLastId.toString();
+         }
          if (responseData['ads_list'] != null) {
            getImageAdsList.addAll(responseData['ads_list']);
          }
       } else if (responseData is List) {
          data = responseData;
-         // Setup simple pagination continuation if max limit is reached
-         allPostLastId = data.length >= 100 ? "1" : "0";
       }
 
-      // Extract homepost items from response and prepend them to the feed
+      if (data.isEmpty) {
+        hasMorePosts = false;
+        log("No more posts returned from API for postId: $postIds");
+      }
+
+      // Extract homepost items from response and prepend them to the feed (only on initial load)
       List homePosts = [];
-      if (responseData is Map && responseData['homepost'] != null && responseData['homepost'] is List) {
-        homePosts = responseData['homepost'];
-      } else if (data.isNotEmpty && data[0] is Map && data[0]['homepost'] != null && data[0]['homepost'] is List) {
-        final raw = data[0]['homepost'];
-        if (raw is List) {
-          homePosts = raw;
-          // Remove the homepost wrapper element from regular data
-          data = data.sublist(1);
+      if (!isPagination) {
+        if (responseData is Map && responseData['homepost'] != null && responseData['homepost'] is List) {
+          homePosts = responseData['homepost'];
+        } else if (data.isNotEmpty && data[0] is Map && data[0]['homepost'] != null && data[0]['homepost'] is List) {
+          final raw = data[0]['homepost'];
+          if (raw is List) {
+            homePosts = raw;
+            data = data.sublist(1);
+          }
         }
+        log("Extracted homePosts count: ${homePosts.length}");
       }
-      log("Extracted homePosts count: ${homePosts.length}");
 
-      // Extract top-level morefollow items if present
+      // Extract top-level morefollow items if present (only on initial load)
       List moreFollowList = [];
-      if (responseData is Map) {
+      if (!isPagination && responseData is Map) {
         final raw = responseData['morefollow'] ??
             responseData['more_follow'] ??
             responseData['moreFollow'] ??
             responseData['moreFollowTags'];
-        if (raw is List) {
+        if (raw is List && raw.isNotEmpty) {
           moreFollowList = raw;
+          moreFollowTagsList = raw;
+        }
+      }
+
+      // If API didn't return morefollow items in /allposts, fetch them from /morefollow endpoint
+      if (!isPagination && moreFollowList.isEmpty) {
+        if (moreFollowTagsList.isNotEmpty) {
+          moreFollowList = moreFollowTagsList;
+        } else {
+          try {
+            final fetched = await HomeRepo().getMoreFollowTags(queryParams: {
+              if (deviceId != null && deviceId.isNotEmpty) "device_id": deviceId,
+              if (userId > 0) "userId": userId,
+              "lang": langCode,
+            });
+            if (fetched.statusCode == 200 && fetched.data is List && (fetched.data as List).isNotEmpty) {
+              moreFollowList = fetched.data as List;
+              moreFollowTagsList = moreFollowList;
+            }
+          } catch (_) {}
         }
       }
 
@@ -601,7 +706,7 @@ class HomeProvider extends ChangeNotifier {
       }
 
       getAllPostList.addAll(data);
-      log("Print all post ${data}");
+      log("Print all post count after addAll: ${getAllPostList.length}");
       final seenIds = <int>{};
       getAllPostList.retainWhere((e) {
         if (e is! Map) return true;
@@ -645,6 +750,15 @@ class HomeProvider extends ChangeNotifier {
         return seenIds.add(id);
       });
 
+      // Update allPostLastId to the last positive ID in the entire list
+      for (int i = getAllPostList.length - 1; i >= 0; i--) {
+        final item = getAllPostList[i];
+        if (item is Map && item['id'] is int && (item['id'] as int) > 0) {
+          allPostLastId = item['id'].toString();
+          break;
+        }
+      }
+
       // Ensure a morefollow recommendation card exists in the initial feed
       bool hasMoreFollow = getAllPostList.any((e) =>
           e is Map &&
@@ -684,6 +798,24 @@ class HomeProvider extends ChangeNotifier {
         });
       }
 
+      // Place Cricket WebView at the 3rd position (index 2) in initial feed
+      if (postIds == "0") {
+        _extractDynamicReviewsAndPolls(data);
+        if (cricketEnable) {
+          _placeCricketWebViewAtThirdPosition();
+        } else {
+          _removeCricketWebView();
+        }
+        _placeMovieReviewAtThirdPosition();
+        _placePollAtFifthPosition();
+        if (dynamicPolls.isEmpty) {
+          fetchDynamicPolls();
+        }
+        if (dynamicMovieReviews.isEmpty) {
+          fetchDynamicMovieReviews();
+        }
+      }
+
       TranslationService().preloadAllArticles(getAllPostList);
       notifyListeners();
     } on DioException catch (e, st) {
@@ -692,10 +824,392 @@ class HomeProvider extends ChangeNotifier {
       log("Get News Api catch error $e", stackTrace: st);
     } finally {
       isReload = false;
-      isHomeLoading = false;
-      isInitialHomeLoaded = true;
+      if (!isPagination) {
+        isHomeLoading = false;
+        isInitialHomeLoaded = true;
+      } else {
+        isLoadingMore = false;
+      }
       notifyListeners();
     }
+  }
+
+  static const List<Map<String, dynamic>> defaultMovieReviews = [];
+
+  List<Map<String, dynamic>> dynamicMovieReviews = [];
+  bool isMovieReviewsLoading = false;
+
+  void _extractDynamicReviewsAndPolls(List data) {
+    for (var p in data) {
+      if (p is Map) {
+        final map = Map<String, dynamic>.from(p);
+        final subType = map['subType']?.toString().toLowerCase();
+        final type = map['type']?.toString().toLowerCase();
+        final postType = map['post_type']?.toString().toLowerCase();
+
+        if (subType == 'reviews' ||
+            subType == 'moviereview' ||
+            subType == 'moviereviews' ||
+            type == 'reviews' ||
+            type == 'moviereview' ||
+            type == 'moviereviews' ||
+            postType == 'reviews' ||
+            postType == 'moviereview') {
+          if (!dynamicMovieReviews.any((e) => e['id'] == map['id'])) {
+            dynamicMovieReviews.add(map);
+          }
+        } else if (subType == 'polls' ||
+            subType == 'poll' ||
+            type == 'polls' ||
+            type == 'poll' ||
+            postType == 'polls' ||
+            postType == 'poll') {
+          if (!dynamicPolls.any((e) => e['id'] == map['id'])) {
+            dynamicPolls.add(map);
+          }
+        }
+      }
+    }
+  }
+
+  Future<void> fetchDynamicMovieReviews({bool refresh = false}) async {
+    if (isMovieReviewsLoading) return;
+    if (refresh || dynamicMovieReviews.isEmpty) {
+      isMovieReviewsLoading = true;
+      notifyListeners();
+    }
+
+    try {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      String? deviceId = preferences.getString("deviceId");
+      String? userId = preferences.getString("userId");
+
+      final Set<dynamic> addedIds = {};
+      final List<Map<String, dynamic>> gathered = [];
+
+      void addIfReview(dynamic post) {
+        if (post is Map) {
+          final map = Map<String, dynamic>.from(post);
+          final subType = map['subType']?.toString().toLowerCase();
+          final type = map['type']?.toString().toLowerCase();
+          final postType = map['post_type']?.toString().toLowerCase();
+          if (subType == 'reviews' ||
+              subType == 'moviereview' ||
+              subType == 'moviereviews' ||
+              type == 'reviews' ||
+              type == 'moviereview' ||
+              type == 'moviereviews' ||
+              postType == 'reviews' ||
+              postType == 'moviereview') {
+            final id = map['id'];
+            if (id != null && !addedIds.contains(id)) {
+              addedIds.add(id);
+              gathered.add(map);
+            }
+          }
+        }
+      }
+
+      for (var post in getAllPostList) {
+        addIfReview(post);
+      }
+
+      Map<String, dynamic> body = {
+        "device_id": deviceId ?? "",
+        "postId": 0,
+        "subType": "Reviews",
+        "type": "Reviews",
+        "post_type": "reviews",
+        "userId": userId ?? "",
+        "isBigTv": true,
+        "lang": langCode,
+      };
+
+      try {
+        Response response = await HomeRepo().getAllPosts(body);
+        if (response.statusCode == 200 && response.data != null) {
+          List apiPosts = [];
+          if (response.data is Map) {
+            apiPosts = response.data['posts'] ?? response.data['data'] ?? [];
+          } else if (response.data is List) {
+            apiPosts = response.data;
+          }
+          for (var p in apiPosts) {
+            addIfReview(p);
+          }
+        }
+      } catch (e) {
+        log("API review query note: $e");
+      }
+
+      if (gathered.isNotEmpty) {
+        dynamicMovieReviews = gathered;
+        if (!getAllPostList.any((e) => isMovieReviewPost(e))) {
+          _placeMovieReviewAtThirdPosition();
+        }
+      }
+    } catch (e, st) {
+      log("Error fetching dynamic movie reviews: $e -- $st");
+    } finally {
+      isMovieReviewsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  List<Map<String, dynamic>> getAllMovieReviews() {
+    final List<Map<String, dynamic>> reviews = [];
+    final Set<dynamic> addedIds = {};
+
+    // 1. Prioritize dynamic reviews from API
+    for (var post in dynamicMovieReviews) {
+      final id = post['id'];
+      if (id != null && !addedIds.contains(id)) {
+        addedIds.add(id);
+        reviews.add(post);
+      }
+    }
+
+    // 2. Gather any review posts in getAllPostList
+    for (var post in getAllPostList) {
+      if (post is Map) {
+        final map = Map<String, dynamic>.from(post);
+        final subType = map['subType']?.toString().toLowerCase();
+        final type = map['type']?.toString().toLowerCase();
+        final postType = map['post_type']?.toString().toLowerCase();
+        if (subType == 'reviews' ||
+            subType == 'moviereview' ||
+            subType == 'moviereviews' ||
+            type == 'reviews' ||
+            type == 'moviereview' ||
+            type == 'moviereviews' ||
+            postType == 'reviews' ||
+            postType == 'moviereview') {
+          final id = map['id'];
+          if (id != null && !addedIds.contains(id)) {
+            addedIds.add(id);
+            reviews.add(map);
+          }
+        }
+      }
+    }
+
+    return reviews;
+  }
+
+  static const String cricketWebUrl = "https://nikhil0626.github.io/bigtv_cricket-_web/";
+
+  void _removeCricketWebView() {
+    getAllPostList.removeWhere((e) =>
+        e is Map &&
+        (e['id'] == 777701 ||
+            e['type']?.toString().toLowerCase() == 'cricketwebview' ||
+            e['subType']?.toString().toLowerCase() == 'cricketwebview' ||
+            e['post_type']?.toString().toLowerCase() == 'cricketwebview' ||
+            e['webUrl'] == cricketWebUrl ||
+            e['url'] == cricketWebUrl));
+  }
+
+  void _placeCricketWebViewAtThirdPosition() {
+    if (!cricketEnable) {
+      _removeCricketWebView();
+      return;
+    }
+    if (getAllPostList.isEmpty) return;
+
+    // Check and remove any existing cricket webview post to prevent duplicates
+    final existingIdx = getAllPostList.indexWhere((e) =>
+        e is Map &&
+        (e['id'] == 777701 ||
+            e['type']?.toString().toLowerCase() == 'cricketwebview' ||
+            e['subType']?.toString().toLowerCase() == 'cricketwebview' ||
+            e['post_type']?.toString().toLowerCase() == 'cricketwebview' ||
+            e['webUrl'] == cricketWebUrl ||
+            e['url'] == cricketWebUrl));
+
+    Map<String, dynamic> cricketItem;
+    if (existingIdx != -1) {
+      cricketItem = Map<String, dynamic>.from(getAllPostList.removeAt(existingIdx));
+    } else {
+      cricketItem = {
+        'id': 777701,
+        'title': 'BIG TV క్రికెట్ లైవ్ స్కోర్',
+        'type': 'CricketWebView',
+        'subType': 'CricketWebView',
+        'post_type': 'CricketWebView',
+        'webUrl': cricketWebUrl,
+        'url': cricketWebUrl,
+        'isAd': false,
+      };
+    }
+
+    final targetIdx = getAllPostList.length >= 2 ? 2 : getAllPostList.length;
+    getAllPostList.insert(targetIdx, cricketItem);
+  }
+
+  void _placeMovieReviewAtThirdPosition() {
+    if (getAllPostList.isEmpty) return;
+    dynamic reviewItem;
+    final existingReviewIdx = getAllPostList.indexWhere((e) =>
+        e is Map &&
+        (e['type']?.toString().toLowerCase() == 'reviews' ||
+            e['type']?.toString().toLowerCase() == 'moviereview' ||
+            e['subType']?.toString().toLowerCase() == 'reviews' ||
+            e['subType']?.toString().toLowerCase() == 'moviereview' ||
+            e['post_type']?.toString().toLowerCase() == 'reviews' ||
+            e['post_type']?.toString().toLowerCase() == 'moviereview'));
+
+    if (existingReviewIdx != -1) {
+      reviewItem = getAllPostList.removeAt(existingReviewIdx);
+    } else if (dynamicMovieReviews.isNotEmpty) {
+      reviewItem = Map<String, dynamic>.from(dynamicMovieReviews.first);
+    } else {
+      return;
+    }
+
+    final targetIdx = getAllPostList.length >= 3 ? 3 : getAllPostList.length;
+    getAllPostList.insert(targetIdx, reviewItem);
+  }
+
+  static const List<Map<String, dynamic>> defaultPolls = [];
+
+  List<Map<String, dynamic>> dynamicPolls = [];
+  bool isPollsLoading = false;
+
+  Future<void> fetchDynamicPolls({bool refresh = false}) async {
+    if (isPollsLoading) return;
+    if (refresh || dynamicPolls.isEmpty) {
+      isPollsLoading = true;
+      notifyListeners();
+    }
+
+    try {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      String? deviceId = preferences.getString("deviceId");
+      String? userId = preferences.getString("userId");
+
+      final Set<dynamic> addedIds = {};
+      final List<Map<String, dynamic>> gathered = [];
+
+      void addIfPoll(dynamic post) {
+        if (post is Map) {
+          final map = Map<String, dynamic>.from(post);
+          final subType = map['subType']?.toString().toLowerCase();
+          final type = map['type']?.toString().toLowerCase();
+          final postType = map['post_type']?.toString().toLowerCase();
+          if (subType == 'polls' ||
+              subType == 'poll' ||
+              type == 'polls' ||
+              type == 'poll' ||
+              postType == 'polls' ||
+              postType == 'poll') {
+            final id = map['id'];
+            if (id != null && !addedIds.contains(id)) {
+              addedIds.add(id);
+              gathered.add(map);
+            }
+          }
+        }
+      }
+
+      for (var post in getAllPostList) {
+        addIfPoll(post);
+      }
+
+      Map<String, dynamic> body = {
+        "device_id": deviceId ?? "",
+        "postId": 0,
+        "subType": "Poll",
+        "type": "Poll",
+        "post_type": "polls",
+        "userId": userId ?? "",
+        "isBigTv": true,
+        "lang": langCode,
+      };
+
+      try {
+        Response response = await HomeRepo().getAllPosts(body);
+        if (response.statusCode == 200 && response.data != null) {
+          List apiPosts = [];
+          if (response.data is Map) {
+            apiPosts = response.data['posts'] ?? response.data['data'] ?? [];
+          } else if (response.data is List) {
+            apiPosts = response.data;
+          }
+          for (var p in apiPosts) {
+            addIfPoll(p);
+          }
+        }
+      } catch (e) {
+        log("API poll query note: $e");
+      }
+
+      if (gathered.isNotEmpty) {
+        dynamicPolls = gathered;
+        if (!getAllPostList.any((e) => isPollPost(e))) {
+          _placePollAtFifthPosition();
+        }
+      }
+    } catch (e, st) {
+      log("Error fetching dynamic polls: $e -- $st");
+    } finally {
+      isPollsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  List<Map<String, dynamic>> getAllPolls() {
+    final List<Map<String, dynamic>> polls = [];
+    final Set<dynamic> addedIds = {};
+
+    // 1. Prioritize dynamic polls from API
+    for (var post in dynamicPolls) {
+      final id = post['id'];
+      if (id != null && !addedIds.contains(id)) {
+        addedIds.add(id);
+        polls.add(post);
+      }
+    }
+
+    // 2. Gather any poll posts in getAllPostList
+    for (var post in getAllPostList) {
+      if (post is Map) {
+        final map = Map<String, dynamic>.from(post);
+        final subType = map['subType']?.toString().toLowerCase();
+        final type = map['type']?.toString().toLowerCase();
+        final postType = map['post_type']?.toString().toLowerCase();
+        if (subType == 'polls' ||
+            subType == 'poll' ||
+            type == 'polls' ||
+            type == 'poll' ||
+            postType == 'polls' ||
+            postType == 'poll') {
+          final id = map['id'];
+          if (id != null && !addedIds.contains(id)) {
+            addedIds.add(id);
+            polls.add(map);
+          }
+        }
+      }
+    }
+
+    return polls;
+  }
+
+  void _placePollAtFifthPosition() {
+    if (getAllPostList.isEmpty) return;
+    dynamic pollItem;
+    final existingPollIdx = getAllPostList.indexWhere((e) => isPollPost(e));
+
+    if (existingPollIdx != -1) {
+      pollItem = getAllPostList.removeAt(existingPollIdx);
+    } else if (dynamicPolls.isNotEmpty) {
+      pollItem = Map<String, dynamic>.from(dynamicPolls.first);
+    } else {
+      return;
+    }
+
+    final targetIdx = getAllPostList.length >= 4 ? 4 : getAllPostList.length;
+    getAllPostList.insert(targetIdx, pollItem);
   }
 
   bool isAiTagsLoading = false;
@@ -863,6 +1377,9 @@ class HomeProvider extends ChangeNotifier {
     if (searchName == 'dna') {
       return {'slug': 'DNA', 'name': 'DNA', 'aitagname': 'DNA', 'id': '77e02f18-f278-4334-ad74-9bfbd22d0af4'};
     }
+    if (searchName == 'news' || searchName == 'epaper' || searchName == 'newspaper') {
+      return {'slug': 'NEWS', 'name': 'News Paper', 'aitagname': 'News Paper', 'id': 'epaper-news-tag'};
+    }
 
     if (searchId == '6c750528-160a-4963-9642-d63d7594c2e8') {
       return {'slug': 'SB', 'name': 'Suprabatham', 'aitagname': 'Suprabatham', 'id': '6c750528-160a-4963-9642-d63d7594c2e8'};
@@ -881,6 +1398,13 @@ class HomeProvider extends ChangeNotifier {
   }
 
   Future<void> fetchVideosByTagSlug(String slug, {String? displayTitle, String? thumbnailUrl}) async {
+    final slugUpper = slug.trim().toUpperCase();
+    if (slugUpper == 'NEWS' || slugUpper == 'EPAPER' || slugUpper == 'NEWSPAPER') {
+      mainNavigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (context) => const EpaperScreen()),
+      );
+      return;
+    }
     final resolved = resolveVideoTag(showOrSlug: slug);
     final effectiveSlug = resolved != null ? (resolved['slug']?.toString() ?? slug) : slug;
     final effectiveTitle = displayTitle ?? (resolved != null ? (resolved['aitagname'] ?? resolved['name'] ?? slug) : slug);
@@ -1125,6 +1649,57 @@ class HomeProvider extends ChangeNotifier {
     if (getAllPostList.isEmpty) return false;
     if (_currentPageIndex >= 0 && _currentPageIndex < getAllPostList.length) {
       return isShowAlertPost(getAllPostList[_currentPageIndex]);
+    }
+    return false;
+  }
+
+  bool isPollPost(dynamic article) {
+    if (article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().trim() ?? '';
+    final subType = article['subType']?.toString().toLowerCase().trim() ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().trim() ?? '';
+    final category = (article['category_name'] ?? article['category'] ?? article['slug'])
+            ?.toString()
+            .toLowerCase()
+            .trim() ??
+        '';
+
+    if (subType == 'polls' || subType == 'poll') return true;
+    if (type == 'polls' || type == 'poll') return true;
+    if (postType == 'polls' || postType == 'poll') return true;
+    if (category == 'polls' || category == 'poll') return true;
+
+    if (article['pollData'] != null &&
+        article['pollData'] is Map &&
+        (article['pollData'] as Map).isNotEmpty) {
+      return true;
+    }
+    if (article['poll_options'] != null &&
+        article['poll_options'] is List &&
+        (article['poll_options'] as List).isNotEmpty) {
+      return true;
+    }
+    return false;
+  }
+
+  bool isMovieReviewPost(dynamic article) {
+    if (article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().trim() ?? '';
+    final subType = article['subType']?.toString().toLowerCase().trim() ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().trim() ?? '';
+    final category = (article['category_name'] ?? article['category'] ?? article['slug'])
+            ?.toString()
+            .toLowerCase()
+            .trim() ??
+        '';
+
+    if (subType == 'reviews' || subType == 'review' || subType == 'moviereview' || subType == 'moviereviews') return true;
+    if (type == 'reviews' || type == 'review' || type == 'moviereview' || type == 'moviereviews') return true;
+    if (postType == 'reviews' || postType == 'review' || postType == 'moviereview' || postType == 'moviereviews') return true;
+    if (category == 'reviews' || category == 'review' || category == 'moviereview') return true;
+
+    if (article['ratings'] != null || article['movie_rating'] != null || article['rating'] != null) {
+      if (article['platformRatings'] != null || article['platform_ratings'] != null) return true;
     }
     return false;
   }
@@ -1475,6 +2050,13 @@ class HomeProvider extends ChangeNotifier {
                 streamUrl: streamUrl,
                 channelName: channelName,
                 playbackType: playbackType,
+                watchCount: liveData?['watch_count'] is num
+                    ? (liveData!['watch_count'] as num).toInt()
+                    : int.tryParse(liveData?['watch_count']?.toString() ?? ''),
+                formattedWatchCount: liveData?['formatted_watch_count']?.toString(),
+                watchCountEnabled: liveData?['watch_count_enabled'] == true ||
+                    liveData?['watch_count_enabled'] == 1 ||
+                    liveData?['watch_count_enabled'] == 'true',
               ),
             ),
           );
@@ -1761,6 +2343,15 @@ class HomeProvider extends ChangeNotifier {
         final String realSlug = matchedTag != null
             ? (matchedTag['slug'] ?? rawShowOrSlug).toString()
             : (rawShowOrSlug.isNotEmpty ? rawShowOrSlug : "DNA");
+        final realSlugUpper = realSlug.trim().toUpperCase();
+        if (realSlugUpper == 'NEWS' || realSlugUpper == 'EPAPER' || realSlugUpper == 'NEWSPAPER') {
+          mainNavigatorKey.currentState?.push(
+            MaterialPageRoute(
+              builder: (context) => const EpaperScreen(),
+            ),
+          );
+          return;
+        }
         final String displayTitle = matchedTag != null
             ? (matchedTag['aitagname'] ?? matchedTag['name'] ?? rawShowOrSlug).toString()
             : (rawShowOrSlug.isNotEmpty ? rawShowOrSlug : realSlug);
@@ -1912,7 +2503,7 @@ class HomeProvider extends ChangeNotifier {
 
       if (pId != null && pId.isNotEmpty && pId != "0") {
         log("Routing to Post ID: $pId (isNotification: $isFromNotification)");
-        final targetPostId = pId!;
+        final targetPostId = pId;
         postId = "0";
         isComeFromLinkOrNotification = true;
         isAiTagDataLoaded = false;
@@ -2043,6 +2634,53 @@ class HomeProvider extends ChangeNotifier {
 
   List getAdsDataList = [];
   bool isAdsDataLoading = false;
+
+  Future<List<dynamic>> fetchMoreFollowTags() async {
+    isMoreFollowLoading = true;
+    notifyListeners();
+
+    try {
+      SharedPreferences preferences = await SharedPreferences.getInstance();
+      String? deviceId = preferences.getString("deviceId");
+      String langCode = preferences.getString("selectedLanguageCode") ?? "te";
+      String? userIdStr = preferences.getString("userId");
+      int userId = 0;
+      if (userIdStr != null && userIdStr.isNotEmpty) {
+        userId = int.tryParse(userIdStr) ?? 0;
+      }
+
+      Map<String, dynamic> params = {
+        if (deviceId != null && deviceId.isNotEmpty) "device_id": deviceId,
+        if (userId > 0) "userId": userId,
+        "lang": langCode,
+      };
+
+      Response response = await HomeRepo().getMoreFollowTags(queryParams: params);
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data;
+        if (data is List) {
+          moreFollowTagsList = data;
+          log("fetchMoreFollowTags loaded ${data.length} tags");
+          for (var item in getAllPostList) {
+            if (item is Map) {
+              final type = item['type']?.toString().toLowerCase();
+              final subType = item['subType']?.toString().toLowerCase();
+              final postType = item['post_type']?.toString().toLowerCase();
+              if (type == 'morefollow' || subType == 'morefollow' || postType == 'morefollow' || item['id'] == -998) {
+                item['morefollow'] = data;
+              }
+            }
+          }
+        }
+      }
+    } catch (e, st) {
+      log("fetchMoreFollowTags error: $e", stackTrace: st);
+    } finally {
+      isMoreFollowLoading = false;
+      notifyListeners();
+    }
+    return moreFollowTagsList;
+  }
 
   Future<void> updateMoreFollowData(List<int> morefollowIds) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();

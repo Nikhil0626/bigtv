@@ -6,6 +6,7 @@ import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/aggricator_screens/events_data/event_repo.dart';
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart';
 
 class InFocusBarWidget extends StatelessWidget {
   const InFocusBarWidget({super.key});
@@ -221,6 +222,28 @@ class InFocusBarWidget extends StatelessWidget {
         final displayTitle = tag['aitagname'] ?? tag['name'] ?? tagSlug;
         final tagThumbnail = tag['thumbnailUrl'] ?? tag['thumbnail_url'] ?? tag['thumbnail'] ?? tag['imageUrl'];
         final chosenId = tagId ?? tagSlug;
+
+        // If the slug is NEWS, navigate to the e-paper
+        final rawSlug = (tag['slug'] ?? tagSlug ?? '').toString().trim().toUpperCase();
+        final rawName = (tag['name'] ?? '').toString().trim().toUpperCase();
+        final rawAiTagName = (tag['aitagname'] ?? '').toString().trim().toUpperCase();
+        if (rawSlug == 'NEWS' || rawSlug == 'EPAPER' || rawSlug == 'NEWSPAPER' || rawName == 'NEWS' || rawAiTagName == 'NEWS') {
+          try {
+            context.read<VideoProvider>().pauseVideo();
+          } catch (_) {}
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const EpaperScreen(),
+            ),
+          );
+          EventRepo().addEvent({
+            "aiTagName": (tag['aitagname'] ?? displayTitle ?? "NEWS").toString(),
+            "aiTagId": (tag['aitagid'] ?? chosenId ?? "NEWS").toString(),
+            "createAt": DateTime.now().toString(),
+          }, "epaper_tag_click");
+          return;
+        }
 
         homeProvider.setSelectedTagId(chosenId);
         if (homeProvider.liveTvVideosEnable) {

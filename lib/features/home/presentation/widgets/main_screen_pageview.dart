@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'package:chotanews/aggricator_screens/video_image_screen/video_provider.dart';
 import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
@@ -127,6 +128,7 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
 
   @override
   void dispose() {
+    homeProvider?.pageController?.removeListener(homeProvider!.scrollListener);
     _cancelProgressTrackers();
     super.dispose();
   }
@@ -199,28 +201,30 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                   ],
                                 ),
                         )
-                      : NotificationListener<ScrollNotification>(
-                          onNotification: (notification) {
-                            if (notification is UserScrollNotification &&
-                                notification.direction != ScrollDirection.idle) {
-                              if (homeProvider.isBottomEnable) {
-                                homeProvider.pageChange(isValue: false);
-                              }
-                            } else if (notification is ScrollUpdateNotification &&
-                                notification.dragDetails != null) {
-                              if (homeProvider.isBottomEnable) {
-                                homeProvider.pageChange(isValue: false);
-                              }
-                            }
-                            return false;
-                          },
-                          child: PageView.builder(
-                            physics: MediaQuery.of(context).orientation == Orientation.landscape
-                                ? const NeverScrollableScrollPhysics()
-                                : const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
-                            controller: homeProvider.pageController!,
-                            scrollDirection: Axis.vertical,
-                            itemCount: homeProvider.getAllPostList.length,
+                      : Stack(
+                          children: [
+                            NotificationListener<ScrollNotification>(
+                              onNotification: (notification) {
+                                if (notification is UserScrollNotification &&
+                                    notification.direction != ScrollDirection.idle) {
+                                  if (homeProvider.isBottomEnable) {
+                                    homeProvider.pageChange(isValue: false);
+                                  }
+                                } else if (notification is ScrollUpdateNotification &&
+                                    notification.dragDetails != null) {
+                                  if (homeProvider.isBottomEnable) {
+                                    homeProvider.pageChange(isValue: false);
+                                  }
+                                }
+                                return false;
+                              },
+                              child: PageView.builder(
+                                physics: MediaQuery.of(context).orientation == Orientation.landscape
+                                    ? const NeverScrollableScrollPhysics()
+                                    : const ClampingScrollPhysics(parent: BouncingScrollPhysics()),
+                                controller: homeProvider.pageController!,
+                                scrollDirection: Axis.vertical,
+                                itemCount: homeProvider.getAllPostList.length,
                             onPageChanged: (value) {
                               if (homeProvider.isBottomEnable) {
                                 homeProvider.pageChange(isValue: false);
@@ -241,6 +245,10 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                                   homeProvider.setSelectedTagId(0);
                                   homeProvider.getAllPost(postIds: "0");
                                 });
+                              } else if (!homeProvider.isAiTagDataLoaded && !widget.isAiTags) {
+                                if (value >= homeProvider.getAllPostList.length - 3) {
+                                  homeProvider.loadMorePosts();
+                                }
                               }
 
                               context.read<HomeProvider>().flipEvent(
@@ -299,6 +307,52 @@ class _MainScreenPageViewState extends State<MainScreenPageView> {
                             },
                           ),
                         ),
+                        if (homeProvider.isLoadingMore)
+                          Positioned(
+                            bottom: 16.h,
+                            left: 0,
+                            right: 0,
+                            child: Center(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xBF000000),
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Color(0x33000000),
+                                      blurRadius: 8,
+                                      offset: Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    SizedBox(
+                                      width: 14.w,
+                                      height: 14.w,
+                                      child: const CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                      ),
+                                    ),
+                                    SizedBox(width: 8.w),
+                                    Text(
+                                      "Loading more news...",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                 ),
               ),
               if (context.watch<HomeProvider>().isAiTagDataLoaded && widget.isAiTags == false && homeProvider.getAllPostList.isNotEmpty)

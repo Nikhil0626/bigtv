@@ -1,120 +1,3 @@
-// import 'dart:developer';
-// import 'package:dio/dio.dart';
-// import 'package:flutter/cupertino.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
-//
-// import '../../../utils/app_toasts.dart';
-// import '../rating_repo/rating_repo.dart';
-//
-// class RatingProvider extends ChangeNotifier {
-//   final TextEditingController commentController = TextEditingController();
-//   final FocusNode commentFocusNode = FocusNode();
-//   int selectedStar = 0;
-//   int selectedOption = 0;
-//   bool isLoading = false;
-//   bool isRated = false;
-//   List ratingsList = [];
-//
-//   void ratingUpdate(rating, article) {
-//
-//     Map<String, dynamic> ratingBody = {"postId":article,"starRating":rating,};
-//     log("post data $ratingBody");
-//     if(rating != null) {
-//       ratingsList.add(ratingBody);
-//       final ratingEntry = ratingsList.firstWhere(
-//             (element) => element['postId'].toString() == article.toString(),
-//         orElse: () => 0,
-//       );
-//       selectedStar = ratingEntry['starRating'];
-//     }
-//
-//     if(rating != 0) {
-//       notifyListeners();
-//     }
-//   }
-//    getPostRating(dynamic article) {
-//     final ratingEntry = ratingsList.firstWhere(
-//           (element) => element['postId'].toString() == article.toString(),
-//       orElse: () => {},
-//     );
-//     log("rating stars $ratingEntry");
-//     selectedStar = ratingEntry['starRating']??0;
-//     return selectedStar != 0 ? selectedStar : 0;
-//   }
-//   bool isFilterData = false;
-//
-//   void filterData(rating) {
-//     isFilterData = !isFilterData;
-//     notifyListeners();
-//     getReviews(rating, isFilterData ? "highest_rated" : "lowest_rated");
-//   }
-//
-//   Set<int> ratedArticleIds = {};
-//
-//   void markAsRated(int articleId) {
-//     ratedArticleIds.add(articleId);
-//     notifyListeners();
-//   }
-//
-//   bool isArticleRated(int articleId) {
-//     return ratedArticleIds.contains(articleId);
-//   }
-//
-//   Future<void> postSubmitRating(article, rated) async {
-//     SharedPreferences preferences = await SharedPreferences.getInstance();
-//     String? deviceId = preferences.getString("deviceId");
-//     String? userId = preferences.getString("userId");
-//     Map<String, dynamic> body = {
-//       "post_id": article.toString()?? 0,
-//       "user_id": userId ?? "",
-//       "rating": selectedStar,
-//       "comment": commentController.text,
-//       "device_id": deviceId,
-//     };
-//     log(body.toString());
-//     try {
-//       Response response = await RatingRepo().postSubmitRating(body);
-//       log(response.data.toString());
-//       if (response.statusCode == 201) {
-//         Map<String, dynamic> ratingBody = {"postId":article.toString(),"starRating":selectedStar,};
-//         ratingsList.add(ratingBody);
-//         markAsRated(int.tryParse(article.toString()) ?? 0);
-//         commentController.text = "";
-//         CustomToast.showSuccessToast(
-//           msg: response.data["message"],
-//         );
-//       } else {}
-//     } on DioException catch (e, st) {
-//       CustomToast.showErrorToast(msg: "something went wrong");
-//       log("Dio error while posting like: ${e.toString()} ---- ${st.toString()}");
-//     } catch (e, st) {
-//       log("Hello siva catch $e --- $st");
-//       ;
-//     } finally {
-//       notifyListeners();
-//     }
-//   }
-//
-//   Map<String, dynamic> getAllReviews = {};
-//
-//   Future getReviews(String postId, name) async {
-//     Map<String, dynamic> body = {
-//       "sort_by": name,
-//     };
-//     try {
-//       Response response = await RatingRepo().getReviews(postId, body);
-//       log(response.data.toString());
-//       if (response.statusCode == 200) {
-//         getAllReviews = response.data;
-//         notifyListeners();
-//         log(getAllReviews.toString());
-//       }
-//     } catch (e, st) {
-//       log("Hello siva catch $e --- $st");
-//     }
-//   }
-// }
-
 import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -122,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../utils/app_toasts.dart';
 import '../../events_data/event_repo.dart';
+import '../rating_model.dart';
 import '../rating_repo/rating_repo.dart';
 
 class RatingProvider extends ChangeNotifier {
@@ -135,8 +19,31 @@ class RatingProvider extends ChangeNotifier {
   bool isRated = false;
   List<Map<String, dynamic>> ratingsList = [];
 
-  // ✅ Updated: Add or update rating properly
-  void ratingUpdate(int rating, dynamic article,{bool isNew = false}) {
+  // Movie review breakdown & critic scores
+  MovieReviewDetails? movieReviewDetails;
+  Map<String, dynamic> getAllReviews = {};
+  final Map<String, List<dynamic>> _postReviewsMap = {};
+  bool isLoadingComments = false;
+  bool isFilterData = false;
+
+  Set<int> ratedArticleIds = {};
+
+  List<dynamic> getReviewsForPost(String postId) {
+    if (_postReviewsMap.containsKey(postId)) {
+      return _postReviewsMap[postId] ?? [];
+    }
+    return (getAllReviews['reviews'] as List?) ?? [];
+  }
+
+  void addLocalReview(String postId, Map<String, dynamic> review) {
+    _postReviewsMap.putIfAbsent(postId, () => []);
+    _postReviewsMap[postId]!.removeWhere((r) => r is Map && r['comment'] == review['comment']);
+    _postReviewsMap[postId]!.insert(0, review);
+    notifyListeners();
+  }
+
+  // Add or update rating properly
+  void ratingUpdate(int rating, dynamic article, {bool isNew = false}) {
     String postId = article.toString();
 
     final existingIndex = ratingsList.indexWhere(
@@ -150,12 +57,12 @@ class RatingProvider extends ChangeNotifier {
     }
 
     selectedStar = rating;
-    if(!isNew) {
+    if (!isNew) {
       notifyListeners();
     }
   }
 
-  // ✅ Updated: Safe getPostRating without errors
+  // Safe getPostRating without errors
   int getPostRating(dynamic article) {
     final ratingEntry = ratingsList.firstWhere(
       (element) => element['postId'].toString() == article.toString(),
@@ -168,8 +75,6 @@ class RatingProvider extends ChangeNotifier {
     return selectedStar;
   }
 
-  Set<int> ratedArticleIds = {};
-
   void markAsRated(int articleId) {
     ratedArticleIds.add(articleId);
     notifyListeners();
@@ -179,75 +84,90 @@ class RatingProvider extends ChangeNotifier {
     return ratedArticleIds.contains(articleId);
   }
 
-  Future<void> postSubmitRating(article, rated, title) async {
+  // Submit or update user star rating & review comment
+  Future<bool> postSubmitRating(dynamic article, dynamic rated, dynamic title) async {
     SharedPreferences preferences = await SharedPreferences.getInstance();
     String? deviceId = preferences.getString("deviceId");
     String? userId = preferences.getString("userId");
 
+    final parsedPostId = int.tryParse(article.toString());
+    final parsedUserId = int.tryParse(userId ?? "0");
+
     Map<String, dynamic> body = {
-      "post_id": article.toString(),
-      "user_id": userId ?? "",
+      "post_id": parsedPostId ?? article.toString(),
+      "user_id": parsedUserId != null && parsedUserId > 0 ? parsedUserId : (userId ?? "0"),
       "rating": selectedStar,
-      "comment": commentController.text,
-      "device_id": deviceId,
+      "comment": commentController.text.trim(),
+      "device_id": deviceId ?? "",
     };
-
-
 
     log("Submitting rating: $body");
 
     try {
       Response response = await RatingRepo().postSubmitRating(body);
-      log("Submitting rating: ${response.statusCode}");
-      if (response.statusCode == 200) {
-        // ✅ Safely replace or add new entry
+      log("Submitting rating response status: ${response.statusCode}");
+      if (response.statusCode == 200 || response.statusCode == 201) {
         ratingsList.removeWhere((element) => element['postId'].toString() == article.toString());
         ratingsList.add({"postId": article.toString(), "starRating": selectedStar});
 
         markAsRated(int.tryParse(article.toString()) ?? 0);
+        final commentSaved = commentController.text.trim();
         commentController.clear();
 
-        CustomToast.showSuccessToast(msg: response.data["message"]);
+        final msg = response.data is Map ? (response.data["message"] ?? "రేటింగ్ విజయవంతంగా నమోదు చేయబడింది!") : "రేటింగ్ విజయవంతంగా నమోదు చేయబడింది!";
+        CustomToast.showSuccessToast(msg: msg);
         EventRepo().addEvent({
           "post_id": article.toString(),
           "user_id": userId ?? "",
-          "post_title": title ?? "",
+          "post_title": title?.toString() ?? "",
           "rating": selectedStar,
-          "comment": commentController.text,
+          "comment": commentSaved,
           "device_id": deviceId.toString(),
         }, "submit_rating");
+        return true;
+      } else {
+        final errorMsg = response.data is Map ? (response.data["message"] ?? "సమర్పించడం విఫలమైంది") : "సమర్పించడం విఫలమైంది";
+        CustomToast.showErrorToast(msg: errorMsg);
+        return false;
       }
     } on DioException catch (e, st) {
-      CustomToast.showErrorToast(msg: "Something went wrong");
+      CustomToast.showErrorToast(msg: e.response?.data?['message'] ?? "Something went wrong");
       log("Dio error: ${e.toString()} ---- ${st.toString()}");
+      return false;
     } catch (e, st) {
       log("Catch error: $e --- $st");
+      return false;
     } finally {
       notifyListeners();
     }
   }
 
-  // Review logic
-  bool isFilterData = false;
-  Map<String, dynamic> getAllReviews = {};
-
-  void filterData(rating) {
+  // Filter reviews
+  void filterData(dynamic rating) {
     isFilterData = !isFilterData;
     notifyListeners();
-    getReviews(rating, isFilterData ? "highest_rated" : "lowest_rated");
+    getReviews(rating.toString(), isFilterData ? "highest_rated" : "lowest_rated");
   }
 
-  bool isLoadingComments = false;
-
-  Future getReviews(String postId, name) async {
-    Map<String, dynamic> body = {
-      "sort_by": name,
+  // Fetch Review Details & Critic Breakdown (GET /moviereviews/{post_id})
+  Future<void> getReviews(String postId, dynamic name) async {
+    Map<String, dynamic> queryParams = {
+      "sort_by": name?.toString() ?? "newest",
+      "limit": 50,
     };
     isLoadingComments = true;
     try {
-      Response response = await RatingRepo().getReviews(postId, body);
-      if (response.statusCode == 200) {
-        getAllReviews = response.data;
+      Response response = await RatingRepo().getReviews(postId, queryParams);
+      if (response.statusCode == 200 && response.data != null) {
+        if (response.data is Map<String, dynamic>) {
+          getAllReviews = response.data as Map<String, dynamic>;
+        } else if (response.data is Map) {
+          getAllReviews = Map<String, dynamic>.from(response.data as Map);
+        }
+        movieReviewDetails = MovieReviewDetails.fromJson(getAllReviews);
+        if (getAllReviews['reviews'] is List) {
+          _postReviewsMap[postId] = List<dynamic>.from(getAllReviews['reviews'] as List);
+        }
         notifyListeners();
       }
     } catch (e, st) {

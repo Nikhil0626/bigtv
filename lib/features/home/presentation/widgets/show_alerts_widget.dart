@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -39,6 +40,21 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
   bool _isLoading = false;
   bool _isTransitioning = false;
   double _overscrollAccumulator = 0;
+  String? _emailError;
+  String? _phoneError;
+
+  bool _isValidEmail(String email) {
+    if (email.isEmpty) return false;
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
+    );
+    return emailRegex.hasMatch(email.trim());
+  }
+
+  bool _isValidPhoneNumber(String phone) {
+    final clean = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    return clean.length == 10 && RegExp(r'^[6-9]\d{9}$').hasMatch(clean);
+  }
 
   void _moveToNextPage() {
     if (_isTransitioning) return;
@@ -143,8 +159,17 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
         widget.articleData?['phone']?.toString() ??
         '';
 
-    _emailController = TextEditingController(text: initialEmail);
-    _phoneController = TextEditingController(text: initialPhone.replaceAll('+91', '').trim());
+    String cleanInitialEmail = initialEmail.trim();
+    if (cleanInitialEmail.toLowerCase() == 'string' || cleanInitialEmail.toLowerCase() == 'null') {
+      cleanInitialEmail = '';
+    }
+    String cleanInitialPhone = initialPhone.replaceAll('+91', '').replaceAll(RegExp(r'[^0-9]'), '').trim();
+    if (cleanInitialPhone.toLowerCase() == 'string' || cleanInitialPhone.toLowerCase() == 'null') {
+      cleanInitialPhone = '';
+    }
+
+    _emailController = TextEditingController(text: cleanInitialEmail);
+    _phoneController = TextEditingController(text: cleanInitialPhone);
     _agreeToTerms = (widget.articleData?['receive_alert'] as bool?) ??
         (widget.articleData?['receiveAlert'] as bool?) ??
         true;
@@ -171,14 +196,50 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
     }
 
     final email = _emailController.text.trim();
-    final phone = _phoneController.text.trim();
+    final rawPhone = _phoneController.text.trim();
+    final cleanPhone = rawPhone.replaceAll(RegExp(r'[^0-9]'), '');
 
-    if (email.isEmpty && phone.isEmpty) {
+    setState(() {
+      _emailError = null;
+      _phoneError = null;
+    });
+
+    if (email.isEmpty && cleanPhone.isEmpty) {
+      setState(() {
+        _emailError = "Please enter email or WhatsApp number";
+        _phoneError = "Please enter email or WhatsApp number";
+      });
       CustomToast.showWarningToast(
         msg: "Please enter your email or WhatsApp number.",
       );
       return;
     }
+
+    bool hasValidationError = false;
+
+    if (email.isNotEmpty && !_isValidEmail(email)) {
+      setState(() {
+        _emailError = "Please enter a valid email address";
+      });
+      CustomToast.showWarningToast(
+        msg: "Please enter a valid email address.",
+      );
+      hasValidationError = true;
+    }
+
+    if (cleanPhone.isNotEmpty && !_isValidPhoneNumber(cleanPhone)) {
+      setState(() {
+        _phoneError = "Please enter a valid 10-digit mobile number";
+      });
+      if (!hasValidationError) {
+        CustomToast.showWarningToast(
+          msg: "Please enter a valid 10-digit mobile number.",
+        );
+      }
+      hasValidationError = true;
+    }
+
+    if (hasValidationError) return;
 
     setState(() {
       _isLoading = true;
@@ -206,7 +267,7 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
         "post_id": postId,
         "show_title": showTitle,
         "email": email,
-        "number": phone,
+        "number": cleanPhone.isNotEmpty ? cleanPhone : rawPhone,
         "receive_alert": _agreeToTerms,
         "remind_timing": selectedOptionText,
         "user_id": userId.isEmpty ? "string" : userId,
@@ -653,7 +714,10 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
                                       color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                                       borderRadius: BorderRadius.circular(6.r),
                                       border: Border.all(
-                                        color: isDark ? Colors.grey.shade700 : const Color(0xFFCBD5E1),
+                                        color: _emailError != null
+                                            ? primaryRed
+                                            : (isDark ? Colors.grey.shade700 : const Color(0xFFCBD5E1)),
+                                        width: _emailError != null ? 1.4 : 1.0,
                                       ),
                                     ),
                                     child: TextField(
@@ -661,6 +725,11 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
                                       focusNode: _emailFocusNode,
                                       keyboardType: TextInputType.emailAddress,
                                       textInputAction: TextInputAction.next,
+                                      onChanged: (val) {
+                                        if (_emailError != null) {
+                                          setState(() => _emailError = null);
+                                        }
+                                      },
                                       onSubmitted: (_) {
                                         FocusScope.of(context).requestFocus(_phoneFocusNode);
                                       },
@@ -677,7 +746,7 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
                                         ),
                                         prefixIcon: Icon(
                                           Icons.mail_outline_rounded,
-                                          color: Colors.grey.shade500,
+                                          color: _emailError != null ? primaryRed : Colors.grey.shade500,
                                           size: 16.w,
                                         ),
                                         border: InputBorder.none,
@@ -687,6 +756,17 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
                                       ),
                                     ),
                                   ),
+                                  if (_emailError != null) ...[
+                                    SizedBox(height: 2.h),
+                                    Text(
+                                      _emailError!,
+                                      style: TextStyle(
+                                        color: primaryRed,
+                                        fontSize: 10.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                               SizedBox(height: 8.h),
@@ -710,7 +790,10 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
                                       color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                                       borderRadius: BorderRadius.circular(6.r),
                                       border: Border.all(
-                                        color: isDark ? Colors.grey.shade700 : const Color(0xFFCBD5E1),
+                                        color: _phoneError != null
+                                            ? primaryRed
+                                            : (isDark ? Colors.grey.shade700 : const Color(0xFFCBD5E1)),
+                                        width: _phoneError != null ? 1.4 : 1.0,
                                       ),
                                     ),
                                     child: Row(
@@ -749,10 +832,17 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
                                             focusNode: _phoneFocusNode,
                                             keyboardType: TextInputType.phone,
                                             textInputAction: TextInputAction.done,
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.digitsOnly,
+                                              LengthLimitingTextInputFormatter(10),
+                                            ],
                                             onSubmitted: (_) {
                                               FocusScope.of(context).unfocus();
                                             },
                                             onChanged: (val) {
+                                              if (_phoneError != null) {
+                                                setState(() => _phoneError = null);
+                                              }
                                               final digits = val.replaceAll(RegExp(r'[^0-9]'), '');
                                               if (digits.length >= 10) {
                                                 FocusScope.of(context).unfocus();
@@ -779,6 +869,17 @@ class _ShowAlertsWidgetState extends State<ShowAlertsWidget> {
                                       ],
                                     ),
                                   ),
+                                  if (_phoneError != null) ...[
+                                    SizedBox(height: 2.h),
+                                    Text(
+                                      _phoneError!,
+                                      style: TextStyle(
+                                        color: primaryRed,
+                                        fontSize: 10.sp,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 ],
                               ),
                               SizedBox(height: 8.h),

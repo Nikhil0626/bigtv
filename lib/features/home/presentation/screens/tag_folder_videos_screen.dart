@@ -53,6 +53,31 @@ class _TagFolderVideosScreenState extends State<TagFolderVideosScreen>
   String get tagTitle => widget.tagTitle;
   String get folderName => widget.folderName;
   String get displayFolderName => widget.displayFolderName;
+  String get formattedDisplayFolderName {
+    final name = displayFolderName.trim();
+    if (name.isNotEmpty && !RegExp(r'^day[\s_\-]*\d+$', caseSensitive: false).hasMatch(name)) {
+      return name;
+    }
+    final trimmed = (name.isNotEmpty ? name : folderName).trim().toLowerCase();
+    final dayMatch = RegExp(r'^day[\s_\-]*(\d+)$', caseSensitive: false).firstMatch(trimmed);
+    if (dayMatch != null) {
+      final dayNum = int.tryParse(dayMatch.group(1) ?? '1') ?? 1;
+      final daysAgo = dayNum > 0 ? (dayNum - 1) : 0;
+      final now = DateTime.now();
+      final targetDate = DateTime(now.year, now.month, now.day).subtract(Duration(days: daysAgo));
+      const weekdays = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
+      return weekdays[targetDate.weekday - 1];
+    }
+    return name.isNotEmpty ? name : folderName;
+  }
   List get videos => widget.videos;
   String? get tagThumbnailUrl => widget.tagThumbnailUrl;
 
@@ -195,7 +220,7 @@ class _TagFolderVideosScreenState extends State<TagFolderVideosScreen>
                       const AppNoData(),
                       const SizedBox(height: 12),
                       Text(
-                        "No videos found in $displayFolderName",
+                        "No videos found in $formattedDisplayFolderName",
                         style: TextStyle(fontSize: 14.sp, color: subTextColor),
                       ),
                     ],
@@ -268,10 +293,10 @@ class _TagFolderVideosScreenState extends State<TagFolderVideosScreen>
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                if (displayFolderName.isNotEmpty && displayFolderName != tagTitle) ...[
+                                if (formattedDisplayFolderName.isNotEmpty && formattedDisplayFolderName != tagTitle) ...[
                                   SizedBox(height: 2.h),
                                   Text(
-                                    displayFolderName,
+                                    formattedDisplayFolderName,
                                     style: TextStyle(
                                       fontFamily: GoogleFonts.notoSerifTelugu().fontFamily,
                                       fontSize: 13.sp,
@@ -445,7 +470,7 @@ class _TagFolderVideosScreenState extends State<TagFolderVideosScreen>
                                   builder: (context) => TagVideoPlayerScreen(
                                     videos: videos,
                                     initialIndex: index,
-                                    tagTitle: "$tagTitle - $displayFolderName",
+                                    tagTitle: "$tagTitle - $formattedDisplayFolderName",
                                     tagThumbnailUrl: tagThumbnailUrl,
                                   ),
                                 ),

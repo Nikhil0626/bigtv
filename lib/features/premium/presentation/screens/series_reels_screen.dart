@@ -1,3 +1,5 @@
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
 import '../../domain/models/series_model.dart';
@@ -156,20 +158,33 @@ class SeriesReelsScreen extends StatefulWidget {
   State<SeriesReelsScreen> createState() => _SeriesReelsScreenState();
 }
 
-class _SeriesReelsScreenState extends State<SeriesReelsScreen> {
+class _SeriesReelsScreenState extends State<SeriesReelsScreen> with WidgetsBindingObserver {
   late PageController _pageController;
   late ReelsStateController _reelsStateController;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WakelockPlus.enable();
     _pageController = PageController(initialPage: widget.initialIndex);
     _reelsStateController = ReelsStateController(widget.initialIndex, widget.episodes);
     _reelsStateController.initPreload();
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      WakelockPlus.enable();
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      WakelockPlus.disable();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    WakelockPlus.disable();
     _pageController.dispose();
     _reelsStateController.dispose();
     super.dispose();
@@ -178,7 +193,7 @@ class _SeriesReelsScreenState extends State<SeriesReelsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColorTokens.primaryRed,
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -246,9 +261,11 @@ class ReelVideoPlayer extends StatelessWidget {
                   child: Stack(
                     fit: StackFit.expand,
                     children: [
-                      SizedBox.expand(
+                      Container(
+                        color: AppColorTokens.primaryRed,
+                        alignment: Alignment.center,
                         child: FittedBox(
-                          fit: BoxFit.cover,
+                          fit: BoxFit.contain,
                           child: SizedBox(
                             width: value.size.width,
                             height: value.size.height,
@@ -258,10 +275,22 @@ class ReelVideoPlayer extends StatelessWidget {
                       ),
                       if (!value.isPlaying)
                         Center(
-                          child: Icon(
-                            Icons.play_arrow,
-                            size: 80,
-                            color: Colors.white.withOpacity(0.5),
+                          child: Container(
+                            width: 72,
+                            height: 72,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.55),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.play_arrow_rounded,
+                              size: 46,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                       // Video Controller Progress Bar
@@ -295,14 +324,18 @@ class ReelVideoPlayer extends StatelessWidget {
                 fit: StackFit.expand,
                 children: [
                   if (episode.thumbnail.isNotEmpty)
-                    Image.network(
-                      episode.thumbnail,
-                      fit: BoxFit.cover,
+                    Container(
+                      color: AppColorTokens.primaryRed,
+                      alignment: Alignment.center,
+                      child: Image.network(
+                        episode.thumbnail,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   const Align(
                     alignment: Alignment.bottomCenter,
                     child: LinearProgressIndicator(
-                      color: Colors.red,
+                      color: AppColorTokens.primaryRed,
                       backgroundColor: Colors.transparent,
                     ),
                   ),
@@ -322,7 +355,7 @@ class ReelVideoPlayer extends StatelessWidget {
               const Align(
                 alignment: Alignment.bottomCenter,
                 child: LinearProgressIndicator(
-                  color: Colors.red,
+                  color: AppColorTokens.primaryRed,
                   backgroundColor: Colors.transparent,
                 ),
               ),

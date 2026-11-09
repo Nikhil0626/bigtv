@@ -159,16 +159,6 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
     try {
       final homeProvider = context.read<HomeProvider>();
 
-      // Ensure bottom navigation tab is switched to Home (Index 1: News / వార్తలు)
-      homeProvider.onItemTapped(1);
-      if (homeProvider.homePageController.hasClients) {
-        try {
-          homeProvider.homePageController.jumpToPage(1);
-        } catch (e) {
-          log("Error jumping to home tab: $e");
-        }
-      }
-
       // Ensure Home screen bottom bar is enabled
       homeProvider.isBottomEnable = true;
       homeProvider.isComeFromLinkOrNotification = false;
@@ -188,6 +178,13 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
     if (Navigator.canPop(context)) {
       Navigator.pop(context);
     } else {
+      try {
+        final homeProvider = context.read<HomeProvider>();
+        homeProvider.onItemTapped(1);
+        if (homeProvider.homePageController.hasClients) {
+          homeProvider.homePageController.jumpToPage(1);
+        }
+      } catch (_) {}
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const HomeView()),
@@ -201,21 +198,10 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
     _stopVideoPlayback();
     try {
       final homeProvider = context.read<HomeProvider>();
-      if (widget.isComeFrom || homeProvider.isComeFromLinkOrNotification) {
-        homeProvider.isComeFromLinkOrNotification = false;
-        homeProvider.onItemTapped(1);
-        if (homeProvider.homePageController.hasClients) {
-          try {
-            homeProvider.homePageController.jumpToPage(1);
-          } catch (_) {}
-        }
-        if (homeProvider.getAllPostList.length <= 1) {
-          homeProvider.getAllPost(isGetAllPost: true);
-        }
-        try {
-          const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
-        } catch (_) {}
-      }
+      homeProvider.isComeFromLinkOrNotification = false;
+      try {
+        const MethodChannel("com.chotanews/whatsapp").invokeMethod("clearInitialIntent");
+      } catch (_) {}
     } catch (_) {}
     super.dispose();
   }

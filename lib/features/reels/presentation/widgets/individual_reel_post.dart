@@ -1,3 +1,5 @@
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:chotanews/core/theme/color_tokens.dart';
 
 import 'dart:developer';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
@@ -25,6 +27,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
   @override
   void initState() {
     super.initState();
+    WakelockPlus.enable();
 
     context.read<ReelsProviders>().getIndividualReelData(widget.postId).then((value) {
       log(value.toString());
@@ -48,6 +51,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
 
   @override
   void dispose() {
+    WakelockPlus.disable();
     _controllerNotifier.value?.dispose(); // Dispose properly
     _controllerNotifier.dispose();
     super.dispose();
@@ -56,6 +60,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColorTokens.primaryRed,
       body: Consumer<ReelsProviders>(builder: (_, reelsProviders, __) {
         return ValueListenableBuilder<YoutubePlayerController?>(
           valueListenable: _controllerNotifier,
@@ -69,31 +74,44 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                 Positioned.fill(
                   child: Screenshot(
                     controller: sc,
-                    child: YoutubePlayer(
-                      controller: controller,
-                      aspectRatio: MediaQuery.of(context).size.width / MediaQuery.of(context).size.height,
-                      bottomActions: [
-                        CurrentPosition(),
-                        ProgressBar(
-                          isExpanded: true,
-                          colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
-                        ),
-                        RemainingDuration(),
-                        IconButton(
-                          icon: Icon(
-                            reelsProviders.isMuted ? Icons.volume_off : Icons.volume_up,
-                            color: Colors.white,
+                    child: Container(
+                      color: AppColorTokens.primaryRed,
+                      width: double.infinity,
+                      height: double.infinity,
+                      alignment: Alignment.center,
+                      child: FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.width / (9 / 16),
+                          child: YoutubePlayer(
+                            controller: controller,
+                            aspectRatio: 9 / 16,
+                            bottomActions: [
+                              CurrentPosition(),
+                              ProgressBar(
+                                isExpanded: true,
+                                colors: ProgressBarColors(bufferedColor: Colors.grey, playedColor: Colors.red),
+                              ),
+                              RemainingDuration(),
+                              IconButton(
+                                icon: Icon(
+                                  reelsProviders.isMuted ? Icons.volume_off : Icons.volume_up,
+                                  color: Colors.white,
+                                ),
+                                onPressed: () {
+                                  if (reelsProviders.isMuted) {
+                                    controller.unMute();
+                                  } else {
+                                    controller.mute();
+                                  }
+                                  reelsProviders.toggleMute();
+                                },
+                              ),
+                            ],
                           ),
-                          onPressed: () {
-                            if (reelsProviders.isMuted) {
-                              controller.unMute();
-                            } else {
-                              controller.mute();
-                            }
-                            reelsProviders.toggleMute();
-                          },
                         ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
