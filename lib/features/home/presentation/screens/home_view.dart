@@ -209,45 +209,54 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                       child: SizedBox(
                         height: 50,
                         child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
                             children: [
                               // 1. Search button
-                              _buildNavItem(
-                                context,
-                                homeProvider,
-                                index: 0,
-                                iconData: Icons.search_rounded,
-                                labelMl: 'തിരയുക',
-                                labelTe: 'శోధన',
+                              Expanded(
+                                child: _buildNavItem(
+                                  context,
+                                  homeProvider,
+                                  index: 0,
+                                  iconData: Icons.search_rounded,
+                                  labelMl: 'തിരയുക',
+                                  labelTe: 'శోధన',
+                                ),
                               ),
                               // 2. Live button
-                              _buildLiveTvNavItem(context, homeProvider),
+                              Expanded(
+                                child: _buildLiveTvNavItem(context, homeProvider),
+                              ),
                               // 3. Home button
-                              _buildNavItem(
-                                context,
-                                homeProvider,
-                                index: 1,
-                                iconPath: "assets/new_app_icon/bytes.svg",
-                                labelMl: 'വാർത്തകൾ',
-                                labelTe: 'వార్తలు',
+                              Expanded(
+                                child: _buildNavItem(
+                                  context,
+                                  homeProvider,
+                                  index: 1,
+                                  iconPath: "assets/new_app_icon/bytes.svg",
+                                  labelMl: 'വാർത്തകൾ',
+                                  labelTe: 'వార్తలు',
+                                ),
                               ),
                               // 4. Bigtv daily button
-                              _buildNavItem(
-                                context,
-                                homeProvider,
-                                index: 2,
-                                iconPath: "assets/new_app_icon/reel.svg",
-                                labelMl: 'ബിഗ് ടിവി ഡെയിലി',
-                                labelTe: 'బిగ్‌టీవీ డైలీ',
+                              Expanded(
+                                child: _buildNavItem(
+                                  context,
+                                  homeProvider,
+                                  index: 2,
+                                  iconPath: "assets/new_app_icon/reel.svg",
+                                  labelMl: 'ബിഗ് ടിവി ഡെയിലി',
+                                  labelTe: 'బిగ్‌టీవీ డైలీ',
+                                ),
                               ),
                               // 5. Marrini button
-                              _buildNavItem(
-                                context,
-                                homeProvider,
-                                index: 3,
-                                iconPath: "assets/new_app_icon/menu.svg",
-                                labelMl: 'കൂടുതൽ',
-                                labelTe: 'మరిన్ని',
+                              Expanded(
+                                child: _buildNavItem(
+                                  context,
+                                  homeProvider,
+                                  index: 3,
+                                  iconPath: "assets/new_app_icon/menu.svg",
+                                  labelMl: 'കൂടുതൽ',
+                                  labelTe: 'మరిన్ని',
+                                ),
                               ),
                             ],
                           ),
@@ -333,7 +342,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
       },
       child: Container(
         height: 50,
-        padding: const EdgeInsets.symmetric(horizontal: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 2),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -364,7 +373,8 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                 maxLines: 1,
                 style: TextStyle(
                   color: itemColor,
-                  fontSize: 11,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
@@ -414,7 +424,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
       },
       child: Container(
         height: 50,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 2),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -440,7 +450,8 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                 maxLines: 1,
                 style: TextStyle(
                   color: itemColor,
-                  fontSize: 11,
+                  fontSize: 9.5,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
