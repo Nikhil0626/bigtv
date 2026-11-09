@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,8 +31,9 @@ class TagVideoGridViewWidget extends StatefulWidget {
 }
 
 class _TagVideoGridViewWidgetState extends State<TagVideoGridViewWidget>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _waveController;
+  Timer? _midnightTimer;
 
   List get videos => widget.videos;
   bool get isLoading => widget.isLoading;
@@ -40,6 +43,8 @@ class _TagVideoGridViewWidgetState extends State<TagVideoGridViewWidget>
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scheduleMidnightTimer();
     _waveController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 3200),
@@ -48,8 +53,33 @@ class _TagVideoGridViewWidgetState extends State<TagVideoGridViewWidget>
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _midnightTimer?.cancel();
     _waveController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && mounted) {
+      // Recalculate day names if device crossed midnight while paused/backgrounded
+      setState(() {});
+      _scheduleMidnightTimer();
+    }
+  }
+
+  void _scheduleMidnightTimer() {
+    _midnightTimer?.cancel();
+    final now = DateTime.now();
+    // Schedule trigger 2 seconds after midnight (00:00:02) to guarantee date rollover
+    final tomorrowMidnight = DateTime(now.year, now.month, now.day + 1, 0, 0, 2);
+    final diff = tomorrowMidnight.difference(now);
+    _midnightTimer = Timer(diff, () {
+      if (mounted) {
+        setState(() {});
+        _scheduleMidnightTimer();
+      }
+    });
   }
 
   String _cleanFileName(String name) {
@@ -57,22 +87,64 @@ class _TagVideoGridViewWidgetState extends State<TagVideoGridViewWidget>
     return name.replaceAll(RegExp(r'\.(mp4|mov|mkv|avi|webm)$', caseSensitive: false), '').trim();
   }
 
+  DateTime? _getDateForFolder(String folder) {
+    final trimmed = folder.trim().toLowerCase();
+    final dayMatch = RegExp(r'^day[\s_\-]*(\d+)$', caseSensitive: false).firstMatch(trimmed);
+    if (dayMatch != null) {
+      final dayNum = int.tryParse(dayMatch.group(1) ?? '1') ?? 1;
+      // day1 = today (0 days ago), day2 = yesterday (1 day ago), day3 = 2 days ago...
+      final daysAgo = dayNum > 0 ? (dayNum - 1) : 0;
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day).subtract(Duration(days: daysAgo));
+    }
+    return null;
+  }
+
   String _formatFolderName(String folder) {
     final trimmed = folder.trim().toLowerCase();
     if (trimmed == 'root' || trimmed.isEmpty) {
       return 'Featured';
     }
-    final dayMatch = RegExp(r'^day\s*(\d+)$', caseSensitive: false).firstMatch(folder.trim());
-    if (dayMatch != null) {
-      return 'Day ${dayMatch.group(1)}';
+    final targetDate = _getDateForFolder(folder);
+    if (targetDate != null) {
+      const weekdays = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
+      return weekdays[targetDate.weekday - 1];
     }
     return folder.trim().split(' ').map((w) => w.isNotEmpty ? '${w[0].toUpperCase()}${w.substring(1)}' : '').join(' ');
+  }
+
+  String _getFolderSubtitle(String folder, String rawVideoDate) {
+    final trimmed = folder.trim().toLowerCase();
+    final dayMatch = RegExp(r'^day[\s_\-]*(\d+)$', caseSensitive: false).firstMatch(trimmed);
+    if (dayMatch != null) {
+      final dayNum = int.tryParse(dayMatch.group(1) ?? '1') ?? 1;
+      final targetDate = _getDateForFolder(folder);
+      if (targetDate != null) {
+        final formattedDate = DateFormat('d MMM').format(targetDate);
+        if (dayNum == 1) {
+          return "Today • $formattedDate";
+        } else if (dayNum == 2) {
+          return "Yesterday • $formattedDate";
+        } else {
+          return formattedDate;
+        }
+      }
+    }
+    return rawVideoDate;
   }
 
   int _folderSortKey(String folder) {
     final trimmed = folder.trim().toLowerCase();
     if (trimmed == 'root' || trimmed.isEmpty) return 0;
-    final dayMatch = RegExp(r'^day\s*(\d+)$', caseSensitive: false).firstMatch(trimmed);
+    final dayMatch = RegExp(r'^day[\s_\-]*(\d+)$', caseSensitive: false).firstMatch(trimmed);
     if (dayMatch != null) {
       return int.tryParse(dayMatch.group(1) ?? '999') ?? 999;
     }
@@ -490,6 +562,7 @@ class _TagVideoGridViewWidgetState extends State<TagVideoGridViewWidget>
                         final date = firstVideo['createdAt'] != null
                             ? firstVideo['createdAt'].toString().split('T').first
                             : "";
+                        final subtitle = _getFolderSubtitle(folderKey, date);
 
                         final cardBg = isFirst
                             ? (isDark ? const Color(0xFF1E1416) : const Color(0xFFFFF7F8))
@@ -654,14 +727,14 @@ class _TagVideoGridViewWidgetState extends State<TagVideoGridViewWidget>
                                               maxLines: 1,
                                               overflow: TextOverflow.ellipsis,
                                             ),
-                                            if (date.isNotEmpty) ...[
+                                            if (subtitle.isNotEmpty) ...[
                                               SizedBox(height: 2.h),
                                               Row(
                                                 children: [
                                                   Icon(Icons.calendar_today_outlined, size: 9.sp, color: subTextColor),
                                                   SizedBox(width: 3.w),
                                                   Text(
-                                                    date,
+                                                    subtitle,
                                                     style: TextStyle(
                                                       fontSize: 10.sp,
                                                       color: subTextColor,

@@ -25,7 +25,6 @@ import 'package:chotanews/utils/date_format.dart';
 
 import 'package:chotanews/utils/in_app_web_view.dart';
 import 'package:chotanews/utils/keep_alive_page.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -40,6 +39,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:chotanews/utils/image_post_slider.dart';
 import 'package:chotanews/utils/translated_text.dart';
 import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
+import 'package:chotanews/features/home/presentation/widgets/link_tap_animation_widget.dart';
 class MainScreenBytView extends StatefulWidget {
   final article;
   final pageController;
@@ -291,7 +291,118 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
   }
 
 
+  bool _isPollPost(dynamic article) {
+    if (article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().trim() ?? '';
+    final subType = article['subType']?.toString().toLowerCase().trim() ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().trim() ?? '';
+    final category = (article['category_name'] ?? article['category'] ?? article['slug'])
+            ?.toString()
+            .toLowerCase()
+            .trim() ??
+        '';
+
+    if (subType == 'polls' || subType == 'poll') return true;
+    if (type == 'polls' || type == 'poll') return true;
+    if (postType == 'polls' || postType == 'poll') return true;
+    if (category == 'polls' || category == 'poll') return true;
+
+    if (article['pollData'] != null &&
+        article['pollData'] is Map &&
+        (article['pollData'] as Map).isNotEmpty) {
+      return true;
+    }
+    if (article['poll_options'] != null &&
+        article['poll_options'] is List &&
+        (article['poll_options'] as List).isNotEmpty) {
+      return true;
+    }
+    return false;
+  }
+
+  bool _isReviewPost(dynamic article) {
+    if (article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().trim() ?? '';
+    final subType = article['subType']?.toString().toLowerCase().trim() ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().trim() ?? '';
+    final category = (article['category_name'] ?? article['category'] ?? article['slug'])
+            ?.toString()
+            .toLowerCase()
+            .trim() ??
+        '';
+
+    if (subType == 'reviews' || subType == 'review' || subType == 'moviereview' || subType == 'moviereviews') return true;
+    if (type == 'reviews' || type == 'review' || type == 'moviereview' || type == 'moviereviews') return true;
+    if (postType == 'reviews' || postType == 'review' || postType == 'moviereview' || postType == 'moviereviews') return true;
+    if (category == 'reviews' || category == 'review' || category == 'moviereview') return true;
+
+    if (article['ratings'] != null || article['movie_rating'] != null || article['rating'] != null) {
+      if (article['platformRatings'] != null || article['platform_ratings'] != null) return true;
+    }
+    return false;
+  }
+
+  bool _isCricketPost(dynamic article) {
+    if (article == null || article is! Map) return false;
+    try {
+      if (!context.read<HomeProvider>().cricketEnable) return false;
+    } catch (_) {}
+    final type = article['type']?.toString().toLowerCase().trim() ?? '';
+    final subType = article['subType']?.toString().toLowerCase().trim() ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().trim() ?? '';
+    final category = (article['category_name'] ?? article['category'] ?? article['slug'])
+            ?.toString()
+            .toLowerCase()
+            .trim() ??
+        '';
+    final url = (article['webUrl'] ?? article['url'] ?? article['postUrl'] ?? '')
+        .toString()
+        .toLowerCase()
+        .trim();
+
+    if (article['id'] == 777701 || article['isCricket'] == true) return true;
+    if (type.contains('cricket') || subType.contains('cricket') || postType.contains('cricket') || category.contains('cricket')) return true;
+    if (url.contains('bigtv_cricket') || url.contains('nikhil0626.github.io')) return true;
+    return false;
+  }
+
+  bool _isWebViewPost(dynamic article) {
+    if (article == null || article is! Map) return false;
+    final type = article['type']?.toString().toLowerCase().trim() ?? '';
+    final subType = article['subType']?.toString().toLowerCase().trim() ?? '';
+    final postType = article['post_type']?.toString().toLowerCase().trim() ?? '';
+    return type == 'weburl' ||
+        subType == 'weburl' ||
+        postType == 'weburl' ||
+        type == 'cricketwebview' ||
+        subType == 'cricketwebview' ||
+        postType == 'cricketwebview';
+  }
+
+  String _getWebUrl(dynamic article) {
+    if (article == null || article is! Map) return HomeProvider.cricketWebUrl;
+    final webUrl = (article['webUrl'] ?? article['url'] ?? article['postUrl'] ?? article['link'] ?? '')
+        .toString()
+        .trim();
+    if (webUrl.isNotEmpty && (webUrl.startsWith('http://') || webUrl.startsWith('https://'))) {
+      return webUrl;
+    }
+    final providerUrl = context.read<HomeProvider>().webUrl.trim();
+    if (providerUrl.isNotEmpty && (providerUrl.startsWith('http://') || providerUrl.startsWith('https://'))) {
+      return providerUrl;
+    }
+    return HomeProvider.cricketWebUrl;
+  }
+
   Widget _buildImageBookmarkButton(BuildContext context) {
+    // Hide bookmark button for video posts
+    final isVideo = widget.article['type'] == 'Video' ||
+        widget.article['post_type'] == 'video' ||
+        (widget.article['video_url'] != null &&
+            widget.article['video_url'].toString().trim().isNotEmpty);
+    if (isVideo) {
+      return const SizedBox.shrink();
+    }
     return Consumer<BookmarksProvider>(
       builder: (context, bookmarksProvider, _) {
         final isBookmarked = bookmarksProvider.isPostBookmarked(
@@ -341,6 +452,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isPostActive = widget.pageController == null ||
+        context.watch<HomeProvider>().currentPageIndex == widget.index;
     return (widget.index + 2 >
                 context.read<HomeProvider>().getAllPostList.length &&
             context.read<HomeProvider>().isAiTagDataLoaded)
@@ -403,18 +516,22 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                     ? widget.article['moreFollowTags'] as List
                                     : [])),
                       )
-                    : (widget.article['type'].toString() == "Standard" &&
-                            widget.article['subType'].toString().toLowerCase() ==
-                                "polls")
+                    : (_isCricketPost(widget.article) || _isWebViewPost(widget.article))
+                        ? InAppWebViewScreen(
+                            webUrl: _getWebUrl(widget.article),
+                            title: '',
+                            isHome: true,
+                            backgroundColor: _isCricketPost(widget.article)
+                                ? const Color(0xFF0C0508)
+                                : null,
+                          )
+                    : _isPollPost(widget.article)
                     ? PollScreenDesign(
                         artical: widget.article,
                         index: widget.index,
+                        showTopBar: false,
                       )
-                    : (widget.article['type'].toString() == "Standard" &&
-                            widget.article['subType']
-                                    .toString()
-                                    .toLowerCase() ==
-                                "reviews")
+                    : _isReviewPost(widget.article)
                         ? MovieRatings(
                             article: widget.article,
                           )
@@ -438,17 +555,16 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                             },
                             child: Screenshot(
                               controller: adsScreenshotController,
-                              child: widget.article['type'].toString() ==
-                                      "WebUrl"
-                                  ? Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: InAppWebViewScreen(
-                                        webUrl: context
-                                            .read<HomeProvider>()
-                                            .webUrl
-                                            .toString(),
-                                        title: '',
-                                      ),
+                              child: (widget.article['type'].toString() == "WebUrl" ||
+                                      _isWebViewPost(widget.article) ||
+                                      _isCricketPost(widget.article))
+                                  ? InAppWebViewScreen(
+                                      webUrl: _getWebUrl(widget.article),
+                                      title: '',
+                                      isHome: true,
+                                      backgroundColor: _isCricketPost(widget.article)
+                                          ? const Color(0xFF0C0508)
+                                          : null,
                                     )
                                   : widget.article['type'] == "Reel"
                                           ? FullStandardVideoView(
@@ -729,8 +845,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                     right: 0,
                                                                     child: Image.asset(
                                                                       "assets/images/BigTvPostLogo.png",
-                                                                      width: 120,
-                                                                      height: 40,
+                                                                      width: 95.w,
+                                                                      height: 32.h,
                                                                       fit: BoxFit.contain,
                                                                     ),
                                                                   ),
@@ -915,16 +1031,18 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                  ),
                                                                                ],
                                                                              )
-                                                                           : (widget.article['links'] != null && (widget.article['links'] as List).isNotEmpty)
+                                                                           : ((widget.article['links'] != null && (widget.article['links'] as List).isNotEmpty) ||
+                                                                                  RegExp(r'(https?:\/\/[^\s]+|<link\d+>)').hasMatch(widget.article['content']?.toString() ?? ''))
                                                                                ? RichText(
                                                                                    text: TextSpan(
                                                                                      text: '',
                                                                                      children: _parseText(
-                                                                                       context, 
-                                                                                       widget.article['content']?.toString() ?? "", 
-                                                                                       widget.article['links'], 
-                                                                                       widget.article
-                                                                                     ),
+                                                                                        context, 
+                                                                                        widget.article['content']?.toString() ?? "", 
+                                                                                        widget.article['links'], 
+                                                                                        widget.article,
+                                                                                        isPostActive: isPostActive,
+                                                                                      ),
                                                                                    ),
                                                                                  )
                                                                                : TranslatedText(
@@ -962,9 +1080,9 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                              }
                                                                                            },
                                                                                            child: Text(
-                                                                                             "BIGTV.COM",
-                                                                                             style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : Colors.red),
-                                                                                           ),
+                                                                                              "BIGTV.COM",
+                                                                                              style: fontStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: (_isBigTvSpecial(widget.article) || _isDarkBg(widget.article, context)) ? Colors.white : Colors.red),
+                                                                                            ),
                                                                                          ),
                                                                                        ),
                                                                                      if (widget.article['isStickyPost'] != 1)
@@ -1068,10 +1186,10 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
           );
   }
 
-  List<TextSpan> _parseText(BuildContext context, String text, links, article) {
+  List<InlineSpan> _parseText(BuildContext context, String text, links, article, {bool isPostActive = true}) {
     RegExp linkRegExp =
-        RegExp(r'(https?:\/\/[^\s]+|<link\d+>(.*?)<\/link\d+>)');
-    List<TextSpan> spans = [];
+        RegExp(r'\[?(https?:\/\/[^\s\]]+|<link\d+>(.*?)<\/link\d+>)\]?');
+    List<InlineSpan> spans = [];
     final isDark = _isDarkBg(article ?? widget.article, context);
 
     text.splitMapJoin(linkRegExp, onMatch: (match) {
@@ -1087,29 +1205,41 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
       } else {
         link = link;
       }
-      spans.add(TextSpan(
-        text: match
-            .group(0)
-            .toString()
-            .replaceFirst('<link1>', '')
-            .replaceFirst('</link1>', '')
-            .replaceFirst('<link2>', '')
-            .replaceFirst('</link2>', '')
-            .replaceFirst('<link3>', '')
-            .replaceFirst('</link3>', ''),
-        style: homeScreenFontStyle(
-          color: _isBigBlackStandard(article)
-              ? Colors.white
-              : (isDark ? Colors.blue.shade200 : Colors.blue),
-          fontWeight: FontWeight.w600,
-          fontSize: 16.sp,
+      final String linkText = match
+          .group(0)
+          .toString()
+          .replaceFirst('<link1>', '')
+          .replaceFirst('</link1>', '')
+          .replaceFirst('<link2>', '')
+          .replaceFirst('</link2>', '')
+          .replaceFirst('<link3>', '')
+          .replaceFirst('</link3>', '')
+          .replaceAll('[', '')
+          .replaceAll(']', '')
+          .trim();
+
+      // Hand tapping animation on the stack overlay of the link (disappears after 3 taps)
+      spans.add(
+        WidgetSpan(
+          alignment: PlaceholderAlignment.middle,
+          child: HyperlinkWithTapAnimation(
+            text: linkText,
+            url: link.toString(),
+            style: homeScreenFontStyle(
+              color: _isBigBlackStandard(article)
+                  ? Colors.white
+                  : (isDark ? Colors.blue.shade200 : const Color(0xFF2563EB)),
+              fontWeight: FontWeight.w600,
+              fontSize: 16.sp,
+            ),
+            isDark: isDark,
+            isActive: isPostActive,
+            onTap: () async {
+              launchURL(Uri.parse(link.toString()));
+            },
+          ),
         ),
-        recognizer: TapGestureRecognizer()
-          ..onTap = () async {
-            print("sbhjhfjksdfnsdknf1111 $link");
-            launchURL(Uri.parse(link.toString()));
-          },
-      ));
+      );
 
       return "";
     }, onNonMatch: (nonMatch) {

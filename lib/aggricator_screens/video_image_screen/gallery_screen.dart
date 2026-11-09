@@ -5,7 +5,6 @@ import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
-import 'package:chotanews/features/auth/presentation/providers/authentication_provider.dart';
 import 'package:chotanews/utils/app_colors.dart';
 import 'package:chotanews/utils/app_fonts.dart';
 import 'package:chotanews/utils/app_spaces.dart';
@@ -15,18 +14,13 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:chotanews/utils/app_toasts.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 import '../../../aggricator_screens/settings_screen/settings_provider/settings_provider.dart';
 import '../../../globel_keys/app_router.dart';
 import '../../../services/image_to_pdf_helper.dart';
-import '../../../services/webengage_event_tracks.dart';
-import '../../../utils/commant_screen.dart';
 import 'package:chotanews/features/home/presentation/widgets/image_preview.dart';
 
 import '../../utils/botton_actions.dart';
@@ -214,7 +208,7 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                             settingsProvider.isLikePost(widget.postDetails);
                              EventRepo().addEvent({
                               "like": !settingsProvider.isLikeList.contains(widget.postDetails['id'].toString()),
-                              "postId": widget.postDetails['id'].toString()??"000",
+                              "postId": widget.postDetails['id']?.toString() ?? "000",
                               "createAt": DateTime.now().toString(),
                                "postTitle": widget.postDetails['title'].toString()
 
@@ -226,19 +220,7 @@ class FullPageCarouselState extends State<FullPageCarousel> {
                       },
                     ),
 
-                    width(width: 12.sp),
 
-                    BottomActions(
-                      postType: widget.postDetails['subType'] ?? "",
-                      icon: "assets/svg/new_comment.svg",
-                      label: 'కామెంట్',
-                      iconColor: AppColorTokens.primaryRed,
-                      iconSize: 28,
-                      onTap: () async {
-                        context.read<AuthenticationProvider>().sendEvent("CommentPage");
-                        showComments(context, widget.postDetails['id'],widget.postDetails['title'],);
-                      },
-                    ),
                     const Spacer(),
                     InkWell(
                       onTap: () {

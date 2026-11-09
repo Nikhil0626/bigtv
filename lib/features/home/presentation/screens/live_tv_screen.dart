@@ -1,11 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chotanews/analytics/analytics_service.dart';
 import 'package:chotanews/analytics/models/analytics_event_name.dart';
+import 'package:chotanews/features/home/presentation/providers/home_provider.dart';
+import 'package:chotanews/features/home/presentation/widgets/live_eye_animation_icon.dart';
 import 'package:chotanews/services/live_tv_share_helper.dart';
 import 'package:chotanews/utils/top_right_wave_painter.dart';
 
@@ -13,12 +18,18 @@ class LiveTvScreen extends StatefulWidget {
   final String streamUrl;
   final String channelName;
   final String? playbackType;
+  final int? watchCount;
+  final String? formattedWatchCount;
+  final bool? watchCountEnabled;
 
   const LiveTvScreen({
     super.key,
     required this.streamUrl,
     this.channelName = "BIGTV",
     this.playbackType = "hls",
+    this.watchCount,
+    this.formattedWatchCount,
+    this.watchCountEnabled,
   });
 
   @override
@@ -39,6 +50,11 @@ class _LiveTvScreenState extends State<LiveTvScreen>
   late AnimationController _waveController;
   late Animation<double> _waveAnimation;
 
+  int? _watchCount;
+  String? _formattedWatchCount;
+  bool _watchCountEnabled = true;
+  Timer? _watchCountTimer;
+
   bool get _isMalayalam =>
       widget.streamUrl.contains('malayalam') ||
       widget.channelName.toLowerCase().contains('malayalam');
@@ -46,6 +62,17 @@ class _LiveTvScreenState extends State<LiveTvScreen>
   @override
   void initState() {
     super.initState();
+    _watchCount = widget.watchCount;
+    _formattedWatchCount = widget.formattedWatchCount;
+    _watchCountEnabled = widget.watchCountEnabled ?? true;
+
+    if (_watchCount == null && (_formattedWatchCount == null || _formattedWatchCount!.isEmpty)) {
+      _refreshWatchCount();
+    }
+    _watchCountTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      _refreshWatchCount();
+    });
+
     _waveController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 4),
@@ -179,6 +206,7 @@ class _LiveTvScreenState extends State<LiveTvScreen>
         'watch_duration_seconds': watchDuration,
       });
     }
+    _watchCountTimer?.cancel();
     _waveController.dispose();
     _hideControlsTimer?.cancel();
     _controller?.dispose();
@@ -188,6 +216,114 @@ class _LiveTvScreenState extends State<LiveTvScreen>
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: SystemUiOverlay.values);
     super.dispose();
+  }
+
+  Future<void> _refreshWatchCount() async {
+    if (_isMalayalam) return;
+    try {
+      final response = await http.get(
+        Uri.parse('https://api.pravasamedia.com/api/v1/live'),
+        headers: {'accept': '*/*'},
+      ).timeout(const Duration(seconds: 8));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data is Map<String, dynamic> && mounted) {
+          setState(() {
+            if (data['watch_count'] != null) {
+              _watchCount = data['watch_count'] is num
+                  ? (data['watch_count'] as num).toInt()
+                  : int.tryParse(data['watch_count'].toString());
+            }
+            if (data['formatted_watch_count'] != null) {
+              _formattedWatchCount = data['formatted_watch_count'].toString();
+            }
+            if (data['watch_count_enabled'] != null) {
+              _watchCountEnabled = data['watch_count_enabled'] == true ||
+                  data['watch_count_enabled'] == 1 ||
+                  data['watch_count_enabled'] == 'true';
+            }
+          });
+        }
+      }
+    } catch (e) {
+      log("Live TV watch count refresh error: $e");
+    }
+  }
+
+  bool get _isWatchCountVisible {
+    if (!_watchCountEnabled) return false;
+    try {
+      if (!context.read<HomeProvider>().liveTvCountEnable) return false;
+    } catch (_) {}
+    final str = _getDisplayWatchCount();
+    return str.isNotEmpty && str != "0";
+  }
+
+  String _getDisplayWatchCount() {
+    if (_formattedWatchCount != null && _formattedWatchCount!.trim().isNotEmpty) {
+      return _formattedWatchCount!.trim();
+    }
+    if (_watchCount != null && _watchCount! > 0) {
+      return _formatWatchCount(_watchCount!);
+    }
+    return "";
+  }
+
+  String _formatWatchCount(int count) {
+    if (count >= 1000000) {
+      final val = count / 1000000.0;
+      return "${val.toStringAsFixed(val >= 10 ? 0 : 1)}M".replaceAll('.0M', 'M');
+    }
+    if (count >= 1000) {
+      final val = count / 1000.0;
+      return "${val.toStringAsFixed(val >= 10 ? 0 : 1)}K".replaceAll('.0K', 'K');
+    }
+    return count.toString();
+  }
+
+  Widget _buildWatchCountBadge(bool isLandscapeMode) {
+    return Container(
+      padding: EdgeInsets.symmetric(
+        horizontal: isLandscapeMode ? 12.0 : 9.w,
+        vertical: isLandscapeMode ? 5.5 : 4.h,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.65),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.25),
+          width: 0.8,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.45),
+            blurRadius: 6,
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          LiveEyeAnimationIcon(
+            size: isLandscapeMode ? 24.0 : 16.0,
+            color: Colors.white,
+            pupilColor: const Color(0xFFED1C24),
+            showRipple: true,
+          ),
+          SizedBox(width: isLandscapeMode ? 6.0 : 5.w),
+          Text(
+            _getDisplayWatchCount(),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: isLandscapeMode ? 14.0 : 12.sp,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 0.3,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -369,8 +505,8 @@ class _LiveTvScreenState extends State<LiveTvScreen>
                               // Live Badge
                               Container(
                                 padding: EdgeInsets.symmetric(
-                                  horizontal: isLandscapeMode ? 6.w : 10.w,
-                                  vertical: isLandscapeMode ? 2.h : 4.h,
+                                  horizontal: isLandscapeMode ? 10.0 : 10.w,
+                                  vertical: isLandscapeMode ? 5.5 : 4.h,
                                 ),
                                 decoration: BoxDecoration(
                                   color: Colors.red.shade700,
@@ -387,28 +523,33 @@ class _LiveTvScreenState extends State<LiveTvScreen>
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     Container(
-                                      width: isLandscapeMode ? 5.r : 8.r,
-                                      height: isLandscapeMode ? 5.r : 8.r,
+                                      width: isLandscapeMode ? 7.5 : 8.r,
+                                      height: isLandscapeMode ? 7.5 : 8.r,
                                       decoration: const BoxDecoration(
                                         color: Colors.white,
                                         shape: BoxShape.circle,
                                       ),
                                     ),
-                                    SizedBox(width: 4.w),
+                                    SizedBox(width: isLandscapeMode ? 5.0 : 4.w),
                                     Text(
                                       "LIVE",
                                       style: TextStyle(
                                         color: Colors.white,
-                                        fontSize: isLandscapeMode ? 8.sp : 12.sp,
+                                        fontSize: isLandscapeMode ? 13.0 : 12.sp,
                                         fontWeight: FontWeight.bold,
                                         letterSpacing: 1.0,
                                       ),
                                     ),
-                                    ],
-                                  ),
+                                  ],
                                 ),
+                              ),
+                              // Live Watch Count with Animated Eye Icon
+                              if (_isWatchCountVisible) ...[
+                                SizedBox(width: isLandscapeMode ? 8.0 : 8.w),
+                                _buildWatchCountBadge(isLandscapeMode),
                               ],
-                            ),
+                            ],
+                          ),
                           ),
                         ),
 

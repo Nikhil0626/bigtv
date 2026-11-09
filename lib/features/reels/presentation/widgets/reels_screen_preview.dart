@@ -1,3 +1,6 @@
+import 'package:wakelock_plus/wakelock_plus.dart';
+import 'dart:async';
+import 'package:chotanews/core/theme/color_tokens.dart';
 import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -33,7 +36,7 @@ class ReelPreviewScreen extends StatefulWidget {
   ReelPreviewScreenState createState() => ReelPreviewScreenState();
 }
 
-class ReelPreviewScreenState extends State<ReelPreviewScreen> {
+class ReelPreviewScreenState extends State<ReelPreviewScreen> with WidgetsBindingObserver {
   late PageController _pageController;
   int currentIndex = 0;
   bool _isAutoScrolling = false;
@@ -47,6 +50,8 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    WakelockPlus.enable();
     currentIndex = widget.initialIndex;
     _reelStartTime = DateTime.now();
     _pageController = PageController(initialPage: widget.initialIndex);
@@ -246,7 +251,18 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      WakelockPlus.enable();
+    } else if (state == AppLifecycleState.paused || state == AppLifecycleState.inactive) {
+      WakelockPlus.disable();
+    }
+  }
+
+  @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    WakelockPlus.disable();
     _pageController.dispose();
     for (final c in _networkControllers.values) {
       c.dispose();
@@ -262,7 +278,7 @@ class ReelPreviewScreenState extends State<ReelPreviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: AppColorTokens.primaryRed,
       body: Consumer<ReelsProviders>(
         builder: (_, reelsProviders, __) {
           final reelsList = reelsProviders.getAllReelsList;
@@ -362,6 +378,9 @@ class _ReelsCardViewState extends State<ReelsCardView> {
   ScreenshotController sc = ScreenshotController();
   bool _hasCompleted = false;
   int _playCount = 0;
+  Timer? _feedbackTimer;
+  bool _showAnimatedFeedback = false;
+  IconData _feedbackIcon = Icons.play_arrow_rounded;
 
   @override
   void initState() {
@@ -393,9 +412,102 @@ class _ReelsCardViewState extends State<ReelsCardView> {
 
   @override
   void dispose() {
+    _feedbackTimer?.cancel();
     widget.videoController?.removeListener(_controllerListener);
     widget.youtubeController?.removeListener(_ytListener);
     super.dispose();
+  }
+
+  void _togglePlayPause() {
+    bool nowPlaying = false;
+    final vc = widget.videoController;
+    final yc = widget.youtubeController;
+
+    if (vc != null && vc.value.isInitialized) {
+      if (vc.value.isPlaying) {
+        vc.pause();
+        nowPlaying = false;
+        AnalyticsService.instance.track(AnalyticsEventName.reelPause, properties: {
+          'reel_id': widget.reelCard.id,
+        });
+      } else {
+        vc.play();
+        nowPlaying = true;
+        AnalyticsService.instance.track(AnalyticsEventName.reelPlay, properties: {
+          'reel_id': widget.reelCard.id,
+        });
+      }
+    } else if (yc != null) {
+      if (yc.value.isPlaying) {
+        yc.pause();
+        nowPlaying = false;
+        AnalyticsService.instance.track(AnalyticsEventName.reelPause, properties: {
+          'reel_id': widget.reelCard.id,
+        });
+      } else {
+        yc.play();
+        nowPlaying = true;
+        AnalyticsService.instance.track(AnalyticsEventName.reelPlay, properties: {
+          'reel_id': widget.reelCard.id,
+        });
+      }
+    }
+
+    _feedbackTimer?.cancel();
+    setState(() {
+      _showAnimatedFeedback = true;
+      _feedbackIcon = nowPlaying ? Icons.play_arrow_rounded : Icons.pause_rounded;
+    });
+
+    _feedbackTimer = Timer(const Duration(milliseconds: 650), () {
+      if (mounted) {
+        setState(() {
+          _showAnimatedFeedback = false;
+        });
+      }
+    });
+  }
+
+  Widget _buildPlayPauseOverlay(bool isPlaying) {
+    final bool shouldShow = !isPlaying || _showAnimatedFeedback;
+    if (!shouldShow) {
+      return const SizedBox.shrink();
+    }
+
+    final IconData icon = _showAnimatedFeedback
+        ? _feedbackIcon
+        : Icons.play_arrow_rounded;
+
+    return Center(
+      child: AnimatedOpacity(
+        opacity: shouldShow ? 1.0 : 0.0,
+        duration: const Duration(milliseconds: 200),
+        child: Container(
+          width: 72.r,
+          height: 72.r,
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.55),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.6),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 10,
+                spreadRadius: 2,
+              ),
+            ],
+          ),
+          child: Icon(
+            icon,
+            size: 46.r,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
   }
 
   void _controllerListener() {
@@ -475,30 +587,34 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           final double vWidth = size.width > 0 ? size.width : screenWidth;
           final double vHeight = size.height > 0 ? size.height : screenHeight;
 
-          return GestureDetector(
-            onTap: () {
-              if (widget.videoController!.value.isPlaying) {
-                widget.videoController!.pause();
-                AnalyticsService.instance.track(AnalyticsEventName.reelPause, properties: {
-                  'reel_id': widget.reelCard.id,
-                });
-              } else {
-                widget.videoController!.play();
-                AnalyticsService.instance.track(AnalyticsEventName.reelPlay, properties: {
-                  'reel_id': widget.reelCard.id,
-                });
-              }
-            },
-            child: SizedBox.expand(
-              child: FittedBox(
-                fit: BoxFit.cover,
-                child: SizedBox(
-                  width: vWidth,
-                  height: vHeight,
-                  child: VideoPlayer(widget.videoController!),
+          return ValueListenableBuilder<VideoPlayerValue>(
+            valueListenable: widget.videoController!,
+            builder: (context, videoValue, _) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _togglePlayPause,
+                child: Container(
+                  color: AppColorTokens.primaryRed,
+                  width: double.infinity,
+                  height: double.infinity,
+                  alignment: Alignment.center,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: vWidth,
+                          height: vHeight,
+                          child: VideoPlayer(widget.videoController!),
+                        ),
+                      ),
+                      _buildPlayPauseOverlay(videoValue.isPlaying),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       );
@@ -513,44 +629,75 @@ class _ReelsCardViewState extends State<ReelsCardView> {
           } else {
             widget.youtubeController!.unMute();
           }
-          final double targetHeight = screenWidth / (9 / 16);
-          return SizedBox.expand(
-            child: FittedBox(
-              fit: BoxFit.cover,
-              child: SizedBox(
-                width: screenWidth,
-                height: targetHeight > screenHeight ? targetHeight : screenHeight,
-                child: YoutubePlayer(
-                  controller: widget.youtubeController!,
-                  aspectRatio: 9 / 16,
-                  bufferIndicator: const Align(
-                    alignment: Alignment.bottomCenter,
-                    child: LinearProgressIndicator(
-                      color: Colors.red,
-                      backgroundColor: Colors.transparent,
-                    ),
+          return ValueListenableBuilder<YoutubePlayerValue>(
+            valueListenable: widget.youtubeController!,
+            builder: (context, ytValue, _) {
+              return GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _togglePlayPause,
+                child: Container(
+                  color: AppColorTokens.primaryRed,
+                  width: double.infinity,
+                  height: double.infinity,
+                  alignment: Alignment.center,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      FittedBox(
+                        fit: BoxFit.contain,
+                        child: SizedBox(
+                          width: screenWidth,
+                          height: screenWidth / (9 / 16),
+                          child: IgnorePointer(
+                            ignoring: true,
+                            child: YoutubePlayer(
+                              controller: widget.youtubeController!,
+                              aspectRatio: 9 / 16,
+                              bufferIndicator: const Align(
+                                alignment: Alignment.bottomCenter,
+                                child: LinearProgressIndicator(
+                                  color: AppColorTokens.primaryRed,
+                                  backgroundColor: Colors.transparent,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      _buildPlayPauseOverlay(ytValue.isPlaying),
+                    ],
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       );
     }
 
-    // 3. Instant Thumbnail Cover (Fills screen with BoxFit.cover)
+    // 3. Instant Thumbnail Cover (Fills screen with BoxFit.contain)
     if (widget.reelCard.thumbnailUrl.isNotEmpty) {
-      return SizedBox.expand(
-        child: CachedNetworkImage(
-          imageUrl: widget.reelCard.thumbnailUrl,
-          fit: BoxFit.cover,
-          placeholder: (_, __) => Container(color: Colors.black),
-          errorWidget: (_, __, ___) => Container(color: Colors.black),
+      return Container(
+        color: AppColorTokens.primaryRed,
+        width: double.infinity,
+        height: double.infinity,
+        alignment: Alignment.center,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            CachedNetworkImage(
+              imageUrl: widget.reelCard.thumbnailUrl,
+              fit: BoxFit.contain,
+              placeholder: (_, __) => Container(color: AppColorTokens.primaryRed),
+              errorWidget: (_, __, ___) => Container(color: AppColorTokens.primaryRed),
+            ),
+            _buildPlayPauseOverlay(false),
+          ],
         ),
       );
     }
 
-    return Container(color: Colors.black);
+    return Container(color: AppColorTokens.primaryRed);
   }
 
   @override

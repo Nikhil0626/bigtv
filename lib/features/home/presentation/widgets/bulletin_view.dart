@@ -426,17 +426,17 @@ class _BulletinViewState extends State<BulletinView>
                           children: [
                             RichText(
                               text: TextSpan(
-                                text: "Live news\n",
+                                text: "Just ",
                                 style: TextStyle(
                                   fontFamily: 'Poppins',
-                                  fontSize: 25.sp,
+                                  fontSize: 26.sp,
                                   fontWeight: FontWeight.w900,
                                   color: isDark ? Colors.white : const Color(0xFF181A20),
                                   height: 1.15,
                                 ),
                                 children: const [
                                   TextSpan(
-                                    text: "bulletins.",
+                                    text: "in",
                                     style: TextStyle(
                                       color: Color(0xFFED1C24),
                                     ),

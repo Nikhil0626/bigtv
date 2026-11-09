@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'dart:math' as math;
 import 'package:chotanews/aggricator_screens/individual_post_details/individual_post_view.dart';
+import 'package:chotanews/aggricator_screens/polls_screens/polls_view/polls_feed_screen.dart';
+import 'package:chotanews/aggricator_screens/rating_screen/rating_view/movie_reviews_screen.dart';
 import 'package:chotanews/core/theme/color_tokens.dart';
 import 'package:chotanews/features/bookmarks/presentation/providers/bookmarks_provider.dart';
 import 'package:chotanews/features/bookmarks/presentation/screens/bookmarks_screen.dart';
@@ -10,7 +12,6 @@ import 'package:chotanews/features/home/presentation/screens/epaper_screen.dart'
 import 'package:chotanews/features/home/presentation/screens/live_tv_screen.dart';
 import 'package:chotanews/features/home/presentation/widgets/games_bottom_sheet.dart';
 import 'package:chotanews/features/home/presentation/widgets/lottie_3d_icon.dart';
-import 'package:chotanews/services/live_tv_share_helper.dart';
 import 'package:chotanews/features/notifications/data/models/app_notification_model.dart';
 import 'package:chotanews/features/notifications/presentation/providers/notifications_provider.dart';
 import 'package:chotanews/features/notifications/presentation/widgets/notification_item_card.dart';
@@ -218,7 +219,17 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
         statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
         statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
       ),
-      child: Scaffold(
+      child: PopScope(
+        canPop: _selectedTabIndex == 0,
+        onPopInvokedWithResult: (didPop, result) {
+          if (didPop) return;
+          if (_selectedTabIndex != 0) {
+            setState(() {
+              _selectedTabIndex = 0;
+            });
+          }
+        },
+        child: Scaffold(
         backgroundColor: isDark ? const Color(0xFF0F0F0F) : const Color(0xFFFBFBFC),
         body: Stack(
           children: [
@@ -264,6 +275,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -479,9 +491,9 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                     Container(
                       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFFEF2F2),
+                        color: isDark ? const Color(0xFF2E1A1A) : const Color(0xFFFEF2F2),
                         borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(color: const Color(0xFFFECACA), width: 0.8),
+                        border: Border.all(color: isDark ? const Color(0xFF5A2222) : const Color(0xFFFECACA), width: 0.8),
                       ),
                       child: Text(
                         "${notifProvider.total} ${isTelugu ? "అలర్ట్‌లు" : "അറിയിപ്പുകൾ"}",
@@ -558,54 +570,9 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
         physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.symmetric(horizontal: 14.w),
         children: [
-          // 1. EDITORIAL
+          // 1. REPORTERS
           _buildCompactChip(
             index: 0,
-            icon: Icons.article_rounded,
-            iconColor: const Color(0xFFFF2A2A),
-            imagePath: 'assets/images/editorial_3d_icon.png',
-            label: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const EditorialScreen()),
-              );
-            },
-          ),
-          SizedBox(width: 8.w),
-
-          // 2. E-PAPER (Removed for Malayalam)
-          if (isTelugu) ...[
-            _buildCompactChip(
-              index: 1,
-              icon: Icons.newspaper_rounded,
-              iconColor: const Color(0xFFD97706),
-              imagePath: 'assets/images/epaper_3d_icon.png',
-              label: "ఈ-పేపర్",
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const EpaperScreen()),
-                );
-              },
-            ),
-            SizedBox(width: 8.w),
-          ],
-
-          // 3. GAMES
-          _buildCompactChip(
-            index: 2,
-            icon: Icons.sports_esports_rounded,
-            iconColor: const Color(0xFF059669),
-            imagePath: 'assets/images/game_3d_icon.png',
-            label: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
-            onTap: () => GamesBottomSheet.show(context, isTelugu),
-          ),
-          SizedBox(width: 8.w),
-
-          // 4. REPORTERS
-          _buildCompactChip(
-            index: 3,
             icon: Icons.mic_rounded,
             iconColor: const Color(0xFF7C3AED),
             imagePath: 'assets/images/reporters_3d_icon.png',
@@ -624,9 +591,86 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
           ),
           SizedBox(width: 8.w),
 
-          // 5. BOOKMARKS
+          // 2. GAMES
           _buildCompactChip(
-            index: 4,
+            index: 1,
+            icon: Icons.sports_esports_rounded,
+            iconColor: const Color(0xFF059669),
+            imagePath: 'assets/images/game_3d_icon.png',
+            label: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
+            onTap: () => GamesBottomSheet.show(context, isTelugu),
+          ),
+          SizedBox(width: 8.w),
+
+          // 3. MOVIE REVIEWS
+          _buildCompactChip(
+            index: 2,
+            icon: Icons.movie_filter_rounded,
+            iconColor: const Color(0xFFE50914),
+            imagePath: 'assets/images/movie_reviews_3d_icon.png',
+            label: isTelugu ? "సినిమా రివ్యూస్" : "സിനിമ റിവ്യൂകൾ",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MovieReviewsScreen()),
+              );
+            },
+          ),
+          SizedBox(width: 8.w),
+
+          // 4. POLLS
+          _buildCompactChip(
+            index: 3,
+            icon: Icons.how_to_vote_rounded,
+            iconColor: const Color(0xFFE50914),
+            imagePath: 'assets/images/polls_3d_icon.png',
+            label: isTelugu ? "పోల్స్" : "വോട്ടെടുപ്പ്",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PollsFeedScreen()),
+              );
+            },
+          ),
+          SizedBox(width: 8.w),
+
+          // 5. E-PAPER (Telugu only)
+          if (isTelugu) ...[
+            _buildCompactChip(
+              index: 4,
+              icon: Icons.newspaper_rounded,
+              iconColor: const Color(0xFFD97706),
+              imagePath: 'assets/images/epaper_3d_icon.png',
+              label: "ఈ-పేపర్",
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const EpaperScreen()),
+                );
+              },
+            ),
+            SizedBox(width: 8.w),
+          ],
+
+          // 6. EDITORIAL
+          _buildCompactChip(
+            index: 5,
+            icon: Icons.article_rounded,
+            iconColor: const Color(0xFFFF2A2A),
+            imagePath: 'assets/images/editorial_3d_icon.png',
+            label: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const EditorialScreen()),
+              );
+            },
+          ),
+          SizedBox(width: 8.w),
+
+          // 7. BOOKMARKS
+          _buildCompactChip(
+            index: 6,
             icon: Icons.bookmark_rounded,
             iconColor: const Color(0xFFBE185D),
             imagePath: 'assets/images/bookmarks_3d_icon.png',
@@ -640,9 +684,9 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
           ),
           SizedBox(width: 8.w),
 
-          // 6. MY FEED / NEWS
+          // 8. MY FEED / NEWS (Arranged last)
           _buildCompactChip(
-            index: 5,
+            index: 7,
             icon: Icons.dynamic_feed_rounded,
             iconColor: const Color(0xFF2563EB),
             imagePath: 'assets/images/myfeed_3d_icon.png',
@@ -716,6 +760,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     NotificationsProvider notifProvider,
     bool isTelugu,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -744,7 +789,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                   ? (isTelugu ? "ఫలితాలు కనుగొనబడలేదు" : "ഫലങ്ങളൊന്നും കണ്ടെത്തിയില്ല")
                   : (isTelugu ? "నోటిఫికేషన్‌లు ఏవీ లేవు" : "അറിയിപ്പുകൾ ഒന്നും ലഭ്യമല്ല"),
               style: TextStyle(
-                color: const Color(0xFF0F172A),
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
                 fontSize: 15.sp,
                 fontWeight: FontWeight.w700,
               ),
@@ -776,6 +821,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     NotificationsProvider notifProvider,
     bool isTelugu,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Center(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 24.w),
@@ -791,7 +837,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             Text(
               isTelugu ? "కనెక్షన్ లోపం ఏర్పడింది" : "കണക്ഷൻ തകരാർ",
               style: TextStyle(
-                color: const Color(0xFF0F172A),
+                color: isDark ? Colors.white : const Color(0xFF0F172A),
                 fontSize: 14.sp,
                 fontWeight: FontWeight.w700,
               ),
@@ -848,7 +894,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
 
           SizedBox(height: 22.h),
 
-          // 2. BigTV 24x7 Broadcast Hero Card
+          // 2. BigTV Broadcast Hero Card
           _buildLiveTvHeroBanner(context, homeProvider, isTelugu),
 
           SizedBox(height: 24.h),
@@ -1031,6 +1077,13 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                       streamUrl: liveData['stream_url'].toString(),
                       channelName: (liveData['channel_name'] ?? "BIGTV").toString(),
                       playbackType: (liveData['playback_type'] ?? "hls").toString(),
+                      watchCount: liveData['watch_count'] is num
+                          ? (liveData['watch_count'] as num).toInt()
+                          : int.tryParse(liveData['watch_count']?.toString() ?? ''),
+                      formattedWatchCount: liveData['formatted_watch_count']?.toString(),
+                      watchCountEnabled: liveData['watch_count_enabled'] == true ||
+                          liveData['watch_count_enabled'] == 1 ||
+                          liveData['watch_count_enabled'] == 'true',
                     ),
                   ),
                 );
@@ -1104,7 +1157,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                     ),
                     SizedBox(width: 5.w),
                     Text(
-                      "LIVE 24x7",
+                      "LIVE",
                       style: TextStyle(
                         color: isDark ? const Color(0xFFFF6B6B) : const Color(0xFFDC2626),
                         fontSize: 10.sp,
@@ -1127,6 +1180,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     required String title,
     Widget? trailing,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.w),
       child: Row(
@@ -1155,7 +1209,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: const Color(0xFF0F172A),
+                      color: isDark ? Colors.white : const Color(0xFF0F172A),
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.2,
@@ -1191,64 +1245,9 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
             physics: const BouncingScrollPhysics(),
             padding: EdgeInsets.symmetric(horizontal: 16.w),
             children: [
-              // 1. EDITORIAL
+              // 1. REPORTERS
               _buildModernShortcutTile(
                 index: 0,
-                title: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
-                subtitle: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
-                icon: Icons.article_rounded,
-                iconGradient: const [Color(0xFFFF5E62), Color(0xFFFF2A2A)],
-                shadowColor: const Color(0xFFFF2A2A).withValues(alpha: 0.25),
-                imagePath: 'assets/images/editorial_3d_icon.png',
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const EditorialScreen(),
-                    ),
-                  );
-                },
-              ),
-              SizedBox(width: 10.w),
-
-              // 2. E-PAPER (Removed for Malayalam)
-              if (isTelugu) ...[
-                _buildModernShortcutTile(
-                  index: 1,
-                  title: "ఈ-పేపర్",
-                  subtitle: "E-Paper",
-                  icon: Icons.newspaper_rounded,
-                  iconGradient: const [Color(0xFFFBBF24), Color(0xFFD97706)],
-                  shadowColor: const Color(0xFFD97706).withValues(alpha: 0.25),
-                  imagePath: 'assets/images/epaper_3d_icon.png',
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const EpaperScreen(),
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(width: 10.w),
-              ],
-
-              // 3. GAMES (Dynamic from API)
-              _buildModernShortcutTile(
-                index: 2,
-                title: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
-                subtitle: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
-                icon: Icons.sports_esports_rounded,
-                iconGradient: const [Color(0xFF10B981), Color(0xFF059669)],
-                shadowColor: const Color(0xFF10B981).withValues(alpha: 0.25),
-                imagePath: 'assets/images/game_3d_icon.png',
-                onTap: () => GamesBottomSheet.show(context, isTelugu),
-              ),
-              SizedBox(width: 10.w),
-
-              // 4. REPORTERS
-              _buildModernShortcutTile(
-                index: 3,
                 title: isTelugu ? "రిపోర్టర్లు" : "റിപ്പോർട്ടർമാർ",
                 subtitle: isTelugu ? "రిపోర్టర్లు" : "റിപ്പോർട്ടർമാർ",
                 icon: Icons.mic_rounded,
@@ -1271,9 +1270,104 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               ),
               SizedBox(width: 10.w),
 
-              // 5. BOOKMARKS
+              // 2. GAMES (Dynamic from API)
               _buildModernShortcutTile(
-                index: 4,
+                index: 1,
+                title: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
+                subtitle: isTelugu ? "గేమ్స్" : "ഗെയിംസ്",
+                icon: Icons.sports_esports_rounded,
+                iconGradient: const [Color(0xFF10B981), Color(0xFF059669)],
+                shadowColor: const Color(0xFF10B981).withValues(alpha: 0.25),
+                imagePath: 'assets/images/game_3d_icon.png',
+                onTap: () => GamesBottomSheet.show(context, isTelugu),
+              ),
+              SizedBox(width: 10.w),
+
+              // 3. MOVIE REVIEWS
+              _buildModernShortcutTile(
+                index: 2,
+                title: isTelugu ? "సినిమా రివ్యూస్" : "സിനിമ റിവ്യൂകൾ",
+                subtitle: isTelugu ? "సినిమా సమీక్షలు" : "Movie Reviews",
+                icon: Icons.movie_filter_rounded,
+                iconGradient: const [Color(0xFFFF2A2A), Color(0xFFE50914)],
+                shadowColor: const Color(0xFFE50914).withValues(alpha: 0.25),
+                imagePath: 'assets/images/movie_reviews_3d_icon.png',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MovieReviewsScreen(),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(width: 10.w),
+
+              // 4. POLLS
+              _buildModernShortcutTile(
+                index: 3,
+                title: isTelugu ? "పోల్స్" : "വോട്ടെടുപ്പ്",
+                subtitle: isTelugu ? "లైవ్ పోల్స్" : "Live Polls",
+                icon: Icons.how_to_vote_rounded,
+                iconGradient: const [Color(0xFFFF3D54), Color(0xFFE50914)],
+                shadowColor: const Color(0xFFE50914).withValues(alpha: 0.25),
+                imagePath: 'assets/images/polls_3d_icon.png',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PollsFeedScreen(),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(width: 10.w),
+
+              // 5. E-PAPER (Removed for Malayalam)
+              if (isTelugu) ...[
+                _buildModernShortcutTile(
+                  index: 4,
+                  title: "ఈ-పేపర్",
+                  subtitle: "E-Paper",
+                  icon: Icons.newspaper_rounded,
+                  iconGradient: const [Color(0xFFFBBF24), Color(0xFFD97706)],
+                  shadowColor: const Color(0xFFD97706).withValues(alpha: 0.25),
+                  imagePath: 'assets/images/epaper_3d_icon.png',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const EpaperScreen(),
+                      ),
+                    );
+                  },
+                ),
+                SizedBox(width: 10.w),
+              ],
+
+              // 6. EDITORIAL
+              _buildModernShortcutTile(
+                index: 5,
+                title: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
+                subtitle: isTelugu ? "ఎడిటోరియల్" : "എഡിറ്റോറിയൽ",
+                icon: Icons.article_rounded,
+                iconGradient: const [Color(0xFFFF5E62), Color(0xFFFF2A2A)],
+                shadowColor: const Color(0xFFFF2A2A).withValues(alpha: 0.25),
+                imagePath: 'assets/images/editorial_3d_icon.png',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const EditorialScreen(),
+                    ),
+                  );
+                },
+              ),
+              SizedBox(width: 10.w),
+
+              // 7. BOOKMARKS
+              _buildModernShortcutTile(
+                index: 6,
                 title: isTelugu ? "బుక్‌మార్క్స్" : "ബുക്ക്‌മാർക്കുകൾ",
                 subtitle: isTelugu ? "బుక్‌మార్క్స్" : "ബുക്ക്‌മാർക്കുകൾ",
                 icon: Icons.bookmark_rounded,
@@ -1291,9 +1385,9 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
               ),
               SizedBox(width: 10.w),
 
-              // 6. MY FEED / NEWS
+              // 8. MY FEED / NEWS (Arranged last)
               _buildModernShortcutTile(
-                index: 5,
+                index: 7,
                 title: isTelugu ? "న్యూస్" : "വാർത്തകൾ",
                 subtitle: isTelugu ? "వార్తలు" : "വാർത്തകൾ",
                 icon: Icons.dynamic_feed_rounded,
@@ -1443,7 +1537,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     );
   }
 
-  /// BigTV 24x7 Broadcast Hero Card with Crimson Gradient & Frosted Play Button
+  /// BigTV Broadcast Hero Card with Crimson Gradient & Frosted Play Button
   Widget _buildLiveTvHeroBanner(
     BuildContext context,
     HomeProvider homeProvider,
@@ -1469,6 +1563,13 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                     streamUrl: liveData['stream_url'].toString(),
                     channelName: (liveData['channel_name'] ?? "BIGTV").toString(),
                     playbackType: (liveData['playback_type'] ?? "hls").toString(),
+                    watchCount: liveData['watch_count'] is num
+                        ? (liveData['watch_count'] as num).toInt()
+                        : int.tryParse(liveData['watch_count']?.toString() ?? ''),
+                    formattedWatchCount: liveData['formatted_watch_count']?.toString(),
+                    watchCountEnabled: liveData['watch_count_enabled'] == true ||
+                        liveData['watch_count_enabled'] == 1 ||
+                        liveData['watch_count_enabled'] == 'true',
                   ),
                 ),
               );
@@ -1595,7 +1696,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                           SizedBox(width: 8.w),
                           Flexible(
                             child: Text(
-                              isTelugu ? "BIG TV 24x7" : "BIG TV Malayalam 24x7",
+                              isTelugu ? "BIG TV" : "BIG TV Malayalam",
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
@@ -1624,35 +1725,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                     ],
                   ),
                 ),
-                SizedBox(width: 8.w),
-                // Frosted Circular Share Button
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20.r),
-                    onTap: () => _shareLiveTv(context, homeProvider, isTelugu),
-                    child: Container(
-                      width: 38.w,
-                      height: 38.w,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.22),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.40),
-                          width: 1.2,
-                        ),
-                      ),
-                      child: Center(
-                        child: Icon(
-                          Icons.share_rounded,
-                          color: Colors.white,
-                          size: 19.sp,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 8.w),
+                SizedBox(width: 10.w),
                 // Frosted Circular Play Button
                 Container(
                   width: 38.w,
@@ -1690,6 +1763,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     HomeProvider homeProvider,
     bool isTelugu,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final tags = homeProvider.getAllAiTagsList;
 
     return Column(
@@ -1727,10 +1801,10 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                       width: double.infinity,
                       padding: EdgeInsets.symmetric(vertical: 24.h, horizontal: 16.w),
                       decoration: BoxDecoration(
-                        color: Colors.grey.withValues(alpha: 0.05),
+                        color: isDark ? const Color(0xFF1E2026) : Colors.grey.withValues(alpha: 0.05),
                         borderRadius: BorderRadius.circular(14.r),
                         border: Border.all(
-                          color: const Color(0xFFE2E8F0),
+                          color: isDark ? const Color(0xFF2E313A) : const Color(0xFFE2E8F0),
                           width: 1,
                         ),
                       ),
@@ -1740,8 +1814,8 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                           Container(
                             width: 44.w,
                             height: 44.w,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFF1F5F9),
+                            decoration: BoxDecoration(
+                              color: isDark ? const Color(0xFF2E313A) : const Color(0xFFF1F5F9),
                               shape: BoxShape.circle,
                             ),
                             child: Center(
@@ -1756,7 +1830,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                           Text(
                             isTelugu ? "డేటా కనుగొనబడలేదు" : "ഡാറ്റ ലഭ്യമല്ല",
                             style: TextStyle(
-                              color: const Color(0xFF475569),
+                              color: isDark ? Colors.white : const Color(0xFF475569),
                               fontSize: 13.sp,
                               fontWeight: FontWeight.w600,
                             ),
@@ -1785,13 +1859,22 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                     if (tagName.trim().isEmpty) return const SizedBox.shrink();
 
                     return Material(
-                      color: Colors.white,
+                      color: isDark ? const Color(0xFF1E2026) : Colors.white,
                       borderRadius: BorderRadius.circular(22.r),
                       elevation: 0,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(22.r),
                         onTap: () {
                           final tagId = tag['aitagid'] ?? tag['id'] ?? tag['slug'] ?? tagName;
+                          final rawSlug = (tag['slug'] ?? tagName).toString().trim().toUpperCase();
+                          final rawName = (tag['name'] ?? '').toString().trim().toUpperCase();
+                          if (rawSlug == 'NEWS' || rawSlug == 'EPAPER' || rawSlug == 'NEWSPAPER' || rawName == 'NEWS') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const EpaperScreen()),
+                            );
+                            return;
+                          }
                           homeProvider.setSelectedTagId(tagId);
                           if (homeProvider.liveTvVideosEnable) {
                             homeProvider.fetchVideosByTagSlug(
@@ -1809,12 +1892,12 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(22.r),
                             border: Border.all(
-                              color: const Color(0xFFE2E8F0),
+                              color: isDark ? const Color(0xFF2E313A) : const Color(0xFFE2E8F0),
                               width: 1.2,
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.03),
+                                color: (isDark ? Colors.black : Colors.black).withValues(alpha: isDark ? 0.2 : 0.03),
                                 blurRadius: 4,
                                 offset: const Offset(0, 1.5),
                               ),
@@ -1835,7 +1918,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                               Text(
                                 tagName,
                                 style: TextStyle(
-                                  color: const Color(0xFF1E293B),
+                                  color: isDark ? const Color(0xFFE2E8F0) : const Color(0xFF1E293B),
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -2074,10 +2157,10 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
                         Container(
                           padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFEF2F2),
+                            color: isDark ? const Color(0xFF2E1A1A) : const Color(0xFFFEF2F2),
                             borderRadius: BorderRadius.circular(4.r),
                             border: Border.all(
-                              color: const Color(0xFFFECACA),
+                              color: isDark ? const Color(0xFF5A2222) : const Color(0xFFFECACA),
                               width: 0.8,
                             ),
                           ),
@@ -2429,24 +2512,7 @@ class _SearchDiscoverScreenState extends State<SearchDiscoverScreen>
     }
   }
 
-  /// Live TV Social & WhatsApp Share Handler
-  Future<void> _shareLiveTv(
-    BuildContext context,
-    HomeProvider homeProvider,
-    bool isTelugu,
-  ) async {
-    final liveData = await homeProvider.fetchLiveTvStream();
-    final String channelName = (liveData?['channel_name'] ?? "BIG TV").toString();
 
-    if (!context.mounted) return;
-    await LiveTvShareHelper.shareLiveTv(
-      context: context,
-      channelName: channelName,
-      isTelugu: isTelugu,
-      langCode: isTelugu ? 'te' : 'ml',
-      source: 'discover_banner',
-    );
-  }
 }
 
 /// Single Uniform Animated Dot Border Painter

@@ -12,9 +12,15 @@ import '../../../../services/base_urls.dart';
 import '../../../../utils/app_enums.dart';
 
 class EventRepo extends BaseService {
-
+  static bool eventsEnable = true;
 
   Future sendEvent(body) async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final bool isEnabled = sharedPreferences.getBool("eventsEnable") ?? eventsEnable;
+    if (!isEnabled) {
+      log("Events sending disabled because eventsEnable is false");
+      return null;
+    }
     log("event body --- $body");
     Response response = await makeRequest(url: BaseUrls.eventUrl, baseUrl: BaseUrls.baseUrlAwsDev, method: RequestType.post, body: body);
     log(response.data.toString());
@@ -23,6 +29,11 @@ class EventRepo extends BaseService {
 
   Future<void> addEvent(Map<String, dynamic> eventData, String eventName) async {
     final sharedPreferences = await SharedPreferences.getInstance();
+    final bool isEnabled = sharedPreferences.getBool("eventsEnable") ?? eventsEnable;
+    if (!isEnabled) {
+      log("Events capturing disabled because eventsEnable is false: $eventName");
+      return;
+    }
     final String userId = sharedPreferences.getString("userId") ?? "guest";
     final String deviceId = sharedPreferences.getString("deviceId") ?? "12345";
 
@@ -57,6 +68,12 @@ class EventRepo extends BaseService {
   }
 
   Future<void> processAndPushEvents() async {
+    final sharedPreferences = await SharedPreferences.getInstance();
+    final bool isEnabled = sharedPreferences.getBool("eventsEnable") ?? eventsEnable;
+    if (!isEnabled) {
+      log("Events push disabled because eventsEnable is false");
+      return;
+    }
     if (!Hive.isBoxOpen('events')) return;
     final box = Hive.box('events');
     final events = box.values.map((e) => _convertEventToJson(e)).toList();

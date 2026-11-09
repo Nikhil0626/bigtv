@@ -8,6 +8,34 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:dio/dio.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:chotanews/utils/app_toasts.dart';
+
+class _IndianPhoneNumberFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String text = newValue.text;
+    String digits = text.replaceAll(RegExp(r'\D'), '');
+    if (digits.startsWith('91') && digits.length > 10) {
+      digits = digits.substring(2);
+    } else if (digits.startsWith('0') && digits.length > 10) {
+      digits = digits.substring(1);
+    }
+    if (digits.length > 10) {
+      digits = digits.substring(0, 10);
+    }
+    int cursorPosition = digits.length;
+    if (newValue.selection.end <= digits.length && text == digits) {
+      cursorPosition = newValue.selection.end;
+    }
+    return TextEditingValue(
+      text: digits,
+      selection: TextSelection.collapsed(offset: cursorPosition),
+    );
+  }
+}
 
 class FolkNightBookingScreen extends StatefulWidget {
   final String eventId;
@@ -18,7 +46,7 @@ class FolkNightBookingScreen extends StatefulWidget {
 
   const FolkNightBookingScreen({
     super.key,
-    this.eventId = "",
+    this.eventId = "e4d962de-5393-4541-a792-4c23f1429f9c",
     this.eventName = "Folk Night",
     this.eventDateStr = "24 Oct • 6:00 PM",
     this.eventLocation = "Hyderabad • Open Air Auditorium",
@@ -30,6 +58,8 @@ class FolkNightBookingScreen extends StatefulWidget {
 }
 
 class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
+  String get effectiveEventId =>
+      widget.eventId.isNotEmpty ? widget.eventId : "e4d962de-5393-4541-a792-4c23f1429f9c";
   bool isLoading = true;
   List<dynamic> tickets = [];
 
@@ -50,11 +80,25 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _phoneCtrl = TextEditingController();
   final TextEditingController _couponCtrl = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   String? _nameError;
   String? _emailError;
   String? _phoneError;
   String? _couponError;
+
+  bool _isValidEmail(String email) {
+    if (email.trim().isEmpty) return false;
+    final emailRegex = RegExp(
+      r'^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)+$',
+    );
+    return emailRegex.hasMatch(email.trim());
+  }
+
+  bool _isValidPhoneNumber(String phone) {
+    final clean = phone.replaceAll(RegExp(r'[^0-9]'), '');
+    return clean.length == 10 && RegExp(r'^[6-9]\d{9}$').hasMatch(clean);
+  }
 
   String? _validateName(String val) {
     final trimmed = val.trim();
@@ -66,24 +110,51 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
   String? _validateEmail(String val) {
     final trimmed = val.trim();
     if (trimmed.isEmpty) return "Email address is required";
-    final emailRegex = RegExp(r"^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$");
-    if (!emailRegex.hasMatch(trimmed)) return "Please enter a valid email address";
+    if (!_isValidEmail(trimmed)) return "Please enter a valid email address";
     return null;
   }
 
   String? _validatePhone(String val) {
-    final trimmed = val.trim();
-    if (trimmed.isEmpty) return "Mobile number is required";
-    if (trimmed.length != 10 || !RegExp(r"^[6-9]\d{9}$").hasMatch(trimmed)) {
+    final clean = val.replaceAll(RegExp(r'[^0-9]'), '').trim();
+    if (clean.isEmpty) return "Mobile number is required";
+    if (clean.length < 10) return "Please enter a valid 10-digit mobile number";
+    if (!RegExp(r'^[6-9]').hasMatch(clean)) {
+      return "Mobile number must start with 6, 7, 8, or 9";
+    }
+    if (!_isValidPhoneNumber(clean)) {
       return "Please enter a valid 10-digit mobile number";
     }
     return null;
+  }
+
+  Future<void> _loadPrefilledUserDetails() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      final storedName = sp.getString("userName");
+      final storedPhone = sp.getString("userPhone") ?? sp.getString("mobileNumber") ?? sp.getString("phone");
+      final storedEmail = sp.getString("userEmail") ?? sp.getString("email");
+      if (mounted) {
+        if (_nameCtrl.text.isEmpty && storedName != null && storedName.isNotEmpty && !storedName.toLowerCase().startsWith("user")) {
+          _nameCtrl.text = storedName.trim();
+        }
+        if (_phoneCtrl.text.isEmpty && storedPhone != null && storedPhone.isNotEmpty) {
+          final cleanPhone = storedPhone.replaceAll(RegExp(r'[^0-9]'), '').trim();
+          if (cleanPhone.length >= 10) {
+            _phoneCtrl.text = cleanPhone.length > 10 ? cleanPhone.substring(cleanPhone.length - 10) : cleanPhone;
+          }
+        }
+        if (_emailCtrl.text.isEmpty && storedEmail != null && storedEmail.isNotEmpty && _isValidEmail(storedEmail)) {
+          _emailCtrl.text = storedEmail.trim();
+        }
+      }
+    } catch (_) {}
   }
 
   @override
   void initState() {
     super.initState();
     fetchTickets();
+    _loadPrefilledUserDetails();
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
@@ -93,6 +164,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
   @override
   void dispose() {
     _razorpay.clear();
+    _scrollController.dispose();
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
@@ -197,17 +269,9 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
     );
   }
 
-  static final List<dynamic> defaultTickets = <dynamic>[
-    {"id": "vip-001", "name": "VIP", "price": 5000},
-    {"id": "plat-002", "name": "Platinum", "price": 2000},
-    {"id": "gold-003", "name": "Gold", "price": 1000},
-    {"id": "silv-004", "name": "Silver", "price": 500},
-  ];
-
   dynamic _findTicket(String? query) {
     if (query == null || query.isEmpty) return null;
-    final effective = tickets.isNotEmpty ? tickets : defaultTickets;
-    for (final t in effective) {
+    for (final t in tickets) {
       if (t != null && t is Map) {
         final id = (t['id'] ?? '').toString();
         final name = (t['name'] ?? '').toString().toUpperCase();
@@ -220,44 +284,51 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
   }
 
   Future<void> fetchTickets() async {
-    if (widget.eventId.isEmpty) {
-      setState(() {
-        tickets = defaultTickets;
-        selectedTicketId = defaultTickets[0]['id'];
-        _selectedZoneKey = "VIP";
-        isLoading = false;
-      });
-      return;
-    }
-
+    setState(() => isLoading = true);
     try {
-      final url = 'https://api.pravasamedia.com/api/v1/events/${widget.eventId}/ticket-types?includeInactive=true';
+      final url = 'https://api.pravasamedia.com/api/v1/events/$effectiveEventId/ticket-types?includeInactive=true';
+      debugPrint("Fetching tickets from API: $url");
       final response = await Dio().get(url);
 
-      if (response.statusCode == 200 && response.data['success'] == true) {
+      if (response.statusCode == 200 && response.data != null && response.data['success'] == true) {
         final List data = response.data['data'] ?? [];
+        final validTickets = data
+            .where((t) => t is Map && (t['isActive'] == null || t['isActive'] == true))
+            .toList();
+
+        // Sort by price descending (VIP highest to lowest)
+        validTickets.sort((a, b) {
+          final pA = (a['price'] as num?) ?? 0;
+          final pB = (b['price'] as num?) ?? 0;
+          return pB.compareTo(pA);
+        });
+
         setState(() {
-          tickets = data.isNotEmpty ? data : defaultTickets;
-          final vip = _findTicket("VIP") ?? (tickets.isNotEmpty ? tickets.first : defaultTickets.first);
-          selectedTicketId = vip['id'];
-          _syncZoneFromTicketName(vip['name'] ?? 'VIP');
+          tickets = validTickets;
+          if (tickets.isNotEmpty) {
+            final defaultChoice = _findTicket("VIP") ?? tickets.first;
+            selectedTicketId = defaultChoice['id']?.toString();
+            _syncZoneFromTicketName(defaultChoice['name']?.toString() ?? '');
+          } else {
+            selectedTicketId = null;
+          }
         });
       } else {
         setState(() {
-          tickets = defaultTickets;
-          selectedTicketId = defaultTickets[0]['id'];
-          _selectedZoneKey = "VIP";
+          tickets = [];
+          selectedTicketId = null;
         });
       }
     } catch (e) {
       debugPrint("❌ Error fetching tickets: $e");
       setState(() {
-        tickets = defaultTickets;
-        selectedTicketId = defaultTickets[0]['id'];
-        _selectedZoneKey = "VIP";
+        tickets = [];
+        selectedTicketId = null;
       });
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
   }
 
@@ -277,9 +348,9 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
   void _selectZone(String zoneKey) {
     setState(() {
       _selectedZoneKey = zoneKey;
-      final match = _findTicket(zoneKey) ?? (tickets.isNotEmpty ? tickets.first : defaultTickets.first);
+      final match = _findTicket(zoneKey) ?? (tickets.isNotEmpty ? tickets.first : null);
       if (match != null && match is Map) {
-        selectedTicketId = match['id'];
+        selectedTicketId = match['id']?.toString();
       }
     });
   }
@@ -292,7 +363,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
     } else {
       setState(() => _couponError = null);
     }
-    if (widget.eventId.isEmpty) return;
+    if (effectiveEventId.isEmpty) return;
 
     int ticketsTotal = 0;
     if (selectedTicketId != null && selectedTicketCount > 0) {
@@ -312,7 +383,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
     try {
       final queryParams = {
         'code': code,
-        'eventId': widget.eventId,
+        'eventId': effectiveEventId,
         'amount': ticketsTotal,
       };
 
@@ -355,7 +426,15 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
         _phoneError = phoneErr;
       });
       final firstError = nameErr ?? emailErr ?? phoneErr ?? "Please fill all contact details correctly";
+      CustomToast.showWarningToast(msg: firstError);
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(firstError)));
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          350.h,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
       return;
     }
 
@@ -365,15 +444,19 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
       SharedPreferences sp = await SharedPreferences.getInstance();
       String userId = sp.getString("userId") ?? "USR-1001";
 
+      final cleanName = _nameCtrl.text.trim();
+      final cleanEmail = _emailCtrl.text.trim();
+      final cleanPhone = _phoneCtrl.text.replaceAll(RegExp(r'[^0-9]'), '').trim();
+
       // 1. Create Booking
       final bookingPayload = {
-        "eventId": widget.eventId,
+        "eventId": effectiveEventId,
         "ticketTypeId": selectedTicketId,
         "quantity": totalTickets,
         "userId": userId,
-        "userName": _nameCtrl.text.trim(),
-        "userEmail": _emailCtrl.text.trim(),
-        "userPhone": _phoneCtrl.text.trim(),
+        "userName": cleanName,
+        "userEmail": cleanEmail,
+        "userPhone": cleanPhone,
         "couponCode": _couponCtrl.text.trim().isNotEmpty ? _couponCtrl.text.trim() : null,
       };
 
@@ -413,8 +496,8 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
         'description': 'Booking Reference: $bookingCode',
         'order_id': orderId,
         'prefill': {
-          'contact': _phoneCtrl.text.trim(),
-          'email': _emailCtrl.text.trim(),
+          'contact': cleanPhone,
+          'email': cleanEmail,
         },
         'theme': {
           'color': '#E11D48',
@@ -729,6 +812,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
               children: [
                 Expanded(
                   child: SingleChildScrollView(
+                    controller: _scrollController,
                     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1037,12 +1121,72 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
   }
 
   Widget _buildTicketGrid() {
-    final zones = [
-      {"key": "VIP", "name": "VIP", "price": 5000, "color": const Color(0xFFF87171), "swatch": const Color(0xFFFCA5A5)},
-      {"key": "PLATINUM", "name": "Platinum", "price": 2000, "color": const Color(0xFF818CF8), "swatch": const Color(0xFFDDD6FE)},
-      {"key": "GOLD", "name": "Gold", "price": 1000, "color": const Color(0xFFFBBF24), "swatch": const Color(0xFFFEF08A)},
-      {"key": "SILVER", "name": "Silver", "price": 500, "color": const Color(0xFF94A3B8), "swatch": const Color(0xFFE2E8F0)},
-    ];
+    if (isLoading) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Ticket category",
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF0F172A),
+            ),
+          ),
+          SizedBox(height: 12.h),
+          Center(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 20.h),
+              child: const CircularProgressIndicator(
+                color: Color(0xFFE11D48),
+                strokeWidth: 2,
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    if (tickets.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Ticket category",
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF0F172A),
+            ),
+          ),
+          SizedBox(height: 10.h),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 14.w),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: const Color(0xFFE2E8F0)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.info_outline, color: const Color(0xFF64748B), size: 18.sp),
+                SizedBox(width: 8.w),
+                Text(
+                  "No ticket types available for this event.",
+                  style: TextStyle(
+                    color: const Color(0xFF64748B),
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1059,31 +1203,58 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: zones.length,
+          itemCount: tickets.length,
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             crossAxisSpacing: 10.w,
             mainAxisSpacing: 10.h,
-            childAspectRatio: 2.2,
+            childAspectRatio: 2.1,
           ),
           itemBuilder: (context, index) {
-            final zone = zones[index];
-            final key = zone["key"] as String;
-            final name = zone["name"] as String;
-            final price = zone["price"] as int;
-            final swatch = zone["swatch"] as Color;
+            final t = tickets[index] as Map;
+            final String id = (t['id'] ?? '').toString();
+            final String name = (t['name'] ?? 'Ticket').toString();
+            final int actualPrice = (t['price'] as num?)?.toInt() ?? 0;
+            final isSelected = selectedTicketId == id;
 
-            final ticketItem = _findTicket(key);
-
-            final actualPrice = (ticketItem != null && ticketItem['price'] != null)
-                ? (ticketItem['price'] as num).toInt()
-                : price;
-
-            final isSelected = _selectedZoneKey == key;
+            final upper = name.toUpperCase();
+            Color swatch;
+            Color borderColor;
+            if (upper.contains("VIP")) {
+              swatch = const Color(0xFFFCA5A5);
+              borderColor = const Color(0xFFF87171);
+            } else if (upper.contains("PLATINUM")) {
+              swatch = const Color(0xFFDDD6FE);
+              borderColor = const Color(0xFF818CF8);
+            } else if (upper.contains("GOLD")) {
+              swatch = const Color(0xFFFEF08A);
+              borderColor = const Color(0xFFFBBF24);
+            } else if (upper.contains("SILVER")) {
+              swatch = const Color(0xFFE2E8F0);
+              borderColor = const Color(0xFF94A3B8);
+            } else {
+              final defaultSwatches = [
+                const Color(0xFFFCA5A5),
+                const Color(0xFFDDD6FE),
+                const Color(0xFFFEF08A),
+                const Color(0xFFE2E8F0),
+              ];
+              final defaultBorders = [
+                const Color(0xFFF87171),
+                const Color(0xFF818CF8),
+                const Color(0xFFFBBF24),
+                const Color(0xFF94A3B8),
+              ];
+              swatch = defaultSwatches[index % defaultSwatches.length];
+              borderColor = defaultBorders[index % defaultBorders.length];
+            }
 
             return GestureDetector(
               onTap: () {
-                _selectZone(key);
+                setState(() {
+                  selectedTicketId = id;
+                  _syncZoneFromTicketName(name);
+                });
               },
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 180),
@@ -1119,7 +1290,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
                         color: swatch,
                         borderRadius: BorderRadius.circular(6.r),
                         border: Border.all(
-                          color: (zone["color"] as Color).withValues(alpha: 0.6),
+                          color: borderColor.withValues(alpha: 0.6),
                           width: 1.0,
                         ),
                       ),
@@ -1300,7 +1471,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
             controller: _nameCtrl,
             errorText: _nameError,
             onChanged: (val) {
-              if (_nameError != null) setState(() => _nameError = _validateName(val));
+              if (_nameError != null) setState(() => _nameError = null);
             },
           ),
           SizedBox(height: 10.h),
@@ -1311,7 +1482,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
             keyboardType: TextInputType.emailAddress,
             errorText: _emailError,
             onChanged: (val) {
-              if (_emailError != null) setState(() => _emailError = _validateEmail(val));
+              if (_emailError != null) setState(() => _emailError = null);
             },
           ),
           SizedBox(height: 10.h),
@@ -1321,12 +1492,16 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
             controller: _phoneCtrl,
             keyboardType: TextInputType.phone,
             errorText: _phoneError,
+            prefixText: "+91 ",
             inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              LengthLimitingTextInputFormatter(10),
+              _IndianPhoneNumberFormatter(),
             ],
             onChanged: (val) {
-              if (_phoneError != null) setState(() => _phoneError = _validatePhone(val));
+              if (_phoneError != null) setState(() => _phoneError = null);
+              final digits = val.replaceAll(RegExp(r'[^0-9]'), '');
+              if (digits.length >= 10) {
+                FocusScope.of(context).unfocus();
+              }
             },
           ),
         ],
@@ -1489,6 +1664,7 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
     TextEditingController? controller,
     TextInputType? keyboardType,
     String? errorText,
+    String? prefixText,
     List<TextInputFormatter>? inputFormatters,
     ValueChanged<String>? onChanged,
   }) {
@@ -1506,6 +1682,12 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
             filled: true,
             fillColor: Colors.white,
             prefixIcon: Icon(icon, color: hasError ? Colors.red : AppColorTokens.primaryRed),
+            prefixText: prefixText,
+            prefixStyle: TextStyle(
+              color: const Color(0xFF0F172A),
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+            ),
             hintText: hint,
             hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14.sp),
             contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
@@ -1532,9 +1714,17 @@ class _FolkNightBookingScreenState extends State<FolkNightBookingScreen> {
         if (hasError)
           Padding(
             padding: EdgeInsets.only(top: 4.h, left: 4.w),
-            child: Text(
-              errorText,
-              style: TextStyle(color: Colors.red, fontSize: 11.sp, fontWeight: FontWeight.w500),
+            child: Row(
+              children: [
+                const Icon(Icons.error_outline, size: 13, color: Colors.red),
+                SizedBox(width: 4.w),
+                Expanded(
+                  child: Text(
+                    errorText,
+                    style: TextStyle(color: Colors.red, fontSize: 11.sp, fontWeight: FontWeight.w500),
+                  ),
+                ),
+              ],
             ),
           ),
       ],

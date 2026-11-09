@@ -71,6 +71,7 @@ class BaseUrls {
   static const String aiTags = "/aitags";
   static const String videoTags = "/api/v1/video-tags";
   static const String aiTagsById = "/aitag/content";
+  static const String getMoreFollow = "/morefollow";
   static const String updateMoreFollow = "/update_morefollow";
 
   ///Rating

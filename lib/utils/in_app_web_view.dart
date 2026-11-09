@@ -11,12 +11,14 @@ class InAppWebViewScreen extends StatefulWidget {
   final String webUrl;
   final String title;
   final bool isHome;
+  final Color? backgroundColor;
 
   const InAppWebViewScreen({
     super.key,
     required this.webUrl,
     required this.title,
     this.isHome = false,
+    this.backgroundColor,
   });
 
   @override
@@ -30,7 +32,7 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
   void initState() {
     super.initState();
     _initializeWebViewController();
-    
+
     // Reset provider state on init
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<WebViewProvider>().reset();
@@ -61,6 +63,7 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
 
     controller
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setBackgroundColor(widget.backgroundColor ?? Colors.white)
       ..setNavigationDelegate(
         NavigationDelegate(
           onProgress: (int progress) {
@@ -114,28 +117,28 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: widget.isHome ? true : false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         if (await webViewController.canGoBack()) {
           await webViewController.goBack();
-        } else if (context.mounted) {
+        } else if (context.mounted && !widget.isHome && Navigator.canPop(context)) {
           Navigator.pop(context);
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: widget.backgroundColor ?? Colors.white,
         appBar: widget.title.isEmpty
             ? null
             : AppBar(
-                backgroundColor: Colors.white,
+                backgroundColor: widget.backgroundColor ?? Colors.white,
                 leading: IconButton(
                   icon:
                       const Icon(Icons.arrow_back, color: Colors.black, size: 23),
                   onPressed: () async {
                     if (await webViewController.canGoBack()) {
                       await webViewController.goBack();
-                    } else if (context.mounted) {
+                    } else if (context.mounted && Navigator.canPop(context)) {
                       Navigator.pop(context);
                     }
                   },
@@ -160,31 +163,30 @@ class _WebViewScreenState extends State<InAppWebViewScreen> {
                   ),
                 ],
               ),
-        body: Column(
-          children: [
-            Consumer<WebViewProvider>(
-              builder: (context, webViewProvider, child) {
-                if (webViewProvider.loadingPercentage < 100) {
-                  return LinearProgressIndicator(
-                    value: webViewProvider.loadingPercentage / 100,
-                    color: Colors.blue,
-                    backgroundColor: Colors.grey[200],
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            Expanded(
-              child: SizedBox(
-                height: widget.isHome
-                    ? MediaQuery.of(context).size.height * 0.56
-                    : null,
+        body: SafeArea(
+          top: widget.title.isEmpty,
+          bottom: false,
+          child: Column(
+            children: [
+              Consumer<WebViewProvider>(
+                builder: (context, webViewProvider, child) {
+                  if (webViewProvider.loadingPercentage < 100) {
+                    return LinearProgressIndicator(
+                      value: webViewProvider.loadingPercentage / 100,
+                      color: Colors.blue,
+                      backgroundColor: Colors.grey[200],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+              Expanded(
                 child: WebViewWidget(
                   controller: webViewController,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

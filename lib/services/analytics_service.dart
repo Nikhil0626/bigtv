@@ -11,6 +11,12 @@ class AnalyticsService {
 
   static Future<void> logEvent2(String name) async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final bool isEnabled = prefs.getBool("eventsEnable") ?? true;
+      if (!isEnabled) {
+        log("Firebase event skipped because eventsEnable is false: $name");
+        return;
+      }
       await _analytics.logEvent(
         name: name,
       );
