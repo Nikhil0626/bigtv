@@ -575,6 +575,8 @@ class HomeProvider extends ChangeNotifier {
 
       isHomeLoading = true;
       getAllPostList = [];
+      dynamicMovieReviews = [];
+      dynamicPolls = [];
       _currentPageIndex = 0;
       isBookMark = [];
       isWebView = false;
@@ -808,12 +810,6 @@ class HomeProvider extends ChangeNotifier {
         }
         _placeMovieReviewAtThirdPosition();
         _placePollAtFifthPosition();
-        if (dynamicPolls.isEmpty) {
-          fetchDynamicPolls();
-        }
-        if (dynamicMovieReviews.isEmpty) {
-          fetchDynamicMovieReviews();
-        }
       }
 
       TranslationService().preloadAllArticles(getAllPostList);
@@ -944,9 +940,6 @@ class HomeProvider extends ChangeNotifier {
 
       if (gathered.isNotEmpty) {
         dynamicMovieReviews = gathered;
-        if (!getAllPostList.any((e) => isMovieReviewPost(e))) {
-          _placeMovieReviewAtThirdPosition();
-        }
       }
     } catch (e, st) {
       log("Error fetching dynamic movie reviews: $e -- $st");
@@ -1048,26 +1041,14 @@ class HomeProvider extends ChangeNotifier {
 
   void _placeMovieReviewAtThirdPosition() {
     if (getAllPostList.isEmpty) return;
-    dynamic reviewItem;
-    final existingReviewIdx = getAllPostList.indexWhere((e) =>
-        e is Map &&
-        (e['type']?.toString().toLowerCase() == 'reviews' ||
-            e['type']?.toString().toLowerCase() == 'moviereview' ||
-            e['subType']?.toString().toLowerCase() == 'reviews' ||
-            e['subType']?.toString().toLowerCase() == 'moviereview' ||
-            e['post_type']?.toString().toLowerCase() == 'reviews' ||
-            e['post_type']?.toString().toLowerCase() == 'moviereview'));
+    final existingReviewIdx = getAllPostList.indexWhere((e) => isMovieReviewPost(e));
 
+    // Only reposition if movie review is already present in allpost response
     if (existingReviewIdx != -1) {
-      reviewItem = getAllPostList.removeAt(existingReviewIdx);
-    } else if (dynamicMovieReviews.isNotEmpty) {
-      reviewItem = Map<String, dynamic>.from(dynamicMovieReviews.first);
-    } else {
-      return;
+      final reviewItem = getAllPostList.removeAt(existingReviewIdx);
+      final targetIdx = getAllPostList.length >= 3 ? 3 : getAllPostList.length;
+      getAllPostList.insert(targetIdx, reviewItem);
     }
-
-    final targetIdx = getAllPostList.length >= 3 ? 3 : getAllPostList.length;
-    getAllPostList.insert(targetIdx, reviewItem);
   }
 
   static const List<Map<String, dynamic>> defaultPolls = [];
@@ -1145,9 +1126,6 @@ class HomeProvider extends ChangeNotifier {
 
       if (gathered.isNotEmpty) {
         dynamicPolls = gathered;
-        if (!getAllPostList.any((e) => isPollPost(e))) {
-          _placePollAtFifthPosition();
-        }
       }
     } catch (e, st) {
       log("Error fetching dynamic polls: $e -- $st");
@@ -1197,19 +1175,14 @@ class HomeProvider extends ChangeNotifier {
 
   void _placePollAtFifthPosition() {
     if (getAllPostList.isEmpty) return;
-    dynamic pollItem;
     final existingPollIdx = getAllPostList.indexWhere((e) => isPollPost(e));
 
+    // Only reposition if poll is already present in allpost response
     if (existingPollIdx != -1) {
-      pollItem = getAllPostList.removeAt(existingPollIdx);
-    } else if (dynamicPolls.isNotEmpty) {
-      pollItem = Map<String, dynamic>.from(dynamicPolls.first);
-    } else {
-      return;
+      final pollItem = getAllPostList.removeAt(existingPollIdx);
+      final targetIdx = getAllPostList.length >= 4 ? 4 : getAllPostList.length;
+      getAllPostList.insert(targetIdx, pollItem);
     }
-
-    final targetIdx = getAllPostList.length >= 4 ? 4 : getAllPostList.length;
-    getAllPostList.insert(targetIdx, pollItem);
   }
 
   bool isAiTagsLoading = false;
