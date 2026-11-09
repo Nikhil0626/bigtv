@@ -456,19 +456,19 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                           width: double.infinity,
                           child: (article['links'] != null && (article['links'] as List).isNotEmpty)
                               ? RichText(
-                                  textAlign: TextAlign.justify,
+                                  textAlign: TextAlign.start,
                                   text: TextSpan(
                                     children: _parseText(
                                       context, 
-                                      article['content'] ?? "", 
+                                      (article['content']?.toString() ?? "").replaceAll(RegExp(r" {2,}"), " "), 
                                       article['links'], 
                                       {'subType': 'Standard'}
                                     ),
                                   ),
                                 )
                               : TranslatedText(
-                                  article['content'] ?? "",
-                                  textAlign: TextAlign.justify,
+                                  (article['content']?.toString() ?? "").replaceAll(RegExp(r" {2,}"), " "),
+                                  textAlign: TextAlign.start,
                                   translate: context.watch<HomeProvider>().isEnglishMode,
                                   style: homeScreenFontStyle(
                                     color: AppColors.textColor,

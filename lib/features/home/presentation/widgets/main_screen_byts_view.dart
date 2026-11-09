@@ -986,7 +986,7 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                           width: double.infinity,
                                                                                           child: TranslatedText(
                                                                                             widget.article['content'].toString(),
-                                                                                            textAlign: TextAlign.justify,
+                                                                                            textAlign: TextAlign.start,
                                                                                             translate: context.watch<HomeProvider>().isEnglishMode,
                                                                                             style: homeScreenFontStyle(
                                                                                               color: _isBigTvSpecial(widget.article) ? Colors.white70 : AppColors.textColor,
@@ -1040,12 +1040,12 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                 child: ((widget.article['links'] != null && (widget.article['links'] as List).isNotEmpty) ||
                                                                                        RegExp(r'(https?:\/\/[^\s]+|<link\d+>)').hasMatch(widget.article['content']?.toString() ?? ''))
                                                                                     ? RichText(
-                                                                                        textAlign: TextAlign.justify,
+                                                                                        textAlign: TextAlign.start,
                                                                                         text: TextSpan(
                                                                                           text: '',
                                                                                           children: _parseText(
                                                                                              context, 
-                                                                                             widget.article['content']?.toString() ?? "", 
+                                                                                             (widget.article['content']?.toString() ?? "").replaceAll(RegExp(r" {2,}"), " "), 
                                                                                              widget.article['links'], 
                                                                                              widget.article,
                                                                                              isPostActive: isPostActive,
@@ -1053,8 +1053,8 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                         ),
                                                                                       )
                                                                                     : TranslatedText(
-                                                                                        widget.article['content']?.toString() ?? "",
-                                                                                        textAlign: TextAlign.justify,
+                                                                                        (widget.article['content']?.toString() ?? "").replaceAll(RegExp(r" {2,}"), " "),
+                                                                                        textAlign: TextAlign.start,
                                                                                         translate: context.watch<HomeProvider>().isEnglishMode,
                                                                                         englishFontSize: 14.sp,
                                                                                         style: homeScreenFontStyle(
