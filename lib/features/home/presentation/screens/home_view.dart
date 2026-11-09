@@ -237,7 +237,7 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                                 homeProvider,
                                 index: 2,
                                 iconPath: "assets/new_app_icon/reel.svg",
-                                labelMl: 'ബിഗ് ടിവി ഡെയ്‌ലി',
+                                labelMl: 'ബിഗ് ടിവി ഡെയിലി',
                                 labelTe: 'బిగ్‌టీవీ డైలీ',
                               ),
                               // 5. Marrini button
@@ -357,11 +357,15 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                     ),
             ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                color: itemColor,
-                fontSize: 11,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  color: itemColor,
+                  fontSize: 11,
+                ),
               ),
             ),
           ],
@@ -429,11 +433,15 @@ class _HomeViewState extends State<HomeView> with WidgetsBindingObserver {
                     size: 20,
                   ),
             const SizedBox(height: 2),
-            Text(
-              label,
-              style: TextStyle(
-                color: itemColor,
-                fontSize: 11,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  color: itemColor,
+                  fontSize: 11,
+                ),
               ),
             ),
           ],
