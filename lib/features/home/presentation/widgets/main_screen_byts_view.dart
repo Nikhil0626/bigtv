@@ -981,17 +981,21 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                mainAxisAlignment: MainAxisAlignment.start,
                                                                                crossAxisAlignment: CrossAxisAlignment.start,
                                                                                children: [
-                                                                                 (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
-                                                                                     ? TranslatedText(
-                                                                                         widget.article['content'].toString(),
-                                                                                         translate: context.watch<HomeProvider>().isEnglishMode,
-                                                                                         style: homeScreenFontStyle(
-                                                                                           color: _isBigTvSpecial(widget.article) ? Colors.white70 : AppColors.textColor,
-                                                                                           fontWeight: FontWeight.w600,
-                                                                                           fontSize: 16.sp,
-                                                                                         ),
-                                                                                       )
-                                                                                     : const SizedBox.shrink(),
+                                                                                  (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty)
+                                                                                      ? SizedBox(
+                                                                                          width: double.infinity,
+                                                                                          child: TranslatedText(
+                                                                                            widget.article['content'].toString(),
+                                                                                            textAlign: TextAlign.justify,
+                                                                                            translate: context.watch<HomeProvider>().isEnglishMode,
+                                                                                            style: homeScreenFontStyle(
+                                                                                              color: _isBigTvSpecial(widget.article) ? Colors.white70 : AppColors.textColor,
+                                                                                              fontWeight: FontWeight.w600,
+                                                                                              fontSize: 16.sp,
+                                                                                            ),
+                                                                                          ),
+                                                                                        )
+                                                                                      : const SizedBox.shrink(),
                                                                                  if (widget.article['content'] != "" && widget.article['content'] != null && widget.article['content'].toString().isNotEmpty) height(height: 8),
                                                                                  ListView(
                                                                                    shrinkWrap: true,
@@ -1031,34 +1035,39 @@ class _MainScreenBytViewState extends State<MainScreenBytView> {
                                                                                  ),
                                                                                ],
                                                                              )
-                                                                           : ((widget.article['links'] != null && (widget.article['links'] as List).isNotEmpty) ||
-                                                                                  RegExp(r'(https?:\/\/[^\s]+|<link\d+>)').hasMatch(widget.article['content']?.toString() ?? ''))
-                                                                               ? RichText(
-                                                                                   text: TextSpan(
-                                                                                     text: '',
-                                                                                     children: _parseText(
-                                                                                        context, 
-                                                                                        widget.article['content']?.toString() ?? "", 
-                                                                                        widget.article['links'], 
-                                                                                        widget.article,
-                                                                                        isPostActive: isPostActive,
+                                                                            : SizedBox(
+                                                                                width: double.infinity,
+                                                                                child: ((widget.article['links'] != null && (widget.article['links'] as List).isNotEmpty) ||
+                                                                                       RegExp(r'(https?:\/\/[^\s]+|<link\d+>)').hasMatch(widget.article['content']?.toString() ?? ''))
+                                                                                    ? RichText(
+                                                                                        textAlign: TextAlign.justify,
+                                                                                        text: TextSpan(
+                                                                                          text: '',
+                                                                                          children: _parseText(
+                                                                                             context, 
+                                                                                             widget.article['content']?.toString() ?? "", 
+                                                                                             widget.article['links'], 
+                                                                                             widget.article,
+                                                                                             isPostActive: isPostActive,
+                                                                                           ),
+                                                                                        ),
+                                                                                      )
+                                                                                    : TranslatedText(
+                                                                                        widget.article['content']?.toString() ?? "",
+                                                                                        textAlign: TextAlign.justify,
+                                                                                        translate: context.watch<HomeProvider>().isEnglishMode,
+                                                                                        englishFontSize: 14.sp,
+                                                                                        style: homeScreenFontStyle(
+                                                                                          color: _isBigTvSpecial(widget.article)
+                                                                                              ? Colors.white70
+                                                                                              : (_isBigBlackStandard(widget.article)
+                                                                                                  ? Colors.white
+                                                                                                  : (_isDarkBg(widget.article, context) ? Colors.white : AppColors.textColor.withValues(alpha: 0.8))),
+                                                                                          fontWeight: FontWeight.w600,
+                                                                                          fontSize: 17.sp,
+                                                                                        ),
                                                                                       ),
-                                                                                   ),
-                                                                                 )
-                                                                               : TranslatedText(
-                                                                                   widget.article['content']?.toString() ?? "",
-                                                                                   translate: context.watch<HomeProvider>().isEnglishMode,
-                                                                                   englishFontSize: 14.sp,
-                                                                                   style: homeScreenFontStyle(
-                                                                                     color: _isBigTvSpecial(widget.article)
-                                                                                         ? Colors.white70
-                                                                                         : (_isBigBlackStandard(widget.article)
-                                                                                             ? Colors.white
-                                                                                             : (_isDarkBg(widget.article, context) ? Colors.white : AppColors.textColor.withValues(alpha: 0.8))),
-                                                                                     fontWeight: FontWeight.w600,
-                                                                                     fontSize: 17.sp,
-                                                                                   ),
-                                                                                 ),
+                                                                              ),
                                                                        if (widget.article['type'] != 'ImageAd' && widget.article['subType'] != 'ImageAd')
                                                                          Padding(
                                                                            padding: const EdgeInsets.symmetric(horizontal: 6.0),

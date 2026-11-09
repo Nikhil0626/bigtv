@@ -452,26 +452,31 @@ class _IndividualPostView1State extends State<IndividualPostView1> {
                           ),
                         ),
                         SizedBox(height: 12.h),
-                        (article['links'] != null && (article['links'] as List).isNotEmpty)
-                            ? RichText(
-                                text: TextSpan(
-                                  children: _parseText(
-                                    context, 
-                                    article['content'] ?? "", 
-                                    article['links'], 
-                                    {'subType': 'Standard'}
+                        SizedBox(
+                          width: double.infinity,
+                          child: (article['links'] != null && (article['links'] as List).isNotEmpty)
+                              ? RichText(
+                                  textAlign: TextAlign.justify,
+                                  text: TextSpan(
+                                    children: _parseText(
+                                      context, 
+                                      article['content'] ?? "", 
+                                      article['links'], 
+                                      {'subType': 'Standard'}
+                                    ),
+                                  ),
+                                )
+                              : TranslatedText(
+                                  article['content'] ?? "",
+                                  textAlign: TextAlign.justify,
+                                  translate: context.watch<HomeProvider>().isEnglishMode,
+                                  style: homeScreenFontStyle(
+                                    color: AppColors.textColor,
+                                    fontWeight: FontWeight.w400,
+                                    fontSize: 16.sp,
                                   ),
                                 ),
-                              )
-                            : TranslatedText(
-                                article['content'] ?? "",
-                                translate: context.watch<HomeProvider>().isEnglishMode,
-                                style: homeScreenFontStyle(
-                                  color: AppColors.textColor,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16.sp,
-                                ),
-                              ),
+                        ),
                         SizedBox(height: 30.h),
                       ],
                     ),
