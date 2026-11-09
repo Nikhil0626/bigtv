@@ -1,5 +1,5 @@
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:chotanews/core/theme/color_tokens.dart';
+import 'package:chotanews/features/home/presentation/widgets/infocus_bar_widget.dart';
 
 import 'dart:developer';
 import 'package:chotanews/features/reels/presentation/providers/reels_provider.dart';
@@ -60,7 +60,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColorTokens.primaryRed,
+      backgroundColor: InFocusBarWidget.barBackgroundColor,
       body: Consumer<ReelsProviders>(builder: (_, reelsProviders, __) {
         return ValueListenableBuilder<YoutubePlayerController?>(
           valueListenable: _controllerNotifier,
@@ -75,7 +75,7 @@ class _ReelsCardViewState extends State<ReelsCardView> {
                   child: Screenshot(
                     controller: sc,
                     child: Container(
-                      color: AppColorTokens.primaryRed,
+                      color: InFocusBarWidget.barBackgroundColor,
                       width: double.infinity,
                       height: double.infinity,
                       alignment: Alignment.center,
